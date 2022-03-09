@@ -4,9 +4,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilMånedPeriode
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -15,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
-import no.nav.familie.ba.sak.kjerne.beregning.tilDatoSegment
+import no.nav.familie.ba.sak.kjerne.beregning.finnTilOgMedDato
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
@@ -29,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -118,11 +121,11 @@ class EndretUtbetalingAndelService(
             it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT
         }
 
-        val datoSegmenter = deltBostedVilkårResultater?.map { it.tilDatoSegment(vilkår = deltBostedVilkårResultater) } // TODO: Feilmeldingene i tilDatoSegment passer ikke til denne bruken
+        val deltBostedPerioder = deltBostedVilkårResultater?.mapNotNull { it.tilPeriode(vilkår = deltBostedVilkårResultater) }
             ?: return emptyList()
 
         return slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
-            perioder = datoSegmenter.map {
+            perioder = deltBostedPerioder.map {
                 Periode(
                     fom = it.fom,
                     tom = it.tom
@@ -208,7 +211,6 @@ private fun skalDeltBostedAndelerSlåsSammen(
     førsteAndel.stønadTom.sisteDagIInneværendeMåned()
         .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned())
 
-// TODO: Denne er veeeldig lik den eksisterende funksjonen som gjør dette på AndelerTilkjentYtelse
 private fun slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
     perioder: MutableList<Periode>,
 ): MutableList<Periode> {
@@ -237,4 +239,17 @@ private fun slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
         }
     }
     return oppdatertListeMedPerioder
+}
+
+private fun VilkårResultat.tilPeriode(
+    vilkår: List<VilkårResultat>
+): Periode? {
+    if (this.periodeFom == null) return null
+    val fraOgMedDato = this.periodeFom!!.førsteDagINesteMåned()
+    val tilOgMedDato = finnTilOgMedDato(tilOgMed = this.periodeTom, vilkårResultater = vilkår)
+    if (fraOgMedDato.toYearMonth().isAfter(tilOgMedDato.toYearMonth())) return null
+    return Periode(
+        fom = fraOgMedDato,
+        tom = tilOgMedDato
+    )
 }

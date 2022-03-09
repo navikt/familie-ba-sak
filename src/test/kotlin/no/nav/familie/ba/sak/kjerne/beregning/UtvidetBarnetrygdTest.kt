@@ -645,12 +645,10 @@ internal class UtvidetBarnetrygdTest {
     fun `Skal kaste feil hvis fom og tom er satt i samme måned`() {
         val utvidetVilkårResultat = lagVilkårResultat(vilkår = Vilkår.UTVIDET_BARNETRYGD, fom = YearMonth.of(2022, 2), tom = YearMonth.of(2022, 2))
 
-        assertThrows<FunksjonellFeil> {
-            utvidetVilkårResultat.tilDatoSegment(
-                vilkår = listOf(utvidetVilkårResultat),
-                segmentVerdi = listOf(UtvidetBarnetrygdGenerator.PeriodeData(aktør = randomAktørId(), rolle = PersonType.SØKER))
-            )
-        }
+        utvidetVilkårResultat.tilDatoSegment(
+            utvidetVilkår = listOf(utvidetVilkårResultat),
+            søkerAktør = randomAktørId()
+        )
     }
 
     @Test
@@ -659,8 +657,8 @@ internal class UtvidetBarnetrygdTest {
 
         assertDoesNotThrow {
             utvidetVilkårResultat.tilDatoSegment(
-                vilkår = listOf(utvidetVilkårResultat, lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 3, 1), periodeTom = null)),
-                segmentVerdi = listOf(UtvidetBarnetrygdGenerator.PeriodeData(aktør = randomAktørId(), rolle = PersonType.SØKER))
+                utvidetVilkår = listOf(utvidetVilkårResultat, lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 3, 1), periodeTom = null)),
+                søkerAktør = randomAktørId()
             )
         }
     }
