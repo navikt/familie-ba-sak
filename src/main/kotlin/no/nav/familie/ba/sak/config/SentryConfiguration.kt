@@ -30,13 +30,16 @@ class SentryConfiguration(
                 val mostSpecificThrowable =
                     if (event.throwable != null) NestedExceptionUtils.getMostSpecificCause(event.throwable!!) else event.throwable
                 val metodeSomFeiler = finnMetodeSomFeiler(mostSpecificThrowable)
+                val prosess = MDC.get("prosess")
 
                 event.setTag("metodeSomFeier", metodeSomFeiler)
                 event.setTag("bruker", SikkerhetContext.hentSaksbehandlerEpost())
                 event.setTag("kibanalenke", hentKibanalenke(MDC.get("callId")))
+                event.setTag("prosess", prosess)
 
                 event.fingerprints = listOf(
                     "{{ default }}",
+                    prosess,
                     event.transaction,
                     mostSpecificThrowable?.message,
                     metodeSomFeiler,

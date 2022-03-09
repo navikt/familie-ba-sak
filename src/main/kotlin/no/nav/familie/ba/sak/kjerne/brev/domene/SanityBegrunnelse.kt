@@ -43,7 +43,7 @@ data class RestSanityBegrunnelse(
     val borMedSokerTriggere: List<String>? = emptyList(),
     val ovrigeTriggere: List<String>? = emptyList(),
     val endringsaarsaker: List<String>? = emptyList(),
-    val hjemler: List<String> = emptyList(),
+    val hjemler: List<String>? = emptyList(),
     val endretUtbetalingsperiodeDeltBostedTriggere: List<String>? = emptyList(),
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
@@ -74,7 +74,7 @@ data class RestSanityBegrunnelse(
             endringsaarsaker = endringsaarsaker?.mapNotNull {
                 finnEnumverdi(it, Årsak.values(), apiNavn)
             },
-            hjemler = hjemler,
+            hjemler = hjemler ?: emptyList(),
             endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere?.mapNotNull {
                 finnEnumverdi(it, EndretUtbetalingsperiodeDeltBostedTriggere.values(), apiNavn)
             },
