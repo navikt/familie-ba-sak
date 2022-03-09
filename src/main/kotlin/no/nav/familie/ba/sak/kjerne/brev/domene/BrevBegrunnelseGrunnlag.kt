@@ -18,7 +18,7 @@ data class BrevBegrunnelseGrunnlag(
         erFørsteVedtaksperiodePåFagsak: Boolean,
         erUregistrerteBarnPåbehandling: Boolean,
     ): BrevBegrunnelseGrunnlagMedPersoner {
-        val personidenterGjeldendeForBegrunnelse: List<String> = hentPersonidenterGjeldendeForBegrunnelse(
+        val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = this.triggesAv,
             vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
             periode = periode,
@@ -41,7 +41,7 @@ data class BrevBegrunnelseGrunnlag(
             vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
             vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
             triggesAv = this.triggesAv,
-            personIdenter = personidenterGjeldendeForBegrunnelse
+            personIdenter = personidenterGjeldendeForBegrunnelse.toList()
         )
     }
 
