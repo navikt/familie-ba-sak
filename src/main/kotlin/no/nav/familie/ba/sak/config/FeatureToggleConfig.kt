@@ -117,8 +117,8 @@ class FeatureToggleConfig(
             "familie-ba-sak.teknisk-iverksett-mot-oppdrag-allerede-sendt"
         const val KONSISTENSAVSTEMMING_SPLITT_BATCH = "familie-ba-sak.teknisk-konsistensavstemming-splitt-batch"
 
-        const val IKKE_LAG_REDUKSJONSPERIODE_FRA_INNVILGELSESTIDSPUNKT =
-            "familie-ba-sak.ikke.lag.reduksjonsperiode.fra.innvilgelsestidspunkt"
+        const val LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT =
+            "familie-ba-sak.lag.reduksjonsperioder.fra.innvilgelsestidspunkt"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
