@@ -279,7 +279,7 @@ class VedtaksperiodeServiceUtilsTest {
         )
 
         Assertions.assertEquals(
-            listOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer()),
+            setOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer()),
             personidenterForBegrunnelse
         )
     }

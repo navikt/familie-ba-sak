@@ -57,6 +57,18 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
 
     val sanityBegrunnelse = this.tilSanityBegrunnelse(sanityBegrunnelser)!!
 
+    fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
+        minimertePersonResultater = minimertePersonResultater,
+        vedtaksperiode = Periode(
+            fom = minimertVedtaksperiode.fom ?: TIDENES_MORGEN,
+            tom = minimertVedtaksperiode.tom ?: TIDENES_ENDE
+        ),
+        oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
+        aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
+        triggesAv = triggesAv,
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+    )
+
     return when {
         !triggesAv.valgbar -> false
 
@@ -64,7 +76,10 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             ytelseType = if (triggesAv.småbarnstillegg) YtelseType.SMÅBARNSTILLEGG else YtelseType.UTVIDET_BARNETRYGD,
             ytelseTyperForPeriode = ytelseTyperForPeriode,
             ytelserGjeldeneForSøkerForrigeMåned = ytelserForSøkerForrigeMåned
-        )
+        ) || when {
+            triggesAv.vilkår.any { it != Vilkår.UTVIDET_BARNETRYGD } -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
+            else -> false
+        }
         triggesAv.personerManglerOpplysninger -> minimertePersonResultater.harPersonerSomManglerOpplysninger()
         triggesAv.barnMedSeksårsdag ->
             minimertePersoner.harBarnMedSeksårsdagPåFom(minimertVedtaksperiode.fom)
@@ -80,17 +95,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
         )
 
-        else -> hentPersonerForAlleUtgjørendeVilkår(
-            minimertePersonResultater = minimertePersonResultater,
-            vedtaksperiode = Periode(
-                fom = minimertVedtaksperiode.fom ?: TIDENES_MORGEN,
-                tom = minimertVedtaksperiode.tom ?: TIDENES_ENDE
-            ),
-            oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
-            aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
-            triggesAv = triggesAv,
-            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
-        ).isNotEmpty()
+        else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
     }
 }
 
