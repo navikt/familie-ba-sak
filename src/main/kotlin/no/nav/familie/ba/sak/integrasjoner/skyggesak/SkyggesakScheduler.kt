@@ -20,8 +20,6 @@ class SkyggesakScheduler(
     val integrasjonClient: IntegrasjonClient
 ) {
 
-    private val logger = LoggerFactory.getLogger(SkyggesakScheduler::class.java)
-
     @Scheduled(fixedDelay = 60000)
     fun opprettSkyggesaker() {
         if (LeaderClient.isLeader() == true) {

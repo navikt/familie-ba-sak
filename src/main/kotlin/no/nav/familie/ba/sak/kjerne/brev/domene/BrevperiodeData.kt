@@ -54,6 +54,5 @@ data class BrevperiodeData(
     companion object {
 
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
-        private val logger = LoggerFactory.getLogger(BrevperiodeData::class.java)
     }
 }

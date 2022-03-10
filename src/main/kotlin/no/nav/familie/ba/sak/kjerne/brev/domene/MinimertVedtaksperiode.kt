@@ -1,10 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
-import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -51,11 +47,6 @@ data class MinimertVedtaksperiode(
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         )
     }
-
-    fun hentMånedPeriode() = MånedPeriode(
-        (fom ?: TIDENES_MORGEN).toYearMonth(),
-        (tom ?: TIDENES_ENDE).toYearMonth()
-    )
 }
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
