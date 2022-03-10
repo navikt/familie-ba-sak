@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v2.5.0
+      - uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: 'temurin'
@@ -32,7 +32,7 @@ jobs:
         run: |
           docker build -t ${IMAGE} -t ${IMAGE_LATEST} .
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@6af3c118c8376c675363897acf1757f7a9be6583
+        uses: docker/login-action@dd4fa0671be5250ee6f50aedf4cb05514abda2c7
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
