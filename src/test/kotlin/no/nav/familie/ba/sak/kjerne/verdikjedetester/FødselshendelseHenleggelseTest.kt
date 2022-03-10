@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -291,7 +292,7 @@ class FødselshendelseHenleggelseTest(
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
-                    fødselsdato = now().minusYears(26).toString(),
+                    fødselsdato = now().minusYears(26).førsteDagINesteMåned().plusDays(6).toString(),
                     fornavn = "Mor",
                     etternavn = "Søker"
                 ),

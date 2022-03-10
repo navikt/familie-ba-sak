@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -27,10 +26,4 @@ class SøknadGrunnlagService(
     fun hentAktiv(behandlingId: Long): SøknadGrunnlag? {
         return søknadGrunnlagRepository.hentAktiv(behandlingId)
     }
-
-    fun hentMinimerteUregistrerteBarn(behandlingId: Long) =
-        hentAktiv(behandlingId)
-            ?.hentUregistrerteBarn()
-            ?.map { uregistrertBarn -> uregistrertBarn.tilMinimertUregisrertBarn() }
-            ?: emptyList()
 }
