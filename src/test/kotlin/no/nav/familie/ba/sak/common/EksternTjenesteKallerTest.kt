@@ -59,8 +59,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTestDev() {
             )
         )
 
-        val feil = assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
-        assertTrue(feil.message?.contains("Opprett oppgave feilet") == true)
+        assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
     }
 
     @Test
@@ -74,8 +73,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTestDev() {
             )
         )
 
-        val feil = assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
-        assertTrue(feil.message?.contains("no body") == true)
+        assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
     }
 
     @Test
@@ -109,6 +107,5 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTestDev() {
         val feil =
             assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
         assertTrue(feil.cause is HttpClientErrorException.NotFound)
-        assertTrue(feil.message?.contains("404") == true)
     }
 }

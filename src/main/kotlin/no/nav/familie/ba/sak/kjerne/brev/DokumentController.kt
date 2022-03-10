@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.sikkerhet.validerBrevGenerert
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
@@ -74,9 +73,6 @@ class DokumentController(
         val vedtak = vedtakService.hent(vedtakId)
 
         tilgangService.validerTilgangTilBehandling(behandlingId = vedtak.behandling.id, event = AuditLoggerEvent.ACCESS)
-
-        val rolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig).nivå
-        validerBrevGenerert(vedtak, rolletilgang)
 
         return dokumentService.hentBrevForVedtak(vedtak)
     }
