@@ -42,7 +42,7 @@ data class UtvidetBarnetrygdGenerator(
         val datoSegmenter = utvidetVilkår
             .filter { it.resultat == Resultat.OPPFYLT }
             .map {
-                it.tilDatoSegment(utvidetVilkår, søkerAktør)
+                it.tilDatoSegment(utvidetVilkår = utvidetVilkår, søkerAktør = søkerAktør)
             }
 
         val utvidaTidslinje = LocalDateTimeline(datoSegmenter)
@@ -144,7 +144,7 @@ fun VilkårResultat.tilDatoSegment(
 ): LocalDateSegment<List<UtvidetBarnetrygdGenerator.PeriodeData>> {
     if (this.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvidet barnetrygd")
     val fraOgMedDato = this.periodeFom!!.førsteDagINesteMåned()
-    val tilOgMedDato = finnTilOgMedDatoForUtvidetSegment(tilOgMed = this.periodeTom, vilkårResultater = utvidetVilkår)
+    val tilOgMedDato = finnTilOgMedDato(tilOgMed = this.periodeTom, vilkårResultater = utvidetVilkår)
     if (tilOgMedDato.toYearMonth() == fraOgMedDato.toYearMonth()
         .minusMonths(1)
     ) throw FunksjonellFeil("Du kan ikke legge inn fom. og tom. innenfor samme kalendermåned. Gå til utvidet barnetrygd vilkåret for å endre.")
@@ -155,21 +155,21 @@ fun VilkårResultat.tilDatoSegment(
     )
 }
 
-private fun finnTilOgMedDatoForUtvidetSegment(
+fun finnTilOgMedDato(
     tilOgMed: LocalDate?,
     vilkårResultater: List<VilkårResultat>
 ): LocalDate {
     // LocalDateTimeline krasjer i isTimelineOutsideInterval funksjonen dersom vi sender med TIDENES_ENDE,
     // så bruker tidenes ende minus én dag.
     if (tilOgMed == null) return TIDENES_ENDE.minusDays(1)
-    val utvidetSkalVidereføresEnMndEkstra = vilkårResultater.any { vilkårResultat ->
+    val skalVidereføresEnMndEkstra = vilkårResultater.any { vilkårResultat ->
         erBack2BackIMånedsskifte(
             tilOgMed = tilOgMed,
             fraOgMed = vilkårResultat.periodeFom
         )
     }
 
-    return if (utvidetSkalVidereføresEnMndEkstra) {
+    return if (skalVidereføresEnMndEkstra) {
         tilOgMed.plusMonths(1).sisteDagIMåned()
     } else tilOgMed.sisteDagIMåned()
 }

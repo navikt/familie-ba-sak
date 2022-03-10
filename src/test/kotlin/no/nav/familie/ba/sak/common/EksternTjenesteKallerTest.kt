@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgave
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.ikkeTilgang
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -57,8 +59,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTestDev() {
             )
         )
 
-        val feil = assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
-        assertTrue(feil.message?.contains("Opprett oppgave feilet") == true)
+        assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
     }
 
     @Test
@@ -72,8 +73,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTestDev() {
             )
         )
 
-        val feil = assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
-        assertTrue(feil.message?.contains("no body") == true)
+        assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
     }
 
     @Test
@@ -89,7 +89,8 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTestDev() {
         )
 
         val feil =
-            assertThrows<HttpClientErrorException.Forbidden> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
+            assertThrows<RessursException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
+        assertTrue(feil.httpStatus == HttpStatus.FORBIDDEN)
         assertTrue(feil.message?.contains("Ikke tilgang til å opprett oppgave") == true)
     }
 
@@ -106,6 +107,5 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTestDev() {
         val feil =
             assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
         assertTrue(feil.cause is HttpClientErrorException.NotFound)
-        assertTrue(feil.message?.contains("404") == true)
     }
 }
