@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.VedtakOmOvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.SatsendringTask
@@ -32,7 +31,6 @@ class TestVerktøyController(
     private val envService: EnvService,
     private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val beregningService: BeregningService,
 ) {
 
     @GetMapping(path = ["/autobrev"])

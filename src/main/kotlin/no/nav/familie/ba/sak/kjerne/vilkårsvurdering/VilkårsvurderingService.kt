@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class VilkårsvurderingService(
@@ -88,6 +90,20 @@ class VilkårsvurderingService(
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> =
         vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(sanityService.hentSanityBegrunnelser())
+
+    fun hentTidligsteVilkårsvurderingKnyttetTilMigrering(behandlingId: Long): YearMonth? {
+        val vilkårsvurdering = hentAktivForBehandling(
+            behandlingId = behandlingId
+        )
+
+        return vilkårsvurdering?.personResultater
+            ?.flatMap { it.vilkårResultater }
+            ?.filter { it.periodeFom != null }
+            ?.filter { it.vilkårType != Vilkår.UNDER_18_ÅR && it.vilkårType != Vilkår.GIFT_PARTNERSKAP }
+            ?.minByOrNull { it.periodeFom!! }
+            ?.periodeFom
+            ?.toYearMonth()
+    }
 
     companion object {
 
