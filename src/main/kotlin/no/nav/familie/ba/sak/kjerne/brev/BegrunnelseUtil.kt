@@ -24,11 +24,12 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     identerMedUtbetalingPåPeriode: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
+    identerMedReduksjonPåPeriode: List<String> = emptyList()
 ): Set<String> {
 
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
-    val erReduksjonBegrunnelse = vedtaksperiodetype == Vedtaksperiodetype.REDUKSJON &&
+    val erReduksjonBegrunnelseMedRedusertPeriode = vedtaksperiodetype == Vedtaksperiodetype.REDUKSJON &&
         vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON
 
     fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
@@ -69,8 +70,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
         erFortsattInnvilgetBegrunnelse ||
-            erEndretUtbetalingBegrunnelse ||
-            erReduksjonBegrunnelse -> identerMedUtbetalingPåPeriode
+            erEndretUtbetalingBegrunnelse -> identerMedUtbetalingPåPeriode
+        erReduksjonBegrunnelseMedRedusertPeriode -> identerMedReduksjonPåPeriode
 
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(

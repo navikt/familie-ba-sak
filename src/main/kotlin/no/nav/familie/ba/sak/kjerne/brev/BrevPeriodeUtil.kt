@@ -63,6 +63,7 @@ fun hentBrevPerioder(
                 utvidetScenarioForEndringsperiode = it.utvidetScenarioForEndringsperiode,
                 erFørsteVedtaksperiodePåFagsak = it.erFørsteVedtaksperiodePåFagsak,
                 brevMålform = it.brevMålform,
+                barnPersonIdentMedReduksjon = it.barnPersonIdentMedReduksjon
             )
         } catch (exception: Exception) {
             val brevPeriodeForLogging = it.tilBrevperiodeForLogging()
@@ -86,6 +87,7 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
+    barnPersonIdentMedReduksjon: List<String> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean,
     brevMålform: Målform
 ): BrevPeriode? {
@@ -94,6 +96,7 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
             erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
+            barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon
         )
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
@@ -246,13 +249,13 @@ fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
 fun BrevPeriodeGrunnlagMedPersoner.finnBarnIReduksjonPeriode(
     personerPåBehandling: List<MinimertRestPerson>,
 ): List<MinimertRestPerson> {
-    val identerIBegrunnelene = this.begrunnelser
+    val identerIBegrunnelsene = this.begrunnelser
         .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON }
         .flatMap { it.personIdenter }
 
     val identerMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer.map { it.person.personIdent }
 
-    val barnIPeriode = (identerIBegrunnelene + identerMedUtbetaling)
+    val barnIPeriode = (identerIBegrunnelsene + identerMedUtbetaling)
         .toSet()
         .mapNotNull { personIdent ->
             personerPåBehandling.find { it.personIdent == personIdent }

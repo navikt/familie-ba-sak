@@ -15,6 +15,7 @@ data class BrevperiodeData(
     val brevMålform: Målform,
     val minimertVedtaksperiode: MinimertVedtaksperiode,
     val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
+    val barnPersonIdentMedReduksjon: List<String> = emptyList()
 ) {
     fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {
         return try {
@@ -23,6 +24,7 @@ data class BrevperiodeData(
                     restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
                     erFørsteVedtaksperiodePåFagsak = this.erFørsteVedtaksperiodePåFagsak,
                     erUregistrerteBarnPåbehandling = this.uregistrerteBarn.isNotEmpty(),
+                    barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon
                 )
                 .byggBegrunnelserOgFritekster(
                     restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,

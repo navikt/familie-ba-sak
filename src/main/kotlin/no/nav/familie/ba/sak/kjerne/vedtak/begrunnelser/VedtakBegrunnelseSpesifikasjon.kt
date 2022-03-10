@@ -1081,7 +1081,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     };
 
     companion object {
-        fun reduksjonsbegrunnelser(): List<VedtakBegrunnelseSpesifikasjon> = listOf(
+        fun begrunnelserForRedusertPerioderFraInnvilgelsestidspunkt(): List<VedtakBegrunnelseSpesifikasjon> = listOf(
             REDUKSJON_IKKE_BOSATT_I_NORGE,
             REDUKSJON_BARN_BOR_IKKE_MED_SØKER,
             REDUKSJON_IKKE_OPPHOLDSTILLATELSE,

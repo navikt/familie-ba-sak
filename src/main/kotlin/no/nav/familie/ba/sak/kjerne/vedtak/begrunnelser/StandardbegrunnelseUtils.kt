@@ -95,7 +95,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
         )
         // TODO kan fjernes etter å implementere øvrige triggere for reduksjonsperiode fra innvilgelsestidspunkt
-        VedtakBegrunnelseSpesifikasjon.reduksjonsbegrunnelser().contains(this) -> false
+        VedtakBegrunnelseSpesifikasjon.begrunnelserForRedusertPerioderFraInnvilgelsestidspunkt().contains(this) -> false
 
         else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
     }

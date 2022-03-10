@@ -151,10 +151,10 @@ fun identifiserReduksjonsperioder(
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter().keys
     val nåværendeSegmenter = andelerTilkjentYtelse.lagVertikaleSegmenter().keys
     val segmenter = forrigeSegmenter.filterNot {
-        nåværendeSegmenter.any { seg -> it.fom == seg.fom && it.tom == seg.tom && it.value == seg.value }
+        nåværendeSegmenter.any { segment -> it.fom == segment.fom && it.tom == segment.tom && it.value == segment.value }
     }
     val reduksjonsperioder = mutableListOf<VedtaksperiodeMedBegrunnelser>()
-    segmenter.filter { nåværendeSegmenter.any { seg -> seg.overlapper(it) } }
+    segmenter.filter { nåværendeSegmenter.any { segment -> segment.overlapper(it) } }
         .forEach {
             val overlappendePerioder =
                 nåværendeSegmenter.filter { nåSegment -> nåSegment.overlapper(it) && nåSegment.value < it.value }
@@ -182,20 +182,21 @@ fun finnOgOppdaterOverlappendeUtbetalingsperiode(
 ): List<VedtaksperiodeMedBegrunnelser> {
     val overlappendePerioder =
         utbetalingsperioder.filter {
-            reduksjonsperioder.any { rd ->
-                rd.fom!!.isSameOrAfter(it.fom!!) && rd.tom!!.isSameOrBefore(
+            reduksjonsperioder.any { reduksjonsperiode ->
+                reduksjonsperiode.fom!!.isSameOrAfter(it.fom!!) && reduksjonsperiode.tom!!.isSameOrBefore(
                     it.tom!!
                 )
             }
         }
     val oppdatertUtbetalingsperioder = mutableListOf<VedtaksperiodeMedBegrunnelser>()
     utbetalingsperioder.forEach {
-        val overlappendePeriode = overlappendePerioder.firstOrNull { o -> it.fom == o.fom && it.tom == o.tom }
+        val overlappendePeriode =
+            overlappendePerioder.firstOrNull { periode -> it.fom == periode.fom && it.tom == periode.tom }
         if (overlappendePeriode != null) {
             oppdatertUtbetalingsperioder.addAll(
-                reduksjonsperioder.filter { r ->
-                    r.fom!! >= overlappendePeriode.fom &&
-                        r.tom!! <= overlappendePeriode.tom
+                reduksjonsperioder.filter { reduksjonsperiode ->
+                    reduksjonsperiode.fom!! >= overlappendePeriode.fom &&
+                        reduksjonsperiode.tom!! <= overlappendePeriode.tom
                 }
             )
         } else {
@@ -303,7 +304,7 @@ private fun velgRedusertBegrunnelser(
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean
 ): List<VedtakBegrunnelseSpesifikasjon> {
-    val redusertBegrunnelser = VedtakBegrunnelseSpesifikasjon.reduksjonsbegrunnelser()
+    val redusertBegrunnelser = VedtakBegrunnelseSpesifikasjon.begrunnelserForRedusertPerioderFraInnvilgelsestidspunkt()
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
         val tillateBegrunnelserForVedtakstype = VedtakBegrunnelseSpesifikasjon.values()
             .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }

@@ -313,7 +313,10 @@ class VedtaksperiodeServiceTest(
             redusertPeriode.fom == periodeFom.nesteMåned().førsteDagIInneværendeMåned() &&
                 redusertPeriode.tom == nyPeriode.sisteDagIMåned()
         }
-        assertTrue { redusertPeriode.gyldigeBegrunnelser.containsAll(VedtakBegrunnelseSpesifikasjon.reduksjonsbegrunnelser()) }
+        assertTrue {
+            redusertPeriode.gyldigeBegrunnelser
+                .containsAll(VedtakBegrunnelseSpesifikasjon.begrunnelserForRedusertPerioderFraInnvilgelsestidspunkt())
+        }
         assertTrue {
             redusertPeriode.gyldigeBegrunnelser.any {
                 it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET &&
@@ -372,7 +375,7 @@ class VedtaksperiodeServiceTest(
             redusertPeriode.fom == opphørsperiode.nesteMåned().førsteDagIInneværendeMåned() &&
                 redusertPeriode.tom == nyPeriode.sisteDagIMåned()
         }
-        assertTrue { redusertPeriode.gyldigeBegrunnelser.containsAll(VedtakBegrunnelseSpesifikasjon.reduksjonsbegrunnelser()) }
+        assertTrue { redusertPeriode.gyldigeBegrunnelser.containsAll(VedtakBegrunnelseSpesifikasjon.begrunnelserForRedusertPerioderFraInnvilgelsestidspunkt()) }
         assertTrue {
             redusertPeriode.gyldigeBegrunnelser.any {
                 it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET &&

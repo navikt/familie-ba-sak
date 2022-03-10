@@ -19,6 +19,7 @@ data class BrevBegrunnelseGrunnlag(
         identerMedUtbetalingPåPeriode: List<String>,
         erFørsteVedtaksperiodePåFagsak: Boolean,
         erUregistrerteBarnPåbehandling: Boolean,
+        barnPersonIdentMedReduksjon: List<String>
     ): BrevBegrunnelseGrunnlagMedPersoner {
         val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = this.triggesAv,
@@ -28,6 +29,7 @@ data class BrevBegrunnelseGrunnlag(
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
             identerMedUtbetalingPåPeriode = identerMedUtbetalingPåPeriode,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+            identerMedReduksjonPåPeriode = barnPersonIdentMedReduksjon.map { it }
         )
 
         if (
