@@ -48,8 +48,6 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
         barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
     )
 
-    LoggerFactory.getLogger("secureLogger")
-        .info("Forrige småbarnstillegg andeler: $forrigeSøkersSmåbarnstilleggAndeler, nye småbarnstillegg andeler: $nyeSmåbarnstilleggAndeler")
     return forrigeSøkersSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)
 }
 

@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -42,7 +41,6 @@ class StegService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
-    private val skyggesakService: SkyggesakService,
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
     private val settPåVentService: SettPåVentService,
