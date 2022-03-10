@@ -57,8 +57,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTestDev() {
             )
         )
 
-        val feil = assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
-        assertTrue(feil.message?.contains("Opprett oppgave feilet") == true)
+        assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
     }
 
     @Test
