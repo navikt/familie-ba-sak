@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FØRSTE_ENDRINGSTIDSPUNKT
@@ -25,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktSerivce
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
@@ -514,61 +512,12 @@ class VedtaksperiodeService(
                 forrigePersonopplysningGrunnlag.søkerOgBarn.any { f -> f.aktør == it.aktør }
             }
 
-        val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter().keys
-        val nåværendeSegmenter = andelerTilkjentYtelse.lagVertikaleSegmenter().keys
-        val segmenter = forrigeSegmenter.filterNot {
-            nåværendeSegmenter.any { seg -> it.fom == seg.fom && it.tom == seg.tom && it.value == seg.value }
-        }
-        val reduksjonsperioder = mutableListOf<VedtaksperiodeMedBegrunnelser>()
-        segmenter.filter { nåværendeSegmenter.any { seg -> seg.overlapper(it) } }
-            .forEach {
-                val overlappendePerioder =
-                    nåværendeSegmenter.filter { nåSegment -> nåSegment.overlapper(it) && nåSegment.value < it.value }
-                overlappendePerioder.forEach { overlappendePeriode ->
-                    reduksjonsperioder.add(
-                        VedtaksperiodeMedBegrunnelser(
-                            vedtak = vedtak,
-                            fom = if (it.fom > overlappendePeriode.fom) it.fom else overlappendePeriode.fom,
-                            tom = if (it.tom > overlappendePeriode.tom) overlappendePeriode.tom else it.tom,
-                            type = Vedtaksperiodetype.REDUKSJON,
-                        )
-                    )
-                }
-            }
-
-        // opphørsperioder kan ikke være inkludert i reduksjonsperioder
-        return reduksjonsperioder.filterNot { reduksjonsperiode ->
-            opphørsperioder.any { it.fom == reduksjonsperiode.fom || it.tom == reduksjonsperiode.tom }
-        }
-    }
-
-    private fun finnOgOppdaterOverlappendeUtbetalingsperiode(
-        utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
-        reduksjonsperioder: List<VedtaksperiodeMedBegrunnelser>
-    ): List<VedtaksperiodeMedBegrunnelser> {
-        val overlappendePerioder =
-            utbetalingsperioder.filter {
-                reduksjonsperioder.any { rd ->
-                    rd.fom!!.isSameOrAfter(it.fom!!) && rd.tom!!.isSameOrBefore(
-                        it.tom!!
-                    )
-                }
-            }
-        val oppdatertUtbetalingsperioder = mutableListOf<VedtaksperiodeMedBegrunnelser>()
-        utbetalingsperioder.forEach {
-            val overlappendePeriode = overlappendePerioder.firstOrNull { o -> it.fom == o.fom && it.tom == o.tom }
-            if (overlappendePeriode != null) {
-                oppdatertUtbetalingsperioder.addAll(
-                    reduksjonsperioder.filter { r ->
-                        r.fom!! >= overlappendePeriode.fom &&
-                            r.tom!! <= overlappendePeriode.tom
-                    }
-                )
-            } else {
-                oppdatertUtbetalingsperioder.add(it)
-            }
-        }
-        return oppdatertUtbetalingsperioder.sortedBy { it.fom }
+        return identifiserReduksjonsperioder(
+            forrigeAndelerTilkjentYtelse,
+            andelerTilkjentYtelse,
+            vedtak,
+            opphørsperioder
+        )
     }
 
     private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
