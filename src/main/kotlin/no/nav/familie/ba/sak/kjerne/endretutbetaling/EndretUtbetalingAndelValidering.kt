@@ -272,7 +272,11 @@ fun finnDeltBostedPerioder(
 ): List<Periode> {
     if (vilkårsvurdering == null || person == null) return emptyList()
     val deltBostedPerioder = if (person.type == PersonType.SØKER) {
-        val deltBostedVilkårResultater = vilkårsvurdering.personResultater.flatMap { personResultat -> personResultat.vilkårResultater.filter { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT } }
+        val deltBostedVilkårResultater = vilkårsvurdering.personResultater.flatMap { personResultat ->
+            personResultat.vilkårResultater.filter {
+                it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT
+            }
+        }
 
         val deltBostedPerioder = deltBostedVilkårResultater.groupBy { it.personResultat?.aktør }.flatMap { (_, vilkårResultater) -> vilkårResultater.mapNotNull { it.tilPeriode(vilkår = vilkårResultater) } }
 

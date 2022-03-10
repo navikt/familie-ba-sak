@@ -315,7 +315,7 @@ class EndretUtbetalingAndelValideringTest {
     }
 
     @Test
-    fun `Skal finne riktige delt bosted perioder, og slå sammen de som er sammenhengende`() {
+    fun `Skal finne riktige delt bosted perioder for barn, og slå sammen de som er sammenhengende`() {
         val behandling = lagBehandling()
         val person = lagPerson(type = PersonType.BARN)
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
@@ -391,7 +391,7 @@ class EndretUtbetalingAndelValideringTest {
     }
 
     @Test
-    fun `Skal finne riktige delt bosted perioder og ikke slå de sammen når de ikke er sammenhengde`() {
+    fun `Skal finne riktige delt bosted perioder for barn og ikke slå de sammen når de ikke er sammenhengde`() {
         val behandling = lagBehandling()
         val person = lagPerson(type = PersonType.BARN)
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
@@ -457,7 +457,8 @@ class EndretUtbetalingAndelValideringTest {
                 periodeFom = fom1.minusMonths(3),
                 periodeTom = tom2.plusMonths(4),
                 erDeltBosted = true,
-                vilkårType = Vilkår.BOR_MED_SØKER
+                vilkårType = Vilkår.BOR_MED_SØKER,
+                lagFullstendigVilkårResultat = true
             )
         )
 
@@ -472,6 +473,164 @@ class EndretUtbetalingAndelValideringTest {
         assertEquals(tom1.sisteDagIMåned(), førstePeriode.tom)
         assertEquals(fom2.plusMonths(1).førsteDagIInneværendeMåned(), andrePeriode.fom)
         assertEquals(tom2.sisteDagIMåned(), andrePeriode.tom)
+    }
+
+    @Test
+    fun `Skal finne riktige delt bosted perioder for søker, og slå sammen de som er sammenhengende`() {
+        val behandling = lagBehandling()
+        val barn = lagPerson(type = PersonType.BARN)
+        val søker = lagPerson(type = PersonType.SØKER)
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+        val fomBarn1 = LocalDate.now().minusMonths(5)
+        val tomBarn1 = LocalDate.now().plusMonths(7)
+        val fomBarn2 = fomBarn1.minusMonths(5)
+        val personResultatForPerson =
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = barn.aktør
+            )
+
+        val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
+        Vilkår.hentVilkårFor(PersonType.BARN).forEach {
+            if (it == Vilkår.BOR_MED_SØKER) {
+                vilkårResultaterForPerson.addAll(
+                    listOf(
+                        VilkårResultat(
+                            personResultat = personResultatForPerson,
+                            periodeFom = fomBarn1,
+                            periodeTom = LocalDate.now().minusMonths(1).sisteDagIMåned(),
+                            vilkårType = it,
+                            resultat = Resultat.OPPFYLT,
+                            begrunnelse = "",
+                            behandlingId = vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        ),
+                        VilkårResultat(
+                            personResultat = personResultatForPerson,
+                            periodeFom = LocalDate.now().førsteDagIInneværendeMåned(),
+                            periodeTom = tomBarn1,
+                            vilkårType = it,
+                            resultat = Resultat.OPPFYLT,
+                            begrunnelse = "",
+                            behandlingId = vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        )
+                    )
+                )
+            } else {
+                VilkårResultat(
+                    personResultat = personResultatForPerson,
+                    periodeFom = fomBarn1,
+                    periodeTom = tomBarn1,
+                    vilkårType = it,
+                    resultat = Resultat.OPPFYLT,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    utdypendeVilkårsvurderinger = emptyList()
+                )
+            }
+        }
+        personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
+
+        vilkårsvurdering.personResultater = setOf(
+            personResultatForPerson,
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = randomAktørId(),
+                resultat = Resultat.OPPFYLT,
+                personType = PersonType.BARN,
+                periodeFom = fomBarn2,
+                periodeTom = fomBarn1,
+                erDeltBosted = true,
+                vilkårType = Vilkår.BOR_MED_SØKER,
+                lagFullstendigVilkårResultat = true
+            )
+        )
+
+        val deltBostedPerioder = finnDeltBostedPerioder(person = søker, vilkårsvurdering = vilkårsvurdering)
+
+        assertTrue(deltBostedPerioder.size == 1)
+        assertEquals(fomBarn2.plusMonths(1).førsteDagIInneværendeMåned(), deltBostedPerioder.single().fom)
+        assertEquals(tomBarn1.sisteDagIMåned(), deltBostedPerioder.single().tom)
+    }
+
+    @Test
+    fun `Skal finne riktige delt bosted perioder for søker, og slå sammen de som overlapper`() {
+        val behandling = lagBehandling()
+        val barn = lagPerson(type = PersonType.BARN)
+        val søker = lagPerson(type = PersonType.SØKER)
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+        val fomBarn1 = LocalDate.now().minusMonths(5)
+        val tomBarn1 = LocalDate.now().plusMonths(7)
+        val fomBarn2 = fomBarn1.minusMonths(5)
+        val personResultatForPerson =
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = barn.aktør
+            )
+
+        val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
+        Vilkår.hentVilkårFor(PersonType.BARN).forEach {
+            if (it == Vilkår.BOR_MED_SØKER) {
+                vilkårResultaterForPerson.addAll(
+                    listOf(
+                        VilkårResultat(
+                            personResultat = personResultatForPerson,
+                            periodeFom = fomBarn1,
+                            periodeTom = LocalDate.now().minusMonths(1).sisteDagIMåned(),
+                            vilkårType = it,
+                            resultat = Resultat.OPPFYLT,
+                            begrunnelse = "",
+                            behandlingId = vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        ),
+                        VilkårResultat(
+                            personResultat = personResultatForPerson,
+                            periodeFom = LocalDate.now().førsteDagIInneværendeMåned(),
+                            periodeTom = tomBarn1,
+                            vilkårType = it,
+                            resultat = Resultat.OPPFYLT,
+                            begrunnelse = "",
+                            behandlingId = vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        )
+                    )
+                )
+            } else {
+                VilkårResultat(
+                    personResultat = personResultatForPerson,
+                    periodeFom = fomBarn1,
+                    periodeTom = tomBarn1,
+                    vilkårType = it,
+                    resultat = Resultat.OPPFYLT,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    utdypendeVilkårsvurderinger = emptyList()
+                )
+            }
+        }
+        personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
+
+        vilkårsvurdering.personResultater = setOf(
+            personResultatForPerson,
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = randomAktørId(),
+                resultat = Resultat.OPPFYLT,
+                personType = PersonType.BARN,
+                periodeFom = fomBarn2,
+                periodeTom = tomBarn1,
+                erDeltBosted = true,
+                vilkårType = Vilkår.BOR_MED_SØKER,
+                lagFullstendigVilkårResultat = true
+            )
+        )
+
+        val deltBostedPerioder = finnDeltBostedPerioder(person = søker, vilkårsvurdering = vilkårsvurdering)
+
+        assertTrue(deltBostedPerioder.size == 1)
+        assertEquals(fomBarn2.plusMonths(1).førsteDagIInneværendeMåned(), deltBostedPerioder.single().fom)
+        assertEquals(tomBarn1.sisteDagIMåned(), deltBostedPerioder.single().tom)
     }
 
     @Test
