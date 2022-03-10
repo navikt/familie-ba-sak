@@ -222,7 +222,7 @@ fun validerTomDato(tomDato: YearMonth?, gyldigTomEtterDagensDato: YearMonth?, å
     }
 }
 
-private fun slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
+private fun slåSammenDeltBostedPerioderSomHengerSammen(
     perioder: MutableList<Periode>,
 ): MutableList<Periode> {
     if (perioder.isEmpty()) return mutableListOf()
@@ -291,7 +291,7 @@ fun finnDeltBostedPerioder(
 
         deltBostedVilkårResultater.mapNotNull { it.tilPeriode(vilkår = deltBostedVilkårResultater) }
     }
-    return slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
+    return slåSammenDeltBostedPerioderSomHengerSammen(
         perioder = deltBostedPerioder.toMutableList()
     )
 }

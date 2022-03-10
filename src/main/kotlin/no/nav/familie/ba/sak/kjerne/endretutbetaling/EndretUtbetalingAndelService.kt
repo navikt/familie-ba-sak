@@ -68,7 +68,7 @@ class EndretUtbetalingAndelService(
             endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
         }
 
-        validerÅrsak(behandling = behandling, årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel, vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id))
+        validerÅrsak(årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel, vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id))
         validerUtbetalingMotÅrsak(årsak = endretUtbetalingAndel.årsak, skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0))
 
         validerIngenOverlappendeEndring(
