@@ -128,6 +128,8 @@ class MigreringServiceTest(
 
 ) : AbstractMockkSpringRunner() {
 
+    lateinit var migreringServiceMock: MigreringService
+
     @BeforeEach
     fun init() {
         MockKafkaProducer.sendteMeldinger.clear()
@@ -146,6 +148,28 @@ class MigreringServiceTest(
         }
         every { envService.erPreprod() } returns false
         every { envService.erProd() } returns false
+
+        val envServiceMock = mockk<EnvService>()
+        every { envServiceMock.erPreprod() } returns false
+        every { envServiceMock.erDev() } returns false
+        migreringServiceMock = MigreringService(
+            mockk(),
+            mockk(),
+            env = envServiceMock,
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(relaxed = true),
+        ) // => env.erDev() = env.erE2E() = false
     }
 
     @Test
@@ -357,25 +381,6 @@ class MigreringServiceTest(
             MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
         virkningsdatoUtleder.trySetAccessible()
 
-        val migreringServiceMock = MigreringService(
-            mockk(),
-            mockk(),
-            env = mockk(relaxed = true),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(relaxed = true),
-        ) // => env.erDev() = env.erE2E() = false
-
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
             val kjøredato = LocalDate.now().minusDays(antallDagerEtterKjøredato)
 
@@ -393,7 +398,7 @@ class MigreringServiceTest(
 
         LocalDate.now().run {
             val kjøredato = this.plusDays(1)
-            assertThat(virkningsdatoFra.invoke(migreringService, kjøredato)).isEqualTo(
+            assertThat(virkningsdatoFra.invoke(migreringServiceMock, kjøredato)).isEqualTo(
                 this.førsteDagIInneværendeMåned().minusMonths(1)
             )
         }
@@ -409,7 +414,7 @@ class MigreringServiceTest(
                 val kjøredato = this.minusDays(antallDagerEtterKjøredato)
                 assertThat(
                     virkningsdatoFra.invoke(
-                        migreringService,
+                        migreringServiceMock,
                         kjøredato
                     )
                 ).isEqualTo(this.førsteDagIInneværendeMåned())

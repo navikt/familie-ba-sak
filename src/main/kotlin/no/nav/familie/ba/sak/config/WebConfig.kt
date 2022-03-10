@@ -10,7 +10,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 @Import(OIDCUtil::class, RolleConfig::class)
 class WebConfig(
-    private val oidcUtil: OIDCUtil,
     private val rolleConfig: RolleConfig
 ) : WebMvcConfigurer {
 
