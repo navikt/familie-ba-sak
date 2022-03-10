@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.common
 
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import java.net.URI
 
@@ -78,17 +80,36 @@ fun handleException(
     uri: URI,
 ): Exception {
     return when (exception) {
+        is RessursException ->
+            when (exception.httpStatus) {
+                HttpStatus.FORBIDDEN -> exception
+                HttpStatus.UNAUTHORIZED -> exception
+                else -> opprettIntegrasjonsException(tjeneste, uri, exception)
+            }
         is HttpClientErrorException.Forbidden -> exception
         is HttpClientErrorException.Unauthorized -> exception
-        else -> IntegrasjonException(
-            msg = "${
-            lagEksternKallPreMelding(
-                tjeneste,
-                uri
-            )
-            } Kall mot $tjeneste feilet: ${exception.message}",
-            uri = uri,
-            throwable = exception
-        )
+        else -> opprettIntegrasjonsException(tjeneste, uri, exception)
     }
+}
+
+private fun opprettIntegrasjonsException(
+    tjeneste: String,
+    uri: URI,
+    exception: Exception
+): IntegrasjonException {
+    val melding = if (exception is RessursException) {
+        exception.ressurs.melding
+    } else {
+        exception.message
+    }
+    return IntegrasjonException(
+        msg = "${
+        lagEksternKallPreMelding(
+            tjeneste,
+            uri
+        )
+        } Kall mot $tjeneste feilet: $melding",
+        uri = uri,
+        throwable = exception
+    )
 }
