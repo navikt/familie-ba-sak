@@ -509,7 +509,7 @@ class VedtaksperiodeService(
         // henter andel tilkjent ytelse for barn som finnes i forrige behandling
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
             .filter {
-                forrigePersonopplysningGrunnlag.søkerOgBarn.any { f -> f.aktør == it.aktør }
+                forrigePersonopplysningGrunnlag.søkerOgBarn.any { forrige -> forrige.aktør == it.aktør }
             }
 
         return identifiserReduksjonsperioder(
