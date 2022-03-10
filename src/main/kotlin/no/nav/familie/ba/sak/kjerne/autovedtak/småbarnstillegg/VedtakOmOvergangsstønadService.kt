@@ -72,6 +72,15 @@ class VedtakOmOvergangsstønadService(
         antallVedtakOmOvergangsstønad.increment()
 
         val fagsak = fagsakService.hent(aktør = aktør) ?: return "har ikke fagsak i systemet"
+        val påvirkerFagsak = småbarnstilleggService.vedtakOmOvergangsstønadPåvirkerFagsak(fagsak)
+        if (!påvirkerFagsak) {
+            antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak.increment()
+
+            return "påvirker ikke fagsak"
+        } else {
+            antallVedtakOmOvergangsstønadPåvirkerFagsak.increment()
+        }
+
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
 
         if (aktivBehandling == null) {
@@ -86,45 +95,35 @@ class VedtakOmOvergangsstønadService(
             )
         }
 
-        val påvirkerFagsak = småbarnstilleggService.vedtakOmOvergangsstønadPåvirkerFagsak(fagsak)
-
-        return if (påvirkerFagsak) {
-            antallVedtakOmOvergangsstønadPåvirkerFagsak.increment()
-
-            val behandlingEtterBehandlingsresultat =
-                autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                    fagsak = fagsak,
-                    behandlingType = BehandlingType.REVURDERING,
-                    behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
-                )
-
-            if (behandlingEtterBehandlingsresultat.status != BehandlingStatus.IVERKSETTER_VEDTAK) {
-                return kanIkkeBehandleAutomatisk(
-                    behandling = behandlingEtterBehandlingsresultat,
-                    metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.NYE_UTBETALINGSPERIODER_FØRER_TIL_MANUELL_BEHANDLING]!!,
-                    meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
-                )
-            }
-
-            begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
-
-            val vedtakEtterTotrinn = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
-                behandlingEtterBehandlingsresultat
+        val behandlingEtterBehandlingsresultat =
+            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
             )
 
-            val task = IverksettMotOppdragTask.opprettTask(
-                behandlingEtterBehandlingsresultat,
-                vedtakEtterTotrinn,
-                SikkerhetContext.hentSaksbehandler()
+        if (behandlingEtterBehandlingsresultat.status != BehandlingStatus.IVERKSETTER_VEDTAK) {
+            return kanIkkeBehandleAutomatisk(
+                behandling = behandlingEtterBehandlingsresultat,
+                metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.NYE_UTBETALINGSPERIODER_FØRER_TIL_MANUELL_BEHANDLING]!!,
+                meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
             )
-            taskRepository.save(task)
-
-            "påvirker fagsak, autovedtak kjørt vellykket"
-        } else {
-            antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak.increment()
-
-            "påvirker ikke fagsak"
         }
+
+        begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
+
+        val vedtakEtterTotrinn = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
+            behandlingEtterBehandlingsresultat
+        )
+
+        val task = IverksettMotOppdragTask.opprettTask(
+            behandlingEtterBehandlingsresultat,
+            vedtakEtterTotrinn,
+            SikkerhetContext.hentSaksbehandler()
+        )
+        taskRepository.save(task)
+
+        return "påvirker fagsak, autovedtak kjørt vellykket"
     }
 
     private fun begrunnAutovedtakForSmåbarnstillegg(

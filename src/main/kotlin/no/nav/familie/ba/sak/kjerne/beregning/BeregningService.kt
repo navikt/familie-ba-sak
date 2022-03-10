@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -62,19 +61,6 @@ class BeregningService(
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
-    fun skalIverksettes(behandlingId: Long, fagsakId: Long, behandlingResultat: BehandlingResultat): Boolean {
-        val harTideligereIverksatteBehandlingPåFagsak =
-            hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId = fagsakId)
-                .isNotEmpty()
-
-        val harAndelTilkjentYtelserMedUtbetalinger =
-            hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId).isNotEmpty()
-
-        return behandlingResultat != BehandlingResultat.FORTSATT_INNVILGET &&
-            behandlingResultat != BehandlingResultat.AVSLÅTT &&
-            (harTideligereIverksatteBehandlingPåFagsak || harAndelTilkjentYtelserMedUtbetalinger)
-    }
-
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
         return iverksatteBehandlinger.mapNotNull {
@@ -105,9 +91,7 @@ class BeregningService(
 
             if (behandlingSomErSendtTilGodkjenning != null) behandlingSomErSendtTilGodkjenning
             else {
-                val godkjenteBehandlingerSomIkkeErIverksattEnda =
-                    behandlingRepository.finnGodkjenteBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id)
-                        .singleOrNull()
+                val godkjenteBehandlingerSomIkkeErIverksattEnda = behandlingRepository.finnGodkjenteBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
                 if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) godkjenteBehandlingerSomIkkeErIverksattEnda
                 else {
                     val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsak.id)

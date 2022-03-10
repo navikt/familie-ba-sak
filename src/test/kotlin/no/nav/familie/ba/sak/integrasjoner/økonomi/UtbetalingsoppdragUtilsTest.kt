@@ -39,9 +39,7 @@ class UtbetalingsoppdragUtilsTest {
                 saksbehandlerId = "",
                 saksnummer = "",
                 utbetalingsperiode = listOf(mockk()),
-            ).valider(
-                behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET,
-            )
+            ).valider(behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET)
         }
         assertTrue(
             feil.message!!.contains("Behandling har resultat fortsatt innvilget")
