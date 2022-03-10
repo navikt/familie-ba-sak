@@ -159,8 +159,6 @@ enum class FagsystemUtfall(val beskrivelse: String) {
     LØPENDE_SAK_I_INFOTRYGD("Mor har løpende sak i infotrygd"),
     FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK("Mor har fagsak uten iverksatte behandlinger"),
     SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER("Mor har saker i infotrygd, men ikke løpende utbetalinger"),
-    MOR_IKKE_NORSK_STATSBORGER("Mor har ikke gyldig norsk statsborgerskap"),
     MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING("Mor har ikke gyldig medlemskap for automatisk vurdering"),
     STØTTET_I_BA_SAK("Person kan automatisk vurderes i ba-sak"),
-    STANDARDUTFALL_INFOTRYGD("Ingen av de tidligere reglene slo til, sender til Infotrygd")
 }

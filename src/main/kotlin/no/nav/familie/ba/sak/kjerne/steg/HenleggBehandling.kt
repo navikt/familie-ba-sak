@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service
 @Service
 class HenleggBehandling(
     private val behandlingService: BehandlingService,
-    private val taskRepository: TaskRepositoryWrapper,
     private val loggService: LoggService,
     private val dokumentService: DokumentService,
     private val oppgaveService: OppgaveService,

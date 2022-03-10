@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -33,7 +32,6 @@ class VedtaksperiodeMedBegrunnelserController(
     private val brevKlient: BrevKlient,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val brevPeriodeService: BrevPeriodeService,
-    private val vedtaksperiodeRepository: VedtaksperiodeRepository,
 ) {
 
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
