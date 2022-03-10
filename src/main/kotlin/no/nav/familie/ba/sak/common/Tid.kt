@@ -111,6 +111,9 @@ fun MånedPeriode.overlapperHeltEllerDelvisMed(annenPeriode: MånedPeriode) =
         annenPeriode.inkluderer(this.fom) ||
         annenPeriode.inkluderer(this.tom)
 
+fun MånedPeriode.erMellom(annenPeriode: MånedPeriode) =
+    annenPeriode.inkluderer(this.fom) && annenPeriode.inkluderer(this.tom)
+
 fun Periode.kanErstatte(other: Periode): Boolean {
     return this.fom.isSameOrBefore(other.fom) && this.tom.isSameOrAfter(other.tom)
 }
@@ -131,6 +134,8 @@ fun Periode.kanFlytteFom(other: Periode): Boolean {
 fun Periode.kanFlytteTom(other: Periode): Boolean {
     return this.fom.isBetween(other) && this.tom.isSameOrAfter(other.tom)
 }
+
+fun Periode.tilMånedPeriode(): MånedPeriode = MånedPeriode(fom = this.fom.toYearMonth(), tom = this.tom.toYearMonth())
 
 data class Periode(val fom: LocalDate, val tom: LocalDate)
 
