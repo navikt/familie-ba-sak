@@ -223,6 +223,71 @@ class SmåbarnstilleggUtilsTest {
     }
 
     @Test
+    fun `Skal svare false om at nye perioder med full OS påvirker behandling ved flere perioder`() {
+        val personIdent = randomAktørId()
+        val barnIdent = randomAktørId()
+
+        val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
+            småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
+                behandlingId = 1L,
+                tilkjentYtelse = mockk()
+            ),
+            nyePerioderMedFullOvergangsstønad = listOf(
+                InternPeriodeOvergangsstønad(
+                    personIdent = personIdent.aktørId,
+                    fomDato = LocalDate.now().minusMonths(10),
+                    tomDato = LocalDate.now().minusMonths(6),
+                ),
+                InternPeriodeOvergangsstønad(
+                    personIdent = personIdent.aktørId,
+                    fomDato = LocalDate.now().minusMonths(4),
+                    tomDato = LocalDate.now().plusMonths(2),
+                )
+            ),
+            forrigeAndelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(10),
+                    tom = YearMonth.now().plusMonths(6),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    person = tilfeldigPerson(aktør = barnIdent),
+                    aktør = barnIdent,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(10),
+                    tom = YearMonth.now().minusMonths(6),
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    person = tilfeldigPerson(aktør = personIdent),
+                    aktør = personIdent,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(10),
+                    tom = YearMonth.now().minusMonths(6),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                    person = tilfeldigPerson(aktør = personIdent),
+                    aktør = personIdent,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(4),
+                    tom = YearMonth.now().plusMonths(2),
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    person = tilfeldigPerson(aktør = personIdent),
+                    aktør = personIdent,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(4),
+                    tom = YearMonth.now().plusMonths(2),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                    person = tilfeldigPerson(aktør = personIdent),
+                    aktør = personIdent,
+                )
+            ),
+            barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
+        )
+
+        assertFalse(påvirkerFagsak)
+    }
+
+    @Test
     fun `Skal legge til innvilgelsesbegrunnelse for småbarnstillegg`() {
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.now().førsteDagIInneværendeMåned(),

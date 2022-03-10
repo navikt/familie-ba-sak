@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
-import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -290,13 +289,8 @@ class PersongrunnlagService(
                     barn.forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR || it.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR }
                 }.map { it.aktør }.toSet()
 
-        return barnasFarEllerMedmorAktører.singleOrNull().also {
-            if (it == null) {
-                logger.warn("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse. Se securelogger for mer informasjon.")
-                secureLogger.info("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse: $barnasFarEllerMedmorAktører")
-            } else {
-                personidentService.hentOgLagreAktør(ident = it.aktørId, lagre = true)
-            }
+        return barnasFarEllerMedmorAktører.singleOrNull()?.also {
+            personidentService.hentOgLagreAktør(ident = it.aktørId, lagre = true)
         }
     }
 

@@ -43,7 +43,7 @@ data class RestSanityBegrunnelse(
     val borMedSokerTriggere: List<String>? = emptyList(),
     val ovrigeTriggere: List<String>? = emptyList(),
     val endringsaarsaker: List<String>? = emptyList(),
-    val hjemler: List<String> = emptyList(),
+    val hjemler: List<String>? = emptyList(),
     val endretUtbetalingsperiodeDeltBostedTriggere: List<String>? = emptyList(),
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
@@ -74,7 +74,7 @@ data class RestSanityBegrunnelse(
             endringsaarsaker = endringsaarsaker?.mapNotNull {
                 finnEnumverdi(it, Årsak.values(), apiNavn)
             },
-            hjemler = hjemler,
+            hjemler = hjemler ?: emptyList(),
             endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere?.mapNotNull {
                 finnEnumverdi(it, EndretUtbetalingsperiodeDeltBostedTriggere.values(), apiNavn)
             },
@@ -144,6 +144,7 @@ enum class ØvrigTrigger {
     ETTER_ENDRET_UTBETALING,
     ENDRET_UTBETALING,
     GJELDER_FØRSTE_PERIODE,
+    GJELDER_FRA_INNVILGELSESTIDSPUNKT,
 }
 
 enum class EndretUtbetalingsperiodeTrigger {
@@ -195,7 +196,8 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
             ?: false,
         endringsaarsaker = this.endringsaarsaker?.toSet() ?: emptySet(),
         småbarnstillegg = this.inneholderUtvidetBarnetrygdTrigger(UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG),
-        gjelderFørstePeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FØRSTE_PERIODE)
+        gjelderFørstePeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FØRSTE_PERIODE),
+        gjelderFraInnvilgelsestidspunkt = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT)
     )
 }
 

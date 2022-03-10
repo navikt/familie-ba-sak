@@ -170,7 +170,7 @@ class IntegrasjonClientMock {
             every { integrasjonClient.hentAlleEØSLand() } returns hentKodeverkLand()
         }
 
-        private fun hentKodeverkLand(): KodeverkDto {
+        internal fun hentKodeverkLand(): KodeverkDto {
             val beskrivelsePolen = BeskrivelseDto("POL", "")
             val betydningPolen = BetydningDto(FOM_2004, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelsePolen))
             val beskrivelseTyskland = BeskrivelseDto("DEU", "")

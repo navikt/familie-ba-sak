@@ -36,20 +36,16 @@ fun hentPersonerForAlleUtgjørendeVilkår(
     triggesAv: TriggesAv,
     erFørsteVedtaksperiodePåFagsak: Boolean
 ): Set<MinimertRestPerson> {
-    return triggesAv.vilkår.fold(mutableSetOf()) { acc, vilkår ->
-        acc.addAll(
-            hentPersonerMedUtgjørendeVilkår(
-                minimertRestPersonResultater = minimertePersonResultater,
-                vedtaksperiode = vedtaksperiode,
-                begrunnelseType = oppdatertBegrunnelseType,
-                vilkårGjeldendeForBegrunnelse = vilkår,
-                aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
-                triggesAv = triggesAv,
-                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
-            )
+    return triggesAv.vilkår.fold(setOf()) { acc, vilkår ->
+        acc + hentPersonerMedUtgjørendeVilkår(
+            minimertRestPersonResultater = minimertePersonResultater,
+            vedtaksperiode = vedtaksperiode,
+            begrunnelseType = oppdatertBegrunnelseType,
+            vilkårGjeldendeForBegrunnelse = vilkår,
+            aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
+            triggesAv = triggesAv,
+            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
         )
-
-        acc
     }
 }
 
