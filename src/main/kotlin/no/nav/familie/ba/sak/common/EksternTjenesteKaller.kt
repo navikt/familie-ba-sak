@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.common
 
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import java.net.URI
 
@@ -21,7 +23,7 @@ inline fun <reified Data> kallEksternTjeneste(
             logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
         }
     } catch (exception: Exception) {
-        throw handleException(exception, tjeneste, uri)
+        throw handleException(exception = exception, tjeneste = tjeneste, uri = uri, formål = formål)
     }
 }
 
@@ -38,7 +40,7 @@ inline fun <reified Data> kallEksternTjenesteRessurs(
             logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
         }
     } catch (exception: Exception) {
-        throw handleException(exception, tjeneste, uri)
+        throw handleException(exception = exception, tjeneste = tjeneste, uri = uri, formål = formål)
     }
 }
 
@@ -55,7 +57,7 @@ inline fun <reified Data> kallEksternTjenesteUtenRespons(
             logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
         }
     } catch (exception: Exception) {
-        throw handleException(exception, tjeneste, uri)
+        throw handleException(exception = exception, tjeneste = tjeneste, uri = uri, formål = formål)
     }
 }
 
@@ -76,19 +78,40 @@ fun handleException(
     exception: Exception,
     tjeneste: String,
     uri: URI,
+    formål: String,
 ): Exception {
     return when (exception) {
+        is RessursException ->
+            when (exception.httpStatus) {
+                HttpStatus.FORBIDDEN -> exception
+                HttpStatus.UNAUTHORIZED -> exception
+                else -> opprettIntegrasjonsException(tjeneste, uri, exception, formål)
+            }
         is HttpClientErrorException.Forbidden -> exception
         is HttpClientErrorException.Unauthorized -> exception
-        else -> IntegrasjonException(
-            msg = "${
-            lagEksternKallPreMelding(
-                tjeneste,
-                uri
-            )
-            } Kall mot $tjeneste feilet: ${exception.message}",
-            uri = uri,
-            throwable = exception
-        )
+        else -> opprettIntegrasjonsException(tjeneste, uri, exception, formål)
     }
+}
+
+private fun opprettIntegrasjonsException(
+    tjeneste: String,
+    uri: URI,
+    exception: Exception,
+    formål: String,
+): IntegrasjonException {
+    val melding = if (exception is RessursException) {
+        exception.ressurs.melding
+    } else {
+        exception.message
+    }
+    return IntegrasjonException(
+        msg = "${
+        lagEksternKallPreMelding(
+            tjeneste,
+            uri
+        )
+        } Kall mot \"$tjeneste\" feilet. Formål: $formål. Feilmelding: $melding",
+        uri = uri,
+        throwable = exception
+    )
 }
