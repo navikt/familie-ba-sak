@@ -21,7 +21,7 @@ inline fun <reified Data> kallEksternTjeneste(
             logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
         }
     } catch (exception: Exception) {
-        throw handleException(exception, tjeneste, uri)
+        throw handleException(exception = exception, tjeneste = tjeneste, uri = uri, formål = formål)
     }
 }
 
@@ -38,7 +38,7 @@ inline fun <reified Data> kallEksternTjenesteRessurs(
             logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
         }
     } catch (exception: Exception) {
-        throw handleException(exception, tjeneste, uri)
+        throw handleException(exception = exception, tjeneste = tjeneste, uri = uri, formål = formål)
     }
 }
 
@@ -55,7 +55,7 @@ inline fun <reified Data> kallEksternTjenesteUtenRespons(
             logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
         }
     } catch (exception: Exception) {
-        throw handleException(exception, tjeneste, uri)
+        throw handleException(exception = exception, tjeneste = tjeneste, uri = uri, formål = formål)
     }
 }
 
@@ -76,6 +76,7 @@ fun handleException(
     exception: Exception,
     tjeneste: String,
     uri: URI,
+    formål: String,
 ): Exception {
     return when (exception) {
         is HttpClientErrorException.Forbidden -> exception
@@ -86,7 +87,7 @@ fun handleException(
                 tjeneste,
                 uri
             )
-            } Kall mot $tjeneste feilet: ${exception.message}",
+            } Kall mot \"$tjeneste\" feilet. Formål: $formål.",
             uri = uri,
             throwable = exception
         )
