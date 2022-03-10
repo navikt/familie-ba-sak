@@ -159,7 +159,7 @@ class MigreringService(
             )
             secureLog.info("Ferdig migrert $personIdent. Response til familie-ba-migrering: $migreringResponseDto")
 
-            if (!SikkerhetContext.erSystemKontekst() && !env!!.erDev()) {
+            if (!SikkerhetContext.erSystemKontekst() && !env.erDev()) {
                 logger.info("Sender manuelt trigget migrering til familie-ba-migrering")
                 Result.runCatching {
                     migrertAvSaksbehandler.increment()
@@ -304,10 +304,10 @@ class MigreringService(
     private fun virkningsdatoFra(kjøredato: LocalDate): LocalDate {
         LocalDate.now().run {
             return when {
-                env?.erPreprod() ?: false -> LocalDate.of(2022, 1, 1)
+                env.erPreprod() -> LocalDate.of(2022, 1, 1)
                 this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
                 this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
-                env!!.erDev() -> this.førsteDagINesteMåned()
+                env.erDev() -> this.førsteDagINesteMåned()
                 else -> {
                     kastOgTellMigreringsFeil(
                         MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
@@ -380,7 +380,7 @@ class MigreringService(
             MigreringsfeilType.IVERKSETT_BEHANDLING_UTEN_VEDTAK,
             "${MigreringsfeilType.IVERKSETT_BEHANDLING_UTEN_VEDTAK.beskrivelse} ${behandling.id}"
         )
-        if (env!!.erPreprod()) {
+        if (env.erPreprod()) {
             vedtak.vedtaksdato = LocalDate.of(2022, 1, 1).atStartOfDay()
         }
         vedtakService.oppdater(vedtak)

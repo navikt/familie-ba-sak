@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØknomiSimuleringMottakerRepository
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -29,19 +28,14 @@ class SimuleringService(
     private val økonomiService: ØkonomiService,
     private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
-    private val beregningService: BeregningService,
     private val vedtakRepository: VedtakRepository,
     private val behandlingRepository: BehandlingRepository,
 ) {
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
 
-        if (!beregningService.skalIverksettes(
-                behandlingResultat = vedtak.behandling.resultat,
-                behandlingId = vedtak.behandling.id,
-                fagsakId = vedtak.behandling.fagsak.id,
-            )
-        ) return null
+        if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == BehandlingResultat.AVSLÅTT) return null
+
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
          * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
@@ -127,10 +121,5 @@ class SimuleringService(
 
     fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere).feilutbetaling
-    }
-
-    companion object {
-
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

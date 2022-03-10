@@ -38,7 +38,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         value = """select id from fagsak
                         where fagsak.id in (
                             with sisteIverksatte as (
-                                select b.fk_fagsak_id as fagsakId, max(b.id) as behandlingId
+                                select b.fk_fagsak_id as fagsakId, max(b.opprettet_tid) as opprettet_tid
                                 from behandling b
                                          inner join tilkjent_ytelse ty on b.id = ty.fk_behandling_id
                                          inner join fagsak f on f.id = b.fk_fagsak_id
@@ -46,10 +46,12 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                   and f.status = 'LØPENDE'
                                   and f.arkivert = false
                                 group by b.id)
-                            select sisteIverksatte.fagsakId
-                            from sisteIverksatte
-                                     inner join tilkjent_ytelse ty on sisteIverksatte.behandlingId = ty.fk_behandling_id
-                            where ty.stonad_tom < date_trunc('month', now()))""",
+                                
+                            select silp.fagsakId
+                            from sisteIverksatte silp
+                                     inner join behandling b on b.fk_fagsak_id = silp.fagsakId
+                                     inner join tilkjent_ytelse ty on b.id = ty.fk_behandling_id
+                            where b.opprettet_tid = silp.opprettet_tid and ty.stonad_tom < date_trunc('month', now()))""",
         nativeQuery = true
     )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>

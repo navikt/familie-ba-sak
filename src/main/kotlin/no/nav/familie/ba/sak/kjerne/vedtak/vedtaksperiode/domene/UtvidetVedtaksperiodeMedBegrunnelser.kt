@@ -11,10 +11,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
-
-private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
 data class UtvidetVedtaksperiodeMedBegrunnelser(
     val id: Long,
@@ -41,7 +38,6 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     erIngenOverlappVedtaksperiodeTogglePå: Boolean,
-
 ): UtvidetVedtaksperiodeMedBegrunnelser {
 
     val utbetalingsperiodeDetaljer = hentUtbetalingsperiodeDetaljer(
