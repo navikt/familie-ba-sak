@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -45,6 +46,7 @@ class EndretUtbetalingAndelServiceTest {
     fun setup() {
         val beregningService = mockk<BeregningService>()
         val sanityService = mockk<SanityService>()
+        val featureToggleService = mockk<FeatureToggleService>()
         endretUtbetalingAndelService = EndretUtbetalingAndelService(
             endretUtbetalingAndelRepository = mockEndretUtbetalingAndelRepository,
             personopplysningGrunnlagRepository = mockPersonopplysningGrunnlagRepository,
@@ -52,7 +54,8 @@ class EndretUtbetalingAndelServiceTest {
             persongrunnlagService = mockPersongrunnlagService,
             andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository,
             sanityService = sanityService,
-            vilkårsvurderingService = mockVilkårsvurderingService
+            vilkårsvurderingService = mockVilkårsvurderingService,
+            featureToggleService = featureToggleService
         )
     }
 
