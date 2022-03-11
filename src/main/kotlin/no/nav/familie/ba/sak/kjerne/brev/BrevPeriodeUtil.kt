@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
@@ -56,24 +54,14 @@ fun hentBrevPerioder(
     brevperioderData: List<BrevperiodeData>
 ) = brevperioderData
     .mapNotNull {
-        try {
-            it.minimertVedtaksperiode.tilBrevPeriode(
-                restBehandlingsgrunnlagForBrev = it.restBehandlingsgrunnlagForBrev,
-                uregistrerteBarn = it.uregistrerteBarn,
-                utvidetScenarioForEndringsperiode = it.utvidetScenarioForEndringsperiode,
-                erFørsteVedtaksperiodePåFagsak = it.erFørsteVedtaksperiodePåFagsak,
-                brevMålform = it.brevMålform,
-            )
-        } catch (exception: Exception) {
-            val brevPeriodeForLogging = it.tilBrevperiodeForLogging()
 
-            secureLogger.error(
-                "Feil ved generering av brevbegrunnelse. Data som ble sendt inn var: " +
-                    brevPeriodeForLogging.convertDataClassToJson(),
-                exception
-            )
-            throw Feil(message = "Feil ved generering av brevperioder: ", throwable = exception)
-        }
+        it.minimertVedtaksperiode.tilBrevPeriode(
+            restBehandlingsgrunnlagForBrev = it.restBehandlingsgrunnlagForBrev,
+            uregistrerteBarn = it.uregistrerteBarn,
+            utvidetScenarioForEndringsperiode = it.utvidetScenarioForEndringsperiode,
+            erFørsteVedtaksperiodePåFagsak = it.erFørsteVedtaksperiodePåFagsak,
+            brevMålform = it.brevMålform,
+        )
     }
 
 enum class UtvidetScenarioForEndringsperiode {
