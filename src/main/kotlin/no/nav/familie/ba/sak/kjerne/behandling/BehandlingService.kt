@@ -102,6 +102,7 @@ class BehandlingService(
             val underkategori = bestemUnderkategori(
                 nyUnderkategori = nyBehandling.underkategori,
                 nyBehandlingType = nyBehandling.behandlingType,
+                nyBehandlingÅrsak = nyBehandling.behandlingÅrsak,
                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id)
             )
 
@@ -176,6 +177,7 @@ class BehandlingService(
             else bestemUnderkategori(
                 nyUnderkategori = nyUnderkategori,
                 nyBehandlingType = behandling.type,
+                nyBehandlingÅrsak = behandling.opprettetÅrsak,
                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id)
             )
 
