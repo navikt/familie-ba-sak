@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.RestTilbakekrevingsbehandling
@@ -13,18 +15,24 @@ open class RestBaseFagsak(
     open val søkerFødselsnummer: String,
     open val status: FagsakStatus,
     open val underBehandling: Boolean,
+    open val løpendeKategori: BehandlingKategori?,
+    open val løpendeUnderkategori: BehandlingUnderkategori?,
     open val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
 )
 
 fun Fagsak.tilRestBaseFagsak(
     underBehandling: Boolean,
-    gjeldendeUtbetalingsperioder: List<Utbetalingsperiode> = emptyList()
+    gjeldendeUtbetalingsperioder: List<Utbetalingsperiode> = emptyList(),
+    løpendeKategori: BehandlingKategori?,
+    løpendeUnderkategori: BehandlingUnderkategori?
 ): RestBaseFagsak = RestBaseFagsak(
     opprettetTidspunkt = this.opprettetTidspunkt,
     id = this.id,
     søkerFødselsnummer = this.aktør.aktivFødselsnummer(),
     status = this.status,
     underBehandling = underBehandling,
+    løpendeKategori = løpendeKategori,
+    løpendeUnderkategori = løpendeUnderkategori,
     gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder
 )
 
@@ -34,6 +42,8 @@ data class RestFagsak(
     override val søkerFødselsnummer: String,
     override val status: FagsakStatus,
     override val underBehandling: Boolean,
+    override val løpendeKategori: BehandlingKategori?,
+    override val løpendeUnderkategori: BehandlingUnderkategori?,
     override val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     val behandlinger: List<RestUtvidetBehandling>,
     val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>
@@ -43,6 +53,8 @@ data class RestFagsak(
     søkerFødselsnummer = søkerFødselsnummer,
     status = status,
     underBehandling = underBehandling,
+    løpendeKategori = løpendeKategori,
+    løpendeUnderkategori = løpendeUnderkategori,
     gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder
 )
 
@@ -55,6 +67,8 @@ fun RestBaseFagsak.tilRestFagsak(
     søkerFødselsnummer = this.søkerFødselsnummer,
     status = this.status,
     underBehandling = this.underBehandling,
+    løpendeKategori = this.løpendeKategori,
+    løpendeUnderkategori = this.løpendeUnderkategori,
     gjeldendeUtbetalingsperioder = this.gjeldendeUtbetalingsperioder,
     behandlinger = restUtvidetBehandlinger,
     tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
@@ -65,6 +79,8 @@ data class RestMinimalFagsak(
     override val id: Long,
     override val søkerFødselsnummer: String,
     override val status: FagsakStatus,
+    override val løpendeKategori: BehandlingKategori?,
+    override val løpendeUnderkategori: BehandlingUnderkategori?,
     override val underBehandling: Boolean,
     override val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     val behandlinger: List<RestVisningBehandling>,
@@ -76,6 +92,8 @@ data class RestMinimalFagsak(
     søkerFødselsnummer = søkerFødselsnummer,
     status = status,
     underBehandling = underBehandling,
+    løpendeKategori = løpendeKategori,
+    løpendeUnderkategori = løpendeUnderkategori,
     gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
 )
 
@@ -89,6 +107,8 @@ fun RestBaseFagsak.tilRestMinimalFagsak(
     søkerFødselsnummer = this.søkerFødselsnummer,
     status = this.status,
     underBehandling = this.underBehandling,
+    løpendeKategori = this.løpendeKategori,
+    løpendeUnderkategori = this.løpendeUnderkategori,
     gjeldendeUtbetalingsperioder = this.gjeldendeUtbetalingsperioder,
     behandlinger = restVisningBehandlinger,
     tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
