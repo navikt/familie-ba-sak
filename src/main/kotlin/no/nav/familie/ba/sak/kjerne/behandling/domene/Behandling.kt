@@ -247,6 +247,8 @@ data class Behandling(
 
     fun erManuellMigrering() = erManuellMigreringForEndreMigreringsdato() || erHelmanuellMigrering()
 
+    fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
+
     private fun erOmregning() =
         this.opprettetÅrsak.erOmregningsårsak()
 
