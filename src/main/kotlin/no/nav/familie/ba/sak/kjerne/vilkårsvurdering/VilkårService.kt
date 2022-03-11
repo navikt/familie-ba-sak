@@ -164,7 +164,7 @@ class VilkårService(
                 frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restSlettVilkår.personIdent}"
             )
         val behandling = behandlingService.hent(behandlingId)
-        if (!(behandling.erManuellMigrering() || behandling.erTekniskEndring()) ||
+        if (!behandling.kanLeggeTilOgFjerneUtvidetVilkår() ||
             Vilkår.UTVIDET_BARNETRYGD != restSlettVilkår.vilkårType ||
             finnesUtvidetBarnetrydIForrigeBehandling(behandling, restSlettVilkår.personIdent)
         ) {
@@ -227,7 +227,7 @@ class VilkårService(
         restNyttVilkår: RestNyttVilkår,
         vilkårsvurdering: Vilkårsvurdering
     ) {
-        if (!(behandling.erManuellMigrering() || behandling.erTekniskEndring()) && !harUtvidetVilkår(vilkårsvurdering)) {
+        if (!behandling.kanLeggeTilOgFjerneUtvidetVilkår() && !harUtvidetVilkår(vilkårsvurdering)) {
             throw FunksjonellFeil(
                 melding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
                     "med behandlingType ${behandling.type.visningsnavn}",
