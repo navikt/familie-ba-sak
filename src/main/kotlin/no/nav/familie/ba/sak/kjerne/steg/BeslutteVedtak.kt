@@ -69,17 +69,21 @@ class BeslutteVedtak(
             val nesteSteg = hentNesteStegForNormalFlyt(behandling)
 
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
-
-            when (nesteSteg) {
-                StegType.IVERKSETT_MOT_OPPDRAG -> {
-                    opprettTaskIverksettMotOppdrag(behandling, vedtak)
-                }
-                StegType.JOURNALFØR_VEDTAKSBREV -> opprettJournalførVedtaksbrevTask(behandling, vedtak)
-                else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på beslutte vedtak steg")
-            }
-
             opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 
+            val erInnvilgetUtenNyeAndeler = true
+            if (erInnvilgetUtenNyeAndeler) {
+                opprettJournalførVedtaksbrevTask(behandling, vedtak)
+                return StegType.JOURNALFØR_VEDTAKSBREV
+            } else {
+                when (nesteSteg) {
+                    StegType.IVERKSETT_MOT_OPPDRAG -> {
+                        opprettTaskIverksettMotOppdrag(behandling, vedtak)
+                    }
+                    StegType.JOURNALFØR_VEDTAKSBREV -> opprettJournalførVedtaksbrevTask(behandling, vedtak)
+                    else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på beslutte vedtak steg")
+                }
+            }
             nesteSteg
         } else {
             val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
