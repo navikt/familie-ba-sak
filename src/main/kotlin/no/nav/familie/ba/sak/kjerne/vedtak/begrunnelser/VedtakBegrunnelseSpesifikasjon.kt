@@ -490,6 +490,50 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonDeltBarnetrygdHastevedtak"
     },
+    REDUKSJON_IKKE_BOSATT_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonIkkeBosattINorge"
+    },
+    REDUKSJON_BARN_BOR_IKKE_MED_SØKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonBarnBoddeIkkeMedSoker"
+    },
+    REDUKSJON_IKKE_OPPHOLDSTILLATELSE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonIkkeOppholdstillatelse"
+    },
+    REDUKSJON_AVTALE_DELT_BOSTED_IKKE_GYLDIG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonAvtaleOmDeltBostedIkkeGyldig"
+    },
+    REDUKSJON_AVTALE_DELT_BOSTED_FØLGES_IKKE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonAvtaleDeltBostedFolgesIkke"
+    },
+    REDUKSJON_FORELDRENE_BODDE_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonForeldreneBoddeSammen"
+    },
+    REDUKSJON_VURDERING_FORELDRENE_BODDE_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingForeldreneBoddeSammen"
+    },
+    REDUKSJON_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVarIkkeMedlem"
+    },
+    REDUKSJON_VURDERING_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingVarIkkeMedlem"
+    },
+    REDUKSJON_ANDRE_FORELDER_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonDenAndreForelderenVarIkkeMedlem"
+    },
+    REDUKSJON_VURDERING_ANDRE_FORELDER_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingDenAndreForelderenVarIkkeMedlem"
+    },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagBosattIRiket"
@@ -1043,6 +1087,22 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val sanityApiNavn = "etterEndretUtbetalingAvtaleDeltBosted"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     };
+
+    companion object {
+        fun begrunnelserForRedusertPerioderFraInnvilgelsestidspunkt(): List<VedtakBegrunnelseSpesifikasjon> = listOf(
+            REDUKSJON_IKKE_BOSATT_I_NORGE,
+            REDUKSJON_BARN_BOR_IKKE_MED_SØKER,
+            REDUKSJON_IKKE_OPPHOLDSTILLATELSE,
+            REDUKSJON_AVTALE_DELT_BOSTED_IKKE_GYLDIG,
+            REDUKSJON_AVTALE_DELT_BOSTED_FØLGES_IKKE,
+            REDUKSJON_FORELDRENE_BODDE_SAMMEN,
+            REDUKSJON_VURDERING_FORELDRENE_BODDE_SAMMEN,
+            REDUKSJON_VAR_IKKE_MEDLEM,
+            REDUKSJON_VURDERING_VAR_IKKE_MEDLEM,
+            REDUKSJON_ANDRE_FORELDER_VAR_IKKE_MEDLEM,
+            REDUKSJON_VURDERING_ANDRE_FORELDER_VAR_IKKE_MEDLEM
+        )
+    }
 }
 
 @Converter

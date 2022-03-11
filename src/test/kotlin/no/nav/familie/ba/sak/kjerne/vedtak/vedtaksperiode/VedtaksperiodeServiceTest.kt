@@ -5,11 +5,14 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
@@ -21,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -29,10 +31,13 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
+import java.time.YearMonth
 
 class VedtaksperiodeServiceTest(
     @Autowired
@@ -54,9 +59,6 @@ class VedtaksperiodeServiceTest(
     private val vilkårsvurderingService: VilkårsvurderingService,
 
     @Autowired
-    private val tilbakekrevingService: TilbakekrevingService,
-
-    @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
@@ -69,13 +71,13 @@ class VedtaksperiodeServiceTest(
     var førstegangsbehandling: Behandling? = null
     var revurdering: Behandling? = null
 
-    @BeforeAll
+    @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
         førstegangsbehandling = kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
+            barnasIdenter = listOf(barnFnr, barn2Fnr),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
@@ -87,7 +89,7 @@ class VedtaksperiodeServiceTest(
         revurdering = kjørStegprosessForRevurderingÅrligKontroll(
             tilSteg = StegType.BEHANDLINGSRESULTAT,
             søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
+            barnasIdenter = listOf(barnFnr, barn2Fnr),
             vedtakService = vedtakService,
             stegService = stegService
         )
@@ -239,5 +241,219 @@ class VedtaksperiodeServiceTest(
             "Begrunnelsestype INNVILGET passer ikke med typen 'FORTSATT_INNVILGET' som er satt på perioden.",
             feil.message
         )
+    }
+
+    @Test
+    fun `skal identifisere reduserte perioder i begynnelsen`() {
+        val barn1 = tilAktør(barnFnr)
+        val barn2 = tilAktør(barn2Fnr)
+        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn1
+        )
+        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn2
+        )
+
+        val andelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 5),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn1
+        )
+        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn2
+        )
+
+        val redusertePerioder = identifiserReduksjonsperioder(
+            forrigeAndelerTilkjentYtelse = listOf(forrigeAndelTilkjentYtelse1, forrigeAndelTilkjentYtelse2),
+            andelerTilkjentYtelse = listOf(andelTilkjentYtelse1, andelTilkjentYtelse2),
+            vedtak = lagVedtak(),
+            opphørsperioder = emptyList()
+        )
+        assertTrue { redusertePerioder.isNotEmpty() }
+        assertEquals(1, redusertePerioder.size)
+        assertEquals(Vedtaksperiodetype.REDUKSJON, redusertePerioder.first().type)
+        assertEquals(LocalDate.of(2021, 4, 1), redusertePerioder.first().fom)
+        assertEquals(LocalDate.of(2021, 4, 30), redusertePerioder.first().tom)
+    }
+
+    @Test
+    fun `skal identifisere reduserte perioder midt i utbetalingsperiode`() {
+        val barn1 = tilAktør(barnFnr)
+        val barn2 = tilAktør(barn2Fnr)
+        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn1
+        )
+        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn2
+        )
+
+        val andelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 6),
+            beløp = 2108,
+            aktør = barn1
+        )
+        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 8),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn1
+        )
+        val andelTilkjentYtelse3 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn2
+        )
+
+        val redusertePerioder = identifiserReduksjonsperioder(
+            forrigeAndelerTilkjentYtelse = listOf(forrigeAndelTilkjentYtelse1, forrigeAndelTilkjentYtelse2),
+            andelerTilkjentYtelse = listOf(andelTilkjentYtelse1, andelTilkjentYtelse2, andelTilkjentYtelse3),
+            vedtak = lagVedtak(),
+            opphørsperioder = emptyList()
+        )
+        assertTrue { redusertePerioder.isNotEmpty() }
+        assertEquals(1, redusertePerioder.size)
+        assertEquals(Vedtaksperiodetype.REDUKSJON, redusertePerioder.first().type)
+        assertEquals(LocalDate.of(2021, 7, 1), redusertePerioder.first().fom)
+        assertEquals(LocalDate.of(2021, 7, 31), redusertePerioder.first().tom)
+    }
+
+    @Test
+    fun `skal identifisere reduserte perioder med opphørsperioder`() {
+        val barn1 = tilAktør(barnFnr)
+        val barn2 = tilAktør(barn2Fnr)
+        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn1
+        )
+        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn2
+        )
+
+        val andelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 5),
+            tom = YearMonth.of(2021, 6),
+            beløp = 2108,
+            aktør = barn1
+        )
+        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 8),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn1
+        )
+        val andelTilkjentYtelse3 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 5),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn2
+        )
+
+        val vedtak = lagVedtak()
+        val redusertePerioder = identifiserReduksjonsperioder(
+            forrigeAndelerTilkjentYtelse = listOf(forrigeAndelTilkjentYtelse1, forrigeAndelTilkjentYtelse2),
+            andelerTilkjentYtelse = listOf(andelTilkjentYtelse1, andelTilkjentYtelse2, andelTilkjentYtelse3),
+            vedtak = vedtak,
+            opphørsperioder = listOf(
+                VedtaksperiodeMedBegrunnelser(
+                    vedtak = vedtak,
+                    fom = LocalDate.of(2021, 4, 1),
+                    tom = LocalDate.of(2021, 4, 30),
+                    type = Vedtaksperiodetype.OPPHØR
+                )
+            )
+        )
+        assertTrue { redusertePerioder.isNotEmpty() }
+        assertEquals(1, redusertePerioder.size)
+        assertEquals(Vedtaksperiodetype.REDUKSJON, redusertePerioder.first().type)
+        assertEquals(LocalDate.of(2021, 7, 1), redusertePerioder.first().fom)
+        assertEquals(LocalDate.of(2021, 7, 31), redusertePerioder.first().tom)
+    }
+
+    @Test
+    fun `skal identifisere flere reduserte perioder`() {
+        val barn1 = tilAktør(barnFnr)
+        val barn2 = tilAktør(barn2Fnr)
+        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn1
+        )
+        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn2
+        )
+
+        val andelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 6),
+            beløp = 2108,
+            aktør = barn1
+        )
+        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 8),
+            tom = YearMonth.of(2021, 8),
+            beløp = 2108,
+            aktør = barn1
+        )
+        val andelTilkjentYtelse3 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 5),
+            tom = YearMonth.of(2021, 7),
+            beløp = 2108,
+            aktør = barn2
+        )
+
+        val redusertePerioder = identifiserReduksjonsperioder(
+            forrigeAndelerTilkjentYtelse = listOf(forrigeAndelTilkjentYtelse1, forrigeAndelTilkjentYtelse2),
+            andelerTilkjentYtelse = listOf(andelTilkjentYtelse1, andelTilkjentYtelse2, andelTilkjentYtelse3),
+            vedtak = lagVedtak(),
+            opphørsperioder = emptyList()
+        )
+        assertTrue { redusertePerioder.isNotEmpty() }
+        assertEquals(3, redusertePerioder.size)
+        assertTrue { redusertePerioder.all { it.type == Vedtaksperiodetype.REDUKSJON } }
+        assertTrue {
+            redusertePerioder.any {
+                it.fom == LocalDate.of(2021, 4, 1) &&
+                    it.tom == LocalDate.of(2021, 4, 30)
+            }
+        }
+        assertTrue {
+            redusertePerioder.any {
+                it.fom == LocalDate.of(2021, 7, 1) &&
+                    it.tom == LocalDate.of(2021, 7, 31)
+            }
+        }
+        assertTrue {
+            redusertePerioder.any {
+                it.fom == LocalDate.of(2021, 8, 1) &&
+                    it.tom == LocalDate.of(2021, 8, 31)
+            }
+        }
     }
 }
