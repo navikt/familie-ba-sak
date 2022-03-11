@@ -74,7 +74,7 @@ class SaksstatistikkService(
             funksjonellTid = now,
             tekniskTid = now,
             mottattDato = datoMottatt.atZone(TIMEZONE),
-            registrertDato = datoMottatt.atZone(TIMEZONE),
+            registrertDato = behandling.opprettetTidspunkt.atZone(TIMEZONE),
             behandlingId = behandling.id.toString(),
             funksjonellId = UUID.randomUUID().toString(),
             sakId = behandling.fagsak.id.toString(),
