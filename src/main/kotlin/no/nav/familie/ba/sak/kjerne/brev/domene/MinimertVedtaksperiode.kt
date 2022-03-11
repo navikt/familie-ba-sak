@@ -21,6 +21,7 @@ data class MinimertVedtaksperiode(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         erFørsteVedtaksperiodePåFagsak: Boolean,
         erUregistrerteBarnPåbehandling: Boolean,
+        barnPersonIdentMedReduksjon: List<String> = emptyList()
     ): BrevPeriodeGrunnlagMedPersoner {
         return BrevPeriodeGrunnlagMedPersoner(
             fom = this.fom,
@@ -32,11 +33,13 @@ data class MinimertVedtaksperiode(
                         fom = this.fom,
                         tom = this.tom
                     ),
+                    vedtaksperiodetype = type,
                     restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                     identerMedUtbetalingPåPeriode = this.minimerteUtbetalingsperiodeDetaljer
                         .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                    erUregistrerteBarnPåbehandling = erUregistrerteBarnPåbehandling
+                    erUregistrerteBarnPåbehandling = erUregistrerteBarnPåbehandling,
+                    barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon
                 )
             },
             fritekster = this.fritekster,
