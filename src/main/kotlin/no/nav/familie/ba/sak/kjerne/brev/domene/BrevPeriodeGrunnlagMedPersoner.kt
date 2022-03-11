@@ -25,7 +25,7 @@ data class BrevPeriodeGrunnlagMedPersoner(
     ): List<Begrunnelse> {
 
         val begrunnelser = this.begrunnelser
-            .sortedBy { it.vedtakBegrunnelseType }
+            .sorted()
             .map {
                 it.tilBrevBegrunnelse(
                     vedtaksperiode = NullablePeriode(this.fom, this.tom),

@@ -7,14 +7,14 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 
-enum class VedtakBegrunnelseType {
-    INNVILGET,
-    REDUKSJON,
-    AVSLAG,
-    OPPHØR,
-    FORTSATT_INNVILGET,
-    ENDRET_UTBETALING,
-    ETTER_ENDRET_UTBETALING
+enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
+    REDUKSJON(1),
+    INNVILGET(2),
+    AVSLAG(3),
+    OPPHØR(4),
+    FORTSATT_INNVILGET(5),
+    ETTER_ENDRET_UTBETALING(6),
+    ENDRET_UTBETALING(7),
 }
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {
