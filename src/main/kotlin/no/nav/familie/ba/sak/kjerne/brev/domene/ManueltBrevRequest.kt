@@ -19,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingData
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Brev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Data
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -28,7 +30,6 @@ data class ManueltBrevRequest(
     val brevmal: BrevType,
     val multiselectVerdier: List<String> = emptyList(),
     val mottakerIdent: String,
-    // Brukes kun ved sending av dokumenter på fagsak uten behandling
     val barnIBrev: List<String> = emptyList(),
     // Settes av backend ved utsending fra behandling
     val mottakerMålform: Målform = Målform.NB,
@@ -123,6 +124,17 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                     navn = this.mottakerNavn,
                     fodselsnummer = this.mottakerIdent,
                     varselÅrsaker = this.multiselectVerdier,
+                )
+            )
+        )
+    BrevType.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14.malId ->
+        VarselOmRevurderingDeltBostedParagraf14Brev(
+            data = VarselOmRevurderingDeltBostedParagraf14Data(
+                delmalData = VarselOmRevurderingDeltBostedParagraf14Data.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
+                flettefelter = VarselOmRevurderingDeltBostedParagraf14Data.Flettefelter(
+                    navn = this.mottakerNavn,
+                    fodselsnummer = this.mottakerIdent,
+                    barnMedDeltBostedAvtale = this.multiselectVerdier,
                 )
             )
         )

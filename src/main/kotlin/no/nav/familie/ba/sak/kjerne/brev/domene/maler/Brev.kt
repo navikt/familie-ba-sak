@@ -15,6 +15,11 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     INNHENTE_OPPLYSNINGER(false, "innhenteOpplysninger", "innhente opplysninger"),
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "henlegge trukket søknad"),
     VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "varsel om revurdering"),
+    VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14(
+        false,
+        "varselOmRevurderingDeltBostedParagrafFjorten",
+        "Varsel om revurdering delt bosted § 14"
+    ),
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
     INFORMASJONSBREV_FØDSEL_MINDREÅRIG(
         false,
