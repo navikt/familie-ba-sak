@@ -62,13 +62,14 @@ object Behandlingutils {
     fun bestemUnderkategori(
         nyUnderkategori: BehandlingUnderkategori?,
         nyBehandlingType: BehandlingType,
+        nyBehandlingÅrsak: BehandlingÅrsak,
         løpendeUnderkategori: BehandlingUnderkategori?
     ): BehandlingUnderkategori {
         if (nyUnderkategori == null && løpendeUnderkategori == null) return BehandlingUnderkategori.ORDINÆR
         return when {
             nyUnderkategori == BehandlingUnderkategori.UTVIDET -> nyUnderkategori
 
-            nyBehandlingType == BehandlingType.REVURDERING ->
+            nyBehandlingType == BehandlingType.REVURDERING || nyBehandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO ->
                 løpendeUnderkategori
                     ?: (nyUnderkategori ?: BehandlingUnderkategori.ORDINÆR)
 
