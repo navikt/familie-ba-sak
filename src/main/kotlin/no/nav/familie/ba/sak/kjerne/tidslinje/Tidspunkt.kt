@@ -133,23 +133,19 @@ data class Tidspunkt(
     }
 }
 
-class TidspunktProgression(
+class TidspunktClosedRange(
     override val start: Tidspunkt,
-    override val endInclusive: Tidspunkt,
-    val hopp: Long = 1
+    override val endInclusive: Tidspunkt
 ) : Iterable<Tidspunkt>,
     ClosedRange<Tidspunkt> {
 
     override fun iterator(): Iterator<Tidspunkt> =
-        TidspunktIterator(start, endInclusive, hopp)
-
-    infix fun step(hopp: Long) = TidspunktProgression(start, endInclusive, hopp)
+        TidspunktIterator(start, endInclusive)
 
     companion object {
         private class TidspunktIterator(
             startTidspunkt: Tidspunkt,
-            val tilOgMedTidspunkt: Tidspunkt,
-            val hopp: Long,
+            val tilOgMedTidspunkt: Tidspunkt
         ) : Iterator<Tidspunkt> {
 
             init {
@@ -161,57 +157,16 @@ class TidspunktProgression(
             private var gjeldendeTidspunkt = startTidspunkt
 
             override fun hasNext() =
-                if (hopp > 0)
-                    gjeldendeTidspunkt.hopp(hopp) <= tilOgMedTidspunkt.neste()
-                else if (hopp < 0)
-                    gjeldendeTidspunkt.hopp(hopp) >= tilOgMedTidspunkt.forrige()
-                else
-                    throw IllegalStateException("Hopp kan ikke være 0")
+                gjeldendeTidspunkt.neste() <= tilOgMedTidspunkt.neste()
 
             override fun next(): Tidspunkt {
                 val next = gjeldendeTidspunkt
-                gjeldendeTidspunkt = gjeldendeTidspunkt.hopp(hopp)
+                gjeldendeTidspunkt = gjeldendeTidspunkt.neste()
                 return next
             }
         }
     }
 }
 
-class FleksibelTidspunktIterator(
-    startTidspunkt: Tidspunkt,
-    val tilOgMedTidspunkt: Tidspunkt
-) : Iterator<Tidspunkt> {
-
-    private var gjeldendeTidspunkt = startTidspunkt
-
-    override fun hasNext() =
-        gjeldendeTidspunkt.neste() <= tilOgMedTidspunkt.neste()
-
-    override fun next(): Tidspunkt {
-        val neste = gjeldendeTidspunkt.neste()
-        val nesteErNyMåned = gjeldendeTidspunkt.tilMåned() < neste.tilMåned()
-
-        if (nesteErNyMåned) {
-            if (neste.tilMåned() < tilOgMedTidspunkt.tilMåned())
-                gjeldendeTidspunkt = neste.tilMåned()
-            else if (neste.tilMåned() == tilOgMedTidspunkt.tilMåned() && tilOgMedTidspunkt.harPresisjonDag())
-                gjeldendeTidspunkt = tilOgMedTidspunkt.tilFørsteDagIMåneden()
-        } else
-            gjeldendeTidspunkt = neste
-
-        return gjeldendeTidspunkt
-    }
-}
-
-class FleksibeltTidspunktClosedRange(
-    override val start: Tidspunkt,
-    override val endInclusive: Tidspunkt
-) : Iterable<Tidspunkt>,
-    ClosedRange<Tidspunkt> {
-
-    override fun iterator(): Iterator<Tidspunkt> =
-        FleksibelTidspunktIterator(start, endInclusive)
-}
-
 operator fun Tidspunkt.rangeTo(tilOgMed: Tidspunkt) =
-    FleksibeltTidspunktClosedRange(this, tilOgMed)
+    TidspunktClosedRange(this, tilOgMed)
