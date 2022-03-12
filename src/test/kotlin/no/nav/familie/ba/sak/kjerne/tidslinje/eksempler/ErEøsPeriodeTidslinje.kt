@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.PeriodeInnhold
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.idListe
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårResultatTidslinje
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk
 
 class ErEøsPeriodeTidslinje(
     private val barnetsVilkårsresultater: List<VilkårResultatTidslinje>
@@ -39,7 +39,7 @@ class ErEøsPeriodeTidslinje(
 
         val alleRelevanteVilkårErEøsVilkår = alleVilkårResultatUtsnitt
             .filter {
-                it.innhold?.regelverk == VilkårRegelverk.EØS_FORORDNINGEN
+                it.innhold?.regelverk == Regelverk.EØS_FORORDNINGEN
             }.map { it.innhold?.vilkår }
             .containsAll(eøsVilkår)
 

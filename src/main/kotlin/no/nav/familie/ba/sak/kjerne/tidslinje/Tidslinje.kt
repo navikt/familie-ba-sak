@@ -2,10 +2,34 @@ package no.nav.familie.ba.sak.kjerne.eøs.temaperiode
 
 import java.time.YearMonth
 
-abstract class Tidslinje<T> {
-    internal abstract val fraOgMed: Tidspunkt
-    internal abstract val tilOgMed: Tidspunkt
-    abstract val perioder: Collection<Periode<T>>
+abstract class Tidslinje<T>(
+    protected val serialiserer: TidslinjeSerialiserer<T>
+) {
+    protected var etterfølgendeTidslinjer: MutableList<TidslinjeMedAvhengigheter<*>> = mutableListOf()
+    private var gjeldendePerioder: Collection<Periode<T>>? = null
+
+    internal val fraOgMed: Tidspunkt = perioder.minOf { it.fom }
+    internal val tilOgMed: Tidspunkt = perioder.maxOf { it.tom }
+    val perioder: Collection<Periode<T>>
+        get() = gjeldendePerioder
+            ?: serialiserer.hent()?.also { gjeldendePerioder = it }
+            ?: serialiserer.lagre(genererPerioder()).also { gjeldendePerioder = it }
+
+    internal fun registrerEtterfølgendeTidslinje(tidslinje: TidslinjeMedAvhengigheter<*>) {
+        etterfølgendeTidslinjer.add(tidslinje)
+    }
+
+    protected fun oppdaterPerioder(perioder: Collection<Periode<T>>) {
+        gjeldendePerioder = serialiserer.lagre(perioder)
+    }
+
+    protected abstract fun genererPerioder(): Collection<Periode<T>>
+
+    internal fun splitt(splitt: PeriodeSplitt<*>) {
+        perioder
+            .flatMap { splitt.påførSplitt(it, etterfølgendeTidslinjer) }
+            .also { oppdaterPerioder(it) }
+    }
 
     // Sammenhengende perioder (ingen hull bruk NULL-perioder)
     // Ingen overlappende perioder
@@ -33,23 +57,32 @@ abstract class Tidslinje<T> {
     }
 }
 
-abstract class AvhengigTidslinje<T>(
-    private val avhengigheter: Collection<Tidslinje<*>>
-) : Tidslinje<T>() {
+abstract class TidslinjeUtenAvhengigheter<T>(
+    tidslinjeSerialiserer: TidslinjeSerialiserer<T>
+) : Tidslinje<T>(tidslinjeSerialiserer) {
+    fun splitt(tidspunkt: Tidspunkt) {
+        splitt(PeriodeSplitt<T>(tidspunkt))
+    }
+}
 
-    override val fraOgMed: Tidspunkt
-        get() = avhengigheter.minOf { it.fraOgMed }
-    override val tilOgMed: Tidspunkt
-        get() = avhengigheter.maxOf { it.tilOgMed }
+abstract class TidslinjeMedAvhengigheter<T>(
+    private val foregåendeTidslinjer: Collection<Tidslinje<*>>,
+    tidslinjeSerialiserer: TidslinjeSerialiserer<T>
+) : Tidslinje<T>(tidslinjeSerialiserer) {
 
-    // Har samme bredde som foregående æraer
-    // Refererer alle perioder på foregående æra(er)
+    init {
+        foregåendeTidslinjer.forEach { it.registrerEtterfølgendeTidslinje(this) }
+    }
+
+    // Refererer alle perioder på foregående tidslinje(r)
     // Ingen løse referanser til perioder på foregående æraer
     override fun valider(): List<TidslinjeFeil> {
         val konsistensFeil = super.valider()
-        val foregåendeFeil = avhengigheter.map { it.valider() }.flatten()
 
-        val foregåendePerioder = avhengigheter.flatMap { it.perioder }.toList()
+        // Tror ikke det er smart å gjøre rekursiv validering
+        val foregåendeFeil = foregåendeTidslinjer.map { it.valider() }.flatten()
+
+        val foregåendePerioder = foregåendeTidslinjer.flatMap { it.perioder }.toList()
         val foregåendePeriodeIder = foregåendePerioder.map { it.id }
         val referertePeriodeIder = perioder.flatMap { it.avhengerAv }.toSet()
 
@@ -65,7 +98,7 @@ abstract class AvhengigTidslinje<T>(
             .flatMap { id -> perioder.filter { it.avhengerAv.contains(id) } }
             .map { TidslinjeFeil(it, this, TidslinjeFeilType.REFERER_TIL_UTGÅTT_PERIODE) }
 
-        // TODO: Må sjekke at vi referer til avhengigheter i samme rekkefølge som de faktisk forekommer
+        // TODO: Må sjekke at vi refererer til avhengigheter i samme rekkefølge som de faktisk forekommer
 
         return foregåendeFeil + konsistensFeil + manglendeReferanserFeil + overflødigeReferanserFeil
     }
@@ -74,18 +107,14 @@ abstract class AvhengigTidslinje<T>(
 abstract class KalkulerendeTidslinje<T>(
     avhengigheter: Collection<Tidslinje<*>>,
     serialiserer: TidslinjeSerialiserer<T> = IngenTidslinjeSerialisering()
-) : AvhengigTidslinje<T>(avhengigheter) {
+) : TidslinjeMedAvhengigheter<T>(avhengigheter, serialiserer) {
 
     constructor(avhengighet: Tidslinje<*>, serialiserer: TidslinjeSerialiserer<T> = IngenTidslinjeSerialisering()) :
         this(listOf(avhengighet), serialiserer)
 
     protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<T>
 
-    override val perioder: Collection<Periode<T>> by lazy {
-        serialiserer.hentEllerOpprett { genererPerioder() }
-    }
-
-    private fun genererPerioder(): List<Periode<T>> =
+    override fun genererPerioder(): List<Periode<T>> =
         (fraOgMed..tilOgMed).map { Pair(it, kalkulerInnhold(it)) }
             .fold(emptyList()) { acc, (måned, innhold) ->
                 val sistePeriode = acc.lastOrNull()
@@ -97,12 +126,11 @@ abstract class KalkulerendeTidslinje<T>(
             }
 }
 
-class SelvbyggerTema<T>(
-    egnePerioder: Collection<Periode<T>>
-) : Tidslinje<T>() {
-    override val fraOgMed = egnePerioder.minOf { it.fom }
-    override val tilOgMed = egnePerioder.maxOf { it.tom }
-    override val perioder = egnePerioder
+class SelvbyggerTidslinje<T>(
+    val egnePerioder: Collection<Periode<T>>,
+    tidslinjeSerialiserer: TidslinjeSerialiserer<T> = IngenTidslinjeSerialisering()
+) : TidslinjeUtenAvhengigheter<T>(tidslinjeSerialiserer) {
+    override fun genererPerioder(): Collection<Periode<T>> = egnePerioder
 }
 
 private fun <T> Collection<T>.replaceLast(replacement: T) =
@@ -131,7 +159,7 @@ enum class TidslinjeFeilType {
 
 interface TidslinjeSerialiserer<T> {
     fun lagre(perioder: Collection<Periode<T>>): Collection<Periode<T>>
-    fun hent(): Collection<Periode<T>>
+    fun hent(): Collection<Periode<T>>?
 }
 
 class IngenTidslinjeSerialisering<T> : TidslinjeSerialiserer<T> {
@@ -140,12 +168,4 @@ class IngenTidslinjeSerialisering<T> : TidslinjeSerialiserer<T> {
     }
 
     override fun hent(): Collection<Periode<T>> = emptyList()
-}
-
-fun <T> TidslinjeSerialiserer<T>.hentEllerOpprett(generator: () -> Collection<Periode<T>>): Collection<Periode<T>> {
-    val hentet = this.hent()
-    if (hentet.isEmpty())
-        return lagre(generator())
-    else
-        return hentet
 }

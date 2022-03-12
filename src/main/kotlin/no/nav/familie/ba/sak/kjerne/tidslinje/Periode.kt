@@ -45,6 +45,16 @@ data class AndelTilkjentYtelse(
     val ytelseType: YtelseType
 )
 
+data class PeriodeSplitt<T>(
+    val tidspunkt: Tidspunkt,
+    val originalId: Long,
+    val før: Periode<T>,
+    val etter: Periode<T>
+) {
+    constructor(tidspunkt: Tidspunkt) :
+        this(tidspunkt, 0, Periode(tidspunkt, tidspunkt), Periode(tidspunkt, tidspunkt))
+}
+
 fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: LocalDate) =
     this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default)
 
@@ -52,3 +62,30 @@ fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: LocalDate) =
     this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default)
 
 fun <U> PeriodeUtsnitt<*>.mapInnhold(nyttInhold: U) = PeriodeInnhold(nyttInhold, listOf(this.id))
+
+fun <T> Periode<T>.erstattAvhengighet(originalId: Long, nyId: Long) =
+    if (this.avhengerAv.contains(originalId)) {
+        this.copy(avhengerAv = this.avhengerAv.filter { it != originalId } + nyId)
+    } else
+        this
+
+fun <T> PeriodeSplitt<*>.påførSplitt(
+    periode: Periode<T>,
+    etterfølgendeTidslinjer: Iterable<TidslinjeMedAvhengigheter<*>>
+): Iterable<Periode<T>> {
+    if (periode.tom <= this.tidspunkt) {
+        return listOf(periode.erstattAvhengighet(originalId, før.id))
+    }
+
+    if (periode.fom >= this.tidspunkt) {
+        return listOf(periode.erstattAvhengighet(originalId, etter.id))
+    }
+
+    val førSplitt = periode.copy(tom = tidspunkt).erstattAvhengighet(originalId, før.id)
+    val etterSplitt = periode.copy(fom = tidspunkt.neste()).erstattAvhengighet(originalId, etter.id)
+    val splitt = PeriodeSplitt(tidspunkt, periode.id, førSplitt, etterSplitt)
+
+    etterfølgendeTidslinjer.forEach { it.splitt(splitt) }
+
+    return listOf(førSplitt, etterSplitt)
+}

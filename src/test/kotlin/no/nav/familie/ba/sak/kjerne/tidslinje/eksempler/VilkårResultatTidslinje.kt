@@ -7,12 +7,12 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.tilTidspunktEllerUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 data class VilkårRegelverkResultat(
-    val regelverk: VilkårRegelverk?,
+    val regelverk: Regelverk?,
     val resultat: Resultat,
     val vilkår: Vilkår,
 )
@@ -29,9 +29,6 @@ class VilkårResultatTidslinje(
     val størsteDato = vilkårResultater.map { it.periodeTom ?: it.periodeFom }
         .filterNotNull()
         .maxOfOrNull { it } ?: throw IllegalStateException("Finner ikke gyldig dato i vilkårsresultatene")
-
-    override val fraOgMed = vilkårResultater.minOf { it.periodeFom.tilTidspunktEllerUendeligLengeSiden(minsteDato) }
-    override val tilOgMed = vilkårResultater.maxOf { it.periodeTom.tilTidspunktEllerUendeligLengeTil(størsteDato) }
 
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<VilkårRegelverkResultat> {
         return vilkårResultater.filter {
