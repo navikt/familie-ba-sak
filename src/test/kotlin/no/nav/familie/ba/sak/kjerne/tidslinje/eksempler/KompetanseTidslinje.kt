@@ -47,7 +47,7 @@ class KompetanseTidslinjeRepository(
     val behandlingId = innhold.first().behandlingId
     override val tidslinjeId = "Kompetanse.$behandlingId.${aktør.aktørId}"
 
-    override fun innholdTilReferanse(kompetanse: Kompetanse?): String {
+    override fun innholdTilString(kompetanse: Kompetanse?): String {
         return kompetanse?.id?.toString()!!
     }
 }

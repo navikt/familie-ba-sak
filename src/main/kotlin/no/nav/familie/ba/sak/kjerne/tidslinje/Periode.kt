@@ -22,6 +22,8 @@ data class PeriodeInnhold<T>(
 
 fun <T> PeriodeUtsnitt<T>.inneholder(innhold: T) = this.innhold == innhold
 fun <T> PeriodeUtsnitt<T>.erSantHvis(predicate: (T) -> Boolean) = this.innhold != null && predicate(this.innhold)
+fun <T, U> Iterable<Periode<T>>.mapInnhold(mapper: (T?) -> U?) =
+    this.map { Periode<U>(it.fom, it.tom, mapper(it.innhold), it.avhengerAv) }
 
 fun <T> PeriodeInnhold<T>.tilPeriode(tidspunkt: Tidspunkt): Periode<T> {
     return Periode(tidspunkt, tidspunkt, this.innhold, this.avhengerAv)

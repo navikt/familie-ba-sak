@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Periode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.PeriodeDto
 import no.nav.familie.ba.sak.kjerne.tidslinje.PeriodeRepository
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -14,14 +14,14 @@ class MockPerideRepository : PeriodeRepository {
     override fun hentPerioder(
         tidslinjeId: String,
         innholdReferanser: List<String>
-    ): Iterable<PeriodeDto> {
+    ): Iterable<Periode<String>> {
         TODO("Not yet implemented")
     }
 
     override fun lagrePerioder(
         tidslinjeId: String,
-        perioder: Iterable<PeriodeDto>
-    ): Iterable<PeriodeDto> {
+        perioder: Iterable<Periode<String>>
+    ): Iterable<Periode<String>> {
         TODO("Not yet implemented")
     }
 }

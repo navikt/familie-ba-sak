@@ -39,7 +39,7 @@ class VilkårsresultatTidslinjeRepository(
     val vilkår = vilkårResultater.first().vilkårType
     override val tidslinjeId = "VilkårResult.$behandlingId.$aktørId.$vilkår"
 
-    override fun innholdTilReferanse(innhold: VilkårResultat?) =
+    override fun innholdTilString(innhold: VilkårResultat?) =
         "${innhold!!.id}.${innhold.vurderesEtter}.${innhold.resultat}.${innhold.periodeFom}.${innhold.resultat}"
 }
 
