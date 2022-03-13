@@ -52,6 +52,33 @@ interface TidslinjeRepository<T> {
     fun hent(): Collection<Periode<T>>
 }
 
+abstract class AbstraktTidslinjeRepository<T>(
+    protected val innhold: Iterable<T>,
+    private val periodeRepository: PeriodeRepository
+) : TidslinjeRepository<T> {
+
+    abstract val tidslinjeId: String
+    abstract fun innholdTilReferanse(innhold: T?): String
+    abstract fun referanseTilInnhold(referanse: String): T
+
+    final override fun lagre(perioder: Collection<Periode<T>>): Collection<Periode<T>> {
+        return periodeRepository
+            .lagrePerioder(tidslinjeId, perioder.map { it.tilDto(innholdTilReferanse(it.innhold)) })
+            .map { dto ->
+                dto.tilPeriode { ref -> referanseTilInnhold(ref) }
+            }
+    }
+
+    final override fun hent(): Collection<Periode<T>> {
+        return periodeRepository.hentPerioder(
+            tidslinjeId = tidslinjeId,
+            innholdReferanser = innhold.map { innholdTilReferanse(it) }
+        ).map {
+            it.tilPeriode { ref -> referanseTilInnhold(ref) }
+        }
+    }
+}
+
 class IngenTidslinjeRepository<T> : TidslinjeRepository<T> {
     override fun lagre(perioder: Collection<Periode<T>>): Collection<Periode<T>> {
         return perioder

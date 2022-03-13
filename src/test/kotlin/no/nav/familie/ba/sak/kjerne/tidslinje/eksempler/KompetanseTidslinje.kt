@@ -10,10 +10,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.erInnenforTidsrom
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.tilTidspunktEllerUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.AbstraktTidslinjeRepository
 import no.nav.familie.ba.sak.kjerne.tidslinje.PeriodeRepository
-import no.nav.familie.ba.sak.kjerne.tidslinje.TidslinjeRepository
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilDto
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilPeriode
 
 typealias PersonIdentDto = String
 
@@ -42,29 +40,19 @@ class KompetanseTidslinje(
 
 class KompetanseTidslinjeRepository(
     private val aktør: Aktør,
-    private val kompetanser: Collection<Kompetanse>,
-    private val periodeRepository: PeriodeRepository
-) : TidslinjeRepository<Kompetanse> {
+    kompetanser: Collection<Kompetanse>,
+    periodeRepository: PeriodeRepository
+) : AbstraktTidslinjeRepository<Kompetanse>(kompetanser, periodeRepository) {
 
-    val behandlingId = kompetanser.first().behandlingId
-    val tidslinjeId = "Kompetanse.$behandlingId.${aktør.aktørId}"
+    val behandlingId = innhold.first().behandlingId
+    override val tidslinjeId = "Kompetanse.$behandlingId.${aktør.aktørId}"
 
-    override fun lagre(perioder: Collection<Periode<Kompetanse>>): Collection<Periode<Kompetanse>> {
-        return periodeRepository
-            .lagrePerioder(tidslinjeId, perioder.map { it.tilDto(it.id.toString()) })
-            .map { dto ->
-                dto.tilPeriode { ref -> kompetanser.find { it.id.toString() == ref } }
-            }
+    override fun innholdTilReferanse(kompetanse: Kompetanse?): String {
+        return kompetanse?.id?.toString()!!
     }
 
-    override fun hent(): Collection<Periode<Kompetanse>> {
-
-        return periodeRepository.hentPerioder(
-            tidslinjeId = tidslinjeId,
-            innholdReferanser = kompetanser.map { it.id.toString() }
-        ).map {
-            it.tilPeriode { ref -> kompetanser.find { it.id.toString() == ref } }
-        }
+    override fun referanseTilInnhold(referanse: String): Kompetanse {
+        return innhold.find { innholdTilReferanse(it) == referanse }!!
     }
 }
 
