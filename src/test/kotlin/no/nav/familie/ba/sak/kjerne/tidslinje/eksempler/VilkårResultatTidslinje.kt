@@ -23,27 +23,26 @@ fun VilkårResultat.tilVilkårRegelverkResultat() =
 class VilkårResultatTidslinje(
     val aktør: Aktør,
     val vilkår: Vilkår,
-    private val repoOgGenerator: VilkårsresultatTidslinjeSerialisererOgGenerator
-) : TidslinjeUtenAvhengigheter<VilkårRegelverkResultat>(repoOgGenerator) {
-    override fun genererPerioder() = repoOgGenerator.genererPerioder()
+    private val vilkårsresultater: List<VilkårResultat>,
+    private val periodeRepository: PeriodeRepository
+) : TidslinjeUtenAvhengigheter<VilkårRegelverkResultat>(
+    VilkårsresultatTidslinjeRepository(vilkårsresultater, periodeRepository)
+) {
+    override fun genererPerioder() = vilkårsresultater
+        .map {
+            val fom = it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom!! }
+            val tom = it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! }
+            Periode(fom, tom, it.tilVilkårRegelverkResultat())
+        }
 }
 
-class VilkårsresultatTidslinjeSerialisererOgGenerator(
+class VilkårsresultatTidslinjeRepository(
     private val vilkårResultater: Collection<VilkårResultat>,
     private val periodeRepository: PeriodeRepository
 ) : TidslinjeRepository<VilkårRegelverkResultat> {
 
     val behandlingId = vilkårResultater.first().behandlingId
     val aktør = vilkårResultater.first().personResultat?.aktør!!
-
-    fun genererPerioder(): List<Periode<VilkårRegelverkResultat>> {
-        return vilkårResultater
-            .map {
-                val fom = it.periodeFom.tilTidspunktEllerUendeligLengeSiden({ it.periodeTom!! })
-                val tom = it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! }
-                Periode(fom, tom, it.tilVilkårRegelverkResultat())
-            }
-    }
 
     override fun lagre(perioder: Collection<Periode<VilkårRegelverkResultat>>): Collection<Periode<VilkårRegelverkResultat>> {
         return periodeRepository.lagrePerioder(

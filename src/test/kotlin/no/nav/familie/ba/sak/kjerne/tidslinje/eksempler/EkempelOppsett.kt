@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.PeriodeDto
 import no.nav.familie.ba.sak.kjerne.tidslinje.PeriodeRepository
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårResultatTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårsresultatTidslinjeSerialisererOgGenerator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
@@ -38,11 +37,8 @@ fun byggSøkerOgBarn(
         .flatMap { pr -> pr.vilkårResultater.map { Pair(pr.aktør, it) } }
         .groupBy({ Pair(it.first, it.second.vilkårType) }, { it.second })
         .mapValues {
-            val repo = VilkårsresultatTidslinjeSerialisererOgGenerator(
-                it.value, MockPerideRepository()
-            )
             VilkårResultatTidslinje(
-                it.key.first, it.key.second, repo
+                it.key.first, it.key.second, it.value, MockPerideRepository()
             )
         }
         .values
