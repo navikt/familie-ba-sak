@@ -7,15 +7,23 @@ import java.time.YearMonth
 abstract class Tidslinje<T>(
     protected val repository: TidslinjeRepository<T>
 ) {
-    protected var etterfølgendeTidslinjer: MutableList<TidslinjeMedAvhengigheter<*>> = mutableListOf()
+    private var etterfølgendeTidslinjer: MutableList<TidslinjeMedAvhengigheter<*>> = mutableListOf()
     private var gjeldendePerioder: Collection<Periode<T>>? = null
 
-    internal val fraOgMed: Tidspunkt = perioder.minOf { it.fom }
-    internal val tilOgMed: Tidspunkt = perioder.maxOf { it.tom }
+    internal abstract val fraOgMed: Tidspunkt
+    internal abstract val tilOgMed: Tidspunkt
+
     val perioder: Collection<Periode<T>>
-        get() = gjeldendePerioder
-            ?: repository.hent()?.also { gjeldendePerioder = it }
-            ?: repository.lagre(genererPerioder()).also { gjeldendePerioder = it }
+        get() =
+            gjeldendePerioder ?: finnPerioder().also { gjeldendePerioder = it }
+
+    fun finnPerioder(): Collection<Periode<T>> {
+        val hentedePerioder = repository.hent().sortedBy { it.fom }
+        val generertePerioder = hentedePerioder.finnHull(fraOgMed, tilOgMed)
+            .flatMap { genererPerioder(it) }
+
+        return hentedePerioder + repository.lagre(generertePerioder)
+    }
 
     internal fun registrerEtterfølgendeTidslinje(tidslinje: TidslinjeMedAvhengigheter<*>) {
         etterfølgendeTidslinjer.add(tidslinje)
@@ -25,7 +33,7 @@ abstract class Tidslinje<T>(
         gjeldendePerioder = repository.lagre(perioder)
     }
 
-    protected abstract fun genererPerioder(): Collection<Periode<T>>
+    protected abstract fun genererPerioder(tidsrom: Tidsrom): Collection<Periode<T>>
 
     internal fun splitt(splitt: PeriodeSplitt<*>) {
         perioder
@@ -72,6 +80,9 @@ abstract class TidslinjeMedAvhengigheter<T>(
     tidslinjeRepository: TidslinjeRepository<T>
 ) : Tidslinje<T>(tidslinjeRepository) {
 
+    override val fraOgMed: Tidspunkt = foregåendeTidslinjer.minOf { it.fraOgMed }
+    override val tilOgMed: Tidspunkt = foregåendeTidslinjer.maxOf { it.tilOgMed }
+
     init {
         foregåendeTidslinjer.forEach { it.registrerEtterfølgendeTidslinje(this) }
     }
@@ -116,8 +127,8 @@ abstract class KalkulerendeTidslinje<T>(
 
     protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<T>
 
-    override fun genererPerioder(): List<Periode<T>> =
-        (fraOgMed..tilOgMed).map { Pair(it, kalkulerInnhold(it)) }
+    override fun genererPerioder(tidsrom: Tidsrom): List<Periode<T>> =
+        tidsrom.map { Pair(it, kalkulerInnhold(it)) }
             .fold(emptyList()) { acc, (måned, innhold) ->
                 val sistePeriode = acc.lastOrNull()
                 when {
@@ -132,7 +143,10 @@ class SelvbyggerTidslinje<T>(
     val egnePerioder: Collection<Periode<T>>,
     tidslinjeRepository: TidslinjeRepository<T> = IngenTidslinjeSerialisering()
 ) : TidslinjeUtenAvhengigheter<T>(tidslinjeRepository) {
-    override fun genererPerioder(): Collection<Periode<T>> = egnePerioder
+    override val fraOgMed: Tidspunkt = egnePerioder.minOf { it.fom }
+    override val tilOgMed: Tidspunkt = egnePerioder.maxOf { it.tom }
+
+    override fun genererPerioder(tidsrom: Tidsrom): Collection<Periode<T>> = egnePerioder
 }
 
 private fun <T> Collection<T>.replaceLast(replacement: T) =
@@ -157,4 +171,26 @@ enum class TidslinjeFeilType {
     MANGLER_REFERANSE_TIL_PERIODE,
     REFERANSER_I_FEIL_REKKEFØLGE,
     REFERER_TIL_UTGÅTT_PERIODE,
+}
+
+fun <T> Collection<Periode<T>>.finnHull(fraOgMed: Tidspunkt, tilOgMed: Tidspunkt): Collection<Tidsrom> {
+
+    if (this.isEmpty())
+        return listOf(Tidsrom(fraOgMed, tilOgMed))
+    else {
+        val sortert = this.sortedBy { it.fom }.toList()
+
+        val tidligste = fraOgMed..sortert.first().fom.forrige()
+        val seneste = sortert.last().tom.neste()..tilOgMed
+        val inni = sortert.mapIndexed { index, periode ->
+            when (index) {
+                0 -> Tidsrom.NULL
+                sortert.size - 1 -> Tidsrom.NULL
+                else -> sortert[index - 1].tom.neste()..periode.fom.forrige()
+            }
+        }
+
+        val alle = listOf(tidligste) + inni + listOf(seneste)
+        return alle.filter { !it.isEmpty() }
+    }
 }

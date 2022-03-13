@@ -133,7 +133,7 @@ data class Tidspunkt(
     }
 }
 
-class TidspunktClosedRange(
+class Tidsrom(
     override val start: Tidspunkt,
     override val endInclusive: Tidspunkt
 ) : Iterable<Tidspunkt>,
@@ -165,8 +165,16 @@ class TidspunktClosedRange(
                 return next
             }
         }
+
+        val NULL = Tidsrom(Tidspunkt(LocalDate.MAX), Tidspunkt(LocalDate.MIN))
     }
 }
 
 operator fun Tidspunkt.rangeTo(tilOgMed: Tidspunkt) =
-    TidspunktClosedRange(this, tilOgMed)
+    Tidsrom(this, tilOgMed)
+
+fun <T> Periode<T>.erInnenforTidsrom(tidsrom: Tidsrom) =
+    fom <= tidsrom.start && tom >= tidsrom.endInclusive
+
+fun <T> Periode<T>.erEnDelAvTidsrom(tidsrom: Tidsrom) =
+    fom <= tidsrom.endInclusive && tom >= tidsrom.start

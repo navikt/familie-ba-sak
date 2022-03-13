@@ -10,10 +10,10 @@ data class PeriodeDto(
     val fom: LocalDate?,
     val tom: LocalDate?,
     val avhengerAv: Collection<Long>,
-    val innholdReferanse: Long
+    val innholdReferanse: String
 )
 
-fun <T> PeriodeDto.tilPeriode(refTilInnhold: (Long) -> T): Periode<T> {
+fun <T> PeriodeDto.tilPeriode(refTilInnhold: (String) -> T?): Periode<T> {
     if (tom == null && fom == null)
         throw IllegalStateException("Både fom og tom er null")
 
@@ -26,19 +26,19 @@ fun <T> PeriodeDto.tilPeriode(refTilInnhold: (Long) -> T): Periode<T> {
     )
 }
 
-fun <T> Periode<T>.tilDto(innholdId: Long) =
+fun <T> Periode<T>.tilDto(innholdRef: String) =
     PeriodeDto(
         id = this.id,
         fom = this.fom.tilLocalDateEllerNull(),
         tom = this.tom.tilLocalDateEllerNull(),
         avhengerAv = avhengerAv,
-        innholdReferanse = innholdId
+        innholdReferanse = innholdRef
     )
 
 interface PeriodeRepository {
     fun hentPerioder(
         tidslinjeId: String,
-        innholdReferanser: List<Long>
+        innholdReferanser: List<String>
     ): Iterable<PeriodeDto>
 
     fun lagrePerioder(
@@ -49,7 +49,7 @@ interface PeriodeRepository {
 
 interface TidslinjeRepository<T> {
     fun lagre(perioder: Collection<Periode<T>>): Collection<Periode<T>>
-    fun hent(): Collection<Periode<T>>?
+    fun hent(): Collection<Periode<T>>
 }
 
 class IngenTidslinjeSerialisering<T> : TidslinjeRepository<T> {

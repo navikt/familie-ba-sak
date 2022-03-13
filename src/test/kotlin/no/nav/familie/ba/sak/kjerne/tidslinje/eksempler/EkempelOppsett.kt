@@ -11,15 +11,13 @@ import java.time.LocalDate
 
 class MockPerideRepository : PeriodeRepository {
     override fun hentPerioder(
-        tidslinjeType: String,
         tidslinjeId: String,
-        innholdReferanser: List<Long>
+        innholdReferanser: List<String>
     ): Iterable<PeriodeDto> {
         TODO("Not yet implemented")
     }
 
     override fun lagrePerioder(
-        tidslinjeType: String,
         tidslinjeId: String,
         perioder: Iterable<PeriodeDto>
     ): Iterable<PeriodeDto> {
