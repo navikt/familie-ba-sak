@@ -1,41 +1,117 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.PeriodeInnhold
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Periode
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.TidslinjeUtenAvhengigheter
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.tilTidspunktEllerUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 
 data class VilkårRegelverkResultat(
+    val vilkårResultatId: Long,
     val regelverk: Regelverk?,
     val resultat: Resultat,
     val vilkår: Vilkår,
 )
 
+fun VilkårResultat.tilVilkårRegelverkResultat() =
+    VilkårRegelverkResultat(id, vurderesEtter, resultat, vilkårType)
+
 class VilkårResultatTidslinje(
     val aktør: Aktør,
     val vilkår: Vilkår,
-    private val vilkårResultater: Collection<VilkårResultat>
-) : KalkulerendeTidslinje<VilkårRegelverkResultat>(emptyList()) {
-    val minsteDato = vilkårResultater.map { it.periodeFom ?: it.periodeTom }
-        .filterNotNull()
-        .minOfOrNull { it } ?: throw IllegalStateException("Finner ikke gyldig dato i vilkårsresultatene")
+    private val repoOgGenerator: VilkårsresultatTidslinjeSerialisererOgGenerator2
+) : TidslinjeUtenAvhengigheter<VilkårRegelverkResultat>(repoOgGenerator) {
+    override fun genererPerioder() = repoOgGenerator.genererPerioder()
+}
 
-    val størsteDato = vilkårResultater.map { it.periodeTom ?: it.periodeFom }
-        .filterNotNull()
-        .maxOfOrNull { it } ?: throw IllegalStateException("Finner ikke gyldig dato i vilkårsresultatene")
+class VilkårsresultatTidslinjeSerialisererOgGenerator(
+    private val behandlingId: Long,
+    private val aktør: Aktør,
+    private val vilkår: Vilkår,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val periodeRepository: PeriodeRepository
+) : TidslinjeRepository<VilkårRegelverkResultat> {
 
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<VilkårRegelverkResultat> {
-        return vilkårResultater.filter {
-            it.periodeFom.tilTidspunktEllerUendeligLengeSiden(minsteDato) <= tidspunkt &&
-                it.periodeTom.tilTidspunktEllerUendeligLengeTil(størsteDato) >= tidspunkt
-        }.firstOrNull()
-            ?.let { PeriodeInnhold(VilkårRegelverkResultat(it.vurderesEtter, it.resultat, vilkår), emptyList()) }
-            ?: PeriodeInnhold(null, emptyList())
+    fun genererPerioder(): List<Periode<VilkårRegelverkResultat>> {
+        return hentVilkårResultater()
+            .map {
+                val fom = it.periodeFom.tilTidspunktEllerUendeligLengeSiden({ it.periodeTom!! })
+                val tom = it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! }
+                Periode(fom, tom, it.tilVilkårRegelverkResultat())
+            }
+    }
+
+    override fun lagre(perioder: Collection<Periode<VilkårRegelverkResultat>>): Collection<Periode<VilkårRegelverkResultat>> {
+        return periodeRepository.lagrePerioder(
+            "Vilkårsresultat",
+            "$behandlingId.${aktør.aktørId}",
+            perioder.map { it.tilDto { it -> it.id } }
+        ).map { dto -> dto.tilPeriode(perioder.find { dto.innholdReferanse == it.id }?.innhold!!) }
+    }
+
+    override fun hent(): Collection<Periode<VilkårRegelverkResultat>>? {
+        val vilkårRegelverkResultater = hentVilkårResultater()
+            .map { it.tilVilkårRegelverkResultat() }
+
+        val idTilVilkårsresultatMap = vilkårRegelverkResultater.associateBy { it.vilkårResultatId }
+
+        return periodeRepository.hentPerioder(
+            tidslinjeType = "Vilkårsresultat",
+            tidslinjeId = "$behandlingId.${aktør.aktørId}",
+            innholdReferanser = vilkårRegelverkResultater.map { it.vilkårResultatId }
+        ).map { it.tilPeriode(idTilVilkårsresultatMap[it.innholdReferanse]!!) }
+    }
+
+    private fun hentVilkårResultater(): List<VilkårResultat> {
+        return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
+            ?.personResultater?.find { it.aktør.aktivFødselsnummer() == aktør.aktivFødselsnummer() }
+            ?.vilkårResultater?.filter { it.vilkårType == vilkår }
+            ?: emptyList()
+    }
+}
+
+class VilkårsresultatTidslinjeSerialisererOgGenerator2(
+    private val vilkårResultater: Collection<VilkårResultat>,
+    private val periodeRepository: PeriodeRepository
+) : TidslinjeRepository<VilkårRegelverkResultat> {
+
+    val behandlingId = vilkårResultater.first().behandlingId
+    val aktør = vilkårResultater.first().personResultat?.aktør!!
+
+    fun genererPerioder(): List<Periode<VilkårRegelverkResultat>> {
+        return vilkårResultater
+            .map {
+                val fom = it.periodeFom.tilTidspunktEllerUendeligLengeSiden({ it.periodeTom!! })
+                val tom = it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! }
+                Periode(fom, tom, it.tilVilkårRegelverkResultat())
+            }
+    }
+
+    override fun lagre(perioder: Collection<Periode<VilkårRegelverkResultat>>): Collection<Periode<VilkårRegelverkResultat>> {
+        return periodeRepository.lagrePerioder(
+            "Vilkårsresultat",
+            "$behandlingId.${aktør.aktørId}",
+            perioder.map { it.tilDto { it -> it.id } }
+        ).map { dto -> dto.tilPeriode(perioder.find { dto.innholdReferanse == it.id }?.innhold!!) }
+    }
+
+    override fun hent(): Collection<Periode<VilkårRegelverkResultat>>? {
+        val vilkårRegelverkResultater = vilkårResultater
+            .map { it.tilVilkårRegelverkResultat() }
+
+        val refTilInhhold: (Long) -> VilkårRegelverkResultat = { ref ->
+            vilkårRegelverkResultater.find { it.vilkårResultatId == ref } ?: throw Error()
+        }
+
+        return periodeRepository.hentPerioder(
+            tidslinjeType = "Vilkårsresultat",
+            tidslinjeId = "$behandlingId.${aktør.aktørId}",
+            innholdReferanser = vilkårRegelverkResultater.map { it.vilkårResultatId }
+        ).map { it.tilPeriode(refTilInhhold(it.id)) }
     }
 }

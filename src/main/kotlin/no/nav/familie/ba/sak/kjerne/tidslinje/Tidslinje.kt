@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.eøs.temaperiode
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.IngenTidslinjeSerialisering
+import no.nav.familie.ba.sak.kjerne.tidslinje.TidslinjeRepository
 import java.time.YearMonth
 
 abstract class Tidslinje<T>(
-    protected val serialiserer: TidslinjeSerialiserer<T>
+    protected val repository: TidslinjeRepository<T>
 ) {
     protected var etterfølgendeTidslinjer: MutableList<TidslinjeMedAvhengigheter<*>> = mutableListOf()
     private var gjeldendePerioder: Collection<Periode<T>>? = null
@@ -12,15 +14,15 @@ abstract class Tidslinje<T>(
     internal val tilOgMed: Tidspunkt = perioder.maxOf { it.tom }
     val perioder: Collection<Periode<T>>
         get() = gjeldendePerioder
-            ?: serialiserer.hent()?.also { gjeldendePerioder = it }
-            ?: serialiserer.lagre(genererPerioder()).also { gjeldendePerioder = it }
+            ?: repository.hent()?.also { gjeldendePerioder = it }
+            ?: repository.lagre(genererPerioder()).also { gjeldendePerioder = it }
 
     internal fun registrerEtterfølgendeTidslinje(tidslinje: TidslinjeMedAvhengigheter<*>) {
         etterfølgendeTidslinjer.add(tidslinje)
     }
 
     protected fun oppdaterPerioder(perioder: Collection<Periode<T>>) {
-        gjeldendePerioder = serialiserer.lagre(perioder)
+        gjeldendePerioder = repository.lagre(perioder)
     }
 
     protected abstract fun genererPerioder(): Collection<Periode<T>>
@@ -58,8 +60,8 @@ abstract class Tidslinje<T>(
 }
 
 abstract class TidslinjeUtenAvhengigheter<T>(
-    tidslinjeSerialiserer: TidslinjeSerialiserer<T>
-) : Tidslinje<T>(tidslinjeSerialiserer) {
+    tidslinjeRepository: TidslinjeRepository<T>
+) : Tidslinje<T>(tidslinjeRepository) {
     fun splitt(tidspunkt: Tidspunkt) {
         splitt(PeriodeSplitt<T>(tidspunkt))
     }
@@ -67,8 +69,8 @@ abstract class TidslinjeUtenAvhengigheter<T>(
 
 abstract class TidslinjeMedAvhengigheter<T>(
     private val foregåendeTidslinjer: Collection<Tidslinje<*>>,
-    tidslinjeSerialiserer: TidslinjeSerialiserer<T>
-) : Tidslinje<T>(tidslinjeSerialiserer) {
+    tidslinjeRepository: TidslinjeRepository<T>
+) : Tidslinje<T>(tidslinjeRepository) {
 
     init {
         foregåendeTidslinjer.forEach { it.registrerEtterfølgendeTidslinje(this) }
@@ -106,10 +108,10 @@ abstract class TidslinjeMedAvhengigheter<T>(
 
 abstract class KalkulerendeTidslinje<T>(
     avhengigheter: Collection<Tidslinje<*>>,
-    serialiserer: TidslinjeSerialiserer<T> = IngenTidslinjeSerialisering()
+    serialiserer: TidslinjeRepository<T> = IngenTidslinjeSerialisering()
 ) : TidslinjeMedAvhengigheter<T>(avhengigheter, serialiserer) {
 
-    constructor(avhengighet: Tidslinje<*>, serialiserer: TidslinjeSerialiserer<T> = IngenTidslinjeSerialisering()) :
+    constructor(avhengighet: Tidslinje<*>, serialiserer: TidslinjeRepository<T> = IngenTidslinjeSerialisering()) :
         this(listOf(avhengighet), serialiserer)
 
     protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<T>
@@ -128,8 +130,8 @@ abstract class KalkulerendeTidslinje<T>(
 
 class SelvbyggerTidslinje<T>(
     val egnePerioder: Collection<Periode<T>>,
-    tidslinjeSerialiserer: TidslinjeSerialiserer<T> = IngenTidslinjeSerialisering()
-) : TidslinjeUtenAvhengigheter<T>(tidslinjeSerialiserer) {
+    tidslinjeRepository: TidslinjeRepository<T> = IngenTidslinjeSerialisering()
+) : TidslinjeUtenAvhengigheter<T>(tidslinjeRepository) {
     override fun genererPerioder(): Collection<Periode<T>> = egnePerioder
 }
 
@@ -155,17 +157,4 @@ enum class TidslinjeFeilType {
     MANGLER_REFERANSE_TIL_PERIODE,
     REFERANSER_I_FEIL_REKKEFØLGE,
     REFERER_TIL_UTGÅTT_PERIODE,
-}
-
-interface TidslinjeSerialiserer<T> {
-    fun lagre(perioder: Collection<Periode<T>>): Collection<Periode<T>>
-    fun hent(): Collection<Periode<T>>?
-}
-
-class IngenTidslinjeSerialisering<T> : TidslinjeSerialiserer<T> {
-    override fun lagre(perioder: Collection<Periode<T>>): Collection<Periode<T>> {
-        return perioder
-    }
-
-    override fun hent(): Collection<Periode<T>> = emptyList()
 }

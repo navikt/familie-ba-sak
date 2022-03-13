@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårResultatTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårsresultatTidslinjeSerialiserer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
@@ -12,10 +13,16 @@ fun byggSøkerOgBarn(
     vilkårsvurdering: Vilkårsvurdering,
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ) {
+
     val vilkårResultatTidslinjer = vilkårsvurdering.personResultater
         .flatMap { pr -> pr.vilkårResultater.map { Pair(pr.aktør, it) } }
         .groupBy({ Pair(it.first, it.second.vilkårType) }, { it.second })
-        .mapValues { VilkårResultatTidslinje(it.key.first, it.key.second, it.value) }
+        .mapValues {
+            VilkårResultatTidslinje(
+                it.key.first, it.key.second, it.value,
+                VilkårsresultatTidslinjeSerialiserer(behandlingId, it.key.first, it.key.second)
+            )
+        }
         .values
 
     val fødseldato: (Aktør) -> LocalDate =

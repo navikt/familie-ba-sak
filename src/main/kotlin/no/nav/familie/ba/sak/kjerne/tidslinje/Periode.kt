@@ -2,9 +2,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.temaperiode
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import java.time.LocalDate
-import java.util.concurrent.atomic.AtomicLong
-
-val idGenerator = AtomicLong()
 
 data class PeriodeUtsnitt<T>(
     val innhold: T? = null,
@@ -25,10 +22,9 @@ data class Periode<T>(
     val fom: Tidspunkt,
     val tom: Tidspunkt,
     val innhold: T? = null,
-    val avhengerAv: Collection<Long> = emptyList()
-) {
-    val id = idGenerator.incrementAndGet()
-}
+    val avhengerAv: Collection<Long> = emptyList(),
+    val id: Long = 0
+)
 
 fun <T> Periode<T>.tilUtsnitt() =
     PeriodeUtsnitt(this.innhold, this.id)
@@ -55,11 +51,11 @@ data class PeriodeSplitt<T>(
         this(tidspunkt, 0, Periode(tidspunkt, tidspunkt), Periode(tidspunkt, tidspunkt))
 }
 
-fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: LocalDate) =
-    this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default)
+fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =
+    this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
 
-fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: LocalDate) =
-    this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default)
+fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate) =
+    this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
 
 fun <U> PeriodeUtsnitt<*>.mapInnhold(nyttInhold: U) = PeriodeInnhold(nyttInhold, listOf(this.id))
 
