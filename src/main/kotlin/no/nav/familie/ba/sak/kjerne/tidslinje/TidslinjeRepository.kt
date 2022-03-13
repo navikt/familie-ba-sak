@@ -59,7 +59,8 @@ abstract class AbstraktTidslinjeRepository<T>(
 
     abstract val tidslinjeId: String
     abstract fun innholdTilReferanse(innhold: T?): String
-    abstract fun referanseTilInnhold(referanse: String): T
+    private fun referanseTilInnhold(referanse: String): T =
+        innhold.find { innholdTilReferanse(it) == referanse }!!
 
     final override fun lagre(perioder: Collection<Periode<T>>): Collection<Periode<T>> {
         return periodeRepository

@@ -6,10 +6,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.PeriodeInnhold
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.idListe
-import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 class SøkerOppfyllerVilkårTidslinje(
-    private val søkersVilkårResultatTemaer: Collection<Tidslinje<VilkårRegelverkResultat>>
+    private val søkersVilkårResultatTemaer: Collection<Tidslinje<VilkårResultat>>
 ) : KalkulerendeTidslinje<Boolean>(søkersVilkårResultatTemaer) {
 
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<Boolean> {

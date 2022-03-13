@@ -50,10 +50,6 @@ class KompetanseTidslinjeRepository(
     override fun innholdTilReferanse(kompetanse: Kompetanse?): String {
         return kompetanse?.id?.toString()!!
     }
-
-    override fun referanseTilInnhold(referanse: String): Kompetanse {
-        return innhold.find { innholdTilReferanse(it) == referanse }!!
-    }
 }
 
 fun Kompetanse.tilPeriode() = Periode(
