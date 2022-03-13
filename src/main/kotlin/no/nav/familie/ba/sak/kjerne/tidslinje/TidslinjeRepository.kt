@@ -52,7 +52,7 @@ interface TidslinjeRepository<T> {
     fun hent(): Collection<Periode<T>>
 }
 
-class IngenTidslinjeSerialisering<T> : TidslinjeRepository<T> {
+class IngenTidslinjeRepository<T> : TidslinjeRepository<T> {
     override fun lagre(perioder: Collection<Periode<T>>): Collection<Periode<T>> {
         return perioder
     }

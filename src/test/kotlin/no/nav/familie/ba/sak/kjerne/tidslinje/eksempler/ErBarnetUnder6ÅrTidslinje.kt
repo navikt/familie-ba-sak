@@ -7,12 +7,13 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.PeriodeInnhold
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.mapInnhold
+import no.nav.familie.ba.sak.kjerne.tidslinje.IngenTidslinjeRepository
 import java.time.LocalDate
 
 class ErBarnetUnder6ÅrTidslinje(
     private val barnetsYtelseTidslinje: Tidslinje<YtelseType>,
     private val barnetsFødselsdato: LocalDate
-) : KalkulerendeTidslinje<Boolean>(barnetsYtelseTidslinje) {
+) : KalkulerendeTidslinje<Boolean>(IngenTidslinjeRepository(), barnetsYtelseTidslinje) {
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<Boolean> {
         val utsnitt = barnetsYtelseTidslinje.hentUtsnitt(tidspunkt)
         return utsnitt

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.temaperiode
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import java.time.LocalDate
+import java.time.YearMonth
 
 data class PeriodeUtsnitt<T>(
     val innhold: T? = null,
@@ -11,9 +12,17 @@ data class PeriodeUtsnitt<T>(
 data class PeriodeInnhold<T>(
     val innhold: T? = null,
     val avhengerAv: Collection<Long>
-)
+) {
+    constructor(innhold: T?, vararg avhengerAv: Long) :
+        this(innhold, avhengerAv.asList())
+
+    constructor(innhold: T?, vararg avhengerAv: PeriodeUtsnitt<*>) :
+        this(innhold, avhengerAv.map { it.id })
+}
 
 fun <T> PeriodeUtsnitt<T>.inneholder(innhold: T) = this.innhold == innhold
+fun <T> PeriodeUtsnitt<T>.erSantHvis(predicate: (T) -> Boolean) = this.innhold != null && predicate(this.innhold)
+
 fun <T> PeriodeInnhold<T>.tilPeriode(tidspunkt: Tidspunkt): Periode<T> {
     return Periode(tidspunkt, tidspunkt, this.innhold, this.avhengerAv)
 }
@@ -55,6 +64,12 @@ fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =
     this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
 
 fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate) =
+    this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
+
+fun YearMonth?.tilTidspunktEllerUendeligLengeSiden(default: () -> YearMonth) =
+    this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
+
+fun YearMonth?.tilTidspunktEllerUendeligLengeTil(default: () -> YearMonth) =
     this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
 
 fun <U> PeriodeUtsnitt<*>.mapInnhold(nyttInhold: U) = PeriodeInnhold(nyttInhold, listOf(this.id))

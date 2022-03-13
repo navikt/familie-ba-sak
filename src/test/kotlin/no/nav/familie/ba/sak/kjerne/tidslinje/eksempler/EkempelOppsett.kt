@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.PeriodeDto
@@ -64,12 +65,19 @@ fun byggSøkerOgBarn(
             BarnetsUtbetalingerTidslinje(barnetsYtelseTidslinje, erUnder6ÅrTidslinje)
         }
 
+    val kompetanser = KompetanseService().hentKompetanser(behandlingId)
+
     val barnasDifferanseBeregningTidslinjeMap =
         barnasVilkårsresultatTidslinjeMap.mapValues { (barn, vilkårsresultatTidslinje) ->
             val erEøsPeriodeTidslinje = ErEøsPeriodeTidslinje(vilkårsresultatTidslinje)
             val kompetanseTidslinje =
-                KompetanseTidslinje(KompetanseService(), erEøsPeriodeTidslinje, behandlingId, barn.aktivFødselsnummer())
-            val erSekundærlandTidslinje = ErSekundærlandTidslinje(kompetanseTidslinje)
+                KompetanseTidslinje(kompetanser.forBarn(barn), barn)
+            val validerKompetanseTidslinje =
+                KompetanseValideringTidslinje(erEøsPeriodeTidslinje, kompetanseTidslinje)
+            val erSekundærlandTidslinje = ErSekundærlandTidslinje(kompetanseTidslinje, validerKompetanseTidslinje)
             DifferanseBeregningTidslinje(barnsUtebetalingTidslinjeMap[barn]!!, erSekundærlandTidslinje)
         }
 }
+
+fun Collection<Kompetanse>.forBarn(barn: Aktør) =
+    this.filter { it.barn.contains(barn.aktivFødselsnummer()) }

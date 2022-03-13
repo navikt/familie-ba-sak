@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.temaperiode
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.IngenTidslinjeSerialisering
+import no.nav.familie.ba.sak.kjerne.tidslinje.IngenTidslinjeRepository
 import no.nav.familie.ba.sak.kjerne.tidslinje.TidslinjeRepository
 import java.time.YearMonth
 
@@ -119,11 +119,11 @@ abstract class TidslinjeMedAvhengigheter<T>(
 
 abstract class KalkulerendeTidslinje<T>(
     avhengigheter: Collection<Tidslinje<*>>,
-    serialiserer: TidslinjeRepository<T> = IngenTidslinjeSerialisering()
-) : TidslinjeMedAvhengigheter<T>(avhengigheter, serialiserer) {
+    repository: TidslinjeRepository<T> = IngenTidslinjeRepository()
+) : TidslinjeMedAvhengigheter<T>(avhengigheter, repository) {
 
-    constructor(avhengighet: Tidslinje<*>, serialiserer: TidslinjeRepository<T> = IngenTidslinjeSerialisering()) :
-        this(listOf(avhengighet), serialiserer)
+    constructor(repository: TidslinjeRepository<T>, vararg avhengighet: Tidslinje<*>) :
+        this(avhengighet.asList(), repository)
 
     protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<T>
 
@@ -141,7 +141,7 @@ abstract class KalkulerendeTidslinje<T>(
 
 class SelvbyggerTidslinje<T>(
     val egnePerioder: Collection<Periode<T>>,
-    tidslinjeRepository: TidslinjeRepository<T> = IngenTidslinjeSerialisering()
+    tidslinjeRepository: TidslinjeRepository<T> = IngenTidslinjeRepository()
 ) : TidslinjeUtenAvhengigheter<T>(tidslinjeRepository) {
     override val fraOgMed: Tidspunkt = egnePerioder.minOf { it.fom }
     override val tilOgMed: Tidspunkt = egnePerioder.maxOf { it.tom }

@@ -5,13 +5,25 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.PeriodeInnhold
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.mapInnhold
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.erSantHvis
+import no.nav.familie.ba.sak.kjerne.tidslinje.IngenTidslinjeRepository
 
 class ErSekundærlandTidslinje(
-    val kompetanseTidslinje: Tidslinje<Kompetanse>
-) : KalkulerendeTidslinje<Boolean>(kompetanseTidslinje) {
+    val kompetanseTidslinje: Tidslinje<Kompetanse>,
+    val validertKompetanseTidsline: Tidslinje<KompetanseValidering>
+) : KalkulerendeTidslinje<Boolean>(
+    IngenTidslinjeRepository(),
+    kompetanseTidslinje, validertKompetanseTidsline
+) {
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<Boolean> {
-        val periodeFragment = kompetanseTidslinje.hentUtsnitt(tidspunkt)
-        return periodeFragment.mapInnhold(periodeFragment.innhold?.sekundærland == "Norge")
+        val kompetanseUtsnitt = kompetanseTidslinje.hentUtsnitt(tidspunkt)
+        val validertKompetanseUtsnitt = validertKompetanseTidsline.hentUtsnitt(tidspunkt)
+
+        val erValidert = validertKompetanseUtsnitt.erSantHvis { it == KompetanseValidering.OK }
+        val erSekundærland = kompetanseUtsnitt.erSantHvis { it.sekundærland == "Norge" }
+        return PeriodeInnhold(
+            erValidert && erSekundærland,
+            kompetanseUtsnitt, validertKompetanseUtsnitt
+        )
     }
 }
