@@ -38,11 +38,15 @@ class VilkårsresultatTidslinjeRepository(
     private val periodeRepository: PeriodeRepository
 ) : TidslinjeRepository<VilkårRegelverkResultat> {
 
+    val behandlingId = vilkårResultater.first().behandlingId
+    val aktørId = vilkårResultater.first().personResultat!!.aktør.aktørId
+    val tidslinjeId = "VilkårResult.$behandlingId.$aktørId"
+
     override fun lagre(perioder: Collection<Periode<VilkårRegelverkResultat>>): Collection<Periode<VilkårRegelverkResultat>> {
         val refTilInnhold = perioder.map { it.innhold!! }.refTilInnhold()
 
         return periodeRepository
-            .lagrePerioder(perioder.map { it.tilDto { it.id.tilInnholdsreferanse() } })
+            .lagrePerioder(tidslinjeId, perioder.map { it.tilDto(it.id) })
             .map { dto -> dto.tilPeriode(refTilInnhold) }
     }
 
@@ -51,12 +55,13 @@ class VilkårsresultatTidslinjeRepository(
             .map { it.tilVilkårRegelverkResultat() }
 
         return periodeRepository.hentPerioder(
-            innholdReferanser = vilkårRegelverkResultater.map { it.vilkårResultatId.tilInnholdsreferanse() }
+            tidslinjeId = tidslinjeId,
+            innholdReferanser = vilkårRegelverkResultater.map { it.vilkårResultatId }
         ).map { it.tilPeriode(vilkårRegelverkResultater.refTilInnhold()) }
     }
 }
 
-fun Collection<VilkårRegelverkResultat>.refTilInnhold(): (String) -> VilkårRegelverkResultat =
-    { ref -> this.find { it.vilkårResultatId.tilInnholdsreferanse() == ref } ?: throw Error() }
+fun Collection<VilkårRegelverkResultat>.refTilInnhold(): (Long) -> VilkårRegelverkResultat =
+    { ref -> this.find { it.vilkårResultatId == ref } ?: throw Error() }
 
 fun Long.tilInnholdsreferanse(): String = "Vilkårsresultat.$this"
