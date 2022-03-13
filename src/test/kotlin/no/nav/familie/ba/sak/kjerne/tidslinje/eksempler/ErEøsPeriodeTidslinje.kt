@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 class ErEøsPeriodeTidslinje(
-    private val barnetsVilkårsresultater: List<VilkårResultatTidslinje>
+    private val barnetsVilkårsresultater: Collection<VilkårResultatTidslinje>
 ) : KalkulerendeTidslinje<Boolean>(barnetsVilkårsresultater) {
 
     private val nødvendigeVilkår = listOf(

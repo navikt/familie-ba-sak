@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
 
 class BarnetsYtelseTidslinje(
     private val søkerOppfyllerVilkårTema: Tidslinje<Boolean>,
-    private val barnetsVilkårsresultater: List<Tidslinje<VilkårRegelverkResultat>>
+    private val barnetsVilkårsresultater: Collection<Tidslinje<VilkårRegelverkResultat>>
 ) : KalkulerendeTidslinje<YtelseType>(barnetsVilkårsresultater + søkerOppfyllerVilkårTema) {
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<YtelseType> {
         val søkersFragment = søkerOppfyllerVilkårTema.hentUtsnitt(tidspunkt)

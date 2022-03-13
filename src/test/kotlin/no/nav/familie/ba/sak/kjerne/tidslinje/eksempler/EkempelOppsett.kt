@@ -33,25 +33,28 @@ fun byggSøkerOgBarn(
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ) {
 
-    val vilkårResultatTidslinjer = vilkårsvurdering.personResultater
-        .flatMap { pr -> pr.vilkårResultater.map { Pair(pr.aktør, it) } }
-        .groupBy({ Pair(it.first, it.second.vilkårType) }, { it.second })
-        .mapValues {
-            VilkårResultatTidslinje(
-                it.key.first, it.key.second, it.value, MockPerideRepository()
-            )
-        }
-        .values
+    val aktørTilVilkårsresultater = vilkårsvurdering.personResultater
+        .flatMap { pr -> pr.vilkårResultater }
+        .groupBy { it.personResultat!!.aktør }
 
     val fødseldato: (Aktør) -> LocalDate =
         { aktør -> personopplysningGrunnlag.personer.filter { it.aktør == aktør }.first().fødselsdato }
 
-    val søkersVilkårsresultatTidslinje = vilkårResultatTidslinjer
-        .filter { personopplysningGrunnlag.søker.aktør == it.aktør }
+    val søkersVilkårsresultatTidslinje = aktørTilVilkårsresultater
+        .filter { (aktør, _) -> personopplysningGrunnlag.søker.aktør == aktør }
+        .mapValues { (_, resultater) ->
+            resultater.groupBy { it.vilkårType }
+                .mapValues { VilkårResultatTidslinje(it.value, MockPerideRepository()) }
+                .values
+        }.values.flatten()
 
-    val barnasVilkårsresultatTidslinjeMap = vilkårResultatTidslinjer
-        .filter { personopplysningGrunnlag.søker.aktør != it.aktør }
-        .groupBy { it.aktør }
+    val barnasVilkårsresultatTidslinjeMap = aktørTilVilkårsresultater
+        .filter { (aktør, _) -> personopplysningGrunnlag.søker.aktør != aktør }
+        .mapValues { (_, resultater) ->
+            resultater.groupBy { it.vilkårType }
+                .mapValues { VilkårResultatTidslinje(it.value, MockPerideRepository()) }
+                .values
+        }
 
     val søkerOppfyllerVilkårTidslinje = SøkerOppfyllerVilkårTidslinje(søkersVilkårsresultatTidslinje)
 
