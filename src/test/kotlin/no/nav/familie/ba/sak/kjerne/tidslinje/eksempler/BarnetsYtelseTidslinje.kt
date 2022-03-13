@@ -20,7 +20,7 @@ class BarnetsYtelseTidslinje(
         val erBarnetsVilkårOppfylt = barnasFragmenter.all { it.innhold?.resultat == Resultat.OPPFYLT }
 
         return if (søkersFragment.inneholder(true) && erBarnetsVilkårOppfylt)
-            PeriodeInnhold(YtelseType.ORDINÆR_BARNETRYGD, (barnasFragmenter + søkersFragment).idListe())
+            PeriodeInnhold(YtelseType.ORDINÆR_BARNETRYGD, barnasFragmenter + søkersFragment)
         else
             PeriodeInnhold(avhengerAv = (barnasFragmenter + søkersFragment).idListe())
     }

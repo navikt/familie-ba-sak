@@ -13,7 +13,7 @@ import java.time.LocalDate
 class MockPerideRepository : PeriodeRepository {
     override fun hentPerioder(
         tidslinjeId: String,
-        innholdReferanser: List<String>
+        akseptertInnhold: List<String>?
     ): Iterable<Periode<String>> {
         TODO("Not yet implemented")
     }

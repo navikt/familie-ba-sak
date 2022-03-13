@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.mapInnhold
 interface PeriodeRepository {
     fun hentPerioder(
         tidslinjeId: String,
-        innhold: List<String>
+        akseptertInnhold: List<String>?
     ): Iterable<Periode<String>>
 
     fun lagrePerioder(
@@ -26,7 +26,7 @@ abstract class AbstraktTidslinjeRepository<T>(
 ) : TidslinjeRepository<T> {
 
     abstract val tidslinjeId: String
-    abstract fun innholdTilString(innhold: T?): String
+    open fun innholdTilString(innhold: T?): String? = innhold?.toString()
     private fun stringTilInnhold(referanse: String?): T? =
         innhold.find { innholdTilString(it) == referanse }!!
 
@@ -39,7 +39,7 @@ abstract class AbstraktTidslinjeRepository<T>(
     final override fun hent(): Collection<Periode<T>> {
         return periodeRepository.hentPerioder(
             tidslinjeId = tidslinjeId,
-            innhold = innhold.map { innholdTilString(it) }
+            akseptertInnhold = innhold.map { innholdTilString(it) }.filterNotNull()
         ).mapInnhold { stringTilInnhold(it) }
     }
 }

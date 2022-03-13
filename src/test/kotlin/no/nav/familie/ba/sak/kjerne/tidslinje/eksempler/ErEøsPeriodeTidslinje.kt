@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.PeriodeInnhold
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.idListe
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -36,7 +35,7 @@ class ErEøsPeriodeTidslinje(
             .containsAll(nødvendigeVilkår)
 
         if (!oppfyllerNødvendigVilkår)
-            return PeriodeInnhold(false, alleVilkårResultatUtsnitt.idListe())
+            return PeriodeInnhold(false, alleVilkårResultatUtsnitt)
 
         val alleRelevanteVilkårErEøsVilkår = alleVilkårResultatUtsnitt
             .filter {
@@ -44,6 +43,6 @@ class ErEøsPeriodeTidslinje(
             }.map { it.innhold?.vilkårType }
             .containsAll(eøsVilkår)
 
-        return PeriodeInnhold(alleRelevanteVilkårErEøsVilkår, alleVilkårResultatUtsnitt.idListe())
+        return PeriodeInnhold(alleRelevanteVilkårErEøsVilkår, alleVilkårResultatUtsnitt)
     }
 }

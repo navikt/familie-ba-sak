@@ -13,10 +13,10 @@ data class PeriodeInnhold<T>(
     val innhold: T? = null,
     val avhengerAv: Collection<Long>
 ) {
-    constructor(innhold: T?, vararg avhengerAv: Long) :
-        this(innhold, avhengerAv.asList())
-
     constructor(innhold: T?, vararg avhengerAv: PeriodeUtsnitt<*>) :
+        this(innhold, avhengerAv.map { it.id })
+
+    constructor(innhold: T?, avhengerAv: Iterable<PeriodeUtsnitt<*>>) :
         this(innhold, avhengerAv.map { it.id })
 }
 

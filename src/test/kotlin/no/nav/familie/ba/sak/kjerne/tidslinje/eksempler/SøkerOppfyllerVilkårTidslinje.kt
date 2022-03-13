@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.PeriodeInnhold
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.idListe
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 class SøkerOppfyllerVilkårTidslinje(
@@ -16,6 +15,6 @@ class SøkerOppfyllerVilkårTidslinje(
         val erAltOppfylt = søkersVilkårResultatTemaer
             .map { it.hentUtsnitt(tidspunkt) }
             .all { it.innhold?.resultat == Resultat.OPPFYLT }
-        return PeriodeInnhold(erAltOppfylt, søkersVilkårResultatTemaer.map { it.hentUtsnitt(tidspunkt) }.idListe())
+        return PeriodeInnhold(erAltOppfylt, søkersVilkårResultatTemaer.map { it.hentUtsnitt(tidspunkt) })
     }
 }
