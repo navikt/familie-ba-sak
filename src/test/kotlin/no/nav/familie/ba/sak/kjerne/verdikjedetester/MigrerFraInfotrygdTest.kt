@@ -25,7 +25,7 @@ class MigrerFraInfotrygdTest(
 
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
-        val scenario2 = mockServerKlient().lagScenario(
+        val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
@@ -42,7 +42,7 @@ class MigrerFraInfotrygdTest(
             )
         )
 
-        val scenario = mockServerKlient().lagScenario(
+        val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
@@ -52,32 +52,19 @@ class MigrerFraInfotrygdTest(
                         bruker = listOf(
                             lagInfotrygdSak(
                                 SatsService.sisteTilleggOrdinærSats.beløp.toDouble(),
-                                scenario2.barna.first().ident.toString(),
+                                barnPåInfotrygdSøknadScenario.barna.first().ident.toString(),
                                 "OR",
                                 "OS"
                             )
                         ),
-                        barn = listOf(
-                            lagInfotrygdSak(
-                                SatsService.sisteTilleggOrdinærSats.beløp.toDouble(),
-                                scenario2.barna.first().ident.toString(),
-                                "OR",
-                                "OS"
-                            )
-                        )
+                        barn = emptyList()
                     )
                 ),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.of(2021, 11, 18).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
+                barna = emptyList()
             )
         )
 
-        val migreringsresponse = migreringService.migrer(scenario.søker.ident!!)
+        val migreringsresponse = migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!)
 
         val restFagsakEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = migreringsresponse.fagsakId)
