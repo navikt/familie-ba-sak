@@ -9,9 +9,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 
 class BarnetsUtbetalingerTidslinje(
+    private val unikId: String,
     private val barnetsYtelseTidslinje: Tidslinje<YtelseType>,
-    private val erBarnetUnder6ÅrTidslinje: Tidslinje<Boolean>
-) : KalkulerendeTidslinje<Int>(listOf(barnetsYtelseTidslinje, erBarnetUnder6ÅrTidslinje)) {
+    private val erBarnetUnder6ÅrTidslinje: Tidslinje<Boolean>,
+    perideRepository: MockPerideRepository
+) : KalkulerendeTidslinje<Int>(perideRepository, barnetsYtelseTidslinje, erBarnetUnder6ÅrTidslinje) {
+
+    override val tidslinjeId: String = "Barns utbetaling.$unikId"
+
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<Int> {
         val erUnder6ÅrFragment = erBarnetUnder6ÅrTidslinje.hentUtsnitt(tidspunkt)
         val erOrdinærBarnetrygdFragment = barnetsYtelseTidslinje.hentUtsnitt(tidspunkt)

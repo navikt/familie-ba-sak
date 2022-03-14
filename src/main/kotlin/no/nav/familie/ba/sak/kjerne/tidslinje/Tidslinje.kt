@@ -1,15 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.eøs.temaperiode
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.IngenTidslinjeRepository
-import no.nav.familie.ba.sak.kjerne.tidslinje.TidslinjeRepository
+import no.nav.familie.ba.sak.kjerne.tidslinje.PeriodeRepository
 import java.time.YearMonth
 
 abstract class Tidslinje<T>(
-    protected val repository: TidslinjeRepository<T>
+    protected val repository: PeriodeRepository
 ) {
     private var etterfølgendeTidslinjer: MutableList<TidslinjeMedAvhengigheter<*>> = mutableListOf()
     private var gjeldendePerioder: Collection<Periode<T>>? = null
 
+    abstract val tidslinjeId: String
     internal abstract val fraOgMed: Tidspunkt
     internal abstract val tilOgMed: Tidspunkt
 
@@ -18,11 +18,11 @@ abstract class Tidslinje<T>(
             gjeldendePerioder ?: finnPerioder().also { gjeldendePerioder = it }
 
     fun finnPerioder(): Collection<Periode<T>> {
-        val hentedePerioder = repository.hent().sortedBy { it.fom }
+        val hentedePerioder = hentPerioder().sortedBy { it.fom }
         val generertePerioder = hentedePerioder.finnHull(fraOgMed, tilOgMed)
             .flatMap { genererPerioder(it) }
 
-        return hentedePerioder + repository.lagre(generertePerioder)
+        return hentedePerioder + lagrePerioder(generertePerioder)
     }
 
     internal fun registrerEtterfølgendeTidslinje(tidslinje: TidslinjeMedAvhengigheter<*>) {
@@ -30,10 +30,12 @@ abstract class Tidslinje<T>(
     }
 
     protected fun oppdaterPerioder(perioder: Collection<Periode<T>>) {
-        gjeldendePerioder = repository.lagre(perioder)
+        gjeldendePerioder = lagrePerioder(perioder)
     }
 
     protected abstract fun genererPerioder(tidsrom: Tidsrom): Collection<Periode<T>>
+    protected abstract fun lagrePerioder(perioder: Collection<Periode<T>>): Collection<Periode<T>>
+    protected abstract fun hentPerioder(): Collection<Periode<T>>
 
     internal fun splitt(splitt: PeriodeSplitt<*>) {
         perioder
@@ -68,17 +70,39 @@ abstract class Tidslinje<T>(
 }
 
 abstract class TidslinjeUtenAvhengigheter<T>(
-    tidslinjeRepository: TidslinjeRepository<T>
-) : Tidslinje<T>(tidslinjeRepository) {
+    periodeRepository: PeriodeRepository
+) : Tidslinje<T>(periodeRepository) {
     fun splitt(tidspunkt: Tidspunkt) {
         splitt(PeriodeSplitt<T>(tidspunkt))
     }
 }
 
+abstract class TidslinjeMedEksterntInnhold<T>(
+    protected val innhold: Iterable<T>,
+    private val periodeRepository: PeriodeRepository
+) : TidslinjeUtenAvhengigheter<T>(periodeRepository) {
+    protected abstract fun innholdTilString(innhold: T?): String?
+    private fun stringTilInnhold(referanse: String?): T? =
+        innhold.find { innholdTilString(it) == referanse }!!
+
+    final override fun lagrePerioder(perioder: Collection<Periode<T>>): Collection<Periode<T>> {
+        return periodeRepository
+            .lagrePerioder(tidslinjeId, perioder.mapInnhold { innholdTilString(it) })
+            .mapInnhold { stringTilInnhold(it) }
+    }
+
+    final override fun hentPerioder(): Collection<Periode<T>> {
+        return periodeRepository.hentPerioder(
+            tidslinjeId = tidslinjeId,
+            akseptertInnhold = innhold.map { innholdTilString(it) }.filterNotNull()
+        ).mapInnhold { stringTilInnhold(it) }
+    }
+}
+
 abstract class TidslinjeMedAvhengigheter<T>(
     private val foregåendeTidslinjer: Collection<Tidslinje<*>>,
-    tidslinjeRepository: TidslinjeRepository<T>
-) : Tidslinje<T>(tidslinjeRepository) {
+    periodeRepository: PeriodeRepository
+) : Tidslinje<T>(periodeRepository) {
 
     override val fraOgMed: Tidspunkt = foregåendeTidslinjer.minOf { it.fraOgMed }
     override val tilOgMed: Tidspunkt = foregåendeTidslinjer.maxOf { it.tilOgMed }
@@ -119,13 +143,24 @@ abstract class TidslinjeMedAvhengigheter<T>(
 
 abstract class KalkulerendeTidslinje<T>(
     avhengigheter: Collection<Tidslinje<*>>,
-    repository: TidslinjeRepository<T> = IngenTidslinjeRepository()
-) : TidslinjeMedAvhengigheter<T>(avhengigheter, repository) {
+    val periodeRepository: PeriodeRepository
+) : TidslinjeMedAvhengigheter<T>(avhengigheter, periodeRepository) {
 
-    constructor(repository: TidslinjeRepository<T>, vararg avhengighet: Tidslinje<*>) :
-        this(avhengighet.asList(), repository)
+    constructor(periodeRepository: PeriodeRepository, vararg avhengighet: Tidslinje<*>) :
+        this(avhengighet.asList(), periodeRepository)
 
-    protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<T>
+    final override fun lagrePerioder(perioder: Collection<Periode<T>>): Collection<Periode<T>> {
+        return periodeRepository
+            .lagrePerioder(tidslinjeId, perioder.mapInnhold { null })
+            .map { }
+    }
+
+    final override fun hentPerioder(): Collection<Periode<T>> {
+        return periodeRepository.hentPerioder(
+            tidslinjeId = tidslinjeId,
+            akseptertInnhold = null
+        ).mapInnhold { stringTilInnhold(it) }
+    }
 
     override fun genererPerioder(tidsrom: Tidsrom): List<Periode<T>> =
         tidsrom.map { Pair(it, kalkulerInnhold(it)) }
@@ -137,16 +172,8 @@ abstract class KalkulerendeTidslinje<T>(
                     else -> acc + innhold.tilPeriode(måned)
                 }
             }
-}
 
-class SelvbyggerTidslinje<T>(
-    val egnePerioder: Collection<Periode<T>>,
-    tidslinjeRepository: TidslinjeRepository<T> = IngenTidslinjeRepository()
-) : TidslinjeUtenAvhengigheter<T>(tidslinjeRepository) {
-    override val fraOgMed: Tidspunkt = egnePerioder.minOf { it.fom }
-    override val tilOgMed: Tidspunkt = egnePerioder.maxOf { it.tom }
-
-    override fun genererPerioder(tidsrom: Tidsrom): Collection<Periode<T>> = egnePerioder
+    protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<T>
 }
 
 private fun <T> Collection<T>.replaceLast(replacement: T) =
