@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SETT_PÅ_VENT
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -192,8 +191,7 @@ class DokumentService(
 
         if (
             behandling != null &&
-            manueltBrevRequest.brevmal.setterBehandlingPåVent() &&
-            featureToggleService.isEnabled(SETT_PÅ_VENT)
+            manueltBrevRequest.brevmal.setterBehandlingPåVent()
         ) {
             settPåVentService.settBehandlingPåVent(
                 behandlingId = behandling.id,
