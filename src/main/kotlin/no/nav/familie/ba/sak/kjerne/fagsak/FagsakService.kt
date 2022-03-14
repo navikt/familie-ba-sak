@@ -198,6 +198,8 @@ class FagsakService(
                 false
             else
                 aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET),
+            løpendeKategori = behandlingService.hentLøpendeKategori(fagsakId = fagsakId),
+            løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(fagsakId = fagsakId),
             gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
         )
     }

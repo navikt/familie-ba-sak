@@ -108,7 +108,8 @@ data class VedtaksperiodeMedBegrunnelser(
     ): List<UtbetalingsperiodeDetalj> =
         if (this.type == Vedtaksperiodetype.UTBETALING ||
             this.type == Vedtaksperiodetype.ENDRET_UTBETALING ||
-            this.type == Vedtaksperiodetype.FORTSATT_INNVILGET
+            this.type == Vedtaksperiodetype.FORTSATT_INNVILGET ||
+            this.type == Vedtaksperiodetype.REDUKSJON
         ) {
             val andelerForVedtaksperiodetype =
                 if (!erIngenOverlappVedtaksperiodeTogglePå) {

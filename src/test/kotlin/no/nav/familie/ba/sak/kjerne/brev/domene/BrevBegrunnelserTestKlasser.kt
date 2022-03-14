@@ -38,7 +38,8 @@ data class BrevBegrunnelserTestConfig(
         fom = this.fom,
         tom = this.tom,
         type = this.vedtaksperiodetype,
-        ytelseTyperForPeriode = ytelserForBarnOgSøkerIPeriode.toSet()
+        ytelseTyperForPeriode = ytelserForBarnOgSøkerIPeriode.toSet(),
+        utbetalingsperioder = emptyList()
     )
 
     fun hentMinimertePersonResultater() = this.personerPåBehandling.map { it.tilMinimertePersonResultater() }
