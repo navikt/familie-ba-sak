@@ -52,7 +52,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -322,7 +321,6 @@ class MigreringServiceTest(
     }
 
     @Test
-    @Disabled("Tester ut ting")
     fun `migrering skal feile dersom PDL returnerer mangelfull liste over barn fra Infotrygd på person`() {
         val barnUnder18 = fødselsnummerGenerator.foedselsnummer(LocalDate.now()).asString
         val barnOver18 = fødselsnummerGenerator.foedselsnummer(LocalDate.now().minusYears(19)).asString
@@ -349,6 +347,44 @@ class MigreringServiceTest(
     }
 
     @Test
+    fun `migrering skal feile dersom person registrert på stønad er også registrert som barn, Det er da mest sannsynlig institusjon`() {
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(
+            listOf(
+                Sak(
+                    stønad = Stønad(
+                        barn = listOf(
+                            Barn(ClientMocks.søkerFnr[0], barnetrygdTom = "000000")
+                        ),
+                        delytelse = listOf(
+                            Delytelse(
+                                fom = LocalDate.now(),
+                                tom = null,
+                                beløp = 2048.0,
+                                typeDelytelse = "MS",
+                                typeUtbetaling = "J",
+                            )
+                        ),
+                        opphørsgrunn = "0"
+                    ),
+                    status = "FB",
+                    valg = "OR",
+                    undervalg = "OS"
+                )
+
+            ),
+            emptyList()
+        )
+
+        assertThatThrownBy {
+            migreringService.migrer(ClientMocks.søkerFnr[0])
+        }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.INSTITUSJON)
+    }
+
+    @Test
     fun `migrering skal feile dersom migrering av person allerede er påbegynt`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
@@ -360,7 +396,7 @@ class MigreringServiceTest(
             migreringService.migrer(ClientMocks.søkerFnr[0])
         }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.MIGRERING_ALLEREDE_PÅBEGYNT)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.INSTITUSJON)
     }
 
     @Test

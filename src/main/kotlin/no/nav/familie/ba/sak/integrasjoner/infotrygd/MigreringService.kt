@@ -100,6 +100,10 @@ class MigreringService(
             secureLog.info("Migrering: fant løpende sak for $personIdent sak=${løpendeSak.id} stønad=${løpendeSak.stønad?.id}")
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
+            if (personIdent in barnasIdenter) {
+                secureLog.info("Migrering: $personIdent er lik barn registert på stønad=${løpendeSak.stønad?.id}")
+                kastOgTellMigreringsFeil(MigreringsfeilType.INSTITUSJON)
+            }
 
             val personAktør = personidentService.hentOgLagreAktør(personIdent, true)
             val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
@@ -128,7 +132,6 @@ class MigreringService(
                 forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this, migreringsdato)
                 vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
-            secureLog.info("Migrering: opprettet vilkårsvurdering for behandlingId=${behandling.id}")
             // Lagre ned migreringsdato
             behandlingService.lagreNedMigreringsdato(migreringsdato, behandling)
 
@@ -171,7 +174,6 @@ class MigreringService(
             }
             return migreringResponseDto
         } catch (e: Exception) {
-            secureLog.info("Migrering feilet for $personIdent. ${e.message}", e)
             if (e is KanIkkeMigrereException) throw e
             kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT, e.message, e)
         }
@@ -413,6 +415,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
     UKJENT("Ukjent migreringsfeil"),
     ÅPEN_SAK_INFOTRYGD("Bruker har åpen behandling i Infotrygd"),
+    INSTITUSJON("Midlertidig ignoerert fordi det er en institusjon"),
 }
 
 open class KanIkkeMigrereException(
