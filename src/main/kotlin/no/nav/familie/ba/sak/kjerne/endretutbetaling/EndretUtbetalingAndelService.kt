@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -70,9 +69,8 @@ class EndretUtbetalingAndelService(
         if (endretUtbetalingAndel.tom == null) {
             endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
         }
-        if (featureToggleService.isEnabled(FeatureToggleConfig.DELT_BOSTED_VALIDERING)) {
-            validerÅrsak(årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel, vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id))
-        }
+        validerÅrsak(årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel, vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id))
+
         validerUtbetalingMotÅrsak(årsak = endretUtbetalingAndel.årsak, skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0))
 
         validerIngenOverlappendeEndring(
