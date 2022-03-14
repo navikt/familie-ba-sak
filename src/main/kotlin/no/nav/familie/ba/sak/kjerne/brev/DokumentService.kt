@@ -75,7 +75,7 @@ class DokumentService(
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
         try {
             if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
-                throw Feil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
+                throw FunksjonellFeil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
             }
 
             val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
