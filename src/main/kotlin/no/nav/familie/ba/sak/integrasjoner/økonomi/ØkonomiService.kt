@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
@@ -32,8 +31,8 @@ class ØkonomiService(
     private val beregningService: BeregningService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
     private val behandlingService: BehandlingService,
-    private val featureToggleService: FeatureToggleService,
 ) {
+    private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak: Vedtak, saksbehandlerId: String) {
 
@@ -48,10 +47,9 @@ class ØkonomiService(
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
         } catch (exception: Exception) {
             if ((exception is HttpClientErrorException) &&
-                exception.statusCode == HttpStatus.CONFLICT &&
-                featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT)
+                exception.statusCode == HttpStatus.CONFLICT
             ) {
-                // Mulighet å bypasse 409 feil.
+                sammeOppdragSendtKonflikt.increment()
                 logger.info("Bypasset feil med HttpKode 409 ved iverksetting mot økonomi for fagsak ${utbetalingsoppdrag.saksnummer}")
                 return
             } else {
