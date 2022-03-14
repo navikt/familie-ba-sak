@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -81,9 +80,6 @@ internal class SaksstatistikkServiceTest(
 
     @MockK
     private val vedtakService: VedtakService,
-
-    @MockK
-    private val envService: EnvService,
 
     @MockK
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -260,7 +256,7 @@ internal class SaksstatistikkServiceTest(
             mottattDato.atZone(SaksstatistikkService.TIMEZONE)
         )
         assertThat(behandlingDvh?.registrertDato).isEqualTo(
-            mottattDato.atZone(SaksstatistikkService.TIMEZONE)
+            behandling.opprettetTidspunkt.atZone(SaksstatistikkService.TIMEZONE)
         )
         assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
