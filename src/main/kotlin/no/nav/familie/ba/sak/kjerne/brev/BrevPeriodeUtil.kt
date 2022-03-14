@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.AVS
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.ENDRET_UTBETALING
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.FORTSATT_INNVILGET
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.OPPHØR
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.REDUKSJON
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.UTBETALING
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
@@ -129,7 +130,7 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
             begrunnelserOgFritekster = begrunnelserOgFritekster,
             personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
         )
-        Vedtaksperiodetype.REDUKSJON -> brevPeriodeGrunnlagMedPersoner.hentReduksjonBrevPeriode(
+        REDUKSJON -> brevPeriodeGrunnlagMedPersoner.hentReduksjonBrevPeriode(
             tomDato = tomDato,
             begrunnelserOgFritekster = begrunnelserOgFritekster,
             personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
@@ -197,6 +198,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentFomTekst(
     ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling perioder når erIngenOverlappVedtaksperiodeTogglePå=true")
     OPPHØR -> fom!!.tilDagMånedÅr()
     AVSLAG -> if (fom != null) fom.tilDagMånedÅr() else ""
+    REDUKSJON -> fom!!.tilDagMånedÅr()
 }
 
 private fun hentPeriodetype(
@@ -209,6 +211,7 @@ private fun hentPeriodetype(
     ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling med erIngenOverlappVedtaksperiodeTogglePå=true")
     AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG else BrevPeriodeType.AVSLAG_UTEN_PERIODE
     OPPHØR -> BrevPeriodeType.OPPHOR
+    REDUKSJON -> BrevPeriodeType.INNVILGELSE
 }
 
 private fun BrevPeriodeGrunnlagMedPersoner.hentAvslagBrevPeriode(
