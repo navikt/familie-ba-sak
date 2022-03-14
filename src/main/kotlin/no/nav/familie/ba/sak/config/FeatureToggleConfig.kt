@@ -107,7 +107,8 @@ class FeatureToggleConfig(
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
         const val SETT_PÅ_VENT = "familie-ba-sak.sett-paa-vent.utgivelse"
         const val INGEN_OVERLAPP_VEDTAKSPERIODER = "familie-ba-sak.ingen-overlapp-vedtaksperioder.utgivelse"
-        const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER = "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
+        const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER =
+            "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
         const val FØRSTE_ENDRINGSTIDSPUNKT = "familie-ba-sak.behandling.forste-endringstidspunkt.utgivelse"
         const val DELT_BOSTED_VALIDERING = "familie-ba-sak.behandling.delt-bosted-validering.utgivelse"
 
@@ -116,6 +117,9 @@ class FeatureToggleConfig(
         const val TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT =
             "familie-ba-sak.teknisk-iverksett-mot-oppdrag-allerede-sendt"
         const val KONSISTENSAVSTEMMING_SPLITT_BATCH = "familie-ba-sak.teknisk-konsistensavstemming-splitt-batch"
+
+        const val LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT =
+            "familie-ba-sak.lag.reduksjonsperioder.fra.innvilgelsestidspunkt"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

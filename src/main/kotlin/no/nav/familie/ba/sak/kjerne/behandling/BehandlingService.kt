@@ -102,6 +102,7 @@ class BehandlingService(
             val underkategori = bestemUnderkategori(
                 nyUnderkategori = nyBehandling.underkategori,
                 nyBehandlingType = nyBehandling.behandlingType,
+                nyBehandlingÅrsak = nyBehandling.behandlingÅrsak,
                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id)
             )
 
@@ -176,6 +177,7 @@ class BehandlingService(
             else bestemUnderkategori(
                 nyUnderkategori = nyUnderkategori,
                 nyBehandlingType = behandling.type,
+                nyBehandlingÅrsak = behandling.opprettetÅrsak,
                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id)
             )
 
@@ -445,8 +447,10 @@ class BehandlingService(
         val personResultater =
             vilkårsvurderingService.hentAktivForBehandling(aktivBehandling.id)?.personResultater ?: setOf()
 
-        return if (andeler.any { it.erEøs(personResultater) && it.erLøpende() }
-        ) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
+        return if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
+            return if (andeler.any { it.erEøs(personResultater) && it.erLøpende() }
+            ) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
+        } else BehandlingKategori.NASJONAL
     }
 
     fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
