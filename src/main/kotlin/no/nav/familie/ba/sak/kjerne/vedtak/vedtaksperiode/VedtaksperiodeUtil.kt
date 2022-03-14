@@ -263,6 +263,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
         Vedtaksperiodetype.FORTSATT_INNVILGET,
         Vedtaksperiodetype.AVSLAG -> tillateBegrunnelserForVedtakstype
         Vedtaksperiodetype.REDUKSJON -> velgRedusertBegrunnelser(
+            tillateBegrunnelserForVedtakstype,
             sanityBegrunnelser,
             minimertVedtaksperiode,
             minimertePersonresultater,
@@ -293,6 +294,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
 }
 
 private fun velgRedusertBegrunnelser(
+    tillateBegrunnelserForVedtakstype: List<VedtakBegrunnelseSpesifikasjon>,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
     minimertePersonresultater: List<MinimertRestPersonResultat>,
@@ -304,12 +306,14 @@ private fun velgRedusertBegrunnelser(
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean
 ): List<VedtakBegrunnelseSpesifikasjon> {
-    val redusertBegrunnelser = VedtakBegrunnelseSpesifikasjon.begrunnelserForRedusertPerioderFraInnvilgelsestidspunkt()
+    val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
+        it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
+    }
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
-        val tillateBegrunnelserForVedtakstype = VedtakBegrunnelseSpesifikasjon.values()
+        val innvilgetBegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
             .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
         val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
-            tillateBegrunnelserForVedtakstype,
+            innvilgetBegrunnelser,
             sanityBegrunnelser,
             minimertVedtaksperiode,
             minimertePersonresultater,

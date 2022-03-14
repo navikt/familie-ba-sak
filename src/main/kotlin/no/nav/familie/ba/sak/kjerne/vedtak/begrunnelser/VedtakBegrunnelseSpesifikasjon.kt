@@ -1087,22 +1087,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val sanityApiNavn = "etterEndretUtbetalingAvtaleDeltBosted"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     };
-
-    companion object {
-        fun begrunnelserForRedusertPerioderFraInnvilgelsestidspunkt(): List<VedtakBegrunnelseSpesifikasjon> = listOf(
-            REDUKSJON_IKKE_BOSATT_I_NORGE,
-            REDUKSJON_BARN_BOR_IKKE_MED_SØKER,
-            REDUKSJON_IKKE_OPPHOLDSTILLATELSE,
-            REDUKSJON_AVTALE_DELT_BOSTED_IKKE_GYLDIG,
-            REDUKSJON_AVTALE_DELT_BOSTED_FØLGES_IKKE,
-            REDUKSJON_FORELDRENE_BODDE_SAMMEN,
-            REDUKSJON_VURDERING_FORELDRENE_BODDE_SAMMEN,
-            REDUKSJON_VAR_IKKE_MEDLEM,
-            REDUKSJON_VURDERING_VAR_IKKE_MEDLEM,
-            REDUKSJON_ANDRE_FORELDER_VAR_IKKE_MEDLEM,
-            REDUKSJON_VURDERING_ANDRE_FORELDER_VAR_IKKE_MEDLEM
-        )
-    }
 }
 
 @Converter
