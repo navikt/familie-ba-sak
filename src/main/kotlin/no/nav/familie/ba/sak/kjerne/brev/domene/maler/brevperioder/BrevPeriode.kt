@@ -12,13 +12,8 @@ interface BrevPeriode {
     val fom: Flettefelt
     val tom: Flettefelt
     val belop: Flettefelt
-
-    @Deprecated("Bruk antallBarnMedUtbetaling eller antallBarnUtenUtbetaling")
     val antallBarn: Flettefelt
-
-    @Deprecated("Bruk fodselsdagerBarnUtenUtbetaling eller fodselsdagerBarnMedUtbetaling")
     val barnasFodselsdager: Flettefelt
-
     val begrunnelser: List<Any>
     val type: Flettefelt
 
@@ -28,7 +23,7 @@ interface BrevPeriode {
     }
 }
 
-// Kan omdøpes til BrevPeriode når alle perioder bruker denne klassen
+// Kan omdøpes til BrevPeriode når alle perioder    bruker denne klassen
 data class GenerellBrevPeriode(
     override val fom: Flettefelt,
     override val tom: Flettefelt,

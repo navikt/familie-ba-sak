@@ -1,36 +1,36 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import BegrunnelseDataTestConfig
-import BrevPeriodeOutputGammel
-import BrevPeriodeTestConfigGammel
+import BrevPeriodeOutput
+import BrevPeriodeTestConfig
 import FritekstBegrunnelseTestConfig
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.GenerellBrevPeriode
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
 import java.io.File
 
-class BrevperiodeTest {
+class BrevperiodeTestIngenEndringsperioder {
 
     @Test
     fun test(testReporter: TestReporter) {
-        val testmappe = File("./src/test/resources/brevperiodeCaser")
+        val testmappe = File("./src/test/resources/brevperiodeCaserIngenEndringsperioder")
 
         val sanityBegrunnelser = hentSanityBegrunnelser()
 
-        val antallFeil = testmappe.list()?.fold(0) { acc, it ->
-            val fil = File("$testmappe/$it")
+        val antallFeil = testmappe.list()?.fold(0) { acc, testfil ->
+            val fil = File("$testmappe/$testfil")
 
             val behandlingsresultatPersonTestConfig =
                 try {
-                    objectMapper.readValue<BrevPeriodeTestConfigGammel>(fil.readText())
+                    objectMapper.readValue<BrevPeriodeTestConfig>(fil.readText())
                 } catch (e: Exception) {
-                    testReporter.publishEntry("Feil i fil: $it")
+                    testReporter.publishEntry("Feil i fil: $testfil")
                     testReporter.publishEntry(e.message)
                     return@fold acc + 1
                 }
@@ -61,11 +61,11 @@ class BrevperiodeTest {
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
-                    erIngenOverlappVedtaksperiodeTogglePå = false,
-                )
+                    erIngenOverlappVedtaksperiodeTogglePå = true,
+                )?.let { it as GenerellBrevPeriode }
             } catch (e: Exception) {
                 testReporter.publishEntry(
-                    "Feil i test: $it" +
+                    "Feil i test: $testmappe/$testfil" +
                         "\nFeilmelding: ${e.message}" +
                         "\nFil: ${e.stackTrace.first()}" +
                         "\n-----------------------------------\n"
@@ -80,7 +80,7 @@ class BrevperiodeTest {
 
             if (feil.isNotEmpty()) {
                 testReporter.publishEntry(
-                    it,
+                    "$testmappe/$testfil",
                     "${behandlingsresultatPersonTestConfig.beskrivelse}\n\n" +
                         feil.joinToString("\n\n") +
                         "\n-----------------------------------\n"
@@ -95,8 +95,8 @@ class BrevperiodeTest {
     }
 
     private fun erLike(
-        forventetOutput: BrevPeriodeOutputGammel?,
-        output: BrevPeriode?
+        forventetOutput: BrevPeriodeOutput?,
+        output: GenerellBrevPeriode?
     ): List<String> {
 
         val feil = mutableListOf<String>()
@@ -117,14 +117,37 @@ class BrevperiodeTest {
         } else {
             validerFelt(forventetOutput.fom, output.fom?.single(), "fom")
             validerFelt(forventetOutput.tom, output.tom?.single(), "tom")
-            validerFelt(forventetOutput.type, output.type?.single(), "type")
+            validerFelt(forventetOutput.apiNavn, output.type?.single(), "apiNavn")
             validerFelt(forventetOutput.barnasFodselsdager, output.barnasFodselsdager?.single(), "barnasFodselsdager")
-            validerFelt(forventetOutput.antallBarn, output.antallBarn?.single(), "antallBarn")
             validerFelt(
-                if (forventetOutput.belop != null)
-                    formaterBeløp(forventetOutput.belop)
-                else null,
-                output.belop?.single(), "belop"
+                forventetOutput.antallBarn,
+                output.antallBarn?.single(),
+                "antallBarn"
+            )
+            validerFelt(
+                forventetOutput.antallBarnMedUtbetaling,
+                output.antallBarnMedUtbetaling?.single(),
+                "antallBarnMedUtbetaling"
+            )
+            validerFelt(
+                forventetOutput.antallBarnUtenUtbetaling,
+                output.antallBarnUtenUtbetaling?.single(),
+                "antallBarnUtenUtbetaling"
+            )
+            validerFelt(
+                forventetOutput.fodselsdagerBarnUtenUtbetaling,
+                output.fodselsdagerBarnUtenUtbetaling?.single(),
+                "fodselsdagerBarnUtenUtbetaling"
+            )
+            validerFelt(
+                forventetOutput.fodselsdagerBarnMedUtbetaling,
+                output.fodselsdagerBarnMedUtbetaling?.single(),
+                "fodselsdagerBarnMedUtbetaling"
+            )
+            validerFelt(
+                forventetOutput.belop?.let { formaterBeløp(it) },
+                output.belop?.single(),
+                "belop"
             )
 
             val forventedeBegrunnelser = forventetOutput.begrunnelser.map {

@@ -27,6 +27,26 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 import java.time.LocalDate
 
+@Deprecated("Bruk BrevPeriodeTestConfig")
+data class BrevPeriodeTestConfigGammel(
+    val beskrivelse: String,
+
+    val fom: LocalDate?,
+    val tom: LocalDate?,
+    val vedtaksperiodetype: Vedtaksperiodetype,
+    val begrunnelser: List<BrevBegrunnelseGrunnlagConfig>,
+    val fritekster: List<String>,
+
+    val personerPåBehandling: List<BrevPeriodeTestPerson>,
+
+    val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
+    val uregistrerteBarn: List<MinimertUregistrertBarn>,
+    val erFørsteVedtaksperiodePåFagsak: Boolean = false,
+    val brevMålform: Målform,
+
+    val forventetOutput: BrevPeriodeOutputGammel?
+)
+
 data class BrevPeriodeTestConfig(
     val beskrivelse: String,
 
@@ -147,7 +167,8 @@ data class BegrunnelseDataTestConfig(
     )
 }
 
-data class BrevPeriodeOutput(
+@Deprecated("Bruk BrevPeriodeOutput")
+data class BrevPeriodeOutputGammel(
     val fom: String?,
     val tom: String?,
     val belop: Int?,
@@ -155,6 +176,20 @@ data class BrevPeriodeOutput(
     val barnasFodselsdager: String?,
     val begrunnelser: List<TestBegrunnelse>,
     val type: String,
+)
+
+data class BrevPeriodeOutput(
+    val fom: String,
+    val tom: String,
+    val belop: Int?,
+    val antallBarn: String,
+    val barnasFodselsdager: String,
+    val begrunnelser: List<TestBegrunnelse>,
+    val antallBarnMedUtbetaling: String,
+    val antallBarnUtenUtbetaling: String,
+    val fodselsdagerBarnMedUtbetaling: String,
+    val fodselsdagerBarnUtenUtbetaling: String,
+    val apiNavn: String,
 )
 
 data class BrevBegrunnelseGrunnlagConfig(

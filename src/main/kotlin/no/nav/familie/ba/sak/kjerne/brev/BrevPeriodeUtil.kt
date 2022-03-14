@@ -97,7 +97,8 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
         uregistrerteBarn = uregistrerteBarn,
         restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-        brevMålform = brevMålform
+        brevMålform = brevMålform,
+        erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
     )
 
     if (begrunnelserOgFritekster.isEmpty()) return null
@@ -163,7 +164,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
     return GenerellBrevPeriode(
 
         fom = this.hentFomTekst(brevMålform),
-        tom = if (tomDato.isNullOrBlank()) "" else " til $tom",
+        tom = if (tomDato.isNullOrBlank()) "" else " til $tomDato",
         belop = Utils.formaterBeløp(this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()),
         begrunnelser = begrunnelserOgFritekster,
         brevPeriodeType = hentPeriodetype(this.fom, this, barnMedUtbetaling),
@@ -185,7 +186,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentFomTekst(
         this.begrunnelser.map { it.vedtakBegrunnelseSpesifikasjon }
     ) ?: "Du får:"
     UTBETALING -> fom!!.tilDagMånedÅr()
-    ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling når erIngenOverlappVedtaksperiodeTogglePå=true")
+    ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling perioder når erIngenOverlappVedtaksperiodeTogglePå=true")
     OPPHØR -> fom!!.tilDagMånedÅr()
     AVSLAG -> if (fom != null) fom.tilDagMånedÅr() else ""
 }

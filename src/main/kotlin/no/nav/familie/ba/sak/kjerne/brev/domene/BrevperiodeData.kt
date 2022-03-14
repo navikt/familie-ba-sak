@@ -13,7 +13,7 @@ data class BrevperiodeData(
     val minimertVedtaksperiode: MinimertVedtaksperiode,
     val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
 ) {
-    fun hentBegrunnelserOgFritekster(): List<Begrunnelse> =
+    fun hentBegrunnelserOgFritekster(erIngenOverlappVedtaksperiodeTogglePå: Boolean): List<Begrunnelse> =
         minimertVedtaksperiode
             .tilBrevPeriodeGrunnlagMedPersoner(
                 restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
@@ -23,7 +23,8 @@ data class BrevperiodeData(
             .byggBegrunnelserOgFritekster(
                 restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
                 uregistrerteBarn = this.uregistrerteBarn,
-                brevMålform = this.brevMålform
+                brevMålform = this.brevMålform,
+                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå
             )
 
     fun tilBrevperiodeForLogging() =

@@ -87,8 +87,11 @@ class BrevPeriodeService(
     }
 
     fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
+        val erIngenOverlappVedtaksperiodeTogglePå =
+            featureToggleService.isEnabled(FeatureToggleConfig.INGEN_OVERLAPP_VEDTAKSPERIODER)
+
         val begrunnelseDataForVedtaksperiode = hentBrevperiodeData(vedtaksperiodeId)
-        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
+        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster(erIngenOverlappVedtaksperiodeTogglePå)
     }
 
     companion object {
