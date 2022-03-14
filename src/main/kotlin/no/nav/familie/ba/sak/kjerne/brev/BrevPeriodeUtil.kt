@@ -170,13 +170,14 @@ private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
 
     val barnUtenUtbetaling = barnIBehandling.filter { it !in barnMedUtbetaling }
 
+    val utbetalingsbeløp = this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()
     return GenerellBrevPeriode(
 
         fom = this.hentFomTekst(brevMålform),
         tom = if (tomDato.isNullOrBlank()) "" else " til $tomDato",
-        belop = Utils.formaterBeløp(this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()),
+        belop = Utils.formaterBeløp(utbetalingsbeløp),
         begrunnelser = begrunnelserOgFritekster,
-        brevPeriodeType = hentPeriodetype(this.fom, this, barnMedUtbetaling),
+        brevPeriodeType = hentPeriodetype(this.fom, this, barnMedUtbetaling, utbetalingsbeløp),
         antallBarn = barnIBehandling.size.toString(),
         barnasFodselsdager = barnIBehandling.tilBarnasFødselsdatoer(),
         antallBarnMedUtbetaling = barnMedUtbetaling.size.toString(),
@@ -204,10 +205,15 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentFomTekst(
 private fun hentPeriodetype(
     fom: LocalDate?,
     brevPeriodeGrunnlagMedPersoner: BrevPeriodeGrunnlagMedPersoner,
-    barnMedUtbetaling: List<MinimertRestPerson>
+    barnMedUtbetaling: List<MinimertRestPerson>,
+    utbetalingsbeløp: Int,
 ) = when (brevPeriodeGrunnlagMedPersoner.type) {
     FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET
-    UTBETALING -> if (barnMedUtbetaling.isEmpty()) BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING else BrevPeriodeType.INNVILGELSE
+    UTBETALING -> when {
+        utbetalingsbeløp == 0 -> BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING
+        barnMedUtbetaling.isEmpty() -> BrevPeriodeType.INNVILGELSE_KUN_UTBETALING_PÅ_SØKER
+        else -> BrevPeriodeType.INNVILGELSE
+    }
     ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling med erIngenOverlappVedtaksperiodeTogglePå=true")
     AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG else BrevPeriodeType.AVSLAG_UTEN_PERIODE
     OPPHØR -> BrevPeriodeType.OPPHOR
