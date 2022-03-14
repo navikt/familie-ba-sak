@@ -7,8 +7,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 class TidslinjeService(
     val vilkårsvurderingRepository: VilkårsvurderingRepository,
     val persongrunnlagService: PersongrunnlagService,
-    val kompetanseService: KompetanseService,
-    val perideRepository: MockPerideRepository
+    val kompetanseService: KompetanseService
 ) {
     fun hentTidslinjer(behandlingId: Long): Tidslinjer {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)!!
@@ -19,8 +18,7 @@ class TidslinjeService(
             behandlingId,
             vilkårsvurdering,
             personopplysningGrunnlag,
-            kompetanser,
-            perideRepository
+            kompetanser
         )
     }
 }

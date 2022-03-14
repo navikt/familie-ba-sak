@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.PeriodeInnhold
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.IngenTidslinjeRepository
 
 enum class KompetanseValidering {
     OK,
@@ -19,7 +18,6 @@ class KompetanseValideringTidslinje(
     private val erEøsPeriodeTidslinje: Tidslinje<Boolean>,
     private val kompetanseTidslinje: Tidslinje<Kompetanse>
 ) : KalkulerendeTidslinje<KompetanseValidering>(
-    IngenTidslinjeRepository(),
     erEøsPeriodeTidslinje,
     kompetanseTidslinje
 ) {

@@ -11,8 +11,7 @@ class Tidslinjer(
     behandlingId: Long,
     vilkårsvurdering: Vilkårsvurdering,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    kompetanser: Collection<Kompetanse>,
-    perideRepository: MockPerideRepository
+    kompetanser: Collection<Kompetanse>
 ) {
     private val aktørTilVilkårsresultater = vilkårsvurdering.personResultater
         .flatMap { pr -> pr.vilkårResultater }
@@ -25,7 +24,7 @@ class Tidslinjer(
         .filter { (aktør, _) -> personopplysningGrunnlag.søker.aktør == aktør }
         .mapValues { (_, resultater) ->
             resultater.groupBy { it.vilkårType }
-                .mapValues { VilkårResultatTidslinje(it.value, MockPerideRepository()) }
+                .mapValues { VilkårResultatTidslinje(it.value) }
                 .values
         }.values.flatten()
 
@@ -33,7 +32,7 @@ class Tidslinjer(
         .filter { (aktør, _) -> personopplysningGrunnlag.søker.aktør != aktør }
         .mapValues { (_, resultater) ->
             resultater.groupBy { it.vilkårType }
-                .mapValues { VilkårResultatTidslinje(it.value, MockPerideRepository()) }
+                .mapValues { VilkårResultatTidslinje(it.value) }
                 .values
         }
 
@@ -45,14 +44,14 @@ class Tidslinjer(
             val barnetsYtelseTidslinje =
                 BarnetsYtelseTidslinje(søkerOppfyllerVilkårTidslinje, vilkårsresultatTidslinjer)
             val erUnder6ÅrTidslinje = ErBarnetUnder6ÅrTidslinje(barnetsYtelseTidslinje, fødseldato(barn))
-            BarnetsUtbetalingerTidslinje(id, barnetsYtelseTidslinje, erUnder6ÅrTidslinje, perideRepository)
+            BarnetsUtbetalingerTidslinje(id, barnetsYtelseTidslinje, erUnder6ÅrTidslinje)
         }
 
     val barnasDifferanseBeregningTidslinjeMap =
         barnasVilkårsresultatTidslinjeMap.mapValues { (barn, vilkårsresultatTidslinje) ->
             val erEøsPeriodeTidslinje = ErEøsPeriodeTidslinje(vilkårsresultatTidslinje)
             val kompetanseTidslinje =
-                KompetanseTidslinje(kompetanser.forBarn(barn), barn, perideRepository)
+                KompetanseTidslinje(kompetanser.forBarn(barn), barn)
             val validerKompetanseTidslinje =
                 KompetanseValideringTidslinje(erEøsPeriodeTidslinje, kompetanseTidslinje)
             val erSekundærlandTidslinje = ErSekundærlandTidslinje(kompetanseTidslinje, validerKompetanseTidslinje)

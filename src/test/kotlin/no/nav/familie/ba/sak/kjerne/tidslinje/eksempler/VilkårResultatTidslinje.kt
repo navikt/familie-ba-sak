@@ -6,29 +6,22 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidsrom
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.erEnDelAvTidsrom
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.erInnenforTidsrom
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.rangeTo
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.tilTidspunktEllerUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 class VilkårResultatTidslinje(
-    private val vilkårsresultater: List<VilkårResultat>,
-    private val periodeRepository: PeriodeRepository
+    private val vilkårsresultater: List<VilkårResultat>
 ) : TidslinjeMedEksterntInnhold<VilkårResultat>(
-    vilkårsresultater,
-    periodeRepository
+    vilkårsresultater
 ) {
-    val behandlingId = innhold.first().behandlingId
-    val aktørId = innhold.first().personResultat!!.aktør.aktørId
-    val vilkår = innhold.first().vilkårType
-    override val tidslinjeId = "VilkårResult.$behandlingId.$aktørId.$vilkår"
-
-    override fun innholdTilString(innhold: VilkårResultat?) =
-        "${innhold!!.id}.${innhold.vurderesEtter}.${innhold.resultat}.${innhold.periodeFom}.${innhold.resultat}"
-
-    override val fraOgMed: Tidspunkt = vilkårsresultater
+    private val fraOgMed: Tidspunkt = vilkårsresultater
         .map { it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom!! } }.minOrNull()!!
-    override val tilOgMed: Tidspunkt = vilkårsresultater
+    private val tilOgMed: Tidspunkt = vilkårsresultater
         .map { it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! } }.maxOrNull()!!
+
+    override val tidsrom: Tidsrom = fraOgMed..tilOgMed
 
     override fun genererPerioder(tidsrom: Tidsrom) = vilkårsresultater
         .map { it.tilPeriode() }

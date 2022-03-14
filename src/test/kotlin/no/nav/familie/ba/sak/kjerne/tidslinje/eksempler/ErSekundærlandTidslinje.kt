@@ -6,13 +6,11 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.PeriodeInnhold
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.erSantHvis
-import no.nav.familie.ba.sak.kjerne.tidslinje.IngenTidslinjeRepository
 
 class ErSekundærlandTidslinje(
     val kompetanseTidslinje: Tidslinje<Kompetanse>,
     val validertKompetanseTidsline: Tidslinje<KompetanseValidering>
 ) : KalkulerendeTidslinje<Boolean>(
-    IngenTidslinjeRepository(),
     kompetanseTidslinje, validertKompetanseTidsline
 ) {
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<Boolean> {
