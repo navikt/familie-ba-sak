@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import BegrunnelseDataTestConfig
-import BrevPeriodeOutputGammel
-import BrevPeriodeTestConfigGammel
+import BrevPeriodeOutput
+import BrevPeriodeTestConfig
 import FritekstBegrunnelseTestConfig
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
@@ -28,7 +28,7 @@ class BrevperiodeTest {
 
             val behandlingsresultatPersonTestConfig =
                 try {
-                    objectMapper.readValue<BrevPeriodeTestConfigGammel>(fil.readText())
+                    objectMapper.readValue<BrevPeriodeTestConfig>(fil.readText())
                 } catch (e: Exception) {
                     testReporter.publishEntry("Feil i fil: $it")
                     testReporter.publishEntry(e.message)
@@ -95,7 +95,7 @@ class BrevperiodeTest {
     }
 
     private fun erLike(
-        forventetOutput: BrevPeriodeOutputGammel?,
+        forventetOutput: BrevPeriodeOutput?,
         output: BrevPeriode?
     ): List<String> {
 
