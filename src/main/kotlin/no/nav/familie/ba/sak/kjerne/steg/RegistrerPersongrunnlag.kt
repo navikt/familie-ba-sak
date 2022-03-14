@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -31,6 +32,7 @@ class RegistrerPersongrunnlag(
         )
         val aktør = personidentService.hentOgLagreAktør(data.ident, true)
         val barnaAktør = personidentService.hentOgLagreAktørIder(data.barnasIdenter, true)
+        secureLogger.info("RegistrerPersongrunnlag: ${data.barnasIdenter} $barnaAktør")
 
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
             val forrigePersongrunnlagBarna =

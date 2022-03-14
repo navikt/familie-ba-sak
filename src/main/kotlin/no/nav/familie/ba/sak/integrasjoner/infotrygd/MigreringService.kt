@@ -100,6 +100,7 @@ class MigreringService(
             secureLog.info("Migrering: fant løpende sak for $personIdent sak=${løpendeSak.id} stønad=${løpendeSak.stønad?.id}")
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
+            secureLog.info("Migrering: fant barnas identer $barnasIdenter")
 
             val personAktør = personidentService.hentOgLagreAktør(personIdent, true)
             val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
@@ -127,7 +128,7 @@ class MigreringService(
             val migreringsdato = virkningsdatoFra(infotrygdKjøredato(YearMonth.now()))
             vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
                 secureLog.info("Migrering: vilkårsvurdering for behandling=${behandling.id} vilkårsvurdering=$this migreringsdato=$migreringsdato")
-                forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this, migreringsdato)
+                // forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this, migreringsdato)
                 secureLog.info("Forsøkt å sette periode")
                 vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
