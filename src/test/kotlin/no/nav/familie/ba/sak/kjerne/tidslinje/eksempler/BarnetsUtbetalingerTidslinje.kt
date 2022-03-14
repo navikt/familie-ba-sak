@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.PeriodeInnhold
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
 
 class BarnetsUtbetalingerTidslinje(
     private val unikId: String,
@@ -14,12 +14,12 @@ class BarnetsUtbetalingerTidslinje(
     private val erBarnetUnder6ÅrTidslinje: Tidslinje<Boolean>
 ) : KalkulerendeTidslinje<Int>(barnetsYtelseTidslinje, erBarnetUnder6ÅrTidslinje) {
 
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<Int> {
-        val erUnder6ÅrFragment = erBarnetUnder6ÅrTidslinje.hentUtsnitt(tidspunkt)
-        val erOrdinærBarnetrygdFragment = barnetsYtelseTidslinje.hentUtsnitt(tidspunkt)
+    override fun kalkulerInnhold(tidspunkt: Tidspunkt): Int {
+        val erUnder6År = erBarnetUnder6ÅrTidslinje.hentUtsnitt(tidspunkt)
+        val erOrdinærBarnetrygd = barnetsYtelseTidslinje.hentUtsnitt(tidspunkt)
         val satstype = when {
-            erUnder6ÅrFragment.innhold == true && erOrdinærBarnetrygdFragment.innhold == YtelseType.ORDINÆR_BARNETRYGD -> SatsType.TILLEGG_ORBA
-            erOrdinærBarnetrygdFragment.innhold == YtelseType.ORDINÆR_BARNETRYGD -> SatsType.ORBA
+            erUnder6År == true && erOrdinærBarnetrygd == YtelseType.ORDINÆR_BARNETRYGD -> SatsType.TILLEGG_ORBA
+            erOrdinærBarnetrygd == YtelseType.ORDINÆR_BARNETRYGD -> SatsType.ORBA
             else -> null
         }
 
@@ -27,9 +27,6 @@ class BarnetsUtbetalingerTidslinje(
             satstype?.let { SatsService.hentGyldigSatsFor(it, tidspunkt.tilYearMonth(), tidspunkt.tilYearMonth()) }
                 ?.first()?.sats ?: 0
 
-        return PeriodeInnhold(
-            innhold = sats,
-            avhengerAv = listOf(erUnder6ÅrFragment.id, erOrdinærBarnetrygdFragment.id)
-        )
+        return sats
     }
 }

@@ -8,9 +8,10 @@ abstract class Tidslinje<T> {
 
     internal abstract val tidsrom: Tidsrom
 
-    val perioder: Collection<Periode<T>>
-        get() =
-            gjeldendePerioder ?: genererPerioder(tidsrom).also { gjeldendePerioder = it }
+    val perioder: Collection<Periode<T>> =
+        gjeldendePerioder ?: genererPerioder(tidsrom).also { gjeldendePerioder = it }
+
+    protected abstract fun genererPerioder(tidsrom: Tidsrom): Collection<Periode<T>>
 
     internal fun registrerEtterfølgendeTidslinje(tidslinje: TidslinjeMedAvhengigheter<*>) {
         etterfølgendeTidslinjer.add(tidslinje)
@@ -19,8 +20,6 @@ abstract class Tidslinje<T> {
     protected fun oppdaterPerioder(perioder: Collection<Periode<T>>) {
         gjeldendePerioder = perioder
     }
-
-    protected abstract fun genererPerioder(tidsrom: Tidsrom): Collection<Periode<T>>
 
     internal fun splitt(splitt: PeriodeSplitt<*>) {
         perioder
@@ -47,12 +46,11 @@ abstract class Tidslinje<T> {
             }
         }.filterNotNull()
     }
-
-    fun hentUtsnitt(tidspunkt: Tidspunkt): PeriodeUtsnitt<T> {
-        return perioder.filter { it.fom <= tidspunkt && it.tom >= tidspunkt }
-            .firstOrNull()?.let { PeriodeUtsnitt(it.innhold, it.id) } ?: throw Error()
-    }
 }
+
+fun <T> Tidslinje<T>.hentUtsnitt(tidspunkt: Tidspunkt): T? =
+    perioder.filter { it.fom <= tidspunkt && it.tom >= tidspunkt }
+        .firstOrNull()?.let { it.innhold }
 
 abstract class TidslinjeUtenAvhengigheter<T> : Tidslinje<T>() {
     fun splitt(tidspunkt: Tidspunkt) {
@@ -84,25 +82,7 @@ abstract class TidslinjeMedAvhengigheter<T>(
         // Tror ikke det er smart å gjøre rekursiv validering
         val foregåendeFeil = foregåendeTidslinjer.map { it.valider() }.flatten()
 
-        val foregåendePerioder = foregåendeTidslinjer.flatMap { it.perioder }.toList()
-        val foregåendePeriodeIder = foregåendePerioder.map { it.id }
-        val referertePeriodeIder = perioder.flatMap { it.avhengerAv }.toSet()
-
-        val manglendeReferanserFeil = foregåendePeriodeIder.minus(referertePeriodeIder).map { id ->
-            TidslinjeFeil(
-                foregåendePerioder.first { it.id == id },
-                this,
-                TidslinjeFeilType.MANGLER_REFERANSE_TIL_PERIODE
-            )
-        }
-
-        val overflødigeReferanserFeil = referertePeriodeIder.minus(foregåendePeriodeIder)
-            .flatMap { id -> perioder.filter { it.avhengerAv.contains(id) } }
-            .map { TidslinjeFeil(it, this, TidslinjeFeilType.REFERER_TIL_UTGÅTT_PERIODE) }
-
-        // TODO: Må sjekke at vi refererer til avhengigheter i samme rekkefølge som de faktisk forekommer
-
-        return foregåendeFeil + konsistensFeil + manglendeReferanserFeil + overflødigeReferanserFeil
+        return foregåendeFeil + konsistensFeil
     }
 }
 
@@ -118,13 +98,13 @@ abstract class KalkulerendeTidslinje<T>(
             .fold(emptyList()) { acc, (måned, innhold) ->
                 val sistePeriode = acc.lastOrNull()
                 when {
-                    sistePeriode != null && sistePeriode.tilInnhold() == innhold && sistePeriode.fom.erRettFør(måned) ->
+                    sistePeriode != null && sistePeriode.innhold == innhold && sistePeriode.fom.erRettFør(måned) ->
                         acc.replaceLast(sistePeriode.copy(tom = måned))
-                    else -> acc + innhold.tilPeriode(måned)
+                    else -> acc + Periode(måned, måned, innhold)
                 }
             }
 
-    protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<T>
+    protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): T?
 }
 
 private fun <T> Collection<T>.replaceLast(replacement: T) =
@@ -132,8 +112,6 @@ private fun <T> Collection<T>.replaceLast(replacement: T) =
 
 private fun YearMonth?.erRettFør(måned: YearMonth) =
     this?.plusMonths(1) == måned
-
-fun Collection<PeriodeUtsnitt<*>>.idListe() = this.map { it.id }
 
 data class TidslinjeFeil(
     val periode: Periode<*>,

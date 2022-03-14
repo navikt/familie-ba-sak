@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.PeriodeInnhold
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -27,22 +27,22 @@ class ErEøsPeriodeTidslinje(
         Vilkår.BOSATT_I_RIKET
     )
 
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): PeriodeInnhold<Boolean> {
-        val alleVilkårResultatUtsnitt = barnetsVilkårsresultater.map { it.hentUtsnitt(tidspunkt) }
-        val oppfyllerNødvendigVilkår = alleVilkårResultatUtsnitt
-            .filter { it.innhold?.resultat == Resultat.OPPFYLT }
-            .map { it.innhold?.vilkårType }
+    override fun kalkulerInnhold(tidspunkt: Tidspunkt): Boolean? {
+        val alleVilkårResultater = barnetsVilkårsresultater.map { it.hentUtsnitt(tidspunkt) }
+        val oppfyllerNødvendigVilkår = alleVilkårResultater
+            .filter { it?.resultat == Resultat.OPPFYLT }
+            .map { it?.vilkårType }
             .containsAll(nødvendigeVilkår)
 
         if (!oppfyllerNødvendigVilkår)
-            return PeriodeInnhold(false, alleVilkårResultatUtsnitt)
+            return false
 
-        val alleRelevanteVilkårErEøsVilkår = alleVilkårResultatUtsnitt
+        val alleRelevanteVilkårErEøsVilkår = alleVilkårResultater
             .filter {
-                it.innhold?.vurderesEtter == Regelverk.EØS_FORORDNINGEN
-            }.map { it.innhold?.vilkårType }
+                it?.vurderesEtter == Regelverk.EØS_FORORDNINGEN
+            }.map { it?.vilkårType }
             .containsAll(eøsVilkår)
 
-        return PeriodeInnhold(alleRelevanteVilkårErEøsVilkår, alleVilkårResultatUtsnitt)
+        return alleRelevanteVilkårErEøsVilkår
     }
 }
