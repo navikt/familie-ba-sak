@@ -30,6 +30,7 @@ class BehandlingUtilsTest {
             Behandlingutils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 nyBehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 løpendeUnderkategori = null
             )
         )
@@ -42,6 +43,7 @@ class BehandlingUtilsTest {
             Behandlingutils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.UTVIDET,
                 nyBehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 løpendeUnderkategori = null
             )
         )
@@ -54,6 +56,7 @@ class BehandlingUtilsTest {
             Behandlingutils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 nyBehandlingType = BehandlingType.REVURDERING,
+                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 løpendeUnderkategori = BehandlingUnderkategori.UTVIDET
             )
         )
@@ -66,6 +69,7 @@ class BehandlingUtilsTest {
             Behandlingutils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 nyBehandlingType = BehandlingType.REVURDERING,
+                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
             )
         )
@@ -78,6 +82,29 @@ class BehandlingUtilsTest {
             Behandlingutils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.UTVIDET,
                 nyBehandlingType = BehandlingType.REVURDERING,
+                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
+            )
+        )
+    }
+
+    @Test
+    fun `Skal velge den løpende underkategorien ved 'endre migreringsdato'`() {
+        assertEquals(
+            BehandlingUnderkategori.UTVIDET,
+            Behandlingutils.bestemUnderkategori(
+                nyUnderkategori = null,
+                nyBehandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                nyBehandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET
+            )
+        )
+        assertEquals(
+            BehandlingUnderkategori.ORDINÆR,
+            Behandlingutils.bestemUnderkategori(
+                nyUnderkategori = null,
+                nyBehandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                nyBehandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                 løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
             )
         )

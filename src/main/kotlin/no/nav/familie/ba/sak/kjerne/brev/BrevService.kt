@@ -161,7 +161,7 @@ class BrevService(
         val utvidetVedtaksperioderMedBegrunnelser =
             vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak).filter {
                 it.begrunnelser.isNotEmpty() || it.fritekster.isNotEmpty()
-            }
+            }.sortedBy { it.fom }
 
         if (utvidetVedtaksperioderMedBegrunnelser.isEmpty()) {
             throw FunksjonellFeil(
