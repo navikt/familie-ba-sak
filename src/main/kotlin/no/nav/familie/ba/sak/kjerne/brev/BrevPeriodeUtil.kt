@@ -61,7 +61,7 @@ fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
 fun hentBrevPerioder(
     brevperioderData: List<BrevperiodeData>,
     erIngenOverlappVedtaksperiodeTogglePå: Boolean,
-) = brevperioderData
+) = brevperioderData.sortedWith(brevperioderComparator)
     .mapNotNull {
 
         it.minimertVedtaksperiode.tilBrevPeriode(
@@ -74,6 +74,20 @@ fun hentBrevPerioder(
             barnPersonIdentMedReduksjon = it.barnPersonIdentMedReduksjon,
         )
     }
+
+val brevperioderComparator = Comparator<BrevperiodeData> { periode1: BrevperiodeData, periode2: BrevperiodeData ->
+    if (periode1.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG && periode2.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG) {
+        sorterPåFom(fom1 = periode1.minimertVedtaksperiode.fom, fom2 = periode2.minimertVedtaksperiode.fom)
+    } else if (periode1.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG) 1
+    else if (periode2.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG) -1
+    else sorterPåFom(fom1 = periode1.minimertVedtaksperiode.fom, fom2 = periode2.minimertVedtaksperiode.fom)
+}
+
+private fun sorterPåFom(fom1: LocalDate?, fom2: LocalDate?) = when (fom1) {
+    fom2 -> 0
+    null -> 1
+    else -> fom1.compareTo(fom2)
+}
 
 enum class UtvidetScenarioForEndringsperiode {
     IKKE_UTVIDET_YTELSE,

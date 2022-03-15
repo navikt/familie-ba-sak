@@ -109,7 +109,6 @@ class FeatureToggleConfig(
         const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER =
             "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
         const val FØRSTE_ENDRINGSTIDSPUNKT = "familie-ba-sak.behandling.forste-endringstidspunkt.utgivelse"
-        const val DELT_BOSTED_VALIDERING = "familie-ba-sak.behandling.delt-bosted-validering.utgivelse"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 

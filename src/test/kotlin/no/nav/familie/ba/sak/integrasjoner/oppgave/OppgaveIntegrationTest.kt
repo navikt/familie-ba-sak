@@ -75,7 +75,7 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
         Assertions.assertFalse(opprettetOppgave.erFerdigstilt)
         Assertions.assertEquals(godkjenneVedtakOppgaveId, opprettetOppgave.gsakId)
 
-        oppgaveService.ferdigstillOppgave(behandling.id, Oppgavetype.GodkjenneVedtak)
+        oppgaveService.ferdigstillOppgaver(behandling.id, Oppgavetype.GodkjenneVedtak)
 
         Assertions.assertNull(
             oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
