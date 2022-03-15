@@ -173,9 +173,11 @@ fun identifiserReduksjonsperioder(
                                 nåAndelTilkjentYtelserForSegment.any {
                                     it.aktør.aktørId == andelerTilkjentYtelse.aktør.aktørId &&
                                         it.sats < andelerTilkjentYtelse.sats &&
-                                        (!it.erDeltBosted() && it.endretUtbetalingAndeler.isEmpty()) // Perioder med delt bosted er ikke vurdert som reduksjonsperioder
+                                        // Perioder med delt bosted eller endret utbetaling er ikke vurdert som reduksjonsperioder
+                                        (!it.erDeltBosted() && it.endretUtbetalingAndeler.isEmpty())
                                 } || nåAndelTilkjentYtelserForSegment.all {
-                                    it.aktør.aktørId != andelerTilkjentYtelse.aktør.aktørId // Når et av barna mister utbetaling på et segment i behandling
+                                    // Når et av barna mister utbetaling på et segment i behandling
+                                    it.aktør.aktørId != andelerTilkjentYtelse.aktør.aktørId
                                 }
                             }
                         }.keys
