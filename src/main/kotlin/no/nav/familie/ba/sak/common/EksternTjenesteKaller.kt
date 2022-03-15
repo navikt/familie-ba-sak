@@ -5,7 +5,6 @@ import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import java.net.URI
 
@@ -81,14 +80,8 @@ fun handleException(
     formål: String,
 ): Exception {
     return when (exception) {
-        is RessursException ->
-            when (exception.httpStatus) {
-                HttpStatus.FORBIDDEN -> exception
-                HttpStatus.UNAUTHORIZED -> exception
-                else -> opprettIntegrasjonsException(tjeneste, uri, exception, formål)
-            }
-        is HttpClientErrorException.Forbidden -> exception
-        is HttpClientErrorException.Unauthorized -> exception
+        is RessursException -> exception
+        is HttpClientErrorException -> exception
         else -> opprettIntegrasjonsException(tjeneste, uri, exception, formål)
     }
 }
@@ -106,10 +99,10 @@ private fun opprettIntegrasjonsException(
     }
     return IntegrasjonException(
         msg = "${
-        lagEksternKallPreMelding(
-            tjeneste,
-            uri
-        )
+            lagEksternKallPreMelding(
+                tjeneste,
+                uri
+            )
         } Kall mot \"$tjeneste\" feilet. Formål: $formål. Feilmelding: $melding",
         uri = uri,
         throwable = exception
