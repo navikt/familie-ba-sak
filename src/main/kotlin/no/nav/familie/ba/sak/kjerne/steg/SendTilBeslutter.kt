@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.task.FerdigstillOppgave
+import no.nav.familie.ba.sak.task.FerdigstillOppgaver
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
@@ -70,9 +70,11 @@ class SendTilBeslutter(
             Oppgavetype.BehandleUnderkjentVedtak,
             Oppgavetype.VurderLivshendelse
         ).forEach { oppgavetype ->
-            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.also {
-                val ferdigstillOppgaveTask = FerdigstillOppgave.opprettTask(behandling.id, oppgavetype)
-                taskRepository.save(ferdigstillOppgaveTask)
+            oppgaveService.hentOppgaverSomIkkeErFerdigstilt(oppgavetype, behandling).also {
+                if (it.isNotEmpty()) {
+                    val ferdigstillOppgaverTask = FerdigstillOppgaver.opprettTask(behandling.id, oppgavetype)
+                    taskRepository.save(ferdigstillOppgaverTask)
+                }
             }
         }
     }

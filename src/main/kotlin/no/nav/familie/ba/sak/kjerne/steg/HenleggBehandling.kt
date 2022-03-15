@@ -37,7 +37,7 @@ class HenleggBehandling(
         }
 
         oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling).forEach {
-            oppgaveService.ferdigstillOppgave(behandling.id, it.type)
+            oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
         }
 
         loggService.opprettHenleggBehandling(behandling, data.årsak.beskrivelse, data.begrunnelse)

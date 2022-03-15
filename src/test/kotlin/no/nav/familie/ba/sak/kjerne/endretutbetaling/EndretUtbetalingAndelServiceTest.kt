@@ -10,8 +10,6 @@ import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -40,7 +38,6 @@ class EndretUtbetalingAndelServiceTest {
     private val mockPersonopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val mockAndelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val mockVilkårsvurderingService = mockk<VilkårsvurderingService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     private lateinit var endretUtbetalingAndelService: EndretUtbetalingAndelService
 
@@ -56,7 +53,6 @@ class EndretUtbetalingAndelServiceTest {
             andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository,
             sanityService = sanityService,
             vilkårsvurderingService = mockVilkårsvurderingService,
-            featureToggleService = featureToggleService
         )
     }
 
@@ -109,7 +105,6 @@ class EndretUtbetalingAndelServiceTest {
         every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
         every { mockEndretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id) } returns emptyList()
         every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns vilkårsvurderingUtenDeltBosted
-        every { featureToggleService.isEnabled(FeatureToggleConfig.DELT_BOSTED_VALIDERING) } returns true
 
         val feil = assertThrows<FunksjonellFeil> { endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling = behandling, endretUtbetalingAndelId = endretUtbetalingAndel.id, restEndretUtbetalingAndel = restEndretUtbetalingAndel) }
         Assertions.assertEquals("Du har valgt årsaken 'delt bosted', denne samstemmer ikke med vurderingene gjort på vilkårsvurderingssiden i perioden du har valgt.", feil.frontendFeilmelding)
