@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -15,7 +15,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidsrom
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.rangeTo
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksempler.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -30,21 +31,18 @@ internal class TidslinjeTest {
 
     @Test
     fun test() {
-        val søker = randomAktørId()
-        val barn1 = randomAktørId()
-        val barn2 = randomAktørId()
-        val barn3 = randomAktørId()
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
 
         val januar2020 = YearMonth.of(2020, 1)
-        val stønadTom = januar2020.plusYears(17)
-
         val behandling = lagBehandling()
 
-        val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandling.id, søker.aktivFødselsnummer(),
-                listOf(barn1.aktivFødselsnummer(), barn2.aktivFødselsnummer(), barn3.aktivFødselsnummer())
-            )
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandling.id,
+            søker, barn1, barn2, barn3
+        )
 
         val vilkårsvurdering = VilkårsvurderingBuilder(behandling = behandling)
             .forPerson(søker, januar2020)
@@ -64,18 +62,22 @@ internal class TidslinjeTest {
             .medVilkår("--------->", Vilkår.GIFT_PARTNERSKAP)
             .byggVilkårsvurdering()
 
-        val kompetanser2 = KompetanseBuilder(behandling = behandling, januar2020)
+        val kompetanser = KompetanseBuilder(behandling = behandling, januar2020)
             .medKompetanse("---PPPPP--SSSSSS", barn1, barn2, barn3)
             .medKompetanse("                SSSSS", barn1)
             .medKompetanse("                PPPPP", barn2)
             .medKompetanse("                -----", barn2)
             .byggKompetanser()
 
-        val tidslinjer = Tidslinjer(vilkårsvurdering, personopplysningGrunnlag, kompetanser2)
+        val tidslinjer = Tidslinjer(
+            vilkårsvurdering,
+            personopplysningGrunnlag,
+            kompetanser
+        )
 
-        println("Barn: ${barn1.aktivFødselsnummer()}")
+        println("Barn: ${barn1.aktør.aktivFødselsnummer()}")
         tidslinjer.forBarn(barn1).kompetanseValidering.perioder().forEach { println(it) }
-        println("Barn: ${barn2.aktivFødselsnummer()}")
+        println("Barn: ${barn2.aktør.aktivFødselsnummer()}")
         tidslinjer.forBarn(barn2).kompetanseValidering.perioder().forEach { println(it) }
     }
 }
@@ -86,7 +88,7 @@ class KompetanseBuilder(
 ) {
     val kompetanser: MutableList<Kompetanse> = mutableListOf()
 
-    fun medKompetanse(k: String, vararg barn: Aktør): KompetanseBuilder {
+    fun medKompetanse(k: String, vararg barn: Person): KompetanseBuilder {
         val charTidslinje = CharTidslinje(k, startMåned)
         val kompetanseTidslinje = KompetanseTidslinje(charTidslinje, behandling.id, barn.toList())
 
@@ -107,8 +109,8 @@ data class VilkårsvurderingBuilder(
 ) {
     val personresultater: MutableSet<PersonResultat> = mutableSetOf()
 
-    fun forPerson(aktør: Aktør, startMåned: YearMonth = YearMonth.of(2020, 1)): PersonResultatBuilder {
-        return PersonResultatBuilder(this, startMåned, aktør)
+    fun forPerson(person: Person, startMåned: YearMonth = YearMonth.of(2020, 1)): PersonResultatBuilder {
+        return PersonResultatBuilder(this, startMåned, person)
     }
 
     fun byggVilkårsvurdering(): Vilkårsvurdering {
@@ -119,15 +121,15 @@ data class VilkårsvurderingBuilder(
     data class PersonResultatBuilder(
         val vilkårsvurderingBuilder: VilkårsvurderingBuilder,
         val startMåned: YearMonth,
-        private val aktør: Aktør = randomAktørId(),
+        private val person: Person = tilfeldigPerson(),
         private val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat>> = emptyList(),
     ) {
         fun medVilkår(v: String, vilkår: Vilkår): PersonResultatBuilder {
             return copy(vilkårsresultatTidslinjer = this.vilkårsresultatTidslinjer + parseVilkår(v, vilkår))
         }
 
-        fun forPerson(aktør: Aktør, startMåned: YearMonth = YearMonth.of(2020, 1)): PersonResultatBuilder {
-            return byggPerson().forPerson(aktør, startMåned)
+        fun forPerson(person: Person, startMåned: YearMonth = YearMonth.of(2020, 1)): PersonResultatBuilder {
+            return byggPerson().forPerson(person, startMåned)
         }
 
         fun byggVilkårsvurdering(): Vilkårsvurdering = byggPerson().byggVilkårsvurdering()
@@ -136,7 +138,7 @@ data class VilkårsvurderingBuilder(
 
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurderingBuilder.vilkårsvurdering,
-                aktør = aktør
+                aktør = person.aktør
             )
 
             val vilkårresultater = vilkårsresultatTidslinjer.flatMap {
@@ -186,11 +188,11 @@ class CharTidslinje(private val tegn: String, private val startMåned: YearMonth
 class KompetanseTidslinje(
     val charTidslinje: Tidslinje<Char>,
     val behandlingId: Long,
-    val barn: List<Aktør>
+    val barn: List<Person>
 ) : KalkulerendeTidslinje<Kompetanse>(charTidslinje) {
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): Kompetanse? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
-        val barnFnr = barn.map { it.aktivFødselsnummer() }.toSet()
+        val barnFnr = barn.map { it.aktør.aktivFødselsnummer() }.toSet()
         val kompetanseMal = Kompetanse(behandlingId = behandlingId, fom = null, tom = null, barn = barnFnr)
         return when (tegn) {
             '-' -> kompetanseMal
