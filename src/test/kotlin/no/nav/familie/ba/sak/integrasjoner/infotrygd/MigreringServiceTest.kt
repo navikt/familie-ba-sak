@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
@@ -125,6 +127,8 @@ class MigreringServiceTest(
 
     @Autowired
     private val envService: EnvService,
+    @Autowired
+    private val featureToggleService: FeatureToggleService
 
 ) : AbstractMockkSpringRunner() {
 
@@ -169,6 +173,7 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(relaxed = true),
+            mockk(relaxed = true)
         ) // => env.erDev() = env.erE2E() = false
     }
 
@@ -221,6 +226,7 @@ class MigreringServiceTest(
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
         val slotAktør = slot<Aktør>()
         every { pdlRestClient.hentForelderBarnRelasjoner(capture(slotAktør)) } returns emptyList()
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SKAL_MIGRERE_FOSTERBARN, true) } returns false
 
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -396,7 +402,7 @@ class MigreringServiceTest(
             migreringService.migrer(ClientMocks.søkerFnr[0])
         }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.INSTITUSJON)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.MIGRERING_ALLEREDE_PÅBEGYNT)
     }
 
     @Test
@@ -578,6 +584,7 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
+            mockk(relaxed = true),
             mockk(relaxed = true),
         )
 

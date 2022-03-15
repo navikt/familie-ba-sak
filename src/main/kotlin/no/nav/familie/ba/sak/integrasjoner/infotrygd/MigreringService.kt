@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
@@ -77,7 +79,8 @@ class MigreringService(
     private val vedtakService: VedtakService,
     private val vilkårService: VilkårService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val migreringRestClient: MigreringRestClient
+    private val migreringRestClient: MigreringRestClient,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
@@ -110,7 +113,9 @@ class MigreringService(
 
             validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
-            validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
+            if (!featureToggleService.isEnabled(FeatureToggleConfig.SKAL_MIGRERE_FOSTERBARN, false)) {
+                validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
+            }
 
             fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
                 .also { kastFeilDersomAlleredeMigrert(it) }
@@ -207,7 +212,7 @@ class MigreringService(
                 "Kan ikke migrere person ${personAktør.aktivFødselsnummer()} fordi barn fra PDL IKKE inneholder alle løpende barnetrygdbarn fra Infotrygd.\n" +
                     "Barn fra PDL: ${listeBarnFraPdl}\n Barn fra Infotrygd: $barnasIdenter"
             )
-            // kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)
+            kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)
         }
     }
 
@@ -390,6 +395,8 @@ class MigreringService(
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)
     }
+
+
 }
 
 enum class MigreringsfeilType(val beskrivelse: String) {

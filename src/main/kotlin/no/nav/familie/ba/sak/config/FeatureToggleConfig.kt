@@ -121,6 +121,8 @@ class FeatureToggleConfig(
         const val LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT =
             "familie-ba-sak.lag.reduksjonsperioder.fra.innvilgelsestidspunkt"
 
+        const val SKAL_MIGRERE_FOSTERBARN = "familie-ba-sak.migrer-fosterbarn"
+
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
 }
