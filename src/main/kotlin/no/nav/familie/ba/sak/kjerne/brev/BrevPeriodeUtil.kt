@@ -162,13 +162,21 @@ private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>
 ): GenerellBrevPeriode {
-    val barnIBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling.filter { it.type == PersonType.BARN }
+    val (utbetalingerBarn, nullutbetalingerBarn) = this.minimerteUtbetalingsperiodeDetaljer
+        .filter { it.person.type == PersonType.BARN }
+        .partition { it.utbetaltPerMnd != 0 }
 
-    val barnMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer
-        .filter { it.person in barnIBehandling && it.utbetaltPerMnd != 0 }
-        .map { it.person }
+    val barnMedUtbetaling = utbetalingerBarn.map { it.person }
+    val barnMedNullutbetaling = nullutbetalingerBarn.map { it.person }
 
-    val barnUtenUtbetaling = barnIBehandling.filter { it !in barnMedUtbetaling }
+    val barnIPeriode: List<MinimertRestPerson> = when (this.type) {
+        UTBETALING -> this.finnBarnIInnvilgelsePeriode(restBehandlingsgrunnlagForBrev.personerPåBehandling)
+        REDUKSJON -> this.finnBarnIReduksjonPeriode(restBehandlingsgrunnlagForBrev.personerPåBehandling)
+        OPPHØR -> emptyList()
+        AVSLAG -> emptyList()
+        FORTSATT_INNVILGET -> barnMedUtbetaling + barnMedNullutbetaling
+        ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling perioder når erIngenOverlappVedtaksperiodeTogglePå=true")
+    }
 
     val utbetalingsbeløp = this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()
     return GenerellBrevPeriode(
@@ -178,12 +186,12 @@ private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
         belop = Utils.formaterBeløp(utbetalingsbeløp),
         begrunnelser = begrunnelserOgFritekster,
         brevPeriodeType = hentPeriodetype(this.fom, this, barnMedUtbetaling, utbetalingsbeløp),
-        antallBarn = barnIBehandling.size.toString(),
-        barnasFodselsdager = barnIBehandling.tilBarnasFødselsdatoer(),
+        antallBarn = barnIPeriode.size.toString(),
+        barnasFodselsdager = barnIPeriode.tilBarnasFødselsdatoer(),
         antallBarnMedUtbetaling = barnMedUtbetaling.size.toString(),
-        antallBarnUtenUtbetaling = barnUtenUtbetaling.size.toString(),
+        antallBarnMedNullutbetaling = barnMedNullutbetaling.size.toString(),
         fodselsdagerBarnMedUtbetaling = barnMedUtbetaling.tilBarnasFødselsdatoer(),
-        fodselsdagerBarnUtenUtbetaling = barnUtenUtbetaling.tilBarnasFødselsdatoer(),
+        fodselsdagerBarnMedNullutbetaling = barnMedNullutbetaling.tilBarnasFødselsdatoer(),
     )
 }
 

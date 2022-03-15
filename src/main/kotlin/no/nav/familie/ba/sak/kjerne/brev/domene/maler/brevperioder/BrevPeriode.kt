@@ -34,9 +34,9 @@ data class GenerellBrevPeriode(
     override val type: Flettefelt,
 
     val antallBarnMedUtbetaling: Flettefelt,
-    val antallBarnUtenUtbetaling: Flettefelt,
-    val fodselsdagerBarnUtenUtbetaling: Flettefelt,
+    val antallBarnMedNullutbetaling: Flettefelt,
     val fodselsdagerBarnMedUtbetaling: Flettefelt,
+    val fodselsdagerBarnMedNullutbetaling: Flettefelt,
 ) : BrevPeriode {
 
     constructor(
@@ -48,9 +48,9 @@ data class GenerellBrevPeriode(
         antallBarn: String,
         barnasFodselsdager: String,
         antallBarnMedUtbetaling: String,
-        antallBarnUtenUtbetaling: String,
-        fodselsdagerBarnUtenUtbetaling: String,
-        fodselsdagerBarnMedUtbetaling: String
+        antallBarnMedNullutbetaling: String,
+        fodselsdagerBarnMedUtbetaling: String,
+        fodselsdagerBarnMedNullutbetaling: String,
     ) : this(
         fom = flettefelt(fom),
         tom = flettefelt(tom),
@@ -58,9 +58,9 @@ data class GenerellBrevPeriode(
         antallBarn = flettefelt(antallBarn),
         barnasFodselsdager = flettefelt(barnasFodselsdager),
         antallBarnMedUtbetaling = flettefelt(antallBarnMedUtbetaling),
-        antallBarnUtenUtbetaling = flettefelt(antallBarnUtenUtbetaling),
-        fodselsdagerBarnUtenUtbetaling = flettefelt(fodselsdagerBarnUtenUtbetaling),
+        antallBarnMedNullutbetaling = flettefelt(antallBarnMedNullutbetaling),
         fodselsdagerBarnMedUtbetaling = flettefelt(fodselsdagerBarnMedUtbetaling),
+        fodselsdagerBarnMedNullutbetaling = flettefelt(fodselsdagerBarnMedNullutbetaling),
         begrunnelser = begrunnelser.map {
             when (it) {
                 is FritekstBegrunnelse -> it.fritekst
