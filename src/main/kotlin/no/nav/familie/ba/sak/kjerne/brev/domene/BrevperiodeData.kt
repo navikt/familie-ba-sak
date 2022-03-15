@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.slf4j.LoggerFactory
 
 data class BrevperiodeData(
@@ -16,7 +18,7 @@ data class BrevperiodeData(
     val minimertVedtaksperiode: MinimertVedtaksperiode,
     val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     val barnPersonIdentMedReduksjon: List<String> = emptyList()
-) {
+) : Comparable<BrevperiodeData> {
     fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {
         return try {
             minimertVedtaksperiode
@@ -50,6 +52,19 @@ data class BrevperiodeData(
             uregistrerteBarn = this.uregistrerteBarn,
             brevMålform = this.brevMålform,
         )
+
+    override fun compareTo(other: BrevperiodeData): Int {
+        val fomCompared = (this.minimertVedtaksperiode.fom ?: TIDENES_MORGEN)
+            .compareTo(other.minimertVedtaksperiode.fom ?: TIDENES_MORGEN)
+
+        return when {
+            this.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG &&
+                other.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> fomCompared
+            this.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> 1
+            other.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> -1
+            else -> fomCompared
+        }
+    }
 
     companion object {
 
