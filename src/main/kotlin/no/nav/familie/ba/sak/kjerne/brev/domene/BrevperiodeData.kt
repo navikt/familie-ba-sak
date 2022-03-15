@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import org.slf4j.LoggerFactory
 
 data class BrevperiodeData(
     val restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
@@ -16,7 +15,7 @@ data class BrevperiodeData(
     val minimertVedtaksperiode: MinimertVedtaksperiode,
     val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     val barnPersonIdentMedReduksjon: List<String> = emptyList()
-) : Comparable<BrevperiodeData>{
+) : Comparable<BrevperiodeData> {
     fun hentBegrunnelserOgFritekster(erIngenOverlappVedtaksperiodeTogglePå: Boolean): List<Begrunnelse> =
         minimertVedtaksperiode
             .tilBrevPeriodeGrunnlagMedPersoner(
