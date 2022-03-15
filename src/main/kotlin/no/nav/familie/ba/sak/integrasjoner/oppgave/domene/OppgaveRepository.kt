@@ -12,6 +12,9 @@ interface OppgaveRepository : JpaRepository<DbOppgave, Long> {
     @Query(value = "SELECT o FROM Oppgave o WHERE o.erFerdigstilt = false AND o.behandling = :behandling AND o.type = :oppgavetype")
     fun findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): DbOppgave?
 
+    @Query(value = "SELECT o FROM Oppgave o WHERE o.erFerdigstilt = false AND o.behandling = :behandling AND o.type = :oppgavetype")
+    fun finnOppgaverSomSkalFerdigstilles(oppgavetype: Oppgavetype, behandling: Behandling): List<DbOppgave>
+
     @Query(value = "SELECT o FROM Oppgave o WHERE o.erFerdigstilt = false AND o.behandling = :behandling")
     fun findByBehandlingAndIkkeFerdigstilt(behandling: Behandling): List<DbOppgave>
 
