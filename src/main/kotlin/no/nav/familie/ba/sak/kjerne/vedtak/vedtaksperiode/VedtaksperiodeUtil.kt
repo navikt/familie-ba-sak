@@ -148,28 +148,47 @@ fun identifiserReduksjonsperioder(
     vedtak: Vedtak,
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
 ): List<VedtaksperiodeMedBegrunnelser> {
-    val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter().keys
-    val nåværendeSegmenter = andelerTilkjentYtelse.lagVertikaleSegmenter().keys
-    val segmenter = forrigeSegmenter.filterNot {
-        nåværendeSegmenter.any { segment -> it.fom == segment.fom && it.tom == segment.tom && it.value == segment.value }
+    val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
+    val nåværendeSegmenter = andelerTilkjentYtelse.lagVertikaleSegmenter()
+    val segmenter = forrigeSegmenter.filterNot { (forrigeSegment, _) ->
+        nåværendeSegmenter.any { (nyttSegment, _) ->
+            forrigeSegment.fom == nyttSegment.fom &&
+                forrigeSegment.tom == nyttSegment.tom &&
+                forrigeSegment.value == nyttSegment.value
+        }
     }
-    val reduksjonsperioder = mutableListOf<VedtaksperiodeMedBegrunnelser>()
-    segmenter.filter { nåværendeSegmenter.any { segment -> segment.overlapper(it) } }
-        .forEach {
-            val overlappendePerioder =
-                nåværendeSegmenter.filter { nåSegment -> nåSegment.overlapper(it) && nåSegment.value < it.value }
-            overlappendePerioder.forEach { overlappendePeriode ->
-                reduksjonsperioder.add(
-                    VedtaksperiodeMedBegrunnelser(
-                        vedtak = vedtak,
-                        fom = if (it.fom > overlappendePeriode.fom) it.fom else overlappendePeriode.fom,
-                        tom = if (it.tom > overlappendePeriode.tom) overlappendePeriode.tom else it.tom,
-                        type = Vedtaksperiodetype.REDUKSJON,
-                    )
+    val reduksjonsperioder =
+        segmenter.filter { (forrigeSegment, _) ->
+            nåværendeSegmenter.any { (nyttSegment, _) ->
+                nyttSegment.overlapper(
+                    forrigeSegment
                 )
             }
-        }
+        }.toList()
+            .fold(emptyList<VedtaksperiodeMedBegrunnelser>()) { acc, (gammeltSegment, andeltilkjenYtelserForSegment) ->
+                val overlappendePerioder =
+                    nåværendeSegmenter
+                        .filter { (nåSegment, nåAndelTilkjentYtelserForSegment) ->
+                            nåSegment.overlapper(gammeltSegment) && andeltilkjenYtelserForSegment.any { andelerTilkjentYtelse ->
+                                nåAndelTilkjentYtelserForSegment.any {
+                                    it.aktør.aktørId == andelerTilkjentYtelse.aktør.aktørId &&
+                                        it.sats < andelerTilkjentYtelse.sats &&
+                                        (!it.erDeltBosted() && it.endretUtbetalingAndeler.isEmpty()) // Perioder med delt bosted er ikke vurdert som reduksjonsperioder
+                                } || nåAndelTilkjentYtelserForSegment.all {
+                                    it.aktør.aktørId != andelerTilkjentYtelse.aktør.aktørId // Når et av barna mister utbetaling på et segment i behandling
+                                }
+                            }
+                        }.keys
 
+                acc + overlappendePerioder.map { overlappendePeriode ->
+                    VedtaksperiodeMedBegrunnelser(
+                        vedtak = vedtak,
+                        fom = if (gammeltSegment.fom > overlappendePeriode.fom) gammeltSegment.fom else overlappendePeriode.fom,
+                        tom = if (gammeltSegment.tom > overlappendePeriode.tom) overlappendePeriode.tom else gammeltSegment.tom,
+                        type = Vedtaksperiodetype.REDUKSJON,
+                    )
+                }
+            }
     // opphørsperioder kan ikke være inkludert i reduksjonsperioder
     return reduksjonsperioder.filterNot { reduksjonsperiode ->
         opphørsperioder.any { it.fom == reduksjonsperiode.fom || it.tom == reduksjonsperiode.tom }
