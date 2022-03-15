@@ -13,19 +13,24 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun hentPersonidenterGjeldendeForBegrunnelse(
     triggesAv: TriggesAv,
     periode: NullablePeriode,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
+    vedtaksperiodetype: Vedtaksperiodetype,
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     identerMedUtbetalingPåPeriode: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
+    identerMedReduksjonPåPeriode: List<String> = emptyList()
 ): Set<String> {
 
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
+    val erReduksjonBegrunnelseMedRedusertPeriode = vedtaksperiodetype == Vedtaksperiodetype.REDUKSJON &&
+        vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON
 
     fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
         minimertePersonResultater = restBehandlingsgrunnlagForBrev.minimertePersonResultater,
@@ -64,7 +69,9 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             else
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
-        erFortsattInnvilgetBegrunnelse || erEndretUtbetalingBegrunnelse -> identerMedUtbetalingPåPeriode
+        erFortsattInnvilgetBegrunnelse ||
+            erEndretUtbetalingBegrunnelse -> identerMedUtbetalingPåPeriode
+        erReduksjonBegrunnelseMedRedusertPeriode -> identerMedReduksjonPåPeriode
 
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(

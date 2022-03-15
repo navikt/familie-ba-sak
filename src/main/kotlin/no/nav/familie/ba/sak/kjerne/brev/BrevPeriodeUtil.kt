@@ -64,6 +64,7 @@ fun hentBrevPerioder(
                 utvidetScenarioForEndringsperiode = it.utvidetScenarioForEndringsperiode,
                 erFørsteVedtaksperiodePåFagsak = it.erFørsteVedtaksperiodePåFagsak,
                 brevMålform = it.brevMålform,
+                barnPersonIdentMedReduksjon = it.barnPersonIdentMedReduksjon
             )
         } catch (exception: Exception) {
             val brevPeriodeForLogging = it.tilBrevperiodeForLogging()
@@ -101,6 +102,7 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
+    barnPersonIdentMedReduksjon: List<String> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean,
     brevMålform: Målform
 ): BrevPeriode? {
@@ -109,6 +111,7 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
             erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
+            barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon
         )
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
@@ -131,6 +134,11 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
         )
 
         Vedtaksperiodetype.UTBETALING -> brevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
+            tomDato = tomDato,
+            begrunnelserOgFritekster = begrunnelserOgFritekster,
+            personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
+        )
+        Vedtaksperiodetype.REDUKSJON -> brevPeriodeGrunnlagMedPersoner.hentReduksjonBrevPeriode(
             tomDato = tomDato,
             begrunnelserOgFritekster = begrunnelserOgFritekster,
             personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
@@ -217,6 +225,23 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
     )
 }
 
+private fun BrevPeriodeGrunnlagMedPersoner.hentReduksjonBrevPeriode(
+    tomDato: String?,
+    begrunnelserOgFritekster: List<Begrunnelse>,
+    personerPåBehandling: List<MinimertRestPerson>,
+): InnvilgelseBrevPeriode {
+    val barnIPeriode = this.finnBarnIReduksjonPeriode(personerPåBehandling)
+
+    return InnvilgelseBrevPeriode(
+        fom = this.fom!!.tilDagMånedÅr(),
+        tom = tomDato,
+        belop = Utils.formaterBeløp(this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()),
+        antallBarn = barnIPeriode.size.toString(),
+        barnasFodselsdager = barnIPeriode.tilBarnasFødselsdatoer(),
+        begrunnelser = begrunnelserOgFritekster
+    )
+}
+
 fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
     personerPåBehandling: List<MinimertRestPerson>,
 ): List<MinimertRestPerson> {
@@ -227,6 +252,25 @@ fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
     val identerMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer.map { it.person.personIdent }
 
     val barnIPeriode = (identerIBegrunnelene + identerMedUtbetaling)
+        .toSet()
+        .mapNotNull { personIdent ->
+            personerPåBehandling.find { it.personIdent == personIdent }
+        }
+        .filter { it.type == PersonType.BARN }
+
+    return barnIPeriode
+}
+
+fun BrevPeriodeGrunnlagMedPersoner.finnBarnIReduksjonPeriode(
+    personerPåBehandling: List<MinimertRestPerson>,
+): List<MinimertRestPerson> {
+    val identerIBegrunnelsene = this.begrunnelser
+        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON }
+        .flatMap { it.personIdenter }
+
+    val identerMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer.map { it.person.personIdent }
+
+    val barnIPeriode = (identerIBegrunnelsene + identerMedUtbetaling)
         .toSet()
         .mapNotNull { personIdent ->
             personerPåBehandling.find { it.personIdent == personIdent }
