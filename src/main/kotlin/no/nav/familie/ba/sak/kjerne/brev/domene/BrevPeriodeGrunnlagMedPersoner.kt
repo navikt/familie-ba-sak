@@ -21,11 +21,15 @@ data class BrevPeriodeGrunnlagMedPersoner(
     fun byggBegrunnelserOgFritekster(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
-        brevMålform: Målform
+        brevMålform: Målform,
+        erIngenOverlappVedtaksperiodeTogglePå: Boolean,
     ): List<Begrunnelse> {
 
-        val begrunnelser = this.begrunnelser
-            .sortedBy { it.vedtakBegrunnelseType }
+        val sorterteBegrunnelser =
+            if (erIngenOverlappVedtaksperiodeTogglePå) this.begrunnelser.sorted()
+            else this.begrunnelser.sortedBy { it.vedtakBegrunnelseType }
+
+        val brevBegrunnelser = sorterteBegrunnelser
             .map {
                 it.tilBrevBegrunnelse(
                     vedtaksperiode = NullablePeriode(this.fom, this.tom),
@@ -38,6 +42,6 @@ data class BrevPeriodeGrunnlagMedPersoner(
 
         val fritekster = fritekster.map { FritekstBegrunnelse(it) }
 
-        return begrunnelser + fritekster
+        return brevBegrunnelser + fritekster
     }
 }
