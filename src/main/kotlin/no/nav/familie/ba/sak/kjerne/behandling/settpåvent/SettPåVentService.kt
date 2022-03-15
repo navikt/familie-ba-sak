@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SETT_PÅ_VENT
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -45,12 +44,10 @@ class SettPåVentService(
         val settPåVent = settPåVentRepository.save(SettPåVent(behandling = behandling, frist = frist, årsak = årsak))
         behandlingService.sendTilDvh(behandling)
 
-        if (toggleService.isEnabled(SETT_PÅ_VENT)) {
-            oppgaveService.forlengOppgavefristerPåBehandling(
-                behandlingId = behandling.id,
-                forlengelse = Period.between(LocalDate.now(), frist)
-            )
-        }
+        oppgaveService.forlengOppgavefristerPåBehandling(
+            behandlingId = behandling.id,
+            forlengelse = Period.between(LocalDate.now(), frist)
+        )
 
         return settPåVent
     }
@@ -78,12 +75,10 @@ class SettPåVentService(
 
         behandlingService.sendTilDvh(behandlingService.hent(behandlingId))
 
-        if (toggleService.isEnabled(SETT_PÅ_VENT)) {
-            oppgaveService.forlengOppgavefristerPåBehandling(
-                behandlingId = behandlingId,
-                forlengelse = Period.between(gammelFrist, frist)
-            )
-        }
+        oppgaveService.forlengOppgavefristerPåBehandling(
+            behandlingId = behandlingId,
+            forlengelse = Period.between(gammelFrist, frist)
+        )
 
         return settPåVentRepository.save(settPåVent)
     }
@@ -101,12 +96,10 @@ class SettPåVentService(
 
         behandlingService.sendTilDvh(behandling)
 
-        if (toggleService.isEnabled(SETT_PÅ_VENT)) {
-            oppgaveService.settOppgavefristerPåBehandlingTil(
-                behandlingId = behandlingId,
-                nyFrist = LocalDate.now().plusDays(1)
-            )
-        }
+        oppgaveService.settOppgavefristerPåBehandlingTil(
+            behandlingId = behandlingId,
+            nyFrist = LocalDate.now().plusDays(1)
+        )
 
         return settPåVent
     }
