@@ -52,6 +52,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.log.NavHttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -124,7 +125,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         )
 
         val feil = assertThrows<RessursException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
-        assertTrue(feil.message?.contains("oppgave") == true)
+        assertEquals("test", feil.ressurs.melding)
     }
 
     @Test
@@ -306,7 +307,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
 
         val feil =
             assertThrows<RessursException> { integrasjonClient.ferdigstillOppgave(123) }
-        assertTrue(feil.message?.contains("oppgave") == true)
+        assertEquals("test", feil.ressurs.melding)
     }
 
     @Test
