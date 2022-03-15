@@ -1,0 +1,87 @@
+{
+  "beskrivelse": "Avslag 1 barn. Søkt om utvidet, men bor med ektefelle. Bor ikke med barn.",
+  "fom": null,
+  "tom": null,
+  "vedtaksperiodetype": "AVSLAG",
+  "begrunnelser": [
+    {
+      "vedtakBegrunnelseSpesifikasjon": "AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE"
+    },
+    {
+      "vedtakBegrunnelseSpesifikasjon": "AVSLAG_FORELDRENE_BOR_SAMMEN"
+    }
+  ],
+  "fritekster": [],
+  "utvidetScenario": "IKKE_UTVIDET_YTELSE",
+  "uregistrerteBarn": [],
+  "erFørsteVedtaksperiodePåFagsak": true,
+  "brevMålform": "NB",
+  "personerPåBehandling": [
+    {
+      "fødselsdato": "2010-12-13",
+      "type": "BARN",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "periodeFom": null,
+          "periodeTom": null,
+          "resultat": "IKKE_OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": true
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": []
+    },
+    {
+      "fødselsdato": "1980-01-01",
+      "type": "SØKER",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "UTVIDET_BARNETRYGD",
+          "periodeFom": null,
+          "periodeTom": null,
+          "resultat": "IKKE_OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": true
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": []
+    }
+  ],
+  "forventetOutput": {
+    "fom": "",
+    "tom": "",
+    "belop": 0,
+    "antallBarn": 0,
+    "antallBarnMedUtbetaling": 0,
+    "antallBarnMedNullutbetaling": 0,
+    "barnasFodselsdager": "",
+    "fodselsdagerBarnMedUtbetaling": "",
+    "fodselsdagerBarnMedNullutbetaling": "",
+    "begrunnelser": [
+      {
+        "gjelderSoker": true,
+        "antallBarn": 0,
+        "barnasFodselsdatoer": "13.12.10",
+        "maanedOgAarBegrunnelsenGjelderFor": null,
+        "maalform": "bokmaal",
+        "apiNavn": "avslagIkkeFlyttetFraEktefelle",
+        "belop": 0
+      },
+      {
+        "gjelderSoker": false,
+        "barnasFodselsdatoer": "13.12.10",
+        "antallBarn": 1,
+        "maanedOgAarBegrunnelsenGjelderFor": null,
+        "maalform": "bokmaal",
+        "apiNavn": "avslagForeldreneBorSammen",
+        "belop": 0
+      }
+    ],
+    "apiNavn": "avslagUtenPeriode"
+  }
+}
