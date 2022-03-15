@@ -92,7 +92,7 @@ class BrevPeriodeService(
 
         if (skalLogge) {
             secureLogger.info(
-                "Data for brevperiode på behandling ${vedtaksperiodeMedBegrunnelser.vedtak.behandling}: " +
+                "Data for brevperiode på behandling ${vedtaksperiodeMedBegrunnelser.vedtak.behandling}: \n" +
                     brevperiodeData.tilBrevperiodeForLogging().convertDataClassToJson()
             )
         }
