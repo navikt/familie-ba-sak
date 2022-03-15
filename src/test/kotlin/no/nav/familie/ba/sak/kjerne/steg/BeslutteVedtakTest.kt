@@ -26,7 +26,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.task.FerdigstillOppgave
+import no.nav.familie.ba.sak.task.FerdigstillOppgaver
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
@@ -101,12 +101,12 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        mockkObject(FerdigstillOppgave.Companion)
-        every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task(FerdigstillOppgave.TASK_STEP_TYPE, "")
+        mockkObject(FerdigstillOppgaver.Companion)
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        verify(exactly = 1) { FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
+        verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
         Assertions.assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, nesteSteg)
     }
 
@@ -118,9 +118,9 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        mockkObject(FerdigstillOppgave.Companion)
+        mockkObject(FerdigstillOppgaver.Companion)
         mockkObject(OpprettOppgaveTask.Companion)
-        every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task(FerdigstillOppgave.TASK_STEP_TYPE, "")
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every {
             OpprettOppgaveTask.opprettTask(
                 any(),
@@ -132,7 +132,7 @@ class BeslutteVedtakTest {
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        verify(exactly = 1) { FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
+        verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
         verify(exactly = 1) {
             OpprettOppgaveTask.opprettTask(
                 behandling.id,
@@ -153,9 +153,9 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        mockkObject(FerdigstillOppgave.Companion)
+        mockkObject(FerdigstillOppgaver.Companion)
         mockkObject(OpprettOppgaveTask.Companion)
-        every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task(FerdigstillOppgave.TASK_STEP_TYPE, "")
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task(
             OpprettOppgaveTask.TASK_STEP_TYPE,
             ""
@@ -174,9 +174,9 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        mockkObject(FerdigstillOppgave.Companion)
-        every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task(
-            type = FerdigstillOppgave.TASK_STEP_TYPE,
+        mockkObject(FerdigstillOppgaver.Companion)
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(
+            type = FerdigstillOppgaver.TASK_STEP_TYPE,
             payload = ""
         )
 

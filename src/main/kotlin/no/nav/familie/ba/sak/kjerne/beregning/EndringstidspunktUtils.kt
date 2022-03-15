@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.hentUtbetalingstidslinjeForSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -20,6 +21,7 @@ typealias AktørId = String
 data class AndelTilkjentYtelseDataForÅKalkulereEndring(
     val aktørId: AktørId,
     val kalkulertBeløp: Int,
+    val endretUtbetalingÅrsaker: List<Årsak>,
     val behandlingAlder: BehandlingAlder,
 )
 
@@ -50,12 +52,12 @@ fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
         ) as LocalDateTimeline<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>
 
         LocalDateTimeline(
-            kombinertTidslinje.toSegments().mapNotNull { it.tilSegmentMedDiffIBeløp() }
+            kombinertTidslinje.toSegments().mapNotNull { it.tilSegmentMedEndringer() }
         )
     }.filter { it.value.toSegments().isNotEmpty() }
 }
 
-private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>.tilSegmentMedDiffIBeløp(): LocalDateSegment<Int>? {
+private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>.tilSegmentMedEndringer(): LocalDateSegment<Int>? {
     val erEndring = erEndringPåPersonISegment(this.value)
 
     return if (erEndring) {
@@ -70,7 +72,12 @@ private fun erEndringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet: List<A
     val nyttBeløp = nyOgGammelDataPåBrukerISegmentet.finnKalkulertBeløp(BehandlingAlder.NY)
     val gammeltBeløp = nyOgGammelDataPåBrukerISegmentet.finnKalkulertBeløp(BehandlingAlder.GAMMEL)
 
-    return nyttBeløp != gammeltBeløp
+    val nyEndretUtbetalingÅrsaker =
+        nyOgGammelDataPåBrukerISegmentet.find { it.behandlingAlder == BehandlingAlder.NY }?.endretUtbetalingÅrsaker?.sorted()
+    val gammelEndretUtbetalingÅrsaker =
+        nyOgGammelDataPåBrukerISegmentet.find { it.behandlingAlder == BehandlingAlder.GAMMEL }?.endretUtbetalingÅrsaker?.sorted()
+
+    return nyttBeløp != gammeltBeløp || nyEndretUtbetalingÅrsaker != gammelEndretUtbetalingÅrsaker
 }
 
 private fun hentBeløpsendringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet: List<AndelTilkjentYtelseDataForÅKalkulereEndring>): Int {
@@ -109,6 +116,7 @@ private fun List<AndelTilkjentYtelse>.hentTidslinje(
             AndelTilkjentYtelseDataForÅKalkulereEndring(
                 aktørId = it.aktør.aktørId,
                 kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
+                endretUtbetalingÅrsaker = it.endretUtbetalingAndeler.mapNotNull { endretUtbetalingAndel -> endretUtbetalingAndel.årsak },
                 behandlingAlder = behandlingAlder,
             )
         )
@@ -129,6 +137,7 @@ private fun kombinerOverlappendeAndelerForSøker(
                 AndelTilkjentYtelseDataForÅKalkulereEndring(
                     aktørId = aktørId,
                     behandlingAlder = behandlingAlder,
+                    endretUtbetalingÅrsaker = emptyList(), // TODO() her bør man nok prøve å hente overstyringer på søker også, men haster mest å fikse endringstidspunkt pga overstyringer på barn.
                     kalkulertBeløp = it.value
                 )
             )

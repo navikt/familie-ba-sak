@@ -53,8 +53,9 @@ fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
     )
 
 fun hentBrevPerioder(
-    brevperioderData: List<BrevperiodeData>
+    brevperioderData: List<BrevperiodeData>,
 ) = brevperioderData
+    .sorted()
     .mapNotNull {
         try {
             it.minimertVedtaksperiode.tilBrevPeriode(

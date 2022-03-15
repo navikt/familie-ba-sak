@@ -5,11 +5,11 @@ import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import java.net.URI
 
 val logger = LoggerFactory.getLogger("eksternTjenesteKaller")
+val secureLogger = LoggerFactory.getLogger("secureLogger")
 inline fun <reified Data> kallEksternTjeneste(
     tjeneste: String,
     uri: URI,
@@ -81,14 +81,27 @@ fun handleException(
     formål: String,
 ): Exception {
     return when (exception) {
-        is RessursException ->
-            when (exception.httpStatus) {
-                HttpStatus.FORBIDDEN -> exception
-                HttpStatus.UNAUTHORIZED -> exception
-                else -> opprettIntegrasjonsException(tjeneste, uri, exception, formål)
-            }
-        is HttpClientErrorException.Forbidden -> exception
-        is HttpClientErrorException.Unauthorized -> exception
+        is RessursException -> {
+            secureLogger.info(
+                "${
+                lagEksternKallPreMelding(
+                    tjeneste,
+                    uri
+                )
+                } Kall mot $tjeneste feilet. Formål: $formål. Feilmelding: ${exception.ressurs.melding}",
+                exception.cause
+            )
+            logger.warn(
+                "${
+                lagEksternKallPreMelding(
+                    tjeneste,
+                    uri
+                )
+                } Kall mot $tjeneste feilet. Formål: $formål."
+            )
+            exception
+        }
+        is HttpClientErrorException -> exception
         else -> opprettIntegrasjonsException(tjeneste, uri, exception, formål)
     }
 }
