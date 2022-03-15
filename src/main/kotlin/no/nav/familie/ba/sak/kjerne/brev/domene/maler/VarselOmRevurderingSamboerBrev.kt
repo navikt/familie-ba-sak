@@ -22,7 +22,7 @@ data class VarselOmRevurderingSamboerData(
         constructor(
             navn: String,
             fodselsnummer: String,
-            datoAvtale: String /* = kotlin.collections.List<kotlin.String>? */
+            datoAvtale: String
         ) : this(
             navn = flettefelt(navn),
             fodselsnummer = flettefelt(fodselsnummer),
