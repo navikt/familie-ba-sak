@@ -9,6 +9,7 @@ import org.springframework.web.client.HttpClientErrorException
 import java.net.URI
 
 val logger = LoggerFactory.getLogger("eksternTjenesteKaller")
+val secureLogger = LoggerFactory.getLogger("secureLogger")
 inline fun <reified Data> kallEksternTjeneste(
     tjeneste: String,
     uri: URI,
@@ -80,7 +81,26 @@ fun handleException(
     formål: String,
 ): Exception {
     return when (exception) {
-        is RessursException -> exception
+        is RessursException -> {
+            secureLogger.info(
+                "${
+                lagEksternKallPreMelding(
+                    tjeneste,
+                    uri
+                )
+                } Kall mot $tjeneste feilet. Formål: $formål. Feilmelding: ${exception.ressurs.melding}",
+                exception.cause
+            )
+            logger.warn(
+                "${
+                lagEksternKallPreMelding(
+                    tjeneste,
+                    uri
+                )
+                } Kall mot $tjeneste feilet. Formål: $formål."
+            )
+            exception
+        }
         is HttpClientErrorException -> exception
         else -> opprettIntegrasjonsException(tjeneste, uri, exception, formål)
     }
@@ -99,10 +119,10 @@ private fun opprettIntegrasjonsException(
     }
     return IntegrasjonException(
         msg = "${
-            lagEksternKallPreMelding(
-                tjeneste,
-                uri
-            )
+        lagEksternKallPreMelding(
+            tjeneste,
+            uri
+        )
         } Kall mot \"$tjeneste\" feilet. Formål: $formål. Feilmelding: $melding",
         uri = uri,
         throwable = exception
