@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 class ErEøsPeriodeTidslinje(
-    private val barnetsVilkårsresultater: Collection<Tidslinje<VilkårResultat>>
+    private val barnetsVilkårsresultater: Collection<Tidslinje<VilkårRegelverkResultat>>
 ) : KalkulerendeTidslinje<Boolean>(barnetsVilkårsresultater) {
 
     private val nødvendigeVilkår = listOf(
@@ -31,7 +31,7 @@ class ErEøsPeriodeTidslinje(
         val alleVilkårResultater = barnetsVilkårsresultater.map { it.hentUtsnitt(tidspunkt) }
         val oppfyllerNødvendigVilkår = alleVilkårResultater
             .filter { it?.resultat == Resultat.OPPFYLT }
-            .map { it?.vilkårType }
+            .map { it?.vilkår }
             .containsAll(nødvendigeVilkår)
 
         if (!oppfyllerNødvendigVilkår)
@@ -39,8 +39,8 @@ class ErEøsPeriodeTidslinje(
 
         val alleRelevanteVilkårErEøsVilkår = alleVilkårResultater
             .filter {
-                it?.vurderesEtter == Regelverk.EØS_FORORDNINGEN
-            }.map { it?.vilkårType }
+                it?.regelverk == Regelverk.EØS_FORORDNINGEN
+            }.map { it?.vilkår }
             .containsAll(eøsVilkår)
 
         return alleRelevanteVilkårErEøsVilkår

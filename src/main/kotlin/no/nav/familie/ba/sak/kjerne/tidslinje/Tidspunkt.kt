@@ -113,6 +113,18 @@ data class Tidspunkt(
     private fun harPresisjonMåned(): Boolean = this.presisjon == TidspunktPresisjon.MÅNED
     fun erUendeligLengeSiden(): Boolean = uendelighet == Uendelighet.FORTID
     fun erUendeligLengeTil(): Boolean = uendelighet == Uendelighet.FREMTID
+    fun somEndelig(): Tidspunkt = this.copy(uendelighet = Uendelighet.INGEN)
+
+    override fun toString(): String {
+        return when (uendelighet) {
+            Uendelighet.FORTID -> "<--"
+            Uendelighet.FREMTID -> "-->"
+            else -> ""
+        } + when (presisjon) {
+            TidspunktPresisjon.MÅNED -> this.dato.toYearMonth().toString()
+            else -> this.dato.toString()
+        }
+    }
 
     companion object {
         fun uendeligLengeSiden(dato: LocalDate) = Tidspunkt(dato, uendelighet = Uendelighet.FORTID)
@@ -133,26 +145,27 @@ data class Tidspunkt(
     }
 }
 
-class Tidsrom(
+data class Tidsrom(
     override val start: Tidspunkt,
     override val endInclusive: Tidspunkt
 ) : Iterable<Tidspunkt>,
     ClosedRange<Tidspunkt> {
 
     override fun iterator(): Iterator<Tidspunkt> =
-        TidspunktIterator(start, endInclusive)
+        // TODO: Dette er ikke helt bra!
+        TidspunktIterator(
+            start.tilMåned().somEndelig(),
+            endInclusive.tilMåned().somEndelig()
+        )
+
+    override fun toString(): String =
+        "$start - $endInclusive"
 
     companion object {
         private class TidspunktIterator(
             startTidspunkt: Tidspunkt,
             val tilOgMedTidspunkt: Tidspunkt
         ) : Iterator<Tidspunkt> {
-
-            init {
-                if (!startTidspunkt.harSammePresisjon(tilOgMedTidspunkt)) {
-                    throw IllegalArgumentException("Tidspunktene har ikke samme presisjon")
-                }
-            }
 
             private var gjeldendeTidspunkt = startTidspunkt
 

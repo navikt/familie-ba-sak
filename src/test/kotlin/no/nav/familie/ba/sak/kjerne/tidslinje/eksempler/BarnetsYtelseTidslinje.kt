@@ -6,11 +6,11 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
 
 class BarnetsYtelseTidslinje(
     private val søkerOppfyllerVilkårTema: Tidslinje<Boolean>,
-    private val barnetsVilkårsresultater: Collection<Tidslinje<VilkårResultat>>
+    private val barnetsVilkårsresultater: Collection<Tidslinje<VilkårRegelverkResultat>>
 ) : KalkulerendeTidslinje<YtelseType>(barnetsVilkårsresultater + søkerOppfyllerVilkårTema) {
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): YtelseType? {
         val søkerOppfyllerVilkår = søkerOppfyllerVilkårTema.hentUtsnitt(tidspunkt)

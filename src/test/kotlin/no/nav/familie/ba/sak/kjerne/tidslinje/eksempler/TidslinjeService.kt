@@ -15,7 +15,6 @@ class TidslinjeService(
         val kompetanser = kompetanseService.hentKompetanser(behandlingId)
 
         return Tidslinjer(
-            behandlingId,
             vilkårsvurdering,
             personopplysningGrunnlag,
             kompetanser

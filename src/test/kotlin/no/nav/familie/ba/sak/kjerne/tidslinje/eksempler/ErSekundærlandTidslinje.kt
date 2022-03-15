@@ -16,7 +16,7 @@ class ErSekundærlandTidslinje(
         val kompetanse = kompetanseTidslinje.hentUtsnitt(tidspunkt)
         val validertKompetanse = validertKompetanseTidsline.hentUtsnitt(tidspunkt)
 
-        val erValidert = validertKompetanse == KompetanseValidering.OK
+        val erValidert = validertKompetanse == KompetanseValidering.OK_EØS_OG_KOMPETANSE
         val erSekundærland = kompetanse?.sekundærland == "Norge"
 
         return erValidert && erSekundærland

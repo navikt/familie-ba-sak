@@ -8,56 +8,61 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
 class Tidslinjer(
-    behandlingId: Long,
     vilkårsvurdering: Vilkårsvurdering,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    kompetanser: Collection<Kompetanse>
+    private val kompetanser: Collection<Kompetanse>
 ) {
-    private val aktørTilVilkårsresultater = vilkårsvurdering.personResultater
+    private val identTilVilkårsresultater = vilkårsvurdering.personResultater
         .flatMap { pr -> pr.vilkårResultater }
-        .groupBy { it.personResultat!!.aktør }
+        .groupBy { it.personResultat!!.aktør.aktivFødselsnummer() }
 
-    private val fødseldato: (Aktør) -> LocalDate =
-        { aktør -> personopplysningGrunnlag.personer.filter { it.aktør == aktør }.first().fødselsdato }
+    private val fødseldato: (String) -> LocalDate =
+        { ident ->
+            personopplysningGrunnlag.personer
+                .filter { it.aktør.harIdent(ident) }
+                .first().fødselsdato
+        }
 
-    val søkersVilkårsresultatTidslinje = aktørTilVilkårsresultater
-        .filter { (aktør, _) -> personopplysningGrunnlag.søker.aktør == aktør }
+    private val barnasVilkårsresultatTidslinjeMap = identTilVilkårsresultater
+        .filter { (ident, _) -> !personopplysningGrunnlag.søker.aktør.harIdent(ident) }
+        .mapValues { (_, resultater) ->
+            resultater
+                .groupBy { it.vilkårType }
+                .mapValues { VilkårResultatTidslinje(it.value) }
+                .values
+        }
+
+    val søkersVilkårsresultater = identTilVilkårsresultater
+        .filter { (ident, _) -> personopplysningGrunnlag.søker.aktør.harIdent(ident) }
         .mapValues { (_, resultater) ->
             resultater.groupBy { it.vilkårType }
                 .mapValues { VilkårResultatTidslinje(it.value) }
                 .values
         }.values.flatten()
 
-    val barnasVilkårsresultatTidslinjeMap = aktørTilVilkårsresultater
-        .filter { (aktør, _) -> personopplysningGrunnlag.søker.aktør != aktør }
-        .mapValues { (_, resultater) ->
-            resultater.groupBy { it.vilkårType }
-                .mapValues { VilkårResultatTidslinje(it.value) }
-                .values
-        }
+    val søkerOppfyllerVilkår = SøkerOppfyllerVilkårTidslinje(søkersVilkårsresultater)
 
-    val søkerOppfyllerVilkårTidslinje = SøkerOppfyllerVilkårTidslinje(søkersVilkårsresultatTidslinje)
+    private val barnasTidslinjer = barnasVilkårsresultatTidslinjeMap.mapValues { (barnIdent, _) ->
+        BarnetsTidslinjer(this, barnIdent)
+    }
 
-    val barnsUtebetalingTidslinjeMap =
-        barnasVilkårsresultatTidslinjeMap.mapValues { (barn, vilkårsresultatTidslinjer) ->
-            val id = barn.aktørId + behandlingId
-            val barnetsYtelseTidslinje =
-                BarnetsYtelseTidslinje(søkerOppfyllerVilkårTidslinje, vilkårsresultatTidslinjer)
-            val erUnder6ÅrTidslinje = ErBarnetUnder6ÅrTidslinje(barnetsYtelseTidslinje, fødseldato(barn))
-            BarnetsUtbetalingerTidslinje(id, barnetsYtelseTidslinje, erUnder6ÅrTidslinje)
-        }
+    fun forBarn(barn: Aktør) = barnasTidslinjer[barn.aktivFødselsnummer()]!!
 
-    val barnasDifferanseBeregningTidslinjeMap =
-        barnasVilkårsresultatTidslinjeMap.mapValues { (barn, vilkårsresultatTidslinje) ->
-            val erEøsPeriodeTidslinje = ErEøsPeriodeTidslinje(vilkårsresultatTidslinje)
-            val kompetanseTidslinje =
-                KompetanseTidslinje(kompetanser.forBarn(barn), barn)
-            val validerKompetanseTidslinje =
-                KompetanseValideringTidslinje(erEøsPeriodeTidslinje, kompetanseTidslinje)
-            val erSekundærlandTidslinje = ErSekundærlandTidslinje(kompetanseTidslinje, validerKompetanseTidslinje)
-            DifferanseBeregningTidslinje(barnsUtebetalingTidslinjeMap[barn]!!, erSekundærlandTidslinje)
-        }
+    class BarnetsTidslinjer(
+        tidslinjer: Tidslinjer,
+        barnIdent: String,
+    ) {
+        val vilkårsresultater = tidslinjer.barnasVilkårsresultatTidslinjeMap[barnIdent]!!
+        val barnetsYtelse = BarnetsYtelseTidslinje(tidslinjer.søkerOppfyllerVilkår, vilkårsresultater)
+        val erUnder6År = ErBarnetUnder6ÅrTidslinje(barnetsYtelse, tidslinjer.fødseldato(barnIdent))
+        val utbetalinger = BarnetsUtbetalingerTidslinje(barnetsYtelse, erUnder6År)
+        val erEøs = ErEøsPeriodeTidslinje(vilkårsresultater)
+        val kompetanser = KompetanseTidslinje(tidslinjer.kompetanser.forBarn(barnIdent))
+        val kompetanseValidering = KompetanseValideringTidslinje(erEøs, kompetanser)
+        val erSekundærland = ErSekundærlandTidslinje(kompetanser, kompetanseValidering)
+        val differanseBeregning = DifferanseBeregningTidslinje(utbetalinger, erSekundærland)
+    }
 }
 
-fun Collection<Kompetanse>.forBarn(barn: Aktør) =
-    this.filter { it.barn.contains(barn.aktivFødselsnummer()) }
+fun Collection<Kompetanse>.forBarn(ident: String) =
+    this.filter { it.barn.contains(ident) }

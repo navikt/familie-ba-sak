@@ -6,12 +6,23 @@ abstract class Tidslinje<T> {
     private var etterfølgendeTidslinjer: MutableList<TidslinjeMedAvhengigheter<*>> = mutableListOf()
     private var gjeldendePerioder: Collection<Periode<T>>? = null
 
-    internal abstract val tidsrom: Tidsrom
+    internal abstract fun tidsrom(): Tidsrom
 
-    val perioder: Collection<Periode<T>> =
-        gjeldendePerioder ?: genererPerioder(tidsrom).also { gjeldendePerioder = it }
+    fun perioder(): Collection<Periode<T>> =
+        gjeldendePerioder ?: genererPerioder(tidsrom()).also { gjeldendePerioder = it }
 
-    protected abstract fun genererPerioder(tidsrom: Tidsrom): Collection<Periode<T>>
+    private fun genererPerioder(tidsrom: Tidsrom): List<Periode<T>> =
+        tidsrom.map { Pair(it, kalkulerInnhold(it)) }
+            .fold(emptyList()) { acc, (tidspunkt, innhold) ->
+                val sistePeriode = acc.lastOrNull()
+                when {
+                    sistePeriode != null && sistePeriode.innhold == innhold && sistePeriode.tom.erRettFør(tidspunkt) ->
+                        acc.replaceLast(sistePeriode.copy(tom = tidspunkt))
+                    else -> acc + Periode(tidspunkt, tidspunkt, innhold)
+                }
+            }
+
+    protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): T?
 
     internal fun registrerEtterfølgendeTidslinje(tidslinje: TidslinjeMedAvhengigheter<*>) {
         etterfølgendeTidslinjer.add(tidslinje)
@@ -22,7 +33,7 @@ abstract class Tidslinje<T> {
     }
 
     internal fun splitt(splitt: PeriodeSplitt<*>) {
-        perioder
+        perioder()
             .flatMap { splitt.påførSplitt(it, etterfølgendeTidslinjer) }
             .also { oppdaterPerioder(it) }
     }
@@ -30,7 +41,7 @@ abstract class Tidslinje<T> {
     // Sammenhengende perioder (ingen hull bruk NULL-perioder)
     // Ingen overlappende perioder
     open fun valider(): Collection<TidslinjeFeil> {
-        val sorterte = perioder.sortedBy { it.fom }.toList()
+        val sorterte = perioder().sortedBy { it.fom }.toList()
 
         return sorterte.mapIndexed { index, periode ->
             when {
@@ -49,7 +60,10 @@ abstract class Tidslinje<T> {
 }
 
 fun <T> Tidslinje<T>.hentUtsnitt(tidspunkt: Tidspunkt): T? =
-    perioder.filter { it.fom <= tidspunkt && it.tom >= tidspunkt }
+    perioder().hentUtsnitt(tidspunkt)
+
+fun <T> Collection<Periode<T>>.hentUtsnitt(tidspunkt: Tidspunkt): T? =
+    this.filter { it.fom <= tidspunkt && it.tom >= tidspunkt }
         .firstOrNull()?.let { it.innhold }
 
 abstract class TidslinjeUtenAvhengigheter<T> : Tidslinje<T>() {
@@ -66,9 +80,8 @@ abstract class TidslinjeMedAvhengigheter<T>(
     private val foregåendeTidslinjer: Collection<Tidslinje<*>>
 ) : Tidslinje<T>() {
 
-    private val fom = foregåendeTidslinjer.minOf { it.tidsrom.start }
-    private val tom = foregåendeTidslinjer.maxOf { it.tidsrom.endInclusive }
-    override val tidsrom = fom..tom
+    override fun tidsrom() =
+        foregåendeTidslinjer.minOf { it.tidsrom().start }..foregåendeTidslinjer.maxOf { it.tidsrom().endInclusive }
 
     init {
         foregåendeTidslinjer.forEach { it.registrerEtterfølgendeTidslinje(this) }
@@ -87,24 +100,11 @@ abstract class TidslinjeMedAvhengigheter<T>(
 }
 
 abstract class KalkulerendeTidslinje<T>(
-    avhengigheter: Collection<Tidslinje<*>>,
+    protected val avhengigheter: Collection<Tidslinje<*>>,
 ) : TidslinjeMedAvhengigheter<T>(avhengigheter) {
 
     constructor(vararg avhengighet: Tidslinje<*>) :
         this(avhengighet.asList())
-
-    override fun genererPerioder(tidsrom: Tidsrom): List<Periode<T>> =
-        tidsrom.map { Pair(it, kalkulerInnhold(it)) }
-            .fold(emptyList()) { acc, (måned, innhold) ->
-                val sistePeriode = acc.lastOrNull()
-                when {
-                    sistePeriode != null && sistePeriode.innhold == innhold && sistePeriode.fom.erRettFør(måned) ->
-                        acc.replaceLast(sistePeriode.copy(tom = måned))
-                    else -> acc + Periode(måned, måned, innhold)
-                }
-            }
-
-    protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): T?
 }
 
 private fun <T> Collection<T>.replaceLast(replacement: T) =

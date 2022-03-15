@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
 
 class BarnetsUtbetalingerTidslinje(
-    private val unikId: String,
     private val barnetsYtelseTidslinje: Tidslinje<YtelseType>,
     private val erBarnetUnder6ÅrTidslinje: Tidslinje<Boolean>
 ) : KalkulerendeTidslinje<Int>(barnetsYtelseTidslinje, erBarnetUnder6ÅrTidslinje) {
