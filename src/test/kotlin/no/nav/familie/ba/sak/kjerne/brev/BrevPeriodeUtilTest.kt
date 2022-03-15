@@ -13,14 +13,30 @@ class BrevPeriodeUtilTest {
 
     @Test
     fun `Skal sortere perioder kronologisk, med avslag til slutt`() {
-        val liste = listOf<BrevperiodeData>(
-            lagBrevperiodeData(fom = LocalDate.now().minusMonths(12), tom = LocalDate.now().minusMonths(8), type = Vedtaksperiodetype.UTBETALING),
-            lagBrevperiodeData(fom = LocalDate.now().minusMonths(4), tom = null, type = Vedtaksperiodetype.AVSLAG),
-            lagBrevperiodeData(fom = LocalDate.now().minusMonths(7), tom = LocalDate.now().minusMonths(4), type = Vedtaksperiodetype.OPPHØR),
-            lagBrevperiodeData(fom = LocalDate.now().minusMonths(3), tom = LocalDate.now(), type = Vedtaksperiodetype.UTBETALING)
+        val liste = listOf(
+            lagBrevperiodeData(
+                fom = LocalDate.now().minusMonths(12),
+                tom = LocalDate.now().minusMonths(8),
+                type = Vedtaksperiodetype.UTBETALING
+            ),
+            lagBrevperiodeData(
+                fom = LocalDate.now().minusMonths(4),
+                tom = null,
+                type = Vedtaksperiodetype.AVSLAG,
+            ),
+            lagBrevperiodeData(
+                fom = LocalDate.now().minusMonths(7),
+                tom = LocalDate.now().minusMonths(4),
+                type = Vedtaksperiodetype.OPPHØR
+            ),
+            lagBrevperiodeData(
+                fom = LocalDate.now().minusMonths(3),
+                tom = LocalDate.now(),
+                type = Vedtaksperiodetype.UTBETALING
+            )
         )
 
-        val sortertListe = liste.sortedWith(brevperioderComparator)
+        val sortertListe = liste.sorted()
 
         Assertions.assertTrue(sortertListe.size == 4)
         val førstePeriode = sortertListe.first()

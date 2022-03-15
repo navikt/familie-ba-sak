@@ -37,7 +37,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
-import java.time.LocalDate
 
 private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -54,8 +53,9 @@ fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
     )
 
 fun hentBrevPerioder(
-    brevperioderData: List<BrevperiodeData>
-) = brevperioderData.sortedWith(brevperioderComparator)
+    brevperioderData: List<BrevperiodeData>,
+) = brevperioderData
+    .sorted()
     .mapNotNull {
         try {
             it.minimertVedtaksperiode.tilBrevPeriode(
@@ -77,20 +77,6 @@ fun hentBrevPerioder(
             throw Feil(message = "Feil ved generering av brevperioder: ", throwable = exception)
         }
     }
-
-val brevperioderComparator = Comparator<BrevperiodeData> { periode1: BrevperiodeData, periode2: BrevperiodeData ->
-    if (periode1.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG && periode2.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG) {
-        sorterPåFom(fom1 = periode1.minimertVedtaksperiode.fom, fom2 = periode2.minimertVedtaksperiode.fom)
-    } else if (periode1.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG) 1
-    else if (periode2.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG) -1
-    else sorterPåFom(fom1 = periode1.minimertVedtaksperiode.fom, fom2 = periode2.minimertVedtaksperiode.fom)
-}
-
-private fun sorterPåFom(fom1: LocalDate?, fom2: LocalDate?) = when (fom1) {
-    fom2 -> 0
-    null -> 1
-    else -> fom1.compareTo(fom2)
-}
 
 enum class UtvidetScenarioForEndringsperiode {
     IKKE_UTVIDET_YTELSE,
