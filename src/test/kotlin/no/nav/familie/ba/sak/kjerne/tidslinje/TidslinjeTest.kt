@@ -64,42 +64,57 @@ internal class TidslinjeTest {
             .medVilkår("--------->", Vilkår.GIFT_PARTNERSKAP)
             .byggVilkårsvurdering()
 
-        val kompetanser = listOf(
-            Kompetanse(
-                behandlingId = behandling.id,
-                fom = januar2020,
-                tom = stønadTom,
-                barn = setOf(barn1.aktivFødselsnummer(), barn2.aktivFødselsnummer(), barn3.aktivFødselsnummer()),
-                status = KompetanseStatus.OK,
-                sekundærland = "NORGE"
-            )
-        )
+        val kompetanser2 = KompetanseBuilder(behandling = behandling, januar2020)
+            .medKompetanse("---PPPPP--SSSSSS", barn1, barn2, barn3)
+            .medKompetanse("                SSSSS", barn1)
+            .medKompetanse("                PPPPP", barn2)
+            .medKompetanse("                -----", barn2)
+            .byggKompetanser()
 
-        val tidslinjer = Tidslinjer(vilkårsvurdering, personopplysningGrunnlag, kompetanser)
+        val tidslinjer = Tidslinjer(vilkårsvurdering, personopplysningGrunnlag, kompetanser2)
 
         println("Barn: ${barn1.aktivFødselsnummer()}")
         tidslinjer.forBarn(barn1).kompetanseValidering.perioder().forEach { println(it) }
         println("Barn: ${barn2.aktivFødselsnummer()}")
         tidslinjer.forBarn(barn2).kompetanseValidering.perioder().forEach { println(it) }
-        // assertEquals(3, erEøs.perioder().size)
+    }
+}
+
+class KompetanseBuilder(
+    val behandling: Behandling = lagBehandling(),
+    val startMåned: YearMonth = YearMonth.of(2020, 1)
+) {
+    val kompetanser: MutableList<Kompetanse> = mutableListOf()
+
+    fun medKompetanse(k: String, vararg barn: Aktør): KompetanseBuilder {
+        val charTidslinje = CharTidslinje(k, startMåned)
+        val kompetanseTidslinje = KompetanseTidslinje(charTidslinje, behandling.id, barn.toList())
+
+        kompetanseTidslinje.perioder()
+            .filter { it.innhold != null }
+            .map { it.innhold!!.copy(fom = it.fom.tilYearMonth(), tom = it.tom.tilYearMonth()) }
+            .all { kompetanser.add(it) }
+
+        return this
     }
 
-    @Test
-    fun tidslinjeTest() {
-        val tidslinje = TestKalkulenendeTidslinje()
-        println(tidslinje.perioder())
-    }
+    fun byggKompetanser(): Collection<Kompetanse> = kompetanser
 }
 
 data class VilkårsvurderingBuilder(
     private val behandling: Behandling = lagBehandling(),
     private val vilkårsvurdering: Vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 ) {
+    val personresultater: MutableSet<PersonResultat> = mutableSetOf()
+
     fun forPerson(aktør: Aktør, startMåned: YearMonth = YearMonth.of(2020, 1)): PersonResultatBuilder {
         return PersonResultatBuilder(this, startMåned, aktør)
     }
 
-    fun byggVilkårsvurdering() = vilkårsvurdering
+    fun byggVilkårsvurdering(): Vilkårsvurdering {
+        vilkårsvurdering.personResultater = personresultater
+        return vilkårsvurdering
+    }
 
     data class PersonResultatBuilder(
         val vilkårsvurderingBuilder: VilkårsvurderingBuilder,
@@ -107,7 +122,6 @@ data class VilkårsvurderingBuilder(
         private val aktør: Aktør = randomAktørId(),
         private val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat>> = emptyList(),
     ) {
-
         fun medVilkår(v: String, vilkår: Vilkår): PersonResultatBuilder {
             return copy(vilkårsresultatTidslinjer = this.vilkårsresultatTidslinjer + parseVilkår(v, vilkår))
         }
@@ -125,101 +139,22 @@ data class VilkårsvurderingBuilder(
                 aktør = aktør
             )
 
-            val vilkårresultater = vilkårsresultatTidslinjer
-                .flatMap {
-                    it.perioder()
-                        .filter { it.innhold != null }
-                        .map { periode ->
-                            VilkårResultat(
-                                personResultat = personResultat,
-                                vilkårType = periode.innhold?.vilkår!!,
-                                resultat = periode.innhold?.resultat!!,
-                                vurderesEtter = periode.innhold?.regelverk,
-                                periodeFom = periode.fom.tilFørsteDagIMåneden().tilLocalDate(),
-                                periodeTom = periode.tom.tilSisteDagIMåneden().tilLocalDate(),
-                                begrunnelse = "",
-                                behandlingId = 0
-                            )
-                        }
-                }
+            val vilkårresultater = vilkårsresultatTidslinjer.flatMap {
+                it.perioder()
+                    .filter { it.innhold != null }
+                    .map { periode -> periode.tilVilkårResultat(personResultat) }
+            }
 
             personResultat.vilkårResultater.addAll(vilkårresultater)
-
-            vilkårsvurderingBuilder.vilkårsvurdering.personResultater =
-                vilkårsvurderingBuilder.vilkårsvurdering.personResultater +
-                personResultat
+            vilkårsvurderingBuilder.personresultater.add(personResultat)
 
             return vilkårsvurderingBuilder
         }
 
         private fun parseVilkår(periodeString: String, vilkår: Vilkår): Tidslinje<VilkårRegelverkResultat> {
-            val perioder = periodeString
-                .mapIndexed { index, tegn ->
-                    val måned = startMåned.plusMonths(index.toLong())
-                    if (erPeriode(tegn)) {
-                        lagVilkårResultatPeriode(vilkår, tegn, Tidspunkt(måned))
-                    } else if (tegn == '>') {
-                        lagVilkårResultatPeriode(
-                            vilkår,
-                            periodeString[index - 1],
-                            Tidspunkt.uendeligLengeTil(måned.minusMonths(1))
-                        )
-                    } else if (tegn == '<') {
-                        lagVilkårResultatPeriode(
-                            vilkår,
-                            periodeString[index + 1],
-                            Tidspunkt.uendeligLengeSiden(måned.plusMonths(1))
-                        )
-                    } else null
-                }
-                .filterNotNull()
-
-            val tidslinje = object : TidslinjeUtenAvhengigheter<VilkårRegelverkResultat>() {
-                override fun tidsrom(): Tidsrom = perioder.minOf { it.fom }..perioder.maxOf { it.tom }
-
-                override fun kalkulerInnhold(tidspunkt: Tidspunkt): VilkårRegelverkResultat? {
-                    return perioder.hentUtsnitt(tidspunkt)
-                }
-            }
-
-            return tidslinje
+            val charTidslinje = CharTidslinje(periodeString, startMåned)
+            return VilkårRegelverkResultatTidslinje(vilkår, charTidslinje)
         }
-
-        private fun lagVilkårResultatPeriode(
-            vilkår: Vilkår,
-            tegn: Char,
-            tidspunkt: Tidspunkt
-        ): Periode<VilkårRegelverkResultat>? = if (erPeriode(tegn))
-            Periode(
-                tidspunkt.tilFørsteDagIMåneden(), tidspunkt.tilSisteDagIMåneden(),
-                VilkårRegelverkResultat(
-                    vilkår = vilkår,
-                    resultat = finnResultat(tegn),
-                    regelverk = finnRegelverk(tegn)
-                )
-            )
-        else
-            null
-
-        private fun erPeriode(c: Char) =
-            when (c) {
-                '?', 'E', 'N', '-' -> true
-                else -> false
-            }
-
-        private fun finnRegelverk(gjeldendeTegn: Char?): Regelverk? =
-            when (gjeldendeTegn) {
-                'E' -> Regelverk.EØS_FORORDNINGEN
-                'N' -> Regelverk.NASJONALE_REGLER
-                else -> null
-            }
-
-        private fun finnResultat(gjeldendeTegn: Char?) =
-            when (gjeldendeTegn) {
-                ' ' -> Resultat.IKKE_VURDERT
-                '?' -> null
-                else -> Resultat.OPPFYLT
-            }
     }
 }
 
@@ -227,12 +162,12 @@ class CharTidslinje(private val tegn: String, private val startMåned: YearMonth
     override fun tidsrom(): Tidsrom {
         val fom = when (tegn.first()) {
             '<' -> Tidspunkt.uendeligLengeSiden(startMåned)
-            else -> Tidspunkt(startMåned)
+            else -> Tidspunkt(startMåned.plusMonths(1))
         }
 
         val sluttMåned = startMåned.plusMonths(tegn.length.toLong())
         val tom = when (tegn.last()) {
-            '>' -> Tidspunkt.uendeligLengeTil(sluttMåned)
+            '>' -> Tidspunkt.uendeligLengeTil(sluttMåned.minusMonths(1))
             else -> Tidspunkt(sluttMåned)
         }
 
@@ -241,10 +176,28 @@ class CharTidslinje(private val tegn: String, private val startMåned: YearMonth
 
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): Char? {
         val månederIMellom = ChronoUnit.MONTHS.between(
-            tidsrom().start.tilLocalDate(),
+            tidsrom().start.tilFørsteDagIMåneden().tilLocalDate(),
             tidspunkt.tilFørsteDagIMåneden().tilLocalDate()
         ).toInt()
         return tegn[månederIMellom]
+    }
+}
+
+class KompetanseTidslinje(
+    val charTidslinje: Tidslinje<Char>,
+    val behandlingId: Long,
+    val barn: List<Aktør>
+) : KalkulerendeTidslinje<Kompetanse>(charTidslinje) {
+    override fun kalkulerInnhold(tidspunkt: Tidspunkt): Kompetanse? {
+        val tegn = charTidslinje.hentUtsnitt(tidspunkt)
+        val barnFnr = barn.map { it.aktivFødselsnummer() }.toSet()
+        val kompetanseMal = Kompetanse(behandlingId = behandlingId, fom = null, tom = null, barn = barnFnr)
+        return when (tegn) {
+            '-' -> kompetanseMal
+            'S' -> kompetanseMal.copy(status = KompetanseStatus.OK, sekundærland = "NORGE")
+            'P' -> kompetanseMal.copy(status = KompetanseStatus.OK, primærland = "NORGE")
+            else -> null
+        }
     }
 }
 
@@ -256,50 +209,23 @@ class VilkårRegelverkResultatTidslinje(
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): VilkårRegelverkResultat? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
 
-        return if (erPeriode(tegn))
-            VilkårRegelverkResultat(
-                vilkår = vilkår,
-                resultat = finnResultat(tegn),
-                regelverk = finnRegelverk(tegn)
-            )
-        else
-            null
-    }
-
-    private fun erPeriode(c: Char?) =
-        when (c) {
-            '?', 'E', 'N', '-' -> true
-            else -> false
-        }
-
-    private fun finnRegelverk(gjeldendeTegn: Char?): Regelverk? =
-        when (gjeldendeTegn) {
-            'E' -> Regelverk.EØS_FORORDNINGEN
-            'N' -> Regelverk.NASJONALE_REGLER
+        return when (tegn) {
+            'E' -> VilkårRegelverkResultat(vilkår, Regelverk.EØS_FORORDNINGEN, Resultat.OPPFYLT)
+            'N' -> VilkårRegelverkResultat(vilkår, Regelverk.NASJONALE_REGLER, Resultat.OPPFYLT)
+            '-' -> VilkårRegelverkResultat(vilkår, null, Resultat.OPPFYLT)
             else -> null
         }
-
-    private fun finnResultat(gjeldendeTegn: Char?) =
-        when (gjeldendeTegn) {
-            ' ' -> Resultat.IKKE_VURDERT
-            '?' -> null
-            else -> Resultat.OPPFYLT
-        }
-}
-
-class TestStatiskTidslinje : TidslinjeUtenAvhengigheter<String>() {
-    override fun tidsrom(): Tidsrom =
-        Tidspunkt(YearMonth.of(2019, 3))..Tidspunkt(YearMonth.of(2025, 12))
-
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): String? {
-        return "Hello"
     }
 }
 
-class TestKalkulenendeTidslinje(
-    val forrigeTidslinje: Tidslinje<String> = TestStatiskTidslinje()
-) : KalkulerendeTidslinje<Boolean>(forrigeTidslinje) {
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): Boolean {
-        return forrigeTidslinje.hentUtsnitt(tidspunkt) == "Hello"
-    }
-}
+fun Periode<VilkårRegelverkResultat>.tilVilkårResultat(personResultat: PersonResultat) =
+    VilkårResultat(
+        personResultat = personResultat,
+        vilkårType = this.innhold?.vilkår!!,
+        resultat = this.innhold?.resultat!!,
+        vurderesEtter = this.innhold?.regelverk,
+        periodeFom = this.fom.tilFørsteDagIMåneden().tilLocalDate(),
+        periodeTom = this.tom.tilSisteDagIMåneden().tilLocalDate(),
+        begrunnelse = "",
+        behandlingId = 0
+    )
