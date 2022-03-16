@@ -87,10 +87,12 @@ internal class TidslinjeTest {
             kompetanser
         )
 
+        println("Søker")
+        tidslinjer.søkerOppfyllerVilkårTidslinje.perioder.forEach { println(it) }
         println("Barn: ${barn1.aktør.aktivFødselsnummer()}")
-        tidslinjer.forBarn(barn1).erEøs.perioder().forEach { println(it) }
+        tidslinjer.forBarn(barn1).erEøsTidslinje.perioder.forEach { println(it) }
         println("Barn: ${barn2.aktør.aktivFødselsnummer()}")
-        tidslinjer.forBarn(barn2).erEøs.perioder().forEach { println(it) }
+        tidslinjer.forBarn(barn2).erEøsTidslinje.perioder.forEach { println(it) }
     }
 }
 

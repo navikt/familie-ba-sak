@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class TidslinjePeriodeEksempelTest {
+
     @Test
     fun `Skal slå sammen barn sine oppfylte vilkårsperioder`() {
         val borMedSøker2018 = TidslinjeEksempel(
