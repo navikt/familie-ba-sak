@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
@@ -77,7 +79,8 @@ class MigreringService(
     private val vedtakService: VedtakService,
     private val vilkårService: VilkårService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val migreringRestClient: MigreringRestClient
+    private val migreringRestClient: MigreringRestClient,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
@@ -100,13 +103,20 @@ class MigreringService(
             secureLog.info("Migrering: fant løpende sak for $personIdent sak=${løpendeSak.id} stønad=${løpendeSak.stønad?.id}")
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
+            if (personIdent in barnasIdenter) {
+                secureLog.info("Migrering: $personIdent er lik barn registert på stønad=${løpendeSak.stønad?.id}")
+                kastOgTellMigreringsFeil(MigreringsfeilType.INSTITUSJON)
+            }
 
             val personAktør = personidentService.hentOgLagreAktør(personIdent, true)
             val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
 
             validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
-            validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
+            if (!featureToggleService.isEnabled(FeatureToggleConfig.SKAL_MIGRERE_FOSTERBARN, false)) {
+                secureLog.info("Migrering: Validerer at barna er i relasjon med $personIdent")
+                validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
+            }
 
             fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
                 .also { kastFeilDersomAlleredeMigrert(it) }
@@ -123,13 +133,11 @@ class MigreringService(
                     )
                 )
             }.getOrElse { kastOgTellMigreringsFeil(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING, it.message, it) }
-
             val migreringsdato = virkningsdatoFra(infotrygdKjøredato(YearMonth.now()))
             vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
                 forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this, migreringsdato)
                 vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
-
             // Lagre ned migreringsdato
             behandlingService.lagreNedMigreringsdato(migreringsdato, behandling)
 
@@ -413,6 +421,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
     UKJENT("Ukjent migreringsfeil"),
     ÅPEN_SAK_INFOTRYGD("Bruker har åpen behandling i Infotrygd"),
+    INSTITUSJON("Midlertidig ignoerert fordi det er en institusjon"),
 }
 
 open class KanIkkeMigrereException(
