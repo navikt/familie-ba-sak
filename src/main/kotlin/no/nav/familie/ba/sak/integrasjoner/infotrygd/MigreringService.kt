@@ -114,6 +114,7 @@ class MigreringService(
             validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
             if (!featureToggleService.isEnabled(FeatureToggleConfig.SKAL_MIGRERE_FOSTERBARN, false)) {
+                secureLog.info("Migrering: Validerer at barna er i relasjon med $personIdent")
                 validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
             }
 
