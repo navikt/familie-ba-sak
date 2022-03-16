@@ -102,8 +102,10 @@ data class Tidspunkt(
             1
         else if (other.uendelighet == Uendelighet.FREMTID)
             -1
+        else if (this.presisjon != other.presisjon || this.presisjon == TidspunktPresisjon.MÅNED)
+            this.dato.toYearMonth().compareTo(other.dato.toYearMonth())
         else
-            dato.compareTo(other.dato) // MÅNED-presisjon settes som siste dag i måneden.
+            this.dato.compareTo(other.dato)
 
     fun harSammePresisjon(tidspunkt: Tidspunkt): Boolean {
         return this.presisjon == tidspunkt.presisjon
@@ -118,12 +120,30 @@ data class Tidspunkt(
     override fun toString(): String {
         return when (uendelighet) {
             Uendelighet.FORTID -> "<--"
-            Uendelighet.FREMTID -> "-->"
             else -> ""
         } + when (presisjon) {
             TidspunktPresisjon.MÅNED -> this.dato.toYearMonth().toString()
             else -> this.dato.toString()
+        } + when (uendelighet) {
+            Uendelighet.FREMTID -> "-->"
+            else -> ""
         }
+    }
+
+    fun somUendeligLengeSiden(): Tidspunkt = this.copy(uendelighet = Uendelighet.FORTID)
+    fun somUendeligLengeTil(): Tidspunkt = this.copy(uendelighet = Uendelighet.FREMTID)
+    fun ikkeUendeligFremtid(): Tidspunkt {
+        return if (uendelighet == Uendelighet.FREMTID) {
+            somEndelig()
+        } else
+            this
+    }
+
+    fun ikkeUendeligFortid(): Tidspunkt {
+        return if (uendelighet == Uendelighet.FORTID) {
+            somEndelig()
+        } else
+            this
     }
 
     companion object {
@@ -154,8 +174,8 @@ data class Tidsrom(
     override fun iterator(): Iterator<Tidspunkt> =
         // TODO: Dette er ikke helt bra!
         TidspunktIterator(
-            start.tilMåned().somEndelig(),
-            endInclusive.tilMåned().somEndelig()
+            start.tilMåned(),
+            endInclusive.tilMåned()
         )
 
     override fun toString(): String =
@@ -163,19 +183,25 @@ data class Tidsrom(
 
     companion object {
         private class TidspunktIterator(
-            startTidspunkt: Tidspunkt,
+            val startTidspunkt: Tidspunkt,
             val tilOgMedTidspunkt: Tidspunkt
         ) : Iterator<Tidspunkt> {
 
-            private var gjeldendeTidspunkt = startTidspunkt
+            private var gjeldendeTidspunkt = startTidspunkt.somEndelig()
 
             override fun hasNext() =
-                gjeldendeTidspunkt.neste() <= tilOgMedTidspunkt.neste()
+                gjeldendeTidspunkt.neste() <= tilOgMedTidspunkt.neste().somEndelig()
 
             override fun next(): Tidspunkt {
                 val next = gjeldendeTidspunkt
                 gjeldendeTidspunkt = gjeldendeTidspunkt.neste()
-                return next
+
+                return if (next.compareTo(tilOgMedTidspunkt.somEndelig()) == 0)
+                    tilOgMedTidspunkt
+                else if (next.compareTo(startTidspunkt.somEndelig()) == 0)
+                    startTidspunkt
+                else
+                    next
             }
         }
 
@@ -185,6 +211,36 @@ data class Tidsrom(
 
 operator fun Tidspunkt.rangeTo(tilOgMed: Tidspunkt) =
     Tidsrom(this, tilOgMed)
+
+fun Iterable<Tidspunkt>.minste(): Tidspunkt {
+    val iterator = this.iterator()
+    if (!iterator.hasNext()) throw NoSuchElementException()
+    var minValue = iterator.next()
+    while (iterator.hasNext()) {
+        val tidspunkt = iterator.next()
+        if (tidspunkt.erUendeligLengeSiden() && minValue.somEndelig() < tidspunkt.somEndelig())
+            minValue = minValue.somUendeligLengeSiden()
+        else if (minValue > tidspunkt) {
+            minValue = tidspunkt
+        }
+    }
+    return minValue
+}
+
+fun Iterable<Tidspunkt>.største(): Tidspunkt {
+    val iterator = this.iterator()
+    if (!iterator.hasNext()) throw NoSuchElementException()
+    var maxValue = iterator.next()
+    while (iterator.hasNext()) {
+        val tidspunkt = iterator.next()
+        if (tidspunkt.erUendeligLengeTil() && maxValue.somEndelig() > tidspunkt.somEndelig())
+            maxValue = maxValue.somUendeligLengeTil()
+        else if (maxValue < tidspunkt) {
+            maxValue = tidspunkt
+        }
+    }
+    return maxValue
+}
 
 fun <T> Periode<T>.erInnenforTidsrom(tidsrom: Tidsrom) =
     fom <= tidsrom.start && tom >= tidsrom.endInclusive

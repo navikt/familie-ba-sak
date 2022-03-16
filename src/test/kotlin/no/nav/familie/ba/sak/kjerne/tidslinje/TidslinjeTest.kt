@@ -23,11 +23,23 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 internal class TidslinjeTest {
+
+    @Test
+    fun testTidsrom() {
+        val fom = Tidspunkt.uendeligLengeSiden(YearMonth.of(2020, 1))
+        val tom = Tidspunkt.uendeligLengeTil(YearMonth.of(2020, 10))
+        val tidsrom = fom..tom
+
+        assertEquals(10, tidsrom.count())
+        assertEquals(fom, tidsrom.first())
+        assertEquals(tom, tidsrom.last())
+    }
 
     @Test
     fun test() {
@@ -76,9 +88,9 @@ internal class TidslinjeTest {
         )
 
         println("Barn: ${barn1.aktør.aktivFødselsnummer()}")
-        tidslinjer.forBarn(barn1).kompetanseValidering.perioder().forEach { println(it) }
+        tidslinjer.forBarn(barn1).erEøs.perioder().forEach { println(it) }
         println("Barn: ${barn2.aktør.aktivFødselsnummer()}")
-        tidslinjer.forBarn(barn2).kompetanseValidering.perioder().forEach { println(it) }
+        tidslinjer.forBarn(barn2).erEøs.perioder().forEach { println(it) }
     }
 }
 
@@ -155,7 +167,9 @@ data class VilkårsvurderingBuilder(
 
         private fun parseVilkår(periodeString: String, vilkår: Vilkår): Tidslinje<VilkårRegelverkResultat> {
             val charTidslinje = CharTidslinje(periodeString, startMåned)
-            return VilkårRegelverkResultatTidslinje(vilkår, charTidslinje)
+            val vilkårRegelverkResultatTidslinje = VilkårRegelverkResultatTidslinje(vilkår, charTidslinje)
+            val perioder = vilkårRegelverkResultatTidslinje.perioder()
+            return vilkårRegelverkResultatTidslinje
         }
     }
 }
@@ -178,8 +192,8 @@ class CharTidslinje(private val tegn: String, private val startMåned: YearMonth
 
     override fun kalkulerInnhold(tidspunkt: Tidspunkt): Char? {
         val månederIMellom = ChronoUnit.MONTHS.between(
-            tidsrom().start.tilFørsteDagIMåneden().tilLocalDate(),
-            tidspunkt.tilFørsteDagIMåneden().tilLocalDate()
+            tidsrom().start.somEndelig().tilFørsteDagIMåneden().tilLocalDate(),
+            tidspunkt.somEndelig().tilFørsteDagIMåneden().tilLocalDate()
         ).toInt()
         return tegn[månederIMellom]
     }

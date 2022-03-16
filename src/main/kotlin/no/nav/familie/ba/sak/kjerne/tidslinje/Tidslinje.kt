@@ -16,9 +16,9 @@ abstract class Tidslinje<T> {
             .fold(emptyList()) { acc, (tidspunkt, innhold) ->
                 val sistePeriode = acc.lastOrNull()
                 when {
-                    sistePeriode != null && sistePeriode.innhold == innhold && sistePeriode.tom.erRettFør(tidspunkt) ->
+                    sistePeriode != null && sistePeriode.innhold == innhold && sistePeriode.tom.erRettFør(tidspunkt.somEndelig()) ->
                         acc.replaceLast(sistePeriode.copy(tom = tidspunkt))
-                    else -> acc + Periode(tidspunkt, tidspunkt, innhold)
+                    else -> acc + Periode(tidspunkt.ikkeUendeligFremtid(), tidspunkt.ikkeUendeligFortid(), innhold)
                 }
             }
 
@@ -80,8 +80,12 @@ abstract class TidslinjeMedAvhengigheter<T>(
     private val foregåendeTidslinjer: Collection<Tidslinje<*>>
 ) : Tidslinje<T>() {
 
-    override fun tidsrom() =
-        foregåendeTidslinjer.minOf { it.tidsrom().start }..foregåendeTidslinjer.maxOf { it.tidsrom().endInclusive }
+    override fun tidsrom(): Tidsrom {
+        val fom = foregåendeTidslinjer.map { it.tidsrom().start }.minste()
+        val tom = foregåendeTidslinjer.map { it.tidsrom().endInclusive }.største()
+
+        return fom..tom
+    }
 
     init {
         foregåendeTidslinjer.forEach { it.registrerEtterfølgendeTidslinje(this) }
