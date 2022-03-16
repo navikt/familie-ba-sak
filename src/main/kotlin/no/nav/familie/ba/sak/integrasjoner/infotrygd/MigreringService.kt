@@ -395,8 +395,6 @@ class MigreringService(
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)
     }
-
-
 }
 
 enum class MigreringsfeilType(val beskrivelse: String) {
