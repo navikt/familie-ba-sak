@@ -9,39 +9,38 @@ enum class TidslinjeTema {
     VILKÅR_PERIODER_BARN
 }
 
-data class TidslinjeEksempel<Data : PeriodeData>(
-    val perioder: List<PeriodeEksempel<Data>>,
+data class TidslinjeEksempel<T>(
+    val perioder: List<PeriodeEksempel<T>>,
     val tema: TidslinjeTema
 ) {
-    fun tilLocalDateTimeline(): LocalDateTimeline<List<PeriodeData>> {
-        return LocalDateTimeline(this.perioder.sortedBy { it.fom }.map {
-            LocalDateSegment(
-                it.fom,
-                it.tom,
-                listOf(it.data)
-            )
-        })
+    fun tilLocalDateTimeline(): LocalDateTimeline<List<T>> {
+        return LocalDateTimeline(
+            this.perioder.sortedBy { it.fom }.map {
+                LocalDateSegment(
+                    it.fom,
+                    it.tom,
+                    listOf(it.data)
+                )
+            }
+        )
     }
 }
 
-fun List<LocalDateTimeline<List<PeriodeData>>>.kombinerTidslinjer(): LocalDateTimeline<List<PeriodeData>> {
-    val restenAvTidslinjene = this.dropLast(1)
-    val sisteTidslinje = this.last()
-    return restenAvTidslinjene.fold(sisteTidslinje) { sammenlagt, neste ->
+fun <T> List<LocalDateTimeline<List<T>>>.kombinerTidslinjer() =
+    this.reduce { sammenlagt, neste ->
         kombinerTidslinjer(sammenlagt, neste)
     }
-}
 
-internal fun kombinerTidslinjer(
-    sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
-    tidslinje: LocalDateTimeline<List<PeriodeData>>
-): LocalDateTimeline<List<PeriodeData>> {
+internal fun <T> kombinerTidslinjer(
+    sammenlagtTidslinje: LocalDateTimeline<List<T>>,
+    tidslinje: LocalDateTimeline<List<T>>
+): LocalDateTimeline<List<T>> {
     val sammenlagt =
         sammenlagtTidslinje.combine(
             tidslinje,
             StandardCombinators::bothValues,
             LocalDateTimeline.JoinStyle.CROSS_JOIN
-        ) as LocalDateTimeline<List<List<PeriodeData>>>
+        ) as LocalDateTimeline<List<List<T>>>
 
     return LocalDateTimeline(
         sammenlagt.toSegments().map {
@@ -50,12 +49,8 @@ internal fun kombinerTidslinjer(
     )
 }
 
-interface PeriodeData {
-    fun hentKriterie(): Any
-}
-
-data class PeriodeEksempel<Data : PeriodeData>(
+data class PeriodeEksempel<T>(
     val fom: LocalDate,
     val tom: LocalDate,
-    val data: Data
+    val data: T
 )

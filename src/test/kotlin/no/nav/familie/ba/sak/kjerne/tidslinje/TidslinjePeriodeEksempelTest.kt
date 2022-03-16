@@ -1,16 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-
-data class VilkårEksempel(
-    val vilkår: Vilkår
-) : PeriodeData {
-    override fun hentKriterie(): Any {
-        return vilkår
-    }
-}
 
 class TidslinjePeriodeEksempelTest {
     @Test
@@ -20,7 +13,7 @@ class TidslinjePeriodeEksempelTest {
                 PeriodeEksempel(
                     fom = LocalDate.of(2018, 1, 1),
                     tom = LocalDate.of(2018, 12, 31),
-                    data = VilkårEksempel(Vilkår.BOR_MED_SØKER)
+                    data = Vilkår.BOR_MED_SØKER
                 )
             ),
             tema = TidslinjeTema.VILKÅR_PERIODER_BARN
@@ -31,7 +24,7 @@ class TidslinjePeriodeEksempelTest {
                 PeriodeEksempel(
                     fom = LocalDate.of(2018, 1, 1),
                     tom = LocalDate.of(2018, 12, 31),
-                    data = VilkårEksempel(Vilkår.BOSATT_I_RIKET)
+                    data = Vilkår.BOSATT_I_RIKET
                 )
             ),
             tema = TidslinjeTema.VILKÅR_PERIODER_BARN
@@ -42,7 +35,7 @@ class TidslinjePeriodeEksempelTest {
                 PeriodeEksempel(
                     fom = LocalDate.of(2018, 1, 1),
                     tom = LocalDate.of(2018, 12, 31),
-                    data = VilkårEksempel(Vilkår.LOVLIG_OPPHOLD)
+                    data = Vilkår.LOVLIG_OPPHOLD
                 )
             ),
             tema = TidslinjeTema.VILKÅR_PERIODER_BARN
@@ -53,7 +46,7 @@ class TidslinjePeriodeEksempelTest {
                 PeriodeEksempel(
                     fom = LocalDate.of(2018, 6, 12),
                     tom = LocalDate.of(2018, 6, 12).plusYears(18),
-                    data = VilkårEksempel(Vilkår.UNDER_18_ÅR)
+                    data = Vilkår.UNDER_18_ÅR
                 )
             ),
             tema = TidslinjeTema.VILKÅR_PERIODER_BARN
@@ -64,13 +57,13 @@ class TidslinjePeriodeEksempelTest {
                 PeriodeEksempel(
                     fom = LocalDate.of(2018, 1, 1),
                     tom = LocalDate.of(2018, 12, 31),
-                    data = VilkårEksempel(Vilkår.GIFT_PARTNERSKAP)
+                    data = Vilkår.GIFT_PARTNERSKAP
                 )
             ),
             tema = TidslinjeTema.VILKÅR_PERIODER_BARN
         )
 
-        val localDateTimelineBarn = listOf(
+        val localDateTimelineBarn: LocalDateTimeline<List<Vilkår>> = listOf(
             borMedSøker2018,
             bosattIRiket2018,
             lovligOpphold2018,
@@ -78,6 +71,6 @@ class TidslinjePeriodeEksempelTest {
             giftPartnerskap2018
         ).map { it.tilLocalDateTimeline() }.kombinerTidslinjer()
 
-        print(localDateTimelineBarn)
+        localDateTimelineBarn.toSegments().forEach { println(it) }
     }
 }
