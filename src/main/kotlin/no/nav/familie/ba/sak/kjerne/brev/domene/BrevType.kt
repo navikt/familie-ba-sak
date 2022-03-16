@@ -36,6 +36,12 @@ enum class BrevType(
         "Varsel om revurdering delt bosted § 14",
         true
     ),
+    VARSEL_OM_REVURDERING_SAMBOER(
+        "varsel-om-revurdering-samboer",
+        Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING_SAMBOER,
+        "Varsel om revurdering samboer",
+        true
+    ),
     VEDTAK("vedtak", Dokumenttype.BARNETRYGD_VEDTAK, "vedtak", false),
     HENLEGGE_TRUKKET_SØKNAD(
         "henlegge-trukket-soknad",
@@ -84,6 +90,7 @@ enum class BrevType(
             INFORMASJONSBREV_DELT_BOSTED -> Brevmal.INFORMASJONSBREV_DELT_BOSTED
             VARSEL_OM_REVURDERING -> Brevmal.VARSEL_OM_REVURDERING
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14
+            VARSEL_OM_REVURDERING_SAMBOER -> Brevmal.VARSEL_OM_REVURDERING_SAMBOER
             HENLEGGE_TRUKKET_SØKNAD -> Brevmal.HENLEGGE_TRUKKET_SØKNAD
             SVARTIDSBREV -> Brevmal.SVARTIDSBREV
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG
