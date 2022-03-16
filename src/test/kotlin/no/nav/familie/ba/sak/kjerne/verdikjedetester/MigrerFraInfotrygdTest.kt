@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.MigreringService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -17,12 +19,13 @@ import java.time.LocalDate
 class MigrerFraInfotrygdTest(
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val migreringService: MigreringService,
-    @Autowired private val mockLocalDateService: LocalDateService
+    @Autowired private val mockLocalDateService: LocalDateService,
+    @Autowired private val featureToggleService: FeatureToggleService
 ) : AbstractVerdikjedetest() {
 
     @Test
     fun `skal migrere fagsak selv om ikke alle barn i infotrygd ligger i PDL`() {
-
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SKAL_MIGRERE_FOSTERBARN, any()) } returns true
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
