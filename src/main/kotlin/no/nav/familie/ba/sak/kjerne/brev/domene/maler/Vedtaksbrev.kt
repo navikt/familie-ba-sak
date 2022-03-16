@@ -15,6 +15,8 @@ interface VedtaksbrevData : BrevData {
 
 enum class BrevPeriodeType(val apiNavn: String) {
     INNVILGELSE("innvilgelse"),
+    INNVILGELSE_INGEN_UTBETALING("innvilgelseIngenUtbetaling"),
+    INNVILGELSE_KUN_UTBETALING_PÅ_SØKER("innvilgelseKunUtbetalingPaSoker"),
     OPPHOR("opphor"),
     AVSLAG("avslag"),
     AVSLAG_UTEN_PERIODE("avslagUtenPeriode"),

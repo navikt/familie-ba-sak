@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.KanIkkeMigrereException
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.slf4j.LoggerFactory
@@ -47,6 +48,11 @@ class ApiExceptionHandler {
         val mostSpecificCause = NestedExceptionUtils.getMostSpecificCause(exception)
 
         return illegalState(mostSpecificCause.message.toString(), mostSpecificCause)
+    }
+
+    @ExceptionHandler(RessursException::class)
+    fun handleRessursException(ressursException: RessursException): ResponseEntity<Ressurs<Any>> {
+        return ResponseEntity.status(ressursException.httpStatus).body(ressursException.ressurs)
     }
 
     @ExceptionHandler(HttpClientErrorException.Forbidden::class)
