@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBrevkode
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -37,18 +36,12 @@ class AutovedtakBrevService(
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val infotrygdService: InfotrygdService
+    private val infotrygdService: InfotrygdService,
 ) : AutovedtakBehandlingService<AutovedtakBrevBehandlingsdata> {
 
     override fun kjørBehandling(
         behandlingsdata: AutovedtakBrevBehandlingsdata,
     ): String {
-        if (autovedtakService.håndterÅpenBehandlingOgAvbrytAutovedtak(
-                aktør = behandlingsdata.aktør,
-                autovedtaktype = Autovedtaktype.OMREGNING_BREV
-            )
-        ) return "Bruker har åpen behandling"
-
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = behandlingsdata.aktør,

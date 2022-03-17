@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -17,7 +17,7 @@ import java.util.Properties
     maxAntallFeil = 3
 )
 class VedtakOmOvergangsstønadTask(
-    private val autovedtakService: AutovedtakService,
+    private val autovedtakStegService: AutovedtakStegService,
     private val personidentService: PersonidentService,
 ) : AsyncTaskStep {
 
@@ -28,8 +28,8 @@ class VedtakOmOvergangsstønadTask(
 
         val aktør = personidentService.hentAktør(personIdent)
 
-        val responeFraService = autovedtakService.kjørBehandling(
-            aktør = aktør,
+        val responeFraService = autovedtakStegService.kjørBehandling(
+            mottakersAktør = aktør,
             autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
             behandlingsdata = aktør
         )

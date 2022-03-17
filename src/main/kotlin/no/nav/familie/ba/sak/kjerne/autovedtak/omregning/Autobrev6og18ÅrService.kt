@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -20,7 +20,7 @@ class Autobrev6og18ÅrService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val behandlingService: BehandlingService,
     private val autovedtakBrevService: AutovedtakBrevService,
-    private val autovedtakService: AutovedtakService
+    private val autovedtakStegService: AutovedtakStegService
 ) {
 
     @Transactional
@@ -28,7 +28,8 @@ class Autobrev6og18ÅrService(
         logger.info("opprettOmregningsoppgaveForBarnIBrytingsalder for fagsak ${autobrev6og18ÅrDTO.fagsakId}")
 
         val behandling =
-            behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId) ?: error("Fant ikke aktiv behandling")
+            behandlingService.hentSisteBehandlingSomErVedtatt(autobrev6og18ÅrDTO.fagsakId)
+                ?: error("Fant ikke aktiv behandling")
 
         val behandlingsårsak = finnBehandlingÅrsakForAlder(
             autobrev6og18ÅrDTO.alder
@@ -61,8 +62,9 @@ class Autobrev6og18ÅrService(
             logger.info("Fagsak ${behandling.fagsak.id} har ikke løpende utbetalinger for barn under 18 år og vil opphøre.")
             return
         }
-        autovedtakService.kjørBehandling(
-            aktør = behandling.fagsak.aktør,
+
+        autovedtakStegService.kjørBehandling(
+            mottakersAktør = behandling.fagsak.aktør,
             autovedtaktype = Autovedtaktype.OMREGNING_BREV,
             behandlingsdata = AutovedtakBrevBehandlingsdata(
                 aktør = behandling.fagsak.aktør,

@@ -141,8 +141,8 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
     return gjeldendeUtvidetVedtaksperiodeId
 }
 
-fun defaultFagsak() = Fagsak(
-    1, aktør = tilAktør(randomFnr())
+fun defaultFagsak(aktør: Aktør = tilAktør(randomFnr())) = Fagsak(
+    1, aktør = aktør
 )
 
 fun lagBehandling(

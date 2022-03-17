@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
@@ -28,7 +28,7 @@ import java.util.Properties
     maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-    private val autovedtakService: AutovedtakService,
+    private val autovedtakStegService: AutovedtakStegService,
     private val velgFagsystemService: VelgFagSystemService,
     private val infotrygdFeedService: InfotrygdFeedService,
     private val personidentService: PersonidentService
@@ -56,7 +56,13 @@ class BehandleFødselshendelseTask(
         }
 
         when (velgFagsystemService.velgFagsystem(nyBehandling).first) {
-            FagsystemRegelVurdering.SEND_TIL_BA -> autovedtakService.kjørBehandling(aktør = personidentService.hentAktør(nyBehandling.morsIdent), autovedtaktype = Autovedtaktype.FØDSELSHENDELSE, behandlingsdata = nyBehandling) // hvem sin aktør?
+            FagsystemRegelVurdering.SEND_TIL_BA -> autovedtakStegService.kjørBehandling(
+                mottakersAktør = personidentService.hentAktør(
+                    nyBehandling.morsIdent
+                ),
+                autovedtaktype = Autovedtaktype.FØDSELSHENDELSE,
+                behandlingsdata = nyBehandling
+            )
             FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> {
                 infotrygdFeedService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
             }

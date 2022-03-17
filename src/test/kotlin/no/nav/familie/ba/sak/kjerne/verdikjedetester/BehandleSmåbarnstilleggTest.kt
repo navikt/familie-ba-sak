@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -71,7 +71,7 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val efSakRestClient: EfSakRestClient,
-    @Autowired private val autovedtakService: AutovedtakService,
+    @Autowired private val autovedtakStegService: AutovedtakStegService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val opprettTaskService: OpprettTaskService
 ) : AbstractVerdikjedetest() {
@@ -280,7 +280,11 @@ class BehandleSmåbarnstilleggTest(
         settOppefSakMockForDeFørste2Testene(søkersIdent)
 
         val søkersAktør = personidentService.hentAktør(søkersIdent)
-        autovedtakService.kjørBehandling(aktør = søkersAktør, autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG, behandlingsdata = søkersAktør)
+        autovedtakStegService.kjørBehandling(
+            mottakersAktør = søkersAktør,
+            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
+            behandlingsdata = søkersAktør
+        )
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
 
@@ -306,7 +310,11 @@ class BehandleSmåbarnstilleggTest(
                 ),
             )
         )
-        autovedtakService.kjørBehandling(aktør = søkersAktør, autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG, behandlingsdata = søkersAktør)
+        autovedtakStegService.kjørBehandling(
+            mottakersAktør = søkersAktør,
+            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
+            behandlingsdata = søkersAktør
+        )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
@@ -359,7 +367,11 @@ class BehandleSmåbarnstilleggTest(
                 ),
             )
         )
-        autovedtakService.kjørBehandling(aktør = søkersAktør, autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG, behandlingsdata = søkersAktør)
+        autovedtakStegService.kjørBehandling(
+            mottakersAktør = søkersAktør,
+            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
+            behandlingsdata = søkersAktør
+        )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!

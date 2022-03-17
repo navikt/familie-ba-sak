@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
@@ -54,7 +54,8 @@ class AutovedtakFødselshendelseService(
     private val autovedtakService: AutovedtakService,
     private val personopplysningerService: PersonopplysningerService,
     private val statsborgerskapService: StatsborgerskapService,
-    private val opprettTaskService: OpprettTaskService
+    private val opprettTaskService: OpprettTaskService,
+    private val oppgaveService: OppgaveService
 ) : AutovedtakBehandlingService<NyBehandlingHendelse> {
 
     val stansetIAutomatiskFiltreringCounter =
@@ -65,12 +66,6 @@ class AutovedtakFødselshendelseService(
 
     override fun kjørBehandling(nyBehandling: NyBehandlingHendelse): String {
         val morsAktør = personidentService.hentAktør(nyBehandling.morsIdent)
-        if (autovedtakService.håndterÅpenBehandlingOgAvbrytAutovedtak(
-                aktør = morsAktør,
-                autovedtaktype = Autovedtaktype.FØDSELSHENDELSE
-            )
-        ) return "Bruker har åpen behandling"
-
         val morsÅpneBehandling = hentÅpenBehandling(aktør = morsAktør)
         val barnsAktører = personidentService.hentAktørIder(nyBehandling.barnasIdenter)
 
@@ -221,7 +216,7 @@ class AutovedtakFødselshendelseService(
             )
         )
 
-        autovedtakService.opprettOppgaveForManuellBehandling(
+        oppgaveService.opprettOppgaveForManuellBehandling(
             behandling = behandling,
             begrunnelse = "Fødselshendelse: $begrunnelseForManuellOppgave",
             oppgavetype = Oppgavetype.VurderLivshendelse

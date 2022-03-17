@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -36,7 +37,8 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class AutobrevOpphørSmåbarnstilleggServiceTest {
-    private val autovedtakService = mockk<AutovedtakService>(relaxed = true)
+    private val autovedtakService = mockk<AutovedtakService>()
+    private val autovedtakStegService = mockk<AutovedtakStegService>()
     private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val behandlingService = mockk<BehandlingService>()
@@ -62,7 +64,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         persongrunnlagService = persongrunnlagService,
         behandlingService = behandlingService,
         periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
-        autovedtakService = autovedtakService
+        autovedtakStegService = autovedtakStegService
     )
 
     @Test
@@ -81,19 +83,18 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
+        every { autovedtakStegService.kjørBehandling<Any>(any(), any(), any()) } returns ""
 
         autobrevOpphørSmåbarnstilleggService
             .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId = behandling.fagsak.id)
 
         verify(exactly = 1) {
-            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+            autovedtakStegService.kjørBehandling<Any>(
                 any(),
                 any(),
                 any()
             )
         }
-
-        verify(exactly = 1) { taskRepository.save(any()) }
     }
 
     @Test

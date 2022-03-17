@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -36,7 +36,8 @@ class AutovedtakSmåbarnstilleggService(
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val taskRepository: TaskRepository,
     private val beregningService: BeregningService,
-    private val autovedtakService: AutovedtakService
+    private val autovedtakService: AutovedtakService,
+    private val oppgaveService: OppgaveService
 ) : AutovedtakBehandlingService<Aktør> {
 
     private val antallVedtakOmOvergangsstønad: Counter =
@@ -66,26 +67,23 @@ class AutovedtakSmåbarnstilleggService(
             )
         }
 
+    override fun kanAutovedtakBehandles(behandlingsdata: Aktør): Boolean {
+        val fagsak = fagsakService.hent(aktør = behandlingsdata) ?: return false
+        val påvirkerFagsak = småbarnstilleggService.vedtakOmOvergangsstønadPåvirkerFagsak(fagsak)
+        return if (!påvirkerFagsak) {
+            antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak.increment()
+
+            logger.info("Påvirker ikke fagsak")
+            false
+        } else {
+            antallVedtakOmOvergangsstønadPåvirkerFagsak.increment()
+            true
+        }
+    }
+
     @Transactional
     override fun kjørBehandling(aktør: Aktør): String {
         antallVedtakOmOvergangsstønad.increment()
-
-        val fagsak = fagsakService.hent(aktør = aktør) ?: return "har ikke fagsak i systemet"
-        val påvirkerFagsak = småbarnstilleggService.vedtakOmOvergangsstønadPåvirkerFagsak(fagsak)
-        if (!påvirkerFagsak) {
-            antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak.increment()
-
-            return "påvirker ikke fagsak"
-        } else {
-            antallVedtakOmOvergangsstønadPåvirkerFagsak.increment()
-        }
-
-        if (autovedtakService.håndterÅpenBehandlingOgAvbrytAutovedtak(
-                aktør = aktør,
-                autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG
-            )
-        ) return "Bruker har åpen behandling"
-
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = aktør,
@@ -162,7 +160,7 @@ class AutovedtakSmåbarnstilleggService(
             behandling = behandling,
             steg = StegType.VILKÅRSVURDERING
         )
-        return autovedtakService.opprettOppgaveForManuellBehandling(
+        return oppgaveService.opprettOppgaveForManuellBehandling(
             behandling = omgjortBehandling,
             begrunnelse = meldingIOppgave,
             oppgavetype = Oppgavetype.VurderLivshendelse,
