@@ -43,7 +43,7 @@ internal class Autobrev6og18ÅrServiceTest {
     private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
 
-    private val autobrevService = AutobrevService(
+    private val autovedtakBrevService = AutovedtakBrevService(
         behandlingService = behandlingService,
         fagsakService = fagsakService,
         autovedtakService = autovedtakService,
@@ -56,7 +56,7 @@ internal class Autobrev6og18ÅrServiceTest {
     private val autobrev6og18ÅrService = Autobrev6og18ÅrService(
         personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
         behandlingService = behandlingService,
-        autobrevService = autobrevService
+        autobrevService = autovedtakBrevService
     )
 
     @Test

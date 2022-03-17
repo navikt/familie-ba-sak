@@ -49,7 +49,7 @@ class FødselshendelseServiceTest {
         integrasjonClient = integrasjonClient
     )
 
-    private val fødselshendelseService = FødselshendelseService(
+    private val autovedtakFødselshendelseService = AutovedtakFødselshendelseService(
         filtreringsreglerService,
         taskRepository,
         fagsakService,
@@ -77,7 +77,7 @@ class FødselshendelseServiceTest {
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
         every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
 
-        fødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
+        autovedtakFødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
 
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
@@ -100,7 +100,7 @@ class FødselshendelseServiceTest {
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
         every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
 
-        fødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
+        autovedtakFødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
 
         verify(exactly = 0) {
             opprettTaskService.opprettOppgaveTask(

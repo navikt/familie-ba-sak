@@ -4,12 +4,14 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBrevkode
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -21,8 +23,14 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
+data class AutovedtakBrevBehandlingsdata(
+    val aktør: Aktør,
+    val behandlingsårsak: BehandlingÅrsak,
+    val standardbegrunnelse: VedtakBegrunnelseSpesifikasjon
+)
+
 @Service
-class AutobrevService(
+class AutovedtakBrevService(
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
     private val autovedtakService: AutovedtakService,
@@ -30,7 +38,38 @@ class AutobrevService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
     private val infotrygdService: InfotrygdService
-) {
+) : AutovedtakBehandlingService<AutovedtakBrevBehandlingsdata> {
+
+    override fun kjørBehandling(
+        behandlingsdata: AutovedtakBrevBehandlingsdata,
+    ): String {
+        if (autovedtakService.håndterÅpenBehandlingOgAvbrytAutovedtak(
+                aktør = behandlingsdata.aktør,
+                autovedtaktype = Autovedtaktype.OMREGNING_BREV
+            )
+        ) return "Bruker har åpen behandling"
+
+        val behandlingEtterBehandlingsresultat =
+            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+                aktør = behandlingsdata.aktør,
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingÅrsak = behandlingsdata.behandlingsårsak
+            )
+
+        vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
+            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id),
+            vedtakBegrunnelseSpesifikasjon = behandlingsdata.standardbegrunnelse
+        )
+
+        val opprettetVedtak =
+            autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
+                behandlingEtterBehandlingsresultat
+            )
+
+        opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
+
+        return "Omregningsbehandling kjørt OK"
+    }
 
     fun skalAutobrevBehandlingOpprettes(
         fagsakId: Long,
@@ -89,31 +128,6 @@ class AutobrevService(
         }
     }
 
-    fun opprettOgKjørOmregningsbehandling(
-        behandling: Behandling,
-        behandlingsårsak: BehandlingÅrsak,
-        standardbegrunnelse: VedtakBegrunnelseSpesifikasjon
-    ) {
-        val behandlingEtterBehandlingsresultat =
-            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                fagsak = behandling.fagsak,
-                behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = behandlingsårsak
-            )
-
-        vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
-            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id),
-            vedtakBegrunnelseSpesifikasjon = standardbegrunnelse
-        )
-
-        val opprettetVedtak =
-            autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
-                behandlingEtterBehandlingsresultat
-            )
-
-        opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
-    }
-
     private fun barnAlleredeBegrunnet(
         vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
         standardbegrunnelser: List<VedtakBegrunnelseSpesifikasjon>
@@ -133,7 +147,7 @@ class AutobrevService(
     }
 
     companion object {
-        val logger = LoggerFactory.getLogger(AutobrevService::class.java)
+        val logger = LoggerFactory.getLogger(AutovedtakBrevService::class.java)
     }
 }
 

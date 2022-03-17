@@ -47,7 +47,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
 
-    private val autobrevService = AutobrevService(
+    private val autovedtakBrevService = AutovedtakBrevService(
         fagsakService = fagsakService,
         behandlingService = behandlingService,
         infotrygdService = infotrygdService,
@@ -58,7 +58,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     )
 
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(
-        autobrevService = autobrevService,
+        autobrevService = autovedtakBrevService,
         persongrunnlagService = persongrunnlagService,
         behandlingService = behandlingService,
         periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository

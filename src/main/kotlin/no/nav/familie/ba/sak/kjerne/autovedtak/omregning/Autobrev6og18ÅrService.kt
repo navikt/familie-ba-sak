@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -18,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 class Autobrev6og18ÅrService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val behandlingService: BehandlingService,
-    private val autobrevService: AutobrevService
+    private val autovedtakBrevService: AutovedtakBrevService
 ) {
 
     @Transactional
@@ -32,7 +31,7 @@ class Autobrev6og18ÅrService(
             autobrev6og18ÅrDTO.alder
         )
 
-        if (!autobrevService.skalAutobrevBehandlingOpprettes(
+        if (!autovedtakBrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = autobrev6og18ÅrDTO.fagsakId,
                 behandlingsårsak = behandlingsårsak,
                 standardbegrunnelser = AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrev6og18ÅrDTO.alder)
@@ -60,15 +59,13 @@ class Autobrev6og18ÅrService(
             return
         }
 
-        if (behandling.status != BehandlingStatus.AVSLUTTET) {
-            error("Kan ikke opprette ny behandling for fagsak ${behandling.fagsak.id} ettersom den allerede har en åpen behanding.")
-        }
-
-        autobrevService.opprettOgKjørOmregningsbehandling(
-            behandling = behandling,
-            behandlingsårsak = behandlingsårsak,
-            standardbegrunnelse = AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
-                autobrev6og18ÅrDTO.alder
+        autovedtakBrevService.kjørBehandling(
+            behandlingsdata = AutovedtakBrevBehandlingsdata(
+                aktør = behandling.fagsak.aktør,
+                behandlingsårsak = behandlingsårsak,
+                standardbegrunnelse = AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
+                    autobrev6og18ÅrDTO.alder
+                )
             )
         )
     }
