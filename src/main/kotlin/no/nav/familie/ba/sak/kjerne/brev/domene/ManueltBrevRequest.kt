@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.HENLEGGE_TRUKKET_SØKNAD
@@ -21,16 +23,20 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Data
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboerBrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboerData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
+import java.time.LocalDate
 
 data class ManueltBrevRequest(
     val brevmal: BrevType,
     val multiselectVerdier: List<String> = emptyList(),
     val mottakerIdent: String,
     val barnIBrev: List<String> = emptyList(),
+    val datoAvtale: String? = null,
     // Settes av backend ved utsending fra behandling
     val mottakerMålform: Målform = Målform.NB,
     val mottakerNavn: String = "",
@@ -135,6 +141,21 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                     navn = this.mottakerNavn,
                     fodselsnummer = this.mottakerIdent,
                     barnMedDeltBostedAvtale = this.multiselectVerdier,
+                )
+            )
+        )
+    BrevType.VARSEL_OM_REVURDERING_SAMBOER.malId ->
+        if (this.datoAvtale == null) throw FunksjonellFeil(
+            frontendFeilmelding = "Du må sette dato for samboerskap for å sende dette brevet.",
+            melding = "Dato er ikke satt for brevtype 'varsel om revurdering samboer'"
+        )
+        else VarselOmRevurderingSamboerBrev(
+            data = VarselOmRevurderingSamboerData(
+                delmalData = VarselOmRevurderingSamboerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
+                flettefelter = VarselOmRevurderingSamboerData.Flettefelter(
+                    navn = this.mottakerNavn,
+                    fodselsnummer = this.mottakerIdent,
+                    datoAvtale = LocalDate.parse(this.datoAvtale).tilDagMånedÅr()
                 )
             )
         )

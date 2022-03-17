@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
@@ -125,6 +127,8 @@ class MigreringServiceTest(
 
     @Autowired
     private val envService: EnvService,
+    @Autowired
+    private val featureToggleService: FeatureToggleService
 
 ) : AbstractMockkSpringRunner() {
 
@@ -169,6 +173,7 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(relaxed = true),
+            mockk(relaxed = true)
         ) // => env.erDev() = env.erE2E() = false
     }
 
@@ -177,6 +182,51 @@ class MigreringServiceTest(
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
+
+        val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
+
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
+            iverksettMotOppdragTask.doTask(task)
+            iverksettMotOppdragTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == SendVedtakTilInfotrygdTask.TASK_STEP_TYPE }!!
+            sendVedtakTilInfotrygdTask.doTask(task)
+            sendVedtakTilInfotrygdTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == StatusFraOppdragTask.TASK_STEP_TYPE }!!
+            statusFraOppdragTask.doTask(task)
+            statusFraOppdragTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            var task = tasks.find { it.type == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
+            ferdigstillBehandlingTask.doTask(task)
+            ferdigstillBehandlingTask.onCompletion(task)
+
+            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
+            publiserVedtakTask.doTask(task)
+            publiserVedtakTask.onCompletion(task)
+
+            val now = LocalDate.now()
+            val forventetUtbetalingFom: LocalDate =
+                if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
+
+            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
+            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
+            assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+        }
+    }
+
+    @Test
+    fun `migrering av ordinær sak - happy case - ikke eget barn`() {
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
+        val slotAktør = slot<Aktør>()
+        every { pdlRestClient.hentForelderBarnRelasjoner(capture(slotAktør)) } returns emptyList()
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SKAL_MIGRERE_FOSTERBARN, any()) } returns true
 
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -300,6 +350,44 @@ class MigreringServiceTest(
         }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
             .extracting("feiltype").isEqualTo(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)
+    }
+
+    @Test
+    fun `migrering skal feile dersom person registrert på stønad er også registrert som barn, Det er da mest sannsynlig institusjon`() {
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(
+            listOf(
+                Sak(
+                    stønad = Stønad(
+                        barn = listOf(
+                            Barn(ClientMocks.søkerFnr[0], barnetrygdTom = "000000")
+                        ),
+                        delytelse = listOf(
+                            Delytelse(
+                                fom = LocalDate.now(),
+                                tom = null,
+                                beløp = 2048.0,
+                                typeDelytelse = "MS",
+                                typeUtbetaling = "J",
+                            )
+                        ),
+                        opphørsgrunn = "0"
+                    ),
+                    status = "FB",
+                    valg = "OR",
+                    undervalg = "OS"
+                )
+
+            ),
+            emptyList()
+        )
+
+        assertThatThrownBy {
+            migreringService.migrer(ClientMocks.søkerFnr[0])
+        }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.INSTITUSJON)
     }
 
     @Test
@@ -496,6 +584,7 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
+            mockk(relaxed = true),
             mockk(relaxed = true),
         )
 
