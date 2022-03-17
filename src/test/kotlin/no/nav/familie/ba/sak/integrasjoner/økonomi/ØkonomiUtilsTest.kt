@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETR
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 
 internal class ØkonomiUtilsTest {
 
@@ -294,7 +295,6 @@ internal class ØkonomiUtilsTest {
         val andelerTilOpphørMedDato =
             andelerTilOpphørMedDato(
                 forrigeKjeder = kjederBehandling1,
-                oppdaterteKjeder = kjederBehandling2,
                 sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede
             )
 
@@ -302,6 +302,94 @@ internal class ØkonomiUtilsTest {
         assertEquals(2, andelerTilOpprettelse.first().size)
         assertEquals(1, andelerTilOpphørMedDato.size)
         assertEquals(årMnd(datoSomSkalOppdateres), andelerTilOpphørMedDato.first().second)
+    }
+
+    @Test
+    fun `skal opphøre først barn helt og innvilge nytt barn når første barn ikke er innvilget i andre behandling`() {
+        val førsteBarn = tilfeldigPerson()
+        val andreBarn = tilfeldigPerson()
+
+        val kjederBehandling1 = kjedeinndelteAndeler(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    årMnd("2019-04"),
+                    årMnd("2020-01"),
+                    ORDINÆR_BARNETRYGD,
+                    1054,
+                    person = førsteBarn,
+                    aktør = førsteBarn.aktør
+                ),
+                lagAndelTilkjentYtelse(
+                    årMnd("2020-02"),
+                    årMnd("2023-01"),
+                    ORDINÆR_BARNETRYGD,
+                    1345,
+                    person = førsteBarn,
+                    aktør = førsteBarn.aktør
+                ),
+                lagAndelTilkjentYtelse(
+                    årMnd("2023-02"),
+                    årMnd("2026-01"),
+                    ORDINÆR_BARNETRYGD,
+                    1654,
+                    person = førsteBarn,
+                    aktør = førsteBarn.aktør
+                )
+            )
+        )
+        val kjederBehandling2 = kjedeinndelteAndeler(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    årMnd("2020-04"),
+                    årMnd("2021-01"),
+                    ORDINÆR_BARNETRYGD,
+                    1054,
+                    person = andreBarn,
+                    aktør = andreBarn.aktør
+                ),
+                lagAndelTilkjentYtelse(
+                    årMnd("2021-02"),
+                    årMnd("2023-01"),
+                    ORDINÆR_BARNETRYGD,
+                    1054,
+                    person = andreBarn,
+                    aktør = andreBarn.aktør
+                ),
+                lagAndelTilkjentYtelse(
+                    årMnd("2025-04"),
+                    årMnd("2026-01"),
+                    ORDINÆR_BARNETRYGD,
+                    1054,
+                    person = andreBarn,
+                    aktør = andreBarn.aktør
+                )
+            )
+        )
+
+        val sisteBeståendePerKjede =
+            sisteBeståendeAndelPerKjede(
+                forrigeKjeder = kjederBehandling1,
+                oppdaterteKjeder = kjederBehandling2
+            )
+        val andelerTilOpprettelse =
+            andelerTilOpprettelse(
+                oppdaterteKjeder = kjederBehandling2,
+                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede
+            )
+        val andelerTilOpphørMedDato =
+            andelerTilOpphørMedDato(
+                forrigeKjeder = kjederBehandling1,
+                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede
+            )
+
+        assertEquals(1, andelerTilOpphørMedDato.size)
+        assertEquals(YearMonth.of(2023, 2), andelerTilOpphørMedDato.first().first.stønadFom)
+        assertEquals(YearMonth.of(2019, 4), andelerTilOpphørMedDato.first().second)
+        assertEquals(3, andelerTilOpprettelse.first().size)
+        assertEquals(YearMonth.of(2020, 4), andelerTilOpprettelse.first().first().stønadFom)
+        assertEquals(YearMonth.of(2021, 1), andelerTilOpprettelse.first().first().stønadTom)
+        assertEquals(YearMonth.of(2025, 4), andelerTilOpprettelse.first().last().stønadFom)
+        assertEquals(YearMonth.of(2026, 1), andelerTilOpprettelse.first().last().stønadTom)
     }
 
     @Test
@@ -358,7 +446,6 @@ internal class ØkonomiUtilsTest {
         val andelerTilOpphørMedDato =
             andelerTilOpphørMedDato(
                 forrigeKjeder = kjederBehandling1,
-                oppdaterteKjeder = kjederBehandling2,
                 sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede
             )
 
