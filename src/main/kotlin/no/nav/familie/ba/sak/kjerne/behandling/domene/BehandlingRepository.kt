@@ -104,14 +104,11 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query(
         """
-            select b from Behandling b 
-                            inner join BehandlingStegTilstand  bst on b.id = bst.behandling.id
-                            inner join TilkjentYtelse ty on b.id = ty.behandling.id
-                            where b.fagsak.id = :fagsakId and bst.behandlingSteg = 'BESLUTTE_VEDTAK' AND bst.behandlingStegStatus = 'UTFØRT'
-                                and ty.utbetalingsoppdrag IS NULL 
+            select b from Behandling b
+                            where b.fagsak.id = :fagsakId and b.status = 'IVERKSETTER_VEDTAK'
         """
     )
-    fun finnGodkjenteBehandlingerSomHolderPåÅIverksettes(fagsakId: Long): List<Behandling>
+    fun finnBehandlingerSomHolderPåÅIverksettes(fagsakId: Long): List<Behandling>
 
     @Query(
         """select b from Behandling b

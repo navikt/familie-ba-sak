@@ -20,6 +20,11 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "varselOmRevurderingDeltBostedParagrafFjorten",
         "Varsel om revurdering delt bosted § 14"
     ),
+    VARSEL_OM_REVURDERING_SAMBOER(
+        false,
+        "varselOmRevurderingSamboer",
+        "Varsel om revurdering samboer"
+    ),
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
     INFORMASJONSBREV_FØDSEL_MINDREÅRIG(
         false,
