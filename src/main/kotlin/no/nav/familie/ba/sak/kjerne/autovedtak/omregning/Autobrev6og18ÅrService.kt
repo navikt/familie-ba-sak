@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -17,7 +19,8 @@ import org.springframework.transaction.annotation.Transactional
 class Autobrev6og18ÅrService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val behandlingService: BehandlingService,
-    private val autovedtakBrevService: AutovedtakBrevService
+    private val autovedtakBrevService: AutovedtakBrevService,
+    private val autovedtakService: AutovedtakService
 ) {
 
     @Transactional
@@ -58,8 +61,9 @@ class Autobrev6og18ÅrService(
             logger.info("Fagsak ${behandling.fagsak.id} har ikke løpende utbetalinger for barn under 18 år og vil opphøre.")
             return
         }
-
-        autovedtakBrevService.kjørBehandling(
+        autovedtakService.kjørBehandling(
+            aktør = behandling.fagsak.aktør,
+            autovedtaktype = Autovedtaktype.OMREGNING_BREV,
             behandlingsdata = AutovedtakBrevBehandlingsdata(
                 aktør = behandling.fagsak.aktør,
                 behandlingsårsak = behandlingsårsak,

@@ -2,8 +2,9 @@ package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
-import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
@@ -29,7 +30,7 @@ class TestVerktøyController(
     private val scheduler: AutobrevScheduler,
     private val personidentService: PersonidentService,
     private val envService: EnvService,
-    private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
+    private val autovedtakService: AutovedtakService,
     private val taskRepository: TaskRepositoryWrapper,
 ) {
 
@@ -71,7 +72,7 @@ class TestVerktøyController(
     fun mottaHendelseOmVedtakOmOvergangsstønad(@RequestBody personIdent: PersonIdent): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
             val aktør = personidentService.hentAktør(personIdent.ident)
-            val melding = autovedtakSmåbarnstilleggService.kjørBehandling(aktør = aktør)
+            val melding = autovedtakService.kjørBehandling(aktør = aktør, autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG, behandlingsdata = aktør)
             ResponseEntity.ok(Ressurs.success(melding))
         } else {
             ResponseEntity.ok(Ressurs.success(MELDING))

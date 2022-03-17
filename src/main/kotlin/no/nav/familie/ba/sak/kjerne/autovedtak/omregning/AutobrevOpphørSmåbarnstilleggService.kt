@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -16,6 +18,7 @@ import java.time.YearMonth
 @Service
 class AutobrevOpphørSmåbarnstilleggService(
     private val autovedtakBrevService: AutovedtakBrevService,
+    private val autovedtakService: AutovedtakService,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingService: BehandlingService,
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository
@@ -60,7 +63,9 @@ class AutobrevOpphørSmåbarnstilleggService(
             return
         }
 
-        autovedtakBrevService.kjørBehandling(
+        autovedtakService.kjørBehandling(
+            aktør = behandling.fagsak.aktør,
+            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
             behandlingsdata = AutovedtakBrevBehandlingsdata(
                 aktør = behandling.fagsak.aktør,
                 behandlingsårsak = behandlingsårsak,

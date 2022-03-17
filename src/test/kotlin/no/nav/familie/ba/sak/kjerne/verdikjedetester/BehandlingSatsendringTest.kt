@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -39,7 +41,8 @@ class BehandlingSatsendringTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService
+    @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService,
+    @Autowired private val autovedtakService: AutovedtakService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -109,7 +112,7 @@ class BehandlingSatsendringTest(
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsService)
-        autovedtakSatsendringService.kjørBehandling(behandling.id)
+        autovedtakService.kjørBehandling(aktør = personidentService.hentAktør(scenario.søker.ident), autovedtaktype = Autovedtaktype.SATSENDRING, behandlingsdata = behandling.id)
 
         val satsendingBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(BehandlingResultat.ENDRET, satsendingBehandling?.resultat)
@@ -196,7 +199,7 @@ class BehandlingSatsendringTest(
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsService)
-        autovedtakSatsendringService.kjørBehandling(behandling.id)
+        autovedtakService.kjørBehandling(aktør = personidentService.hentAktør(scenario.søker.ident), autovedtaktype = Autovedtaktype.SATSENDRING, behandlingsdata = behandling.id)
 
         val åpenBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(revurdering.data!!.behandlingId, åpenBehandling!!.id)
@@ -272,7 +275,7 @@ class BehandlingSatsendringTest(
         unmockkObject(SatsService)
         autovedtakSatsendringService.finnBehandlingerForSatsendring(1054, YearMonth.of(2022, 1))
             .filter { it == behandling.id } // kjør kun satsendring for behandlingen vi tester i dette testcaset
-            .forEach { autovedtakSatsendringService.kjørBehandling(it) }
+            .forEach { autovedtakService.kjørBehandling(aktør = personidentService.hentAktør(scenario.søker.ident), autovedtaktype = Autovedtaktype.SATSENDRING, behandlingsdata = it) }
 
         val satsendingBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(BehandlingResultat.ENDRET, satsendingBehandling?.resultat)

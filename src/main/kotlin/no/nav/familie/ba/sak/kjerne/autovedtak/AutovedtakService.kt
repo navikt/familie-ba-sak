@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevBehandlingsdata
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -36,7 +37,8 @@ interface AutovedtakBehandlingService<Behandlingsdata> {
 enum class Autovedtaktype(val displayName: String) {
     FØDSELSHENDELSE("Fødselshendelse"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
-    OMREGNING_BREV("Omregning")
+    OMREGNING_BREV("Omregning"),
+    SATSENDRING("Satsendring")
 }
 
 @Service
@@ -80,6 +82,11 @@ class AutovedtakService(
                 val autovedtakFødselshendelseService: AutovedtakBrevService =
                     autovedtakServices.find { it.hentAutovedtaktype() == autovedtaktype } as AutovedtakBrevService
                 autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as AutovedtakBrevBehandlingsdata)
+            }
+            Autovedtaktype.SATSENDRING -> {
+                val autovedtakFødselshendelseService: AutovedtakSatsendringService =
+                    autovedtakServices.find { it.hentAutovedtaktype() == autovedtaktype } as AutovedtakSatsendringService
+                autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as Long)
             }
         }
     }

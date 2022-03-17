@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -32,6 +33,10 @@ class AutovedtakSatsendringService(
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) : AutovedtakBehandlingService<Long> {
 
+    override fun hentAutovedtaktype(): Autovedtaktype {
+        return Autovedtaktype.SATSENDRING
+    }
+
     /**
      * Gjennomfører og commiter revurderingsbehandling
      * med årsak satsendring og uten endring i vilkår.
@@ -39,7 +44,7 @@ class AutovedtakSatsendringService(
      */
     @Transactional
     override fun kjørBehandling(sistIverksatteBehandlingId: Long): String {
-
+        // TODO Fjerne mye av koden under?
         val behandling = behandlingRepository.finnBehandling(behandlingId = sistIverksatteBehandlingId)
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = behandling.fagsak.id)
         val søkerAktør = behandling.fagsak.aktør
