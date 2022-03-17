@@ -13,7 +13,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
     val vedtakBegrunnelseType: VedtakBegrunnelseType,
     val triggesAv: TriggesAv,
     val personIdenter: List<String>,
-) {
+) : Comparable<BrevBegrunnelseGrunnlagMedPersoner> {
     fun hentAntallBarnForBegrunnelse(
         uregistrerteBarn: List<MinimertUregistrertBarn>,
         gjelderSøker: Boolean,
@@ -55,5 +55,9 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
             personerPåBegrunnelse
                 .filter { it.type == PersonType.BARN }
                 .map { it.fødselsdato }
+    }
+
+    override fun compareTo(other: BrevBegrunnelseGrunnlagMedPersoner): Int {
+        return this.vedtakBegrunnelseType.sorteringsrekkefølge - other.vedtakBegrunnelseType.sorteringsrekkefølge
     }
 }

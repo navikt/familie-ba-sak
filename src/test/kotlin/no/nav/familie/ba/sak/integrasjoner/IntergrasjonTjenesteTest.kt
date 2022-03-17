@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgi
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidstaker
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Skyggesak
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -51,6 +52,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.log.NavHttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -60,6 +62,7 @@ import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
@@ -121,8 +124,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
             )
         )
 
-        val feil = assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
-        assertTrue(feil.message?.contains("oppgave") == true)
+        val feil = assertThrows<RessursException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
+        assertEquals("test", feil.ressurs.melding)
     }
 
     @Test
@@ -265,7 +268,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
                 )
         )
 
-        assertThrows<IntegrasjonException> { integrasjonClient.distribuerBrev("123456789") }
+        assertThrows<HttpClientErrorException.BadRequest> { integrasjonClient.distribuerBrev("123456789") }
     }
 
     @Test
@@ -303,8 +306,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         )
 
         val feil =
-            assertThrows<IntegrasjonException> { integrasjonClient.ferdigstillOppgave(123) }
-        assertTrue(feil.message?.contains("oppgave") == true)
+            assertThrows<RessursException> { integrasjonClient.ferdigstillOppgave(123) }
+        assertEquals("test", feil.ressurs.melding)
     }
 
     @Test
