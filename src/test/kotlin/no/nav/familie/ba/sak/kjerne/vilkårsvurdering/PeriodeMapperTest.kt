@@ -379,10 +379,17 @@ class PeriodeMapperTest {
             )
         )
         vilkårsvurdering.personResultater = setOf(personResultat1)
-        val periodeResultater = vilkårsvurdering.personResultaterTilPeriodeResultater(true).toList()
+        val periodeResultater = vilkårsvurdering.personResultaterTilPeriodeResultater(false).toList()
 
-        Assertions.assertEquals(123, periodeResultater)
+        Assertions.assertEquals(2, periodeResultater.size)
 
-        Assertions.assertEquals(1, periodeResultater.size)
+        val førstePeriode = periodeResultater[0]
+        val andrePeriode = periodeResultater[1]
+
+        Assertions.assertEquals(5, førstePeriode.vilkårResultater.size)
+        Assertions.assertTrue(førstePeriode.vilkårResultater.map { it.vilkårType }.containsAll(Vilkår.hentVilkårFor(PersonType.BARN)))
+
+        Assertions.assertEquals(4, andrePeriode.vilkårResultater.size)
+        Assertions.assertFalse(andrePeriode.vilkårResultater.map { it.vilkårType }.containsAll(Vilkår.hentVilkårFor(PersonType.BARN)))
     }
 }
