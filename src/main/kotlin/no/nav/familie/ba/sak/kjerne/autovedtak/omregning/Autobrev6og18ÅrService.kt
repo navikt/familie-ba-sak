@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -18,7 +19,8 @@ import org.springframework.transaction.annotation.Transactional
 class Autobrev6og18ÅrService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val behandlingService: BehandlingService,
-    private val autobrevService: AutobrevService
+    private val autovedtakBrevService: AutovedtakBrevService,
+    private val autovedtakStegService: AutovedtakStegService
 ) {
 
     @Transactional
@@ -26,13 +28,14 @@ class Autobrev6og18ÅrService(
         logger.info("opprettOmregningsoppgaveForBarnIBrytingsalder for fagsak ${autobrev6og18ÅrDTO.fagsakId}")
 
         val behandling =
-            behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId) ?: error("Fant ikke aktiv behandling")
+            behandlingService.hentSisteBehandlingSomErVedtatt(autobrev6og18ÅrDTO.fagsakId)
+                ?: error("Fant ikke aktiv behandling")
 
         val behandlingsårsak = finnBehandlingÅrsakForAlder(
             autobrev6og18ÅrDTO.alder
         )
 
-        if (!autobrevService.skalAutobrevBehandlingOpprettes(
+        if (!autovedtakBrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = autobrev6og18ÅrDTO.fagsakId,
                 behandlingsårsak = behandlingsårsak,
                 standardbegrunnelser = AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrev6og18ÅrDTO.alder)
@@ -60,15 +63,15 @@ class Autobrev6og18ÅrService(
             return
         }
 
-        if (behandling.status != BehandlingStatus.AVSLUTTET) {
-            error("Kan ikke opprette ny behandling for fagsak ${behandling.fagsak.id} ettersom den allerede har en åpen behanding.")
-        }
-
-        autobrevService.opprettOgKjørOmregningsbehandling(
-            behandling = behandling,
-            behandlingsårsak = behandlingsårsak,
-            standardbegrunnelse = AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
-                autobrev6og18ÅrDTO.alder
+        autovedtakStegService.kjørBehandling(
+            mottakersAktør = behandling.fagsak.aktør,
+            autovedtaktype = Autovedtaktype.OMREGNING_BREV,
+            behandlingsdata = AutovedtakBrevBehandlingsdata(
+                aktør = behandling.fagsak.aktør,
+                behandlingsårsak = behandlingsårsak,
+                standardbegrunnelse = AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
+                    autobrev6og18ÅrDTO.alder
+                )
             )
         )
     }

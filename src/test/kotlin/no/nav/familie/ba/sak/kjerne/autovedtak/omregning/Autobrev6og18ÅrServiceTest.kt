@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -26,16 +27,16 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.prosessering.domene.Task
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class Autobrev6og18ÅrServiceTest {
 
-    private val autovedtakService = mockk<AutovedtakService>(relaxed = true)
+    private val autovedtakService = mockk<AutovedtakService>()
+    private val autovedtakStegService = mockk<AutovedtakStegService>()
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
-    private val behandlingService = mockk<BehandlingService>(relaxed = true)
+    private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val infotrygdService = mockk<InfotrygdService>(relaxed = true)
     private val stegService = mockk<StegService>()
@@ -43,7 +44,7 @@ internal class Autobrev6og18ÅrServiceTest {
     private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
 
-    private val autobrevService = AutobrevService(
+    private val autovedtakBrevService = AutovedtakBrevService(
         behandlingService = behandlingService,
         fagsakService = fagsakService,
         autovedtakService = autovedtakService,
@@ -56,7 +57,8 @@ internal class Autobrev6og18ÅrServiceTest {
     private val autobrev6og18ÅrService = Autobrev6og18ÅrService(
         personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
         behandlingService = behandlingService,
-        autobrevService = autobrevService
+        autovedtakBrevService = autovedtakBrevService,
+        autovedtakStegService = autovedtakStegService
     )
 
     @Test
@@ -105,22 +107,7 @@ internal class Autobrev6og18ÅrServiceTest {
     }
 
     @Test
-    fun `Verifiser at behandling for omregning kaster feil om behandling ikke er avsluttet`() {
-        val behandling = initMock(BehandlingStatus.OPPRETTET, alder = 6)
-
-        val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
-            fagsakId = behandling.fagsak.id,
-            alder = Alder.SEKS.år,
-            årMåned = inneværendeMåned()
-        )
-
-        Assertions.assertThrows(IllegalStateException::class.java) {
-            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
-        }
-    }
-
-    @Test
-    fun `Verifiser at behandling for omregning blir opprettet og prosessert for løpende fagsak med barn som fyller inneværende måned`() {
+    fun `Verifiser at behandling for omregning blir trigget for løpende fagsak med barn som fyller inneværende måned`() {
         val behandling = initMock(alder = 6)
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
@@ -134,23 +121,17 @@ internal class Autobrev6og18ÅrServiceTest {
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
+        every { autovedtakStegService.kjørBehandling<Any>(any(), any(), any()) } returns ""
+
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
         verify(exactly = 1) {
-            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+            autovedtakStegService.kjørBehandling<Any>(
                 any(),
                 any(),
                 any()
             )
         }
-        verify(exactly = 1) {
-            vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
-                any(),
-                any()
-            )
-        }
-        verify(exactly = 1) { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) }
-        verify(exactly = 1) { taskRepository.save(any()) }
     }
 
     @Test
@@ -201,9 +182,10 @@ internal class Autobrev6og18ÅrServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(alder = alder, behandling)
 
         every { infotrygdService.harSendtbrev(any(), any()) } returns false
-        every { behandlingService.hentAktivForFagsak(behandling.fagsak.id) } returns behandling
+        every { behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns behandling
         every { behandlingService.opprettBehandling(any()) } returns behandling
         every { behandlingService.hentBehandlinger(any()) } returns emptyList()
+        every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns false
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns personopplysningGrunnlag
         return behandling
     }
