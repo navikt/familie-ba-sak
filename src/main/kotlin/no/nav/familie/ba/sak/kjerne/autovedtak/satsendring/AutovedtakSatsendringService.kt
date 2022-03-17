@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -32,10 +31,6 @@ class AutovedtakSatsendringService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) : AutovedtakBehandlingService<Long> {
-
-    override fun hentAutovedtaktype(): Autovedtaktype {
-        return Autovedtaktype.SATSENDRING
-    }
 
     /**
      * Gjennomfører og commiter revurderingsbehandling

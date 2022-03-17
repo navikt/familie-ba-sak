@@ -61,7 +61,8 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         autovedtakBrevService = autovedtakBrevService,
         persongrunnlagService = persongrunnlagService,
         behandlingService = behandlingService,
-        periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository
+        periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
+        autovedtakService = autovedtakService
     )
 
     @Test

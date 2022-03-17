@@ -66,10 +66,6 @@ class AutovedtakSmåbarnstilleggService(
             )
         }
 
-    override fun hentAutovedtaktype(): Autovedtaktype {
-        return Autovedtaktype.SMÅBARNSTILLEGG
-    }
-
     @Transactional
     override fun kjørBehandling(aktør: Aktør): String {
         antallVedtakOmOvergangsstønad.increment()

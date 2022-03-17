@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -16,15 +14,13 @@ import java.util.Properties
     maxAntallFeil = 1
 )
 class SatsendringTask(
-    val autovedtakService: AutovedtakService,
-    val behandlingRepository: BehandlingRepository
+    val autovedtakSatsendringService: AutovedtakSatsendringService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandlingId = task.payload.toLong()
-        val behandling = behandlingRepository.finnBehandling(behandlingId = behandlingId)
 
-        autovedtakService.kjørBehandling(aktør = behandling.fagsak.aktør, autovedtaktype = Autovedtaktype.SATSENDRING, behandlingsdata = behandlingId)
+        autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = behandlingId)
     }
 
     companion object {

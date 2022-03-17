@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevBehandlingsdata
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -26,19 +25,17 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 interface AutovedtakBehandlingService<Behandlingsdata> {
     fun kjørBehandling(behandlingsdata: Behandlingsdata): String
-
-    fun hentAutovedtaktype(): Autovedtaktype
 }
 
 enum class Autovedtaktype(val displayName: String) {
     FØDSELSHENDELSE("Fødselshendelse"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
-    OMREGNING_BREV("Omregning"),
-    SATSENDRING("Satsendring")
+    OMREGNING_BREV("Omregning")
 }
 
 @Service
@@ -50,7 +47,7 @@ class AutovedtakService(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val opprettTaskService: OpprettTaskService,
     private val fagsakService: FagsakService,
-    private val autovedtakServices: List<AutovedtakBehandlingService<Any>>
+    @Autowired private val autovedtakServices: List<AutovedtakBehandlingService<Any>>
 ) {
     private val antallAutovedtakÅpenBehandling: Map<Autovedtaktype, Counter> = Autovedtaktype.values().associateWith {
         Metrics.counter("behandling.saksbehandling.autovedtak.aapen_behandling", "type", it.name)
@@ -70,23 +67,18 @@ class AutovedtakService(
         return when (autovedtaktype) {
             Autovedtaktype.FØDSELSHENDELSE -> {
                 val autovedtakFødselshendelseService: AutovedtakFødselshendelseService =
-                    autovedtakServices.find { it.hentAutovedtaktype() == autovedtaktype } as AutovedtakFødselshendelseService
+                    autovedtakServices.find { it is AutovedtakFødselshendelseService } as AutovedtakFødselshendelseService
                 autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as NyBehandlingHendelse)
             }
             Autovedtaktype.SMÅBARNSTILLEGG -> {
                 val autovedtakFødselshendelseService: AutovedtakSmåbarnstilleggService =
-                    autovedtakServices.find { it.hentAutovedtaktype() == autovedtaktype } as AutovedtakSmåbarnstilleggService
+                    autovedtakServices.find { it is AutovedtakSmåbarnstilleggService } as AutovedtakSmåbarnstilleggService
                 autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as Aktør)
             }
             Autovedtaktype.OMREGNING_BREV -> {
                 val autovedtakFødselshendelseService: AutovedtakBrevService =
-                    autovedtakServices.find { it.hentAutovedtaktype() == autovedtaktype } as AutovedtakBrevService
+                    autovedtakServices.find { it is AutovedtakBrevService } as AutovedtakBrevService
                 autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as AutovedtakBrevBehandlingsdata)
-            }
-            Autovedtaktype.SATSENDRING -> {
-                val autovedtakFødselshendelseService: AutovedtakSatsendringService =
-                    autovedtakServices.find { it.hentAutovedtaktype() == autovedtaktype } as AutovedtakSatsendringService
-                autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as Long)
             }
         }
     }
