@@ -58,7 +58,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     )
 
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(
-        autobrevService = autovedtakBrevService,
+        autovedtakBrevService = autovedtakBrevService,
         persongrunnlagService = persongrunnlagService,
         behandlingService = behandlingService,
         periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.VedtakOmOvergangsstønadService
+import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -16,7 +16,7 @@ import java.util.Properties
     maxAntallFeil = 3
 )
 class VedtakOmOvergangsstønadTask(
-    private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService,
+    private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
     private val personidentService: PersonidentService,
 ) : AsyncTaskStep {
 
@@ -27,7 +27,7 @@ class VedtakOmOvergangsstønadTask(
 
         val aktør = personidentService.hentAktør(personIdent)
 
-        val responeFraService = vedtakOmOvergangsstønadService.kjørBehandling(
+        val responeFraService = autovedtakSmåbarnstilleggService.kjørBehandling(
             aktør
         )
         secureLogger.info("Håndterte vedtak om overgangsstønad for person $personIdent:\n$responeFraService")

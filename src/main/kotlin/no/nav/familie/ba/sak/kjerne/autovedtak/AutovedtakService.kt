@@ -3,8 +3,13 @@ package no.nav.familie.ba.sak.kjerne.autovedtak
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
+import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevBehandlingsdata
+import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
+import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -24,6 +29,8 @@ import org.springframework.stereotype.Service
 
 interface AutovedtakBehandlingService<Behandlingsdata> {
     fun kjørBehandling(behandlingsdata: Behandlingsdata): String
+
+    fun hentAutovedtaktype(): Autovedtaktype
 }
 
 enum class Autovedtaktype(val displayName: String) {
@@ -40,10 +47,41 @@ class AutovedtakService(
     private val loggService: LoggService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val opprettTaskService: OpprettTaskService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
+    private val autovedtakServices: List<AutovedtakBehandlingService<Any>>
 ) {
     private val antallAutovedtakÅpenBehandling: Map<Autovedtaktype, Counter> = Autovedtaktype.values().associateWith {
         Metrics.counter("behandling.saksbehandling.autovedtak.aapen_behandling", "type", it.name)
+    }
+
+    fun <Behandlingsdata> kjørBehandling(
+        aktør: Aktør,
+        autovedtaktype: Autovedtaktype,
+        behandlingsdata: Behandlingsdata
+    ): String {
+        if (håndterÅpenBehandlingOgAvbrytAutovedtak(
+                aktør = aktør,
+                autovedtaktype = autovedtaktype
+            )
+        ) return "Bruker har åpen behandling"
+
+        return when (autovedtaktype) {
+            Autovedtaktype.FØDSELSHENDELSE -> {
+                val autovedtakFødselshendelseService: AutovedtakFødselshendelseService =
+                    autovedtakServices.find { it.hentAutovedtaktype() == autovedtaktype } as AutovedtakFødselshendelseService
+                autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as NyBehandlingHendelse)
+            }
+            Autovedtaktype.SMÅBARNSTILLEGG -> {
+                val autovedtakFødselshendelseService: AutovedtakSmåbarnstilleggService =
+                    autovedtakServices.find { it.hentAutovedtaktype() == autovedtaktype } as AutovedtakSmåbarnstilleggService
+                autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as Aktør)
+            }
+            Autovedtaktype.OMREGNING_BREV -> {
+                val autovedtakFødselshendelseService: AutovedtakBrevService =
+                    autovedtakServices.find { it.hentAutovedtaktype() == autovedtaktype } as AutovedtakBrevService
+                autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as AutovedtakBrevBehandlingsdata)
+            }
+        }
     }
 
     fun håndterÅpenBehandlingOgAvbrytAutovedtak(aktør: Aktør, autovedtaktype: Autovedtaktype): Boolean {

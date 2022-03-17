@@ -40,6 +40,10 @@ class AutovedtakBrevService(
     private val infotrygdService: InfotrygdService
 ) : AutovedtakBehandlingService<AutovedtakBrevBehandlingsdata> {
 
+    override fun hentAutovedtaktype(): Autovedtaktype {
+        return Autovedtaktype.OMREGNING_BREV
+    }
+
     override fun kjørBehandling(
         behandlingsdata: AutovedtakBrevBehandlingsdata,
     ): String {

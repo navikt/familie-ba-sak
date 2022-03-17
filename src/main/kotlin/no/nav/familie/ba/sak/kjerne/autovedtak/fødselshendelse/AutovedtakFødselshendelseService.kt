@@ -63,6 +63,10 @@ class AutovedtakFødselshendelseService(
         Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
     val passertFiltreringOgVilkårsvurderingCounter = Metrics.counter("familie.ba.sak.henvendelse.passert")
 
+    override fun hentAutovedtaktype(): Autovedtaktype {
+        return Autovedtaktype.FØDSELSHENDELSE
+    }
+
     override fun kjørBehandling(nyBehandling: NyBehandlingHendelse): String {
         val morsAktør = personidentService.hentAktør(nyBehandling.morsIdent)
         if (autovedtakService.håndterÅpenBehandlingOgAvbrytAutovedtak(

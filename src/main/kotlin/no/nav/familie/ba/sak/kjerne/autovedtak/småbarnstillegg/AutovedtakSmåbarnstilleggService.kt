@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class VedtakOmOvergangsstønadService(
+class AutovedtakSmåbarnstilleggService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
@@ -65,6 +65,10 @@ class VedtakOmOvergangsstønadService(
                 it.beskrivelse,
             )
         }
+
+    override fun hentAutovedtaktype(): Autovedtaktype {
+        return Autovedtaktype.SMÅBARNSTILLEGG
+    }
 
     @Transactional
     override fun kjørBehandling(aktør: Aktør): String {
@@ -171,6 +175,6 @@ class VedtakOmOvergangsstønadService(
     }
 
     companion object {
-        val logger = LoggerFactory.getLogger(VedtakOmOvergangsstønadService::class.java)
+        val logger = LoggerFactory.getLogger(AutovedtakSmåbarnstilleggService::class.java)
     }
 }
