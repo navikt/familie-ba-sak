@@ -42,7 +42,7 @@ class AutobrevStegServiceTest {
             it.status = BehandlingStatus.UTREDES
         }
 
-        every { autovedtakSmåbarnstilleggService.kanAutovedtakBehandles(aktør) } returns true
+        every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
         every { fagsakService.hent(aktør) } returns fagsak
         every { behandlingService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
@@ -64,7 +64,7 @@ class AutobrevStegServiceTest {
             it.status = BehandlingStatus.IVERKSETTER_VEDTAK
         }
 
-        every { autovedtakSmåbarnstilleggService.kanAutovedtakBehandles(aktør) } returns true
+        every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
         every { fagsakService.hent(aktør) } returns fagsak
         every { behandlingService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
@@ -64,16 +65,15 @@ class AutovedtakFødselshendelseService(
         Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
     val passertFiltreringOgVilkårsvurderingCounter = Metrics.counter("familie.ba.sak.henvendelse.passert")
 
-    override fun kjørBehandling(nyBehandling: NyBehandlingHendelse): String {
-        val morsAktør = personidentService.hentAktør(nyBehandling.morsIdent)
+    override fun skalAutovedtakBehandles(behandlingsdata: NyBehandlingHendelse): Boolean {
+        val morsAktør = personidentService.hentAktør(behandlingsdata.morsIdent)
         val morsÅpneBehandling = hentÅpenBehandling(aktør = morsAktør)
-        val barnsAktører = personidentService.hentAktørIder(nyBehandling.barnasIdenter)
+        val barnsAktører = personidentService.hentAktørIder(behandlingsdata.barnasIdenter)
 
         if (morsÅpneBehandling != null) {
             val barnaPåÅpenBehandling =
                 persongrunnlagService.hentBarna(behandling = morsÅpneBehandling).map { it.aktør }
 
-            // TODO avklare om vi trenger å sjekke dette, isåfall må det sjekke før man ev oppretter oppgave
             if (barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
                     barnaPåHendelse = barnsAktører,
                     barnaPåÅpenBehandling = barnaPåÅpenBehandling
@@ -82,15 +82,15 @@ class AutovedtakFødselshendelseService(
                 logger.info("Ignorerer fødselshendelse fordi åpen behandling inneholder alle barna i hendelsen.")
                 secureLogger.info(
                     "Ignorerer fødselshendelse fordi åpen behandling inneholder alle barna i hendelsen." +
-                        "Barn på hendelse=${nyBehandling.barnasIdenter}, barn på åpen behandling=$barnaPåÅpenBehandling"
+                        "Barn på hendelse=${behandlingsdata.barnasIdenter}, barn på åpen behandling=$barnaPåÅpenBehandling"
                 )
-                return "Ignorerer fødselshendelse fordi åpen behandling inneholder alle barna i hendelsen."
+                return false
             }
         }
 
         val (barnSomSkalBehandlesForMor, alleBarnSomKanBehandles) = finnBarnSomSkalBehandlesForMor(
             fagsak = fagsakService.hent(aktør = morsAktør),
-            nyBehandlingHendelse = nyBehandling
+            nyBehandlingHendelse = behandlingsdata
         )
 
         if (barnSomSkalBehandlesForMor.isEmpty()) {
@@ -99,8 +99,19 @@ class AutovedtakFødselshendelseService(
                 "Ignorere fødselshendelse, alle barna fra hendelse er allerede behandlet. " +
                     "Alle barna som kan behandles=$alleBarnSomKanBehandles, "
             )
-            return "Ignorere fødselshendelse, alle barna fra hendelse er allerede behandlet"
+            return false
         }
+
+        return true
+    }
+
+    override fun kjørBehandling(nyBehandling: NyBehandlingHendelse): String {
+        val morsAktør = personidentService.hentAktør(nyBehandling.morsIdent)
+
+        val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
+            fagsak = fagsakService.hent(aktør = morsAktør),
+            nyBehandlingHendelse = nyBehandling
+        )
 
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(
             nyBehandling.copy(
@@ -108,28 +119,24 @@ class AutovedtakFødselshendelseService(
             )
         )
 
-        logger.info("Behandler fødselshendelse på behandling $behandling")
-
         val behandlingEtterFiltrering =
             stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
 
-        if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
+        return if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
+            stansetIAutomatiskFiltreringCounter.increment()
+
             henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandlingEtterFiltrering,
                 begrunnelse = filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
                     .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
             )
-
-            stansetIAutomatiskFiltreringCounter.increment()
         } else vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = barnSomSkalBehandlesForMor)
-
-        return "Fødselshendelse kjørt OK"
     }
 
-    private fun vurderVilkår(behandling: Behandling, barnaSomVurderes: List<String>) {
+    private fun vurderVilkår(behandling: Behandling, barnaSomVurderes: List<String>): String {
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
 
-        if (behandlingEtterVilkårsvurdering.resultat == BehandlingResultat.INNVILGET) {
+        return if (behandlingEtterVilkårsvurdering.resultat == BehandlingResultat.INNVILGET) {
             val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
             vedtaksperiodeService.oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak, barnaSomVurderes)
 
@@ -146,10 +153,12 @@ class AutovedtakFødselshendelseService(
             opprettFremleggsoppgaveDersomEØSMedlem(behandling)
 
             passertFiltreringOgVilkårsvurderingCounter.increment()
-        } else {
-            henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsvurdering)
 
+            AutovedtakStegService.BEHANDLING_FERDIG
+        } else {
             stansetIAutomatiskVilkårsvurderingCounter
+
+            henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsvurdering)
         }
     }
 
@@ -199,14 +208,12 @@ class AutovedtakFødselshendelseService(
     private fun henleggBehandlingOgOpprettManuellOppgave(
         behandling: Behandling,
         begrunnelse: String = "",
-    ) {
+    ): String {
         val begrunnelseForManuellOppgave = if (begrunnelse == "") {
             hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)
         } else {
             begrunnelse
         }
-
-        logger.info("Henlegger behandling $behandling automatisk på grunn av ugyldig resultat")
 
         stegService.håndterHenleggBehandling(
             behandling = behandling,
@@ -221,6 +228,8 @@ class AutovedtakFødselshendelseService(
             begrunnelse = "Fødselshendelse: $begrunnelseForManuellOppgave",
             oppgavetype = Oppgavetype.VurderLivshendelse
         )
+
+        return "Henlegger behandling $behandling automatisk på grunn av ugyldig resultat"
     }
 
     private fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String {

@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBrevkode
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -61,7 +62,7 @@ class AutovedtakBrevService(
 
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
 
-        return "Omregningsbehandling kjørt OK"
+        return AutovedtakStegService.BEHANDLING_FERDIG
     }
 
     fun skalAutobrevBehandlingOpprettes(

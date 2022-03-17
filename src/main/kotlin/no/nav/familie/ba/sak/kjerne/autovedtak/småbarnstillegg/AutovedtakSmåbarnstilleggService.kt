@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -67,7 +68,7 @@ class AutovedtakSmåbarnstilleggService(
             )
         }
 
-    override fun kanAutovedtakBehandles(behandlingsdata: Aktør): Boolean {
+    override fun skalAutovedtakBehandles(behandlingsdata: Aktør): Boolean {
         val fagsak = fagsakService.hent(aktør = behandlingsdata) ?: return false
         val påvirkerFagsak = småbarnstilleggService.vedtakOmOvergangsstønadPåvirkerFagsak(fagsak)
         return if (!påvirkerFagsak) {
@@ -112,7 +113,7 @@ class AutovedtakSmåbarnstilleggService(
         )
         taskRepository.save(task)
 
-        return "påvirker fagsak, autovedtak kjørt vellykket"
+        return AutovedtakStegService.BEHANDLING_FERDIG
     }
 
     private fun begrunnAutovedtakForSmåbarnstillegg(

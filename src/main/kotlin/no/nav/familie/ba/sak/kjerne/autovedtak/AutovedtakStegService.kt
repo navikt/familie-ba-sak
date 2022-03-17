@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevBehandlingsdata
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 interface AutovedtakBehandlingService<Behandlingsdata> {
-    fun kanAutovedtakBehandles(behandlingsdata: Behandlingsdata): Boolean = true
+    fun skalAutovedtakBehandles(behandlingsdata: Behandlingsdata): Boolean = true
 
     fun kjørBehandling(behandlingsdata: Behandlingsdata): String
 }
@@ -52,29 +53,44 @@ class AutovedtakStegService(
         autovedtaktype: Autovedtaktype,
         behandlingsdata: Behandlingsdata
     ): String {
+        secureLoggAutovedtakBehandling(autovedtaktype, mottakersAktør, BEHANDLING_STARTER)
         antallAutovedtak[autovedtaktype]?.increment()
 
-        val kanAutovedtakBehandles = when (autovedtaktype) {
+        val skalAutovedtakBehandles = when (autovedtaktype) {
             Autovedtaktype.FØDSELSHENDELSE -> {
-                autovedtakFødselshendelseService.kanAutovedtakBehandles(behandlingsdata as NyBehandlingHendelse)
+                autovedtakFødselshendelseService.skalAutovedtakBehandles(behandlingsdata as NyBehandlingHendelse)
             }
             Autovedtaktype.OMREGNING_BREV -> {
-                autovedtakBrevService.kanAutovedtakBehandles(behandlingsdata as AutovedtakBrevBehandlingsdata)
+                autovedtakBrevService.skalAutovedtakBehandles(behandlingsdata as AutovedtakBrevBehandlingsdata)
             }
             Autovedtaktype.SMÅBARNSTILLEGG -> {
-                autovedtakSmåbarnstilleggService.kanAutovedtakBehandles(behandlingsdata as Aktør)
+                autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(behandlingsdata as Aktør)
             }
         }
 
-        if (!kanAutovedtakBehandles) return "Behandling stoppet i prekjøringssteget"
+        if (!skalAutovedtakBehandles) {
+            secureLoggAutovedtakBehandling(
+                autovedtaktype,
+                mottakersAktør,
+                "Skal ikke behandles"
+            )
+            return "${autovedtaktype.displayName}: Skal ikke behandles"
+        }
 
         if (håndterÅpenBehandlingOgAvbrytAutovedtak(
                 aktør = mottakersAktør,
                 autovedtaktype = autovedtaktype
             )
-        ) return "Bruker har åpen behandling"
+        ) {
+            secureLoggAutovedtakBehandling(
+                autovedtaktype,
+                mottakersAktør,
+                "Bruker har åpen behandling"
+            )
+            return "${autovedtaktype.displayName}: Bruker har åpen behandling"
+        }
 
-        return when (autovedtaktype) {
+        val resultatAvKjøring = when (autovedtaktype) {
             Autovedtaktype.FØDSELSHENDELSE -> {
                 autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as NyBehandlingHendelse)
             }
@@ -85,6 +101,14 @@ class AutovedtakStegService(
                 autovedtakSmåbarnstilleggService.kjørBehandling(behandlingsdata as Aktør)
             }
         }
+
+        secureLoggAutovedtakBehandling(
+            autovedtaktype,
+            mottakersAktør,
+            resultatAvKjøring
+        )
+
+        return resultatAvKjøring
     }
 
     fun håndterÅpenBehandlingOgAvbrytAutovedtak(aktør: Aktør, autovedtaktype: Autovedtaktype): Boolean {
@@ -111,5 +135,18 @@ class AutovedtakStegService(
         } else {
             throw Feil("Ikke håndtert feilsituasjon på $åpenBehandling")
         }
+    }
+
+    private fun secureLoggAutovedtakBehandling(
+        autovedtaktype: Autovedtaktype,
+        aktør: Aktør,
+        melding: String
+    ) {
+        secureLogger.info("$autovedtaktype(${aktør.aktivFødselsnummer()}): $melding")
+    }
+
+    companion object {
+        const val BEHANDLING_STARTER = "Behandling starter"
+        const val BEHANDLING_FERDIG = "Behandling ferdig"
     }
 }

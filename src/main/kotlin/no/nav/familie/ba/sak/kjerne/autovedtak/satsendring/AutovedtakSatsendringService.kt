@@ -39,7 +39,6 @@ class AutovedtakSatsendringService(
      */
     @Transactional
     override fun kjørBehandling(sistIverksatteBehandlingId: Long): String {
-        // TODO Fjerne mye av koden under?
         val behandling = behandlingRepository.finnBehandling(behandlingId = sistIverksatteBehandlingId)
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = behandling.fagsak.id)
         val søkerAktør = behandling.fagsak.aktør
@@ -48,7 +47,6 @@ class AutovedtakSatsendringService(
         secureLogger.info("Kjører satsendring på $behandling for ${søkerAktør.aktivFødselsnummer()}")
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${behandling.fagsak.id}")
 
-        // TODO vurdere å innlemme dette i åpen behandling opplegg?
         if (aktivOgÅpenBehandling != null) {
             val brukerHarÅpenBehandlingMelding = if (harAlleredeNySats(behandlingId = aktivOgÅpenBehandling.id)) {
                 "Åpen behandling har allerede siste sats og vi lar den ligge."
