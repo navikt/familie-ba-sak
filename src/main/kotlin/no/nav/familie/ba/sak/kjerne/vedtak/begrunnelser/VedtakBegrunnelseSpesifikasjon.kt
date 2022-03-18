@@ -302,6 +302,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetErklaeringOmMotregning"
     },
+    INNVILGET_TILLEGGSTEKST_TRANSPORTERKLÆRING_HELE_ETTERBETALINGEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstTransporterklaeringHeleEtterbetalingen"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"

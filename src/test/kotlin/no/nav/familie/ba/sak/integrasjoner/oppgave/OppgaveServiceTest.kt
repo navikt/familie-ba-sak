@@ -25,9 +25,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -66,18 +68,24 @@ class OppgaveServiceTest {
     @MockK
     lateinit var oppgaveRepository: OppgaveRepository
 
+    @MockK
+    lateinit var opprettTaskService: OpprettTaskService
+
+    @MockK
+    lateinit var loggService: LoggService
+
     @InjectMockKs
     lateinit var oppgaveService: OppgaveService
 
     @Test
     fun `Opprett oppgave skal lage oppgave med enhetsnummer fra behandlingen`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
-        every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
-        every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
+        every { behandlingRepository.save(any()) } returns lagTestBehandling()
+        every { oppgaveRepository.save(any()) } returns lagTestOppgave()
         every {
             oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
-                any<Oppgavetype>(),
-                any<Behandling>()
+                any(),
+                any()
             )
         } returns null
         every { personidentService.hentAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
@@ -118,16 +126,16 @@ class OppgaveServiceTest {
     fun `Ferdigstill oppgave`() {
         every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {}
         every {
-            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
-                any<Oppgavetype>(),
-                any<Behandling>()
+            oppgaveRepository.finnOppgaverSomSkalFerdigstilles(
+                any(),
+                any()
             )
-        } returns lagTestOppgave()
-        every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
+        } returns listOf(lagTestOppgave())
+        every { oppgaveRepository.saveAndFlush(any()) } returns lagTestOppgave()
         val slot = slot<Long>()
         every { integrasjonClient.ferdigstillOppgave(capture(slot)) } just runs
 
-        oppgaveService.ferdigstillOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
+        oppgaveService.ferdigstillOppgaver(BEHANDLING_ID, Oppgavetype.BehandleSak)
         assertThat(slot.captured).isEqualTo(OPPGAVE_ID.toLong())
     }
 

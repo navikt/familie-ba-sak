@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service
     maxAntallFeil = 1
 )
 class StartSatsendringForAlleBehandlingerTask(
-    val satsendringService: SatsendringService,
+    val autovedtakSatsendringService: AutovedtakSatsendringService,
     val taskRepository: TaskRepositoryWrapper
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val gammelSats = task.payload.toInt()
-        satsendringService.finnOgOpprettTaskerForSatsendring(gammelSats)
+        autovedtakSatsendringService.finnOgOpprettTaskerForSatsendring(gammelSats)
     }
 
     companion object {
