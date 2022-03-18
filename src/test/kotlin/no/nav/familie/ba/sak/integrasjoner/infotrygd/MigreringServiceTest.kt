@@ -265,6 +265,51 @@ class MigreringServiceTest(
     }
 
     @Test
+    fun `migrering av ordinær sak med delt bosted - enkel case`() {
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(
+            listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6 / 2).copy(undervalg = "MD")),
+            emptyList()
+        )
+
+        val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
+
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
+            iverksettMotOppdragTask.doTask(task)
+            iverksettMotOppdragTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == SendVedtakTilInfotrygdTask.TASK_STEP_TYPE }!!
+            sendVedtakTilInfotrygdTask.doTask(task)
+            sendVedtakTilInfotrygdTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == StatusFraOppdragTask.TASK_STEP_TYPE }!!
+            statusFraOppdragTask.doTask(task)
+            statusFraOppdragTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            var task = tasks.find { it.type == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
+            ferdigstillBehandlingTask.doTask(task)
+            ferdigstillBehandlingTask.onCompletion(task)
+
+            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
+            publiserVedtakTask.doTask(task)
+            publiserVedtakTask.onCompletion(task)
+
+            val now = LocalDate.now()
+            val forventetUtbetalingFom: LocalDate =
+                if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
+
+            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
+            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
+            assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+        }
+    }
+
+    @Test
     fun `migrering av utvidet sak - happy case`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
