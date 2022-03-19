@@ -1,13 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.eøs.temaperiode
 
-import java.time.YearMonth
-
 abstract class Tidslinje<T> {
     private var etterfølgendeTidslinjer: MutableList<TidslinjeMedAvhengigheter<*>> = mutableListOf()
     private var gjeldendePerioder: Collection<Periode<T>>? = null
 
     internal abstract fun tidsrom(): Tidsrom
-
     abstract fun perioder(): Collection<Periode<T>>
 
     internal fun registrerEtterfølgendeTidslinje(tidslinje: TidslinjeMedAvhengigheter<*>) {
@@ -45,13 +42,6 @@ abstract class Tidslinje<T> {
     }
 }
 
-fun <T> Tidslinje<T>.hentUtsnitt(tidspunkt: Tidspunkt): T? =
-    perioder().hentUtsnitt(tidspunkt)
-
-fun <T> Collection<Periode<T>>.hentUtsnitt(tidspunkt: Tidspunkt): T? =
-    this.filter { it.fom <= tidspunkt && it.tom >= tidspunkt }
-        .firstOrNull()?.let { it.innhold }
-
 abstract class TidslinjeUtenAvhengigheter<T> : Tidslinje<T>() {
     fun splitt(tidspunkt: Tidspunkt) {
         splitt(PeriodeSplitt<T>(tidspunkt))
@@ -67,8 +57,8 @@ abstract class TidslinjeMedAvhengigheter<T>(
 ) : Tidslinje<T>() {
 
     override fun tidsrom(): Tidsrom {
-        val fom = foregåendeTidslinjer.map { it.tidsrom().start }.minste()
-        val tom = foregåendeTidslinjer.map { it.tidsrom().endInclusive }.største()
+        val fom = foregåendeTidslinjer.map { it.tidsrom().start }.minsteEllerUendelig()
+        val tom = foregåendeTidslinjer.map { it.tidsrom().endInclusive }.størsteEllerUendelig()
 
         return fom..tom
     }
@@ -89,18 +79,21 @@ abstract class TidslinjeMedAvhengigheter<T>(
     }
 }
 
-abstract class KalkulerendeTidslinje<T>(
+abstract class SnittTidslinje<T>(
     protected val avhengigheter: Collection<Tidslinje<*>>,
 ) : TidslinjeMedAvhengigheter<T>(avhengigheter) {
+
+    var generertePerioder: Collection<Periode<T>>? = null
 
     constructor(vararg avhengighet: Tidslinje<*>) :
         this(avhengighet.asList())
 
-    override fun perioder(): Collection<Periode<T>> =
-        genererPerioder(tidsrom())
+    override fun perioder(): Collection<Periode<T>> {
+        return generertePerioder ?: genererPerioder().also { generertePerioder = it }
+    }
 
-    private fun genererPerioder(tidsrom: Tidsrom): List<Periode<T>> =
-        tidsrom.map { Pair(it, kalkulerInnhold(it)) }
+    private fun genererPerioder(): List<Periode<T>> =
+        tidsrom().map { Pair(it, beregnSnitt(it)) }
             .fold(emptyList()) { acc, (tidspunkt, innhold) ->
                 val sistePeriode = acc.lastOrNull()
                 when {
@@ -110,22 +103,26 @@ abstract class KalkulerendeTidslinje<T>(
                 }
             }
 
-    protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): T?
-}
+    protected abstract fun beregnSnitt(tidspunkt: Tidspunkt): T?
 
-class KomprimerendeTidslinje<T>(val tidslinje: Tidslinje<T>) : KalkulerendeTidslinje<T>(tidslinje) {
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): T? {
-        return tidslinje.hentUtsnitt(tidspunkt)
+    companion object {
+        private fun <T> Collection<T>.replaceLast(replacement: T) =
+            this.take(this.size - 1) + replacement
     }
 }
 
+fun <T> Tidslinje<T>.hentUtsnitt(tidspunkt: Tidspunkt): T? =
+    perioder().hentUtsnitt(tidspunkt)
+
+fun <T> Collection<Periode<T>>.hentUtsnitt(tidspunkt: Tidspunkt): T? =
+    this.filter { it.fom <= tidspunkt && it.tom >= tidspunkt }
+        .firstOrNull()?.let { it.innhold }
+
+class KomprimerendeTidslinje<T>(val tidslinje: Tidslinje<T>) : SnittTidslinje<T>(tidslinje) {
+    override fun beregnSnitt(tidspunkt: Tidspunkt): T? = tidslinje.hentUtsnitt(tidspunkt)
+}
+
 fun <T> Tidslinje<T>.komprimer(): Tidslinje<T> = KomprimerendeTidslinje(this)
-
-private fun <T> Collection<T>.replaceLast(replacement: T) =
-    this.take(this.size - 1) + replacement
-
-private fun YearMonth?.erRettFør(måned: YearMonth) =
-    this?.plusMonths(1) == måned
 
 data class TidslinjeFeil(
     val periode: Periode<*>,

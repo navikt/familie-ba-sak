@@ -16,7 +16,7 @@ class KompetanseTidslinje(
 
     override fun tidsrom(): Tidsrom {
         val fom = kompetanser.map { it.fom.tilTidspunktEllerUendeligLengeSiden { it.tom!! } }.minOrNull()!!
-        val tom = kompetanser.map { it.tom.tilTidspunktEllerUendeligLengeSiden { it.fom!! } }.maxOrNull()!!
+        val tom = kompetanser.map { it.tom.tilTidspunktEllerUendeligLengeTil { it.fom!! } }.maxOrNull()!!
 
         return fom..tom
     }
@@ -27,7 +27,7 @@ class KompetanseTidslinje(
 }
 
 fun Kompetanse.tilPeriode() = Periode(
-    fom = this.fom.tilTidspunktEllerUendeligLengeTil { tom!! },
+    fom = this.fom.tilTidspunktEllerUendeligLengeSiden { tom!! },
     tom = this.tom.tilTidspunktEllerUendeligLengeTil { fom!! },
     innhold = this
 )

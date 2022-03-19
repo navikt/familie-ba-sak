@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.SnittTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
@@ -26,25 +26,12 @@ private val eøsVilkår = listOf(
 
 class ErEøsPeriodeTidslinje(
     private val barnetsVilkårsresultater: Collection<Tidslinje<VilkårRegelverkResultat>>
-) : KalkulerendeTidslinje<Boolean>(barnetsVilkårsresultater) {
+) : SnittTidslinje<Boolean>(barnetsVilkårsresultater) {
 
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): Boolean? {
+    private val kombinator = EøsPeriodeKombinator()
+    override fun beregnSnitt(tidspunkt: Tidspunkt): Boolean {
         val alleVilkårResultater = barnetsVilkårsresultater.map { it.hentUtsnitt(tidspunkt) }
-        val oppfyllerNødvendigVilkår = alleVilkårResultater
-            .filter { it?.resultat == Resultat.OPPFYLT }
-            .map { it?.vilkår }
-            .containsAll(nødvendigeVilkår)
-
-        if (!oppfyllerNødvendigVilkår)
-            return false
-
-        val alleRelevanteVilkårErEøsVilkår = alleVilkårResultater
-            .filter {
-                it?.regelverk == Regelverk.EØS_FORORDNINGEN
-            }.map { it?.vilkår }
-            .containsAll(eøsVilkår)
-
-        return alleRelevanteVilkårErEøsVilkår
+        return kombinator.kombiner(alleVilkårResultater.filterNotNull())
     }
 }
 

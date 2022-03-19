@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.SnittTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
@@ -9,15 +9,14 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.ListeKombinator
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-class SøkerOppfyllerVilkårTidslinje(
-    private val søkersVilkårResultatTemaer: Collection<Tidslinje<VilkårRegelverkResultat>>
-) : KalkulerendeTidslinje<Boolean>(søkersVilkårResultatTemaer) {
+class AktørOppfyllerVilkårTidslinje(
+    private val vilkårResultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat>>,
+    private val vilkårKombinator: ListeKombinator<VilkårRegelverkResultat, Boolean>
+) : SnittTidslinje<Boolean>(vilkårResultatTidslinjer) {
 
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): Boolean {
-        val erAltOppfylt = søkersVilkårResultatTemaer
-            .map { it.hentUtsnitt(tidspunkt) }
-            .all { it?.resultat == Resultat.OPPFYLT }
-        return erAltOppfylt
+    override fun beregnSnitt(tidspunkt: Tidspunkt): Boolean {
+        val vilkårResultater = vilkårResultatTidslinjer.map { it.hentUtsnitt(tidspunkt) }.filterNotNull()
+        return vilkårKombinator.kombiner(vilkårResultater)
     }
 }
 

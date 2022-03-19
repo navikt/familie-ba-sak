@@ -1,10 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
@@ -44,22 +47,60 @@ class Tidslinjer(
     val søkerOppfyllerVilkårTidslinje = søkersVilkårsresultatTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator())
 
     private val barnasTidslinjer = barnasVilkårsresultatTidslinjeMap.mapValues { (barnIdent, _) ->
-        BarnetsTidslinjer(this, barnIdent)
+        BarnetsTidslinjerTimeline(this, barnIdent)
     }
 
     fun forBarn(barn: Person) = barnasTidslinjer[barn.aktør.aktivFødselsnummer()]!!
 
-    class BarnetsTidslinjer(
+    interface BarnetsTidslinjer {
+        val barnetsVilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat>>
+        val barnetOppfyllerVilkårTidslinje: Tidslinje<Boolean>
+        val erEøsTidslinje: Tidslinje<Boolean>
+        val kompetanseTidslinje: Tidslinje<Kompetanse>
+        val kompetanseValideringTidslinje: Tidslinje<KompetanseValidering>
+        val erSekundærlandTidslinje: Tidslinje<Boolean>
+    }
+
+    class BarnetsTidslinjerUtsnitt(
         tidslinjer: Tidslinjer,
         barnIdent: String,
-    ) {
-        val barnetsVilkårsresultatTidslinjer = tidslinjer.barnasVilkårsresultatTidslinjeMap[barnIdent]!!
+    ) : BarnetsTidslinjer {
+        override val barnetsVilkårsresultatTidslinjer = tidslinjer.barnasVilkårsresultatTidslinjeMap[barnIdent]!!
 
-        // val erEøsTidslinje = ErEøsPeriodeTidslinje(barnetsVilkårsresultatTidslinjer)
-        val erEøsTidslinje = barnetsVilkårsresultatTidslinjer.kombiner(EøsPeriodeKombinator())
-        // val kompetanseTidslinje = tidslinjer.kompetanser.tilTidslinjeforBarn(barnIdent)
-        // val kompetanseValideringTidslinje =
-        //    kompetanseTidslinje.kombinerMed(erEøsTidslinje, KompetanseValideringKombinator())
-        // val erSekundærland = kompetanseTidslinje.kombinerMed(kompetanseValideringTidslinje, ErSekundærlandKombinator())
+        override val barnetOppfyllerVilkårTidslinje =
+            AktørOppfyllerVilkårTidslinje(barnetsVilkårsresultatTidslinjer, BarnOppfyllerVilkårKombinator())
+
+        override val erEøsTidslinje = ErEøsPeriodeTidslinje(barnetsVilkårsresultatTidslinjer)
+
+        override val kompetanseTidslinje = tidslinjer.kompetanser.tilTidslinjeforBarn(barnIdent)
+
+        override val kompetanseValideringTidslinje = KompetanseValideringTidslinje(erEøsTidslinje, kompetanseTidslinje)
+
+        override val erSekundærlandTidslinje =
+            ErSekundærlandTidslinje(kompetanseTidslinje, kompetanseValideringTidslinje)
+    }
+
+    class BarnetsTidslinjerTimeline(
+        tidslinjer: Tidslinjer,
+        barnIdent: String,
+    ) : BarnetsTidslinjer {
+        override val barnetsVilkårsresultatTidslinjer = tidslinjer.barnasVilkårsresultatTidslinjeMap[barnIdent]!!
+
+        override val barnetOppfyllerVilkårTidslinje: Tidslinje<Boolean> =
+            barnetsVilkårsresultatTidslinjer.kombiner(BarnOppfyllerVilkårKombinator())
+
+        override val erEøsTidslinje = barnetsVilkårsresultatTidslinjer.kombiner(EøsPeriodeKombinator())
+
+        override val kompetanseTidslinje = tidslinjer.kompetanser.tilTidslinjeforBarn(barnIdent)
+
+        override val kompetanseValideringTidslinje =
+            kompetanseTidslinje.kombinerMed(erEøsTidslinje, KompetanseValideringKombinator())
+
+        override val erSekundærlandTidslinje =
+            kompetanseTidslinje.kombinerMed(kompetanseValideringTidslinje, ErSekundærlandKombinator())
     }
 }
+
+fun Iterable<Kompetanse>.tilTidslinjeforBarn(barnIdent: String) =
+    this.filter { it.barn.contains(barnIdent) }
+        .let { KompetanseTidslinje(it) }

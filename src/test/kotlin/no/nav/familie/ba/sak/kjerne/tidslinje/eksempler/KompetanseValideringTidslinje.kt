@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseStatus
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.SnittTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
@@ -19,12 +19,12 @@ enum class KompetanseValidering {
 class KompetanseValideringTidslinje(
     private val erEøsPeriodeTidslinje: Tidslinje<Boolean>,
     private val kompetanseTidslinje: Tidslinje<Kompetanse>
-) : KalkulerendeTidslinje<KompetanseValidering>(
+) : SnittTidslinje<KompetanseValidering>(
     erEøsPeriodeTidslinje,
     kompetanseTidslinje
 ) {
     val kombinator = KompetanseValideringKombinator()
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): KompetanseValidering {
+    override fun beregnSnitt(tidspunkt: Tidspunkt): KompetanseValidering {
         return kombinator.kombiner(
             kompetanseTidslinje.hentUtsnitt(tidspunkt),
             erEøsPeriodeTidslinje.hentUtsnitt(tidspunkt)

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.SnittTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
@@ -10,12 +10,12 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.PeriodeKombinator
 class ErSekundærlandTidslinje(
     val kompetanseTidslinje: Tidslinje<Kompetanse>,
     val validertKompetanseTidsline: Tidslinje<KompetanseValidering>
-) : KalkulerendeTidslinje<Boolean>(
+) : SnittTidslinje<Boolean>(
     kompetanseTidslinje, validertKompetanseTidsline
 ) {
     val erSekundærlandKombinator = ErSekundærlandKombinator()
 
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): Boolean? {
+    override fun beregnSnitt(tidspunkt: Tidspunkt): Boolean? {
         return erSekundærlandKombinator.kombiner(
             kompetanseTidslinje.hentUtsnitt(tidspunkt),
             validertKompetanseTidsline.hentUtsnitt(tidspunkt)
@@ -29,7 +29,7 @@ class ErSekundærlandKombinator : PeriodeKombinator<Kompetanse, KompetanseValide
         val validertKompetanse = validering
 
         val erValidert = validertKompetanse == KompetanseValidering.OK_EØS_OG_KOMPETANSE
-        val erSekundærland = kompetanse?.sekundærland == "Norge"
+        val erSekundærland = kompetanse?.sekundærland == "NORGE"
 
         return erValidert && erSekundærland
     }

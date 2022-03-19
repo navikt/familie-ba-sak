@@ -37,7 +37,7 @@ class VilkårResultatTidslinje(
 }
 
 fun VilkårResultat.tilPeriode(): Periode<VilkårRegelverkResultat> {
-    val fom = periodeFom.tilTidspunktEllerUendeligLengeSiden { periodeTom!! }
-    val tom = periodeTom.tilTidspunktEllerUendeligLengeTil { periodeFom!! }
+    val fom = periodeFom.tilTidspunktEllerUendeligLengeSiden { periodeTom!! }.tilMåned()
+    val tom = periodeTom.tilTidspunktEllerUendeligLengeTil { periodeFom!! }.tilMåned()
     return Periode(fom, tom, VilkårRegelverkResultat(vilkårType, vurderesEtter, resultat))
 }

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.temaperiode
 
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -17,14 +16,17 @@ data class Periode<T>(
     override fun toString(): String = "$fom - $tom: $innhold"
 }
 
-data class ForeldetUtbetaling(
-    val begrunnelse: String
-)
+fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =
+    this?.let { DagTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
 
-data class AndelTilkjentYtelse(
-    val kalkulerBeløp: Double,
-    val ytelseType: YtelseType
-)
+fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate) =
+    this?.let { DagTidspunkt(this) } ?: Tidspunkt.uendeligLengeTil(default())
+
+fun YearMonth?.tilTidspunktEllerUendeligLengeSiden(default: () -> YearMonth) =
+    this?.let { MånedTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
+
+fun YearMonth?.tilTidspunktEllerUendeligLengeTil(default: () -> YearMonth) =
+    this?.let { MånedTidspunkt(this) } ?: Tidspunkt.uendeligLengeTil(default())
 
 data class PeriodeSplitt<T>(
     val tidspunkt: Tidspunkt,
@@ -34,18 +36,6 @@ data class PeriodeSplitt<T>(
     constructor(tidspunkt: Tidspunkt) :
         this(tidspunkt, Periode(tidspunkt, tidspunkt), Periode(tidspunkt, tidspunkt))
 }
-
-fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =
-    this?.let { DagTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
-
-fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate) =
-    this?.let { DagTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
-
-fun YearMonth?.tilTidspunktEllerUendeligLengeSiden(default: () -> YearMonth) =
-    this?.let { MånedTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
-
-fun YearMonth?.tilTidspunktEllerUendeligLengeTil(default: () -> YearMonth) =
-    this?.let { MånedTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
 
 fun <T> PeriodeSplitt<*>.påførSplitt(
     periode: Periode<T>,

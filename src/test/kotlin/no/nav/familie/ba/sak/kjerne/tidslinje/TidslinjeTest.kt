@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseStatus
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.KalkulerendeTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Periode
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.SnittTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.TidslinjeUtenAvhengigheter
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.komprimer
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.rangeTo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksempler.BarnOppfyllerVilkårKombinator
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksempler.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -54,7 +53,7 @@ internal class TidslinjeTest {
 
     @Test
     fun testUendeligTidslinjee() {
-        val tegn = "<------->"
+        val tegn = "<--->"
         val charTidslinje = CharTidslinje(tegn, YearMonth.of(2020, 1))
         charTidslinje.perioder().forEach { println(it) }
         assertEquals(tegn.length, charTidslinje.perioder().size)
@@ -90,17 +89,17 @@ internal class TidslinjeTest {
             .medVilkår("---------------------", Vilkår.GIFT_PARTNERSKAP)
             .forPerson(barn2, januar2020)
             .medVilkår("--------->", Vilkår.UNDER_18_ÅR)
-            .medVilkår(" EEEE--EE>", Vilkår.BOSATT_I_RIKET)
+            .medVilkår(" EEEE--EEE", Vilkår.BOSATT_I_RIKET)
             .medVilkår("EEEEEEEEE>", Vilkår.LOVLIG_OPPHOLD)
             .medVilkår("EEEENNEEE>", Vilkår.BOR_MED_SØKER)
             .medVilkår("--------->", Vilkår.GIFT_PARTNERSKAP)
             .byggVilkårsvurdering()
 
         val kompetanser = KompetanseBuilder(behandling = behandling, januar2020)
-            .medKompetanse("---PPPPP--SSSSSS", barn1, barn2, barn3)
+            .medKompetanse("---SSSPP--SSPPSS", barn1, barn2, barn3)
             .medKompetanse("                SSSSS", barn1)
             .medKompetanse("                PPPPP", barn2)
-            .medKompetanse("                -----", barn2)
+            .medKompetanse("                -----", barn3)
             .byggKompetanser()
 
         val tidslinjer = Tidslinjer(
@@ -109,16 +108,26 @@ internal class TidslinjeTest {
             kompetanser
         )
 
+        // tidslinjer.forBarn(barn2).barnetsVilkårsresultatTidslinjer.print()
+        // tidslinjer.forBarn(barn2).erEøsTidslinje.print()
+        // tidslinjer.forBarn(barn2).kompetanseTidslinje.print()
+
         println("Søker")
-        tidslinjer.søkerOppfyllerVilkårTidslinje.komprimer().perioder().forEach { println(it) }
+        tidslinjer.søkerOppfyllerVilkårTidslinje.print()
         println("Barn: ${barn1.aktør.aktivFødselsnummer()}")
-        tidslinjer.forBarn(barn1).erEøsTidslinje.komprimer().perioder().forEach { println(it) }
+        tidslinjer.forBarn(barn1).erEøsTidslinje.print()
         println("Barn: ${barn2.aktør.aktivFødselsnummer()}")
-        // tidslinjer.forBarn(barn2).erEøsTidslinje.perioder().forEach { println(it) }
-        tidslinjer.forBarn(barn2).barnetsVilkårsresultatTidslinjer
-            .kombiner(BarnOppfyllerVilkårKombinator())
-            .perioder().forEach { println(it) }
+
+        tidslinjer.forBarn(barn2).erEøsTidslinje.print()
+        tidslinjer.forBarn(barn2).kompetanseValideringTidslinje.perioder().size
+        tidslinjer.forBarn(barn2).erSekundærlandTidslinje.perioder().size
     }
+}
+
+fun Iterable<Tidslinje<*>>.print() = this.forEach { it.print() }
+fun Tidslinje<*>.print() {
+    println("${this.tidsrom()} ${this.javaClass.name}")
+    this.perioder().forEach { println(it) }
 }
 
 class KompetanseBuilder(
@@ -183,7 +192,7 @@ data class VilkårsvurderingBuilder(
             val vilkårresultater = vilkårsresultatTidslinjer.flatMap {
                 it.perioder()
                     .filter { it.innhold != null }
-                    .map { periode -> periode.tilVilkårResultat(personResultat) }
+                    .flatMap { periode -> periode.tilVilkårResultater(personResultat) }
             }
 
             personResultat.vilkårResultater.addAll(vilkårresultater)
@@ -195,7 +204,10 @@ data class VilkårsvurderingBuilder(
         private fun parseVilkår(periodeString: String, vilkår: Vilkår): Tidslinje<VilkårRegelverkResultat> {
             val charTidslinje = CharTidslinje(periodeString, startMåned).komprimer()
             val vilkårRegelverkResultatTidslinje = VilkårRegelverkResultatTidslinje(vilkår, charTidslinje)
-            val perioder = vilkårRegelverkResultatTidslinje.perioder()
+            // val charPeridoer = charTidslinje.perioder()
+            // val vilkårPerioder = vilkårRegelverkResultatTidslinje.perioder()
+            // vilkårRegelverkResultatTidslinje.print()
+
             return vilkårRegelverkResultatTidslinje
         }
     }
@@ -234,8 +246,8 @@ class KompetanseTidslinje(
     val charTidslinje: Tidslinje<Char>,
     val behandlingId: Long,
     val barn: List<Person>
-) : KalkulerendeTidslinje<Kompetanse>(charTidslinje) {
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): Kompetanse? {
+) : SnittTidslinje<Kompetanse>(charTidslinje) {
+    override fun beregnSnitt(tidspunkt: Tidspunkt): Kompetanse? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
         val barnFnr = barn.map { it.aktør.aktivFødselsnummer() }.toSet()
         val kompetanseMal = Kompetanse(behandlingId = behandlingId, fom = null, tom = null, barn = barnFnr)
@@ -252,8 +264,8 @@ class VilkårRegelverkResultatTidslinje(
     val vilkår: Vilkår,
     val charTidslinje: Tidslinje<Char>
 ) :
-    KalkulerendeTidslinje<VilkårRegelverkResultat>(charTidslinje) {
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): VilkårRegelverkResultat? {
+    SnittTidslinje<VilkårRegelverkResultat>(charTidslinje) {
+    override fun beregnSnitt(tidspunkt: Tidspunkt): VilkårRegelverkResultat? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
 
         return when (tegn) {
@@ -265,14 +277,33 @@ class VilkårRegelverkResultatTidslinje(
     }
 }
 
-fun Periode<VilkårRegelverkResultat>.tilVilkårResultat(personResultat: PersonResultat) =
-    VilkårResultat(
-        personResultat = personResultat,
-        vilkårType = this.innhold?.vilkår!!,
-        resultat = this.innhold?.resultat!!,
-        vurderesEtter = this.innhold?.regelverk,
-        periodeFom = this.fom.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
-        periodeTom = this.tom.tilSisteDagIMåneden().tilLocalDateEllerNull(),
-        begrunnelse = "",
-        behandlingId = 0
+fun Periode<VilkårRegelverkResultat>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> {
+    return listOf(
+        VilkårResultat(
+            personResultat = personResultat,
+            vilkårType = this.innhold?.vilkår!!,
+            resultat = this.innhold?.resultat!!,
+            vurderesEtter = this.innhold?.regelverk,
+            periodeFom = this.fom.tilLocalDateEllerNull(),
+            periodeTom = this.tom.tilLocalDateEllerNull(),
+            begrunnelse = "",
+            behandlingId = 0
+        )
     )
+}
+
+fun <T> Periode<T>.dekomponerUendelig(): Iterable<Periode<T>> {
+    val fraUendelig = if (this.fom.erUendeligLengeSiden())
+        this.copy(fom = this.fom.forrige(), tom = this.fom.forrige().somEndelig())
+    else
+        null
+
+    val endelig = this.copy(fom.somEndelig(), tom.somEndelig())
+
+    val tilUendelig = if (this.tom.erUendeligLengeTil())
+        this.copy(fom = this.tom.neste().somEndelig(), tom = this.tom.neste())
+    else
+        null
+
+    return listOf(fraUendelig, endelig, tilUendelig).filterNotNull()
+}
