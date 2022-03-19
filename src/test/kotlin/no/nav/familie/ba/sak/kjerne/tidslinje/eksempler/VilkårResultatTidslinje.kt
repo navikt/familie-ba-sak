@@ -24,15 +24,15 @@ class VilkårResultatTidslinje(
 
     override fun tidsrom(): Tidsrom {
         val fraOgMed: Tidspunkt = vilkårsresultater
-            .map { it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom!! } }.minOrNull()!!
+            .map { it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom!! }.tilMåned() }.minOrNull()!!
         val tilOgMed: Tidspunkt = vilkårsresultater
-            .map { it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! } }.maxOrNull()!!
+            .map { it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! }.tilMåned() }.maxOrNull()!!
 
         return fraOgMed..tilOgMed
     }
 
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): VilkårRegelverkResultat? {
-        return vilkårsresultater.map { it.tilPeriode() }.find { it.fom <= tidspunkt && it.tom >= tidspunkt }?.innhold
+    override fun perioder(): Collection<Periode<VilkårRegelverkResultat>> {
+        return vilkårsresultater.map { it.tilPeriode() }
     }
 }
 

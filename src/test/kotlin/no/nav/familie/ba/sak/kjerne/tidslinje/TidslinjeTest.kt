@@ -14,9 +14,11 @@ import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.TidslinjeUtenAvhengigheter
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidsrom
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.komprimer
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.rangeTo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksempler.BarnOppfyllerVilkårKombinator
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksempler.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -26,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 
 internal class TidslinjeTest {
 
@@ -39,6 +40,27 @@ internal class TidslinjeTest {
         assertEquals(10, tidsrom.count())
         assertEquals(fom, tidsrom.first())
         assertEquals(tom, tidsrom.last())
+    }
+
+    @Test
+    fun testCharTidsline() {
+        val tegn = "---------------"
+        val charTidslinje = CharTidslinje(tegn, YearMonth.of(2020, 1))
+        assertEquals(tegn.length, charTidslinje.perioder().size)
+        val perioder = charTidslinje.komprimer().perioder()
+        perioder.forEach { println(it) }
+        assertEquals(1, perioder.size)
+    }
+
+    @Test
+    fun testUendeligTidslinjee() {
+        val tegn = "<------->"
+        val charTidslinje = CharTidslinje(tegn, YearMonth.of(2020, 1))
+        charTidslinje.perioder().forEach { println(it) }
+        assertEquals(tegn.length, charTidslinje.perioder().size)
+        val perioder = charTidslinje.komprimer().perioder()
+        perioder.forEach { println(it) }
+        assertEquals(1, perioder.size)
     }
 
     @Test
@@ -88,11 +110,14 @@ internal class TidslinjeTest {
         )
 
         println("Søker")
-        tidslinjer.søkerOppfyllerVilkårTidslinje.perioder.forEach { println(it) }
+        tidslinjer.søkerOppfyllerVilkårTidslinje.komprimer().perioder().forEach { println(it) }
         println("Barn: ${barn1.aktør.aktivFødselsnummer()}")
-        tidslinjer.forBarn(barn1).erEøsTidslinje.perioder.forEach { println(it) }
+        tidslinjer.forBarn(barn1).erEøsTidslinje.komprimer().perioder().forEach { println(it) }
         println("Barn: ${barn2.aktør.aktivFødselsnummer()}")
-        tidslinjer.forBarn(barn2).erEøsTidslinje.perioder.forEach { println(it) }
+        // tidslinjer.forBarn(barn2).erEøsTidslinje.perioder().forEach { println(it) }
+        tidslinjer.forBarn(barn2).barnetsVilkårsresultatTidslinjer
+            .kombiner(BarnOppfyllerVilkårKombinator())
+            .perioder().forEach { println(it) }
     }
 }
 
@@ -103,7 +128,7 @@ class KompetanseBuilder(
     val kompetanser: MutableList<Kompetanse> = mutableListOf()
 
     fun medKompetanse(k: String, vararg barn: Person): KompetanseBuilder {
-        val charTidslinje = CharTidslinje(k, startMåned)
+        val charTidslinje = CharTidslinje(k, startMåned).komprimer()
         val kompetanseTidslinje = KompetanseTidslinje(charTidslinje, behandling.id, barn.toList())
 
         kompetanseTidslinje.perioder()
@@ -168,7 +193,7 @@ data class VilkårsvurderingBuilder(
         }
 
         private fun parseVilkår(periodeString: String, vilkår: Vilkår): Tidslinje<VilkårRegelverkResultat> {
-            val charTidslinje = CharTidslinje(periodeString, startMåned)
+            val charTidslinje = CharTidslinje(periodeString, startMåned).komprimer()
             val vilkårRegelverkResultatTidslinje = VilkårRegelverkResultatTidslinje(vilkår, charTidslinje)
             val perioder = vilkårRegelverkResultatTidslinje.perioder()
             return vilkårRegelverkResultatTidslinje
@@ -180,24 +205,28 @@ class CharTidslinje(private val tegn: String, private val startMåned: YearMonth
     override fun tidsrom(): Tidsrom {
         val fom = when (tegn.first()) {
             '<' -> Tidspunkt.uendeligLengeSiden(startMåned)
-            else -> Tidspunkt(startMåned.plusMonths(1))
+            else -> Tidspunkt.med(startMåned)
         }
 
-        val sluttMåned = startMåned.plusMonths(tegn.length.toLong())
+        val sluttMåned = startMåned.plusMonths(tegn.length.toLong() - 1)
         val tom = when (tegn.last()) {
-            '>' -> Tidspunkt.uendeligLengeTil(sluttMåned.minusMonths(1))
-            else -> Tidspunkt(sluttMåned)
+            '>' -> Tidspunkt.uendeligLengeTil(sluttMåned)
+            else -> Tidspunkt.med(sluttMåned)
         }
 
         return fom..tom
     }
 
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): Char? {
-        val månederIMellom = ChronoUnit.MONTHS.between(
-            tidsrom().start.somEndelig().tilFørsteDagIMåneden().tilLocalDate(),
-            tidspunkt.somEndelig().tilFørsteDagIMåneden().tilLocalDate()
-        ).toInt()
-        return tegn[månederIMellom]
+    override fun perioder(): Collection<Periode<Char>> {
+
+        return tidsrom().mapIndexed { index, tidspunkt ->
+            val c = when (index) {
+                0 -> if (tegn[index] == '<') tegn[index + 1] else tegn[index]
+                tegn.length - 1 -> if (tegn[index] == '>') tegn[index - 1] else tegn[index]
+                else -> tegn[index]
+            }
+            Periode(tidspunkt.somFraOgMed(), tidspunkt.somTilOgMed(), c)
+        }
     }
 }
 
@@ -242,8 +271,8 @@ fun Periode<VilkårRegelverkResultat>.tilVilkårResultat(personResultat: PersonR
         vilkårType = this.innhold?.vilkår!!,
         resultat = this.innhold?.resultat!!,
         vurderesEtter = this.innhold?.regelverk,
-        periodeFom = this.fom.tilFørsteDagIMåneden().tilLocalDate(),
-        periodeTom = this.tom.tilSisteDagIMåneden().tilLocalDate(),
+        periodeFom = this.fom.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
+        periodeTom = this.tom.tilSisteDagIMåneden().tilLocalDateEllerNull(),
         begrunnelse = "",
         behandlingId = 0
     )

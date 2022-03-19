@@ -8,21 +8,7 @@ abstract class Tidslinje<T> {
 
     internal abstract fun tidsrom(): Tidsrom
 
-    fun perioder(): Collection<Periode<T>> =
-        gjeldendePerioder ?: genererPerioder(tidsrom()).also { gjeldendePerioder = it }
-
-    private fun genererPerioder(tidsrom: Tidsrom): List<Periode<T>> =
-        tidsrom.map { Pair(it, kalkulerInnhold(it)) }
-            .fold(emptyList()) { acc, (tidspunkt, innhold) ->
-                val sistePeriode = acc.lastOrNull()
-                when {
-                    sistePeriode != null && sistePeriode.innhold == innhold && sistePeriode.tom.erRettFør(tidspunkt.somEndelig()) ->
-                        acc.replaceLast(sistePeriode.copy(tom = tidspunkt))
-                    else -> acc + Periode(tidspunkt.ikkeUendeligFremtid(), tidspunkt.ikkeUendeligFortid(), innhold)
-                }
-            }
-
-    protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): T?
+    abstract fun perioder(): Collection<Periode<T>>
 
     internal fun registrerEtterfølgendeTidslinje(tidslinje: TidslinjeMedAvhengigheter<*>) {
         etterfølgendeTidslinjer.add(tidslinje)
@@ -109,7 +95,31 @@ abstract class KalkulerendeTidslinje<T>(
 
     constructor(vararg avhengighet: Tidslinje<*>) :
         this(avhengighet.asList())
+
+    override fun perioder(): Collection<Periode<T>> =
+        genererPerioder(tidsrom())
+
+    private fun genererPerioder(tidsrom: Tidsrom): List<Periode<T>> =
+        tidsrom.map { Pair(it, kalkulerInnhold(it)) }
+            .fold(emptyList()) { acc, (tidspunkt, innhold) ->
+                val sistePeriode = acc.lastOrNull()
+                when {
+                    sistePeriode != null && sistePeriode.innhold == innhold && sistePeriode.tom.erRettFør(tidspunkt.somEndelig()) ->
+                        acc.replaceLast(sistePeriode.copy(tom = tidspunkt.somTilOgMed()))
+                    else -> acc + Periode(tidspunkt.somFraOgMed(), tidspunkt.somTilOgMed(), innhold)
+                }
+            }
+
+    protected abstract fun kalkulerInnhold(tidspunkt: Tidspunkt): T?
 }
+
+class KomprimerendeTidslinje<T>(val tidslinje: Tidslinje<T>) : KalkulerendeTidslinje<T>(tidslinje) {
+    override fun kalkulerInnhold(tidspunkt: Tidspunkt): T? {
+        return tidslinje.hentUtsnitt(tidspunkt)
+    }
+}
+
+fun <T> Tidslinje<T>.komprimer(): Tidslinje<T> = KomprimerendeTidslinje(this)
 
 private fun <T> Collection<T>.replaceLast(replacement: T) =
     this.take(this.size - 1) + replacement

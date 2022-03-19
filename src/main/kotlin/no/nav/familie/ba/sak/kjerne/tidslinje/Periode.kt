@@ -36,16 +36,16 @@ data class PeriodeSplitt<T>(
 }
 
 fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =
-    this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
+    this?.let { DagTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
 
 fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate) =
-    this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
+    this?.let { DagTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
 
 fun YearMonth?.tilTidspunktEllerUendeligLengeSiden(default: () -> YearMonth) =
-    this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
+    this?.let { MånedTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
 
 fun YearMonth?.tilTidspunktEllerUendeligLengeTil(default: () -> YearMonth) =
-    this?.let { Tidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
+    this?.let { MånedTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
 
 fun <T> PeriodeSplitt<*>.påførSplitt(
     periode: Periode<T>,

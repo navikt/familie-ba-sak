@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Periode
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.TidslinjeMedEksterntInnhold
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidsrom
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.rangeTo
 import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.tilTidspunktEllerUendeligLengeSiden
@@ -22,8 +21,8 @@ class KompetanseTidslinje(
         return fom..tom
     }
 
-    override fun kalkulerInnhold(tidspunkt: Tidspunkt): Kompetanse? {
-        return innhold.map { it.tilPeriode() }.find { it.fom <= tidspunkt && it.tom >= tidspunkt }?.innhold
+    override fun perioder(): Collection<Periode<Kompetanse>> {
+        return kompetanser.map { it.tilPeriode() }
     }
 }
 

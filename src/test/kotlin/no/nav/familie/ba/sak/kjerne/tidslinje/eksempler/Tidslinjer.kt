@@ -3,9 +3,8 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje2
+import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilPeriode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
@@ -30,7 +29,7 @@ class Tidslinjer(
         .mapValues { (_, resultater) ->
             resultater
                 .groupBy { it.vilkårType }
-                .mapValues { it.value.map { vr -> vr.tilPeriode() }.let { Tidslinje2(it) } }
+                .mapValues { VilkårResultatTidslinje(it.value) }
                 .values
         }
 
@@ -38,7 +37,7 @@ class Tidslinjer(
         .filter { (ident, _) -> personopplysningGrunnlag.søker.aktør.harIdent(ident) }
         .mapValues { (_, resultater) ->
             resultater.groupBy { it.vilkårType }
-                .mapValues { it.value.map { vr -> vr.tilPeriode() }.let { Tidslinje2(it) } }
+                .mapValues { VilkårResultatTidslinje(it.value) }
                 .values
         }.values.flatten()
 
@@ -55,6 +54,8 @@ class Tidslinjer(
         barnIdent: String,
     ) {
         val barnetsVilkårsresultatTidslinjer = tidslinjer.barnasVilkårsresultatTidslinjeMap[barnIdent]!!
+
+        // val erEøsTidslinje = ErEøsPeriodeTidslinje(barnetsVilkårsresultatTidslinjer)
         val erEøsTidslinje = barnetsVilkårsresultatTidslinjer.kombiner(EøsPeriodeKombinator())
         // val kompetanseTidslinje = tidslinjer.kompetanser.tilTidslinjeforBarn(barnIdent)
         // val kompetanseValideringTidslinje =
@@ -62,8 +63,3 @@ class Tidslinjer(
         // val erSekundærland = kompetanseTidslinje.kombinerMed(kompetanseValideringTidslinje, ErSekundærlandKombinator())
     }
 }
-
-fun Collection<Kompetanse>.tilTidslinjeforBarn(ident: String) =
-    this.filter { it.barn.contains(ident) }
-        .map { it.tilPeriode() }
-        .let { Tidslinje2(it) }
