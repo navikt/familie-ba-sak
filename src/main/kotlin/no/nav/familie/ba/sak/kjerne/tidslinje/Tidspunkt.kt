@@ -56,16 +56,16 @@ interface Tidspunkt : Comparable<Tidspunkt> {
             if (fraOgMed == null || fraOgMed < PRAKTISK_TIDLIGSTE_DAG)
                 uendeligLengeSiden(maxOf(praktiskMinsteFraOgMed, PRAKTISK_TIDLIGSTE_DAG))
             else
-                DagTidspunkt(fraOgMed)
+                DagTidspunkt(fraOgMed, Uendelighet.INGEN)
 
         fun tilOgMed(tilOgMed: LocalDate?, praktiskStørsteTilOgMed: LocalDate) =
             if (tilOgMed == null || tilOgMed > PRAKTISK_SENESTE_DAG)
                 uendeligLengeTil(minOf(praktiskStørsteTilOgMed, PRAKTISK_SENESTE_DAG))
             else
-                DagTidspunkt(tilOgMed)
+                DagTidspunkt(tilOgMed, Uendelighet.INGEN)
 
-        fun med(dato: LocalDate) = DagTidspunkt(dato)
-        fun med(måned: YearMonth) = MånedTidspunkt(måned)
+        fun med(dato: LocalDate) = DagTidspunkt(dato, Uendelighet.INGEN)
+        fun med(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.INGEN)
     }
 
     // Betrakter to uendeligheter som like, selv underliggende tidspunkt kan være forskjellig
@@ -88,7 +88,7 @@ interface Tidspunkt : Comparable<Tidspunkt> {
 
 data class DagTidspunkt(
     private val dato: LocalDate,
-    override val uendelighet: Uendelighet = Uendelighet.INGEN,
+    override val uendelighet: Uendelighet
 ) : Tidspunkt {
 
     init {
@@ -179,10 +179,8 @@ data class DagTidspunkt(
 
 data class MånedTidspunkt(
     private val måned: YearMonth,
-    override val uendelighet: Uendelighet = Uendelighet.INGEN
+    override val uendelighet: Uendelighet
 ) : Tidspunkt {
-    constructor(tidspunkt: YearMonth) : this(tidspunkt, uendelighet = Uendelighet.INGEN)
-
     init {
         if (måned < PRAKTISK_TIDLIGSTE_DAG.toYearMonth())
             throw IllegalArgumentException("Tidspunktet er for lenge siden. Bruk uendeligLengeSiden()")
@@ -274,13 +272,13 @@ fun Iterable<Tidspunkt>.størsteEllerUendelig() = this.reduce { acc, neste ->
 }
 
 fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =
-    this?.let { DagTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
+    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeSiden(default())
 
 fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate) =
-    this?.let { DagTidspunkt(this) } ?: Tidspunkt.uendeligLengeTil(default())
+    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeTil(default())
 
 fun YearMonth?.tilTidspunktEllerUendeligLengeSiden(default: () -> YearMonth) =
-    this?.let { MånedTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
+    this?.let { MånedTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeSiden(default())
 
 fun YearMonth?.tilTidspunktEllerUendeligLengeTil(default: () -> YearMonth) =
-    this?.let { MånedTidspunkt(this) } ?: Tidspunkt.uendeligLengeTil(default())
+    this?.let { MånedTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeTil(default())
