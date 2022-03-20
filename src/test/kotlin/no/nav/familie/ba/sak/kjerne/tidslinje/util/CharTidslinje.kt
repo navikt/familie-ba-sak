@@ -4,12 +4,11 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidsrom
+import no.nav.familie.ba.sak.kjerne.tidslinje.komprimer
 import no.nav.familie.ba.sak.kjerne.tidslinje.rangeTo
 import java.time.YearMonth
 
-class CharTidslinje(private val tegn: String, private val startMåned: Tidspunkt) : Tidslinje<Char>() {
-    constructor(tegn: String, startMåned: YearMonth) : this(tegn, Tidspunkt.med(startMåned))
-
+internal class CharTidslinje(private val tegn: String, private val startMåned: Tidspunkt) : Tidslinje<Char>() {
     override fun tidsrom(): Tidsrom {
         val fom = when (tegn.first()) {
             '<' -> startMåned.somUendeligLengeSiden()
@@ -37,3 +36,8 @@ class CharTidslinje(private val tegn: String, private val startMåned: Tidspunkt
         }
     }
 }
+
+fun String.tilCharTidslinje(fom: YearMonth): Tidslinje<Char> =
+    CharTidslinje(this, Tidspunkt.Companion.med(fom)).komprimer()
+
+fun String.tilCharTidslinje(fom: Tidspunkt): Tidslinje<Char> = CharTidslinje(this, fom).komprimer()

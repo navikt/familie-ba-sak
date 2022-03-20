@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.hentUtsnitt
-import no.nav.familie.ba.sak.kjerne.tidslinje.komprimer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -70,7 +69,7 @@ data class VilkårsvurderingBuilder(
         }
 
         private fun parseVilkår(periodeString: String, vilkår: Vilkår): Tidslinje<VilkårRegelverkResultat> {
-            val charTidslinje = CharTidslinje(periodeString, startMåned).komprimer()
+            val charTidslinje = periodeString.tilCharTidslinje(startMåned)
             return VilkårRegelverkResultatTidslinje(vilkår, charTidslinje)
         }
     }

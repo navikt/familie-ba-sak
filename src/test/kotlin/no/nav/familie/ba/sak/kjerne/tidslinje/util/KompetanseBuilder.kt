@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.SnittTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.hentUtsnitt
-import no.nav.familie.ba.sak.kjerne.tidslinje.komprimer
 import java.time.YearMonth
 
 class KompetanseBuilder(
@@ -19,7 +18,7 @@ class KompetanseBuilder(
     val kompetanser: MutableList<Kompetanse> = mutableListOf()
 
     fun medKompetanse(k: String, vararg barn: Person): KompetanseBuilder {
-        val charTidslinje = CharTidslinje(k, startMåned).komprimer()
+        val charTidslinje = k.tilCharTidslinje(startMåned)
         val kompetanseTidslinje = KompetanseTidslinje(charTidslinje, behandling.id, barn.toList())
 
         kompetanseTidslinje.perioder()
