@@ -17,14 +17,14 @@ interface Tidspunkt : Comparable<Tidspunkt> {
     fun tilFørsteDagIMåneden(): DagTidspunkt
     fun tilSisteDagIMåneden(): DagTidspunkt
     fun tilDagIMåned(dag: Int): DagTidspunkt
-    fun tilMåned(): MånedTidspunkt
-    fun tilDag(): DagTidspunkt
+    fun tilDag(månedTilDagMapper: (YearMonth) -> LocalDate): DagTidspunkt
+    fun tilInneværendeMåned(): MånedTidspunkt
     fun tilLocalDateEllerNull(): LocalDate?
     fun tilLocalDate(): LocalDate
     fun tilYearMonthEllerNull(): YearMonth?
     fun tilYearMonth(): YearMonth
 
-    fun flytt(antallSteg: Long): Tidspunkt
+    fun flytt(tidsenheter: Long): Tidspunkt
     fun neste() = flytt(1)
     fun forrige() = flytt(-1)
 
@@ -104,11 +104,11 @@ data class DagTidspunkt(
         return this.copy(dato = dato.withDayOfMonth(dag))
     }
 
-    override fun tilMåned(): MånedTidspunkt {
+    override fun tilDag(månedTilDagMapper: (YearMonth) -> LocalDate): DagTidspunkt = this
+
+    override fun tilInneværendeMåned(): MånedTidspunkt {
         return MånedTidspunkt(dagTilMånedKonverterer(this.dato), uendelighet)
     }
-
-    override fun tilDag() = this
 
     override fun tilLocalDateEllerNull(): LocalDate? {
         if (uendelighet != Uendelighet.INGEN)
@@ -129,8 +129,8 @@ data class DagTidspunkt(
         return dagTilMånedKonverterer(tilLocalDate())
     }
 
-    override fun flytt(antallSteg: Long): Tidspunkt {
-        return this.copy(dato = dato.plusDays(antallSteg))
+    override fun flytt(tidsenheter: Long): Tidspunkt {
+        return this.copy(dato = dato.plusDays(tidsenheter))
     }
 
     override fun somEndelig(): Tidspunkt {
@@ -193,8 +193,10 @@ data class MånedTidspunkt(
     override fun tilDagIMåned(dag: Int): DagTidspunkt =
         DagTidspunkt(måned.atDay(dag), this.uendelighet)
 
-    override fun tilMåned() = this
-    override fun tilDag() = DagTidspunkt(månedTilDagKonverterer(måned), uendelighet)
+    override fun tilDag(månedTilDagMapper: (YearMonth) -> LocalDate): DagTidspunkt =
+        DagTidspunkt(månedTilDagMapper(måned), uendelighet = uendelighet)
+
+    override fun tilInneværendeMåned() = this
 
     override fun tilLocalDateEllerNull(): LocalDate? =
         tilYearMonthEllerNull()?.let(månedTilDagKonverterer)
@@ -213,7 +215,7 @@ data class MånedTidspunkt(
         else
             måned
 
-    override fun flytt(antallSteg: Long) = copy(måned = måned.plusMonths(antallSteg))
+    override fun flytt(tidsenheter: Long) = copy(måned = måned.plusMonths(tidsenheter))
 
     override fun neste() = flytt(1)
 
@@ -259,8 +261,10 @@ data class Tidsrom(
     ClosedRange<Tidspunkt> {
 
     override fun iterator(): Iterator<Tidspunkt> =
-        if (start.erDag() || endInclusive.erDag())
-            TidspunktIterator(start.tilDag(), endInclusive.tilDag())
+        if (start.erDag() && !endInclusive.erDag())
+            TidspunktIterator(start, endInclusive.tilSisteDagIMåneden())
+        else if (!start.erDag() && endInclusive.erDag())
+            TidspunktIterator(start.tilFørsteDagIMåneden(), endInclusive)
         else
             TidspunktIterator(start, endInclusive)
 

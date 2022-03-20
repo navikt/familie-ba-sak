@@ -24,9 +24,11 @@ class VilkårResultatTidslinje(
 
     override fun tidsrom(): Tidsrom {
         val fraOgMed: Tidspunkt = vilkårsresultater
-            .map { it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom!! }.tilMåned() }.minOrNull()!!
+            .map { it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom!! }.tilInneværendeMåned() }
+            .minOrNull()!!
         val tilOgMed: Tidspunkt = vilkårsresultater
-            .map { it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! }.tilMåned() }.maxOrNull()!!
+            .map { it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! }.tilInneværendeMåned() }
+            .maxOrNull()!!
 
         return fraOgMed..tilOgMed
     }
@@ -37,7 +39,7 @@ class VilkårResultatTidslinje(
 }
 
 fun VilkårResultat.tilPeriode(): Periode<VilkårRegelverkResultat> {
-    val fom = periodeFom.tilTidspunktEllerUendeligLengeSiden { periodeTom!! }.tilMåned()
-    val tom = periodeTom.tilTidspunktEllerUendeligLengeTil { periodeFom!! }.tilMåned()
+    val fom = periodeFom.tilTidspunktEllerUendeligLengeSiden { periodeTom!! }.tilInneværendeMåned()
+    val tom = periodeTom.tilTidspunktEllerUendeligLengeTil { periodeFom!! }.tilInneværendeMåned()
     return Periode(fom, tom, VilkårRegelverkResultat(vilkårType, vurderesEtter, resultat))
 }
