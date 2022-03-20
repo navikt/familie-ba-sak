@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.tidslinje.SnittTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.SnittTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
 class BarnetsUtbetalingerTidslinje(
     private val barnetsYtelseTidslinje: Tidslinje<YtelseType>,

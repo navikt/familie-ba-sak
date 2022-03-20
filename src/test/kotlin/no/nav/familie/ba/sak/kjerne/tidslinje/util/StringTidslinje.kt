@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidsrom
-import no.nav.familie.ba.sak.kjerne.tidslinje.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsrom
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 
 class StringTidslinje(
     val start: Tidspunkt,

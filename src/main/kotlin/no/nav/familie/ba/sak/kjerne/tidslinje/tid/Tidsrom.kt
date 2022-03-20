@@ -1,6 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje
-
-import java.time.LocalDate
+package no.nav.familie.ba.sak.kjerne.tidslinje.tid
 
 data class Tidsrom(
     override val start: Tidspunkt,
@@ -42,8 +40,6 @@ data class Tidsrom(
                     next
             }
         }
-
-        val NULL = Tidspunkt.med(LocalDate.now())..Tidspunkt.med(LocalDate.now().minusDays(2))
     }
 }
 

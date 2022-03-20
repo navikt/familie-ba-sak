@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidsrom
-import no.nav.familie.ba.sak.kjerne.tidslinje.rangeTo
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidspunktEllerUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidspunktEllerUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsrom
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeTil
 
 class KompetanseTidslinje(
     private val kompetanser: List<Kompetanse>,

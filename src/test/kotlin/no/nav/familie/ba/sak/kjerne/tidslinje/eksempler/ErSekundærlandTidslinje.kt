@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.tidslinje.PeriodeKombinator
-import no.nav.familie.ba.sak.kjerne.tidslinje.SnittTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.ToveisKombinator
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.SnittTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
 class ErSekundærlandTidslinje(
     val kompetanseTidslinje: Tidslinje<Kompetanse>,
@@ -23,7 +23,7 @@ class ErSekundærlandTidslinje(
     }
 }
 
-class ErSekundærlandKombinator : PeriodeKombinator<Kompetanse, KompetanseValidering, Boolean> {
+class ErSekundærlandKombinator : ToveisKombinator<Kompetanse, KompetanseValidering, Boolean> {
     override fun kombiner(kompetanse: Kompetanse?, validering: KompetanseValidering?): Boolean {
         val kompetanse = kompetanse
         val validertKompetanse = validering

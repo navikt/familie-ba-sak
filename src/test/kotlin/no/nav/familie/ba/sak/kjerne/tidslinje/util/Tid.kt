@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidsrom
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsrom
 import java.time.YearMonth
 
 fun jan(år: Int) = Tidspunkt.med(YearMonth.of(år, 1))

@@ -1,5 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.SnittTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.StringTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
@@ -8,7 +12,7 @@ import org.junit.jupiter.api.Test
 
 class TidslinjeKombinasjonTest {
 
-    val kombinator = object : PeriodeKombinator<Char, Char, String> {
+    val kombinator = object : ToveisKombinator<Char, Char, String> {
         override fun kombiner(venstre: Char?, høyre: Char?) =
             (venstre?.toString() ?: "").trim() + (høyre?.toString() ?: "").trim()
     }
@@ -66,12 +70,12 @@ class TidslinjeKombinasjonTest {
 
 fun <V, H, R> Tidslinje<V>.snittKombinerMed(
     tidslinje: Tidslinje<H>,
-    periodeKombinator: PeriodeKombinator<V, H, R>
+    toveisKombinator: ToveisKombinator<V, H, R>
 ): Tidslinje<R> {
     val v1 = this
     return object : SnittTidslinje<R>(v1, tidslinje) {
         override fun beregnSnitt(tidspunkt: Tidspunkt): R? =
-            periodeKombinator.kombiner(
+            toveisKombinator.kombiner(
                 v1.hentUtsnitt(tidspunkt),
                 tidslinje.hentUtsnitt(tidspunkt)
             )

@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb

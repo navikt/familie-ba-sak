@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komprimer
-import no.nav.familie.ba.sak.kjerne.tidslinje.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

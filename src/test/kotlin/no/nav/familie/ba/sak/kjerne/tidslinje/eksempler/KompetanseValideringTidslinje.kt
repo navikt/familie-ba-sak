@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseStatus
-import no.nav.familie.ba.sak.kjerne.tidslinje.PeriodeKombinator
-import no.nav.familie.ba.sak.kjerne.tidslinje.SnittTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.ToveisKombinator
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.SnittTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
 enum class KompetanseValidering {
     OK_EØS_OG_KOMPETANSE,
@@ -32,7 +32,7 @@ class KompetanseValideringTidslinje(
     }
 }
 
-class KompetanseValideringKombinator : PeriodeKombinator<Kompetanse, Boolean, KompetanseValidering> {
+class KompetanseValideringKombinator : ToveisKombinator<Kompetanse, Boolean, KompetanseValidering> {
 
     override fun kombiner(kompetanse: Kompetanse?, erEøs: Boolean?): KompetanseValidering {
         val erEøsPeriode = erEøs ?: false

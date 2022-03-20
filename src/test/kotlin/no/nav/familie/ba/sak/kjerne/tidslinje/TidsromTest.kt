@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

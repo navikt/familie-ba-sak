@@ -1,23 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeMedAvhengigheter
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
-interface PeriodeKombinator<V, H, R> {
-    fun kombiner(venstre: V?, høyre: H?): R
-}
-
-interface ListeKombinator<T, R> {
-    fun kombiner(liste: Iterable<T>): R
-}
-
 class LocalDatetimeTimelineToveisTidslinje<V, H, R>(
     val venstre: Tidslinje<V>,
     val høyre: Tidslinje<H>,
-    val periodeKombinator: PeriodeKombinator<V, H, R>
+    val periodeKombinator: ToveisKombinator<V, H, R>
 ) : TidslinjeMedAvhengigheter<R>(listOf(venstre, høyre)) {
 
     override fun perioder(): Collection<Periode<R>> {
@@ -70,7 +65,7 @@ class LocalDatetimeTimelineListeTidslinje<T, R>(
     }
 }
 
-class LocalDateSegmentPeriodeKombinator<V, H, R>(val periodeKombinator: PeriodeKombinator<V, H, R>) :
+class LocalDateSegmentPeriodeKombinator<V, H, R>(val periodeKombinator: ToveisKombinator<V, H, R>) :
     LocalDateSegmentCombinator<V, H, R> {
     override fun combine(
         intervall: LocalDateInterval?,
@@ -86,7 +81,7 @@ fun <T, R> Collection<Tidslinje<T>>.kombiner(listeKombinator: ListeKombinator<T,
     return LocalDatetimeTimelineListeTidslinje(this, listeKombinator).komprimer()
 }
 
-fun <T, U, R> Tidslinje<T>.kombinerMed(tidslinje: Tidslinje<U>, kombinator: PeriodeKombinator<T, U, R>): Tidslinje<R> {
+fun <T, U, R> Tidslinje<T>.kombinerMed(tidslinje: Tidslinje<U>, kombinator: ToveisKombinator<T, U, R>): Tidslinje<R> {
     // Har ikke fått LocalDateTimeline.compress til å funke helt, og kjører egen komprimering på toppen
     return LocalDatetimeTimelineToveisTidslinje(this, tidslinje, kombinator).komprimer()
 }
