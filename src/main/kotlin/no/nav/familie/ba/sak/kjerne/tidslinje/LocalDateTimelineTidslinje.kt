@@ -1,10 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Periode
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.TidslinjeMedAvhengigheter
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.komprimer
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator
@@ -26,14 +21,14 @@ class LocalDatetimeTimelineToveisTidslinje<V, H, R>(
 ) : TidslinjeMedAvhengigheter<R>(listOf(venstre, høyre)) {
 
     override fun perioder(): Collection<Periode<R>> {
-        val perioder =
-            venstre.toLocalDateTimeline().combine(
-                høyre.toLocalDateTimeline(),
-                LocalDateSegmentPeriodeKombinator(periodeKombinator),
-                LocalDateTimeline.JoinStyle.CROSS_JOIN
-            ).compress().toSegments().map { it.tilPeriode() }
 
-        return perioder
+        return venstre.toLocalDateTimeline().combine(
+            høyre.toLocalDateTimeline(),
+            LocalDateSegmentPeriodeKombinator(periodeKombinator),
+            LocalDateTimeline.JoinStyle.CROSS_JOIN
+        ).compress()
+            .toSegments()
+            .map { it.tilPeriode() }
     }
 }
 
@@ -51,6 +46,7 @@ class LocalDatetimeTimelineListeTidslinje<T, R>(
 
         return tidslinjer.map { it.toLocalDateTimeline() }
             .fold(startVerdi) { acc, neste -> kombinerVerdier(acc, neste) }
+            .compress()
             .toSegments()
             .map { LocalDateSegment(it.fom, it.tom, listeKombinator.kombiner(it.value)) }
             .map { it.tilPeriode() }
@@ -77,11 +73,11 @@ class LocalDatetimeTimelineListeTidslinje<T, R>(
 class LocalDateSegmentPeriodeKombinator<V, H, R>(val periodeKombinator: PeriodeKombinator<V, H, R>) :
     LocalDateSegmentCombinator<V, H, R> {
     override fun combine(
-        p0: LocalDateInterval?,
-        p1: LocalDateSegment<V>?,
-        p2: LocalDateSegment<H>?
+        intervall: LocalDateInterval?,
+        venstre: LocalDateSegment<V>?,
+        høyre: LocalDateSegment<H>?
     ): LocalDateSegment<R> {
-        return LocalDateSegment(p0, periodeKombinator.kombiner(p1?.value, p2?.value))
+        return LocalDateSegment(intervall, periodeKombinator.kombiner(venstre?.value, høyre?.value))
     }
 }
 
@@ -95,11 +91,11 @@ fun <T, U, R> Tidslinje<T>.kombinerMed(tidslinje: Tidslinje<U>, kombinator: Peri
 
 fun <T> Tidslinje<T>.toLocalDateTimeline(): LocalDateTimeline<T> {
     return LocalDateTimeline(
-        this.perioder().sortedBy { it.fom }.map { it.tilSegment() }
+        this.perioder().sortedBy { it.fom }.map { it.tilLocalDateSegment() }
     )
 }
 
-fun <T> Periode<T>.tilSegment(): LocalDateSegment<T> =
+fun <T> Periode<T>.tilLocalDateSegment(): LocalDateSegment<T> =
     LocalDateSegment(
         this.fom.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
         this.tom.tilSisteDagIMåneden().tilLocalDateEllerNull(),

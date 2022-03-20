@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.SnittTidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.ListeKombinator
+import no.nav.familie.ba.sak.kjerne.tidslinje.SnittTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
+import no.nav.familie.ba.sak.kjerne.tidslinje.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 

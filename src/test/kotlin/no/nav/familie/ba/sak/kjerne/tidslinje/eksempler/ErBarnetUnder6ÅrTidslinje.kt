@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.SnittTidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.SnittTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.hentUtsnitt
 import java.time.LocalDate
 
 class ErBarnetUnder6ÅrTidslinje(

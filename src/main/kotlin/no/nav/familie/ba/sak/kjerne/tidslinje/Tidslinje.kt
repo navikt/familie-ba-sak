@@ -1,25 +1,8 @@
-package no.nav.familie.ba.sak.kjerne.eøs.temaperiode
+package no.nav.familie.ba.sak.kjerne.tidslinje
 
 abstract class Tidslinje<T> {
-    private var etterfølgendeTidslinjer: MutableList<TidslinjeMedAvhengigheter<*>> = mutableListOf()
-    private var gjeldendePerioder: Collection<Periode<T>>? = null
-
     internal abstract fun tidsrom(): Tidsrom
     abstract fun perioder(): Collection<Periode<T>>
-
-    internal fun registrerEtterfølgendeTidslinje(tidslinje: TidslinjeMedAvhengigheter<*>) {
-        etterfølgendeTidslinjer.add(tidslinje)
-    }
-
-    protected fun oppdaterPerioder(perioder: Collection<Periode<T>>) {
-        gjeldendePerioder = perioder
-    }
-
-    internal fun splitt(splitt: PeriodeSplitt<*>) {
-        perioder()
-            .flatMap { splitt.påførSplitt(it, etterfølgendeTidslinjer) }
-            .also { oppdaterPerioder(it) }
-    }
 
     // Sammenhengende perioder (ingen hull bruk NULL-perioder)
     // Ingen overlappende perioder
@@ -42,16 +25,6 @@ abstract class Tidslinje<T> {
     }
 }
 
-abstract class TidslinjeUtenAvhengigheter<T> : Tidslinje<T>() {
-    fun splitt(tidspunkt: Tidspunkt) {
-        splitt(PeriodeSplitt<T>(tidspunkt))
-    }
-}
-
-abstract class TidslinjeMedEksterntInnhold<T>(
-    protected val innhold: Iterable<T>,
-) : TidslinjeUtenAvhengigheter<T>()
-
 abstract class TidslinjeMedAvhengigheter<T>(
     private val foregåendeTidslinjer: Collection<Tidslinje<*>>
 ) : Tidslinje<T>() {
@@ -62,25 +35,10 @@ abstract class TidslinjeMedAvhengigheter<T>(
 
         return fom..tom
     }
-
-    init {
-        foregåendeTidslinjer.forEach { it.registrerEtterfølgendeTidslinje(this) }
-    }
-
-    // Refererer alle perioder på foregående tidslinje(r)
-    // Ingen løse referanser til perioder på foregående æraer
-    override fun valider(): List<TidslinjeFeil> {
-        val konsistensFeil = super.valider()
-
-        // Tror ikke det er smart å gjøre rekursiv validering
-        val foregåendeFeil = foregåendeTidslinjer.map { it.valider() }.flatten()
-
-        return foregåendeFeil + konsistensFeil
-    }
 }
 
 abstract class SnittTidslinje<T>(
-    protected val avhengigheter: Collection<Tidslinje<*>>,
+    avhengigheter: Collection<Tidslinje<*>>,
 ) : TidslinjeMedAvhengigheter<T>(avhengigheter) {
 
     var generertePerioder: Collection<Periode<T>>? = null
@@ -135,29 +93,4 @@ enum class TidslinjeFeilType {
     `UE#NDELIG_FREMTID_FØR_SISTE_PERIODE`,
     PERIODE_BLIR_IKKE_FULGT_AV_PERIODE,
     TOM_ER_FØR_FOM,
-    MANGLER_REFERANSE_TIL_PERIODE,
-    REFERANSER_I_FEIL_REKKEFØLGE,
-    REFERER_TIL_UTGÅTT_PERIODE,
-}
-
-fun <T> Collection<Periode<T>>.finnHull(fraOgMed: Tidspunkt, tilOgMed: Tidspunkt): Collection<Tidsrom> {
-
-    if (this.isEmpty())
-        return listOf(Tidsrom(fraOgMed, tilOgMed))
-    else {
-        val sortert = this.sortedBy { it.fom }.toList()
-
-        val tidligste = fraOgMed..sortert.first().fom.forrige()
-        val seneste = sortert.last().tom.neste()..tilOgMed
-        val inni = sortert.mapIndexed { index, periode ->
-            when (index) {
-                0 -> Tidsrom.NULL
-                sortert.size - 1 -> Tidsrom.NULL
-                else -> sortert[index - 1].tom.neste()..periode.fom.forrige()
-            }
-        }
-
-        val alle = listOf(tidligste) + inni + listOf(seneste)
-        return alle.filter { !it.isEmpty() }
-    }
 }

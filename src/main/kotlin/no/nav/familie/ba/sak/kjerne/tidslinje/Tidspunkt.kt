@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.temaperiode
+package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -10,6 +10,12 @@ val PRAKTISK_TIDLIGSTE_DAG = LocalDate.of(1900, 1, 1)
 
 private val månedTilDagKonverterer: (YearMonth) -> LocalDate = { it.atEndOfMonth() }
 private val dagTilMånedKonverterer: (LocalDate) -> YearMonth = { it.toYearMonth() }
+
+enum class Uendelighet {
+    INGEN,
+    FORTID,
+    FREMTID
+}
 
 interface Tidspunkt : Comparable<Tidspunkt> {
     val uendelighet: Uendelighet
@@ -319,14 +325,14 @@ fun Iterable<Tidspunkt>.størsteEllerUendelig() = this.reduce { acc, neste ->
     else maxOf(acc, neste).somEndelig()
 }
 
-fun <T> Periode<T>.erInnenforTidsrom(tidsrom: Tidsrom) =
-    fom <= tidsrom.start && tom >= tidsrom.endInclusive
+fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =
+    this?.let { DagTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
 
-fun <T> Periode<T>.erEnDelAvTidsrom(tidsrom: Tidsrom) =
-    fom <= tidsrom.endInclusive && tom >= tidsrom.start
+fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate) =
+    this?.let { DagTidspunkt(this) } ?: Tidspunkt.uendeligLengeTil(default())
 
-enum class Uendelighet {
-    INGEN,
-    FORTID,
-    FREMTID
-}
+fun YearMonth?.tilTidspunktEllerUendeligLengeSiden(default: () -> YearMonth) =
+    this?.let { MånedTidspunkt(this) } ?: Tidspunkt.uendeligLengeSiden(default())
+
+fun YearMonth?.tilTidspunktEllerUendeligLengeTil(default: () -> YearMonth) =
+    this?.let { MånedTidspunkt(this) } ?: Tidspunkt.uendeligLengeTil(default())

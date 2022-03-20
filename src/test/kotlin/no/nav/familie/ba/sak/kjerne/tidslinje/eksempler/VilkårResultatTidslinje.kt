@@ -1,13 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Periode
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.TidslinjeUtenAvhengigheter
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidsrom
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.rangeTo
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.tilTidspunktEllerUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.tilTidspunktEllerUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -20,7 +13,7 @@ data class VilkårRegelverkResultat(
 
 class VilkårResultatTidslinje(
     private val vilkårsresultater: List<VilkårResultat>
-) : TidslinjeUtenAvhengigheter<VilkårRegelverkResultat>() {
+) : Tidslinje<VilkårRegelverkResultat>() {
 
     override fun tidsrom(): Tidsrom {
         val fraOgMed: Tidspunkt = vilkårsresultater

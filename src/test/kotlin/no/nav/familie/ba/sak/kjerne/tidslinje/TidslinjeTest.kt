@@ -7,15 +7,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseStatus
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Periode
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.SnittTidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.TidslinjeUtenAvhengigheter
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.Tidsrom
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.hentUtsnitt
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.komprimer
-import no.nav.familie.ba.sak.kjerne.eøs.temaperiode.rangeTo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksempler.Tidslinjer
@@ -213,7 +204,7 @@ data class VilkårsvurderingBuilder(
     }
 }
 
-class CharTidslinje(private val tegn: String, private val startMåned: YearMonth) : TidslinjeUtenAvhengigheter<Char>() {
+class CharTidslinje(private val tegn: String, private val startMåned: YearMonth) : Tidslinje<Char>() {
     override fun tidsrom(): Tidsrom {
         val fom = when (tegn.first()) {
             '<' -> Tidspunkt.uendeligLengeSiden(startMåned)
