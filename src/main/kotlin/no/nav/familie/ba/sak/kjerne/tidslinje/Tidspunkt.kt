@@ -223,12 +223,6 @@ data class MånedTidspunkt(
 
     override fun flytt(tidsenheter: Long) = copy(måned = måned.plusMonths(tidsenheter))
 
-    override fun neste() = flytt(1)
-
-    override fun forrige() = flytt(1)
-
-    override fun erRettFør(tidspunkt: Tidspunkt) = neste() == tidspunkt
-
     override fun somEndelig(): Tidspunkt = this.copy(uendelighet = Uendelighet.INGEN)
 
     override fun toString(): String {

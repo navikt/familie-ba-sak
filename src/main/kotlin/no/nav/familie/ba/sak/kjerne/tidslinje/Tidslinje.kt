@@ -23,11 +23,31 @@ abstract class Tidslinje<T> {
             }
         }.filterNotNull()
     }
+
+    companion object {
+        data class TidslinjeFeil(
+            val periode: Periode<*>,
+            val tidslinje: Tidslinje<*>,
+            val type: TidslinjeFeilType
+        )
+
+        enum class TidslinjeFeilType {
+            UENDELIG_FORTID_ETTER_FØRSTE_PERIODE,
+            `UE#NDELIG_FREMTID_FØR_SISTE_PERIODE`,
+            PERIODE_BLIR_IKKE_FULGT_AV_PERIODE,
+            TOM_ER_FØR_FOM,
+        }
+    }
 }
 
 abstract class TidslinjeMedAvhengigheter<T>(
     private val foregåendeTidslinjer: Collection<Tidslinje<*>>
 ) : Tidslinje<T>() {
+
+    init {
+        if (foregåendeTidslinjer.size == 0)
+            throw IllegalStateException("Skal ha avhengigheter, men listen over avhengigher er tom")
+    }
 
     override fun tidsrom(): Tidsrom {
         val fom = foregåendeTidslinjer.map { it.tidsrom().start }.minsteEllerUendelig()
@@ -74,23 +94,10 @@ fun <T> Tidslinje<T>.hentUtsnitt(tidspunkt: Tidspunkt): T? =
 
 fun <T> Collection<Periode<T>>.hentUtsnitt(tidspunkt: Tidspunkt): T? =
     this.filter { it.fom <= tidspunkt && it.tom >= tidspunkt }
-        .firstOrNull()?.let { it.innhold }
+        .firstOrNull()?.innhold
 
 class KomprimerendeTidslinje<T>(val tidslinje: Tidslinje<T>) : SnittTidslinje<T>(tidslinje) {
     override fun beregnSnitt(tidspunkt: Tidspunkt): T? = tidslinje.hentUtsnitt(tidspunkt)
 }
 
 fun <T> Tidslinje<T>.komprimer(): Tidslinje<T> = KomprimerendeTidslinje(this)
-
-data class TidslinjeFeil(
-    val periode: Periode<*>,
-    val tidslinje: Tidslinje<*>,
-    val type: TidslinjeFeilType
-)
-
-enum class TidslinjeFeilType {
-    UENDELIG_FORTID_ETTER_FØRSTE_PERIODE,
-    `UE#NDELIG_FREMTID_FØR_SISTE_PERIODE`,
-    PERIODE_BLIR_IKKE_FULGT_AV_PERIODE,
-    TOM_ER_FØR_FOM,
-}

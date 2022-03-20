@@ -15,7 +15,7 @@ import java.time.YearMonth
 internal class TidslinjeTest {
 
     @Test
-    fun test() {
+    fun skrivUtEksempler() {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
