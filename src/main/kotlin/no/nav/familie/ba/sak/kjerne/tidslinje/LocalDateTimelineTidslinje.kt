@@ -10,7 +10,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
-import java.time.LocalDate
 
 interface PeriodeKombinator<V, H, R> {
     fun kombiner(venste: V?, høyre: H?): R
@@ -44,7 +43,11 @@ class LocalDatetimeTimelineListeTidslinje<T, R>(
 ) : TidslinjeMedAvhengigheter<R>(tidslinjer) {
 
     override fun perioder(): Collection<Periode<R>> {
-        val startVerdi = LocalDateTimeline(LocalDate.MIN, LocalDate.MAX, emptyList<T>())
+        val startVerdi = LocalDateTimeline(
+            tidsrom().start.tilLocalDateEllerNull(),
+            tidsrom().endInclusive.tilLocalDateEllerNull(),
+            emptyList<T>()
+        )
 
         return tidslinjer.map { it.toLocalDateTimeline() }
             .fold(startVerdi) { acc, neste -> kombinerVerdier(acc, neste) }

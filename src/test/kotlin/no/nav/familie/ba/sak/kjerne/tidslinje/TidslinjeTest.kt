@@ -89,7 +89,7 @@ internal class TidslinjeTest {
             .medVilkår("---------------------", Vilkår.GIFT_PARTNERSKAP)
             .forPerson(barn2, januar2020)
             .medVilkår("--------->", Vilkår.UNDER_18_ÅR)
-            .medVilkår(" EEEE--EEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår(" EEEE--EE>", Vilkår.BOSATT_I_RIKET)
             .medVilkår("EEEEEEEEE>", Vilkår.LOVLIG_OPPHOLD)
             .medVilkår("EEEENNEEE>", Vilkår.BOR_MED_SØKER)
             .medVilkår("--------->", Vilkår.GIFT_PARTNERSKAP)
@@ -108,7 +108,7 @@ internal class TidslinjeTest {
             kompetanser
         )
 
-        // tidslinjer.forBarn(barn2).barnetsVilkårsresultatTidslinjer.print()
+        tidslinjer.forBarn(barn2).barnetsVilkårsresultatTidslinjer.print()
         // tidslinjer.forBarn(barn2).erEøsTidslinje.print()
         // tidslinjer.forBarn(barn2).kompetanseTidslinje.print()
 

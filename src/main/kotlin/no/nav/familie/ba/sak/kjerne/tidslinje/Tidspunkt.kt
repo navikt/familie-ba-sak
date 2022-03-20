@@ -1,19 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.eøs.temaperiode
 
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_BEGYNNELSE
 import java.time.LocalDate
 import java.time.YearMonth
 
-val TIDLIGSTE_TIDSPUNKT =
-    listOf(LocalDate.MIN, TIDENES_MORGEN, TIDENES_BEGYNNELSE, LocalDate.of(1900, 1, 1))
-        .maxOrNull()
-val SENESTE_TIDSPUNKT =
-    listOf(LocalDate.MAX, TIDENES_ENDE, TIDENES_ENDE, LocalDate.of(2199, 12, 31))
-        .minOrNull()
+val PRAKTISK_SENESTE_DAG = LocalDate.of(2499, 12, 31)
+val PRAKTISK_TIDLIGSTE_DAG = LocalDate.of(1900, 1, 1)
+
+private val månedTilDagKonverterer: (YearMonth) -> LocalDate = { it.atEndOfMonth() }
+private val dagTilMånedKonverterer: (LocalDate) -> YearMonth = { it.toYearMonth() }
 
 interface Tidspunkt : Comparable<Tidspunkt> {
     val uendelighet: Uendelighet
@@ -51,14 +47,14 @@ interface Tidspunkt : Comparable<Tidspunkt> {
         fun uendeligLengeTil(dato: LocalDate) = DagTidspunkt(dato, uendelighet = Uendelighet.FREMTID)
         fun uendeligLengeTil(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.FREMTID)
         fun fraOgMed(fraOgMed: LocalDate?, praktiskMinsteFraOgMed: LocalDate) =
-            if (fraOgMed == null || fraOgMed <= TIDLIGSTE_TIDSPUNKT)
-                uendeligLengeSiden(praktiskMinsteFraOgMed)
+            if (fraOgMed == null || fraOgMed < PRAKTISK_TIDLIGSTE_DAG)
+                uendeligLengeSiden(maxOf(praktiskMinsteFraOgMed, PRAKTISK_TIDLIGSTE_DAG))
             else
                 DagTidspunkt(fraOgMed)
 
         fun tilOgMed(tilOgMed: LocalDate?, praktiskStørsteTilOgMed: LocalDate) =
-            if (tilOgMed == null || tilOgMed > SENESTE_TIDSPUNKT)
-                uendeligLengeTil(praktiskStørsteTilOgMed)
+            if (tilOgMed == null || tilOgMed > PRAKTISK_SENESTE_DAG)
+                uendeligLengeTil(minOf(praktiskStørsteTilOgMed, PRAKTISK_SENESTE_DAG))
             else
                 DagTidspunkt(tilOgMed)
 
@@ -66,6 +62,7 @@ interface Tidspunkt : Comparable<Tidspunkt> {
         fun med(måned: YearMonth) = MånedTidspunkt(måned)
     }
 
+    // Betrakter to uendeligheter som like, selv underliggende tidspunkt kan være forskjellig
     override fun compareTo(other: Tidspunkt) =
         if (this.uendelighet == Uendelighet.FORTID && other.uendelighet == Uendelighet.FORTID)
             0
@@ -86,15 +83,13 @@ interface Tidspunkt : Comparable<Tidspunkt> {
 data class DagTidspunkt(
     private val dato: LocalDate,
     override val uendelighet: Uendelighet = Uendelighet.INGEN,
-    private val månedTilDagKonverterer: (YearMonth) -> LocalDate = { it.atEndOfMonth() },
-    private val dagTilMånedKonverterer: (LocalDate) -> YearMonth = { it.toYearMonth() }
 ) : Tidspunkt {
 
     init {
-        if (dato == LocalDate.MIN)
-            throw IllegalArgumentException("Kan ikke håndtere LocalDate.MIN. Bruk uendeligLengeSiden()")
-        else if (dato == LocalDate.MAX)
-            throw IllegalArgumentException("Kan ikke håndtere LocalDate.MAX. Bruk uendeligLengeTil()")
+        if (dato < PRAKTISK_TIDLIGSTE_DAG)
+            throw IllegalArgumentException("Kan ikke håndtere så tidlig tidspunkt. Bruk uendeligLengeSiden()")
+        else if (dato > PRAKTISK_SENESTE_DAG)
+            throw IllegalArgumentException("Kan ikke håndtere så sent tidspunkt. Bruk uendeligLengeTil()")
     }
 
     override fun tilFørsteDagIMåneden(): DagTidspunkt {
@@ -178,17 +173,15 @@ data class DagTidspunkt(
 
 data class MånedTidspunkt(
     private val måned: YearMonth,
-    override val uendelighet: Uendelighet = Uendelighet.INGEN,
-    private val månedTilDagKonverterer: (YearMonth) -> LocalDate = { it.atEndOfMonth() },
-    private val dagTilMånedKonverterer: (LocalDate) -> YearMonth = { it.toYearMonth() }
+    override val uendelighet: Uendelighet = Uendelighet.INGEN
 ) : Tidspunkt {
     constructor(tidspunkt: YearMonth) : this(tidspunkt, uendelighet = Uendelighet.INGEN)
 
     init {
-        if (måned == LocalDate.MIN.toYearMonth())
-            throw IllegalArgumentException("Kan ikke håndtere YearMonth.MIN. Bruk uendeligLengeSiden()")
-        else if (måned == LocalDate.MAX.toYearMonth())
-            throw IllegalArgumentException("Kan ikke håndtere YearMonth.MAX. Bruk uendeligLengeTil()")
+        if (måned < PRAKTISK_TIDLIGSTE_DAG.toYearMonth())
+            throw IllegalArgumentException("Tidspunktet er for lenge siden. Bruk uendeligLengeSiden()")
+        else if (måned > PRAKTISK_SENESTE_DAG.toYearMonth())
+            throw IllegalArgumentException("Tidspunktet er for lenge til. Bruk uendeligLengeTil()")
     }
 
     override fun tilFørsteDagIMåneden(): DagTidspunkt =
@@ -226,7 +219,7 @@ data class MånedTidspunkt(
 
     override fun forrige() = flytt(1)
 
-    override fun erRettFør(tidspunkt: Tidspunkt): Boolean = this.neste() == tidspunkt
+    override fun erRettFør(tidspunkt: Tidspunkt) = neste() == tidspunkt
 
     override fun somEndelig(): Tidspunkt = this.copy(uendelighet = Uendelighet.INGEN)
 
