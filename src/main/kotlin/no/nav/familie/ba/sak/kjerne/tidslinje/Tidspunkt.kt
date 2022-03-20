@@ -35,6 +35,7 @@ interface Tidspunkt : Comparable<Tidspunkt> {
     fun forrige() = flytt(-1)
 
     fun erRettFør(tidspunkt: Tidspunkt) = neste() == tidspunkt
+    fun erEndelig(): Boolean = uendelighet == Uendelighet.INGEN
     fun erUendeligLengeSiden(): Boolean = uendelighet == Uendelighet.FORTID
     fun erUendeligLengeTil(): Boolean = uendelighet == Uendelighet.FREMTID
 
@@ -252,24 +253,33 @@ data class MånedTidspunkt(
     override fun erDag() = false
 }
 
-fun Iterable<Tidspunkt>.minsteEllerUendelig() = this.reduce { acc, neste ->
-    if (acc.erUendeligLengeSiden() && neste.erUendeligLengeSiden())
-        minOf(acc.somEndelig(), neste.somEndelig()).somUendeligLengeSiden()
-    else if (acc.erUendeligLengeSiden() || neste.erUendeligLengeSiden())
-    // Må gå til tidspunktet før den endelig perioden for å fange opp at den ikke er uendelig
-        minOf(acc.somEndelig(), neste.somEndelig()).forrige().somUendeligLengeSiden()
+fun størsteAv(t1: Tidspunkt, t2: Tidspunkt): Tidspunkt =
+    if (t1.erUendeligLengeTil() && t2.erEndelig() && t1.somEndelig() <= t2)
+        t2.neste().somUendeligLengeTil()
+    else if (t2.erUendeligLengeTil() && t1.erEndelig() && t2.somEndelig() <= t1)
+        t1.neste().somUendeligLengeTil()
+    else if (t1.erUendeligLengeTil() || t2.erUendeligLengeTil())
+        maxOf(t1.somEndelig(), t2.somEndelig()).somUendeligLengeTil()
     else
-        minOf(acc, neste).somEndelig()
-}
+        maxOf(t1, t2)
 
-fun Iterable<Tidspunkt>.størsteEllerUendelig() = this.reduce { acc, neste ->
-    if (acc.erUendeligLengeTil() && neste.erUendeligLengeTil())
-        maxOf(acc.somEndelig(), neste.somEndelig()).somUendeligLengeTil()
-    else if (acc.erUendeligLengeTil() || neste.erUendeligLengeTil())
-    // Må gå til tidspunktet etter den endelig perioden for å fange opp at den ikke er uendelig
-        maxOf(acc.somEndelig(), neste.somEndelig()).neste().somUendeligLengeTil()
-    else maxOf(acc, neste).somEndelig()
-}
+fun minsteAv(t1: Tidspunkt, t2: Tidspunkt): Tidspunkt =
+    if (t1.erUendeligLengeSiden() && t2.erEndelig() && t1.somEndelig() >= t2)
+        t2.forrige().somUendeligLengeSiden()
+    else if (t2.erUendeligLengeSiden() && t1.erEndelig() && t2.somEndelig() >= t1)
+        t1.forrige().somUendeligLengeSiden()
+    else if (t1.erUendeligLengeSiden() || t2.erUendeligLengeSiden())
+        minOf(t1.somEndelig(), t2.somEndelig()).somUendeligLengeSiden()
+    else
+        minOf(t1, t2)
+
+fun Iterable<Tidspunkt>.størsteEllerUendelig() =
+    this.reduce { acc, neste ->
+        størsteAv(acc, neste)
+    }
+
+fun Iterable<Tidspunkt>.minsteEllerUendelig() =
+    this.reduce { acc, neste -> minsteAv(acc, neste) }
 
 fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =
     this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeSiden(default())

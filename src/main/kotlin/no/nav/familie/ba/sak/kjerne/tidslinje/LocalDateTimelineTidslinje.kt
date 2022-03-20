@@ -7,7 +7,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
 interface PeriodeKombinator<V, H, R> {
-    fun kombiner(venste: V?, høyre: H?): R
+    fun kombiner(venstre: V?, høyre: H?): R
 }
 
 interface ListeKombinator<T, R> {
@@ -82,10 +82,12 @@ class LocalDateSegmentPeriodeKombinator<V, H, R>(val periodeKombinator: PeriodeK
 }
 
 fun <T, R> Collection<Tidslinje<T>>.kombiner(listeKombinator: ListeKombinator<T, R>): Tidslinje<R> {
+    // Har ikke fått LocalDateTimeline.compress til å funke helt, og kjører egen komprimering på toppen
     return LocalDatetimeTimelineListeTidslinje(this, listeKombinator).komprimer()
 }
 
 fun <T, U, R> Tidslinje<T>.kombinerMed(tidslinje: Tidslinje<U>, kombinator: PeriodeKombinator<T, U, R>): Tidslinje<R> {
+    // Har ikke fått LocalDateTimeline.compress til å funke helt, og kjører egen komprimering på toppen
     return LocalDatetimeTimelineToveisTidslinje(this, tidslinje, kombinator).komprimer()
 }
 

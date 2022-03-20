@@ -24,6 +24,18 @@ abstract class Tidslinje<T> {
         }.filterNotNull()
     }
 
+    override fun equals(other: Any?): Boolean {
+        return if (other is Tidslinje<*>) {
+            tidsrom().start == other.tidsrom().start &&
+                tidsrom().endInclusive == other.tidsrom().endInclusive &&
+                perioder() == other.perioder()
+        } else
+            false
+    }
+
+    override fun toString(): String =
+        perioder().map { it.toString() }.joinToString(" | ")
+
     companion object {
         data class TidslinjeFeil(
             val periode: Periode<*>,
