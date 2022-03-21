@@ -96,6 +96,7 @@ fun lagTidslinjeMedOverlappendePerioder(tidslinjer: List<LocalDateTimeline<Vilk�
 fun PersonResultat.tilPeriodeResultater(brukM책ned: Boolean, inkluderUtvidet: Boolean = false): List<PeriodeResultat> {
     val tidslinjer = this.vilk책rResultater
         .filter { it.vilk책rType !== Vilk책r.UTVIDET_BARNETRYGD || inkluderUtvidet }
+        .filter { !it.erAvslagUtenPeriode() }
         .map { vilk책rResultat ->
             LocalDateTimeline(
                 listOf(

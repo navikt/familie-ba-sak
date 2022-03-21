@@ -3,9 +3,11 @@ package no.nav.familie.ba.sak.task
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -26,9 +28,10 @@ import java.util.Properties
     maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-    private val fødselshendelseService: FødselshendelseService,
+    private val autovedtakStegService: AutovedtakStegService,
     private val velgFagsystemService: VelgFagSystemService,
-    private val infotrygdFeedService: InfotrygdFeedService
+    private val infotrygdFeedService: InfotrygdFeedService,
+    private val personidentService: PersonidentService
 ) : AsyncTaskStep {
 
     private val dagerSidenBarnBleFødt: DistributionSummary = Metrics.summary("foedselshendelse.dagersidenbarnfoedt")
@@ -53,7 +56,13 @@ class BehandleFødselshendelseTask(
         }
 
         when (velgFagsystemService.velgFagsystem(nyBehandling).first) {
-            FagsystemRegelVurdering.SEND_TIL_BA -> fødselshendelseService.behandleFødselshendelse(nyBehandling = nyBehandling)
+            FagsystemRegelVurdering.SEND_TIL_BA -> autovedtakStegService.kjørBehandling(
+                mottakersAktør = personidentService.hentAktør(
+                    nyBehandling.morsIdent
+                ),
+                autovedtaktype = Autovedtaktype.FØDSELSHENDELSE,
+                behandlingsdata = nyBehandling
+            )
             FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> {
                 infotrygdFeedService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
             }

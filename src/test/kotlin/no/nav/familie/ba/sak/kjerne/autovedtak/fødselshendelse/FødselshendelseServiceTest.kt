@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
@@ -43,13 +44,14 @@ class FødselshendelseServiceTest {
     val autovedtakService = mockk<AutovedtakService>()
     val personopplysningerService = mockk<PersonopplysningerService>()
     val opprettTaskService = mockk<OpprettTaskService>()
+    val oppgaveService = mockk<OppgaveService>()
 
     val integrasjonClient = mockk<IntegrasjonClient>()
     val statsborgerskapService = StatsborgerskapService(
         integrasjonClient = integrasjonClient
     )
 
-    private val fødselshendelseService = FødselshendelseService(
+    private val autovedtakFødselshendelseService = AutovedtakFødselshendelseService(
         filtreringsreglerService,
         taskRepository,
         fagsakService,
@@ -64,6 +66,7 @@ class FødselshendelseServiceTest {
         personopplysningerService,
         statsborgerskapService,
         opprettTaskService,
+        oppgaveService
     )
 
     @Test
@@ -77,7 +80,7 @@ class FødselshendelseServiceTest {
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
         every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
 
-        fødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
+        autovedtakFødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
 
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
@@ -100,7 +103,7 @@ class FødselshendelseServiceTest {
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
         every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
 
-        fødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
+        autovedtakFødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
 
         verify(exactly = 0) {
             opprettTaskService.opprettOppgaveTask(

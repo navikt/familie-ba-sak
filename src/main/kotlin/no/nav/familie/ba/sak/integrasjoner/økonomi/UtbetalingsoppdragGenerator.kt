@@ -74,7 +74,7 @@ class UtbetalingsoppdragGenerator(
         }
 
         val andelerTilOpphør =
-            andelerTilOpphørMedDato(forrigeKjeder, oppdaterteKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato)
+            andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato)
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 

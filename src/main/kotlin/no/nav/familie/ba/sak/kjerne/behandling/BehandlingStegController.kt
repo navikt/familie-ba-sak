@@ -73,7 +73,7 @@ class BehandlingStegController(
     @GetMapping(path = ["behandlingsresultat/valider"])
     fun validerBehandlingsresultat(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<Boolean>> {
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "validere behandlingsresultat"
         )
 

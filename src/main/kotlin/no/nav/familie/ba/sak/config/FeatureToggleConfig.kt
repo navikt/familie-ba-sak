@@ -109,6 +109,7 @@ class FeatureToggleConfig(
         const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER =
             "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
         const val FØRSTE_ENDRINGSTIDSPUNKT = "familie-ba-sak.behandling.forste-endringstidspunkt.utgivelse"
+        const val BREV_VARSEL_REVURDRING_SAMBOER = "familie-ba-sak.behandling.varsel-revurdering-samboer.utgivelse"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 
@@ -120,6 +121,8 @@ class FeatureToggleConfig(
             "familie-ba-sak.lag.reduksjonsperioder.fra.innvilgelsestidspunkt"
 
         const val SKAL_MIGRERE_FOSTERBARN = "familie-ba-sak.migrer-fosterbarn"
+
+        const val KAN_MIGRERE_DELT_BOSTED = "familie-ba-sak.migrer-delt-bosted"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

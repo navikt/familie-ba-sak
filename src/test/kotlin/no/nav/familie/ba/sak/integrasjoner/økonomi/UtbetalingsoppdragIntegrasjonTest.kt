@@ -8,26 +8,33 @@ import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.YearMonth
 
 class UtbetalingsoppdragIntegrasjonTest(
     @Autowired
@@ -46,7 +53,10 @@ class UtbetalingsoppdragIntegrasjonTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val økonomiService: ØkonomiService
+    private val økonomiService: ØkonomiService,
+
+    @Autowired
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) : AbstractSpringIntegrationTest() {
 
     lateinit var utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
@@ -475,10 +485,11 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
-        assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.size)
+        assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
         val sorterteUtbetalingsperioder = utbetalingsoppdrag.utbetalingsperiode.sortedBy { it.periodeId }
-        assertUtbetalingsperiode(sorterteUtbetalingsperioder.first(), 2, null, 1054, "2022-01-01", "2034-12-31")
-        assertUtbetalingsperiode(sorterteUtbetalingsperioder.last(), 3, 2, 1054, "2037-01-01", "2039-12-31")
+        assertUtbetalingsperiode(sorterteUtbetalingsperioder[0], 1, 0, 1054, "2033-01-01", "2034-12-31")
+        assertUtbetalingsperiode(sorterteUtbetalingsperioder[1], 2, null, 1054, "2022-01-01", "2034-12-31")
+        assertUtbetalingsperiode(sorterteUtbetalingsperioder[2], 3, 2, 1054, "2037-01-01", "2039-12-31")
     }
 
     @Test
@@ -1077,6 +1088,94 @@ class UtbetalingsoppdragIntegrasjonTest(
         tilkjentYtelse3.andelerTilkjentYtelse.addAll(andelerRevurdering2)
 
         assertEquals(0, økonomiService.hentSisteOffsetPåFagsak(behandling = behandling3))
+    }
+
+    @Test
+    fun `Skal opphøre tideligere utbetaling hvis barnet ikke har utbetaling i den nye behandlingen`() {
+        val søker = tilfeldigPerson()
+        val førsteBarnet = tilfeldigPerson()
+        val andreBarnet = tilfeldigPerson()
+
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
+        val førsteBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val førsteVedtak = lagVedtak(behandling = førsteBehandling)
+
+        val førsteTilkjentYtelse = lagInitiellTilkjentYtelse(førsteBehandling)
+        val førsteAndelerTilkjentYtelse = listOf(
+            lagAndelTilkjentYtelse(
+                årMnd("2019-04"),
+                årMnd("2023-03"),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                1345,
+                førsteBehandling,
+                person = førsteBarnet,
+                aktør = personidentService.hentOgLagreAktør(førsteBarnet.aktør.aktivFødselsnummer(), true),
+                tilkjentYtelse = førsteTilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                årMnd("2023-04"),
+                årMnd("2027-06"),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                1054,
+                førsteBehandling,
+                person = førsteBarnet,
+                aktør = personidentService.hentOgLagreAktør(førsteBarnet.aktør.aktivFødselsnummer(), true),
+                tilkjentYtelse = førsteTilkjentYtelse
+            )
+        )
+        førsteTilkjentYtelse.andelerTilkjentYtelse.addAll(førsteAndelerTilkjentYtelse)
+        førsteTilkjentYtelse.utbetalingsoppdrag = "utbetalingsoppdrg"
+        tilkjentYtelseRepository.saveAndFlush(førsteTilkjentYtelse)
+
+        økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(førsteVedtak, "Z123")
+        førsteBehandling.status = BehandlingStatus.AVSLUTTET
+        førsteBehandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
+        behandlingService.lagre(førsteBehandling)
+
+        val andreBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak,
+                behandlingType = BehandlingType.REVURDERING
+            )
+        )
+        val andreVedtak = lagVedtak(behandling = andreBehandling)
+
+        val andreTilkjentYtelse = lagInitiellTilkjentYtelse(andreBehandling)
+        val andreAndelerTilkjentYtelse = listOf(
+            lagAndelTilkjentYtelse(
+                årMnd("2019-04"),
+                årMnd("2023-03"),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                1345,
+                andreBehandling,
+                person = andreBarnet,
+                aktør = personidentService.hentOgLagreAktør(andreBarnet.aktør.aktivFødselsnummer(), true),
+                tilkjentYtelse = andreTilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                årMnd("2023-04"),
+                årMnd("2027-06"),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                1054,
+                andreBehandling,
+                person = andreBarnet,
+                aktør = personidentService.hentOgLagreAktør(andreBarnet.aktør.aktivFødselsnummer(), true),
+                tilkjentYtelse = andreTilkjentYtelse
+            )
+        )
+        andreTilkjentYtelse.andelerTilkjentYtelse.addAll(andreAndelerTilkjentYtelse)
+        tilkjentYtelseRepository.saveAndFlush(andreTilkjentYtelse)
+
+        val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(andreVedtak, "Z123")
+        assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
+        assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
+        assertEquals(true, utbetalingsoppdrag.utbetalingsperiode.first().erEndringPåEksisterendePeriode)
+        assertEquals(Opphør(YearMonth.of(2019, 4).toLocalDate()), utbetalingsoppdrag.utbetalingsperiode.first().opphør)
+        assertEquals(0, utbetalingsoppdrag.utbetalingsperiode.first().forrigePeriodeId)
+        assertEquals(false, utbetalingsoppdrag.utbetalingsperiode[1].erEndringPåEksisterendePeriode)
+        assertNull(utbetalingsoppdrag.utbetalingsperiode[1].opphør)
+        assertNull(utbetalingsoppdrag.utbetalingsperiode[1].forrigePeriodeId)
     }
 
     private fun assertUtbetalingsperiode(
