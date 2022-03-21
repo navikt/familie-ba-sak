@@ -2,13 +2,15 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.domene.erÅpen
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
@@ -27,7 +29,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class VedtakOmOvergangsstønadService(
+class AutovedtakSmåbarnstilleggService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
@@ -35,13 +37,12 @@ class VedtakOmOvergangsstønadService(
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val taskRepository: TaskRepository,
     private val beregningService: BeregningService,
-    private val autovedtakService: AutovedtakService
-) {
+    private val autovedtakService: AutovedtakService,
+    private val oppgaveService: OppgaveService
+) : AutovedtakBehandlingService<Aktør> {
 
     private val antallVedtakOmOvergangsstønad: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "antall")
-    private val antallVedtakOmOvergangsstønadÅpenBehandling: Counter =
-        Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "aapen_behandling")
     private val antallVedtakOmOvergangsstønadPåvirkerFagsak: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_fagsak")
     private val antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak: Counter =
@@ -67,37 +68,26 @@ class VedtakOmOvergangsstønadService(
             )
         }
 
-    @Transactional
-    fun håndterVedtakOmOvergangsstønad(aktør: Aktør): String {
-        antallVedtakOmOvergangsstønad.increment()
-
-        val fagsak = fagsakService.hent(aktør = aktør) ?: return "har ikke fagsak i systemet"
+    override fun skalAutovedtakBehandles(behandlingsdata: Aktør): Boolean {
+        val fagsak = fagsakService.hent(aktør = behandlingsdata) ?: return false
         val påvirkerFagsak = småbarnstilleggService.vedtakOmOvergangsstønadPåvirkerFagsak(fagsak)
-        if (!påvirkerFagsak) {
+        return if (!påvirkerFagsak) {
             antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak.increment()
 
-            return "påvirker ikke fagsak"
+            logger.info("Påvirker ikke fagsak")
+            false
         } else {
             antallVedtakOmOvergangsstønadPåvirkerFagsak.increment()
+            true
         }
+    }
 
-        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
-
-        if (aktivBehandling == null) {
-            return "har ikke vært noe behandling på fagsak, ingenting å revurdere"
-        } else if (aktivBehandling.status.erÅpen()) {
-            antallVedtakOmOvergangsstønadÅpenBehandling.increment()
-            return autovedtakService.opprettOppgaveForManuellBehandling(
-                behandling = aktivBehandling,
-                begrunnelse = "Småbarnstillegg: Bruker har åpen behandling",
-                oppgavetype = Oppgavetype.VurderLivshendelse,
-                opprettLogginnslag = false
-            )
-        }
-
+    @Transactional
+    override fun kjørBehandling(aktør: Aktør): String {
+        antallVedtakOmOvergangsstønad.increment()
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                fagsak = fagsak,
+                aktør = aktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
             )
@@ -123,7 +113,7 @@ class VedtakOmOvergangsstønadService(
         )
         taskRepository.save(task)
 
-        return "påvirker fagsak, autovedtak kjørt vellykket"
+        return AutovedtakStegService.BEHANDLING_FERDIG
     }
 
     private fun begrunnAutovedtakForSmåbarnstillegg(
@@ -171,7 +161,7 @@ class VedtakOmOvergangsstønadService(
             behandling = behandling,
             steg = StegType.VILKÅRSVURDERING
         )
-        return autovedtakService.opprettOppgaveForManuellBehandling(
+        return oppgaveService.opprettOppgaveForManuellBehandling(
             behandling = omgjortBehandling,
             begrunnelse = meldingIOppgave,
             oppgavetype = Oppgavetype.VurderLivshendelse,
@@ -180,6 +170,6 @@ class VedtakOmOvergangsstønadService(
     }
 
     companion object {
-        val logger = LoggerFactory.getLogger(VedtakOmOvergangsstønadService::class.java)
+        val logger = LoggerFactory.getLogger(AutovedtakSmåbarnstilleggService::class.java)
     }
 }

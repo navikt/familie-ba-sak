@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -31,7 +33,9 @@ class OppgaveService(
     private val integrasjonClient: IntegrasjonClient,
     private val behandlingRepository: BehandlingRepository,
     private val oppgaveRepository: OppgaveRepository,
-    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository
+    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
+    private val opprettTaskService: OpprettTaskService,
+    private val loggService: LoggService
 ) {
 
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
@@ -88,6 +92,30 @@ class OppgaveService(
 
             opprettetOppgaveId
         }
+    }
+
+    fun opprettOppgaveForManuellBehandling(
+        behandling: Behandling,
+        oppgavetype: Oppgavetype,
+        begrunnelse: String = "",
+        opprettLogginnslag: Boolean = false
+    ): String {
+        logger.info("Sender autovedtak til manuell behandling, se secureLogger for mer detaljer.")
+        secureLogger.info("Sender autovedtak til manuell behandling. Begrunnelse: $begrunnelse")
+        opprettTaskService.opprettOppgaveTask(
+            behandlingId = behandling.id,
+            oppgavetype = oppgavetype,
+            beskrivelse = begrunnelse
+        )
+
+        if (opprettLogginnslag) {
+            loggService.opprettAutovedtakTilManuellBehandling(
+                behandling = behandling,
+                tekst = begrunnelse
+            )
+        }
+
+        return begrunnelse
     }
 
     private fun økTellerForAntallOppgaveTyper(oppgavetype: Oppgavetype) {
@@ -209,5 +237,6 @@ class OppgaveService(
     companion object {
 
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLoger")
     }
 }

@@ -23,10 +23,10 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.1.0</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
-        <prosessering.version>1.20220308102416_2479ea0</prosessering.version>
+        <prosessering.version>1.20220309070312_27348fa</prosessering.version>
         <felles.version>1.20220310100515_c0dcfc1</felles.version>
-        <eksterne-kontrakter-bisys.version>2.0_20211221122007_2c5c69d</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>2.0_20220316123605_8c83061</felles-kontrakter.version>
+        <eksterne-kontrakter-bisys.version>2.0_20220316123415_223f003</eksterne-kontrakter-bisys.version>
+        <felles-kontrakter.version>2.0_20220318103429_0930281</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20220106092651_8730ac3</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
@@ -151,13 +151,13 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-model</artifactId>
-            <version>3.8.4</version>
+            <version>3.8.5</version>
         </dependency>
 
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-spring-boot-starter</artifactId>
-            <version>5.6.2</version>
+            <version>5.7.0</version>
         </dependency>
 
         <dependency>
