@@ -461,4 +461,87 @@ class VedtaksperiodeServiceTest(
         assertEquals(LocalDate.of(2021, 6, 1), redusertePerioder.first().fom)
         assertEquals(LocalDate.of(2021, 7, 31), redusertePerioder.first().tom)
     }
+
+
+    @Test
+    fun `skal identifisere flere reduserte perioder`() {
+        val barn1 = tilAktør(barnFnr)
+        val barn2 = tilAktør(barn2Fnr)
+        val behandling = lagBehandling()
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr, barn2Fnr))
+
+        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            aktør = barn1
+        )
+        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 8),
+            aktør = barn2
+        )
+
+        val andelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 4),
+            tom = YearMonth.of(2021, 4),
+            behandling = behandling,
+            aktør = barn1
+        )
+        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 8),
+            tom = YearMonth.of(2021, 8),
+            behandling = behandling,
+            aktør = barn1
+        )
+        val andelTilkjentYtelse3 = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2021, 6),
+            tom = YearMonth.of(2021, 8),
+            behandling = behandling,
+            aktør = barn2
+        )
+
+        val vedtak = lagVedtak()
+        val opphørsperiode = lagVedtaksperiodeMedBegrunnelser(
+            vedtak = vedtak,
+            fom = LocalDate.of(2021, 5, 1),
+            tom = LocalDate.of(2021, 5, 31),
+            type = Vedtaksperiodetype.OPPHØR
+        )
+        val utbetalingsperioder = listOf(
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = LocalDate.of(2021, 4, 1),
+                tom = LocalDate.of(2021, 4, 30),
+                type = Vedtaksperiodetype.UTBETALING
+            ),
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = LocalDate.of(2021, 6, 1),
+                tom = LocalDate.of(2021, 8, 31),
+                type = Vedtaksperiodetype.UTBETALING
+            )
+        )
+
+        val redusertePerioder = identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
+            forrigeAndelerTilkjentYtelse = listOf(forrigeAndelTilkjentYtelse1, forrigeAndelTilkjentYtelse2),
+            andelerTilkjentYtelse = listOf(
+                andelTilkjentYtelse1,
+                andelTilkjentYtelse2,
+                andelTilkjentYtelse3
+            ),
+            vedtak = vedtak,
+            utbetalingsperioder = utbetalingsperioder,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            erIngenOverlappVedtaksperiodeTogglePå = true,
+            opphørsperioder = listOf(opphørsperiode)
+        )
+        assertTrue { redusertePerioder.isNotEmpty() }
+        assertEquals(2, redusertePerioder.size)
+        assertTrue { redusertePerioder.all { Vedtaksperiodetype.REDUKSJON == it.type } }
+        assertEquals(LocalDate.of(2021, 4, 1), redusertePerioder.first().fom)
+        assertEquals(LocalDate.of(2021, 4, 30), redusertePerioder.first().tom)
+        assertEquals(LocalDate.of(2021, 6, 1), redusertePerioder.last().fom)
+        assertEquals(LocalDate.of(2021, 7, 31), redusertePerioder.last().tom)
+    }
 }
