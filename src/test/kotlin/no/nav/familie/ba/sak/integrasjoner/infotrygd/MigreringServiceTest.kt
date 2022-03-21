@@ -307,6 +307,7 @@ class MigreringServiceTest(
 
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
+            assertThat(vedtakDVH.utbetalingsperioder.first().utbetaltPerMnd.toDouble()).isEqualTo(SAK_BELØP_2_BARN_1_UNDER_6 / 2)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
         }
     }
