@@ -1095,6 +1095,22 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetForsvunnetEktefelle"
     },
+    FORTSATT_INNVILGET_BRUKER_ER_BLITT_NORSK_STATSBORGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetBrukerErBlittNorskStatsborger"
+    },
+    FORTSATT_INNVILGET_BRUKER_OG_BARN_ER_BLITT_NORSKE_STATSBORGERE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetBrukerOgBarnErBlittNorskeStatsborgere"
+    },
+    FORTSATT_INNVILGET_ET_BARN_ER_BLITT_NORSK_STATSBORGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetEtBarnErBlittNorskStatsborger"
+    },
+    FORTSATT_INNVILGET_FLERE_BARN_ER_BLITT_NORSKE_STATSBORGERE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetFlereBarnErBlittNorskeStatsborgere"
+    },
     ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingDeltBostedFullUtbetalingForSoknad"
