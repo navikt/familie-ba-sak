@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
@@ -61,11 +62,20 @@ class ØkonomiService(
     fun hentStatus(oppdragId: OppdragId): OppdragStatus =
         økonomiKlient.hentStatus(oppdragId)
 
+    fun skalIverksettes(vedtak: Vedtak) =
+        genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            vedtak = vedtak,
+            saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+            erSimulering = true,
+            skalValideres = false
+        ).utbetalingsperiode.isNotEmpty()
+
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
         vedtak: Vedtak,
         saksbehandlerId: String,
         erSimulering: Boolean = false,
+        skalValideres: Boolean = true
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand =
@@ -131,10 +141,12 @@ class ØkonomiService(
         }
 
         return utbetalingsoppdrag.also {
-            it.valider(
-                behandlingsresultat = vedtak.behandling.resultat,
-                erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-            )
+            if (skalValideres) {
+                it.valider(
+                    behandlingsresultat = vedtak.behandling.resultat,
+                    erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                )
+            }
         }
     }
 

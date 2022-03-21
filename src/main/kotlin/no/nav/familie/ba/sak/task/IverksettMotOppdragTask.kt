@@ -1,12 +1,14 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
@@ -23,43 +25,64 @@ import java.util.Properties
 class IverksettMotOppdragTask(
     private val stegService: StegService,
     private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService,
+    private val økonomiService: ØkonomiService,
     private val personidentService: PersonidentService,
     private val taskRepository: TaskRepositoryWrapper
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        stegService.håndterIverksettMotØkonomi(
-            behandling = behandlingService.hent(iverksettingTask.behandlingsId),
-            iverksettingTaskDTO = iverksettingTask
-        )
+        val behandling = behandlingService.hent(iverksettingTask.behandlingsId)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+
+        if (økonomiService.skalIverksettes(vedtak = vedtak)
+        ) {
+            stegService.håndterIverksettMotØkonomi(
+                behandling = behandlingService.hent(iverksettingTask.behandlingsId),
+                iverksettingTaskDTO = iverksettingTask
+            )
+        }
     }
 
     override fun onCompletion(task: Task) {
-
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
+
+        val behandling = behandlingService.hent(iverksettingTask.behandlingsId)
         val personIdent = personidentService.hentAktør(iverksettingTask.personIdent).aktivFødselsnummer()
-        val statusFraOppdragTask = Task(
-            type = StatusFraOppdragTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(
-                StatusFraOppdragDTO(
-                    aktørId = iverksettingTask.personIdent,
-                    personIdent = personIdent,
-                    fagsystem = FAGSYSTEM,
-                    behandlingsId = iverksettingTask.behandlingsId,
-                    vedtaksId = iverksettingTask.vedtaksId
-                )
-            ),
-            properties = task.metadata
-        )
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
 
-        val sendMeldingTilBisysTask = Task(
-            type = SendMeldingTilBisysTask.TASK_STEP_TYPE,
-            payload = iverksettingTask.behandlingsId.toString()
-        )
+        if (økonomiService.skalIverksettes(vedtak = vedtak)
+        ) {
+            val statusFraOppdragTask = Task(
+                type = StatusFraOppdragTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                    StatusFraOppdragDTO(
+                        aktørId = iverksettingTask.personIdent,
+                        personIdent = personIdent,
+                        fagsystem = FAGSYSTEM,
+                        behandlingsId = iverksettingTask.behandlingsId,
+                        vedtaksId = iverksettingTask.vedtaksId
+                    )
+                ),
+                properties = task.metadata
+            )
 
-        taskRepository.save(statusFraOppdragTask)
-        taskRepository.save(sendMeldingTilBisysTask)
+            val sendMeldingTilBisysTask = Task(
+                type = SendMeldingTilBisysTask.TASK_STEP_TYPE,
+                payload = iverksettingTask.behandlingsId.toString()
+            )
+
+            taskRepository.save(statusFraOppdragTask)
+            taskRepository.save(sendMeldingTilBisysTask)
+        } else {
+            val journalførVedtaksbrevTask = JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+                vedtakId = iverksettingTask.vedtaksId,
+                personIdent = personIdent,
+                behandlingId = iverksettingTask.behandlingsId
+            )
+            taskRepository.save(journalførVedtaksbrevTask)
+        }
     }
 
     companion object {
