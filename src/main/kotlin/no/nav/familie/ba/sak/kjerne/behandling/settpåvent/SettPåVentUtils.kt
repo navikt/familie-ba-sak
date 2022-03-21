@@ -12,8 +12,8 @@ fun validerBehandlingKanSettesPåVent(
     behandling: Behandling
 ) {
     if (gammelSettPåVent != null) {
-        throw Feil(
-            message = "Behandling ${behandling.id} er allerede satt på vent.",
+        throw FunksjonellFeil(
+            melding = "Behandling ${behandling.id} er allerede satt på vent.",
             frontendFeilmelding = "Behandlingen er allerede satt på vent."
         )
     }
