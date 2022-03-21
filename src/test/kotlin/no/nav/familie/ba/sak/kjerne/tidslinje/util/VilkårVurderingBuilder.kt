@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.SnittTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -79,8 +79,8 @@ class VilkårRegelverkResultatTidslinje(
     val vilkår: Vilkår,
     val charTidslinje: Tidslinje<Char>
 ) :
-    SnittTidslinje<VilkårRegelverkResultat>(charTidslinje) {
-    override fun beregnSnitt(tidspunkt: Tidspunkt): VilkårRegelverkResultat? {
+    TidslinjeSomStykkerOppTiden<VilkårRegelverkResultat>(charTidslinje) {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): VilkårRegelverkResultat? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
 
         return when (tegn) {
@@ -99,8 +99,8 @@ fun Periode<VilkårRegelverkResultat>.tilVilkårResultater(personResultat: Perso
             vilkårType = this.innhold?.vilkår!!,
             resultat = this.innhold?.resultat!!,
             vurderesEtter = this.innhold?.regelverk,
-            periodeFom = this.fom.tilLocalDateEllerNull(),
-            periodeTom = this.tom.tilLocalDateEllerNull(),
+            periodeFom = this.fraOgMed.tilLocalDateEllerNull(),
+            periodeTom = this.tilOgMed.tilLocalDateEllerNull(),
             begrunnelse = "",
             behandlingId = 0
         )

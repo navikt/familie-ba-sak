@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
-class TidsromTest {
+class TidspunktClosedRangeTest {
     @Test
     fun testTidsromMedMåneder() {
         val fom = Tidspunkt.uendeligLengeSiden(YearMonth.of(2020, 1))

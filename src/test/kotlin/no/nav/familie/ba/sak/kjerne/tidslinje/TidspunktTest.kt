@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
@@ -11,6 +12,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 class TidspunktTest {
     @Test
@@ -51,5 +54,15 @@ class TidspunktTest {
             feb(2020).somUendeligLengeSiden(),
             størsteAv(feb(2020).somUendeligLengeSiden(), mar(2020).somUendeligLengeSiden())
         )
+    }
+
+    @Test
+    fun `En høyst teoretisk sjekk av at systemet ikke er blitt så gammelt at det ikke virker`() {
+        assertThrows<IllegalArgumentException> {
+            // Systemet virker ikke om 500 år
+            Tidspunkt.med(LocalDate.now().plusYears(500))
+        }
+        // Vil kaste exception hvis det er mindre enn 100 år til systemet ikke virker
+        Tidspunkt.med(LocalDate.now().plusYears(100))
     }
 }

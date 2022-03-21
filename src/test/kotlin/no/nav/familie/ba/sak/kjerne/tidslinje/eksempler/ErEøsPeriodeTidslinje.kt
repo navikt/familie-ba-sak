@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.ListeKombinator
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.SnittTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -26,10 +26,10 @@ private val eøsVilkår = listOf(
 
 class ErEøsPeriodeTidslinje(
     private val barnetsVilkårsresultater: Collection<Tidslinje<VilkårRegelverkResultat>>
-) : SnittTidslinje<Boolean>(barnetsVilkårsresultater) {
+) : TidslinjeSomStykkerOppTiden<Boolean>(barnetsVilkårsresultater) {
 
     private val kombinator = EøsPeriodeKombinator()
-    override fun beregnSnitt(tidspunkt: Tidspunkt): Boolean {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): Boolean {
         val alleVilkårResultater = barnetsVilkårsresultater.map { it.hentUtsnitt(tidspunkt) }
         return kombinator.kombiner(alleVilkårResultater.filterNotNull())
     }

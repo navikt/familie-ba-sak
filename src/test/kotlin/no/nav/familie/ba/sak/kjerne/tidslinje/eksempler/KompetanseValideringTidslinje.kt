@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseStatus
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.ToveisKombinator
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.SnittTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
@@ -19,12 +19,12 @@ enum class KompetanseValidering {
 class KompetanseValideringTidslinje(
     private val erEøsPeriodeTidslinje: Tidslinje<Boolean>,
     private val kompetanseTidslinje: Tidslinje<Kompetanse>
-) : SnittTidslinje<KompetanseValidering>(
+) : TidslinjeSomStykkerOppTiden<KompetanseValidering>(
     erEøsPeriodeTidslinje,
     kompetanseTidslinje
 ) {
     val kombinator = KompetanseValideringKombinator()
-    override fun beregnSnitt(tidspunkt: Tidspunkt): KompetanseValidering {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): KompetanseValidering {
         return kombinator.kombiner(
             kompetanseTidslinje.hentUtsnitt(tidspunkt),
             erEøsPeriodeTidslinje.hentUtsnitt(tidspunkt)

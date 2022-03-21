@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsrom
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -20,18 +17,15 @@ class VilkårResultatTidslinje(
     private val vilkårsresultater: List<VilkårResultat>
 ) : Tidslinje<VilkårRegelverkResultat>() {
 
-    override fun tidsrom(): Tidsrom {
-        val fraOgMed: Tidspunkt = vilkårsresultater
-            .map { it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom!! }.tilInneværendeMåned() }
-            .minOrNull()!!
-        val tilOgMed: Tidspunkt = vilkårsresultater
-            .map { it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! }.tilInneværendeMåned() }
-            .maxOrNull()!!
+    override fun fraOgMed() = vilkårsresultater
+        .map { it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom!! }.tilInneværendeMåned() }
+        .minOrNull()!!
 
-        return fraOgMed..tilOgMed
-    }
+    override fun tilOgMed() = vilkårsresultater
+        .map { it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! }.tilInneværendeMåned() }
+        .maxOrNull()!!
 
-    override fun perioder(): Collection<Periode<VilkårRegelverkResultat>> {
+    override fun lagPerioder(): Collection<Periode<VilkårRegelverkResultat>> {
         return vilkårsresultater.map { it.tilPeriode() }
     }
 }

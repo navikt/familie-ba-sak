@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tid
 
-data class Tidsrom(
+data class TidspunktClosedRange(
     override val start: Tidspunkt,
     override val endInclusive: Tidspunkt
 ) : Iterable<Tidspunkt>,
@@ -43,5 +43,5 @@ data class Tidsrom(
     }
 }
 
-operator fun Tidspunkt.rangeTo(tilOgMed: Tidspunkt): Tidsrom =
-    Tidsrom(this, tilOgMed)
+operator fun Tidspunkt.rangeTo(tilOgMed: Tidspunkt): TidspunktClosedRange =
+    TidspunktClosedRange(this, tilOgMed)

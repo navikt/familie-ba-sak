@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.SnittTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import java.time.YearMonth
@@ -23,7 +23,7 @@ class KompetanseBuilder(
 
         kompetanseTidslinje.perioder()
             .filter { it.innhold != null }
-            .map { it.innhold!!.copy(fom = it.fom.tilYearMonth(), tom = it.tom.tilYearMonth()) }
+            .map { it.innhold!!.copy(fom = it.fraOgMed.tilYearMonth(), tom = it.tilOgMed.tilYearMonth()) }
             .all { kompetanser.add(it) }
 
         return this
@@ -36,8 +36,8 @@ class KompetanseTidslinje(
     val charTidslinje: Tidslinje<Char>,
     val behandlingId: Long,
     val barn: List<Person>
-) : SnittTidslinje<Kompetanse>(charTidslinje) {
-    override fun beregnSnitt(tidspunkt: Tidspunkt): Kompetanse? {
+) : TidslinjeSomStykkerOppTiden<Kompetanse>(charTidslinje) {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): Kompetanse? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
         val barnFnr = barn.map { it.aktør.aktivFødselsnummer() }.toSet()
         val kompetanseMal = Kompetanse(behandlingId = behandlingId, fom = null, tom = null, barn = barnFnr)

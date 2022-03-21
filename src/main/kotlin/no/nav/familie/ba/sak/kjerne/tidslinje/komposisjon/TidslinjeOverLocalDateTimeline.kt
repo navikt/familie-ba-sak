@@ -15,7 +15,7 @@ class LocalDatetimeTimelineToveisTidslinje<V, H, R>(
     val periodeKombinator: ToveisKombinator<V, H, R>
 ) : TidslinjeMedAvhengigheter<R>(listOf(venstre, høyre)) {
 
-    override fun perioder(): Collection<Periode<R>> {
+    override fun lagPerioder(): Collection<Periode<R>> {
 
         return venstre.toLocalDateTimeline().combine(
             høyre.toLocalDateTimeline(),
@@ -32,10 +32,10 @@ class LocalDatetimeTimelineListeTidslinje<T, R>(
     val listeKombinator: ListeKombinator<T, R>
 ) : TidslinjeMedAvhengigheter<R>(tidslinjer) {
 
-    override fun perioder(): Collection<Periode<R>> {
+    override fun lagPerioder(): Collection<Periode<R>> {
         val startVerdi = LocalDateTimeline(
-            tidsrom().start.tilLocalDateEllerNull(),
-            tidsrom().endInclusive.tilLocalDateEllerNull(),
+            fraOgMed().tilLocalDateEllerNull(),
+            tilOgMed().tilLocalDateEllerNull(),
             emptyList<T>()
         )
 
@@ -88,20 +88,20 @@ fun <T, U, R> Tidslinje<T>.kombinerMed(tidslinje: Tidslinje<U>, kombinator: Tove
 
 fun <T> Tidslinje<T>.toLocalDateTimeline(): LocalDateTimeline<T> {
     return LocalDateTimeline(
-        this.perioder().sortedBy { it.fom }.map { it.tilLocalDateSegment() }
+        this.perioder().map { it.tilLocalDateSegment() }
     )
 }
 
 fun <T> Periode<T>.tilLocalDateSegment(): LocalDateSegment<T> =
     LocalDateSegment(
-        this.fom.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
-        this.tom.tilSisteDagIMåneden().tilLocalDateEllerNull(),
+        this.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
+        this.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
         this.innhold
     )
 
 fun <T> LocalDateSegment<T>.tilPeriode(): Periode<T> =
     Periode(
-        fom = Tidspunkt.fraOgMed(this.fom, this.tom),
-        tom = Tidspunkt.tilOgMed(this.tom, this.fom),
+        fraOgMed = Tidspunkt.fraOgMed(this.fom, this.tom),
+        tilOgMed = Tidspunkt.tilOgMed(this.tom, this.fom),
         innhold = this.value
     )

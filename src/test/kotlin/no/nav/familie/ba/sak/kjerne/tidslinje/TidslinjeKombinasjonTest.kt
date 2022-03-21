@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.SnittTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
@@ -73,8 +73,8 @@ fun <V, H, R> Tidslinje<V>.snittKombinerMed(
     toveisKombinator: ToveisKombinator<V, H, R>
 ): Tidslinje<R> {
     val v1 = this
-    return object : SnittTidslinje<R>(v1, tidslinje) {
-        override fun beregnSnitt(tidspunkt: Tidspunkt): R? =
+    return object : TidslinjeSomStykkerOppTiden<R>(v1, tidslinje) {
+        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): R? =
             toveisKombinator.kombiner(
                 v1.hentUtsnitt(tidspunkt),
                 tidslinje.hentUtsnitt(tidspunkt)

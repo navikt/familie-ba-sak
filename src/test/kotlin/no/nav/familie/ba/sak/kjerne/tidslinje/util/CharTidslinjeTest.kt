@@ -16,8 +16,8 @@ class CharTidslinjeTest {
         Assertions.assertEquals(1, perioder.size)
 
         val periode = perioder.first()
-        Assertions.assertEquals(jan(2020), periode.fom)
-        Assertions.assertEquals(mar(2021), periode.tom)
+        Assertions.assertEquals(jan(2020), periode.fraOgMed)
+        Assertions.assertEquals(mar(2021), periode.tilOgMed)
         Assertions.assertEquals('-', periode.innhold)
     }
 
@@ -32,10 +32,10 @@ class CharTidslinjeTest {
 
         Assertions.assertEquals(1, perioder.size)
         val periode = perioder.first()
-        Assertions.assertTrue(periode.fom.erUendeligLengeSiden())
-        Assertions.assertTrue(periode.tom.erUendeligLengeTil())
-        Assertions.assertEquals(jan(2020), periode.fom.somEndelig())
-        Assertions.assertEquals(mai(2020), periode.tom.somEndelig())
+        Assertions.assertTrue(periode.fraOgMed.erUendeligLengeSiden())
+        Assertions.assertTrue(periode.tilOgMed.erUendeligLengeTil())
+        Assertions.assertEquals(jan(2020), periode.fraOgMed.somEndelig())
+        Assertions.assertEquals(mai(2020), periode.tilOgMed.somEndelig())
         Assertions.assertEquals('-', periode.innhold)
     }
 
