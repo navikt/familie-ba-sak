@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_MIGRERE_DELT_BOSTED
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
@@ -98,6 +99,10 @@ class MigreringService(
 
             val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
+            if (løpendeSak.undervalg == "MD" && !featureToggleService.isEnabled(KAN_MIGRERE_DELT_BOSTED, false)) {
+                secureLog.warn("Migrering: Kan ikke migrere saker med delt bosted")
+                kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
+            }
             val underkategori = kastFeilEllerHentUnderkategori(løpendeSak)
             kastfeilHvisIkkeEnDelytelseIInfotrygd(løpendeSak)
 
@@ -391,7 +396,7 @@ class MigreringService(
             kastOgTellMigreringsFeil(
                 beløpfeilType,
                 beløpfeilType.beskrivelse +
-                        "($førsteUtbetalingsbeløp(ba-sak) ≠ $beløpFraInfotrygd(infotrygd))"
+                    "($førsteUtbetalingsbeløp(ba-sak) ≠ $beløpFraInfotrygd(infotrygd))"
             )
         }
     }
