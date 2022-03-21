@@ -306,6 +306,38 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstTransporterklaeringHeleEtterbetalingen"
     },
+    INNVILGET_EØS_BORGER_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerJobber"
+    },
+    INNVILGET_EØS_BORGER_UTBETALING_FRA_NAV {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerUtbetalingFraNAV"
+    },
+    INNVILGET_EØS_BORGER_EKTEFELLE_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerEktefelleJobber"
+    },
+    INNVILGET_EØS_BORGER_SAMBOER_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerSamboerJobber"
+    },
+    INNVILGET_EØS_BORGER_EKTEFELLE_UTBETALING_FRA_NAV {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerEktefelleUtbetalingFraNav"
+    },
+    INNVILGET_EØS_BORGER_SAMBOER_UTBETALING_FRA_NAV {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerSamboerUtbetalingFraNav"
+    },
+    INNVILGET_FAKTISK_SEPARASJON_SEPARERT_ETTERPÅ {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFaktiskSeparasjonSeparertEtterpaa"
+    },
+    INNVILGET_BARN_16ÅR_UTVIDET_FRA_FLYTTING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetBarn16AarUtvidetFraFlytting"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
