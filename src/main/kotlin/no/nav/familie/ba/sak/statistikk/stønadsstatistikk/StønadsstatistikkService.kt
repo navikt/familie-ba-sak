@@ -174,8 +174,8 @@ class StønadsstatistikkService(
         val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(person.aktør)
 
         if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {
-            logger.warn("Sender landkode ukjent til DVH. Bør undersøke om hvorfor. Ident i securelogger")
-            secureLogger.warn("Ukjent land sendt til DVH for person ${person.aktør.aktivFødselsnummer()}")
+            logger.info("Sender landkode ukjent til DVH")
+            secureLogger.info("Ukjent land sendt til DVH for person ${person.aktør.aktivFødselsnummer()}")
         }
         landKode
     }

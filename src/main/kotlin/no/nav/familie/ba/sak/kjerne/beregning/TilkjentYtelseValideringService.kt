@@ -13,7 +13,7 @@ class TilkjentYtelseValideringService(
     private val persongrunnlagService: PersongrunnlagService
 ) {
     fun validerAtIngenUtbetalingerOverstiger100Prosent(behandling: Behandling) {
-        if (behandling.erMigrering()) return
+        if (behandling.erMigrering() || behandling.erTekniskEndring()) return
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
 
         if (totrinnskontroll?.godkjent == true) {
@@ -38,7 +38,8 @@ class TilkjentYtelseValideringService(
 
     fun barnetrygdLøperForAnnenForelder(behandling: Behandling, barna: List<Person>): Boolean {
         return barna.any {
-            beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = it.aktør, fagsakId = behandling.fagsak.id).isNotEmpty()
+            beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = it.aktør, fagsakId = behandling.fagsak.id)
+                .isNotEmpty()
         }
     }
 }

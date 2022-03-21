@@ -145,7 +145,7 @@ data class AndelTilkjentYtelse(
     }
 
     override fun toString(): String {
-        return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, " +
+        return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type = $type, prosent = $prosent," +
             "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
     }
 
