@@ -132,6 +132,7 @@ class EndretUtbetalingAndelService(
     }
 
     @Transactional
+    @Deprecated("Kan fjernes når INGEN_OVERLAPP_VEDTAKSPERIODER-toggle fjernes.")
     fun oppdaterEndreteUtbetalingsandelerMedBegrunnelser(behandling: Behandling): MutableList<EndretUtbetalingAndel> {
         val endredeUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
