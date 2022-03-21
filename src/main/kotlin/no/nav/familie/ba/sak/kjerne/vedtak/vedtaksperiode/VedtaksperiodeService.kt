@@ -286,7 +286,15 @@ class VedtaksperiodeService(
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        val reduksjonsperioder = hentReduksjonsperioder(vedtak, opphørsperioder)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
+
+        val reduksjonsperioder = hentReduksjonsperioderFraInnvilgelsesTidspunkt(
+            vedtak,
+            utbetalingsperioder,
+            personopplysningGrunnlag,
+            erIngenOverlappVedtaksperiodeTogglePå,
+            opphørsperioder
+        )
 
         val oppdatertUtbetalingsperiode =
             finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
@@ -492,8 +500,11 @@ class VedtaksperiodeService(
         )
     }
 
-    fun hentReduksjonsperioder(
+    fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
         vedtak: Vedtak,
+        utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        erIngenOverlappVedtaksperiodeTogglePå: Boolean,
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
         val erToggelenPå = featureToggleService.isEnabled(LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT)
@@ -512,10 +523,13 @@ class VedtaksperiodeService(
                 forrigePersonopplysningGrunnlag.søkerOgBarn.any { forrige -> forrige.aktør == it.aktør }
             }
 
-        return identifiserReduksjonsperioder(
+        return identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
             forrigeAndelerTilkjentYtelse,
             andelerTilkjentYtelse,
             vedtak,
+            utbetalingsperioder,
+            personopplysningGrunnlag,
+            erIngenOverlappVedtaksperiodeTogglePå,
             opphørsperioder
         )
     }

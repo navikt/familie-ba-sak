@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
@@ -142,10 +143,13 @@ fun erFørsteVedtaksperiodePåFagsak(
     )
 }
 
-fun identifiserReduksjonsperioder(
+fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak,
+    utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
+    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
 ): List<VedtaksperiodeMedBegrunnelser> {
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
@@ -157,7 +161,7 @@ fun identifiserReduksjonsperioder(
                 forrigeSegment.value == nyttSegment.value
         }
     }
-    val reduksjonsperioder =
+    val reduksjonsperioderFraInnvilgelsesTidspunkt =
         segmenter.filter { (forrigeSegment, _) ->
             nåværendeSegmenter.any { (nyttSegment, _) ->
                 nyttSegment.overlapper(
@@ -165,37 +169,54 @@ fun identifiserReduksjonsperioder(
                 )
             }
         }.toList()
-            .fold(emptyList<VedtaksperiodeMedBegrunnelser>()) { acc, (gammeltSegment, andeltilkjenYtelserForSegment) ->
-                val overlappendePerioder =
-                    nåværendeSegmenter
-                        .filter { (nåSegment, nåAndelTilkjentYtelserForSegment) ->
-                            nåSegment.overlapper(gammeltSegment) && andeltilkjenYtelserForSegment.any { andelerTilkjentYtelse ->
-                                nåAndelTilkjentYtelserForSegment.any {
-                                    it.aktør.aktørId == andelerTilkjentYtelse.aktør.aktørId &&
-                                        it.sats < andelerTilkjentYtelse.sats &&
-                                        // Perioder med delt bosted eller endret utbetaling er ikke vurdert som reduksjonsperioder
-                                        (!it.erDeltBosted() && it.endretUtbetalingAndeler.isEmpty())
-                                } || nåAndelTilkjentYtelserForSegment.all {
-                                    // Når et av barna mister utbetaling på et segment i behandling
-                                    it.aktør.aktørId != andelerTilkjentYtelse.aktør.aktørId
+            .fold(emptyList<VedtaksperiodeMedBegrunnelser>()) { acc, (gammeltSegment, gammeltAndelerTyForSegment) ->
+                val overlappendePerioder = nåværendeSegmenter.filter { (nåSegment, nåAndelTilkjentYtelserForSegment) ->
+                    nåSegment.overlapper(gammeltSegment) && gammeltAndelerTyForSegment.any { gammelAndelTyForSegment ->
+                        val fom = nåSegment.fom
+                        nåAndelTilkjentYtelserForSegment.all { nåAndelTyForSegment ->
+                            // Når et av barna mister utbetaling på et segment i behandling
+                            nåAndelTyForSegment.aktør.aktørId != gammelAndelTyForSegment.aktør.aktørId &&
+                                // Når det barnet som mister utbetaling ikke har en utbetaling i forrige måned
+                                utbetalingsperioder.none { utbetalingsperiode ->
+                                    utbetalingsperiode.tom == fom.minusDays(1) &&
+                                        utbetalingsperiode.hentUtbetalingsperiodeDetaljer(
+                                            andelerTilkjentYtelse,
+                                            personopplysningGrunnlag,
+                                            erIngenOverlappVedtaksperiodeTogglePå
+                                        )
+                                            .any {
+                                                it.person.personIdent ==
+                                                    gammelAndelTyForSegment.aktør.aktivFødselsnummer()
+                                            }
                                 }
-                            }
-                        }.keys
+                        }
+                    }
+                }.keys
 
                 acc + overlappendePerioder.map { overlappendePeriode ->
                     VedtaksperiodeMedBegrunnelser(
                         vedtak = vedtak,
-                        fom = if (gammeltSegment.fom > overlappendePeriode.fom) gammeltSegment.fom else overlappendePeriode.fom,
-                        tom = if (gammeltSegment.tom > overlappendePeriode.tom) overlappendePeriode.tom else gammeltSegment.tom,
+                        fom = utledFom(gammeltSegment, overlappendePeriode),
+                        tom = utledTom(gammeltSegment, overlappendePeriode),
                         type = Vedtaksperiodetype.REDUKSJON,
                     )
                 }
             }
     // opphørsperioder kan ikke være inkludert i reduksjonsperioder
-    return reduksjonsperioder.filterNot { reduksjonsperiode ->
+    return reduksjonsperioderFraInnvilgelsesTidspunkt.filterNot { reduksjonsperiode ->
         opphørsperioder.any { it.fom == reduksjonsperiode.fom || it.tom == reduksjonsperiode.tom }
     }
 }
+
+private fun utledFom(
+    gammeltSegment: LocalDateSegment<Int>,
+    overlappendePeriode: LocalDateSegment<Int>
+) = if (gammeltSegment.fom > overlappendePeriode.fom) gammeltSegment.fom else overlappendePeriode.fom
+
+private fun utledTom(
+    gammeltSegment: LocalDateSegment<Int>,
+    overlappendePeriode: LocalDateSegment<Int>
+) = if (gammeltSegment.tom > overlappendePeriode.tom) overlappendePeriode.tom else gammeltSegment.tom
 
 fun finnOgOppdaterOverlappendeUtbetalingsperiode(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
@@ -331,10 +352,8 @@ private fun velgRedusertBegrunnelser(
         it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
     }
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
-        val innvilgetBegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
-            .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
         val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
-            innvilgetBegrunnelser,
+            VedtakBegrunnelseSpesifikasjon.values().toList(),
             sanityBegrunnelser,
             minimertVedtaksperiode,
             minimertePersonresultater,
