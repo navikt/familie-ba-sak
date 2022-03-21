@@ -176,6 +176,7 @@ fun hentPersonerForEtterEndretUtbetalingsperiode(
         endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }.map { it.personIdent }
 
+@Deprecated("Kan fjernes når INGEN_OVERLAPP_VEDTAKSPERIODER -toggle fjernes .")
 fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
@@ -190,9 +191,10 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
             if (sanityBegrunnelse != null) {
                 val triggesAv = sanityBegrunnelse.tilTriggesAv()
                 triggesAv.erTriggereOppfyltForEndretUtbetaling(
-                    vilkår = sanityBegrunnelse.vilkaar,
                     utvidetScenario = utvidetScenarioForEndringsperiode,
-                    minimertEndretAndel = this.tilMinimertEndretUtbetalingAndel()
+                    minimertEndretAndel = this.tilMinimertEndretUtbetalingAndel(),
+                    ytelseTyperForPeriode = emptySet(),
+                    erIngenOverlappVedtaksperiodeToggelPå = false
                 )
             } else false
         }
