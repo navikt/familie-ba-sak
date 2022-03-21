@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_MIGRERE_DELT_BOSTED
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
@@ -260,6 +261,53 @@ class MigreringServiceTest(
 
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
+            assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+        }
+    }
+
+    @Test
+    fun `migrering av ordinær sak med delt bosted - enkel case`() {
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(
+            listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6 / 2).copy(undervalg = "MD")),
+            emptyList()
+        )
+        every { featureToggleService.isEnabled(KAN_MIGRERE_DELT_BOSTED, any()) } returns true
+
+        val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
+
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
+            iverksettMotOppdragTask.doTask(task)
+            iverksettMotOppdragTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == SendVedtakTilInfotrygdTask.TASK_STEP_TYPE }!!
+            sendVedtakTilInfotrygdTask.doTask(task)
+            sendVedtakTilInfotrygdTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == StatusFraOppdragTask.TASK_STEP_TYPE }!!
+            statusFraOppdragTask.doTask(task)
+            statusFraOppdragTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            var task = tasks.find { it.type == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
+            ferdigstillBehandlingTask.doTask(task)
+            ferdigstillBehandlingTask.onCompletion(task)
+
+            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
+            publiserVedtakTask.doTask(task)
+            publiserVedtakTask.onCompletion(task)
+
+            val now = LocalDate.now()
+            val forventetUtbetalingFom: LocalDate =
+                if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
+
+            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
+            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
+            assertThat(vedtakDVH.utbetalingsperioder.first().utbetaltPerMnd.toDouble()).isEqualTo(SAK_BELØP_2_BARN_1_UNDER_6 / 2)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
         }
     }
