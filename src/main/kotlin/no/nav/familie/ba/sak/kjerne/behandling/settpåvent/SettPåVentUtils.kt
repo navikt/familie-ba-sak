@@ -13,7 +13,8 @@ fun validerBehandlingKanSettesPåVent(
 ) {
     if (gammelSettPåVent != null) {
         throw Feil(
-            "Behandling ${behandling.id} er allerede satt på vent."
+            message = "Behandling ${behandling.id} er allerede satt på vent.",
+            frontendFeilmelding = "Behandlingen er allerede satt på vent."
         )
     }
 
@@ -25,8 +26,9 @@ fun validerBehandlingKanSettesPåVent(
     }
 
     if (behandling.status == BehandlingStatus.AVSLUTTET) {
-        throw Feil(
-            "Behandling ${behandling.id} er avsluttet og kan ikke settes på vent."
+        throw FunksjonellFeil(
+            melding = "Behandling ${behandling.id} er avsluttet og kan ikke settes på vent.",
+            frontendFeilmelding = "Kan ikke sette en avsluttet behandling på vent."
         )
     }
 
