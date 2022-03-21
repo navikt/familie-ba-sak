@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_MIGRERE_DELT_BOSTED
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
@@ -34,11 +35,12 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
-import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -97,6 +99,10 @@ class MigreringService(
 
             val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
+            if (løpendeSak.undervalg == "MD" && !featureToggleService.isEnabled(KAN_MIGRERE_DELT_BOSTED, false)) {
+                secureLog.warn("Migrering: Kan ikke migrere saker med delt bosted")
+                kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
+            }
             val underkategori = kastFeilEllerHentUnderkategori(løpendeSak)
             kastfeilHvisIkkeEnDelytelseIInfotrygd(løpendeSak)
 
@@ -133,9 +139,12 @@ class MigreringService(
                     )
                 )
             }.getOrElse { kastOgTellMigreringsFeil(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING, it.message, it) }
+
             val migreringsdato = virkningsdatoFra(infotrygdKjøredato(YearMonth.now()))
+
             vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
                 forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this, migreringsdato)
+                if (løpendeSak.undervalg == "MD") leggTilVilkårsvurderingDeltBostedPåBarna()
                 vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
             // Lagre ned migreringsdato
@@ -146,7 +155,7 @@ class MigreringService(
 
             val førsteUtbetalingsperiode = finnFørsteUtbetalingsperiode(behandling.id)
 
-            sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(førsteUtbetalingsperiode.value, løpendeSak.stønad!!)
+            sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(førsteUtbetalingsperiode.value, løpendeSak)
 
             iverksett(behandlingEtterVilkårsvurdering)
 
@@ -263,7 +272,7 @@ class MigreringService(
     private fun kastFeilEllerHentUnderkategori(sak: Sak): BehandlingUnderkategori {
 
         return when {
-            (sak.valg == "OR" && sak.undervalg == "OS") -> {
+            (sak.valg == "OR" && sak.undervalg in listOf("OS", "MD")) -> {
                 BehandlingUnderkategori.ORDINÆR
             }
             (sak.valg == "UT" && sak.undervalg == "EF") -> {
@@ -351,6 +360,13 @@ class MigreringService(
         )
     }
 
+    private fun Vilkårsvurdering.leggTilVilkårsvurderingDeltBostedPåBarna() {
+        this.personResultater.filter { !it.erSøkersResultater() }.forEach {
+            val vilkårBorMedSøker = it.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }
+            vilkårBorMedSøker?.utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+        }
+    }
+
     private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDateSegment<Int> {
         return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse
             ?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
@@ -367,16 +383,19 @@ class MigreringService(
 
     private fun sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(
         førsteUtbetalingsbeløp: Int?,
-        infotrygdStønad: Stønad,
+        infotrygdSak: Sak,
     ) {
         val beløpFraInfotrygd =
-            infotrygdStønad.delytelse.singleOrNull { it.tom == null }?.beløp?.toInt()
+            infotrygdSak.stønad!!.delytelse.singleOrNull { it.tom == null }?.beløp?.toInt()
                 ?: kastOgTellMigreringsFeil(MigreringsfeilType.FLERE_DELYTELSER_I_INFOTRYGD)
 
         if (førsteUtbetalingsbeløp != beløpFraInfotrygd) {
+            val beløpfeilType = if (infotrygdSak.undervalg == "MD")
+                MigreringsfeilType.BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD else
+                MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD
             kastOgTellMigreringsFeil(
-                MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD,
-                MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD.beskrivelse +
+                beløpfeilType,
+                beløpfeilType.beskrivelse +
                     "($førsteUtbetalingsbeløp(ba-sak) ≠ $beløpFraInfotrygd(infotrygd))"
             )
         }
@@ -401,7 +420,8 @@ class MigreringService(
 enum class MigreringsfeilType(val beskrivelse: String) {
     AKTIV_BEHANDLING("Det finnes allerede en aktiv behandling på personen som ikke er migrering"),
     ALLEREDE_MIGRERT("Personen er allerede migrert"),
-    BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD("Beregnet beløp var ulikt beløp fra Infotryg"),
+    BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD("Beregnet beløp var ulikt beløp fra Infotrygd"),
+    BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD("Beløp beregnet for delt bosted var ulikt beløp fra Infotrygd"),
     DIFF_BARN_INFOTRYGD_OG_PDL("Kan ikke migrere fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd"),
     FAGSAK_AVSLUTTET_UTEN_MIGRERING("Personen er allerede migrert"),
     FLERE_DELYTELSER_I_INFOTRYGD("Finnes flere delytelser på sak"),

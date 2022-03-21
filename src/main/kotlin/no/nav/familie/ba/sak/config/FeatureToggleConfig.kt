@@ -122,6 +122,8 @@ class FeatureToggleConfig(
 
         const val SKAL_MIGRERE_FOSTERBARN = "familie-ba-sak.migrer-fosterbarn"
 
+        const val KAN_MIGRERE_DELT_BOSTED = "familie-ba-sak.migrer-delt-bosted"
+
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
 }
