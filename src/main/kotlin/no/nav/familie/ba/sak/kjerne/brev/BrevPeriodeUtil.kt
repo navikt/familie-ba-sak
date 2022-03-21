@@ -76,6 +76,7 @@ fun hentBrevPerioder(
         )
     }
 
+@Deprecated("Kan fjernes når INGEN_OVERLAPP_VEDTAKSPERIODER-toggle fjernes. Kan utledes fra perioden.")
 enum class UtvidetScenarioForEndringsperiode {
     IKKE_UTVIDET_YTELSE,
     UTVIDET_YTELSE_ENDRET,
