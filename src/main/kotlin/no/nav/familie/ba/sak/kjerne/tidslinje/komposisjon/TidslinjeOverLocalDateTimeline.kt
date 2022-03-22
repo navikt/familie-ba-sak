@@ -94,8 +94,8 @@ fun <T> Tidslinje<T>.toLocalDateTimeline(): LocalDateTimeline<T> {
 
 fun <T> Periode<T>.tilLocalDateSegment(): LocalDateSegment<T> =
     LocalDateSegment(
-        this.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
-        this.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
+        this.fraOgMed.tilLocalDateEllerNull(),
+        this.tilOgMed.tilLocalDateEllerNull(),
         this.innhold
     )
 

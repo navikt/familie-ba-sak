@@ -4,10 +4,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårRegelverkResultat
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 

@@ -44,7 +44,7 @@ abstract class Tidslinje<T> {
     }
 
     override fun toString(): String =
-        lagPerioder().map { it.toString() }.joinToString(" | ")
+        lagPerioder().joinToString(" | ") { it.toString() }
 
     companion object {
         data class TidslinjeFeil(

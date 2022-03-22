@@ -9,7 +9,7 @@ abstract class TidslinjeMedAvhengigheter<T>(
 ) : Tidslinje<T>() {
 
     init {
-        if (foregåendeTidslinjer.size == 0)
+        if (foregåendeTidslinjer.isEmpty())
             throw IllegalStateException("Skal ha avhengigheter, men listen over avhengigher er tom")
     }
 

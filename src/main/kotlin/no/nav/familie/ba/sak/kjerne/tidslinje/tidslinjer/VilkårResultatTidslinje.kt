@@ -1,9 +1,11 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje
+package no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.PRAKTISK_SENESTE_DAG
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeTil
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -18,13 +20,13 @@ class VilkårResultatTidslinje(
     private val vilkårsresultater: List<VilkårResultat>
 ) : Tidslinje<VilkårRegelverkResultat>() {
 
-    override fun fraOgMed() = vilkårsresultater
-        .map { it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom!! } }
-        .minOrNull()!!
+    override fun fraOgMed() = vilkårsresultater.minOf {
+        it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom!! }.tilInneværendeMåned()
+    }
 
-    override fun tilOgMed() = vilkårsresultater
-        .map { it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! } }
-        .maxOrNull()!!
+    override fun tilOgMed() = vilkårsresultater.maxOf {
+        it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! }.tilInneværendeMåned()
+    }
 
     override fun lagPerioder(): Collection<Periode<VilkårRegelverkResultat>> {
         return vilkårsresultater.map { it.tilPeriode() }
@@ -32,7 +34,8 @@ class VilkårResultatTidslinje(
 }
 
 fun VilkårResultat.tilPeriode(): Periode<VilkårRegelverkResultat> {
-    val fom = periodeFom.tilTidspunktEllerUendeligLengeSiden { periodeTom!! }
+    // Forskyv fom til neste måned som blir virkningstidspunktet
+    val fom = periodeFom.tilTidspunktEllerUendeligLengeSiden { periodeTom ?: PRAKTISK_SENESTE_DAG }.neste()
     val tom = periodeTom.tilTidspunktEllerUendeligLengeTil { periodeFom!! }
     return Periode(fom, tom, VilkårRegelverkResultat(vilkårType, vurderesEtter, resultat))
 }

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.util.Objects
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -51,12 +50,8 @@ data class Aktør(
         if (other == null || javaClass != other.javaClass) {
             return false
         }
-        val entitet: Aktør = other as Aktør
-        return Objects.equals(hashCode(), entitet.hashCode())
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(aktørId)
+        val otherAktør: Aktør = other as Aktør
+        return aktørId == otherAktør.aktørId
     }
 
     fun aktivFødselsnummer() = personidenter.single { it.aktiv }.fødselsnummer
