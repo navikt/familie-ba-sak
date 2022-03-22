@@ -67,6 +67,7 @@ enum class LoggType(val visningsnavn: String) {
     GODKJENNE_VEDTAK("Godkjenne vedtak"),
     MIGRERING_BEKREFTET("Migrering bekreftet"),
     DISTRIBUERE_BREV("Distribuere brev"),
+    BREV_IKKE_DISTRIBUERT("Brev ikke distribuert"),
     FERDIGSTILLE_BEHANDLING("Ferdigstille behandling"),
     HENLEGG_BEHANDLING("Henlegg behandling"),
     BEHANDLIG_SATT_PÅ_VENT("Behandlingen er satt på vent"),
