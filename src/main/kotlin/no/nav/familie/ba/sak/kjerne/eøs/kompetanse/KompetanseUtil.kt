@@ -8,20 +8,20 @@ object KompetanseUtil {
 
         val kompetanseForRestBarn = gammelKompetanse
             .copy(
-                barn = gammelKompetanse.barn.minus(nyKompetanse.barn)
-            ).takeIf { it.barn.size > 0 }
+                barnAktørIder = gammelKompetanse.barnAktørIder.minus(nyKompetanse.barnAktørIder)
+            ).takeIf { it.barnAktørIder.size > 0 }
 
         val kompetanseForForegåendePerioder = gammelKompetanse
             .copy(
                 fom = gammelKompetanse.fom,
                 tom = nyKompetanse.fom?.minusMonths(1),
-                barn = nyKompetanse.barn
+                barnAktørIder = nyKompetanse.barnAktørIder
             ).takeIf { it.fom != null && it.fom < it.tom }
 
         val kompetanseForEtterfølgendePerioder = gammelKompetanse.copy(
             fom = nyKompetanse.tom?.plusMonths(1),
             tom = gammelKompetanse.tom,
-            barn = nyKompetanse.barn
+            barnAktørIder = nyKompetanse.barnAktørIder
         ).takeIf { it.fom != null && it.fom < it.tom }
 
         return listOf(kompetanseForRestBarn, kompetanseForForegåendePerioder, kompetanseForEtterfølgendePerioder)
@@ -54,11 +54,11 @@ object KompetanseUtil {
 
     private fun mergeBarn(kompetanser: List<Kompetanse>): List<Kompetanse> {
         return kompetanser
-            .groupBy { it.copy(id = 0L, barn = emptySet()) }
+            .groupBy { it.copy(id = 0L, barnAktørIder = emptySet()) }
             .mapValues { (_, kompetanser) ->
                 kompetanser
                     .reduce { acc, neste ->
-                        neste.copy(id = 0, barn = acc.barn.union(neste.barn))
+                        neste.copy(id = 0, barnAktørIder = acc.barnAktørIder.union(neste.barnAktørIder))
                     }
             }.values.toList()
     }
