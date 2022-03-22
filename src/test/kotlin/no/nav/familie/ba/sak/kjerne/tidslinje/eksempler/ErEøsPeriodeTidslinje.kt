@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import java.time.YearMonth
 
 private val nødvendigeVilkår = listOf(
     Vilkår.UNDER_18_ÅR,
@@ -25,11 +26,11 @@ private val eøsVilkår = listOf(
 )
 
 class ErEøsPeriodeTidslinje(
-    private val barnetsVilkårsresultater: Collection<Tidslinje<VilkårRegelverkResultat>>
-) : TidslinjeSomStykkerOppTiden<Boolean>(barnetsVilkårsresultater) {
+    private val barnetsVilkårsresultater: Collection<Tidslinje<VilkårRegelverkResultat, YearMonth>>
+) : TidslinjeSomStykkerOppTiden<Boolean, YearMonth>(barnetsVilkårsresultater) {
 
     private val kombinator = EøsPeriodeKombinator()
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): Boolean {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<YearMonth>): Boolean {
         val alleVilkårResultater = barnetsVilkårsresultater.map { it.hentUtsnitt(tidspunkt) }
         return kombinator.kombiner(alleVilkårResultater.filterNotNull())
     }

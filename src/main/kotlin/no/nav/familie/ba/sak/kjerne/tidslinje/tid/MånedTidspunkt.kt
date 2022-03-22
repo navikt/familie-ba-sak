@@ -4,10 +4,10 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class MånedTidspunkt(
+data class MånedTidspunkt internal constructor(
     private val måned: YearMonth,
-    override val uendelighet: Uendelighet
-) : Tidspunkt {
+    private val uendelighet: Uendelighet
+) : Tidspunkt<YearMonth>(uendelighet) {
     init {
         if (måned < PRAKTISK_TIDLIGSTE_DAG.toYearMonth())
             throw IllegalArgumentException("Tidspunktet er for lenge siden. Bruk uendeligLengeSiden()")
@@ -20,12 +20,6 @@ data class MånedTidspunkt(
 
     override fun tilSisteDagIMåneden(): DagTidspunkt =
         DagTidspunkt(måned.atEndOfMonth(), this.uendelighet)
-
-    override fun tilDagIMåned(dag: Int): DagTidspunkt =
-        DagTidspunkt(måned.atDay(dag), this.uendelighet)
-
-    override fun tilDag(månedTilDagMapper: (YearMonth) -> LocalDate): DagTidspunkt =
-        DagTidspunkt(månedTilDagMapper(måned), uendelighet = uendelighet)
 
     override fun tilInneværendeMåned() = this
 
@@ -48,7 +42,7 @@ data class MånedTidspunkt(
 
     override fun flytt(tidsenheter: Long) = copy(måned = måned.plusMonths(tidsenheter))
 
-    override fun somEndelig(): Tidspunkt = this.copy(uendelighet = Uendelighet.INGEN)
+    override fun somEndelig(): MånedTidspunkt = this.copy(uendelighet = Uendelighet.INGEN)
 
     override fun toString(): String {
         return when (uendelighet) {
@@ -60,21 +54,37 @@ data class MånedTidspunkt(
         }
     }
 
-    override fun somUendeligLengeSiden(): Tidspunkt = this.copy(uendelighet = Uendelighet.FORTID)
-    override fun somUendeligLengeTil(): Tidspunkt = this.copy(uendelighet = Uendelighet.FREMTID)
-    override fun somFraOgMed(): Tidspunkt {
+    override fun somUendeligLengeSiden(): MånedTidspunkt = this.copy(uendelighet = Uendelighet.FORTID)
+    override fun somUendeligLengeTil(): MånedTidspunkt = this.copy(uendelighet = Uendelighet.FREMTID)
+    override fun somFraOgMed(): MånedTidspunkt {
         return if (uendelighet == Uendelighet.FREMTID) {
             somEndelig()
         } else
             this
     }
 
-    override fun somTilOgMed(): Tidspunkt {
+    override fun somTilOgMed(): MånedTidspunkt {
         return if (uendelighet == Uendelighet.FORTID) {
             somEndelig()
         } else
             this
     }
 
-    override fun erDag() = false
+    override fun somFraOgMed(dato: LocalDate): MånedTidspunkt {
+        return if (dato < PRAKTISK_TIDLIGSTE_DAG)
+            MånedTidspunkt(PRAKTISK_TIDLIGSTE_DAG.toYearMonth(), Uendelighet.FORTID)
+        else
+            MånedTidspunkt(dato.toYearMonth(), Uendelighet.INGEN)
+    }
+
+    override fun somTilOgMed(dato: LocalDate): MånedTidspunkt {
+        return if (dato > PRAKTISK_SENESTE_DAG)
+            MånedTidspunkt(PRAKTISK_SENESTE_DAG.toYearMonth(), Uendelighet.FREMTID)
+        else
+            MånedTidspunkt(dato.toYearMonth(), Uendelighet.INGEN).somTilOgMed()
+    }
+
+    override fun sammenliknMed(tidspunkt: Tidspunkt<YearMonth>): Int {
+        return måned.compareTo(tidspunkt.tilYearMonth())
+    }
 }

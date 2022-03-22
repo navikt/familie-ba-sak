@@ -37,7 +37,7 @@ data class VilkårsvurderingBuilder(
         val vilkårsvurderingBuilder: VilkårsvurderingBuilder,
         val startMåned: YearMonth,
         private val person: Person = tilfeldigPerson(),
-        private val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat>> = emptyList(),
+        private val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat, YearMonth>> = emptyList(),
     ) {
         fun medVilkår(v: String, vilkår: Vilkår): PersonResultatBuilder {
             return copy(vilkårsresultatTidslinjer = this.vilkårsresultatTidslinjer + parseVilkår(v, vilkår))
@@ -68,7 +68,7 @@ data class VilkårsvurderingBuilder(
             return vilkårsvurderingBuilder
         }
 
-        private fun parseVilkår(periodeString: String, vilkår: Vilkår): Tidslinje<VilkårRegelverkResultat> {
+        private fun parseVilkår(periodeString: String, vilkår: Vilkår): Tidslinje<VilkårRegelverkResultat, YearMonth> {
             val charTidslinje = periodeString.tilCharTidslinje(startMåned)
             return VilkårRegelverkResultatTidslinje(vilkår, charTidslinje)
         }
@@ -77,10 +77,10 @@ data class VilkårsvurderingBuilder(
 
 class VilkårRegelverkResultatTidslinje(
     val vilkår: Vilkår,
-    val charTidslinje: Tidslinje<Char>
+    val charTidslinje: Tidslinje<Char, YearMonth>
 ) :
-    TidslinjeSomStykkerOppTiden<VilkårRegelverkResultat>(charTidslinje) {
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): VilkårRegelverkResultat? {
+    TidslinjeSomStykkerOppTiden<VilkårRegelverkResultat, YearMonth>(charTidslinje) {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<YearMonth>): VilkårRegelverkResultat? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
 
         return when (tegn) {
@@ -92,7 +92,7 @@ class VilkårRegelverkResultatTidslinje(
     }
 }
 
-fun Periode<VilkårRegelverkResultat>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> {
+fun Periode<VilkårRegelverkResultat, YearMonth>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> {
     return listOf(
         VilkårResultat(
             personResultat = personResultat,

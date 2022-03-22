@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 
 class TidslinjeKombinasjonTest {
 
@@ -68,13 +69,13 @@ class TidslinjeKombinasjonTest {
     }
 }
 
-fun <V, H, R> Tidslinje<V>.snittKombinerMed(
-    tidslinje: Tidslinje<H>,
+fun <V, H, R> Tidslinje<V, YearMonth>.snittKombinerMed(
+    tidslinje: Tidslinje<H, YearMonth>,
     toveisKombinator: ToveisKombinator<V, H, R>
-): Tidslinje<R> {
+): Tidslinje<R, YearMonth> {
     val v1 = this
-    return object : TidslinjeSomStykkerOppTiden<R>(v1, tidslinje) {
-        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): R? =
+    return object : TidslinjeSomStykkerOppTiden<R, YearMonth>(v1, tidslinje) {
+        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<YearMonth>): R? =
             toveisKombinator.kombiner(
                 v1.hentUtsnitt(tidspunkt),
                 tidslinje.hentUtsnitt(tidspunkt)

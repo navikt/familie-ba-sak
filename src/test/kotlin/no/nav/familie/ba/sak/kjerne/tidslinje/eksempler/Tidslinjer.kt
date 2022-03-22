@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
+import java.time.YearMonth
 
 class Tidslinjer(
     vilkårsvurdering: Vilkårsvurdering,
@@ -53,12 +54,12 @@ class Tidslinjer(
     fun forBarn(barn: Person) = barnasTidslinjer[barn.aktør.aktørId]!!
 
     interface BarnetsTidslinjer {
-        val barnetsVilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat>>
-        val barnetOppfyllerVilkårTidslinje: Tidslinje<Boolean>
-        val erEøsTidslinje: Tidslinje<Boolean>
-        val kompetanseTidslinje: Tidslinje<Kompetanse>
-        val kompetanseValideringTidslinje: Tidslinje<KompetanseValidering>
-        val erSekundærlandTidslinje: Tidslinje<Boolean>
+        val barnetsVilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat, YearMonth>>
+        val barnetOppfyllerVilkårTidslinje: Tidslinje<Boolean, YearMonth>
+        val erEøsTidslinje: Tidslinje<Boolean, YearMonth>
+        val kompetanseTidslinje: Tidslinje<Kompetanse, YearMonth>
+        val kompetanseValideringTidslinje: Tidslinje<KompetanseValidering, YearMonth>
+        val erSekundærlandTidslinje: Tidslinje<Boolean, YearMonth>
     }
 
     class BarnetsTidslinjerUtsnitt(
@@ -86,7 +87,7 @@ class Tidslinjer(
     ) : BarnetsTidslinjer {
         override val barnetsVilkårsresultatTidslinjer = tidslinjer.barnasVilkårsresultatTidslinjeMap[barnIdent]!!
 
-        override val barnetOppfyllerVilkårTidslinje: Tidslinje<Boolean> =
+        override val barnetOppfyllerVilkårTidslinje: Tidslinje<Boolean, YearMonth> =
             barnetsVilkårsresultatTidslinjer.kombiner(BarnOppfyllerVilkårKombinator())
 
         override val erEøsTidslinje = barnetsVilkårsresultatTidslinjer.kombiner(EøsPeriodeKombinator())

@@ -33,11 +33,11 @@ class KompetanseBuilder(
 }
 
 class KompetanseTidslinje(
-    val charTidslinje: Tidslinje<Char>,
+    val charTidslinje: Tidslinje<Char, YearMonth>,
     val behandlingId: Long,
     val barn: List<Person>
-) : TidslinjeSomStykkerOppTiden<Kompetanse>(charTidslinje) {
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): Kompetanse? {
+) : TidslinjeSomStykkerOppTiden<Kompetanse, YearMonth>(charTidslinje) {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<YearMonth>): Kompetanse? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
         val barnAktørIder = barn.map { it.aktør.aktørId }.toSet()
         val kompetanseMal =

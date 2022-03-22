@@ -18,4 +18,4 @@ fun okt(år: Int) = Tidspunkt.med(YearMonth.of(år, 10))
 fun nov(år: Int) = Tidspunkt.med(YearMonth.of(år, 11))
 fun des(år: Int) = Tidspunkt.med(YearMonth.of(år, 12))
 
-fun <T> TidspunktClosedRange.med(t: T) = Periode(this, t)
+fun <T> TidspunktClosedRange<YearMonth>.med(t: T) = Periode(this, t)

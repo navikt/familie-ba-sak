@@ -6,16 +6,17 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.ToveisKombinator
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import java.time.YearMonth
 
 class ErSekundærlandTidslinje(
-    val kompetanseTidslinje: Tidslinje<Kompetanse>,
-    val validertKompetanseTidsline: Tidslinje<KompetanseValidering>
-) : TidslinjeSomStykkerOppTiden<Boolean>(
+    val kompetanseTidslinje: Tidslinje<Kompetanse, YearMonth>,
+    val validertKompetanseTidsline: Tidslinje<KompetanseValidering, YearMonth>
+) : TidslinjeSomStykkerOppTiden<Boolean, YearMonth>(
     kompetanseTidslinje, validertKompetanseTidsline
 ) {
     val erSekundærlandKombinator = ErSekundærlandKombinator()
 
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): Boolean? {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<YearMonth>): Boolean? {
         return erSekundærlandKombinator.kombiner(
             kompetanseTidslinje.hentUtsnitt(tidspunkt),
             validertKompetanseTidsline.hentUtsnitt(tidspunkt)

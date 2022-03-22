@@ -8,13 +8,14 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOpp
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import java.time.YearMonth
 
 class AktørOppfyllerVilkårTidslinje(
-    private val vilkårResultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat>>,
+    private val vilkårResultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat, YearMonth>>,
     private val vilkårKombinator: ListeKombinator<VilkårRegelverkResultat, Boolean>
-) : TidslinjeSomStykkerOppTiden<Boolean>(vilkårResultatTidslinjer) {
+) : TidslinjeSomStykkerOppTiden<Boolean, YearMonth>(vilkårResultatTidslinjer) {
 
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): Boolean {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<YearMonth>): Boolean {
         val vilkårResultater = vilkårResultatTidslinjer.map { it.hentUtsnitt(tidspunkt) }.filterNotNull()
         return vilkårKombinator.kombiner(vilkårResultater)
     }

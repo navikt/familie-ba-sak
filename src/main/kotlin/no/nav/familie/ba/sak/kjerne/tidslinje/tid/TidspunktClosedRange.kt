@@ -1,34 +1,31 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tid
 
-data class TidspunktClosedRange(
-    override val start: Tidspunkt,
-    override val endInclusive: Tidspunkt
-) : Iterable<Tidspunkt>,
-    ClosedRange<Tidspunkt> {
+import java.time.temporal.Temporal
 
-    override fun iterator(): Iterator<Tidspunkt> =
-        if (start.erDag() && !endInclusive.erDag())
-            TidspunktIterator(start, endInclusive.tilSisteDagIMåneden())
-        else if (!start.erDag() && endInclusive.erDag())
-            TidspunktIterator(start.tilFørsteDagIMåneden(), endInclusive)
-        else
-            TidspunktIterator(start, endInclusive)
+data class TidspunktClosedRange<TID : Temporal>(
+    override val start: Tidspunkt<TID>,
+    override val endInclusive: Tidspunkt<TID>
+) : Iterable<Tidspunkt<TID>>,
+    ClosedRange<Tidspunkt<TID>> {
+
+    override fun iterator(): Iterator<Tidspunkt<TID>> =
+        TidspunktIterator(start, endInclusive)
 
     override fun toString(): String =
         "$start - $endInclusive"
 
     companion object {
-        private class TidspunktIterator(
-            val startTidspunkt: Tidspunkt,
-            val tilOgMedTidspunkt: Tidspunkt
-        ) : Iterator<Tidspunkt> {
+        private class TidspunktIterator<TID : Temporal>(
+            val startTidspunkt: Tidspunkt<TID>,
+            val tilOgMedTidspunkt: Tidspunkt<TID>
+        ) : Iterator<Tidspunkt<TID>> {
 
             private var gjeldendeTidspunkt = startTidspunkt.somEndelig()
 
             override fun hasNext() =
                 gjeldendeTidspunkt.neste() <= tilOgMedTidspunkt.neste().somEndelig()
 
-            override fun next(): Tidspunkt {
+            override fun next(): Tidspunkt<TID> {
                 val next = gjeldendeTidspunkt
                 gjeldendeTidspunkt = gjeldendeTidspunkt.neste()
 
@@ -43,5 +40,5 @@ data class TidspunktClosedRange(
     }
 }
 
-operator fun Tidspunkt.rangeTo(tilOgMed: Tidspunkt): TidspunktClosedRange =
+operator fun <TID : Temporal> Tidspunkt<TID>.rangeTo(tilOgMed: Tidspunkt<TID>): TidspunktClosedRange<TID> =
     TidspunktClosedRange(this, tilOgMed)
