@@ -183,7 +183,6 @@ internal class BisysServiceTest {
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
 
-
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelseUtvidet(
                 fom = "2021-08",
@@ -230,13 +229,11 @@ internal class BisysServiceTest {
         assertThat(response.perioder.first().manueltBeregnet).isFalse
     }
 
-
     @Test
     fun `Skal slå sammen resultat fra ba-sak og infotrygd, typisk rett etter en migrering, hvor tomMåned i infotrygd er null`() {
         val behandling = lagBehandling()
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
-
 
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelseUtvidet(
