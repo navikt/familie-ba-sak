@@ -178,6 +178,110 @@ internal class BisysServiceTest {
     }
 
     @Test
+    fun `Skal slå sammen resultat fra ba-sak og infotrygd når periodene overlapper`() {
+        val behandling = lagBehandling()
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
+
+        val andelTilkjentYtelse =
+            lagAndelTilkjentYtelseUtvidet(
+                fom = "2021-08",
+                tom = "2029-02",
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                beløp = 1054
+            )
+
+        tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
+        every { mockPersonidentService.hentAktør(any()) } answers { andelTilkjentYtelse.aktør }
+        every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(andelTilkjentYtelse.aktør.aktivFødselsnummer()) }
+
+        val periodeInfotrygd = UtvidetBarnetrygdPeriode(
+            BisysStønadstype.UTVIDET,
+            YearMonth.of(2020, 9),
+            YearMonth.of(2021, 12),
+            1054.0,
+            manueltBeregnet = false,
+            deltBosted = false
+        )
+        every {
+            mockInfotrygdClient.hentUtvidetBarnetrygd(
+                andelTilkjentYtelse.aktør.aktivFødselsnummer(),
+                any()
+            )
+        } returns BisysUtvidetBarnetrygdResponse(
+            perioder = listOf(periodeInfotrygd)
+        )
+
+        every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
+
+        every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
+        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
+
+        val response =
+            bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2021, 1, 1))
+
+        assertThat(response.perioder).hasSize(1)
+        assertThat(response.perioder.first().beløp).isEqualTo(1054.0)
+        assertThat(response.perioder.first().fomMåned).isEqualTo(YearMonth.of(2020, 9))
+        assertThat(response.perioder.first().tomMåned).isEqualTo(YearMonth.of(2029, 2))
+        assertThat(response.perioder.first().manueltBeregnet).isFalse
+    }
+
+    @Test
+    fun `Skal slå sammen resultat fra ba-sak og infotrygd, typisk rett etter en migrering, hvor tomMåned i infotrygd er null`() {
+        val behandling = lagBehandling()
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
+
+        val andelTilkjentYtelse =
+            lagAndelTilkjentYtelseUtvidet(
+                fom = "2022-01",
+                tom = "2022-12",
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                beløp = 1054
+            )
+
+        tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
+        every { mockPersonidentService.hentAktør(any()) } answers { andelTilkjentYtelse.aktør }
+        every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(andelTilkjentYtelse.aktør.aktivFødselsnummer()) }
+
+        val periodeInfotrygd = UtvidetBarnetrygdPeriode(
+            BisysStønadstype.UTVIDET,
+            YearMonth.of(2019, 3),
+            null,
+            1054.0,
+            manueltBeregnet = false,
+            deltBosted = false
+        )
+        every {
+            mockInfotrygdClient.hentUtvidetBarnetrygd(
+                andelTilkjentYtelse.aktør.aktivFødselsnummer(),
+                any()
+            )
+        } returns BisysUtvidetBarnetrygdResponse(
+            perioder = listOf(periodeInfotrygd)
+        )
+
+        every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
+
+        every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
+        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
+
+        val response =
+            bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2021, 1, 1))
+
+        assertThat(response.perioder).hasSize(1)
+        assertThat(response.perioder.first().beløp).isEqualTo(1054.0)
+        assertThat(response.perioder.first().fomMåned).isEqualTo(YearMonth.of(2019, 3))
+        assertThat(response.perioder.first().tomMåned).isEqualTo(YearMonth.of(2022, 12))
+        assertThat(response.perioder.first().manueltBeregnet).isFalse
+    }
+
+    @Test
     fun `Skal ikke slå sammen resultat fra ba-sak og infotrygd hvis periode er manuelt beregnet i infotrygd`() {
         val behandling = lagBehandling()
 
