@@ -31,9 +31,6 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
         containerFactory = "concurrentKafkaListenerContainerFactory"
     )
     fun listen(consumerRecord: ConsumerRecord<String, String>, ack: Acknowledgment) {
-        logger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
-        secureLogger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
-
         val data: String = consumerRecord.value()
         val key: String = consumerRecord.key()
         val request: HentFagsystemsbehandlingRequest =
@@ -42,6 +39,8 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
         if (request.ytelsestype != Ytelsestype.BARNETRYGD) {
             return
         }
+        logger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
+        secureLogger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
 
         val fagsystemsbehandling = try {
             fagsystemsbehandlingService.hentFagsystemsbehandling(request)
