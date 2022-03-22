@@ -17,6 +17,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -129,6 +130,7 @@ internal class BisysServiceTest {
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
 
+        val kalkulertbeløp = 660
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelseUtvidet(
                 fom = "2020-01",
@@ -136,8 +138,9 @@ internal class BisysServiceTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
-                beløp = 660
-            )
+                beløp = kalkulertbeløp
+            ).copy(prosent = BigDecimal.valueOf(50), sats = 2 * kalkulertbeløp)
+
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
         every { mockPersonidentService.hentAktør(any()) } answers { andelTilkjentYtelse.aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(andelTilkjentYtelse.aktør.aktivFødselsnummer()) }
@@ -148,7 +151,7 @@ internal class BisysServiceTest {
             YearMonth.of(2019, 12),
             660.0,
             manueltBeregnet = false,
-            deltBosted = false
+            deltBosted = true
         )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
