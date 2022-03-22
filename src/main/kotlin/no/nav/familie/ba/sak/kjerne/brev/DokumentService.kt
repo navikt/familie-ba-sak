@@ -237,7 +237,7 @@ class DokumentService(
         behandlingId: Long,
         brevMal: Brevmal
     ) {
-        logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId")
+        logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent adresse.")
         loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(
             behandlingId = behandlingId,
             brevnavn = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
