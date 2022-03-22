@@ -46,6 +46,8 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: (erIngenOverlappVed
     OPPHØR({ listOf(VedtakBegrunnelseType.OPPHØR) }),
     AVSLAG({ listOf(VedtakBegrunnelseType.AVSLAG) }),
     FORTSATT_INNVILGET({ listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET) }),
+
+    @Deprecated("Skal ikke brukes lenger. Fjernes når INGEN_OVERLAPP_VEDTAKSPERIODER-triggeren fjernes.")
     ENDRET_UTBETALING({
         listOf(
             VedtakBegrunnelseType.ENDRET_UTBETALING

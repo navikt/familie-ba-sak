@@ -4,7 +4,6 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -67,7 +66,6 @@ class VelgFagsystemIntegrasjonTest(
     @Test
     fun `skal IKKE velge ba-sak når mor er EØS borger`() {
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
-        val fagsystemUtfall = FagsystemUtfall.MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING
 
         every { mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns Statsborgerskap(
             land = "POL",
@@ -76,13 +74,8 @@ class VelgFagsystemIntegrasjonTest(
             bekreftelsesdato = null
         )
         val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_AUTOMATISK_BEHANDLE_EØS)) {
-            assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, fagsystemRegelVurdering)
-            assertEquals(FagsystemUtfall.STØTTET_I_BA_SAK, faktiskFagsystemUtfall)
-        } else {
-            assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, fagsystemRegelVurdering)
-            assertEquals(fagsystemUtfall, faktiskFagsystemUtfall)
-        }
+        assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, fagsystemRegelVurdering)
+        assertEquals(FagsystemUtfall.STØTTET_I_BA_SAK, faktiskFagsystemUtfall)
     }
 
     @Test
