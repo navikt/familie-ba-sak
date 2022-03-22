@@ -28,16 +28,16 @@ class LocalDatetimeTimelineToveisTidslinje<V, H, R, T : Tidsenhet>(
     }
 }
 
-class LocalDatetimeTimelineListeTidslinje<T, R, TID : Tidsenhet>(
-    val tidslinjer: Collection<Tidslinje<T, TID>>,
-    val listeKombinator: ListeKombinator<T, R>,
-) : TidslinjeMedAvhengigheter<R, TID>(tidslinjer) {
+class LocalDatetimeTimelineListeTidslinje<I, R, T : Tidsenhet>(
+    val tidslinjer: Collection<Tidslinje<I, T>>,
+    val listeKombinator: ListeKombinator<I, R>,
+) : TidslinjeMedAvhengigheter<R, T>(tidslinjer) {
 
-    override fun lagPerioder(): Collection<Periode<R, TID>> {
+    override fun lagPerioder(): Collection<Periode<R, T>> {
         val startVerdi = LocalDateTimeline(
             fraOgMed().tilLocalDateEllerNull(),
             tilOgMed().tilLocalDateEllerNull(),
-            emptyList<T>()
+            emptyList<I>()
         )
 
         return tidslinjer.map { it.toLocalDateTimeline() }
@@ -77,33 +77,33 @@ class LocalDateSegmentPeriodeKombinator<V, H, R>(val periodeKombinator: ToveisKo
     }
 }
 
-fun <DATA, R, TID : Tidsenhet> Collection<Tidslinje<DATA, TID>>.kombiner(listeKombinator: ListeKombinator<DATA, R>): Tidslinje<R, TID> {
+fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(listeKombinator: ListeKombinator<I, R>): Tidslinje<R, T> {
     // Har ikke fått LocalDateTimeline.compress til å funke helt, og kjører egen komprimering på toppen
     return LocalDatetimeTimelineListeTidslinje(this, listeKombinator).komprimer()
 }
 
-fun <V, H, R, TID : Tidsenhet> Tidslinje<V, TID>.kombinerMed(
-    tidslinje: Tidslinje<H, TID>,
+fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
+    tidslinje: Tidslinje<H, T>,
     kombinator: ToveisKombinator<V, H, R>
-): Tidslinje<R, TID> {
+): Tidslinje<R, T> {
     // Har ikke fått LocalDateTimeline.compress til å funke helt, og kjører egen komprimering på toppen
     return LocalDatetimeTimelineToveisTidslinje(this, tidslinje, kombinator).komprimer()
 }
 
-fun <DATA, TID : Tidsenhet> Tidslinje<DATA, TID>.toLocalDateTimeline(): LocalDateTimeline<DATA> {
+fun <I, T : Tidsenhet> Tidslinje<I, T>.toLocalDateTimeline(): LocalDateTimeline<I> {
     return LocalDateTimeline(
         this.perioder().map { it.tilLocalDateSegment() }
     )
 }
 
-fun <DATA, TID : Tidsenhet> Periode<DATA, TID>.tilLocalDateSegment(): LocalDateSegment<DATA> =
+fun <I, T : Tidsenhet> Periode<I, T>.tilLocalDateSegment(): LocalDateSegment<I> =
     LocalDateSegment(
         this.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
         this.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
         this.innhold
     )
 
-fun <DATA, TID : Tidsenhet> LocalDateSegment<DATA>.tilPeriode(tidspunktMal: Tidspunkt<TID>): Periode<DATA, TID> =
+fun <I, T : Tidsenhet> LocalDateSegment<I>.tilPeriode(tidspunktMal: Tidspunkt<T>): Periode<I, T> =
     Periode(
         fraOgMed = tidspunktMal.somFraOgMed(this.fom),
         tilOgMed = tidspunktMal.somTilOgMed(this.tom),

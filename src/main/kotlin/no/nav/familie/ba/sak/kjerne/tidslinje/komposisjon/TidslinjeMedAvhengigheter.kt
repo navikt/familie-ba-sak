@@ -5,21 +5,23 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteEllerNull
 
-abstract class TidslinjeMedAvhengigheter<DATA, T : Tidsenhet>(
+val MANGLER_AVHENGIGHETER = IllegalArgumentException("Det er ikke sendt med noen avhengigheter")
+
+abstract class TidslinjeMedAvhengigheter<I, T : Tidsenhet>(
     private val foregåendeTidslinjer: Collection<Tidslinje<*, T>>
-) : Tidslinje<DATA, T>() {
+) : Tidslinje<I, T>() {
 
     init {
         if (foregåendeTidslinjer.isEmpty()) {
-            throw IllegalArgumentException("Det er ikke sendt med noen avhengigheter")
+            throw MANGLER_AVHENGIGHETER
         }
     }
 
     override fun fraOgMed() = foregåendeTidslinjer
         .map { it.fraOgMed() }
-        .minsteEllerNull()!!
+        .minsteEllerNull() ?: throw MANGLER_AVHENGIGHETER
 
     override fun tilOgMed() = foregåendeTidslinjer
         .map { it.tilOgMed() }
-        .størsteEllerNull()!!
+        .størsteEllerNull() ?: throw MANGLER_AVHENGIGHETER
 }

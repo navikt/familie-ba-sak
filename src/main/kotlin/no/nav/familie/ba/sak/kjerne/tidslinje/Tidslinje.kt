@@ -3,13 +3,13 @@ package no.nav.familie.ba.sak.kjerne.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
-abstract class Tidslinje<DATA, T : Tidsenhet> {
-    private var periodeCache: List<Periode<DATA, T>>? = null
+abstract class Tidslinje<I, T : Tidsenhet> {
+    private var periodeCache: List<Periode<I, T>>? = null
 
     internal abstract fun fraOgMed(): Tidspunkt<T>
     internal abstract fun tilOgMed(): Tidspunkt<T>
 
-    fun perioder(): Collection<Periode<DATA, T>> {
+    fun perioder(): Collection<Periode<I, T>> {
         return periodeCache ?: lagPerioder().sortedBy { it.fraOgMed }.toList()
             .also {
                 valider(it)
@@ -17,9 +17,9 @@ abstract class Tidslinje<DATA, T : Tidsenhet> {
             }
     }
 
-    protected abstract fun lagPerioder(): Collection<Periode<DATA, T>>
+    protected abstract fun lagPerioder(): Collection<Periode<I, T>>
 
-    protected open fun valider(perioder: List<Periode<DATA, T>>) {
+    protected open fun valider(perioder: List<Periode<I, T>>) {
         perioder.mapIndexed { index, periode ->
             when {
                 index > 0 && periode.fraOgMed.erUendeligLengeSiden() ->
