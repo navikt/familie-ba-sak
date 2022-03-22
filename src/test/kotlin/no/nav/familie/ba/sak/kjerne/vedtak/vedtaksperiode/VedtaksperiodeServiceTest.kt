@@ -462,7 +462,6 @@ class VedtaksperiodeServiceTest(
         assertEquals(LocalDate.of(2021, 7, 31), redusertePerioder.first().tom)
     }
 
-
     @Test
     fun `skal identifisere flere reduserte perioder`() {
         val barn1 = tilAktør(barnFnr)
