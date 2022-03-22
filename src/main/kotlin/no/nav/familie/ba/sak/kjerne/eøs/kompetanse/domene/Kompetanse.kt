@@ -7,7 +7,7 @@ data class Kompetanse(
     val behandlingId: Long = 0,
     val fom: YearMonth?,
     val tom: YearMonth?,
-    val barn: Set<String>,
+    val barnAktørIder: Set<String>,
     val status: KompetanseStatus? = KompetanseStatus.IKKE_UTFYLT,
     val søkersAktivitet: String? = null,
     val annenForeldersAktivitet: String? = null,

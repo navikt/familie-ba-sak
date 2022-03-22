@@ -18,7 +18,7 @@ class MockKompetanseRepository {
     private val malKompetanse = Kompetanse(
         fom = YearMonth.of(2021, 2),
         tom = YearMonth.of(2021, 11),
-        barn = setOf(barn1, barn2, barn3),
+        barnAktørIder = setOf(barn1, barn2, barn3),
     )
 
     private val kompetanser = mutableMapOf<Long, Kompetanse>()

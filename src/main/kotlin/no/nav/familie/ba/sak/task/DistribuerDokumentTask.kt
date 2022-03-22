@@ -26,11 +26,11 @@ class DistribuerDokumentTask(
         val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
 
         if (distribuerDokumentDTO.erManueltSendt && !distribuerDokumentDTO.brevmal.erVedtaksbrev) {
-            dokumentService.distribuerBrevOgLoggHendelse(
+            dokumentService.prøvDistribuerBrevOgLoggHendelse(
                 journalpostId = distribuerDokumentDTO.journalpostId,
                 behandlingId = distribuerDokumentDTO.behandlingId,
                 loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                brevMal = distribuerDokumentDTO.brevmal
+                brevmal = distribuerDokumentDTO.brevmal
             )
         } else if (!distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevmal.erVedtaksbrev && distribuerDokumentDTO.behandlingId != null) {
             stegService.håndterDistribuerVedtaksbrev(

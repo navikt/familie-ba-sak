@@ -16,7 +16,7 @@ internal class KompetanseUtilTest {
             behandlingId = 1L,
             fom = YearMonth.of(2021, 1),
             tom = YearMonth.of(2021, 12),
-            barn = setOf("111", "222", "333")
+            barnAktørIder = setOf("111", "222", "333")
         )
 
         val oppdatertKompetanse = Kompetanse(
@@ -24,7 +24,7 @@ internal class KompetanseUtilTest {
             behandlingId = 1L,
             fom = YearMonth.of(2021, 3),
             tom = YearMonth.of(2021, 10),
-            barn = setOf("111")
+            barnAktørIder = setOf("111")
         )
 
         val restKompetanser = KompetanseUtil.finnRestKompetanser(kompetanse, oppdatertKompetanse)
@@ -37,7 +37,7 @@ internal class KompetanseUtilTest {
                     behandlingId = 1L,
                     fom = YearMonth.of(2021, 1),
                     tom = YearMonth.of(2021, 2),
-                    barn = setOf("111")
+                    barnAktørIder = setOf("111")
                 )
             )
 
@@ -49,7 +49,7 @@ internal class KompetanseUtilTest {
                     behandlingId = 1L,
                     fom = YearMonth.of(2021, 11),
                     tom = YearMonth.of(2021, 12),
-                    barn = setOf("111")
+                    barnAktørIder = setOf("111")
                 )
             )
         )
@@ -60,7 +60,7 @@ internal class KompetanseUtilTest {
                     behandlingId = 1L,
                     fom = YearMonth.of(2021, 1),
                     tom = YearMonth.of(2021, 12),
-                    barn = setOf("222", "333")
+                    barnAktørIder = setOf("222", "333")
                 )
             )
         )
@@ -71,7 +71,7 @@ internal class KompetanseUtilTest {
         val kompetanse1 = Kompetanse(
             fom = YearMonth.of(2021, 1),
             tom = YearMonth.of(2021, 12),
-            barn = setOf("111", "222", "333")
+            barnAktørIder = setOf("111", "222", "333")
         )
         val kompetanse2 = kompetanse1.copy(
             fom = YearMonth.of(2022, 1),
@@ -90,7 +90,7 @@ internal class KompetanseUtilTest {
         val kompetanse1 = Kompetanse(
             fom = YearMonth.of(2021, 1),
             tom = YearMonth.of(2021, 12),
-            barn = setOf("111", "222", "333")
+            barnAktørIder = setOf("111", "222", "333")
         )
         val kompetanse2 = kompetanse1.copy(
             fom = YearMonth.of(2022, 2),
@@ -112,7 +112,7 @@ internal class KompetanseUtilTest {
         val kompetanse1 = Kompetanse(
             fom = YearMonth.of(2021, 1),
             tom = null,
-            barn = setOf("111", "222", "333")
+            barnAktørIder = setOf("111", "222", "333")
         )
         val kompetanse2 = kompetanse1.copy(
             fom = YearMonth.of(2022, 2),
@@ -131,7 +131,7 @@ internal class KompetanseUtilTest {
         val kompetanse1 = Kompetanse(
             fom = YearMonth.of(2021, 1),
             tom = YearMonth.of(2022, 3),
-            barn = setOf("111", "222", "333")
+            barnAktørIder = setOf("111", "222", "333")
         )
         val kompetanse2 = kompetanse1.copy(
             fom = YearMonth.of(2021, 11),
@@ -150,7 +150,7 @@ internal class KompetanseUtilTest {
         val kompetanse1 = Kompetanse(
             fom = YearMonth.of(2021, 1),
             tom = YearMonth.of(2021, 11),
-            barn = setOf("111", "222", "333")
+            barnAktørIder = setOf("111", "222", "333")
         )
         val kompetanse2 = kompetanse1.copy(
             fom = YearMonth.of(2021, 9),
