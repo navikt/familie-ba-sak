@@ -212,40 +212,56 @@ class DokumentService(
         }
     }
 
-    fun distribuerBrevOgLoggHendelse(
+    fun prøvDistribuerBrevOgLoggHendelse(
         journalpostId: String,
         behandlingId: Long?,
         loggBehandlerRolle: BehandlerRolle,
-        brevMal: Brevmal,
+        brevmal: Brevmal,
     ) {
         try {
-            integrasjonClient.distribuerBrev(journalpostId)
-
-            if (behandlingId != null) {
-                loggService.opprettDistribuertBrevLogg(
-                    behandlingId = behandlingId,
-                    tekst = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
-                    rolle = loggBehandlerRolle
-                )
-            }
-
-            antallBrevSendt[brevMal]?.increment()
+            distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
         } catch (ressursException: RessursException) {
-            logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId")
+            val mottakerErIkkeDigitalOgHarUkjentAdresse =
+                ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
 
-            if (ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true) {
-                if (behandlingId != null) {
-                    loggService.opprettBrevIkkeDistribuertLogg(
-                        behandlingId = behandlingId,
-                        tekst = "Mottaker har ukjent adresse\n" +
-                            brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
-                    )
-                }
-                antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
+            if (mottakerErIkkeDigitalOgHarUkjentAdresse && behandlingId != null) {
+                loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
             } else {
                 throw ressursException
             }
         }
+    }
+
+    internal fun loggBrevIkkeDistribuertUkjentAdresse(
+        journalpostId: String,
+        behandlingId: Long,
+        brevMal: Brevmal
+    ) {
+        logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId")
+        loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(
+            behandlingId = behandlingId,
+            brevnavn = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+        )
+        antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
+    }
+
+    private fun distribuerBrevOgLoggHendlese(
+        journalpostId: String,
+        behandlingId: Long?,
+        brevMal: Brevmal,
+        loggBehandlerRolle: BehandlerRolle
+    ) {
+        integrasjonClient.distribuerBrev(journalpostId)
+
+        if (behandlingId != null) {
+            loggService.opprettDistribuertBrevLogg(
+                behandlingId = behandlingId,
+                tekst = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+                rolle = loggBehandlerRolle
+            )
+        }
+
+        antallBrevSendt[brevMal]?.increment()
     }
 
     companion object {
