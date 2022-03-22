@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
@@ -31,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
+import no.nav.familie.ba.sak.task.DistribuerDødsfallDokumentPåFagsakTask
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
@@ -54,7 +54,6 @@ class DokumentService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val rolleConfig: RolleConfig,
     private val settPåVentService: SettPåVentService,
-    private val featureToggleService: FeatureToggleService,
 ) {
 
     private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
@@ -67,7 +66,7 @@ class DokumentService(
     private val antallBrevIkkeDistribuertUkjentAndresse: Map<Brevmal, Counter> =
         mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
             Metrics.counter(
-                "brev.ikke.sendt",
+                "brev.ikke.sendt.ukjent.andresse",
                 "brevtype", it.visningsTekst
             )
         }
@@ -217,18 +216,26 @@ class DokumentService(
         behandlingId: Long?,
         loggBehandlerRolle: BehandlerRolle,
         brevmal: Brevmal,
-    ) {
-        try {
-            distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
-        } catch (ressursException: RessursException) {
-            val mottakerErIkkeDigitalOgHarUkjentAdresse =
-                ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
+    ) = try {
+        distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
+    } catch (ressursException: RessursException) {
+        val statuskode = ressursException.hentStatuskodeFraOriginalFeil()
 
-            if (mottakerErIkkeDigitalOgHarUkjentAdresse && behandlingId != null) {
+        val mottakerErIkkeDigitalOgHarUkjentAdresse = statuskode == 400 &&
+            ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
+
+        val mottakerErDødUtenDødsboadresse = statuskode == 410
+
+        when {
+            mottakerErIkkeDigitalOgHarUkjentAdresse && behandlingId != null ->
                 loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
-            } else {
-                throw ressursException
+            mottakerErDødUtenDødsboadresse && behandlingId != null -> {
+                val task =
+                    DistribuerDødsfallDokumentPåFagsakTask.opprettTask(journalpostId = journalpostId, brevmal = brevmal)
+                taskRepository.save(task)
+                loggBrevIkkeDistribuertUkjentDødsboadresse(journalpostId, behandlingId, brevmal)
             }
+            else -> throw ressursException
         }
     }
 
@@ -241,8 +248,22 @@ class DokumentService(
         loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(
             behandlingId = behandlingId,
             brevnavn = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+            begrunnelse = "mottaker har ukjent adresse",
         )
         antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
+    }
+
+    internal fun loggBrevIkkeDistribuertUkjentDødsboadresse(
+        journalpostId: String,
+        behandlingId: Long,
+        brevMal: Brevmal
+    ) {
+        logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent dødsboadresse.")
+        loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(
+            behandlingId = behandlingId,
+            brevnavn = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+            begrunnelse = "mottaker har ukjent adresse. En oppgave er opprettet på fagsaknivå for å sende brevet når adressen er satt",
+        )
     }
 
     private fun distribuerBrevOgLoggHendlese(
