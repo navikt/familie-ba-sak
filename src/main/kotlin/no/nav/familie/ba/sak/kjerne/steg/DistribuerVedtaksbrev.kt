@@ -22,11 +22,11 @@ class DistribuerVedtaksbrev(
     ): StegType {
         logger.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
 
-        dokumentService.distribuerBrevOgLoggHendelse(
+        dokumentService.prøvDistribuerBrevOgLoggHendelse(
             journalpostId = data.journalpostId,
             behandlingId = data.behandlingId,
             loggBehandlerRolle = BehandlerRolle.SYSTEM,
-            brevMal = data.brevmal
+            brevmal = data.brevmal
         )
         val aktør = personidentService.hentAktør(data.personIdent)
 
