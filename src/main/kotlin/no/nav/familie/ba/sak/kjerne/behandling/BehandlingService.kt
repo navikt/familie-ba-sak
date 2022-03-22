@@ -324,7 +324,7 @@ class BehandlingService(
             } ?: emptyList()
 
     /**
-     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse som ikke er .
+     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse som ikke er endret til null i utbetaling.
      */
     fun finnBarnFraBehandlingMedTilkjentUtbetalingSomikkeErEndret(behandlingId: Long): List<Aktør> =
         personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
