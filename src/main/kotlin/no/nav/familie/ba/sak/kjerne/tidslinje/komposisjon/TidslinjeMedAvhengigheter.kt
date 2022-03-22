@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteEllerNull
 import java.time.temporal.Temporal
 
-abstract class TidslinjeMedAvhengigheter<T, TID : Temporal>(
+abstract class TidslinjeMedAvhengigheter<DATA, TID : Temporal>(
     private val foregåendeTidslinjer: Collection<Tidslinje<*, TID>>
-) : Tidslinje<T, TID>() {
+) : Tidslinje<DATA, TID>() {
 
     init {
         if (foregåendeTidslinjer.isEmpty()) {
