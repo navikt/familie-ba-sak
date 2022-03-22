@@ -71,13 +71,19 @@ class BeslutteVedtak(
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
             opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 
-            val erInnvilgetUtenNyeAndeler = true
-            if (erInnvilgetUtenNyeAndeler) {
+            val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
+                behandlingService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling)
+
+            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder) {
+                if (!behandling.erBehandlingMedVedtaksbrevutsending())
+                    throw Feil("Prøvte å opprette vedtaksbrev for behandling som ikke skal sende ut vedtaksbrev.")
+
                 opprettJournalførVedtaksbrevTask(behandling, vedtak)
                 return StegType.JOURNALFØR_VEDTAKSBREV
             } else {
                 when (nesteSteg) {
                     StegType.IVERKSETT_MOT_OPPDRAG -> {
+                        behandling.resultat
                         opprettTaskIverksettMotOppdrag(behandling, vedtak)
                     }
                     StegType.JOURNALFØR_VEDTAKSBREV -> opprettJournalførVedtaksbrevTask(behandling, vedtak)

@@ -324,6 +324,20 @@ class BehandlingService(
             } ?: emptyList()
 
     /**
+     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse som ikke er .
+     */
+    fun finnBarnFraBehandlingMedTilkjentUtbetalingSomikkeErEndret(behandlingId: Long): List<Aktør> =
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
+            ?.filter { aktør ->
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                    behandlingId,
+                    aktør
+                ).filter { aty ->
+                    aty.kalkulertUtbetalingsbeløp != 0 || aty.endretUtbetalingAndeler.isEmpty()
+                }.isNotEmpty()
+            } ?: emptyList()
+
+    /**
      * Henter siste iverksatte behandling FØR en gitt behandling.
      * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet
      * eller ved behandlingsresultat.
@@ -513,6 +527,30 @@ class BehandlingService(
 
     fun hentSøknadMottattDato(behandlingId: Long): LocalDateTime? {
         return behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId)?.mottattDato
+    }
+
+    fun innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling: Behandling): Boolean {
+        val barnMedUtbetalingSomIkkeBlittEndretISisteBehandling =
+            finnBarnFraBehandlingMedTilkjentUtbetalingSomikkeErEndret(behandling.id)
+
+        val alleBarnISisteBehanlding = finnBarnFraBehandlingMedTilkjentYtsele(behandling.id)
+
+        val alleBarnISistIverksattBehandling =
+            hentForrigeBehandlingSomErIverksatt(behandling)?.let { finnBarnFraBehandlingMedTilkjentYtsele(it.id) }
+                ?: emptyList()
+
+        val nyeBarnISisteBehandling = alleBarnISisteBehanlding.minus(alleBarnISistIverksattBehandling.toSet())
+
+        val nyeBarnMedUtebtalingSomIkkeErEndret =
+            barnMedUtbetalingSomIkkeBlittEndretISisteBehandling.intersect(nyeBarnISisteBehandling)
+
+        val innvilget_opphørt_eller_endret_og_opphørt =
+            behandling.resultat == BehandlingResultat.INNVILGET_OG_OPPHØRT ||
+                behandling.resultat == BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
+
+        return innvilget_opphørt_eller_endret_og_opphørt &&
+            behandling.erSøknad() &&
+            nyeBarnMedUtebtalingSomIkkeErEndret.isEmpty()
     }
 
     companion object {

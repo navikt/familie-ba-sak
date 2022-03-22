@@ -163,6 +163,8 @@ data class Behandling(
 
     fun erVedtatt() = status == BehandlingStatus.AVSLUTTET && !erHenlagt()
 
+    fun erSøknad() = opprettetÅrsak == BehandlingÅrsak.SØKNAD
+
     fun leggTilBehandlingStegTilstand(nesteSteg: StegType): Behandling {
         if (nesteSteg != StegType.HENLEGG_BEHANDLING) {
             fjernAlleSenereSteg(nesteSteg)
