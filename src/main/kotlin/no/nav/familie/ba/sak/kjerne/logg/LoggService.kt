@@ -240,6 +240,18 @@ class LoggService(
         )
     }
 
+    fun opprettBrevIkkeDistribuertUkjentAdresseLogg(behandlingId: Long, brevnavn: String) {
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.BREV_IKKE_DISTRIBUERT,
+                tittel = "Brevet ble ikke distribuert fordi mottaker har ukjent adresse",
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
+                tekst = brevnavn
+            )
+        )
+    }
+
     fun opprettFerdigstillBehandling(behandling: Behandling) {
         lagre(
             Logg(

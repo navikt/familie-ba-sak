@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -46,15 +46,22 @@ fun triggesAvSkalUtbetales(
     }
 }
 fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
-    vilkår: List<SanityVilkår>?,
     utvidetScenario: UtvidetScenarioForEndringsperiode,
-    minimertEndretAndel: MinimertEndretAndel
+    minimertEndretAndel: MinimertEndretAndel,
+    ytelseTyperForPeriode: Set<YtelseType>,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
     val hørerTilEtterEndretUtbetaling = this.etterEndretUtbetaling
 
     val oppfyllerSkalUtbetalesTrigger = minimertEndretAndel.oppfyllerSkalUtbetalesTrigger(this)
 
-    val oppfyllerUtvidetScenario = oppfyllerUtvidetScenario(utvidetScenario, vilkår)
+    val oppfyllerUtvidetScenario =
+        oppfyllerUtvidetScenario(
+            utvidetScenario,
+            this.vilkår,
+            ytelseTyperForPeriode,
+            erIngenOverlappVedtaksperiodeToggelPå
+        )
 
     val erAvSammeÅrsak = this.endringsaarsaker.contains(minimertEndretAndel.årsak)
 
@@ -72,13 +79,21 @@ fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
 
 private fun oppfyllerUtvidetScenario(
     utvidetScenario: UtvidetScenarioForEndringsperiode,
-    vilkår: List<SanityVilkår>?
+    vilkår: Set<Vilkår>?,
+    ytelseTyperForPeriode: Set<YtelseType>,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
-    val erUtvidetYtelseUtenEndring =
-        utvidetScenario == UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET
+    return if (erIngenOverlappVedtaksperiodeToggelPå) {
+        val begrunnelseGjelderUtvidet = vilkår?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 
-    val begrunnelseSkalVisesVedutvidetYtelseUtenEndring =
-        vilkår?.contains(SanityVilkår.UTVIDET_BARNETRYGD) ?: false
+        begrunnelseGjelderUtvidet == ytelseTyperForPeriode.contains(YtelseType.UTVIDET_BARNETRYGD)
+    } else {
+        val erUtvidetYtelseUtenEndring =
+            utvidetScenario == UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET
 
-    return erUtvidetYtelseUtenEndring == begrunnelseSkalVisesVedutvidetYtelseUtenEndring
+        val begrunnelseSkalVisesVedutvidetYtelseUtenEndring =
+            vilkår?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
+
+        erUtvidetYtelseUtenEndring == begrunnelseSkalVisesVedutvidetYtelseUtenEndring
+    }
 }

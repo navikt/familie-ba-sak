@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SETT_PÅ_VENT
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -32,8 +31,11 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -62,6 +64,14 @@ class DokumentService(
         )
     }
 
+    private val antallBrevIkkeDistribuertUkjentAndresse: Map<Brevmal, Counter> =
+        mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
+            Metrics.counter(
+                "brev.ikke.sendt",
+                "brevtype", it.visningsTekst
+            )
+        }
+
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         if (SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig) == BehandlerRolle.VEILEDER && vedtak.stønadBrevPdF == null) {
             throw FunksjonellFeil("Det finnes ikke noe vedtaksbrev.")
@@ -75,7 +85,7 @@ class DokumentService(
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
         try {
             if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
-                throw Feil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
+                throw FunksjonellFeil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
             }
 
             val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
@@ -192,8 +202,7 @@ class DokumentService(
 
         if (
             behandling != null &&
-            manueltBrevRequest.brevmal.setterBehandlingPåVent() &&
-            featureToggleService.isEnabled(SETT_PÅ_VENT)
+            manueltBrevRequest.brevmal.setterBehandlingPåVent()
         ) {
             settPåVentService.settBehandlingPåVent(
                 behandlingId = behandling.id,
@@ -203,13 +212,47 @@ class DokumentService(
         }
     }
 
-    fun distribuerBrevOgLoggHendelse(
+    fun prøvDistribuerBrevOgLoggHendelse(
         journalpostId: String,
         behandlingId: Long?,
         loggBehandlerRolle: BehandlerRolle,
+        brevmal: Brevmal,
+    ) {
+        try {
+            distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
+        } catch (ressursException: RessursException) {
+            val mottakerErIkkeDigitalOgHarUkjentAdresse =
+                ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
+
+            if (mottakerErIkkeDigitalOgHarUkjentAdresse && behandlingId != null) {
+                loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
+            } else {
+                throw ressursException
+            }
+        }
+    }
+
+    internal fun loggBrevIkkeDistribuertUkjentAdresse(
+        journalpostId: String,
+        behandlingId: Long,
+        brevMal: Brevmal
+    ) {
+        logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent adresse.")
+        loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(
+            behandlingId = behandlingId,
+            brevnavn = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+        )
+        antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
+    }
+
+    private fun distribuerBrevOgLoggHendlese(
+        journalpostId: String,
+        behandlingId: Long?,
         brevMal: Brevmal,
+        loggBehandlerRolle: BehandlerRolle
     ) {
         integrasjonClient.distribuerBrev(journalpostId)
+
         if (behandlingId != null) {
             loggService.opprettDistribuertBrevLogg(
                 behandlingId = behandlingId,
@@ -217,6 +260,11 @@ class DokumentService(
                 rolle = loggBehandlerRolle
             )
         }
+
         antallBrevSendt[brevMal]?.increment()
+    }
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }

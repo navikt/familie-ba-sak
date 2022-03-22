@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.FerdigstillOppgave
+import no.nav.familie.ba.sak.task.FerdigstillOppgaver
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
@@ -132,7 +132,7 @@ class BeslutteVedtak(
         loggService.opprettBeslutningOmVedtakLogg(behandling, beslutning.beslutning, beslutning.begrunnelse)
         if (!behandling.erManuellMigrering()) {
             val ferdigstillGodkjenneVedtakTask =
-                FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
+                FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
             taskRepository.save(ferdigstillGodkjenneVedtakTask)
         }
     }

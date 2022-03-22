@@ -103,19 +103,24 @@ class FeatureToggleConfig(
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
         const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
-        const val KAN_AUTOMATISK_BEHANDLE_EØS = "familie-ba-sak.behandling.automatisk.eos"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
-        const val SETT_PÅ_VENT = "familie-ba-sak.sett-paa-vent.utgivelse"
         const val INGEN_OVERLAPP_VEDTAKSPERIODER = "familie-ba-sak.ingen-overlapp-vedtaksperioder.utgivelse"
-        const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER = "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
+        const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER =
+            "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
         const val FØRSTE_ENDRINGSTIDSPUNKT = "familie-ba-sak.behandling.forste-endringstidspunkt.utgivelse"
-        const val DELT_BOSTED_VALIDERING = "familie-ba-sak.behandling.delt-bosted-validering.utgivelse"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 
         const val TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT =
             "familie-ba-sak.teknisk-iverksett-mot-oppdrag-allerede-sendt"
         const val KONSISTENSAVSTEMMING_SPLITT_BATCH = "familie-ba-sak.teknisk-konsistensavstemming-splitt-batch"
+
+        const val LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT =
+            "familie-ba-sak.lag.reduksjonsperioder.fra.innvilgelsestidspunkt"
+
+        const val SKAL_MIGRERE_FOSTERBARN = "familie-ba-sak.migrer-fosterbarn"
+
+        const val KAN_MIGRERE_DELT_BOSTED = "familie-ba-sak.migrer-delt-bosted"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

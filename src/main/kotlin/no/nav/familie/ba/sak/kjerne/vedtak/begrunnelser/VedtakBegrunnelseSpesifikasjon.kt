@@ -302,6 +302,42 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetErklaeringOmMotregning"
     },
+    INNVILGET_TILLEGGSTEKST_TRANSPORTERKLÆRING_HELE_ETTERBETALINGEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstTransporterklaeringHeleEtterbetalingen"
+    },
+    INNVILGET_EØS_BORGER_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerJobber"
+    },
+    INNVILGET_EØS_BORGER_UTBETALING_FRA_NAV {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerUtbetalingFraNAV"
+    },
+    INNVILGET_EØS_BORGER_EKTEFELLE_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerEktefelleJobber"
+    },
+    INNVILGET_EØS_BORGER_SAMBOER_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerSamboerJobber"
+    },
+    INNVILGET_EØS_BORGER_EKTEFELLE_UTBETALING_FRA_NAV {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerEktefelleUtbetalingFraNav"
+    },
+    INNVILGET_EØS_BORGER_SAMBOER_UTBETALING_FRA_NAV {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerSamboerUtbetalingFraNav"
+    },
+    INNVILGET_FAKTISK_SEPARASJON_SEPARERT_ETTERPÅ {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFaktiskSeparasjonSeparertEtterpaa"
+    },
+    INNVILGET_BARN_16ÅR_UTVIDET_FRA_FLYTTING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetBarn16AarUtvidetFraFlytting"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -489,6 +525,50 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     REDUKSJON_DELT_BARNETRYGD_HASTEVEDTAK {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonDeltBarnetrygdHastevedtak"
+    },
+    REDUKSJON_IKKE_BOSATT_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonIkkeBosattINorge"
+    },
+    REDUKSJON_BARN_BOR_IKKE_MED_SØKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonBarnBoddeIkkeMedSoker"
+    },
+    REDUKSJON_IKKE_OPPHOLDSTILLATELSE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonIkkeOppholdstillatelse"
+    },
+    REDUKSJON_AVTALE_DELT_BOSTED_IKKE_GYLDIG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonAvtaleOmDeltBostedIkkeGyldig"
+    },
+    REDUKSJON_AVTALE_DELT_BOSTED_FØLGES_IKKE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonAvtaleDeltBostedFolgesIkke"
+    },
+    REDUKSJON_FORELDRENE_BODDE_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonForeldreneBoddeSammen"
+    },
+    REDUKSJON_VURDERING_FORELDRENE_BODDE_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingForeldreneBoddeSammen"
+    },
+    REDUKSJON_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVarIkkeMedlem"
+    },
+    REDUKSJON_VURDERING_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingVarIkkeMedlem"
+    },
+    REDUKSJON_ANDRE_FORELDER_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonDenAndreForelderenVarIkkeMedlem"
+    },
+    REDUKSJON_VURDERING_ANDRE_FORELDER_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingDenAndreForelderenVarIkkeMedlem"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
@@ -874,7 +954,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorDenAndreForelderenVarIkkeMedlem"
     },
-
+    OPPHØR_IKKE_OPPHOLDSRETT_EØS_BORGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorIkkeOppholdsrettEosBorger"
+    },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetSokerOgBarnBosattIRiket"
@@ -1014,6 +1097,22 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     FORTSATT_INNVILGET_FORSVUNNET_EKTEFELLE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetForsvunnetEktefelle"
+    },
+    FORTSATT_INNVILGET_BRUKER_ER_BLITT_NORSK_STATSBORGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetBrukerErBlittNorskStatsborger"
+    },
+    FORTSATT_INNVILGET_BRUKER_OG_BARN_ER_BLITT_NORSKE_STATSBORGERE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetBrukerOgBarnErBlittNorskeStatsborgere"
+    },
+    FORTSATT_INNVILGET_ET_BARN_ER_BLITT_NORSK_STATSBORGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetEtBarnErBlittNorskStatsborger"
+    },
+    FORTSATT_INNVILGET_FLERE_BARN_ER_BLITT_NORSKE_STATSBORGERE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetFlereBarnErBlittNorskeStatsborgere"
     },
     ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING

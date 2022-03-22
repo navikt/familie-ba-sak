@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FØRSTE_ENDRINGSTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
@@ -285,12 +286,25 @@ class VedtaksperiodeService(
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
+
+        val reduksjonsperioder = hentReduksjonsperioderFraInnvilgelsesTidspunkt(
+            vedtak,
+            utbetalingsperioder,
+            personopplysningGrunnlag,
+            erIngenOverlappVedtaksperiodeTogglePå,
+            opphørsperioder
+        )
+
+        val oppdatertUtbetalingsperiode =
+            finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
+
         val endringstidspunkt =
             if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT))
                 endringstidspunktSerivce.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
             else TIDENES_MORGEN
 
-        return (utbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder).filter {
+        return (oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder).filter {
             (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
         }
     }
@@ -335,7 +349,6 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
             behandlingId = behandling.id
         )
-
         val persongrunnlag =
             persongrunnlagService.hentAktivThrows(behandling.id)
 
@@ -487,6 +500,40 @@ class VedtaksperiodeService(
         )
     }
 
+    fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
+        vedtak: Vedtak,
+        utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        erIngenOverlappVedtaksperiodeTogglePå: Boolean,
+        opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
+    ): List<VedtaksperiodeMedBegrunnelser> {
+        val erToggelenPå = featureToggleService.isEnabled(LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT)
+        if (!erToggelenPå) return emptyList()
+        val behandling = vedtak.behandling
+        if (behandling.skalBehandlesAutomatisk) return emptyList()
+        val forrigeIverksatteBehandling: Behandling = hentForrigeIverksatteBehandling(behandling) ?: return emptyList()
+        val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag =
+            forrigeIverksatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
+
+        val forrigeAndelerTilkjentYtelse =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
+        // henter andel tilkjent ytelse for barn som finnes i forrige behandling
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+            .filter {
+                forrigePersonopplysningGrunnlag.søkerOgBarn.any { forrige -> forrige.aktør == it.aktør }
+            }
+
+        return identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
+            forrigeAndelerTilkjentYtelse,
+            andelerTilkjentYtelse,
+            vedtak,
+            utbetalingsperioder,
+            personopplysningGrunnlag,
+            erIngenOverlappVedtaksperiodeTogglePå,
+            opphørsperioder
+        )
+    }
+
     private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         val behandling = vedtak.behandling
         val vilkårsvurdering =
@@ -567,6 +614,17 @@ class VedtaksperiodeService(
 
     fun hent(vedtaksperiodeId: Long): VedtaksperiodeMedBegrunnelser =
         vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
+
+    private fun hentForrigeIverksatteBehandling(behandling: Behandling): Behandling? {
+        val iverksatteBehandlinger =
+            behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
+
+        val forrigeIverksatteBehandling: Behandling? = Behandlingutils.hentForrigeIverksatteBehandling(
+            iverksatteBehandlinger = iverksatteBehandlinger,
+            behandlingFørFølgende = behandling
+        )
+        return forrigeIverksatteBehandling
+    }
 
     companion object {
 

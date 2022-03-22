@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
@@ -9,6 +10,8 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -30,7 +33,9 @@ class OppgaveService(
     private val integrasjonClient: IntegrasjonClient,
     private val behandlingRepository: BehandlingRepository,
     private val oppgaveRepository: OppgaveRepository,
-    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository
+    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
+    private val opprettTaskService: OpprettTaskService,
+    private val loggService: LoggService
 ) {
 
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
@@ -89,6 +94,30 @@ class OppgaveService(
         }
     }
 
+    fun opprettOppgaveForManuellBehandling(
+        behandling: Behandling,
+        oppgavetype: Oppgavetype,
+        begrunnelse: String = "",
+        opprettLogginnslag: Boolean = false
+    ): String {
+        logger.info("Sender autovedtak til manuell behandling, se secureLogger for mer detaljer.")
+        secureLogger.info("Sender autovedtak til manuell behandling. Begrunnelse: $begrunnelse")
+        opprettTaskService.opprettOppgaveTask(
+            behandlingId = behandling.id,
+            oppgavetype = oppgavetype,
+            beskrivelse = begrunnelse
+        )
+
+        if (opprettLogginnslag) {
+            loggService.opprettAutovedtakTilManuellBehandling(
+                behandling = behandling,
+                tekst = begrunnelse
+            )
+        }
+
+        return begrunnelse
+    }
+
     private fun økTellerForAntallOppgaveTyper(oppgavetype: Oppgavetype) {
         if (antallOppgaveTyper[oppgavetype] == null) {
             antallOppgaveTyper[oppgavetype] = Metrics.counter("oppgave.opprettet", "type", oppgavetype.name)
@@ -127,8 +156,8 @@ class OppgaveService(
         return integrasjonClient.finnOppgaveMedId(oppgaveId)
     }
 
-    fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): DbOppgave? {
-        return oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
+    fun hentOppgaverSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, behandling: Behandling): List<DbOppgave> {
+        return oppgaveRepository.finnOppgaverSomSkalFerdigstilles(oppgavetype, behandling)
     }
 
     fun hentOppgaverSomIkkeErFerdigstilt(behandling: Behandling): List<DbOppgave> {
@@ -139,21 +168,22 @@ class OppgaveService(
         return integrasjonClient.finnOppgaveMedId(oppgaveId)
     }
 
-    fun ferdigstillOppgave(behandlingId: Long, oppgavetype: Oppgavetype) {
-        val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
+    fun ferdigstillOppgaver(behandlingId: Long, oppgavetype: Oppgavetype) {
+        oppgaveRepository.finnOppgaverSomSkalFerdigstilles(
             oppgavetype,
             behandlingRepository.finnBehandling(
                 behandlingId
             )
-        )
+        ).forEach {
+            try {
+                integrasjonClient.ferdigstillOppgave(it.gsakId.toLong())
 
-        if (oppgave == null) {
-            logger.info("Finner ingen oppgaver av type $oppgavetype på behandling $behandlingId som kan ferdigstilles")
-        } else {
-            integrasjonClient.ferdigstillOppgave(oppgave.gsakId.toLong())
-
-            oppgave.erFerdigstilt = true
-            oppgaveRepository.save(oppgave)
+                it.erFerdigstilt = true
+                // Her sørger vi for at oppgaver som blir ferdigstilt riktig får samme status hos oss selv om en av de andre dbOppgavene feiler.
+                oppgaveRepository.saveAndFlush(it)
+            } catch (exception: Exception) {
+                throw Feil(message = "Klarte ikke å ferdigstille oppgave med id ${it.gsakId}.", cause = exception)
+            }
         }
     }
 
@@ -207,5 +237,6 @@ class OppgaveService(
     companion object {
 
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLoger")
     }
 }

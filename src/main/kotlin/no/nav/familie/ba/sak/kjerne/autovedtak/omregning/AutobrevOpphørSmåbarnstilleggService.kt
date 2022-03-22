@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -15,7 +17,8 @@ import java.time.YearMonth
 
 @Service
 class AutobrevOpphørSmåbarnstilleggService(
-    private val autobrevService: AutobrevService,
+    private val autovedtakBrevService: AutovedtakBrevService,
+    private val autovedtakStegService: AutovedtakStegService,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingService: BehandlingService,
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository
@@ -43,7 +46,7 @@ class AutobrevOpphørSmåbarnstilleggService(
             if (yngsteBarnFylteTreÅrForrigeMåned) VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
             else VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
 
-        if (!autobrevService.skalAutobrevBehandlingOpprettes(
+        if (!autovedtakBrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = fagsakId,
                 behandlingsårsak = behandlingsårsak,
                 standardbegrunnelser = listOf(standardbegrunnelse)
@@ -60,10 +63,14 @@ class AutobrevOpphørSmåbarnstilleggService(
             return
         }
 
-        autobrevService.opprettOgKjørOmregningsbehandling(
-            behandling = behandling,
-            behandlingsårsak = behandlingsårsak,
-            standardbegrunnelse = standardbegrunnelse
+        autovedtakStegService.kjørBehandling(
+            mottakersAktør = behandling.fagsak.aktør,
+            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
+            behandlingsdata = AutovedtakBrevBehandlingsdata(
+                aktør = behandling.fagsak.aktør,
+                behandlingsårsak = behandlingsårsak,
+                standardbegrunnelse = standardbegrunnelse
+            )
         )
     }
 

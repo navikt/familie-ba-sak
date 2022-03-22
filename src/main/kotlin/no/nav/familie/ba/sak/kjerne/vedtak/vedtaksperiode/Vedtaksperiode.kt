@@ -35,9 +35,19 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: (erIngenOverlappVed
                 utbetalingstyperUtenEndretUtbetaling.plus(VedtakBegrunnelseType.ENDRET_UTBETALING)
         }
     ),
+    REDUKSJON({
+        listOf(
+            VedtakBegrunnelseType.REDUKSJON,
+            VedtakBegrunnelseType.INNVILGET,
+            VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
+            VedtakBegrunnelseType.ENDRET_UTBETALING
+        )
+    }),
     OPPHØR({ listOf(VedtakBegrunnelseType.OPPHØR) }),
     AVSLAG({ listOf(VedtakBegrunnelseType.AVSLAG) }),
     FORTSATT_INNVILGET({ listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET) }),
+
+    @Deprecated("Skal ikke brukes lenger. Fjernes når INGEN_OVERLAPP_VEDTAKSPERIODER-triggeren fjernes.")
     ENDRET_UTBETALING({
         listOf(
             VedtakBegrunnelseType.ENDRET_UTBETALING

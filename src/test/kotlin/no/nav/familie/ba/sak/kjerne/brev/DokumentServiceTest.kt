@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -226,7 +226,7 @@ class DokumentServiceTest(
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
-        val feil = assertThrows<Feil> {
+        val feil = assertThrows<FunksjonellFeil> {
             dokumentService.genererBrevForVedtak(vedtak)
         }
 

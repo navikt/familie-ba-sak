@@ -42,8 +42,14 @@ class SentryConfiguration(
                     prosess,
                     event.transaction,
                     mostSpecificThrowable?.message,
-                    metodeSomFeiler,
                 )
+
+                if (metodeSomFeiler != UKJENT_METODE_SOM_FEILER) {
+                    event.fingerprints = (event.fingerprints ?: emptyList()) + listOf(
+                        metodeSomFeiler
+                    )
+                }
+
                 event
             }
         }
@@ -61,10 +67,11 @@ class SentryConfiguration(
             val className = firstElement.className.split(".").lastOrNull()
             return "$className::${firstElement.methodName}(${firstElement.lineNumber})"
         }
-        return e?.cause?.let { finnMetodeSomFeiler(it) } ?: "(Ukjent metode som feiler)"
+        return e?.cause?.let { finnMetodeSomFeiler(it) } ?: UKJENT_METODE_SOM_FEILER
     }
 
     companion object {
         val logger = LoggerFactory.getLogger(SentryConfiguration::class.java)
+        const val UKJENT_METODE_SOM_FEILER = "(Ukjent metode som feiler)"
     }
 }

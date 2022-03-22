@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
       - name: Deploy bisys_opphoer_av_barnetrygd_topic til dev
         uses: nais/deploy/actions/deploy@v1
         env:

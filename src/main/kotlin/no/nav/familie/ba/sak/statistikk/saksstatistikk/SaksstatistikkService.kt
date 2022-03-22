@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SETT_PÅ_VENT
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -66,15 +65,12 @@ class SaksstatistikkService(
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId)
 
         val now = ZonedDateTime.now()
-        val settPaaVentDVH: SettPåVent? =
-            if (featureToggleService.isEnabled(SETT_PÅ_VENT))
-                hentSettPåVentDVH(behandlingId)
-            else null
+
         return BehandlingDVH(
             funksjonellTid = now,
             tekniskTid = now,
             mottattDato = datoMottatt.atZone(TIMEZONE),
-            registrertDato = datoMottatt.atZone(TIMEZONE),
+            registrertDato = behandling.opprettetTidspunkt.atZone(TIMEZONE),
             behandlingId = behandling.id.toString(),
             funksjonellId = UUID.randomUUID().toString(),
             sakId = behandling.fagsak.id.toString(),
@@ -103,7 +99,7 @@ class SaksstatistikkService(
             behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
             beslutter = totrinnskontroll?.beslutterId,
             saksbehandler = totrinnskontroll?.saksbehandlerId,
-            settPaaVent = settPaaVentDVH,
+            settPaaVent = hentSettPåVentDVH(behandlingId),
         )
     }
 

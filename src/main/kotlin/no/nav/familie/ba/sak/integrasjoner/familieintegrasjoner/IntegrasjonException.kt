@@ -17,7 +17,7 @@ class IntegrasjonException(
     init {
         val message = if (throwable is RestClientResponseException) throwable.responseBodyAsString else ""
 
-        secureLogger.info("Ukjent feil ved integrasjon mot $uri. ident=$ident $message $throwable")
+        secureLogger.info("Ukjent feil ved integrasjon mot $uri. ident=$ident msg=$msg, message=$message", throwable)
         logger.warn("Ukjent feil ved integrasjon mot '$uri'.")
     }
 

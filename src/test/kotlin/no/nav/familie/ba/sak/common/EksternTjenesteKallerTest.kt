@@ -104,8 +104,6 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTestDev() {
             )
         )
 
-        val feil =
-            assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
-        assertTrue(feil.cause is HttpClientErrorException.NotFound)
+        assertThrows<HttpClientErrorException.NotFound> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
     }
 }

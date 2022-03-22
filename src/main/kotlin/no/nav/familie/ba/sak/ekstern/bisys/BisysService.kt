@@ -75,7 +75,7 @@ class BisysService(
                     stønadstype = BisysStønadstype.UTVIDET,
                     fomMåned = it.stønadFom,
                     tomMåned = it.stønadTom,
-                    beløp = it.sats.toDouble(),
+                    beløp = it.kalkulertUtbetalingsbeløp.toDouble(),
                     manueltBeregnet = false,
                     deltBosted = it.erDeltBosted()
                 )
@@ -85,7 +85,7 @@ class BisysService(
     private fun slåSammenSammenhengendePerioder(utbetalingerAvSammeBeløp: List<UtvidetBarnetrygdPeriode>): List<UtvidetBarnetrygdPeriode> {
         return utbetalingerAvSammeBeløp.sortedBy { it.fomMåned }
             .fold(mutableListOf()) { sammenslåttePerioder, nesteUtbetaling ->
-                if (sammenslåttePerioder.lastOrNull()?.tomMåned == nesteUtbetaling.fomMåned.minusMonths(1) &&
+                if (sammenslåttePerioder.lastOrNull()?.tomMåned?.isSameOrAfter(nesteUtbetaling.fomMåned.minusMonths(1)) != false &&
                     sammenslåttePerioder.lastOrNull()?.manueltBeregnet == nesteUtbetaling.manueltBeregnet &&
                     sammenslåttePerioder.lastOrNull()?.deltBosted == nesteUtbetaling.deltBosted
                 ) {

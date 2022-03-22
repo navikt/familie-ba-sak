@@ -461,8 +461,10 @@ class BehandlingService(
         val personResultater =
             vilkårsvurderingService.hentAktivForBehandling(aktivBehandling.id)?.personResultater ?: setOf()
 
-        return if (andeler.any { it.erEøs(personResultater) && it.erLøpende() }
-        ) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
+        return if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
+            return if (andeler.any { it.erEøs(personResultater) && it.erLøpende() }
+            ) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
+        } else BehandlingKategori.NASJONAL
     }
 
     fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {

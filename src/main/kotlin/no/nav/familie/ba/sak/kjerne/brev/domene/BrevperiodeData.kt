@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
-import org.slf4j.LoggerFactory
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
 data class BrevperiodeData(
     val restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
@@ -15,32 +14,22 @@ data class BrevperiodeData(
     val brevMålform: Målform,
     val minimertVedtaksperiode: MinimertVedtaksperiode,
     val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
-) {
-    fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {
-        return try {
-            minimertVedtaksperiode
-                .tilBrevPeriodeGrunnlagMedPersoner(
-                    restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
-                    erFørsteVedtaksperiodePåFagsak = this.erFørsteVedtaksperiodePåFagsak,
-                    erUregistrerteBarnPåbehandling = this.uregistrerteBarn.isNotEmpty(),
-                )
-                .byggBegrunnelserOgFritekster(
-                    restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
-                    uregistrerteBarn = this.uregistrerteBarn,
-                    brevMålform = this.brevMålform
-                )
-        } catch (exception: Exception) {
-            val brevPeriodeForLogging = this.tilBrevperiodeForLogging()
-
-            secureLogger.error(
-                "Feil ved generering av brevbegrunnelse. Data som ble sendt inn var: ${
-                brevPeriodeForLogging.convertDataClassToJson()
-                }",
-                exception
+    val barnPersonIdentMedReduksjon: List<String> = emptyList()
+) : Comparable<BrevperiodeData> {
+    fun hentBegrunnelserOgFritekster(erIngenOverlappVedtaksperiodeTogglePå: Boolean): List<Begrunnelse> =
+        minimertVedtaksperiode
+            .tilBrevPeriodeGrunnlagMedPersoner(
+                restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
+                erFørsteVedtaksperiodePåFagsak = this.erFørsteVedtaksperiodePåFagsak,
+                erUregistrerteBarnPåbehandling = this.uregistrerteBarn.isNotEmpty(),
+                barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
             )
-            throw Feil(message = "Feil ved generering av brevbegrunnelse: ", throwable = exception)
-        }
-    }
+            .byggBegrunnelserOgFritekster(
+                restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
+                uregistrerteBarn = this.uregistrerteBarn,
+                brevMålform = this.brevMålform,
+                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå
+            )
 
     fun tilBrevperiodeForLogging() =
         minimertVedtaksperiode.tilBrevPeriodeForLogging(
@@ -49,8 +38,16 @@ data class BrevperiodeData(
             brevMålform = this.brevMålform,
         )
 
-    companion object {
+    override fun compareTo(other: BrevperiodeData): Int {
+        val fomCompared = (this.minimertVedtaksperiode.fom ?: TIDENES_MORGEN)
+            .compareTo(other.minimertVedtaksperiode.fom ?: TIDENES_MORGEN)
 
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
+        return when {
+            this.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG &&
+                other.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> fomCompared
+            this.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> 1
+            other.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> -1
+            else -> fomCompared
+        }
     }
 }
