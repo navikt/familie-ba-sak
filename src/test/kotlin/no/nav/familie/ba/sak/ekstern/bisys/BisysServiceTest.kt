@@ -191,7 +191,7 @@ internal class BisysServiceTest {
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
                 beløp = 660
-            ).copy(prosent = BigDecimal.valueOf(50), sats = 2 * 660)
+            )
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
 
         every { mockPersonidentService.hentAktør(any()) } answers { andelTilkjentYtelse.aktør }
