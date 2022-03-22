@@ -72,12 +72,9 @@ class PersonopplysningerService(
         return VergeResponse(harVerge)
     }
 
-    fun hentGjeldendeStatsborgerskap(aktør: Aktør): Statsborgerskap =
-        pdlRestClient.hentStatsborgerskapUtenHistorikk(aktør).firstOrNull()
-            ?: throw Feil(
-                message = "Bruker mangler statsborgerskap",
-                frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler statsborgerskap."
-            )
+    fun hentGjeldendeStatsborgerskap(aktør: Aktør): Statsborgerskap {
+        return pdlRestClient.hentStatsborgerskapUtenHistorikk(aktør).firstOrNull() ?: UKJENT_STATSBORGERSKAP
+    }
 
     fun hentGjeldendeOpphold(aktør: Aktør): Opphold = pdlRestClient.hentOppholdUtenHistorikk(aktør).firstOrNull()
         ?: throw Feil(
@@ -96,6 +93,7 @@ class PersonopplysningerService(
     companion object {
 
         const val UKJENT_LANDKODE = "ZZ"
+        val UKJENT_STATSBORGERSKAP = Statsborgerskap(land = "XUK", bekreftelsesdato = null, gyldigFraOgMed = null, gyldigTilOgMed = null)
     }
 }
 

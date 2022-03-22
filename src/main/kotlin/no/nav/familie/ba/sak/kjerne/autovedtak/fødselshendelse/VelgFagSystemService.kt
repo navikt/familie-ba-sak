@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -92,11 +91,9 @@ class VelgFagSystemService(
                 "medlemskap=$medlemskap"
         )
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_AUTOMATISK_BEHANDLE_EØS) && medlemskap == EØS) return true
-
         return when (medlemskap) {
-            NORDEN, TREDJELANDSBORGER, STATSLØS -> true
-            EØS, UKJENT, null -> false
+            NORDEN, TREDJELANDSBORGER, STATSLØS, EØS -> true
+            UKJENT, null -> false
         }
     }
 
