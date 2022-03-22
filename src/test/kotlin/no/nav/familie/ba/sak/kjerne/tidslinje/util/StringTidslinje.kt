@@ -2,23 +2,23 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
-import java.time.YearMonth
 
 class StringTidslinje(
-    val start: Tidspunkt<YearMonth>,
+    val start: Tidspunkt<Måned>,
     val s: List<String>
-) : Tidslinje<String, YearMonth>() {
+) : Tidslinje<String, Måned>() {
 
     override fun fraOgMed() = if (s.firstOrNull() == "<") start.somUendeligLengeSiden() else start
 
-    override fun tilOgMed(): Tidspunkt<YearMonth> {
+    override fun tilOgMed(): Tidspunkt<Måned> {
         val slutt = start.flytt(s.size.toLong() - 1)
         return if (s.lastOrNull() == ">") slutt.somUendeligLengeTil() else slutt
     }
 
-    override fun lagPerioder(): Collection<Periode<String, YearMonth>> {
+    override fun lagPerioder(): Collection<Periode<String, Måned>> {
         val tidspunkter = fraOgMed()..tilOgMed()
         return tidspunkter.mapIndexed { index, tidspunkt ->
             val c = when (index) {

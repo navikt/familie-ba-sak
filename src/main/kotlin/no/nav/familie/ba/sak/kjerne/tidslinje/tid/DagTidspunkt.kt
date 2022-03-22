@@ -7,7 +7,7 @@ import java.time.YearMonth
 data class DagTidspunkt internal constructor(
     private val dato: LocalDate,
     private val uendelighet: Uendelighet
-) : Tidspunkt<LocalDate>(uendelighet) {
+) : Tidspunkt<Dag>(uendelighet) {
 
     init {
         if (dato < PRAKTISK_TIDLIGSTE_DAG)
@@ -101,7 +101,7 @@ data class DagTidspunkt internal constructor(
             DagTidspunkt(dato, Uendelighet.INGEN).somTilOgMed()
     }
 
-    override fun sammenliknMed(tidspunkt: Tidspunkt<LocalDate>): Int {
+    override fun sammenliknMed(tidspunkt: Tidspunkt<Dag>): Int {
         return dato.compareTo(tidspunkt.tilLocalDate())
     }
 }

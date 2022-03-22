@@ -7,7 +7,7 @@ import java.time.YearMonth
 data class MånedTidspunkt internal constructor(
     private val måned: YearMonth,
     private val uendelighet: Uendelighet
-) : Tidspunkt<YearMonth>(uendelighet) {
+) : Tidspunkt<Måned>(uendelighet) {
     init {
         if (måned < PRAKTISK_TIDLIGSTE_DAG.toYearMonth())
             throw IllegalArgumentException("Tidspunktet er for lenge siden. Bruk uendeligLengeSiden()")
@@ -84,7 +84,7 @@ data class MånedTidspunkt internal constructor(
             MånedTidspunkt(dato.toYearMonth(), Uendelighet.INGEN).somTilOgMed()
     }
 
-    override fun sammenliknMed(tidspunkt: Tidspunkt<YearMonth>): Int {
+    override fun sammenliknMed(tidspunkt: Tidspunkt<Måned>): Int {
         return måned.compareTo(tidspunkt.tilYearMonth())
     }
 }

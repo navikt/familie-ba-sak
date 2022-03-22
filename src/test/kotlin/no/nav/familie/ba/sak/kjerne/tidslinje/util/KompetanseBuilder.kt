@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import java.time.YearMonth
 
@@ -33,11 +34,11 @@ class KompetanseBuilder(
 }
 
 class KompetanseTidslinje(
-    val charTidslinje: Tidslinje<Char, YearMonth>,
+    val charTidslinje: Tidslinje<Char, Måned>,
     val behandlingId: Long,
     val barn: List<Person>
-) : TidslinjeSomStykkerOppTiden<Kompetanse, YearMonth>(charTidslinje) {
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<YearMonth>): Kompetanse? {
+) : TidslinjeSomStykkerOppTiden<Kompetanse, Måned>(charTidslinje) {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): Kompetanse? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
         val barnAktørIder = barn.map { it.aktør.aktørId }.toSet()
         val kompetanseMal =

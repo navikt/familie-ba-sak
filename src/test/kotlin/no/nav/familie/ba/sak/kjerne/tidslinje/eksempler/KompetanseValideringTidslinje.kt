@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.ToveisKombinator
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import java.time.YearMonth
 
 enum class KompetanseValidering {
     OK_EØS_OG_KOMPETANSE,
@@ -18,14 +18,14 @@ enum class KompetanseValidering {
 }
 
 class KompetanseValideringTidslinje(
-    private val erEøsPeriodeTidslinje: Tidslinje<Boolean, YearMonth>,
-    private val kompetanseTidslinje: Tidslinje<Kompetanse, YearMonth>
-) : TidslinjeSomStykkerOppTiden<KompetanseValidering, YearMonth>(
+    private val erEøsPeriodeTidslinje: Tidslinje<Boolean, Måned>,
+    private val kompetanseTidslinje: Tidslinje<Kompetanse, Måned>
+) : TidslinjeSomStykkerOppTiden<KompetanseValidering, Måned>(
     erEøsPeriodeTidslinje,
     kompetanseTidslinje
 ) {
     val kombinator = KompetanseValideringKombinator()
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<YearMonth>): KompetanseValidering {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): KompetanseValidering {
         return kombinator.kombiner(
             kompetanseTidslinje.hentUtsnitt(tidspunkt),
             erEøsPeriodeTidslinje.hentUtsnitt(tidspunkt)

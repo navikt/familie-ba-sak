@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.TidspunktClosedRange
 import java.time.YearMonth
@@ -18,4 +19,4 @@ fun okt(år: Int) = Tidspunkt.med(YearMonth.of(år, 10))
 fun nov(år: Int) = Tidspunkt.med(YearMonth.of(år, 11))
 fun des(år: Int) = Tidspunkt.med(YearMonth.of(år, 12))
 
-fun <T> TidspunktClosedRange<YearMonth>.med(t: T) = Periode(this, t)
+fun <T> TidspunktClosedRange<Måned>.med(t: T) = Periode(this, t)

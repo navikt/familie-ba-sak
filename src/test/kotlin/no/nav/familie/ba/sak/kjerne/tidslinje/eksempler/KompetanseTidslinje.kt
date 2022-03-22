@@ -3,13 +3,13 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeTil
-import java.time.YearMonth
 
 class KompetanseTidslinje(
     private val kompetanser: List<Kompetanse>,
-) : Tidslinje<Kompetanse, YearMonth>() {
+) : Tidslinje<Kompetanse, Måned>() {
 
     override fun fraOgMed() = kompetanser
         .map { it.fom.tilTidspunktEllerUendeligLengeSiden { it.tom!! } }
@@ -19,7 +19,7 @@ class KompetanseTidslinje(
         .map { it.tom.tilTidspunktEllerUendeligLengeTil { it.fom!! } }
         .maxOrNull() ?: throw IllegalStateException("Listen av kompetanser er tom")
 
-    override fun lagPerioder(): Collection<Periode<Kompetanse, YearMonth>> {
+    override fun lagPerioder(): Collection<Periode<Kompetanse, Måned>> {
         return kompetanser.map { it.tilPeriode() }
     }
 }

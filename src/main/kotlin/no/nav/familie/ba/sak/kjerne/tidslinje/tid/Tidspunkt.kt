@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.tid
 import no.nav.familie.ba.sak.common.toYearMonth
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.temporal.Temporal
 
 val PRAKTISK_SENESTE_DAG = LocalDate.of(2499, 12, 31)
 val PRAKTISK_TIDLIGSTE_DAG = LocalDate.of(1900, 1, 1)
@@ -17,7 +16,11 @@ internal enum class Uendelighet {
     FREMTID
 }
 
-abstract class Tidspunkt<T : Temporal> internal constructor(
+interface Tidsenhet
+class Dag : Tidsenhet
+class Måned : Tidsenhet
+
+abstract class Tidspunkt<T : Tidsenhet> internal constructor(
     private val uendelighet: Uendelighet
 ) : Comparable<Tidspunkt<T>> {
     abstract fun tilFørsteDagIMåneden(): DagTidspunkt
@@ -86,7 +89,7 @@ abstract class Tidspunkt<T : Temporal> internal constructor(
     protected abstract fun sammenliknMed(tidspunkt: Tidspunkt<T>): Int
 }
 
-fun <T : Temporal> størsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
+fun <T : Tidsenhet> størsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
     if (t1.erUendeligLengeTil() && t2.erEndelig() && t1.somEndelig() <= t2)
         t2.neste().somUendeligLengeTil()
     else if (t2.erUendeligLengeTil() && t1.erEndelig() && t2.somEndelig() <= t1)
@@ -96,7 +99,7 @@ fun <T : Temporal> størsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> 
     else
         maxOf(t1, t2)
 
-fun <T : Temporal> minsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
+fun <T : Tidsenhet> minsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
     if (t1.erUendeligLengeSiden() && t2.erEndelig() && t1.somEndelig() >= t2)
         t2.forrige().somUendeligLengeSiden()
     else if (t2.erUendeligLengeSiden() && t1.erEndelig() && t2.somEndelig() >= t1)
@@ -106,12 +109,12 @@ fun <T : Temporal> minsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
     else
         minOf(t1, t2)
 
-fun <T : Temporal> Iterable<Tidspunkt<T>>.størsteEllerNull() =
+fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.størsteEllerNull() =
     this.reduceOrNull { acc, neste ->
         størsteAv(acc, neste)
     }
 
-fun <T : Temporal> Iterable<Tidspunkt<T>>.minsteEllerNull() =
+fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.minsteEllerNull() =
     this.reduceOrNull { acc, neste -> minsteAv(acc, neste) }
 
 fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =

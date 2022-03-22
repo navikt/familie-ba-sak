@@ -1,31 +1,29 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tid
 
-import java.time.temporal.Temporal
+data class TidspunktClosedRange<T : Tidsenhet>(
+    override val start: Tidspunkt<T>,
+    override val endInclusive: Tidspunkt<T>
+) : Iterable<Tidspunkt<T>>,
+    ClosedRange<Tidspunkt<T>> {
 
-data class TidspunktClosedRange<TID : Temporal>(
-    override val start: Tidspunkt<TID>,
-    override val endInclusive: Tidspunkt<TID>
-) : Iterable<Tidspunkt<TID>>,
-    ClosedRange<Tidspunkt<TID>> {
-
-    override fun iterator(): Iterator<Tidspunkt<TID>> =
+    override fun iterator(): Iterator<Tidspunkt<T>> =
         TidspunktIterator(start, endInclusive)
 
     override fun toString(): String =
         "$start - $endInclusive"
 
     companion object {
-        private class TidspunktIterator<TID : Temporal>(
-            val startTidspunkt: Tidspunkt<TID>,
-            val tilOgMedTidspunkt: Tidspunkt<TID>
-        ) : Iterator<Tidspunkt<TID>> {
+        private class TidspunktIterator<T : Tidsenhet>(
+            val startTidspunkt: Tidspunkt<T>,
+            val tilOgMedTidspunkt: Tidspunkt<T>
+        ) : Iterator<Tidspunkt<T>> {
 
             private var gjeldendeTidspunkt = startTidspunkt.somEndelig()
 
             override fun hasNext() =
                 gjeldendeTidspunkt.neste() <= tilOgMedTidspunkt.neste().somEndelig()
 
-            override fun next(): Tidspunkt<TID> {
+            override fun next(): Tidspunkt<T> {
                 val next = gjeldendeTidspunkt
                 gjeldendeTidspunkt = gjeldendeTidspunkt.neste()
 
@@ -40,5 +38,5 @@ data class TidspunktClosedRange<TID : Temporal>(
     }
 }
 
-operator fun <TID : Temporal> Tidspunkt<TID>.rangeTo(tilOgMed: Tidspunkt<TID>): TidspunktClosedRange<TID> =
+operator fun <T : Tidsenhet> Tidspunkt<T>.rangeTo(tilOgMed: Tidspunkt<T>): TidspunktClosedRange<T> =
     TidspunktClosedRange(this, tilOgMed)

@@ -2,17 +2,17 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
-import java.time.temporal.Temporal
 
-abstract class TidslinjeSomStykkerOppTiden<T, TID : Temporal>(
-    avhengigheter: Collection<Tidslinje<*, TID>>,
-) : TidslinjeMedAvhengigheter<T, TID>(avhengigheter) {
-    constructor(vararg avhengighet: Tidslinje<*, TID>) :
+abstract class TidslinjeSomStykkerOppTiden<I, T : Tidsenhet>(
+    avhengigheter: Collection<Tidslinje<*, T>>,
+) : TidslinjeMedAvhengigheter<I, T>(avhengigheter) {
+    constructor(vararg avhengighet: Tidslinje<*, T>) :
         this(avhengighet.asList())
 
-    override fun lagPerioder(): Collection<Periode<T, TID>> {
+    override fun lagPerioder(): Collection<Periode<I, T>> {
         val tidspunkter = fraOgMed()..tilOgMed()
         return tidspunkter.map { tidspunkt -> TidspunktMedInnhold(tidspunkt, finnInnholdForTidspunkt(tidspunkt)) }
             .fold(emptyList()) { perioder, tidspunktMedInnhold ->
@@ -25,7 +25,7 @@ abstract class TidslinjeSomStykkerOppTiden<T, TID : Temporal>(
             }
     }
 
-    protected abstract fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<TID>): T?
+    protected abstract fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): I?
 
     companion object {
         private fun <T> Collection<T>.replaceLast(replacement: T) =
@@ -33,24 +33,24 @@ abstract class TidslinjeSomStykkerOppTiden<T, TID : Temporal>(
     }
 }
 
-fun <T, TID : Temporal> Tidslinje<T, TID>.hentUtsnitt(tidspunkt: Tidspunkt<TID>): T? =
+fun <I, T : Tidsenhet> Tidslinje<I, T>.hentUtsnitt(tidspunkt: Tidspunkt<T>): I? =
     perioder().hentUtsnitt(tidspunkt)
 
-fun <T, TID : Temporal> Collection<Periode<T, TID>>.hentUtsnitt(tidspunkt: Tidspunkt<TID>): T? =
+fun <I, T : Tidsenhet> Collection<Periode<I, T>>.hentUtsnitt(tidspunkt: Tidspunkt<T>): I? =
     this.filter { it.fraOgMed <= tidspunkt && it.tilOgMed >= tidspunkt }
         .firstOrNull()?.innhold
 
-private fun <T, TID : Temporal> Periode<T, TID>.kanUtvidesMed(tidspunktMedInnhold: TidspunktMedInnhold<T, TID>) =
+private fun <I, T : Tidsenhet> Periode<I, T>.kanUtvidesMed(tidspunktMedInnhold: TidspunktMedInnhold<I, T>) =
     this.innhold == tidspunktMedInnhold.innhold &&
         this.tilOgMed.erRettFør(tidspunktMedInnhold.tidspunkt.somEndelig())
 
-private fun <T, TID : Temporal> Periode<T, TID>.utvidMed(tidspunktMedInnhold: TidspunktMedInnhold<T, TID>): Periode<T, TID> =
+private fun <I, T : Tidsenhet> Periode<I, T>.utvidMed(tidspunktMedInnhold: TidspunktMedInnhold<I, T>): Periode<I, T> =
     this.copy(tilOgMed = tidspunktMedInnhold.tidspunkt)
 
-private data class TidspunktMedInnhold<T, TID : Temporal>(
-    val tidspunkt: Tidspunkt<TID>,
-    val innhold: T?
+private data class TidspunktMedInnhold<I, T : Tidsenhet>(
+    val tidspunkt: Tidspunkt<T>,
+    val innhold: I?
 )
 
-private fun <T, TID : Temporal> TidspunktMedInnhold<T, TID>.tilPeriode() =
+private fun <I, T : Tidsenhet> TidspunktMedInnhold<I, T>.tilPeriode() =
     Periode(this.tidspunkt.somFraOgMed(), this.tidspunkt.somTilOgMed(), this.innhold)

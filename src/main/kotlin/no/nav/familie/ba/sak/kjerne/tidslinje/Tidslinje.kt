@@ -1,15 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import java.time.temporal.Temporal
 
-abstract class Tidslinje<DATA, TID : Temporal> {
-    private var periodeCache: List<Periode<DATA, TID>>? = null
+abstract class Tidslinje<DATA, T : Tidsenhet> {
+    private var periodeCache: List<Periode<DATA, T>>? = null
 
-    internal abstract fun fraOgMed(): Tidspunkt<TID>
-    internal abstract fun tilOgMed(): Tidspunkt<TID>
+    internal abstract fun fraOgMed(): Tidspunkt<T>
+    internal abstract fun tilOgMed(): Tidspunkt<T>
 
-    fun perioder(): Collection<Periode<DATA, TID>> {
+    fun perioder(): Collection<Periode<DATA, T>> {
         return periodeCache ?: lagPerioder().sortedBy { it.fraOgMed }.toList()
             .also {
                 valider(it)
@@ -17,9 +17,9 @@ abstract class Tidslinje<DATA, TID : Temporal> {
             }
     }
 
-    protected abstract fun lagPerioder(): Collection<Periode<DATA, TID>>
+    protected abstract fun lagPerioder(): Collection<Periode<DATA, T>>
 
-    protected open fun valider(perioder: List<Periode<DATA, TID>>) {
+    protected open fun valider(perioder: List<Periode<DATA, T>>) {
         perioder.mapIndexed { index, periode ->
             when {
                 index > 0 && periode.fraOgMed.erUendeligLengeSiden() ->

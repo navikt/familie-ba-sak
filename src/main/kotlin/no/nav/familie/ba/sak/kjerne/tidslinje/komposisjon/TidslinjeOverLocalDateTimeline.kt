@@ -2,21 +2,21 @@ package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeMedAvhengigheter
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
-import java.time.temporal.Temporal
 
-class LocalDatetimeTimelineToveisTidslinje<V, H, R, TID : Temporal>(
-    val venstre: Tidslinje<V, TID>,
-    val høyre: Tidslinje<H, TID>,
+class LocalDatetimeTimelineToveisTidslinje<V, H, R, T : Tidsenhet>(
+    val venstre: Tidslinje<V, T>,
+    val høyre: Tidslinje<H, T>,
     val periodeKombinator: ToveisKombinator<V, H, R>,
-) : TidslinjeMedAvhengigheter<R, TID>(listOf(venstre, høyre)) {
+) : TidslinjeMedAvhengigheter<R, T>(listOf(venstre, høyre)) {
 
-    override fun lagPerioder(): Collection<Periode<R, TID>> {
+    override fun lagPerioder(): Collection<Periode<R, T>> {
 
         return venstre.toLocalDateTimeline().combine(
             høyre.toLocalDateTimeline(),
@@ -28,7 +28,7 @@ class LocalDatetimeTimelineToveisTidslinje<V, H, R, TID : Temporal>(
     }
 }
 
-class LocalDatetimeTimelineListeTidslinje<T, R, TID : Temporal>(
+class LocalDatetimeTimelineListeTidslinje<T, R, TID : Tidsenhet>(
     val tidslinjer: Collection<Tidslinje<T, TID>>,
     val listeKombinator: ListeKombinator<T, R>,
 ) : TidslinjeMedAvhengigheter<R, TID>(tidslinjer) {
@@ -77,12 +77,12 @@ class LocalDateSegmentPeriodeKombinator<V, H, R>(val periodeKombinator: ToveisKo
     }
 }
 
-fun <DATA, R, TID : Temporal> Collection<Tidslinje<DATA, TID>>.kombiner(listeKombinator: ListeKombinator<DATA, R>): Tidslinje<R, TID> {
+fun <DATA, R, TID : Tidsenhet> Collection<Tidslinje<DATA, TID>>.kombiner(listeKombinator: ListeKombinator<DATA, R>): Tidslinje<R, TID> {
     // Har ikke fått LocalDateTimeline.compress til å funke helt, og kjører egen komprimering på toppen
     return LocalDatetimeTimelineListeTidslinje(this, listeKombinator).komprimer()
 }
 
-fun <V, H, R, TID : Temporal> Tidslinje<V, TID>.kombinerMed(
+fun <V, H, R, TID : Tidsenhet> Tidslinje<V, TID>.kombinerMed(
     tidslinje: Tidslinje<H, TID>,
     kombinator: ToveisKombinator<V, H, R>
 ): Tidslinje<R, TID> {
@@ -90,20 +90,20 @@ fun <V, H, R, TID : Temporal> Tidslinje<V, TID>.kombinerMed(
     return LocalDatetimeTimelineToveisTidslinje(this, tidslinje, kombinator).komprimer()
 }
 
-fun <DATA, TID : Temporal> Tidslinje<DATA, TID>.toLocalDateTimeline(): LocalDateTimeline<DATA> {
+fun <DATA, TID : Tidsenhet> Tidslinje<DATA, TID>.toLocalDateTimeline(): LocalDateTimeline<DATA> {
     return LocalDateTimeline(
         this.perioder().map { it.tilLocalDateSegment() }
     )
 }
 
-fun <DATA, TID : Temporal> Periode<DATA, TID>.tilLocalDateSegment(): LocalDateSegment<DATA> =
+fun <DATA, TID : Tidsenhet> Periode<DATA, TID>.tilLocalDateSegment(): LocalDateSegment<DATA> =
     LocalDateSegment(
         this.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
         this.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
         this.innhold
     )
 
-fun <DATA, TID : Temporal> LocalDateSegment<DATA>.tilPeriode(tidspunktMal: Tidspunkt<TID>): Periode<DATA, TID> =
+fun <DATA, TID : Tidsenhet> LocalDateSegment<DATA>.tilPeriode(tidspunktMal: Tidspunkt<TID>): Periode<DATA, TID> =
     Periode(
         fraOgMed = tidspunktMal.somFraOgMed(this.fom),
         tilOgMed = tidspunktMal.somTilOgMed(this.tom),

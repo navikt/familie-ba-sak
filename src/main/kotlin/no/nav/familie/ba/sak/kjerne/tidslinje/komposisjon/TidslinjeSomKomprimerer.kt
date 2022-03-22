@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import java.time.temporal.Temporal
 
-class KomprimerendeTidslinje<T, TID : Temporal>(val tidslinje: Tidslinje<T, TID>) :
-    TidslinjeSomStykkerOppTiden<T, TID>(tidslinje) {
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<TID>): T? = tidslinje.hentUtsnitt(tidspunkt)
+class KomprimerendeTidslinje<I, T : Tidsenhet>(val tidslinje: Tidslinje<I, T>) :
+    TidslinjeSomStykkerOppTiden<I, T>(tidslinje) {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): I? = tidslinje.hentUtsnitt(tidspunkt)
 }
 
-fun <T, TID : Temporal> Tidslinje<T, TID>.komprimer(): Tidslinje<T, TID> = KomprimerendeTidslinje(this)
+fun <I, T : Tidsenhet> Tidslinje<I, T>.komprimer(): Tidslinje<I, T> = KomprimerendeTidslinje(this)

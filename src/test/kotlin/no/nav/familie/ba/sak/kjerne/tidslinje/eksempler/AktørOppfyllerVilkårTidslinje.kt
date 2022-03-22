@@ -6,16 +6,16 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import java.time.YearMonth
 
 class AktørOppfyllerVilkårTidslinje(
-    private val vilkårResultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat, YearMonth>>,
+    private val vilkårResultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat, Måned>>,
     private val vilkårKombinator: ListeKombinator<VilkårRegelverkResultat, Boolean>
-) : TidslinjeSomStykkerOppTiden<Boolean, YearMonth>(vilkårResultatTidslinjer) {
+) : TidslinjeSomStykkerOppTiden<Boolean, Måned>(vilkårResultatTidslinjer) {
 
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<YearMonth>): Boolean {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): Boolean {
         val vilkårResultater = vilkårResultatTidslinjer.map { it.hentUtsnitt(tidspunkt) }.filterNotNull()
         return vilkårKombinator.kombiner(vilkårResultater)
     }
