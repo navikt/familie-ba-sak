@@ -75,7 +75,7 @@ class BisysService(
                     stønadstype = BisysStønadstype.UTVIDET,
                     fomMåned = it.stønadFom,
                     tomMåned = it.stønadTom,
-                    beløp = it.sats.toDouble(),
+                    beløp = it.kalkulertUtbetalingsbeløp.toDouble(),
                     manueltBeregnet = false,
                     deltBosted = it.erDeltBosted()
                 )

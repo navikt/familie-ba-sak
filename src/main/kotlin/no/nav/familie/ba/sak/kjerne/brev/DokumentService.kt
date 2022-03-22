@@ -31,8 +31,11 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -60,6 +63,14 @@ class DokumentService(
             "brevtype", it.visningsTekst
         )
     }
+
+    private val antallBrevIkkeDistribuertUkjentAndresse: Map<Brevmal, Counter> =
+        mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
+            Metrics.counter(
+                "brev.ikke.sendt",
+                "brevtype", it.visningsTekst
+            )
+        }
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         if (SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig) == BehandlerRolle.VEILEDER && vedtak.stønadBrevPdF == null) {
@@ -201,13 +212,47 @@ class DokumentService(
         }
     }
 
-    fun distribuerBrevOgLoggHendelse(
+    fun prøvDistribuerBrevOgLoggHendelse(
         journalpostId: String,
         behandlingId: Long?,
         loggBehandlerRolle: BehandlerRolle,
+        brevmal: Brevmal,
+    ) {
+        try {
+            distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
+        } catch (ressursException: RessursException) {
+            val mottakerErIkkeDigitalOgHarUkjentAdresse =
+                ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
+
+            if (mottakerErIkkeDigitalOgHarUkjentAdresse && behandlingId != null) {
+                loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
+            } else {
+                throw ressursException
+            }
+        }
+    }
+
+    internal fun loggBrevIkkeDistribuertUkjentAdresse(
+        journalpostId: String,
+        behandlingId: Long,
+        brevMal: Brevmal
+    ) {
+        logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent adresse.")
+        loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(
+            behandlingId = behandlingId,
+            brevnavn = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+        )
+        antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
+    }
+
+    private fun distribuerBrevOgLoggHendlese(
+        journalpostId: String,
+        behandlingId: Long?,
         brevMal: Brevmal,
+        loggBehandlerRolle: BehandlerRolle
     ) {
         integrasjonClient.distribuerBrev(journalpostId)
+
         if (behandlingId != null) {
             loggService.opprettDistribuertBrevLogg(
                 behandlingId = behandlingId,
@@ -215,6 +260,11 @@ class DokumentService(
                 rolle = loggBehandlerRolle
             )
         }
+
         antallBrevSendt[brevMal]?.increment()
+    }
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }

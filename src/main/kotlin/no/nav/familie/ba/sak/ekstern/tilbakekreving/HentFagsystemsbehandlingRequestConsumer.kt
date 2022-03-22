@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.ekstern.tilbakekreving
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -30,13 +31,16 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
         containerFactory = "concurrentKafkaListenerContainerFactory"
     )
     fun listen(consumerRecord: ConsumerRecord<String, String>, ack: Acknowledgment) {
-        logger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
-        secureLogger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
-
         val data: String = consumerRecord.value()
         val key: String = consumerRecord.key()
         val request: HentFagsystemsbehandlingRequest =
             objectMapper.readValue(data, HentFagsystemsbehandlingRequest::class.java)
+
+        if (request.ytelsestype != Ytelsestype.BARNETRYGD) {
+            return
+        }
+        logger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
+        secureLogger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
 
         val fagsystemsbehandling = try {
             fagsystemsbehandlingService.hentFagsystemsbehandling(request)
