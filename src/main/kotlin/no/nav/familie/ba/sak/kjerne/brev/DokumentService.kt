@@ -31,8 +31,11 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -60,6 +63,14 @@ class DokumentService(
             "brevtype", it.visningsTekst
         )
     }
+
+    private val antallBrevIkkeDistribuertUkjentAndresse: Map<Brevmal, Counter> =
+        mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
+            Metrics.counter(
+                "brev.ikke.sendt",
+                "brevtype", it.visningsTekst
+            )
+        }
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         if (SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig) == BehandlerRolle.VEILEDER && vedtak.stønadBrevPdF == null) {
@@ -207,14 +218,37 @@ class DokumentService(
         loggBehandlerRolle: BehandlerRolle,
         brevMal: Brevmal,
     ) {
-        integrasjonClient.distribuerBrev(journalpostId)
-        if (behandlingId != null) {
-            loggService.opprettDistribuertBrevLogg(
-                behandlingId = behandlingId,
-                tekst = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
-                rolle = loggBehandlerRolle
-            )
+        try {
+            integrasjonClient.distribuerBrev(journalpostId)
+
+            if (behandlingId != null) {
+                loggService.opprettDistribuertBrevLogg(
+                    behandlingId = behandlingId,
+                    tekst = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+                    rolle = loggBehandlerRolle
+                )
+            }
+
+            antallBrevSendt[brevMal]?.increment()
+        } catch (ressursException: RessursException) {
+            logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId")
+
+            if (ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true) {
+                if (behandlingId != null) {
+                    loggService.opprettBrevIkkeDistribuertLogg(
+                        behandlingId = behandlingId,
+                        tekst = "Mottaker har ukjent adresse\n" +
+                            brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+                    )
+                }
+                antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
+            } else {
+                throw ressursException
+            }
         }
-        antallBrevSendt[brevMal]?.increment()
+    }
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }

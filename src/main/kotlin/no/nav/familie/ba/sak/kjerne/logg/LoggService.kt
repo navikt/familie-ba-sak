@@ -240,6 +240,18 @@ class LoggService(
         )
     }
 
+    fun opprettBrevIkkeDistribuertLogg(behandlingId: Long, tekst: String) {
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.BREV_IKKE_DISTRIBUERT,
+                tittel = "Brevet ble ikke distribuert",
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
+                tekst = tekst
+            )
+        )
+    }
+
     fun opprettFerdigstillBehandling(behandling: Behandling) {
         lagre(
             Logg(
