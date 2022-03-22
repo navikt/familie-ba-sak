@@ -39,8 +39,9 @@ class KompetanseTidslinje(
 ) : TidslinjeSomStykkerOppTiden<Kompetanse>(charTidslinje) {
     override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): Kompetanse? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
-        val barnFnr = barn.map { it.aktør.aktivFødselsnummer() }.toSet()
-        val kompetanseMal = Kompetanse(behandlingId = behandlingId, fom = null, tom = null, barn = barnFnr)
+        val barnAktørIder = barn.map { it.aktør.aktørId }.toSet()
+        val kompetanseMal =
+            Kompetanse(behandlingId = behandlingId, fom = null, tom = null, barnAktørIder = barnAktørIder)
         return when (tegn) {
             '-' -> kompetanseMal
             'S' -> kompetanseMal.copy(status = KompetanseStatus.OK, sekundærland = "NORGE")

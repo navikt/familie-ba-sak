@@ -16,19 +16,19 @@ class Tidslinjer(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     private val kompetanser: Collection<Kompetanse>
 ) {
-    private val identTilVilkårsresultater = vilkårsvurdering.personResultater
+    private val aktørIdTilVilkårsresultater = vilkårsvurdering.personResultater
         .flatMap { pr -> pr.vilkårResultater }
-        .groupBy { it.personResultat!!.aktør.aktivFødselsnummer() }
+        .groupBy { it.personResultat!!.aktør.aktørId }
 
     private val fødseldato: (String) -> LocalDate =
-        { ident ->
+        { aktørId ->
             personopplysningGrunnlag.personer
-                .filter { it.aktør.harIdent(ident) }
+                .filter { it.aktør.aktørId == aktørId }
                 .first().fødselsdato
         }
 
-    private val barnasVilkårsresultatTidslinjeMap = identTilVilkårsresultater
-        .filter { (ident, _) -> !personopplysningGrunnlag.søker.aktør.harIdent(ident) }
+    private val barnasVilkårsresultatTidslinjeMap = aktørIdTilVilkårsresultater
+        .filter { (aktørId, _) -> personopplysningGrunnlag.søker.aktør.aktørId != aktørId }
         .mapValues { (_, resultater) ->
             resultater
                 .groupBy { it.vilkårType }
@@ -36,8 +36,8 @@ class Tidslinjer(
                 .values
         }
 
-    val søkersVilkårsresultatTidslinjer = identTilVilkårsresultater
-        .filter { (ident, _) -> personopplysningGrunnlag.søker.aktør.harIdent(ident) }
+    val søkersVilkårsresultatTidslinjer = aktørIdTilVilkårsresultater
+        .filter { (aktørId, _) -> personopplysningGrunnlag.søker.aktør.aktørId == aktørId }
         .mapValues { (_, resultater) ->
             resultater.groupBy { it.vilkårType }
                 .mapValues { VilkårResultatTidslinje(it.value) }
@@ -46,11 +46,11 @@ class Tidslinjer(
 
     val søkerOppfyllerVilkårTidslinje = søkersVilkårsresultatTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator())
 
-    private val barnasTidslinjer = barnasVilkårsresultatTidslinjeMap.mapValues { (barnIdent, _) ->
-        BarnetsTidslinjerTimeline(this, barnIdent)
+    private val barnasTidslinjer = barnasVilkårsresultatTidslinjeMap.mapValues { (barnAktørId, _) ->
+        BarnetsTidslinjerTimeline(this, barnAktørId)
     }
 
-    fun forBarn(barn: Person) = barnasTidslinjer[barn.aktør.aktivFødselsnummer()]!!
+    fun forBarn(barn: Person) = barnasTidslinjer[barn.aktør.aktørId]!!
 
     interface BarnetsTidslinjer {
         val barnetsVilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat>>
@@ -63,16 +63,16 @@ class Tidslinjer(
 
     class BarnetsTidslinjerUtsnitt(
         tidslinjer: Tidslinjer,
-        barnIdent: String,
+        barnAktørId: String,
     ) : BarnetsTidslinjer {
-        override val barnetsVilkårsresultatTidslinjer = tidslinjer.barnasVilkårsresultatTidslinjeMap[barnIdent]!!
+        override val barnetsVilkårsresultatTidslinjer = tidslinjer.barnasVilkårsresultatTidslinjeMap[barnAktørId]!!
 
         override val barnetOppfyllerVilkårTidslinje =
             AktørOppfyllerVilkårTidslinje(barnetsVilkårsresultatTidslinjer, BarnOppfyllerVilkårKombinator())
 
         override val erEøsTidslinje = ErEøsPeriodeTidslinje(barnetsVilkårsresultatTidslinjer)
 
-        override val kompetanseTidslinje = tidslinjer.kompetanser.tilTidslinjeforBarn(barnIdent)
+        override val kompetanseTidslinje = tidslinjer.kompetanser.tilTidslinjeforBarn(barnAktørId)
 
         override val kompetanseValideringTidslinje = KompetanseValideringTidslinje(erEøsTidslinje, kompetanseTidslinje)
 
@@ -101,6 +101,6 @@ class Tidslinjer(
     }
 }
 
-fun Iterable<Kompetanse>.tilTidslinjeforBarn(barnIdent: String) =
-    this.filter { it.barn.contains(barnIdent) }
+fun Iterable<Kompetanse>.tilTidslinjeforBarn(barnAktørId: String) =
+    this.filter { it.barnAktørIder.contains(barnAktørId) }
         .let { KompetanseTidslinje(it) }

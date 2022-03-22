@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -19,11 +20,11 @@ class VilkårResultatTidslinje(
 
     override fun fraOgMed() = vilkårsresultater
         .map { it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom!! }.tilInneværendeMåned() }
-        .minOrNull()!!
+        .minOrNull() ?: Tidspunkt.iDag().neste()
 
     override fun tilOgMed() = vilkårsresultater
         .map { it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom!! }.tilInneværendeMåned() }
-        .maxOrNull()!!
+        .maxOrNull() ?: Tidspunkt.iDag().forrige()
 
     override fun lagPerioder(): Collection<Periode<VilkårRegelverkResultat>> {
         return vilkårsresultater.map { it.tilPeriode() }

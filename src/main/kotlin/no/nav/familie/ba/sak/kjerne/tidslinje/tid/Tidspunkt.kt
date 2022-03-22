@@ -66,6 +66,7 @@ interface Tidspunkt : Comparable<Tidspunkt> {
 
         fun med(dato: LocalDate) = DagTidspunkt(dato, Uendelighet.INGEN)
         fun med(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.INGEN)
+        fun iDag() = DagTidspunkt(LocalDate.now(), Uendelighet.INGEN)
     }
 
     // Betrakter to uendeligheter som like, selv underliggende tidspunkt kan være forskjellig
@@ -106,13 +107,13 @@ fun minsteAv(t1: Tidspunkt, t2: Tidspunkt): Tidspunkt =
     else
         minOf(t1, t2)
 
-fun Iterable<Tidspunkt>.størsteEllerUendelig() =
-    this.reduce { acc, neste ->
+fun Iterable<Tidspunkt>.størsteEllerNull() =
+    this.reduceOrNull() { acc, neste ->
         størsteAv(acc, neste)
     }
 
-fun Iterable<Tidspunkt>.minsteEllerUendelig() =
-    this.reduce { acc, neste -> minsteAv(acc, neste) }
+fun Iterable<Tidspunkt>.minsteEllerNull() =
+    this.reduceOrNull() { acc, neste -> minsteAv(acc, neste) }
 
 fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =
     this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeSiden(default())

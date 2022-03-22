@@ -63,11 +63,11 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
             throw Feil("Manglende fra-og-med", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.fom > oppdatertKompetanse.tom)
             throw Feil("Fra-og-med er etter til-og-med", httpStatus = HttpStatus.BAD_REQUEST)
-        if (oppdatertKompetanse.barn.size == 0)
+        if (oppdatertKompetanse.barnAktørIder.size == 0)
             throw Feil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.fom < gammelKompetanse.fom)
             throw Feil("Setter fra-og-med tidligere", httpStatus = HttpStatus.BAD_REQUEST)
-        if (!gammelKompetanse.barn.containsAll(oppdatertKompetanse.barn))
+        if (!gammelKompetanse.barnAktørIder.containsAll(oppdatertKompetanse.barnAktørIder))
             throw Feil("Oppdaterer barn som ikke er knyttet til kompetansen", httpStatus = HttpStatus.BAD_REQUEST)
     }
 }
