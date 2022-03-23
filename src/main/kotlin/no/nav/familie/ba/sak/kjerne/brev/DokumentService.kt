@@ -220,7 +220,7 @@ class DokumentService(
         distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
     } catch (ressursException: RessursException) {
         val mottakerErIkkeDigitalOgHarUkjentAdresse =
-            ressursException.hentStatuskodeFraOriginalFeil() == HttpStatus.BAD_REQUEST &&
+            ressursException.hentStatuskodeFraOriginalFeilEllerKastFeil() == HttpStatus.BAD_REQUEST &&
                 ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
 
         when {
