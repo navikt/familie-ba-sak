@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerDefault
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -19,17 +20,17 @@ class VilkårResultatTidslinje(
     private val vilkårsresultater: List<VilkårResultat>,
     private val praktiskTidligsteDato: LocalDate,
     private val praktiskSenesteDato: LocalDate
-) : Tidslinje<VilkårRegelverkResultat>() {
+) : Tidslinje<VilkårRegelverkResultat, Dag>() {
 
     override fun fraOgMed() = vilkårsresultater.minOf {
-        it.periodeFom.tilTidspunktEllerDefault { praktiskTidligsteDato }.neste().tilInneværendeMåned()
+        it.periodeFom.tilTidspunktEllerDefault { praktiskTidligsteDato }
     }
 
     override fun tilOgMed() = vilkårsresultater.maxOf {
-        it.periodeTom.tilTidspunktEllerDefault { praktiskSenesteDato }.tilInneværendeMåned()
+        it.periodeTom.tilTidspunktEllerDefault { praktiskSenesteDato }
     }
 
-    override fun lagPerioder(): Collection<Periode<VilkårRegelverkResultat>> {
+    override fun lagPerioder(): Collection<Periode<VilkårRegelverkResultat, Dag>> {
         return vilkårsresultater.map { it.tilPeriode(praktiskTidligsteDato, praktiskSenesteDato) }
     }
 }
@@ -37,9 +38,8 @@ class VilkårResultatTidslinje(
 fun VilkårResultat.tilPeriode(
     praktiskTidligsteDato: LocalDate,
     praktiskSenesteDato: LocalDate
-): Periode<VilkårRegelverkResultat> {
-    // Forskyv fom til neste måned som blir virkningstidspunktet
-    val fom = periodeFom.tilTidspunktEllerDefault { praktiskTidligsteDato }.neste()
+): Periode<VilkårRegelverkResultat, Dag> {
+    val fom = periodeFom.tilTidspunktEllerDefault { praktiskTidligsteDato }
     val tom = periodeTom.tilTidspunktEllerDefault { praktiskSenesteDato }
     return Periode(fom, tom, VilkårRegelverkResultat(vilkårType, vurderesEtter, resultat))
 }

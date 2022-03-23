@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.rest
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårRegelverkResultat
@@ -46,13 +49,13 @@ data class RestTidslinjer(
 )
 
 data class RestTidslinjerForBarn(
-    val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>>,
-    val oppfyllerVilkårTidslinje: List<RestTidslinjePeriode<Resultat>>,
-    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk>>
+    val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat, Dag>>>,
+    val oppfyllerVilkårTidslinje: List<RestTidslinjePeriode<Resultat, Måned>>,
+    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk, Måned>>
 )
 
-data class RestTidslinjePeriode<T>(
-    val fraOgMed: Tidspunkt,
-    val tilOgMed: Tidspunkt,
+data class RestTidslinjePeriode<T, I : Tidsenhet>(
+    val fraOgMed: Tidspunkt<I>,
+    val tilOgMed: Tidspunkt<I>,
     val innhold: T
 )

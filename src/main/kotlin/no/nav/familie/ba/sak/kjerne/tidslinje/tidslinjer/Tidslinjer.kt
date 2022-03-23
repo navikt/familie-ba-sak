@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
@@ -55,7 +57,9 @@ class Tidslinjer(
                 }
         }
 
-    val søkerOppfyllerVilkårTidslinje = søkersVilkårsresultatTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator())
+    val søkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
+        søkersVilkårsresultatTidslinjer.map { VilkårsresultatMånedTidslinje(it) }
+            .kombiner(SøkerOppfyllerVilkårKombinator())
 
     private val barnasTidslinjer: Map<Aktør, BarnetsTidslinjerTimeline> =
         barna.associateWith { BarnetsTidslinjerTimeline(this, it) }
@@ -66,10 +70,10 @@ class Tidslinjer(
         barnasTidslinjer.entries.associate { it.key to it.value }
 
     interface BarnetsTidslinjer {
-        val barnetsVilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat>>
-        val barnetOppfyllerVilkårTidslinje: Tidslinje<Resultat>
-        val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat>
-        val regelverkTidslinje: Tidslinje<Regelverk>
+        val barnetsVilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat, Dag>>
+        val barnetOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned>
+        val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned>
+        val regelverkTidslinje: Tidslinje<Regelverk, Måned>
     }
 
     class BarnetsTidslinjerTimeline(
@@ -78,15 +82,21 @@ class Tidslinjer(
     ) : BarnetsTidslinjer {
         override val barnetsVilkårsresultatTidslinjer = tidslinjer.barnasVilkårsresultatTidslinjeMap[barnAktør]!!
 
-        override val barnetOppfyllerVilkårTidslinje: Tidslinje<Resultat> =
-            barnetsVilkårsresultatTidslinjer.kombiner(BarnOppfyllerVilkårKombinator())
+        val barnetsVilkårsresultatMånedTidslinjer =
+            barnetsVilkårsresultatTidslinjer.map {
+                VilkårsresultatMånedTidslinje(it)
+            }
 
-        override val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat> =
+        override val barnetOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
+            barnetsVilkårsresultatMånedTidslinjer.kombiner(BarnOppfyllerVilkårKombinator())
+
+        override val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             barnetOppfyllerVilkårTidslinje.kombinerMed(
                 tidslinjer.søkerOppfyllerVilkårTidslinje,
                 BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()
             )
 
-        override val regelverkTidslinje = barnetsVilkårsresultatTidslinjer.kombiner(RegelverkPeriodeKombinator())
+        override val regelverkTidslinje =
+            barnetsVilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator())
     }
 }

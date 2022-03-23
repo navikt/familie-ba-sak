@@ -110,7 +110,7 @@ fun <T : Tidsenhet> minsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
         minOf(t1, t2)
 
 fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.største() =
-    this.reduce { acc, neste ->
+    this.reduceOrNull { acc, neste ->
         maxOf(acc, neste)
     }
 
