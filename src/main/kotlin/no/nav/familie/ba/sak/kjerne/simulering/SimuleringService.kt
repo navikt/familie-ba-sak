@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØknomiSimuleringMottakerRepository
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
@@ -34,7 +34,7 @@ class SimuleringService(
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
 
-        if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == BehandlingResultat.AVSLÅTT) return null
+        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT) return null
 
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,

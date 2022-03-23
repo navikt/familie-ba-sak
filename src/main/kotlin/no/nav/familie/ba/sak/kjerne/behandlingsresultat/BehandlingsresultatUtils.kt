@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -72,7 +72,7 @@ object BehandlingsresultatUtils {
         )
     }
 
-    fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
+    fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): Behandlingsresultat {
         validerYtelsePersoner(ytelsePersoner)
 
         val samledeResultater = ytelsePersoner.flatMap { it.resultater }.toMutableSet()
@@ -104,77 +104,77 @@ object BehandlingsresultatUtils {
         }
 
         return when {
-            samledeResultater.isEmpty() -> BehandlingResultat.FORTSATT_INNVILGET
-            samledeResultater == setOf(YtelsePersonResultat.ENDRET) -> BehandlingResultat.ENDRET
+            samledeResultater.isEmpty() -> Behandlingsresultat.FORTSATT_INNVILGET
+            samledeResultater == setOf(YtelsePersonResultat.ENDRET) -> Behandlingsresultat.ENDRET
             samledeResultater == setOf(
                 YtelsePersonResultat.ENDRET,
                 YtelsePersonResultat.OPPHØRT
-            ) -> BehandlingResultat.ENDRET_OG_OPPHØRT
-            samledeResultater == setOf(YtelsePersonResultat.OPPHØRT) -> BehandlingResultat.OPPHØRT
-            samledeResultater == setOf(YtelsePersonResultat.INNVILGET) -> BehandlingResultat.INNVILGET
+            ) -> Behandlingsresultat.ENDRET_OG_OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.OPPHØRT) -> Behandlingsresultat.OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.INNVILGET) -> Behandlingsresultat.INNVILGET
             samledeResultater == setOf(
                 YtelsePersonResultat.INNVILGET,
                 YtelsePersonResultat.OPPHØRT
-            ) -> BehandlingResultat.INNVILGET_OG_OPPHØRT
+            ) -> Behandlingsresultat.INNVILGET_OG_OPPHØRT
             samledeResultater == setOf(
                 YtelsePersonResultat.INNVILGET,
                 YtelsePersonResultat.ENDRET
-            ) -> BehandlingResultat.INNVILGET_OG_ENDRET
+            ) -> Behandlingsresultat.INNVILGET_OG_ENDRET
             samledeResultater == setOf(
                 YtelsePersonResultat.INNVILGET,
                 YtelsePersonResultat.ENDRET,
                 YtelsePersonResultat.OPPHØRT
-            ) -> BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
+            ) -> Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT
             samledeResultater == setOf(
                 YtelsePersonResultat.INNVILGET,
                 YtelsePersonResultat.AVSLÅTT
-            ) -> BehandlingResultat.DELVIS_INNVILGET
+            ) -> Behandlingsresultat.DELVIS_INNVILGET
             samledeResultater == setOf(
                 YtelsePersonResultat.INNVILGET,
                 YtelsePersonResultat.AVSLÅTT,
                 YtelsePersonResultat.OPPHØRT
-            ) -> BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT
+            ) -> Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT
             samledeResultater == setOf(
                 YtelsePersonResultat.INNVILGET,
                 YtelsePersonResultat.AVSLÅTT,
                 YtelsePersonResultat.ENDRET
-            ) -> BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET
+            ) -> Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET
             samledeResultater == setOf(
                 YtelsePersonResultat.INNVILGET,
                 YtelsePersonResultat.AVSLÅTT,
                 YtelsePersonResultat.ENDRET,
                 YtelsePersonResultat.OPPHØRT
-            ) -> BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
-            samledeResultater == setOf(YtelsePersonResultat.AVSLÅTT) -> BehandlingResultat.AVSLÅTT
+            ) -> Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.AVSLÅTT) -> Behandlingsresultat.AVSLÅTT
             samledeResultater == setOf(
                 YtelsePersonResultat.AVSLÅTT,
                 YtelsePersonResultat.OPPHØRT
-            ) -> BehandlingResultat.AVSLÅTT_OG_OPPHØRT
+            ) -> Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
             samledeResultater == setOf(
                 YtelsePersonResultat.AVSLÅTT,
                 YtelsePersonResultat.ENDRET
-            ) -> BehandlingResultat.AVSLÅTT_OG_ENDRET
+            ) -> Behandlingsresultat.AVSLÅTT_OG_ENDRET
             samledeResultater == setOf(
                 YtelsePersonResultat.AVSLÅTT,
                 YtelsePersonResultat.ENDRET,
                 YtelsePersonResultat.OPPHØRT
-            ) -> BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+            ) -> Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
             else -> throw ikkeStøttetFeil
         }
     }
 
-    fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat) {
+    fun validerBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat) {
         if ((
             behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
-                    BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
-                    BehandlingResultat.ENDRET,
-                    BehandlingResultat.ENDRET_OG_OPPHØRT,
-                    BehandlingResultat.OPPHØRT,
-                    BehandlingResultat.FORTSATT_INNVILGET,
-                    BehandlingResultat.IKKE_VURDERT
+                    Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
+                    Behandlingsresultat.ENDRET,
+                    Behandlingsresultat.ENDRET_OG_OPPHØRT,
+                    Behandlingsresultat.OPPHØRT,
+                    Behandlingsresultat.FORTSATT_INNVILGET,
+                    Behandlingsresultat.IKKE_VURDERT
                 ).contains(resultat)
             ) ||
-            (behandling.type == BehandlingType.REVURDERING && resultat == BehandlingResultat.IKKE_VURDERT)
+            (behandling.type == BehandlingType.REVURDERING && resultat == Behandlingsresultat.IKKE_VURDERT)
         ) {
 
             val feilmelding = "Behandlingsresultatet ${resultat.displayName.lowercase()} " +
@@ -182,10 +182,10 @@ object BehandlingsresultatUtils {
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
         if (behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE && setOf(
-                BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
-                BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-                BehandlingResultat.AVSLÅTT_OG_ENDRET,
-                BehandlingResultat.AVSLÅTT
+                Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
+                Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
+                Behandlingsresultat.AVSLÅTT_OG_ENDRET,
+                Behandlingsresultat.AVSLÅTT
             ).contains(resultat)
         ) {
             val feilmelding = "Behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn.lowercase()} " +
@@ -200,7 +200,7 @@ private fun validerYtelsePersoner(ytelsePersoner: List<YtelsePerson>) {
         throw Feil(message = "Minst én ytelseperson er ikke vurdert")
 
     if (ytelsePersoner.any { it.ytelseSlutt == null })
-        throw Feil(message = "YtelseSlutt ikke satt ved utledning av BehandlingResultat")
+        throw Feil(message = "YtelseSlutt ikke satt ved utledning av behandlingsresultat")
 
     if (ytelsePersoner.any {
         it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(

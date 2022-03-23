@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -108,7 +108,7 @@ class TekniskEndringAvFødselshendelseTest(
             restUtvidetBehandling = restUtvidetBehandlingEtterBehandlingsresultat,
             behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.VURDER_TILBAKEKREVING,
-            behandlingResultat = BehandlingResultat.OPPHØRT
+            behandlingsresultat = Behandlingsresultat.OPPHØRT
         )
 
         val restUtvidetBehandlingEtterVurderTilbakekreving =
@@ -120,7 +120,7 @@ class TekniskEndringAvFødselshendelseTest(
             restUtvidetBehandling = restUtvidetBehandlingEtterVurderTilbakekreving,
             behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
-            behandlingResultat = BehandlingResultat.OPPHØRT
+            behandlingsresultat = Behandlingsresultat.OPPHØRT
         )
 
         val restUtvidetBehandlingEtterSendTilBeslutter =

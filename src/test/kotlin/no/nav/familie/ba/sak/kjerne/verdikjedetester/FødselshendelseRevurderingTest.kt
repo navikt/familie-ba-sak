@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -97,7 +97,7 @@ class FødselshendelseRevurderingTest(
 
         val vurderteVilkårIDenneBehandlingen = aktivBehandling.personResultater.flatMap { it.vilkårResultater }
             .filter { it.behandlingId == aktivBehandling.behandlingId }
-        assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
+        assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
         assertEquals(5, vurderteVilkårIDenneBehandlingen.size)
         vurderteVilkårIDenneBehandlingen.forEach { assertEquals(revurderingsbarnSinFødselsdato, it.periodeFom) }
 

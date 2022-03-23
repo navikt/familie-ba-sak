@@ -570,6 +570,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonVurderingDenAndreForelderenVarIkkeMedlem"
     },
+    REDUKSJON_DELT_BOSTED_GENERELL {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonDeltBostedGenerell"
+    },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagBosattIRiket"
