@@ -46,9 +46,9 @@ class DistribuerDødsfallDokumentPåFagsakTask(
         val journalpostId = distribuerDødsfallDokumentPåFagsakTask.journalpostId
         val brevmal = distribuerDødsfallDokumentPåFagsakTask.brevmal
 
-        val taskEldreEnn6Mnd = task.opprettetTid.isBefore(LocalDateTime.now().minusMonths(6))
+        val erTaskEldreEnn6Mnd = task.opprettetTid.isBefore(LocalDateTime.now().minusMonths(6))
 
-        if (taskEldreEnn6Mnd) {
+        if (erTaskEldreEnn6Mnd) {
             antallBrevIkkeDistribuertUkjentDødsboadresse[brevmal]?.increment()
         } else {
             try {
