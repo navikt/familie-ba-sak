@@ -236,8 +236,7 @@ class DokumentService(
         brevmal: Brevmal,
         behandlingId: Long
     ) {
-        val task =
-            DistribuerDødsfallDokumentPåFagsakTask.opprettTask(journalpostId = journalpostId, brevmal = brevmal)
+        val task = DistribuerDødsfallDokumentPåFagsakTask.opprettTask(journalpostId = journalpostId, brevmal = brevmal)
         taskRepository.save(task)
         loggBrevIkkeDistribuertUkjentDødsboadresse(journalpostId, behandlingId, brevmal)
     }
