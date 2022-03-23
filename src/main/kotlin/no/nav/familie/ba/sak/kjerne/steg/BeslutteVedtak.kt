@@ -66,29 +66,22 @@ class BeslutteVedtak(
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                 ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
-            val nesteSteg = hentNesteStegForNormalFlyt(behandling)
-
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
             opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 
-            val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
-                behandlingService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling)
+            val nesteSteg = sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling)
 
-            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder) {
-                if (!behandling.erBehandlingMedVedtaksbrevutsending())
-                    throw Feil("Prøvte å opprette vedtaksbrev for behandling som ikke skal sende ut vedtaksbrev.")
-
-                opprettJournalførVedtaksbrevTask(behandling, vedtak)
-                return StegType.JOURNALFØR_VEDTAKSBREV
-            } else {
-                when (nesteSteg) {
-                    StegType.IVERKSETT_MOT_OPPDRAG -> {
-                        behandling.resultat
-                        opprettTaskIverksettMotOppdrag(behandling, vedtak)
-                    }
-                    StegType.JOURNALFØR_VEDTAKSBREV -> opprettJournalførVedtaksbrevTask(behandling, vedtak)
-                    else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på beslutte vedtak steg")
+            when (nesteSteg) {
+                StegType.IVERKSETT_MOT_OPPDRAG -> {
+                    opprettTaskIverksettMotOppdrag(behandling, vedtak)
                 }
+                StegType.JOURNALFØR_VEDTAKSBREV -> {
+                    if (!behandling.erBehandlingMedVedtaksbrevutsending())
+                        throw Feil("Prøvte å opprette vedtaksbrev for behandling som ikke skal sende ut vedtaksbrev.")
+
+                    opprettJournalførVedtaksbrevTask(behandling, vedtak)
+                }
+                else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på beslutte vedtak steg")
             }
             nesteSteg
         } else {
@@ -126,6 +119,20 @@ class BeslutteVedtak(
 
     override fun stegType(): StegType {
         return StegType.BESLUTTE_VEDTAK
+    }
+
+    private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
+        var nesteSteg = hentNesteStegForNormalFlyt(behandling)
+
+        if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG) {
+            val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
+                behandlingService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling)
+
+            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder) {
+                nesteSteg = StegType.JOURNALFØR_VEDTAKSBREV
+            }
+        }
+        return nesteSteg
     }
 
     private fun opprettTaskFerdigstillGodkjenneVedtak(behandling: Behandling, beslutning: RestBeslutningPåVedtak) {

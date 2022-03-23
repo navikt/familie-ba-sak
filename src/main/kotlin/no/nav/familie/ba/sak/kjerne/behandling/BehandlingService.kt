@@ -326,7 +326,7 @@ class BehandlingService(
     /**
      * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse som ikke er endret til null i utbetaling.
      */
-    fun finnBarnFraBehandlingMedTilkjentUtbetalingSomikkeErEndret(behandlingId: Long): List<Aktør> =
+    fun finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandlingId: Long): List<Aktør> =
         personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
             ?.filter { aktør ->
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
@@ -533,7 +533,7 @@ class BehandlingService(
 
     fun innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling: Behandling): Boolean {
         val barnMedUtbetalingSomIkkeBlittEndretISisteBehandling =
-            finnBarnFraBehandlingMedTilkjentUtbetalingSomikkeErEndret(behandling.id)
+            finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandling.id)
 
         val alleBarnISisteBehanlding = finnBarnFraBehandlingMedTilkjentYtsele(behandling.id)
 
