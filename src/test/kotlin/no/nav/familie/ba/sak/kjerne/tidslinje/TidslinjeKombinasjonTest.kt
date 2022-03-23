@@ -43,7 +43,7 @@ class TidslinjeKombinasjonTest {
         assertTidslinjer(
             linje1 = "abc>",
             linje2 = "abacd>",
-            "aa", "bb", "ca", "cc", "cd", ">"
+            "aa", "bb", "ca", "c", "d", ">"
         )
     }
 

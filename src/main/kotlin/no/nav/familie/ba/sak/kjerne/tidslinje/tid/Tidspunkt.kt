@@ -109,21 +109,13 @@ fun <T : Tidsenhet> minsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
     else
         minOf(t1, t2)
 
-fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.største() =
+fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.størsteEllerNull() =
     this.reduceOrNull { acc, neste ->
-        maxOf(acc, neste)
+        størsteAv(acc, neste)
     }
 
-fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.minste() =
-    this.reduceOrNull { acc, neste -> minOf(acc, neste) }
+fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.minsteEllerNull() =
+    this.reduceOrNull { acc, neste -> minsteAv(acc, neste) }
 
 fun LocalDate?.tilTidspunktEllerDefault(default: () -> LocalDate) =
     this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: DagTidspunkt(default(), Uendelighet.INGEN)
-
-fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate?) =
-    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeSiden(
-        default() ?: PRAKTISK_TIDLIGSTE_DAG
-    )
-
-fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate?) =
-    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeTil(default() ?: PRAKTISK_SENESTE_DAG)
