@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
@@ -58,7 +58,7 @@ fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
                             .map { vedtakBegrunnelseSpesifikasjon ->
                                 Vedtaksbegrunnelse(
                                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
-                                    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                                    standardbegrunnelse = vedtakBegrunnelseSpesifikasjon,
                                 )
                             }
                     )
@@ -292,8 +292,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean,
-): List<VedtakBegrunnelseSpesifikasjon> {
-    val tillateBegrunnelserForVedtakstype = VedtakBegrunnelseSpesifikasjon.values()
+): List<Standardbegrunnelse> {
+    val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.values()
         .filter {
             minimertVedtaksperiode
                 .type
@@ -336,7 +336,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
 }
 
 private fun velgRedusertBegrunnelser(
-    tillateBegrunnelserForVedtakstype: List<VedtakBegrunnelseSpesifikasjon>,
+    tillateBegrunnelserForVedtakstype: List<Standardbegrunnelse>,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
     minimertePersonresultater: List<MinimertRestPersonResultat>,
@@ -347,13 +347,13 @@ private fun velgRedusertBegrunnelser(
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean
-): List<VedtakBegrunnelseSpesifikasjon> {
+): List<Standardbegrunnelse> {
     val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
         it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
     }
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
         val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
-            VedtakBegrunnelseSpesifikasjon.values().toList(),
+            Standardbegrunnelse.values().toList(),
             sanityBegrunnelser,
             minimertVedtaksperiode,
             minimertePersonresultater,
@@ -371,7 +371,7 @@ private fun velgRedusertBegrunnelser(
 }
 
 private fun velgUtbetalingsbegrunnelser(
-    tillateBegrunnelserForVedtakstype: List<VedtakBegrunnelseSpesifikasjon>,
+    tillateBegrunnelserForVedtakstype: List<Standardbegrunnelse>,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
     minimertePersonresultater: List<MinimertRestPersonResultat>,
@@ -382,8 +382,8 @@ private fun velgUtbetalingsbegrunnelser(
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean
-): List<VedtakBegrunnelseSpesifikasjon> {
-    val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
+): List<Standardbegrunnelse> {
+    val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype
             .filter { it.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
             .filter { it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }

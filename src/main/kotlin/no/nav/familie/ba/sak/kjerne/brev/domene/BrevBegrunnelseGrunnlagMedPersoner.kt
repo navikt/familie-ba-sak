@@ -3,13 +3,13 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import java.time.LocalDate
 
 data class BrevBegrunnelseGrunnlagMedPersoner(
-    val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
+    val standardbegrunnelse: Standardbegrunnelse,
     val vedtakBegrunnelseType: VedtakBegrunnelseType,
     val triggesAv: TriggesAv,
     val personIdenter: List<String>,
@@ -20,7 +20,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
         barnasFødselsdatoer: List<LocalDate>,
     ): Int {
         val erAvslagUregistrerteBarn =
-            this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN
+            this.standardbegrunnelse == Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
 
         return when {
             erAvslagUregistrerteBarn -> uregistrerteBarn.size
@@ -36,7 +36,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
         personerPåBegrunnelse: List<MinimertRestPerson>,
         personerMedUtbetaling: List<MinimertRestPerson>,
     ) = when {
-        this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN ->
+        this.standardbegrunnelse == Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN ->
             uregistrerteBarn.mapNotNull { it.fødselsdato }
 
         gjelderSøker -> {

@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -183,7 +183,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             tom = tom,
             person = barn2,
             prosent = BigDecimal.valueOf(100),
-            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING)
+            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING)
         )
 
         val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(
@@ -192,7 +192,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             tom = tom,
             person = barn3,
             prosent = BigDecimal.ZERO,
-            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING)
+            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING)
         )
 
         val andelerTilkjentYtelse = listOf(
@@ -230,7 +230,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             fom = fom.førsteDagIInneværendeMåned(),
             tom = tom.sisteDagIInneværendeMåned(),
             type = Vedtaksperiodetype.ENDRET_UTBETALING,
-            begrunnelser = mutableSetOf(lagVedtaksbegrunnelse(vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING))
+            begrunnelser = mutableSetOf(lagVedtaksbegrunnelse(standardbegrunnelse = Standardbegrunnelse.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING))
         )
 
         val utvidetVedtaksperiodeMedBegrunnelser =

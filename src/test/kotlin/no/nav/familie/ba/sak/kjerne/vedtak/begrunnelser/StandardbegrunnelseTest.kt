@@ -28,7 +28,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VedtakBegrunnelseSpesifikasjonTest {
+internal class StandardbegrunnelseTest {
 
     private val behandling = lagBehandling()
     private val søker = tilfeldigPerson(personType = PersonType.SØKER)
@@ -48,7 +48,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     @Test
     fun `Oppfyller vilkår skal gi true`() {
         assertTrue(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
                 .triggesForPeriode(
                     erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
@@ -66,7 +66,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     @Test
     fun `Annen periode type skal gi false`() {
         assertFalse(
-            VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
+            Standardbegrunnelse.OPPHØR_UTVANDRET
                 .triggesForPeriode(
                     erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
@@ -84,7 +84,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     @Test
     fun `Har ikke barn med seksårsdag skal gi false`() {
         assertFalse(
-            VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+            Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
                     erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
@@ -108,7 +108,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             )
 
         assertTrue(
-            VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+            Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
                     erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
@@ -132,7 +132,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         )
 
         assertTrue(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+            Standardbegrunnelse.INNVILGET_SATSENDRING
                 .triggesForPeriode(
                     erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
@@ -156,7 +156,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         )
 
         assertFalse(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+            Standardbegrunnelse.INNVILGET_SATSENDRING
                 .triggesForPeriode(
                     erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
@@ -176,7 +176,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
 
         assertFalse(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
+            Standardbegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
                     erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
@@ -196,7 +196,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker)
 
         assertTrue(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
+            Standardbegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
                     erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
@@ -216,7 +216,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
 
         assertTrue(
-            VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
+            Standardbegrunnelse.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
                     erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
@@ -250,7 +250,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
 
         assertFalse(
-            VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
+            Standardbegrunnelse.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
                     erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
@@ -319,13 +319,13 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
 
     @Test
     fun `Alle begrunnelser er unike`() {
-        val vedtakBegrunnelser = VedtakBegrunnelseSpesifikasjon.values().groupBy { it.sanityApiNavn }
-        assertEquals(vedtakBegrunnelser.size, VedtakBegrunnelseSpesifikasjon.values().size)
+        val vedtakBegrunnelser = Standardbegrunnelse.values().groupBy { it.sanityApiNavn }
+        assertEquals(vedtakBegrunnelser.size, Standardbegrunnelse.values().size)
     }
 
     @Test
     fun `Alle api-navn inkluderer vedtaksbegrunnelsestypen`() {
-        VedtakBegrunnelseSpesifikasjon.values().groupBy { it.vedtakBegrunnelseType }
+        Standardbegrunnelse.values().groupBy { it.vedtakBegrunnelseType }
             .forEach { (vedtakBegrunnelseType, standardbegrunnelser) ->
                 standardbegrunnelser.forEach {
                     val prefix = when (vedtakBegrunnelseType) {

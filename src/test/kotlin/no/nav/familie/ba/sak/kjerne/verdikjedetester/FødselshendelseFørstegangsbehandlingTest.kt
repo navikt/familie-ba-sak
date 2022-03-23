@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
@@ -93,8 +93,8 @@ class FødselshendelseFørstegangsbehandlingTest(
             desember2021Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt(),
         )
         assertEquals(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
-            desember2021Vedtaksperiode?.begrunnelser?.first()?.vedtakBegrunnelseSpesifikasjon,
+            Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
+            desember2021Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse,
         )
 
         assertEquals(
@@ -102,8 +102,8 @@ class FødselshendelseFørstegangsbehandlingTest(
             januar2022Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt(),
         )
         assertEquals(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING,
-            januar2022Vedtaksperiode?.begrunnelser?.first()?.vedtakBegrunnelseSpesifikasjon,
+            Standardbegrunnelse.INNVILGET_SATSENDRING,
+            januar2022Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse,
         )
     }
 

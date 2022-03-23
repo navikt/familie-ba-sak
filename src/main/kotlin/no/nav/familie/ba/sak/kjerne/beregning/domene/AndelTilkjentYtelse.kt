@@ -214,7 +214,7 @@ data class AndelTilkjentYtelse(
                 endretUtbetalingAndel.vedtakBegrunnelseSpesifikasjoner.single()
 
             vedtaksperiodeMedBegrunnelser.begrunnelser.any {
-                it.vedtakBegrunnelseSpesifikasjon == gyldigBegrunnelseForEndretUtbetalingAndel
+                it.standardbegrunnelse == gyldigBegrunnelseForEndretUtbetalingAndel
             }
         }
 

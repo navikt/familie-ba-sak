@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -32,7 +32,7 @@ data class BrevBegrunnelserTestConfig(
     val erFørsteVedtaksperiodePåFagsak: Boolean,
     val personerPåBehandling: List<BrevbegrunnelserTestPerson>,
 
-    val forventetOutput: List<VedtakBegrunnelseSpesifikasjon>
+    val forventetOutput: List<Standardbegrunnelse>
 ) {
     fun hentMinimertVedtaksperiode() = MinimertVedtaksperiode(
         fom = this.fom,

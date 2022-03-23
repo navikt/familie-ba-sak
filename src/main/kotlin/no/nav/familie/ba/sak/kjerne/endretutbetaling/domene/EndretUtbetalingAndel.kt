@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTriggereOppfyltForEndretUtbetaling
@@ -88,7 +88,7 @@ data class EndretUtbetalingAndel(
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
-    var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList()
+    var vedtakBegrunnelseSpesifikasjoner: List<Standardbegrunnelse> = emptyList()
 ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode)
@@ -180,8 +180,8 @@ fun hentPersonerForEtterEndretUtbetalingsperiode(
 fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
-): VedtakBegrunnelseSpesifikasjon {
-    val gyldigeBegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
+): Standardbegrunnelse {
+    val gyldigeBegrunnelser = Standardbegrunnelse.values()
         .filter { vedtakBegrunnelseSpesifikasjon ->
             vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
         }

@@ -13,7 +13,7 @@ interface IVedtakBegrunnelse {
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
-enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
+enum class Standardbegrunnelse : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetBosattIRiket"
@@ -1150,11 +1150,11 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
 @Converter
 class VedtakBegrunnelseSpesifikasjonListConverter :
-    AttributeConverter<List<VedtakBegrunnelseSpesifikasjon>, String> {
+    AttributeConverter<List<Standardbegrunnelse>, String> {
 
-    override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon>) =
+    override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjoner: List<Standardbegrunnelse>) =
         konverterEnumsTilString(vedtakBegrunnelseSpesifikasjoner)
 
-    override fun convertToEntityAttribute(string: String?): List<VedtakBegrunnelseSpesifikasjon> =
+    override fun convertToEntityAttribute(string: String?): List<Standardbegrunnelse> =
         konverterStringTilEnums(string)
 }

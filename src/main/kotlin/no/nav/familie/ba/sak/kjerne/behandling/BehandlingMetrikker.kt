@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
@@ -28,7 +28,7 @@ class BehandlingMetrikker(
     private val sanityService: SanityService
 ) {
     private var sanityBegrunnelser: List<SanityBegrunnelse> = emptyList()
-    private var antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> = emptyMap()
+    private var antallBrevBegrunnelseSpesifikasjon: Map<Standardbegrunnelse, Counter> = emptyMap()
 
     private val antallManuelleBehandlinger: Counter =
         Metrics.counter("behandling.behandlinger", "saksbehandling", "manuell")
@@ -55,7 +55,7 @@ class BehandlingMetrikker(
     fun hentBegrunnelserOgByggMetrikker() {
         Result.runCatching {
             sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-            antallBrevBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.values().associateWith {
+            antallBrevBegrunnelseSpesifikasjon = Standardbegrunnelse.values().associateWith {
                 val tittel = it.tilSanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
 
                 Metrics.counter(
@@ -109,7 +109,7 @@ class BehandlingMetrikker(
 
             vedtaksperiodeMedBegrunnelser.forEach {
                 it.begrunnelser.forEach { vedtaksbegrunnelse: Vedtaksbegrunnelse ->
-                    antallBrevBegrunnelseSpesifikasjon[vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon]?.increment()
+                    antallBrevBegrunnelseSpesifikasjon[vedtaksbegrunnelse.standardbegrunnelse]?.increment()
                 }
             }
         }

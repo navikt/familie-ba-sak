@@ -35,7 +35,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
@@ -101,7 +101,7 @@ class VedtaksperiodeService(
 
     fun oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId: Long,
-        standardbegrunnelserFraFrontend: List<VedtakBegrunnelseSpesifikasjon>
+        standardbegrunnelserFraFrontend: List<Standardbegrunnelse>
     ): Vedtak {
         val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
 
@@ -195,9 +195,9 @@ class VedtaksperiodeService(
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(
                 listOf(
                     Vedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
-                            VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
-                        } else VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
+                        standardbegrunnelse = if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
+                            Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
+                        } else Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
                         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     )
                 )
@@ -218,7 +218,7 @@ class VedtaksperiodeService(
                         satsendringsvedtaksperiode.settBegrunnelser(
                             listOf(
                                 Vedtaksbegrunnelse(
-                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING,
+                                    standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                                     vedtaksperiodeMedBegrunnelser = satsendringsvedtaksperiode,
                                 )
                             )
@@ -424,7 +424,7 @@ class VedtaksperiodeService(
 
     fun oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
         vedtak: Vedtak,
-        vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon
+        standardbegrunnelse: Standardbegrunnelse
     ) {
         val vedtaksperioder = hentPersisterteVedtaksperioder(vedtak)
 
@@ -436,7 +436,7 @@ class VedtaksperiodeService(
             listOf(
                 Vedtaksbegrunnelse(
                     vedtaksperiodeMedBegrunnelser = fortsattInnvilgetPeriode,
-                    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                    standardbegrunnelse = standardbegrunnelse,
                 )
             )
         )
@@ -563,7 +563,7 @@ class VedtaksperiodeService(
                         vedtakBegrunnelseSpesifikasjoner.map { begrunnelse ->
                             Vedtaksbegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,
-                                vedtakBegrunnelseSpesifikasjon = begrunnelse
+                                standardbegrunnelse = begrunnelse
                             )
                         }
                     )
@@ -604,7 +604,7 @@ class VedtaksperiodeService(
                     begrunnelser.add(
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN,
+                            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
                         )
                     )
                 }

@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingA
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
@@ -49,7 +49,7 @@ class VedtaksperiodeServiceUtilsTest {
                             fom = fom,
                             tom = tom,
                             vedtakBegrunnelseSpesifikasjoner = listOf(
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
+                                Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
                             )
                         )
                     )
@@ -65,7 +65,7 @@ class VedtaksperiodeServiceUtilsTest {
                             fom = fom,
                             tom = tom,
                             vedtakBegrunnelseSpesifikasjoner = listOf(
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
+                                Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
                             )
                         )
                     )
@@ -101,7 +101,7 @@ class VedtaksperiodeServiceUtilsTest {
                             fom = fom,
                             tom = tom,
                             vedtakBegrunnelseSpesifikasjoner = listOf(
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
+                                Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
                             )
                         )
                     )
@@ -117,7 +117,7 @@ class VedtaksperiodeServiceUtilsTest {
                             fom = fom,
                             tom = tom,
                             vedtakBegrunnelseSpesifikasjoner = listOf(
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
+                                Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
                             )
                         )
                     )
@@ -152,7 +152,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person1,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 ),
@@ -166,7 +166,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person2,
                             fom = fom.minusMonths(2),
                             tom = tom.minusMonths(2),
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.AVSLAG_BOR_HOS_SØKER)
                         )
                     )
                 )
@@ -200,7 +200,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person1,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 ),
@@ -214,7 +214,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person2,
                             fom = fom,
                             tom = tom.plusMonths(2),
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 )

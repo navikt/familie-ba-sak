@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelserTestConfig
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentGyldigeBegrunnelserForVedtaksperiodeMinimert
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Disabled
@@ -76,8 +76,8 @@ class BrevBegrunnelseTest {
     }
 
     private fun erLike(
-        forventetOutput: List<VedtakBegrunnelseSpesifikasjon>,
-        output: List<VedtakBegrunnelseSpesifikasjon>
+        forventetOutput: List<Standardbegrunnelse>,
+        output: List<Standardbegrunnelse>
     ): List<String> {
 
         val feil = mutableListOf<String>()
