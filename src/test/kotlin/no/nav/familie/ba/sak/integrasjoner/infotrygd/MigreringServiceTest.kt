@@ -20,9 +20,9 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -307,7 +307,9 @@ class MigreringServiceTest(
 
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
-            assertThat(vedtakDVH.utbetalingsperioder.first().utbetaltPerMnd.toDouble()).isEqualTo(SAK_BELØP_2_BARN_1_UNDER_6 / 2)
+            assertThat(vedtakDVH.utbetalingsperioder.first().utbetaltPerMnd.toDouble()).isEqualTo(
+                SAK_BELØP_2_BARN_1_UNDER_6 / 2
+            )
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
         }
     }
@@ -604,7 +606,7 @@ class MigreringServiceTest(
             BehandlingStatus.AVSLUTTET.name
         )
         assertThat(behandlingDvhMeldinger).extracting("resultat")
-            .containsSequence(BehandlingResultat.IKKE_VURDERT.name, BehandlingResultat.INNVILGET.name)
+            .containsSequence(Behandlingsresultat.IKKE_VURDERT.name, Behandlingsresultat.INNVILGET.name)
         assertThat(behandlingDvhMeldinger).extracting("totrinnsbehandling").containsOnly(false)
         assertThat(behandlingDvhMeldinger).extracting("behandlingAarsak").containsOnly(BehandlingÅrsak.MIGRERING.name)
         assertThat(behandlingDvhMeldinger).extracting("behandlingType")

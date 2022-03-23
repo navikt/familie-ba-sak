@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
@@ -435,8 +435,8 @@ class IntegrasjonClient(
     }
 }
 
-fun BehandlingResultat.tilDokumenttype() = when (this) {
-    BehandlingResultat.AVSLÅTT -> Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG
-    BehandlingResultat.OPPHØRT -> Dokumenttype.BARNETRYGD_OPPHØR
+fun Behandlingsresultat.tilDokumenttype() = when (this) {
+    Behandlingsresultat.AVSLÅTT -> Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG
+    Behandlingsresultat.OPPHØRT -> Dokumenttype.BARNETRYGD_OPPHØR
     else -> Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
 }

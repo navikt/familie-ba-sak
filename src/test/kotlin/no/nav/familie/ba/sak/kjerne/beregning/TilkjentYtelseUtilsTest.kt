@@ -67,7 +67,7 @@ internal class TilkjentYtelseUtilsTest {
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnSeksårsdag
             )
@@ -98,7 +98,7 @@ internal class TilkjentYtelseUtilsTest {
         val vilkårOppfyltFom = barnSeksårsdag.minusMonths(2)
         val vilkårOppfyltTom = barnSeksårsdag.plusDays(2)
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = vilkårOppfyltFom,
                 vilkårOppfyltTom = vilkårOppfyltTom
@@ -133,7 +133,7 @@ internal class TilkjentYtelseUtilsTest {
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato
             )
@@ -192,7 +192,7 @@ internal class TilkjentYtelseUtilsTest {
         val barnFødselsdato = LocalDate.of(2021, 2, 2)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true
@@ -224,7 +224,7 @@ internal class TilkjentYtelseUtilsTest {
         val barnFødselsdato = LocalDate.of(2016, 2, 5)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true
@@ -255,7 +255,7 @@ internal class TilkjentYtelseUtilsTest {
         val barnFødselsdato = LocalDate.of(2016, 2, 5)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true
@@ -286,7 +286,7 @@ internal class TilkjentYtelseUtilsTest {
         val barnFødselsdato = LocalDate.of(2016, 2, 5)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true
@@ -317,7 +317,7 @@ internal class TilkjentYtelseUtilsTest {
         val barnFødselsdato = LocalDate.of(2016, 2, 5)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true
@@ -348,7 +348,7 @@ internal class TilkjentYtelseUtilsTest {
         val barnFødselsdato = LocalDate.of(2016, 2, 5)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true
@@ -379,7 +379,7 @@ internal class TilkjentYtelseUtilsTest {
         val barnFødselsdato = LocalDate.of(2016, 2, 5)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true
@@ -410,7 +410,7 @@ internal class TilkjentYtelseUtilsTest {
         val barnFødselsdato = LocalDate.of(2016, 2, 5)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true
@@ -441,7 +441,7 @@ internal class TilkjentYtelseUtilsTest {
         val barnFødselsdato = LocalDate.of(2016, 2, 5)
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererBehandlingResultatOgPersonopplysningGrunnlag(
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true
@@ -508,7 +508,7 @@ internal class TilkjentYtelseUtilsTest {
         return vilkårsvurdering
     }
 
-    private fun genererBehandlingResultatOgPersonopplysningGrunnlag(
+    private fun genererVilkårsvurderingOgPersonopplysningGrunnlag(
         barnFødselsdato: LocalDate,
         vilkårOppfyltFom: LocalDate,
         vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18),
