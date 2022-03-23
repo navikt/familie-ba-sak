@@ -1,34 +1,29 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tid
 
-data class TidspunktClosedRange(
-    override val start: Tidspunkt,
-    override val endInclusive: Tidspunkt
-) : Iterable<Tidspunkt>,
-    ClosedRange<Tidspunkt> {
+data class TidspunktClosedRange<T : Tidsenhet>(
+    override val start: Tidspunkt<T>,
+    override val endInclusive: Tidspunkt<T>
+) : Iterable<Tidspunkt<T>>,
+    ClosedRange<Tidspunkt<T>> {
 
-    override fun iterator(): Iterator<Tidspunkt> =
-        if (start.erDag() && !endInclusive.erDag())
-            TidspunktIterator(start, endInclusive.tilSisteDagIMåneden())
-        else if (!start.erDag() && endInclusive.erDag())
-            TidspunktIterator(start.tilFørsteDagIMåneden(), endInclusive)
-        else
-            TidspunktIterator(start, endInclusive)
+    override fun iterator(): Iterator<Tidspunkt<T>> =
+        TidspunktIterator(start, endInclusive)
 
     override fun toString(): String =
         "$start - $endInclusive"
 
     companion object {
-        private class TidspunktIterator(
-            val startTidspunkt: Tidspunkt,
-            val tilOgMedTidspunkt: Tidspunkt
-        ) : Iterator<Tidspunkt> {
+        private class TidspunktIterator<T : Tidsenhet>(
+            val startTidspunkt: Tidspunkt<T>,
+            val tilOgMedTidspunkt: Tidspunkt<T>
+        ) : Iterator<Tidspunkt<T>> {
 
             private var gjeldendeTidspunkt = startTidspunkt.somEndelig()
 
             override fun hasNext() =
                 gjeldendeTidspunkt.neste() <= tilOgMedTidspunkt.neste().somEndelig()
 
-            override fun next(): Tidspunkt {
+            override fun next(): Tidspunkt<T> {
                 val next = gjeldendeTidspunkt
                 gjeldendeTidspunkt = gjeldendeTidspunkt.neste()
 
@@ -43,5 +38,5 @@ data class TidspunktClosedRange(
     }
 }
 
-operator fun Tidspunkt.rangeTo(tilOgMed: Tidspunkt): TidspunktClosedRange =
+operator fun <T : Tidsenhet> Tidspunkt<T>.rangeTo(tilOgMed: Tidspunkt<T>): TidspunktClosedRange<T> =
     TidspunktClosedRange(this, tilOgMed)
