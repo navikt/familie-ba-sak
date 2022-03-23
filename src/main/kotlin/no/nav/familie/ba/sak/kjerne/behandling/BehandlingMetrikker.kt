@@ -6,8 +6,8 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -41,8 +41,8 @@ class BehandlingMetrikker(
         initBehandlingTypeMetrikker("automatisk")
     private val behandlingÅrsak: Map<BehandlingÅrsak, Counter> = initBehandlingÅrsakMetrikker()
 
-    private val antallBehandlingResultat: Map<BehandlingResultat, Counter> =
-        BehandlingResultat.values().associateWith {
+    private val antallBehandlingsresultat: Map<Behandlingsresultat, Counter> =
+        Behandlingsresultat.values().associateWith {
             Metrics.counter(
                 "behandling.resultat",
                 "type", it.name,
@@ -83,7 +83,7 @@ class BehandlingMetrikker(
 
     fun oppdaterBehandlingMetrikker(behandling: Behandling) {
         tellBehandlingstidMetrikk(behandling)
-        økBehandlingResultatTypeMetrikk(behandling)
+        økBehandlingsresultatTypeMetrikk(behandling)
         økBegrunnelseMetrikk(behandling)
     }
 
@@ -92,9 +92,9 @@ class BehandlingMetrikker(
         behandlingstid.record(dagerSidenOpprettet.toDouble())
     }
 
-    private fun økBehandlingResultatTypeMetrikk(behandling: Behandling) {
-        val behandlingResultat = behandlingRepository.finnBehandling(behandling.id).resultat
-        antallBehandlingResultat[behandlingResultat]?.increment()
+    private fun økBehandlingsresultatTypeMetrikk(behandling: Behandling) {
+        val behandlingsresultat = behandlingRepository.finnBehandling(behandling.id).resultat
+        antallBehandlingsresultat[behandlingsresultat]?.increment()
     }
 
     private fun økBegrunnelseMetrikk(behandling: Behandling) {

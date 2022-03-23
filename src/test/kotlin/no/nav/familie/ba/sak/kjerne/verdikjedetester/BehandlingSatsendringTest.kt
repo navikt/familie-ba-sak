@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -112,7 +112,7 @@ class BehandlingSatsendringTest(
         autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = behandling.id)
 
         val satsendingBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
-        assertEquals(BehandlingResultat.ENDRET, satsendingBehandling?.resultat)
+        assertEquals(Behandlingsresultat.ENDRET, satsendingBehandling?.resultat)
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, satsendingBehandling?.steg)
 
         val satsendingsvedtak = vedtakService.hentAktivForBehandling(behandlingId = satsendingBehandling!!.id)
@@ -275,7 +275,7 @@ class BehandlingSatsendringTest(
             .forEach { autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = it) }
 
         val satsendingBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
-        assertEquals(BehandlingResultat.ENDRET, satsendingBehandling?.resultat)
+        assertEquals(Behandlingsresultat.ENDRET, satsendingBehandling?.resultat)
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, satsendingBehandling?.steg)
 
         val satsendingsvedtak = vedtakService.hentAktivForBehandling(behandlingId = satsendingBehandling!!.id)

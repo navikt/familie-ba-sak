@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -118,16 +118,16 @@ class LoggService(
 
     fun opprettVilkårsvurderingLogg(
         behandling: Behandling,
-        forrigeBehandlingResultat: BehandlingResultat,
-        nyttBehandlingResultat: BehandlingResultat
+        forrigeBehandlingsresultat: Behandlingsresultat,
+        nyttBehandlingsresultat: Behandlingsresultat
     ): Logg? {
 
         val tekst = when {
-            forrigeBehandlingResultat == BehandlingResultat.IKKE_VURDERT -> {
-                "Resultat ble ${nyttBehandlingResultat.displayName.lowercase()}"
+            forrigeBehandlingsresultat == Behandlingsresultat.IKKE_VURDERT -> {
+                "Resultat ble ${nyttBehandlingsresultat.displayName.lowercase()}"
             }
-            forrigeBehandlingResultat != nyttBehandlingResultat -> {
-                "Resultat gikk fra ${forrigeBehandlingResultat.displayName.lowercase()} til ${nyttBehandlingResultat.displayName.lowercase()}"
+            forrigeBehandlingsresultat != nyttBehandlingsresultat -> {
+                "Resultat gikk fra ${forrigeBehandlingsresultat.displayName.lowercase()} til ${nyttBehandlingsresultat.displayName.lowercase()}"
             }
             else -> return null
         }
@@ -136,7 +136,7 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.VILKÅRSVURDERING,
-                tittel = if (forrigeBehandlingResultat != BehandlingResultat.IKKE_VURDERT) "Vilkårsvurdering endret" else "Vilkårsvurdering gjennomført",
+                tittel = if (forrigeBehandlingsresultat != Behandlingsresultat.IKKE_VURDERT) "Vilkårsvurdering endret" else "Vilkårsvurdering gjennomført",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
