@@ -279,7 +279,7 @@ class DokumentService(
         if (behandlingId != null) {
             loggService.opprettDistribuertBrevLogg(
                 behandlingId = behandlingId,
-                tekst = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+                tekst = brevMal.visningsTekst,
                 rolle = loggBehandlerRolle
             )
         }
