@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
@@ -115,17 +115,18 @@ class BehandlingsresultatSteg(
             endretUtbetalingAndelService.oppdaterEndreteUtbetalingsandelerMedBegrunnelser(behandling)
         }
 
-        val behandlingMedResultat = if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
-            settBehandlingResultat(behandling, BehandlingResultat.INNVILGET)
-        } else {
-            val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-            behandlingService.oppdaterResultatPåBehandling(
-                behandlingId = behandling.id,
-                resultat = resultat
-            )
-        }
+        val behandlingMedOppdatertBehandlingsresultat =
+            if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
+                settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
+            } else {
+                val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+                behandlingService.oppdaterBehandlingsresultat(
+                    behandlingId = behandling.id,
+                    resultat = resultat
+                )
+            }
 
-        if (behandlingMedResultat.erBehandlingMedVedtaksbrevutsending()) {
+        if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
                 vedtak = vedtakService.hentAktivForBehandlingThrows(
                     behandlingId = behandling.id
@@ -133,28 +134,28 @@ class BehandlingsresultatSteg(
             )
         }
 
-        if (behandlingMedResultat.skalRettFraBehandlingsresultatTilIverksetting() ||
+        if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting() ||
             beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
-                    behandling = behandlingMedResultat,
-                    sistIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandlingMedResultat)
+                    behandling = behandlingMedOppdatertBehandlingsresultat,
+                    sistIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandlingMedOppdatertBehandlingsresultat)
                 )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
-                behandlingMedResultat.id,
+                behandlingMedOppdatertBehandlingsresultat.id,
                 BehandlingStatus.IVERKSETTER_VEDTAK
             )
         } else {
-            simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
+            simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        return hentNesteStegForNormalFlyt(behandlingMedResultat)
+        return hentNesteStegForNormalFlyt(behandlingMedOppdatertBehandlingsresultat)
     }
 
     override fun stegType(): StegType {
         return StegType.BEHANDLINGSRESULTAT
     }
 
-    private fun settBehandlingResultat(behandling: Behandling, resultat: BehandlingResultat): Behandling {
+    private fun settBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat): Behandling {
         behandling.resultat = resultat
         return behandlingService.lagreEllerOppdater(behandling)
     }

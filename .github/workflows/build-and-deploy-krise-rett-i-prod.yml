@@ -7,7 +7,7 @@ env:
   IMAGE_LATEST: ghcr.io/navikt/familie-ba-sak:latest
 jobs:
   deploy-to-prod:
-    name: Bygg app/image, push til github, deploy til prod-fss (MÅ KUN BRUKES VED KRISE)
+    name: Bygg app/image, push til github, deploy til prod-gcp (MÅ KUN BRUKES VED KRISE)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -41,7 +41,7 @@ jobs:
         run: docker push $IMAGE
       - name: Push Docker image med 'latest' tag
         run: docker push ${IMAGE_LATEST}
-      - name: Deploy til pros-fss
+      - name: Deploy til prod-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}

@@ -85,7 +85,12 @@ class SettPåVentService(
 
     fun gjenopptaBehandling(behandlingId: Long, nå: LocalDate = LocalDate.now()): SettPåVent {
         val behandling = behandlingService.hent(behandlingId)
-        val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
+        val aktivSettPåVent =
+            finnAktivSettPåVentPåBehandling(behandlingId)
+                ?: throw FunksjonellFeil(
+                    melding = "Behandling $behandlingId er ikke satt på vent.",
+                    frontendFeilmelding = "Behandlingen er ikke på vent og det er ikke mulig å gjenoppta behandling."
+                )
 
         loggService.gjenopptaBehandlingLogg(behandling)
         logger.info("Gjenopptar behandling $behandlingId")

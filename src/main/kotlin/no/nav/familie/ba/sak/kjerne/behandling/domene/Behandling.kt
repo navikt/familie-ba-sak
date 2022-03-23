@@ -50,7 +50,7 @@ data class Behandling(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat", nullable = false)
-    var resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
+    var resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "behandling_type", nullable = false)
@@ -156,10 +156,10 @@ data class Behandling(
     }
 
     fun erHenlagt() =
-        resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET ||
-            resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET ||
-            resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE ||
-            resultat == BehandlingResultat.HENLAGT_TEKNISK_VEDLIKEHOLD
+        resultat == Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET ||
+            resultat == Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET ||
+            resultat == Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE ||
+            resultat == Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
 
     fun erVedtatt() = status == BehandlingStatus.AVSLUTTET && !erHenlagt()
 
@@ -185,10 +185,10 @@ data class Behandling(
 
     fun skalRettFraBehandlingsresultatTilIverksetting(): Boolean {
         return when {
-            skalBehandlesAutomatisk && erOmregning() && resultat == BehandlingResultat.FORTSATT_INNVILGET -> true
-            skalBehandlesAutomatisk && erMigrering() && resultat == BehandlingResultat.INNVILGET -> true
-            skalBehandlesAutomatisk && erFødselshendelse() && resultat == BehandlingResultat.INNVILGET -> true
-            skalBehandlesAutomatisk && erSatsendring() && resultat == BehandlingResultat.ENDRET -> true
+            skalBehandlesAutomatisk && erOmregning() && resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
+            skalBehandlesAutomatisk && erMigrering() && resultat == Behandlingsresultat.INNVILGET -> true
+            skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
+            skalBehandlesAutomatisk && erSatsendring() && resultat == Behandlingsresultat.ENDRET -> true
             else -> false
         }
     }
@@ -251,7 +251,8 @@ data class Behandling(
 
     fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
 
-    fun kanLeggeTilOgFjerneUtvidetVilkår() = erManuellMigrering() || erTekniskEndring() || erKorrigereVedtak() || erKlage()
+    fun kanLeggeTilOgFjerneUtvidetVilkår() =
+        erManuellMigrering() || erTekniskEndring() || erKorrigereVedtak() || erKlage()
 
     private fun erOmregning() =
         this.opprettetÅrsak.erOmregningsårsak()
@@ -285,7 +286,7 @@ data class Behandling(
  *
  * @displayName benyttes for visning av resultat
  */
-enum class BehandlingResultat(val displayName: String) {
+enum class Behandlingsresultat(val displayName: String) {
 
     // Søknad
     INNVILGET(displayName = "Innvilget"),
