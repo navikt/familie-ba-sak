@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -73,7 +73,7 @@ class FødselshendelseFørstegangsbehandlingTest(
         )
 
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
-        assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
+        assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
 
         val vedtaksperioder = aktivBehandling.vedtak?.vedtaksperioderMedBegrunnelser
 
@@ -148,7 +148,7 @@ class FødselshendelseFørstegangsbehandlingTest(
         )
 
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
-        assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
+        assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
         val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {

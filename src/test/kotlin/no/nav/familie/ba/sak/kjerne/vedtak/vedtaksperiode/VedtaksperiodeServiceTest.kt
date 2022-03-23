@@ -21,8 +21,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -186,7 +186,7 @@ class VedtaksperiodeServiceTest(
 
     @Test
     fun `Skal validere at vedtaksperioder blir lagret ved fortsatt innvilget som resultat`() {
-        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, revurdering?.resultat)
+        assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, revurdering?.resultat)
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)

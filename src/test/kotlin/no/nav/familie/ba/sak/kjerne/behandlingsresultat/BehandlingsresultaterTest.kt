@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.randomAktørId
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +17,7 @@ data class BehandlingsresultatPersonTestConfig(
     val personer: List<BehandlingsresultatPerson>,
     val uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     val beskrivelse: String,
-    val forventetResultat: BehandlingResultat,
+    val forventetResultat: Behandlingsresultat,
     val inneværendeMåned: String,
 )
 

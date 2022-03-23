@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -42,12 +42,12 @@ class BehandlingsresultatUtilsTest {
         val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
         setOf(
-            BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
-            BehandlingResultat.ENDRET,
-            BehandlingResultat.ENDRET_OG_OPPHØRT,
-            BehandlingResultat.OPPHØRT,
-            BehandlingResultat.FORTSATT_INNVILGET,
-            BehandlingResultat.IKKE_VURDERT
+            Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
+            Behandlingsresultat.ENDRET,
+            Behandlingsresultat.ENDRET_OG_OPPHØRT,
+            Behandlingsresultat.OPPHØRT,
+            Behandlingsresultat.FORTSATT_INNVILGET,
+            Behandlingsresultat.IKKE_VURDERT
         ).forEach {
 
             val feil = assertThrows<FunksjonellFeil> {
@@ -62,7 +62,7 @@ class BehandlingsresultatUtilsTest {
         val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
 
         val feil = assertThrows<FunksjonellFeil> {
-            BehandlingsresultatUtils.validerBehandlingsresultat(behandling, BehandlingResultat.IKKE_VURDERT)
+            BehandlingsresultatUtils.validerBehandlingsresultat(behandling, Behandlingsresultat.IKKE_VURDERT)
         }
         assertTrue(feil.message?.contains("ugyldig") ?: false)
     }
