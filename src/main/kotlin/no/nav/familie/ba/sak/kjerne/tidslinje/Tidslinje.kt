@@ -1,14 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
-abstract class Tidslinje<T> {
-    private var periodeCache: List<Periode<T>>? = null
+abstract class Tidslinje<I, T : Tidsenhet> {
+    private var periodeCache: List<Periode<I, T>>? = null
 
-    internal abstract fun fraOgMed(): Tidspunkt
-    internal abstract fun tilOgMed(): Tidspunkt
+    internal abstract fun fraOgMed(): Tidspunkt<T>
+    internal abstract fun tilOgMed(): Tidspunkt<T>
 
-    fun perioder(): Collection<Periode<T>> {
+    fun perioder(): Collection<Periode<I, T>> {
         return periodeCache ?: lagPerioder().sortedBy { it.fraOgMed }.toList()
             .also {
                 valider(it)
@@ -16,9 +17,9 @@ abstract class Tidslinje<T> {
             }
     }
 
-    protected abstract fun lagPerioder(): Collection<Periode<T>>
+    protected abstract fun lagPerioder(): Collection<Periode<I, T>>
 
-    protected open fun valider(perioder: List<Periode<T>>) {
+    protected open fun valider(perioder: List<Periode<I, T>>) {
         perioder.mapIndexed { index, periode ->
             when {
                 index > 0 && periode.fraOgMed.erUendeligLengeSiden() ->
@@ -35,7 +36,7 @@ abstract class Tidslinje<T> {
     }
 
     override fun equals(other: Any?): Boolean {
-        return if (other is Tidslinje<*>) {
+        return if (other is Tidslinje<*, *>) {
             fraOgMed() == other.fraOgMed() &&
                 tilOgMed() == other.tilOgMed() &&
                 lagPerioder() == other.lagPerioder()
@@ -48,8 +49,8 @@ abstract class Tidslinje<T> {
 
     companion object {
         data class TidslinjeFeil(
-            val periode: Periode<*>,
-            val tidslinje: Tidslinje<*>,
+            val periode: Periode<*, *>,
+            val tidslinje: Tidslinje<*, *>,
             val type: TidslinjeFeilType
         )
 
