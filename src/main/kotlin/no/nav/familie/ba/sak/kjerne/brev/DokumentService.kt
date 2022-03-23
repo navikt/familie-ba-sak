@@ -224,6 +224,8 @@ class DokumentService(
         val mottakerErIkkeDigitalOgHarUkjentAdresse = statuskode == 400 &&
             ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
 
+        // 410 er unikt for bruker død og ingen dødsboadresse
+        // https://nav-it.slack.com/archives/C6W9E5GPJ/p1647956660364779?thread_ts=1647936835.099329&cid=C6W9E5GPJ
         val mottakerErDødUtenDødsboadresse = statuskode == 410
 
         when {
