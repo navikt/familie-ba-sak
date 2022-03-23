@@ -26,7 +26,6 @@ object KompetanseUtil {
 
         return listOf(kompetanseForRestBarn, kompetanseForForegåendePerioder, kompetanseForEtterfølgendePerioder)
             .filterNotNull()
-            .map { it.copy(id = 0L) }
     }
 
     fun revurderStatus(kompetanser: List<Kompetanse>): List<Kompetanse> =
@@ -48,26 +47,27 @@ object KompetanseUtil {
         return kompetanse.copy(status = nyStatus)
     }
 
-    fun mergeKompetanser(kompetanser: Collection<Kompetanse>): List<Kompetanse> {
-        return mergeBarn(mergePerioder(kompetanser))
+    fun mergeKompetanser(kompetanser: Collection<Kompetanse>): Collection<Kompetanse> {
+        return mergePerioder(mergeBarn(kompetanser))
     }
 
-    private fun mergeBarn(kompetanser: List<Kompetanse>): List<Kompetanse> {
+    private fun mergeBarn(kompetanser: Collection<Kompetanse>): Collection<Kompetanse> {
         return kompetanser
-            .groupBy { it.copy(id = 0L, barnAktørIder = emptySet()) }
+            // Ta bort barn og id, slik at vi grupperer på like perioder og likt innhold
+            .groupBy { it.copy(barnAktørIder = emptySet()) }
             .mapValues { (_, kompetanser) ->
                 kompetanser
                     .reduce { acc, neste ->
-                        neste.copy(id = 0, barnAktørIder = acc.barnAktørIder.union(neste.barnAktørIder))
+                        neste.copy(barnAktørIder = acc.barnAktørIder.union(neste.barnAktørIder))
                     }
-            }.values.toList()
+            }.values
     }
 
     private fun mergePerioder(
         kompetanser: Collection<Kompetanse>
-    ): List<Kompetanse> {
+    ): Collection<Kompetanse> {
         val nøytralisertePerioder = kompetanser
-            .groupBy { it.copy(id = 0L, fom = null, tom = null) }
+            .groupBy { it.copy(fom = null, tom = null) }
         return nøytralisertePerioder
             .mapValues { (_, kompetanser) ->
                 kompetanser
@@ -82,10 +82,7 @@ object KompetanseUtil {
                                 acc
                             else if (siste.tom >= neste.fom?.minusMonths(1))
                                 acc.subList(0, acc.size - 1) + listOf(
-                                    siste.copy(
-                                        id = 0,
-                                        tom = neste.tom?.let { maxOf(siste.tom, it) }
-                                    )
+                                    siste.copy(tom = neste.tom?.let { maxOf(siste.tom, it) })
                                 )
                             else
                                 acc + listOf(neste)

@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseUtil.mergeKompetan
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseUtil.revurderStatus
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.blankUt
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.erPraktiskLik
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -30,7 +29,7 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
         val tilLagring = mergeKompetanser(revurderteKompetanser)
         val tilSletting = listOf(gammelKompetanse).minus(tilLagring)
 
-        if (!tilLagring.erPraktiskLik(tilSletting)) {
+        if (tilLagring != tilSletting) {
             kompetanseRepository.delete(tilSletting)
             kompetanseRepository.save(tilLagring)
         }
@@ -50,7 +49,7 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
         val tilLagring = mergeKompetanser(revurderStatus(oppdaterteKompetanser))
         val tilSletting = eksisterendeKompetanser.minus(tilLagring)
 
-        if (!tilLagring.erPraktiskLik(tilSletting)) {
+        if (tilLagring != tilSletting) {
             kompetanseRepository.delete(tilSletting)
             kompetanseRepository.save(tilLagring)
         }

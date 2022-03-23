@@ -12,7 +12,6 @@ internal class KompetanseUtilTest {
     fun testOppdatering() {
 
         val kompetanse = Kompetanse(
-            id = 1,
             behandlingId = 1L,
             fom = YearMonth.of(2021, 1),
             tom = YearMonth.of(2021, 12),
@@ -20,7 +19,6 @@ internal class KompetanseUtilTest {
         )
 
         val oppdatertKompetanse = Kompetanse(
-            id = 1,
             behandlingId = 1L,
             fom = YearMonth.of(2021, 3),
             tom = YearMonth.of(2021, 10),
@@ -33,7 +31,6 @@ internal class KompetanseUtilTest {
         assertTrue(
             restKompetanser.contains(
                 Kompetanse(
-                    id = 0,
                     behandlingId = 1L,
                     fom = YearMonth.of(2021, 1),
                     tom = YearMonth.of(2021, 2),
@@ -45,7 +42,6 @@ internal class KompetanseUtilTest {
         assertTrue(
             restKompetanser.contains(
                 Kompetanse(
-                    id = 0,
                     behandlingId = 1L,
                     fom = YearMonth.of(2021, 11),
                     tom = YearMonth.of(2021, 12),
@@ -56,7 +52,6 @@ internal class KompetanseUtilTest {
         assertTrue(
             restKompetanser.contains(
                 Kompetanse(
-                    id = 0,
                     behandlingId = 1L,
                     fom = YearMonth.of(2021, 1),
                     tom = YearMonth.of(2021, 12),
@@ -97,7 +92,7 @@ internal class KompetanseUtilTest {
             tom = YearMonth.of(2022, 12),
         )
 
-        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2))
+        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2)).toList()
         assertEquals(2, merge.size)
 
         assertEquals(YearMonth.of(2021, 1), merge[0].fom)
@@ -119,7 +114,7 @@ internal class KompetanseUtilTest {
             tom = YearMonth.of(2022, 12),
         )
 
-        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2))
+        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2)).toList()
         assertEquals(1, merge.size)
 
         assertEquals(YearMonth.of(2021, 1), merge[0].fom)
@@ -138,7 +133,7 @@ internal class KompetanseUtilTest {
             tom = YearMonth.of(2022, 12),
         )
 
-        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2))
+        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2)).toList()
         assertEquals(1, merge.size)
 
         assertEquals(YearMonth.of(2021, 1), merge[0].fom)
@@ -157,7 +152,7 @@ internal class KompetanseUtilTest {
             tom = null
         )
 
-        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2))
+        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2)).toList()
         assertEquals(1, merge.size)
 
         assertEquals(YearMonth.of(2021, 1), merge[0].fom)
