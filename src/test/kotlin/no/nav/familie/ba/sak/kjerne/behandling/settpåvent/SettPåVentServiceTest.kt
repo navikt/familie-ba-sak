@@ -164,6 +164,15 @@ class SettPåVentServiceTest(
         )
 
         Assertions.assertEquals(frist2, settPåVentService.finnAktivSettPåVentPåBehandlingThrows(behandlingId).frist)
+
+        val frist3 = LocalDate.now().plusDays(10)
+        settPåVentService.oppdaterSettBehandlingPåVent(
+            behandlingId = behandlingEtterVilkårsvurderingSteg.id,
+            frist = frist3,
+            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+        )
+
+        Assertions.assertEquals(frist3, settPåVentService.finnAktivSettPåVentPåBehandlingThrows(behandlingId).frist)
     }
 
     @Test
