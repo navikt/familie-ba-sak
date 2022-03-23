@@ -63,7 +63,7 @@ class DistribuerDødsfallDokumentPåFagsakTask(
                 )
             } catch (e: Exception) {
                 if (e is RessursException && mottakerErDødUtenDødsboadresse(e)) {
-                    logger.info("Klarte ikke å distribuere \"${brevmal.hentPresentabelVisningstekst()}\" på journalpost $journalpostId. Prøver igjen om 7 dager.")
+                    logger.info("Klarte ikke å distribuere \"${brevmal.visningsTekst}\" på journalpost $journalpostId. Prøver igjen om 7 dager.")
                     throw e
                 } else {
                     Sentry.captureException(e)
