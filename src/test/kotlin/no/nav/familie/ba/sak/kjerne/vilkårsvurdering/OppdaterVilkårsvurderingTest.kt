@@ -29,8 +29,8 @@ class OppdaterVilkårsvurderingTest {
         val fnr1 = randomFnr()
         val aktørId1 = randomAktørId()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultat(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
-        val resB = lagBehandlingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
+        val resA = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
+        val resB = lagVilkårsvurderingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(3, oppdatert.personResultater.first().vilkårResultater.size)
@@ -47,8 +47,8 @@ class OppdaterVilkårsvurderingTest {
         val fnr1 = randomFnr()
         val aktørId1 = randomAktørId()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
-        val resB = lagBehandlingResultat(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
+        val resA = lagVilkårsvurderingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
+        val resB = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(2, oppdatert.personResultater.first().vilkårResultater.size)
@@ -68,8 +68,8 @@ class OppdaterVilkårsvurderingTest {
         val aktørId1 = randomAktørId()
         val aktørId2 = randomAktørId()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultat(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
-        val resB = lagBehandlingResultat(
+        val resA = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
+        val resB = lagVilkårsvurdering(
             behandling = behandling,
             fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2))
         )
@@ -86,11 +86,11 @@ class OppdaterVilkårsvurderingTest {
         val aktørId1 = randomAktørId()
         val aktørId2 = randomAktørId()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultat(
+        val resA = lagVilkårsvurdering(
             behandling = behandling,
             fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2))
         )
-        val resB = lagBehandlingResultat(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
+        val resB = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(1, oppdatert.personResultater.size)
@@ -104,11 +104,11 @@ class OppdaterVilkårsvurderingTest {
         val aktørId1 = tilAktør(fnr1)
         val aktørId2 = tilAktør(fnr2)
         val behandling = lagBehandling()
-        val resultat1 = lagBehandlingResultat(
+        val resultat1 = lagVilkårsvurdering(
             behandling = behandling,
             fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2))
         )
-        val resultat2 = lagBehandlingResultat(behandling = behandling, fnrAktør = listOf(Pair(fnr2, aktørId2)))
+        val resultat2 = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr2, aktørId2)))
 
         val resterende = flyttResultaterTilInitielt(resultat2, resultat1).second
         val fjernedeVilkår = resultat1.personResultater.first().vilkårResultater.toList()
@@ -475,7 +475,7 @@ class OppdaterVilkårsvurderingTest {
         return vilkårsvurdering
     }
 
-    fun lagBehandlingResultat(fnrAktør: List<Pair<String, Aktør>>, behandling: Behandling): Vilkårsvurdering {
+    fun lagVilkårsvurdering(fnrAktør: List<Pair<String, Aktør>>, behandling: Behandling): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(
             behandling = behandling
         )
@@ -515,7 +515,7 @@ class OppdaterVilkårsvurderingTest {
         return vilkårsvurdering
     }
 
-    fun lagBehandlingResultatB(fnrAktør: List<Pair<String, Aktør>>, behandling: Behandling): Vilkårsvurdering {
+    fun lagVilkårsvurderingResultatB(fnrAktør: List<Pair<String, Aktør>>, behandling: Behandling): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(
             behandling = behandling
         )

@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -33,7 +33,7 @@ class BehandlingsresultatService(
     private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
 
-    fun utledBehandlingsresultat(behandlingId: Long): BehandlingResultat {
+    fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingService.hent(behandlingId = behandlingId)
         val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
 
