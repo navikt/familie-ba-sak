@@ -55,6 +55,8 @@ class UtvidetBehandlingService(
 
         val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
 
+        if (behandling.id == 999954L) error("Test feil")
+
         val personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.personResultater
 
         val andelerTilkjentYtelse =
