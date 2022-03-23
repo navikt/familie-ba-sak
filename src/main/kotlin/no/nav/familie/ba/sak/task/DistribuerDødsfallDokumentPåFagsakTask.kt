@@ -5,7 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import io.sentry.Sentry
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.brev.hentStatuskodeFraOriginalFeil
+import no.nav.familie.ba.sak.kjerne.brev.mottakerErDødUtenDødsboadresse
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -59,8 +59,7 @@ class DistribuerDødsfallDokumentPåFagsakTask(
                     brevmal = brevmal
                 )
             } catch (ressursException: RessursException) {
-                val mottakerErDødUtenDødsboadresse = ressursException.hentStatuskodeFraOriginalFeil() == 410
-                if (mottakerErDødUtenDødsboadresse) throw ressursException
+                if (mottakerErDødUtenDødsboadresse(ressursException)) throw ressursException
             } catch (e: Exception) {
                 Sentry.captureException(e)
                 throw e

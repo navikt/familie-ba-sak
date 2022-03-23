@@ -219,19 +219,14 @@ class DokumentService(
     ) = try {
         distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
     } catch (ressursException: RessursException) {
-        val statuskode = ressursException.hentStatuskodeFraOriginalFeil()
-
-        val mottakerErIkkeDigitalOgHarUkjentAdresse = statuskode == 400 &&
-            ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
-
-        // 410 er unikt for bruker død og ingen dødsboadresse mot dokdist
-        // https://nav-it.slack.com/archives/C6W9E5GPJ/p1647956660364779?thread_ts=1647936835.099329&cid=C6W9E5GPJ
-        val mottakerErDødUtenDødsboadresse = statuskode == 410
+        val mottakerErIkkeDigitalOgHarUkjentAdresse =
+            ressursException.hentStatuskodeFraOriginalFeil() == HttpStatus.BAD_REQUEST &&
+                ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
 
         when {
             mottakerErIkkeDigitalOgHarUkjentAdresse && behandlingId != null ->
                 loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
-            mottakerErDødUtenDødsboadresse && behandlingId != null -> {
+            mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null -> {
                 val task =
                     DistribuerDødsfallDokumentPåFagsakTask.opprettTask(journalpostId = journalpostId, brevmal = brevmal)
                 taskRepository.save(task)
