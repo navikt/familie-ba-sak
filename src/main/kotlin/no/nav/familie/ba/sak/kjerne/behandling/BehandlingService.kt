@@ -27,12 +27,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -59,7 +58,6 @@ import java.time.YearMonth
 @Service
 class BehandlingService(
     private val behandlingRepository: BehandlingRepository,
-    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingMetrikker: BehandlingMetrikker,
     private val fagsakRepository: FagsakRepository,
@@ -71,6 +69,7 @@ class BehandlingService(
     private val infotrygdService: InfotrygdService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val personidentService: PersonidentService,
+    private val beregningService: BeregningService,
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
@@ -311,33 +310,6 @@ class BehandlingService(
     }
 
     /**
-     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse.
-     */
-    fun finnBarnFraBehandlingMedTilkjentYtsele(behandlingId: Long): List<Aktør> =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
-            ?.filter {
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                    behandlingId,
-                    it
-                )
-                    .isNotEmpty()
-            } ?: emptyList()
-
-    /**
-     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse som ikke er endret til null i utbetaling.
-     */
-    fun finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandlingId: Long): List<Aktør> =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
-            ?.filter { aktør ->
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                    behandlingId,
-                    aktør
-                ).filter { aty ->
-                    aty.kalkulertUtbetalingsbeløp != 0 || aty.endretUtbetalingAndeler.isEmpty()
-                }.isNotEmpty()
-            } ?: emptyList()
-
-    /**
      * Henter siste iverksatte behandling FØR en gitt behandling.
      * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet
      * eller ved behandlingsresultat.
@@ -533,12 +505,16 @@ class BehandlingService(
 
     fun innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling: Behandling): Boolean {
         val barnMedUtbetalingSomIkkeBlittEndretISisteBehandling =
-            finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandling.id)
+            beregningService.finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandling.id)
 
-        val alleBarnISisteBehanlding = finnBarnFraBehandlingMedTilkjentYtsele(behandling.id)
+        val alleBarnISisteBehanlding = beregningService.finnBarnFraBehandlingMedTilkjentYtsele(behandling.id)
 
         val alleBarnISistIverksattBehandling =
-            hentForrigeBehandlingSomErIverksatt(behandling)?.let { finnBarnFraBehandlingMedTilkjentYtsele(it.id) }
+            hentForrigeBehandlingSomErIverksatt(behandling)?.let {
+                beregningService.finnBarnFraBehandlingMedTilkjentYtsele(
+                    it.id
+                )
+            }
                 ?: emptyList()
 
         val nyeBarnISisteBehandling = alleBarnISisteBehanlding.minus(alleBarnISistIverksattBehandling.toSet())

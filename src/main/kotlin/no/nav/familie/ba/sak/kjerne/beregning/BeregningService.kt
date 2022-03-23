@@ -91,7 +91,8 @@ class BeregningService(
 
             if (behandlingSomErSendtTilGodkjenning != null) behandlingSomErSendtTilGodkjenning
             else {
-                val godkjenteBehandlingerSomIkkeErIverksattEnda = behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
+                val godkjenteBehandlingerSomIkkeErIverksattEnda =
+                    behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
                 if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) godkjenteBehandlingerSomIkkeErIverksattEnda
                 else {
                     val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsak.id)
@@ -189,6 +190,33 @@ class BeregningService(
             reduserteMånedPerioder = reduserteMånedPerioder
         )
     }
+
+    /**
+     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse.
+     */
+    fun finnBarnFraBehandlingMedTilkjentYtsele(behandlingId: Long): List<Aktør> =
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
+            ?.filter {
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                    behandlingId,
+                    it
+                )
+                    .isNotEmpty()
+            } ?: emptyList()
+
+    /**
+     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse som ikke er endret til null i utbetaling.
+     */
+    fun finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandlingId: Long): List<Aktør> =
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
+            ?.filter { aktør ->
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                    behandlingId,
+                    aktør
+                ).filter { aty ->
+                    aty.kalkulertUtbetalingsbeløp != 0 || aty.endretUtbetalingAndeler.isEmpty()
+                }.isNotEmpty()
+            } ?: emptyList()
 
     private fun populerTilkjentYtelse(
         behandling: Behandling,
