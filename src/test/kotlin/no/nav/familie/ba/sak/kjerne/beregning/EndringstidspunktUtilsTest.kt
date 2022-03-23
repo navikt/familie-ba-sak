@@ -3,9 +3,11 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -46,6 +48,118 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 2108,
                 person = person2
+            ),
+        )
+
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
+            forrigeAndelerTilkjentYtelse = forrigeAndeler
+        )
+        assertEquals(inneværendeMåned().minusYears(1).førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
+    }
+
+    @Test
+    fun `Skal finne endringer på grunn av ny overstyring`() {
+        val person1 = lagPerson()
+        val person2 = lagPerson(type = PersonType.BARN)
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2,
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        person = person2,
+                        fom = inneværendeMåned().minusYears(1),
+                        tom = inneværendeMåned(),
+                        prosent = BigDecimal(100),
+                        behandlingId = 123L,
+                        årsak = Årsak.DELT_BOSTED
+                    )
+                )
+            ),
+        )
+
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
+            forrigeAndelerTilkjentYtelse = forrigeAndeler
+        )
+        assertEquals(inneværendeMåned().minusYears(1).førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
+    }
+
+    @Test
+    fun `Skal finne endringer på grunn av endret overstyring`() {
+        val person1 = lagPerson()
+        val person2 = lagPerson(type = PersonType.BARN)
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2,
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        person = person2,
+                        fom = inneværendeMåned().minusYears(1),
+                        tom = inneværendeMåned(),
+                        prosent = BigDecimal(100),
+                        behandlingId = 123L,
+                        årsak = Årsak.DELT_BOSTED
+                    )
+                )
+            ),
+        )
+
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2,
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        person = person2,
+                        fom = inneværendeMåned().minusYears(1),
+                        tom = inneværendeMåned(),
+                        prosent = BigDecimal(100),
+                        behandlingId = 123L,
+                        årsak = Årsak.ALLEREDE_UTBETALT
+                    )
+                )
             ),
         )
 

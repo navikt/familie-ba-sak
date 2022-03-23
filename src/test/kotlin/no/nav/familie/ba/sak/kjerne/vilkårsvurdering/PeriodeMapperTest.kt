@@ -312,4 +312,84 @@ class PeriodeMapperTest {
         Assertions.assertFalse(periodeResultater.last().allePåkrevdeVilkårErOppfylt(PersonType.BARN))
         Assertions.assertTrue(periodeResultater[1].allePåkrevdeVilkårErOppfylt(PersonType.BARN))
     }
+
+    @Test
+    fun `Skal ikke ta med avslåtte vilkår uten periode i utregning`() {
+        val fnr1 = randomFnr()
+        val aktørId1 = tilAktør(fnr1)
+        val personResultat1 =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = aktørId1)
+        personResultat1.setSortedVilkårResultater(
+            setOf(
+                VilkårResultat(
+                    personResultat = personResultat1,
+                    vilkårType = Vilkår.UNDER_18_ÅR,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = datoer[0],
+                    periodeTom = datoer[5].minusDays(1),
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id
+                ),
+                VilkårResultat(
+                    personResultat = personResultat1,
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = datoer[0],
+                    periodeTom = datoer[5].minusDays(1),
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id
+                ),
+                VilkårResultat(
+                    personResultat = personResultat1,
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = datoer[0],
+                    periodeTom = datoer[4].minusDays(1),
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id
+                ),
+                VilkårResultat(
+                    personResultat = personResultat1,
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    erEksplisittAvslagPåSøknad = true,
+                    periodeFom = null,
+                    periodeTom = null,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id
+                ),
+                VilkårResultat(
+                    personResultat = personResultat1,
+                    vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = datoer[0],
+                    periodeTom = datoer[5].minusDays(1),
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id
+                ),
+                VilkårResultat(
+                    personResultat = personResultat1,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = datoer[0],
+                    periodeTom = datoer[5].minusDays(1),
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id
+                )
+            )
+        )
+        vilkårsvurdering.personResultater = setOf(personResultat1)
+        val periodeResultater = vilkårsvurdering.personResultaterTilPeriodeResultater(false).toList()
+
+        Assertions.assertEquals(2, periodeResultater.size)
+
+        val førstePeriode = periodeResultater[0]
+        val andrePeriode = periodeResultater[1]
+
+        Assertions.assertEquals(5, førstePeriode.vilkårResultater.size)
+        Assertions.assertTrue(førstePeriode.vilkårResultater.map { it.vilkårType }.containsAll(Vilkår.hentVilkårFor(PersonType.BARN)))
+
+        Assertions.assertEquals(4, andrePeriode.vilkårResultater.size)
+        Assertions.assertFalse(andrePeriode.vilkårResultater.map { it.vilkårType }.containsAll(Vilkår.hentVilkårFor(PersonType.BARN)))
+    }
 }
