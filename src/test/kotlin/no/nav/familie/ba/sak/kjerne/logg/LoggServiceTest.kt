@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -97,19 +97,19 @@ class LoggServiceTest(
         val behandling = lagBehandling()
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(
             behandling = behandling,
-            forrigeBehandlingResultat = behandling.resultat,
-            nyttBehandlingResultat = BehandlingResultat.INNVILGET
+            forrigeBehandlingsresultat = behandling.resultat,
+            nyttBehandlingsresultat = Behandlingsresultat.INNVILGET
         )
 
         assertNotNull(vilkårsvurderingLogg)
         assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg!!.tittel)
 
-        behandling.resultat = BehandlingResultat.INNVILGET
+        behandling.resultat = Behandlingsresultat.INNVILGET
         val nyVilkårsvurderingLogg =
             loggService.opprettVilkårsvurderingLogg(
                 behandling = behandling,
-                forrigeBehandlingResultat = behandling.resultat,
-                nyttBehandlingResultat = BehandlingResultat.AVSLÅTT
+                forrigeBehandlingsresultat = behandling.resultat,
+                nyttBehandlingsresultat = Behandlingsresultat.AVSLÅTT
             )
 
         assertNotNull(nyVilkårsvurderingLogg)
@@ -123,8 +123,8 @@ class LoggServiceTest(
     fun `Skal ikke logge ved uforandret behandlingsresultat`() {
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(
             behandling = lagBehandling(),
-            forrigeBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET,
-            nyttBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET
+            forrigeBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
+            nyttBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET
         )
 
         assertNull(vilkårsvurderingLogg)
@@ -137,7 +137,7 @@ class LoggServiceTest(
             årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
         )
         loggService.opprettBehandlingLogg(behandling)
-        loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, BehandlingResultat.INNVILGET)
+        loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
         loggService.opprettSendTilBeslutterLogg(behandling)
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT, "begrunnelse")
         loggService.opprettFerdigstillBehandling(behandling)

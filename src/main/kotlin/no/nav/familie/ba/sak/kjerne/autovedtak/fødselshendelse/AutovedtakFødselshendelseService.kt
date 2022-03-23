@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
@@ -136,7 +136,7 @@ class AutovedtakFødselshendelseService(
     private fun vurderVilkår(behandling: Behandling, barnaSomVurderes: List<String>): String {
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
 
-        return if (behandlingEtterVilkårsvurdering.resultat == BehandlingResultat.INNVILGET) {
+        return if (behandlingEtterVilkårsvurdering.resultat == Behandlingsresultat.INNVILGET) {
             val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
             vedtaksperiodeService.oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak, barnaSomVurderes)
 

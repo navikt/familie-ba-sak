@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class BehandlingResultatMedKravTest {
+class BehandlingsresultatMedKravTest {
 
     /**
      * Tester for caser hvor krav er framstilt av søker
@@ -38,7 +38,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.INNVILGET, behandlingsresultat)
     }
 
     @Test
@@ -62,7 +62,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.INNVILGET, behandlingsresultat)
     }
 
     @Test
@@ -86,7 +86,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.INNVILGET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.INNVILGET, behandlingsresultat)
     }
 
     @Test
@@ -110,7 +110,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.INNVILGET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.INNVILGET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -133,7 +133,7 @@ class BehandlingResultatMedKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.INNVILGET_OG_ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.INNVILGET_OG_ENDRET, behandlingsresultat)
     }
 
     @Test
@@ -156,7 +156,7 @@ class BehandlingResultatMedKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -180,7 +180,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
     // Delvis innvilget
@@ -198,7 +198,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.DELVIS_INNVILGET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.DELVIS_INNVILGET, behandlingsresultat)
     }
 
     @Test
@@ -222,7 +222,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.DELVIS_INNVILGET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.DELVIS_INNVILGET, behandlingsresultat)
     }
 
     @Test
@@ -246,7 +246,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -278,7 +278,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -301,7 +301,7 @@ class BehandlingResultatMedKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET, behandlingsresultat)
     }
 
     @Test
@@ -329,7 +329,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -356,7 +356,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT, behandlingsresultat)
     }
 
     // Avslått
@@ -373,7 +373,7 @@ class BehandlingResultatMedKravTest {
                 ),
             )
         )
-        assertEquals(BehandlingResultat.AVSLÅTT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.AVSLÅTT, behandlingsresultat)
     }
 
     @Test
@@ -396,7 +396,7 @@ class BehandlingResultatMedKravTest {
                 ),
             )
         )
-        assertEquals(BehandlingResultat.AVSLÅTT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.AVSLÅTT, behandlingsresultat)
     }
 
     @Test
@@ -419,7 +419,7 @@ class BehandlingResultatMedKravTest {
                 ),
             )
         )
-        assertEquals(BehandlingResultat.AVSLÅTT_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.AVSLÅTT_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -442,7 +442,7 @@ class BehandlingResultatMedKravTest {
                 ),
             )
         )
-        assertEquals(BehandlingResultat.AVSLÅTT_OG_ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.AVSLÅTT_OG_ENDRET, behandlingsresultat)
     }
 
     @Test
@@ -465,7 +465,7 @@ class BehandlingResultatMedKravTest {
                 ),
             )
         )
-        assertEquals(BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -481,6 +481,6 @@ class BehandlingResultatMedKravTest {
                 ),
             )
         )
-        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, behandlingsresultat)
     }
 }

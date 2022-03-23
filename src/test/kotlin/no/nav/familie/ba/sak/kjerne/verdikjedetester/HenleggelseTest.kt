@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
@@ -59,7 +59,7 @@ class HenleggelseTest(
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = responseHenlagtSøknad.data!!.behandlingId)
 
         assertThat(!ferdigstiltBehandling.aktiv)
-        assertThat(ferdigstiltBehandling.resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET)
+        assertThat(ferdigstiltBehandling.resultat == Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET)
 
         val behandlingslogg = familieBaSakKlient().hentBehandlingslogg(responseHenlagtSøknad.data!!.behandlingId)
         assertEquals(Ressurs.Status.SUKSESS, behandlingslogg.status)
@@ -105,7 +105,7 @@ class HenleggelseTest(
         val ferdigstiltBehandling = behandlingService.hent(behandlingId = responseHenlagtSøknad.data!!.behandlingId)
 
         assertThat(!ferdigstiltBehandling.aktiv)
-        assertThat(ferdigstiltBehandling.resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET)
+        assertThat(ferdigstiltBehandling.resultat == Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET)
 
         val behandlingslogg = familieBaSakKlient().hentBehandlingslogg(responseHenlagtSøknad.data!!.behandlingId)
         assertEquals(Ressurs.Status.SUKSESS, behandlingslogg.status)

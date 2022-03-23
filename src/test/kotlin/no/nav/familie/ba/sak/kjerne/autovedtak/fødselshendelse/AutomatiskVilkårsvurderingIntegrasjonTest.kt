@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -54,7 +54,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
-        Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
+        Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
     @Test
@@ -70,7 +70,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
-        Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
+        Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
     @Test
@@ -95,7 +95,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
-        Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
+        Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
     @Test
@@ -139,6 +139,6 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
-        Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
+        Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 }
