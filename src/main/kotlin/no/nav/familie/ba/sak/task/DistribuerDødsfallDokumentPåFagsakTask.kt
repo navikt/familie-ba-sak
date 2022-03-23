@@ -22,7 +22,8 @@ const val ANTALL_SEKUNDER_I_EN_UKE = 604800L
     taskStepType = DistribuerDødsfallDokumentPåFagsakTask.TASK_STEP_TYPE,
     beskrivelse = "Send dødsfall dokument til Dokdist",
     triggerTidVedFeilISekunder = ANTALL_SEKUNDER_I_EN_UKE,
-    // ~8 måneder dersom vi prøver én gang i uka
+    // ~8 måneder dersom vi prøver én gang i uka.
+    // Tasken skal stoppe etter 6 måneder, så om vi kommer hit har det skjedd noe galt.
     maxAntallFeil = 4 * 8,
     settTilManuellOppfølgning = true,
 )
