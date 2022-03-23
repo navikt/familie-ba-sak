@@ -219,19 +219,17 @@ class DokumentService(
     ) = try {
         distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
     } catch (ressursException: RessursException) {
-        val mottakerErIkkeDigitalOgHarUkjentAdresse =
-            ressursException.hentStatuskodeFraOriginalFeilEllerKastFeil() == HttpStatus.BAD_REQUEST &&
-                ressursException.cause?.message?.contains("Mottaker har ukjent adresse") == true
-
         when {
-            mottakerErIkkeDigitalOgHarUkjentAdresse && behandlingId != null ->
+            mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null ->
                 loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
+
             mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null -> {
                 val task =
                     DistribuerDødsfallDokumentPåFagsakTask.opprettTask(journalpostId = journalpostId, brevmal = brevmal)
                 taskRepository.save(task)
                 loggBrevIkkeDistribuertUkjentDødsboadresse(journalpostId, behandlingId, brevmal)
             }
+
             else -> throw ressursException
         }
     }
