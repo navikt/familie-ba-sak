@@ -5,17 +5,18 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.ToveisKombinator
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
 class ErSekundærlandTidslinje(
-    val kompetanseTidslinje: Tidslinje<Kompetanse>,
-    val validertKompetanseTidsline: Tidslinje<KompetanseValidering>
-) : TidslinjeSomStykkerOppTiden<Boolean>(
+    val kompetanseTidslinje: Tidslinje<Kompetanse, Måned>,
+    val validertKompetanseTidsline: Tidslinje<KompetanseValidering, Måned>
+) : TidslinjeSomStykkerOppTiden<Boolean, Måned>(
     kompetanseTidslinje, validertKompetanseTidsline
 ) {
     val erSekundærlandKombinator = ErSekundærlandKombinator()
 
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): Boolean? {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): Boolean? {
         return erSekundærlandKombinator.kombiner(
             kompetanseTidslinje.hentUtsnitt(tidspunkt),
             validertKompetanseTidsline.hentUtsnitt(tidspunkt)

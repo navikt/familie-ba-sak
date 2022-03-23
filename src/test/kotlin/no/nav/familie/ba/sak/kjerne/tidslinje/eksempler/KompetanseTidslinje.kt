@@ -3,23 +3,23 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksempler
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunktEllerUendeligLengeTil
 
 class KompetanseTidslinje(
     private val kompetanser: List<Kompetanse>,
-) : Tidslinje<Kompetanse>() {
+) : Tidslinje<Kompetanse, Måned>() {
 
     override fun fraOgMed() = kompetanser
         .map { it.fom.tilTidspunktEllerUendeligLengeSiden { it.tom!! } }
-        .minOrNull() ?: Tidspunkt.iDag().neste() // Tom liste, sørg for at fraOgMed er etter tilOgMed
+        .minOrNull() ?: throw IllegalStateException("Listen av kompetanser er tom")
 
     override fun tilOgMed() = kompetanser
         .map { it.tom.tilTidspunktEllerUendeligLengeTil { it.fom!! } }
-        .maxOrNull() ?: Tidspunkt.iDag().forrige() // Tom liste, sørg for at tilOgMed er før fraOgMed
+        .maxOrNull() ?: throw IllegalStateException("Listen av kompetanser er tom")
 
-    override fun lagPerioder(): Collection<Periode<Kompetanse>> {
+    override fun lagPerioder(): Collection<Periode<Kompetanse, Måned>> {
         return kompetanser.map { it.tilPeriode() }
     }
 }
