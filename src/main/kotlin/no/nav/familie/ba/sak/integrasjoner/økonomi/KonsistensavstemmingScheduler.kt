@@ -1,14 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdrag
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
-import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
@@ -34,29 +31,17 @@ class KonsistensavstemmingScheduler(
 
         logger.info("Kjører konsistensavstemming for $inneværendeMåned")
 
-        val konsistensavstemmingTask =
-            if (featureToggleService.isEnabled(FeatureToggleConfig.KONSISTENSAVSTEMMING_SPLITT_BATCH)) {
-                Task(
-                    type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(
-                        KonsistensavstemmingStartTaskDTO(
-                            batchId = plukketBatch.id,
-                            avstemmingdato = LocalDateTime.now(),
-                        )
+        taskRepository.save(
+            Task(
+                type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                    KonsistensavstemmingStartTaskDTO(
+                        batchId = plukketBatch.id,
+                        avstemmingdato = LocalDateTime.now(),
                     )
                 )
-            } else {
-                Task(
-                    type = KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(
-                        KonsistensavstemmingTaskDTO(
-                            LocalDateTime.now()
-                        )
-                    )
-                )
-            }
-
-        taskRepository.save(konsistensavstemmingTask)
+            )
+        )
 
         batchService.lagreNyStatus(plukketBatch, KjøreStatus.FERDIG)
     }
