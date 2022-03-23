@@ -1,15 +1,22 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import java.time.LocalDate
 
 class Tidslinjer(
     vilkårsvurdering: Vilkårsvurdering,
+    søkersFødselsdato: LocalDate,
+    yngsteBarnSin18årsdag: LocalDate,
+    barnOgFødselsdatoer: Map<Aktør, LocalDate>
 ) {
     private val barna = vilkårsvurdering.personResultater.filter { !it.erSøkersResultater() }.map { it.aktør }
     private val søker = vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.aktør
@@ -20,13 +27,16 @@ class Tidslinjer(
         .entries.associate { (aktør, personResultat) ->
             aktør to personResultat.vilkårResultater.groupBy { it.vilkårType }
                 .map {
+                    val barnFødselsdato = barnOgFødselsdatoer[aktør] ?: throw Feil("Finner ikke fødselsdato på barn")
                     VilkårResultatTidslinje(
-                        it.value
+                        vilkårsresultater = it.value,
+                        praktiskTidligsteDato = barnFødselsdato,
+                        praktiskSenesteDato = barnFødselsdato.til18ÅrsVilkårsdato()
                         /**.filter { vilkårResultat ->
 
-                        // TODO støtt perioder med uendelig fom og tom, kan komme i kombinasjon med perioder med fom eller tom
-                        vilkårResultat.periodeFom != null || vilkårResultat.periodeTom != null
-                        }*/
+                         // TODO støtt perioder med uendelig fom og tom, kan komme i kombinasjon med perioder med fom eller tom
+                         vilkårResultat.periodeFom != null || vilkårResultat.periodeTom != null
+                         }*/
                     )
                 }
         }
@@ -34,7 +44,15 @@ class Tidslinjer(
     val søkersVilkårsresultatTidslinjer = aktørTilPersonResultater
         .filter { it.value.erSøkersResultater() }
         .flatMap { (_, personResultat) ->
-            personResultat.vilkårResultater.groupBy { it.vilkårType }.map { VilkårResultatTidslinje(it.value) }
+            personResultat.vilkårResultater
+                .groupBy { it.vilkårType }
+                .map {
+                    VilkårResultatTidslinje(
+                        vilkårsresultater = it.value,
+                        praktiskTidligsteDato = søkersFødselsdato,
+                        praktiskSenesteDato = yngsteBarnSin18årsdag.til18ÅrsVilkårsdato()
+                    )
+                }
         }
 
     val søkerOppfyllerVilkårTidslinje = søkersVilkårsresultatTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator())
@@ -51,7 +69,7 @@ class Tidslinjer(
         val barnetsVilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat>>
         val barnetOppfyllerVilkårTidslinje: Tidslinje<Resultat>
         val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat>
-        val erEøsTidslinje: Tidslinje<Boolean>
+        val regelverkTidslinje: Tidslinje<Regelverk>
     }
 
     class BarnetsTidslinjerTimeline(
@@ -69,6 +87,6 @@ class Tidslinjer(
                 BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()
             )
 
-        override val erEøsTidslinje = barnetsVilkårsresultatTidslinjer.kombiner(EøsPeriodeKombinator())
+        override val regelverkTidslinje = barnetsVilkårsresultatTidslinjer.kombiner(RegelverkPeriodeKombinator())
     }
 }

@@ -66,6 +66,7 @@ interface Tidspunkt : Comparable<Tidspunkt> {
 
         fun med(dato: LocalDate) = DagTidspunkt(dato, Uendelighet.INGEN)
         fun med(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.INGEN)
+        fun iDag() = DagTidspunkt(LocalDate.now(), Uendelighet.INGEN)
     }
 
     // Betrakter to uendeligheter som like, selv underliggende tidspunkt kan være forskjellig
@@ -106,22 +107,21 @@ fun minsteAv(t1: Tidspunkt, t2: Tidspunkt): Tidspunkt =
     else
         minOf(t1, t2)
 
-fun Iterable<Tidspunkt>.størsteEllerUendelig() =
+fun Iterable<Tidspunkt>.største() =
     this.reduce { acc, neste ->
-        størsteAv(acc, neste)
+        maxOf(acc, neste)
     }
 
-fun Iterable<Tidspunkt>.minsteEllerUendelig() =
-    this.reduce { acc, neste -> minsteAv(acc, neste) }
+fun Iterable<Tidspunkt>.minste() =
+    this.reduce { acc, neste -> minOf(acc, neste) }
 
-fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =
-    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeSiden(default())
+fun LocalDate?.tilTidspunktEllerDefault(default: () -> LocalDate) =
+    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: DagTidspunkt(default(), Uendelighet.INGEN)
 
-fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate) =
-    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeTil(default())
+fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate?) =
+    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeSiden(
+        default() ?: PRAKTISK_TIDLIGSTE_DAG
+    )
 
-fun YearMonth?.tilTidspunktEllerUendeligLengeSiden(default: () -> YearMonth) =
-    this?.let { MånedTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeSiden(default())
-
-fun YearMonth?.tilTidspunktEllerUendeligLengeTil(default: () -> YearMonth) =
-    this?.let { MånedTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeTil(default())
+fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate?) =
+    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeTil(default() ?: PRAKTISK_SENESTE_DAG)

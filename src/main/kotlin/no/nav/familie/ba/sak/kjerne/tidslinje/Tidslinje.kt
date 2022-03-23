@@ -19,7 +19,7 @@ abstract class Tidslinje<T> {
     protected abstract fun lagPerioder(): Collection<Periode<T>>
 
     protected open fun valider(perioder: List<Periode<T>>) {
-        perioder.mapIndexed { index, periode ->
+        val perioderMedFeil = perioder.mapIndexed { index, periode ->
             when {
                 index > 0 && periode.fraOgMed.erUendeligLengeSiden() ->
                     TidslinjeFeil(periode, this, TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE)
@@ -31,7 +31,11 @@ abstract class Tidslinje<T> {
                     TidslinjeFeil(periode, this, TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE)
                 else -> null
             }
-        }.filterNotNull().takeIf { it.isNotEmpty() }?.also { throw TidslinjeFeilException(it) }
+        }.filterNotNull()
+
+        perioderMedFeil.takeIf { it.isNotEmpty() }?.also {
+            throw TidslinjeFeilException(it)
+        }
     }
 
     override fun equals(other: Any?): Boolean {

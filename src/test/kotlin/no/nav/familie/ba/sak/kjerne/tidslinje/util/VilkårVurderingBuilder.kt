@@ -78,8 +78,7 @@ data class VilkårsvurderingBuilder(
 class VilkårRegelverkResultatTidslinje(
     val vilkår: Vilkår,
     val charTidslinje: Tidslinje<Char>
-) :
-    TidslinjeSomStykkerOppTiden<VilkårRegelverkResultat>(charTidslinje) {
+) : TidslinjeSomStykkerOppTiden<VilkårRegelverkResultat>(charTidslinje) {
     override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): VilkårRegelverkResultat? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
 

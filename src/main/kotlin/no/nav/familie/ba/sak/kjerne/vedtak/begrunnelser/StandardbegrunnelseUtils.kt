@@ -41,9 +41,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
     erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
 
-    val triggesAv =
-        this.tilSanityBegrunnelse(sanityBegrunnelser)
-            ?.tilTriggesAv() ?: return false
+    val triggesAv = this.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
 
     val aktuellePersoner = minimertePersoner
         .filter { person -> triggesAv.personTyper.contains(person.type) }
@@ -54,8 +52,6 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
         }
 
     val ytelseTyperForPeriode = minimertVedtaksperiode.ytelseTyperForPeriode
-
-    val sanityBegrunnelse = this.tilSanityBegrunnelse(sanityBegrunnelser)!!
 
     fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
         minimertePersonResultater = minimertePersonResultater,
@@ -72,7 +68,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
     return when {
         !triggesAv.valgbar -> false
 
-        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) -> this.vedtakBegrunnelseType.periodeErOppyltForYtelseType(
+        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && !triggesAv.erEndret() -> this.vedtakBegrunnelseType.periodeErOppyltForYtelseType(
             ytelseType = if (triggesAv.småbarnstillegg) YtelseType.SMÅBARNSTILLEGG else YtelseType.UTVIDET_BARNETRYGD,
             ytelseTyperForPeriode = ytelseTyperForPeriode,
             ytelserGjeldeneForSøkerForrigeMåned = ytelserForSøkerForrigeMåned
@@ -85,18 +81,23 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             minimertePersoner.harBarnMedSeksårsdagPåFom(minimertVedtaksperiode.fom)
         triggesAv.satsendring -> fomErPåSatsendring(minimertVedtaksperiode.fom ?: TIDENES_MORGEN)
 
-        triggesAv.erEndret() -> erEndretTriggerErOppfylt(
+        triggesAv.etterEndretUtbetaling && minimertVedtaksperiode.type != Vedtaksperiodetype.ENDRET_UTBETALING ->
+            erEtterEndretPeriodeAvSammeÅrsak(
+                minimerteEndredeUtbetalingAndeler,
+                minimertVedtaksperiode,
+                aktuellePersoner,
+                triggesAv
+            )
+
+        triggesAv.erEndret() && !triggesAv.etterEndretUtbetaling -> erEndretTriggerErOppfylt(
             triggesAv = triggesAv,
             minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
             minimertVedtaksperiode = minimertVedtaksperiode,
-            aktuellePersoner = aktuellePersoner,
-            sanityBegrunnelse = sanityBegrunnelse,
             utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
             erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
+            ytelseTyperForPeriode = ytelseTyperForPeriode,
         )
-        // TODO kan fjernes etter å implementere øvrige triggere for reduksjonsperiode fra innvilgelsestidspunkt
-        VedtakBegrunnelseSpesifikasjon.begrunnelserForRedusertPerioderFraInnvilgelsestidspunkt().contains(this) -> false
-
+        triggesAv.gjelderFraInnvilgelsestidspunkt -> false
         else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
     }
 }
@@ -105,32 +106,23 @@ private fun erEndretTriggerErOppfylt(
     triggesAv: TriggesAv,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
-    aktuellePersoner: List<MinimertPerson>,
-    sanityBegrunnelse: SanityBegrunnelse,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean
-): Boolean =
-    if (triggesAv.etterEndretUtbetaling) {
-        minimertVedtaksperiode.type != Vedtaksperiodetype.ENDRET_UTBETALING &&
-            erEtterEndretPeriodeAvSammeÅrsak(
-                minimerteEndredeUtbetalingAndeler,
-                minimertVedtaksperiode,
-                aktuellePersoner,
-                triggesAv
-            )
-    } else {
-        val endredeAndelerSomOverlapperVedtaksperiode = minimertVedtaksperiode
-            .finnEndredeAndelerISammePeriode(minimerteEndredeUtbetalingAndeler)
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
+    ytelseTyperForPeriode: Set<YtelseType>
+): Boolean {
+    val endredeAndelerSomOverlapperVedtaksperiode = minimertVedtaksperiode
+        .finnEndredeAndelerISammePeriode(minimerteEndredeUtbetalingAndeler)
 
-        (erIngenOverlappVedtaksperiodeToggelPå || minimertVedtaksperiode.type == Vedtaksperiodetype.ENDRET_UTBETALING) &&
-            endredeAndelerSomOverlapperVedtaksperiode.any {
-                triggesAv.erTriggereOppfyltForEndretUtbetaling(
-                    vilkår = sanityBegrunnelse.vilkaar,
-                    utvidetScenario = utvidetScenarioForEndringsperiode,
-                    minimertEndretAndel = it
-                )
-            }
-    }
+    return (erIngenOverlappVedtaksperiodeToggelPå || minimertVedtaksperiode.type == Vedtaksperiodetype.ENDRET_UTBETALING) &&
+        endredeAndelerSomOverlapperVedtaksperiode.any {
+            triggesAv.erTriggereOppfyltForEndretUtbetaling(
+                utvidetScenario = utvidetScenarioForEndringsperiode,
+                minimertEndretAndel = it,
+                ytelseTyperForPeriode = ytelseTyperForPeriode,
+                erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
+            )
+        }
+}
 
 private fun erEtterEndretPeriodeAvSammeÅrsak(
     endretUtbetalingAndeler: List<MinimertEndretAndel>,

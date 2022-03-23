@@ -103,13 +103,11 @@ class FeatureToggleConfig(
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
         const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
-        const val KAN_AUTOMATISK_BEHANDLE_EØS = "familie-ba-sak.behandling.automatisk.eos"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
         const val INGEN_OVERLAPP_VEDTAKSPERIODER = "familie-ba-sak.ingen-overlapp-vedtaksperioder.utgivelse"
         const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER =
             "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
         const val FØRSTE_ENDRINGSTIDSPUNKT = "familie-ba-sak.behandling.forste-endringstidspunkt.utgivelse"
-        const val BREV_VARSEL_REVURDRING_SAMBOER = "familie-ba-sak.behandling.varsel-revurdering-samboer.utgivelse"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 

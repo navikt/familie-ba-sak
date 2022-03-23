@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteEllerUendelig
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteEllerUendelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minste
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.største
 
 abstract class TidslinjeMedAvhengigheter<T>(
     private val foregåendeTidslinjer: Collection<Tidslinje<*>>
@@ -13,6 +13,6 @@ abstract class TidslinjeMedAvhengigheter<T>(
             throw IllegalStateException("Skal ha avhengigheter, men listen over avhengigher er tom")
     }
 
-    override fun fraOgMed() = foregåendeTidslinjer.map { it.fraOgMed() }.minsteEllerUendelig()
-    override fun tilOgMed() = foregåendeTidslinjer.map { it.tilOgMed() }.størsteEllerUendelig()
+    override fun fraOgMed() = foregåendeTidslinjer.map { it.fraOgMed() }.minste()
+    override fun tilOgMed() = foregåendeTidslinjer.map { it.tilOgMed() }.største()
 }

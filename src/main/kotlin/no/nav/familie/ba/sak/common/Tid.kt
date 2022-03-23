@@ -54,6 +54,8 @@ fun senesteDatoAv(dato1: LocalDate, dato2: LocalDate): LocalDate {
     return maxOf(dato1, dato2)
 }
 
+fun LocalDate.til18ÅrsVilkårsdato() = this.plusYears(18).minusDays(1)
+
 fun LocalDate.sisteDagIMåned(): LocalDate {
     return YearMonth.from(this).atEndOfMonth()
 }

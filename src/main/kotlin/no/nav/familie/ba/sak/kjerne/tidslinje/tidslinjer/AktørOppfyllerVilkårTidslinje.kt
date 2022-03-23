@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.ListeKombinator
-import no.nav.familie.ba.sak.kjerne.tidslinje.ToveisKombinator
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ListeKombinator
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ToveisKombinator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 private val nødvendigeVilkårSøker = listOf(
@@ -24,8 +24,9 @@ class SøkerOppfyllerVilkårKombinator : ListeKombinator<VilkårRegelverkResulta
     override fun kombiner(liste: Iterable<VilkårRegelverkResultat>): Resultat {
         val nødvendigeVilkårAvhengigAvVurdering =
             if (liste.any {
-                    it.vilkår == Vilkår.UTVIDET_BARNETRYGD
-                }) nødvendigeVilkårSøkerMedUtvidet else nødvendigeVilkårSøker
+                it.vilkår == Vilkår.UTVIDET_BARNETRYGD
+            }
+            ) nødvendigeVilkårSøkerMedUtvidet else nødvendigeVilkårSøker
 
         return when {
             liste.all { it.resultat == Resultat.OPPFYLT } &&

@@ -36,8 +36,7 @@ fun <T> Tidslinje<T>.hentUtsnitt(tidspunkt: Tidspunkt): T? =
     perioder().hentUtsnitt(tidspunkt)
 
 fun <T> Collection<Periode<T>>.hentUtsnitt(tidspunkt: Tidspunkt): T? =
-    this.filter { it.fraOgMed <= tidspunkt && it.tilOgMed >= tidspunkt }
-        .firstOrNull()?.innhold
+    this.firstOrNull { it.fraOgMed <= tidspunkt && it.tilOgMed >= tidspunkt }?.innhold
 
 private fun <T> Periode<T>.kanUtvidesMed(tidspunktMedInnhold: TidspunktMedInnhold<T>) =
     this.innhold == tidspunktMedInnhold.innhold &&
