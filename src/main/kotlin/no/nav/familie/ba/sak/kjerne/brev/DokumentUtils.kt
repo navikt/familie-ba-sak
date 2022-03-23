@@ -4,7 +4,7 @@ import no.nav.familie.http.client.RessursException
 import org.springframework.web.client.RestClientResponseException
 
 fun RessursException.hentStatuskodeFraOriginalFeil(): Int {
-    val cause = cause
+    val cause = this.cause
     return if (cause is RestClientResponseException) {
         cause.rawStatusCode
     } else {
