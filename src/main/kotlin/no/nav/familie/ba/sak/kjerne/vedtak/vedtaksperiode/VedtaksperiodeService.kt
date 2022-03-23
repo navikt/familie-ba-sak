@@ -19,8 +19,8 @@ import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktSerivce
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -232,7 +232,7 @@ class VedtaksperiodeService(
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
 
         slettVedtaksperioderFor(vedtak)
-        if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
+        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
 
             val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
@@ -466,7 +466,7 @@ class VedtaksperiodeService(
     }
 
     fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
-        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return emptyList()
+        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
 
         val iverksatteBehandlinger =
             behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)

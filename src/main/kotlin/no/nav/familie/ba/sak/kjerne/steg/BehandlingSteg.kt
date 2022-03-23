@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLINGSRESULTAT
 import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLING_AVSLUTTET
@@ -228,7 +228,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 REGISTRERE_PERSONGRUNNLAG -> FILTRERING_FØDSELSHENDELSER
                 FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (behandling.resultat == BehandlingResultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
+                BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
@@ -282,7 +282,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (behandling.resultat == BehandlingResultat.ENDRET)
+                BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.ENDRET)
                     IVERKSETT_MOT_OPPDRAG
                 else throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
@@ -313,9 +313,9 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
     }
 }
 
-fun hentNesteStegTypeBasertPåBehandlingsresultat(resultat: BehandlingResultat): StegType {
+fun hentNesteStegTypeBasertPåBehandlingsresultat(resultat: Behandlingsresultat): StegType {
     return when (resultat) {
-        BehandlingResultat.FORTSATT_INNVILGET, BehandlingResultat.AVSLÅTT -> JOURNALFØR_VEDTAKSBREV
+        Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.AVSLÅTT -> JOURNALFØR_VEDTAKSBREV
         else -> IVERKSETT_MOT_OPPDRAG
     }
 }

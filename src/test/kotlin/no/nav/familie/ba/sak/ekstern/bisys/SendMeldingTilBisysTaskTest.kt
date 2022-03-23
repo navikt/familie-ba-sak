@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -52,7 +52,7 @@ class SendMeldingTilBisysTaskTest {
 
         val nyBehandling = lagBehandling(
             forrigeBehandling.fagsak,
-            resultat = BehandlingResultat.OPPHØRT,
+            resultat = Behandlingsresultat.OPPHØRT,
             førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG
         )
 

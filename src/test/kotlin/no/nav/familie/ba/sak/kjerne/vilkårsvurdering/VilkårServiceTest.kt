@@ -194,12 +194,12 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagMedEkstraBarn)
 
-        val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurderingMedEkstraBarn = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
-        assertEquals(3, behandlingResultatMedEkstraBarn.personResultater.size)
+        assertEquals(3, vilkårsvurderingMedEkstraBarn.personResultater.size)
     }
 
     @Test
@@ -249,18 +249,18 @@ class VilkårServiceTest(
                     }
             }
 
-        val kopiertBehandlingResultat = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
+        val kopiertVilkårsvurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
 
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertBehandlingResultat)
-        val behandlingsResultater = vilkårsvurderingService
-            .hentBehandlingResultatForBehandling(behandlingId = behandling.id)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertVilkårsvurdering)
+        val personResultater = vilkårsvurderingService
+            .hentAktivForBehandling(behandlingId = behandling.id)!!.personResultater
 
-        assertEquals(2, behandlingsResultater.size)
-        Assertions.assertNotEquals(vilkårsvurdering.id, kopiertBehandlingResultat.id)
-        assertEquals(1, kopiertBehandlingResultat.personResultater.first().andreVurderinger.size)
+        assertEquals(2, personResultater.size)
+        Assertions.assertNotEquals(vilkårsvurdering.id, kopiertVilkårsvurdering.id)
+        assertEquals(1, kopiertVilkårsvurdering.personResultater.first().andreVurderinger.size)
         assertEquals(
             AnnenVurderingType.OPPLYSNINGSPLIKT,
-            kopiertBehandlingResultat.personResultater.first().andreVurderinger.first().type
+            kopiertVilkårsvurdering.personResultater.first().andreVurderinger.first().type
         )
     }
 
@@ -385,15 +385,15 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
 
-        val behandlingResultat2 = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering1 = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling2,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = behandling
         )
 
-        assertEquals(3, behandlingResultat2.personResultater.size)
+        assertEquals(3, vilkårsvurdering1.personResultater.size)
 
-        val personResultat = behandlingResultat2.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
+        val personResultat = vilkårsvurdering1.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
         val borMedSøkerVilkår = personResultat.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         assertEquals(behandling.id, borMedSøkerVilkår.behandlingId)
 
@@ -412,9 +412,9 @@ class VilkårServiceTest(
             )
         )
 
-        val behandlingResultatEtterEndring = vilkårsvurderingService.oppdater(behandlingResultat2)
+        val vilkårsvurderingEtterEndring = vilkårsvurderingService.oppdater(vilkårsvurdering1)
         val personResultatEtterEndring =
-            behandlingResultatEtterEndring.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
+            vilkårsvurderingEtterEndring.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
         val borMedSøkerVilkårEtterEndring =
             personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)

@@ -24,7 +24,7 @@ data class BehandlingsresultatPerson(
     /**
      * Utleder krav for personer framstilt nå og/eller tidligere.
      * Disse populeres med behandlingens utfall for enkeltpersonene (YtelsePerson),
-     * som igjen brukes for å utlede det totale BehandlingResultat.
+     * som igjen brukes for å utlede det totale Behandlingsresultat.
      *
      * @return Informasjon om hvordan person påvirkes i behandlingen (se YtelsePerson-doc)
      */

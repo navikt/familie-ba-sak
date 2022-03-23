@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
@@ -129,7 +129,7 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE).also {
-            it.resultat = BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
+            it.resultat = Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
         }
 
         every { behandlingService.hent(any()) } returns behandling
@@ -146,7 +146,7 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til behandlingDVH for Automatisk rute`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true).also {
-            it.resultat = BehandlingResultat.INNVILGET
+            it.resultat = Behandlingsresultat.INNVILGET
         }
 
         val vedtak = lagVedtak(behandling)
@@ -204,7 +204,8 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Skal mappe til behandlingDVH for manuell rute`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = BehandlingResultat.AVSLÅTT }
+        val behandling =
+            lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = Behandlingsresultat.AVSLÅTT }
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
             saksbehandler = "Saksbehandler",

@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class BehandlingResultatUtenKravTest {
+class BehandlingsresultatUtenKravTest {
 
     val søker = tilfeldigPerson()
     private val barn1Aktør = randomAktørId()
@@ -55,7 +55,7 @@ class BehandlingResultatUtenKravTest {
                 ),
             )
         )
-        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET, behandlingsresultat)
     }
 
     @Test
@@ -79,7 +79,7 @@ class BehandlingResultatUtenKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -103,7 +103,7 @@ class BehandlingResultatUtenKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -126,7 +126,7 @@ class BehandlingResultatUtenKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET, behandlingsresultat)
     }
 
     @Test
@@ -149,7 +149,7 @@ class BehandlingResultatUtenKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET, behandlingsresultat)
     }
 
     @Test
@@ -172,7 +172,7 @@ class BehandlingResultatUtenKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET, behandlingsresultat)
     }
 
     @Test
@@ -195,7 +195,7 @@ class BehandlingResultatUtenKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -218,7 +218,7 @@ class BehandlingResultatUtenKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -241,7 +241,7 @@ class BehandlingResultatUtenKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET, behandlingsresultat)
     }
 
     @Test
@@ -264,7 +264,7 @@ class BehandlingResultatUtenKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.OPPHØRT, behandlingsresultat)
+        assertEquals(Behandlingsresultat.OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -288,6 +288,6 @@ class BehandlingResultatUtenKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.FORTSATT_INNVILGET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, behandlingsresultat)
     }
 }

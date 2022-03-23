@@ -14,8 +14,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -227,7 +227,7 @@ class StegService(
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
 
-        return if (behandlingEtterBehandlingsresultatSteg.resultat == BehandlingResultat.AVSLÅTT &&
+        return if (behandlingEtterBehandlingsresultatSteg.resultat == Behandlingsresultat.AVSLÅTT &&
             !behandlingEtterBehandlingsresultatSteg.skalBehandlesAutomatisk
         ) {
             håndterVurderTilbakekreving(
