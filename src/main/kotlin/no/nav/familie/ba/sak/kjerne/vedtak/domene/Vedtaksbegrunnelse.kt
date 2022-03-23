@@ -51,7 +51,7 @@ class Vedtaksbegrunnelse(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
-    val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon
+    val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
 ) {
 
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
