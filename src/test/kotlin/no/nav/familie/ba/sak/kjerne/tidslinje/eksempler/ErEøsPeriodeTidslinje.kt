@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -25,11 +26,11 @@ private val eøsVilkår = listOf(
 )
 
 class ErEøsPeriodeTidslinje(
-    private val barnetsVilkårsresultater: Collection<Tidslinje<VilkårRegelverkResultat>>
-) : TidslinjeSomStykkerOppTiden<Boolean>(barnetsVilkårsresultater) {
+    private val barnetsVilkårsresultater: Collection<Tidslinje<VilkårRegelverkResultat, Måned>>
+) : TidslinjeSomStykkerOppTiden<Boolean, Måned>(barnetsVilkårsresultater) {
 
     private val kombinator = EøsPeriodeKombinator()
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): Boolean {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): Boolean {
         val alleVilkårResultater = barnetsVilkårsresultater.map { it.hentUtsnitt(tidspunkt) }
         return kombinator.kombiner(alleVilkårResultater.filterNotNull())
     }

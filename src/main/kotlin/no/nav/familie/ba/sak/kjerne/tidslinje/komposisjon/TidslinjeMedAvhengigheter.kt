@@ -1,20 +1,27 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteEllerNull
 
-abstract class TidslinjeMedAvhengigheter<T>(
-    private val foregåendeTidslinjer: Collection<Tidslinje<*>>
-) : Tidslinje<T>() {
+val MANGLER_AVHENGIGHETER = IllegalArgumentException("Det er ikke sendt med noen avhengigheter")
 
-    // Når fraOgMed er større enn tilOgMed, så er effektivt tidslinjen tom
+abstract class TidslinjeMedAvhengigheter<I, T : Tidsenhet>(
+    private val foregåendeTidslinjer: Collection<Tidslinje<*, T>>
+) : Tidslinje<I, T>() {
+
+    init {
+        if (foregåendeTidslinjer.isEmpty()) {
+            throw MANGLER_AVHENGIGHETER
+        }
+    }
+
     override fun fraOgMed() = foregåendeTidslinjer
         .map { it.fraOgMed() }
-        .minsteEllerNull() ?: Tidspunkt.iDag().neste()
+        .minsteEllerNull() ?: throw MANGLER_AVHENGIGHETER
 
     override fun tilOgMed() = foregåendeTidslinjer
         .map { it.tilOgMed() }
-        .størsteEllerNull() ?: Tidspunkt.iDag().forrige()
+        .størsteEllerNull() ?: throw MANGLER_AVHENGIGHETER
 }

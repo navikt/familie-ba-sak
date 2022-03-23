@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.StringTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
@@ -68,13 +69,13 @@ class TidslinjeKombinasjonTest {
     }
 }
 
-fun <V, H, R> Tidslinje<V>.snittKombinerMed(
-    tidslinje: Tidslinje<H>,
+fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
+    tidslinje: Tidslinje<H, T>,
     toveisKombinator: ToveisKombinator<V, H, R>
-): Tidslinje<R> {
+): Tidslinje<R, T> {
     val v1 = this
-    return object : TidslinjeSomStykkerOppTiden<R>(v1, tidslinje) {
-        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt): R? =
+    return object : TidslinjeSomStykkerOppTiden<R, T>(v1, tidslinje) {
+        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
             toveisKombinator.kombiner(
                 v1.hentUtsnitt(tidspunkt),
                 tidslinje.hentUtsnitt(tidspunkt)
