@@ -224,14 +224,22 @@ class DokumentService(
                 loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
 
             mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null -> {
-                val task =
-                    DistribuerDødsfallDokumentPåFagsakTask.opprettTask(journalpostId = journalpostId, brevmal = brevmal)
-                taskRepository.save(task)
-                loggBrevIkkeDistribuertUkjentDødsboadresse(journalpostId, behandlingId, brevmal)
+                håndterMottakerDødIngenAdressePåBehandling(journalpostId, brevmal, behandlingId)
             }
 
             else -> throw ressursException
         }
+    }
+
+    private fun håndterMottakerDødIngenAdressePåBehandling(
+        journalpostId: String,
+        brevmal: Brevmal,
+        behandlingId: Long
+    ) {
+        val task =
+            DistribuerDødsfallDokumentPåFagsakTask.opprettTask(journalpostId = journalpostId, brevmal = brevmal)
+        taskRepository.save(task)
+        loggBrevIkkeDistribuertUkjentDødsboadresse(journalpostId, behandlingId, brevmal)
     }
 
     internal fun loggBrevIkkeDistribuertUkjentAdresse(
