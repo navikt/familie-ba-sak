@@ -69,9 +69,7 @@ class SettPåVentService(
         logger.info("Oppdater sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
 
         val gammelFrist = aktivSettPåVent.frist
-        aktivSettPåVent.frist = frist
-        aktivSettPåVent.årsak = årsak
-        val settPåVent = settPåVentRepository.save(aktivSettPåVent)
+        val settPåVent = settPåVentRepository.save(aktivSettPåVent.copy(frist = frist, årsak = årsak))
 
         behandlingService.sendTilDvh(behandlingService.hent(behandlingId))
 

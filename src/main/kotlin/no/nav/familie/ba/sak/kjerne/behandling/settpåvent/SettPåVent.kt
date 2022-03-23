@@ -28,7 +28,7 @@ data class SettPåVent(
     val behandling: Behandling,
 
     @Column(name = "frist", nullable = false)
-    var frist: LocalDate,
+    val frist: LocalDate,
 
     @Column(name = "tid_tatt_av_vent", nullable = true)
     var tidTattAvVent: LocalDate? = null,
@@ -38,7 +38,7 @@ data class SettPåVent(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "aarsak", nullable = false)
-    var årsak: SettPåVentÅrsak,
+    val årsak: SettPåVentÅrsak,
 
     @Column(name = "aktiv", nullable = false)
     var aktiv: Boolean = true,
