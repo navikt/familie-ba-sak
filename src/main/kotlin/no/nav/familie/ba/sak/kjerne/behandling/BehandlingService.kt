@@ -546,11 +546,7 @@ class BehandlingService(
         val nyeBarnMedUtebtalingSomIkkeErEndret =
             barnMedUtbetalingSomIkkeBlittEndretISisteBehandling.intersect(nyeBarnISisteBehandling)
 
-        val innvilget_opphørt_eller_endret_og_opphørt =
-            behandling.resultat == BehandlingResultat.INNVILGET_OG_OPPHØRT ||
-                behandling.resultat == BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
-
-        return innvilget_opphørt_eller_endret_og_opphørt &&
+        return behandling.resultat == BehandlingResultat.INNVILGET_OG_OPPHØRT &&
             behandling.erSøknad() &&
             nyeBarnMedUtebtalingSomIkkeErEndret.isEmpty()
     }
