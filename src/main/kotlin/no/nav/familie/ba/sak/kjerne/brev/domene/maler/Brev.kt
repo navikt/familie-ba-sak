@@ -56,7 +56,9 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "Autovedtak - Barn 6 og 18 år og småbarnstillegg"
     ),
     AUTOVEDTAK_NYFØDT_FØRSTE_BARN(true, "autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),
-    AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(true, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før"),
+    AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(true, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før");
+
+    fun hentPresentabelVisningstekst() = this.visningsTekst.replaceFirstChar { it.uppercase() }
 }
 
 interface BrevData {

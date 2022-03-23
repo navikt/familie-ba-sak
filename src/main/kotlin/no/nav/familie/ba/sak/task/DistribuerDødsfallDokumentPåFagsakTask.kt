@@ -12,6 +12,8 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -49,6 +51,7 @@ class DistribuerDødsfallDokumentPåFagsakTask(
         val erTaskEldreEnn6Mnd = task.opprettetTid.isBefore(LocalDateTime.now().minusMonths(6))
 
         if (erTaskEldreEnn6Mnd) {
+            logger.info("Stopper \"DistribuerDødsfallDokumentPåFagsakTask\" fordi den er eldre enn 6 måneder.")
             antallBrevIkkeDistribuertUkjentDødsboadresse[brevmal]?.increment()
         } else {
             try {
@@ -58,11 +61,14 @@ class DistribuerDødsfallDokumentPåFagsakTask(
                     loggBehandlerRolle = BehandlerRolle.SYSTEM,
                     brevmal = brevmal
                 )
-            } catch (ressursException: RessursException) {
-                if (mottakerErDødUtenDødsboadresse(ressursException)) throw ressursException
             } catch (e: Exception) {
-                Sentry.captureException(e)
-                throw e
+                if (e is RessursException && mottakerErDødUtenDødsboadresse(e)) {
+                    logger.info("Klarte ikke å distribuere \"${brevmal.hentPresentabelVisningstekst()}\" på journalpost $journalpostId. Prøver igjen om 7 dager.")
+                    throw e
+                } else {
+                    Sentry.captureException(e)
+                    throw e
+                }
             }
         }
     }
@@ -81,6 +87,7 @@ class DistribuerDødsfallDokumentPåFagsakTask(
         }
 
         const val TASK_STEP_TYPE = "distribuerDokumentPåFagsak"
+        val logger: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }
 

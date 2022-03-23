@@ -249,7 +249,7 @@ class DokumentService(
         logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent adresse.")
         loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(
             behandlingId = behandlingId,
-            brevnavn = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+            brevnavn = brevMal.hentPresentabelVisningstekst(),
             begrunnelse = "mottaker har ukjent adresse",
         )
         antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
@@ -263,7 +263,7 @@ class DokumentService(
         logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent dødsboadresse.")
         loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(
             behandlingId = behandlingId,
-            brevnavn = brevMal.visningsTekst.replaceFirstChar { it.uppercase() },
+            brevnavn = brevMal.hentPresentabelVisningstekst(),
             begrunnelse = "mottaker har ukjent adresse. En oppgave er opprettet på fagsaknivå for å sende brevet når adressen er satt",
         )
     }
