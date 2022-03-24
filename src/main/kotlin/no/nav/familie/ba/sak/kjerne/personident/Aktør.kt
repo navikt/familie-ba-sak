@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import java.util.Objects
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -52,6 +53,10 @@ data class Aktør(
         }
         val otherAktør: Aktør = other as Aktør
         return aktørId == otherAktør.aktørId
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(aktørId)
     }
 
     fun aktivFødselsnummer() = personidenter.single { it.aktiv }.fødselsnummer

@@ -44,7 +44,7 @@ internal class TidslinjeTest {
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurdering,
             søkersFødselsdato = søker.fødselsdato,
-            yngsteBarnSin18årsdag = maxOf(barn1.fødselsdato, barn2.fødselsdato),
+            yngsteBarnFødselsdato = maxOf(barn1.fødselsdato, barn2.fødselsdato),
             barnOgFødselsdatoer = mapOf(barn1.aktør to barn1.fødselsdato, barn2.aktør to barn2.fødselsdato)
         )
 

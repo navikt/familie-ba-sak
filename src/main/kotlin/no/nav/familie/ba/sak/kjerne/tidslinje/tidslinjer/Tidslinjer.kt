@@ -17,7 +17,7 @@ import java.time.LocalDate
 class Tidslinjer(
     vilkårsvurdering: Vilkårsvurdering,
     søkersFødselsdato: LocalDate,
-    yngsteBarnSin18årsdag: LocalDate,
+    yngsteBarnFødselsdato: LocalDate,
     barnOgFødselsdatoer: Map<Aktør, LocalDate>
 ) {
     private val barna = vilkårsvurdering.personResultater.filter { !it.erSøkersResultater() }.map { it.aktør }
@@ -33,7 +33,7 @@ class Tidslinjer(
                         VilkårResultatTidslinje(
                             vilkårsresultater = it.value,
                             praktiskTidligsteDato = søkersFødselsdato,
-                            praktiskSenesteDato = yngsteBarnSin18årsdag.til18ÅrsVilkårsdato()
+                            praktiskSenesteDato = yngsteBarnFødselsdato.til18ÅrsVilkårsdato()
                         )
                     } else {
                         val barnFødselsdato =

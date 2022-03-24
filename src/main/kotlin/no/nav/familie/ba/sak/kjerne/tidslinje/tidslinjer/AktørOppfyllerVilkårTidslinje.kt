@@ -1,22 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ListeKombinator
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ToveisKombinator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-private val nødvendigeVilkårSøker = listOf(
-    Vilkår.LOVLIG_OPPHOLD,
-    Vilkår.BOSATT_I_RIKET
-)
+private val nødvendigeVilkårSøker = Vilkår.hentVilkårFor(PersonType.SØKER)
 
-private val nødvendigeVilkårBarn = listOf(
-    Vilkår.UNDER_18_ÅR,
-    Vilkår.BOR_MED_SØKER,
-    Vilkår.GIFT_PARTNERSKAP,
-    Vilkår.LOVLIG_OPPHOLD,
-    Vilkår.BOSATT_I_RIKET
-)
+private val nødvendigeVilkårBarn = Vilkår.hentVilkårFor(PersonType.BARN)
 
 class SøkerOppfyllerVilkårKombinator : ListeKombinator<VilkårRegelverkResultat, Resultat> {
     override fun kombiner(liste: Iterable<VilkårRegelverkResultat>): Resultat {
