@@ -49,7 +49,7 @@ data class PersonopplysningGrunnlag(
         get() = personer.filter { it.type == PersonType.BARN }
 
     val yngsteBarnSinFødselsdato: LocalDate
-        get() = barna.minOf { it.fødselsdato }
+        get() = barna.maxOf { it.fødselsdato }
 
     val søker: Person
         get() = personer.singleOrNull { it.type == PersonType.SØKER }

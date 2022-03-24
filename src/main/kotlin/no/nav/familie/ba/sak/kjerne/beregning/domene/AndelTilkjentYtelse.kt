@@ -194,7 +194,6 @@ data class AndelTilkjentYtelse(
             Regelverk.NASJONALE_REGLER
         } else {
             Regelverk.NASJONALE_REGLER
-            // error("AndelTilkjentYtelse ${this.id} er basert på VilkårsResultater med en blanding av nasjonale og EØS regelverk.")
         }
     }
 
