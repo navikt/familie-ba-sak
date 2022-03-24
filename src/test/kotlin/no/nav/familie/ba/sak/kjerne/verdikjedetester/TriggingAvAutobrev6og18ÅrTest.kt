@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
@@ -50,8 +50,8 @@ class TriggingAvAutobrev6og18ÅrTest(
     fun kjørFørstegangsbehandlingOgTriggAutobrev(årMedReduksjonsbegrunnelse: Int) {
 
         val reduksjonsbegrunnelse = if (årMedReduksjonsbegrunnelse == 6)
-            VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR else
-            VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+            Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR else
+            Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
@@ -141,7 +141,7 @@ class TriggingAvAutobrev6og18ÅrTest(
             vedtaksperiodeId = førsteVedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER
                 )
             )
         )

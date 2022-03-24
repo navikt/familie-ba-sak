@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "AVSLAG_BOSATT_I_RIKET"
+      "standardbegrunnelse": "AVSLAG_BOSATT_I_RIKET"
     }
   ],
   "fritekster": [],

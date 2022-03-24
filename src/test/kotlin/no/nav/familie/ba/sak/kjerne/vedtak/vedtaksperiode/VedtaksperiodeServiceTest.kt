@@ -28,7 +28,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -141,8 +141,8 @@ class VedtaksperiodeServiceTest(
         assertEquals(1, vedtaksperioder.size)
         assertEquals(1, vedtaksperioder.flatMap { it.begrunnelser }.size)
         assertEquals(
-            VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN,
-            vedtaksperioder.flatMap { it.begrunnelser }.first().vedtakBegrunnelseSpesifikasjon
+            Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
+            vedtaksperioder.flatMap { it.begrunnelser }.first().standardbegrunnelse
         )
     }
 
@@ -202,28 +202,28 @@ class VedtaksperiodeServiceTest(
 
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperioder.first().id,
-            standardbegrunnelserFraFrontend = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE)
+            standardbegrunnelserFraFrontend = listOf(Standardbegrunnelse.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE)
         )
 
         val vedtaksperioderMedUtfylteBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.size)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
         assertEquals(
-            VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
-            vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon
+            Standardbegrunnelse.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
+            vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().standardbegrunnelse
         )
 
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperioder.first().id,
-            standardbegrunnelserFraFrontend = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG),
+            standardbegrunnelserFraFrontend = listOf(Standardbegrunnelse.FORTSATT_INNVILGET_FAST_OMSORG),
         )
 
         val vedtaksperioderMedOverskrevneBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.size)
         assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.size)
         assertEquals(
-            VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG,
-            vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon
+            Standardbegrunnelse.FORTSATT_INNVILGET_FAST_OMSORG,
+            vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.first().standardbegrunnelse
         )
         assertEquals(0, vedtaksperioderMedOverskrevneBegrunnelser.first().fritekster.size)
     }
@@ -236,7 +236,7 @@ class VedtaksperiodeServiceTest(
         val feil = assertThrows<Feil> {
             vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
-                standardbegrunnelserFraFrontend = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER),
+                standardbegrunnelserFraFrontend = listOf(Standardbegrunnelse.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER),
             )
         }
 

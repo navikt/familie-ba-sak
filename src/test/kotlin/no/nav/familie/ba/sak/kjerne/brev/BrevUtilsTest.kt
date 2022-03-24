@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions
@@ -329,7 +329,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -337,7 +337,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -350,11 +350,11 @@ internal class BrevUtilsTest {
                 utvidetVedtaksperioderMedBegrunnelser.map { it.tilMinimertVedtaksperiode(hentSanityBegrunnelser()) },
                 listOf(
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                         hjemler = listOf("10"),
                     )
                 )
@@ -368,7 +368,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -376,7 +376,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -393,11 +393,11 @@ internal class BrevUtilsTest {
                 },
                 sanityBegrunnelser = listOf(
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                         hjemler = listOf("10"),
                     )
                 ),
@@ -412,7 +412,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -420,7 +420,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -437,11 +437,11 @@ internal class BrevUtilsTest {
                 },
                 sanityBegrunnelser = listOf(
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                         hjemler = listOf("10"),
                     )
                 ),
