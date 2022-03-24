@@ -58,8 +58,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
@@ -864,12 +864,13 @@ fun lagVedtaksperiodeMedBegrunnelser(
 )
 
 fun lagRestVedtaksbegrunnelse(
-    vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
-        VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
+    standardbegrunnelse: Standardbegrunnelse =
+        Standardbegrunnelse.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
     vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET,
 ) = RestVedtaksbegrunnelse(
-    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+    standardbegrunnelse = standardbegrunnelse,
     vedtakBegrunnelseType = vedtakBegrunnelseType,
+    vedtakBegrunnelseSpesifikasjon = standardbegrunnelse
 )
 
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(
@@ -903,7 +904,7 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
         standardbegrunnelserFraFrontend = listOf(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
         )
     )
 }
@@ -956,7 +957,7 @@ fun lagEndretUtbetalingAndel(
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
-    vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
+    standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
     andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf()
 ) =
     EndretUtbetalingAndel(
@@ -970,7 +971,7 @@ fun lagEndretUtbetalingAndel(
         avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
         søknadstidspunkt = søknadstidspunkt,
         begrunnelse = "Test",
-        vedtakBegrunnelseSpesifikasjoner = vedtakBegrunnelseSpesifikasjoner,
+        standardbegrunnelser = standardbegrunnelser,
         andelTilkjentYtelser = andelTilkjentYtelser
     )
 

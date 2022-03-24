@@ -28,7 +28,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
@@ -203,7 +203,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentFomTekst(
     FORTSATT_INNVILGET -> hentFomtekstFortsattInnvilget(
         brevMålform,
         this.fom,
-        this.begrunnelser.map { it.vedtakBegrunnelseSpesifikasjon }
+        this.begrunnelser.map { it.standardbegrunnelse }
     ) ?: "Du får:"
     UTBETALING -> fom!!.tilDagMånedÅr()
     ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling perioder når erIngenOverlappVedtaksperiodeTogglePå=true")
@@ -354,7 +354,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentFortsattInnvilgetBrevPeriode(
     val fom = hentFomtekstFortsattInnvilget(
         målform = målform,
         fom = this.fom,
-        begrunnelser = this.begrunnelser.map { it.vedtakBegrunnelseSpesifikasjon }
+        begrunnelser = this.begrunnelser.map { it.standardbegrunnelse }
     )
     return FortsattInnvilgetBrevPeriode(
         fom = fom ?: "Du får:",
@@ -368,11 +368,11 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentFortsattInnvilgetBrevPeriode(
 private fun hentFomtekstFortsattInnvilget(
     målform: Målform,
     fom: LocalDate?,
-    begrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
+    begrunnelser: List<Standardbegrunnelse>,
 ): String? {
     val erAutobrev = begrunnelser.any {
-        it == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ||
-            it == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
+        it == Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ||
+            it == Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
     }
     return if (erAutobrev && fom != null) {
         val fra = if (målform == Målform.NB) "Fra" else "Frå"

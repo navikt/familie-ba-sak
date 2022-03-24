@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import org.junit.jupiter.api.Assertions
@@ -23,7 +23,7 @@ class VedtaksbegrunnelseTest {
     val barn3 = lagPerson(type = PersonType.BARN)
 
     val restVedtaksbegrunnelse = lagRestVedtaksbegrunnelse(
-        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
+        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
         vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
     )
 
@@ -38,7 +38,7 @@ class VedtaksbegrunnelseTest {
     @Test
     fun `skal ta med alle barnas fødselsdatoer ved avslag på søker, men ikke inkludere dem i antall barn`() {
         val brevBegrunnelseGrunnlagMedPersoner = lagBrevBegrunnelseGrunnlagMedPersoner(
-            vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
+            standardbegrunnelse = Standardbegrunnelse.AVSLAG_BOR_HOS_SØKER,
             personIdenter = listOf(søker).map { it.aktør.aktivFødselsnummer() },
             vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         )
@@ -74,7 +74,7 @@ class VedtaksbegrunnelseTest {
         }
 
         val brevBegrunnelseGrunnlagMedPersoner = lagBrevBegrunnelseGrunnlagMedPersoner(
-            vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN,
+            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
             personIdenter = emptyList(),
             vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         )

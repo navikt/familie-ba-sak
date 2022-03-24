@@ -14,14 +14,16 @@ import org.springframework.core.NestedExceptionUtils
 class SentryConfiguration(
     @Value("\${sentry.environment}") val environment: String,
     @Value("\${sentry.dsn}") val dsn: String,
+    @Value("\${sentry.logging.enabled}") val enabled: Boolean
 ) {
     init {
         Sentry.init { options ->
-            options.dsn = dsn
+            options.dsn = if (enabled) dsn else "" // Tom streng betryr at Sentry er disabled
             options.environment = environment
             options.beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
                 Sentry.configureScope { scope ->
                     scope.user = User().apply {
+                        id = SikkerhetContext.hentSaksbehandler()
                         email = SikkerhetContext.hentSaksbehandlerEpost()
                         username = SikkerhetContext.hentSaksbehandler()
                     }

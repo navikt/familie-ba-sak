@@ -6,7 +6,7 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD"
+      "standardbegrunnelse": "REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD"
     }
   ],
   "fritekster": [],
