@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -66,7 +66,7 @@ class RestartAvSmåbarnstilleggService(
                 vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
             }
 
-        val standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG)
+        val standardbegrunnelser = listOf(Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG)
 
         return vedtaksperioderForVedtatteBehandlinger.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = standardbegrunnelser,

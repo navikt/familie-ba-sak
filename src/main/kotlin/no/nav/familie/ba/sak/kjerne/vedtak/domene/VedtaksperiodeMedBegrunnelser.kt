@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentAndelerForSegment
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -155,11 +155,11 @@ data class VedtaksperiodeMedBegrunnelser(
 }
 
 fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
-    standardbegrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
+    standardbegrunnelser: List<Standardbegrunnelse>,
     måned: YearMonth
 ): Boolean {
     return this.any {
-        it.fom?.toYearMonth() == måned && it.begrunnelser.any { standardbegrunnelse -> standardbegrunnelse.vedtakBegrunnelseSpesifikasjon in standardbegrunnelser }
+        it.fom?.toYearMonth() == måned && it.begrunnelser.any { standardbegrunnelse -> standardbegrunnelse.standardbegrunnelse in standardbegrunnelser }
     }
 }
 
@@ -173,7 +173,7 @@ private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<Andel
 class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {
 
     override fun compare(o1: Vedtaksbegrunnelse, o2: Vedtaksbegrunnelse): Int {
-        return if (o1.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
+        return if (o1.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
             -1
         } else 1
     }

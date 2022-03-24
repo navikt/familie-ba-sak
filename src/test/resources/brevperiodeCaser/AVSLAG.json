@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "AVSLAG_BOR_HOS_SØKER"
+      "standardbegrunnelse": "AVSLAG_BOR_HOS_SØKER"
     }
   ],
   "fritekster": [],

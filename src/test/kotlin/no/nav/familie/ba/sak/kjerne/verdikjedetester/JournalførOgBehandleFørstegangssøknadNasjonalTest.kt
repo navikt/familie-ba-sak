@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -159,7 +159,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER
                 )
             )
         )
@@ -340,7 +340,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER
                 )
             )
         )

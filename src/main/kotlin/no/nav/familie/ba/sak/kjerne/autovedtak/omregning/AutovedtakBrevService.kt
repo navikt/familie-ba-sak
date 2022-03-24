@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -26,7 +26,7 @@ import java.time.YearMonth
 data class AutovedtakBrevBehandlingsdata(
     val aktør: Aktør,
     val behandlingsårsak: BehandlingÅrsak,
-    val standardbegrunnelse: VedtakBegrunnelseSpesifikasjon
+    val standardbegrunnelse: Standardbegrunnelse
 )
 
 @Service
@@ -52,7 +52,7 @@ class AutovedtakBrevService(
 
         vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id),
-            vedtakBegrunnelseSpesifikasjon = behandlingsdata.standardbegrunnelse
+            standardbegrunnelse = behandlingsdata.standardbegrunnelse
         )
 
         val opprettetVedtak =
@@ -68,7 +68,7 @@ class AutovedtakBrevService(
     fun skalAutobrevBehandlingOpprettes(
         fagsakId: Long,
         behandlingsårsak: BehandlingÅrsak,
-        standardbegrunnelser: List<VedtakBegrunnelseSpesifikasjon>
+        standardbegrunnelser: List<Standardbegrunnelse>
     ): Boolean {
         if (!behandlingsårsak.erOmregningsårsak()) {
             throw Feil("Sjekk om autobrevbehandling skal opprettes sjekker på årsak som ikke er omregning.")
@@ -124,7 +124,7 @@ class AutovedtakBrevService(
 
     private fun barnAlleredeBegrunnet(
         vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
-        standardbegrunnelser: List<VedtakBegrunnelseSpesifikasjon>
+        standardbegrunnelser: List<Standardbegrunnelse>
     ): Boolean {
         return vedtaksperioderMedBegrunnelser.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = standardbegrunnelser,
