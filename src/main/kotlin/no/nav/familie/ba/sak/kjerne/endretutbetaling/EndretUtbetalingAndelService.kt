@@ -141,7 +141,7 @@ class EndretUtbetalingAndelService(
             val utvidetScenario =
                 andelTilkjentYtelser.hentUtvidetScenarioForEndringsperiode(it.periode)
 
-            it.vedtakBegrunnelseSpesifikasjoner =
+            it.standardbegrunnelser =
                 listOf(
                     it.hentGyldigEndretBegrunnelse(
                         sanityService.hentSanityBegrunnelser(),

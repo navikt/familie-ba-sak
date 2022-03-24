@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -285,10 +285,10 @@ object VilkårsvurderingUtils {
     }
 }
 
-fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(
+fun standardbegrunnelserTilNedtrekksmenytekster(
     sanityBegrunnelser: List<SanityBegrunnelse>
 ) =
-    VedtakBegrunnelseSpesifikasjon
+    Standardbegrunnelse
         .values()
         .groupBy { it.vedtakBegrunnelseType }
         .mapValues { begrunnelseGruppe ->
@@ -303,7 +303,7 @@ fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(
 
 fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
+    vedtakBegrunnelse: Standardbegrunnelse,
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
     val sanityBegrunnelse = vedtakBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser) ?: return emptyList()
 

@@ -180,7 +180,7 @@ fun hentHjemlerIVedtaksperioderFraSanity(
 ): List<String> =
     brevPeriodeGrunnlag.flatMap { periode ->
         periode.begrunnelser.mapNotNull {
-            it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser)?.hjemler
+            it.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)?.hjemler
         }.flatten()
     }
 

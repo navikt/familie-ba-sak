@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "AVSLAG_IKKE_MEKLINGSATTEST"
+      "standardbegrunnelse": "AVSLAG_IKKE_MEKLINGSATTEST"
     }
   ],
   "fritekster": [],
