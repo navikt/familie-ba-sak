@@ -219,6 +219,8 @@ class DokumentService(
     ) = try {
         distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
     } catch (ressursException: RessursException) {
+        logger.info("Klarte ikke å distribuere brev til journalpost $journalpostId. Httpstatus ${ressursException.httpStatus}")
+
         when {
             mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null ->
                 loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
