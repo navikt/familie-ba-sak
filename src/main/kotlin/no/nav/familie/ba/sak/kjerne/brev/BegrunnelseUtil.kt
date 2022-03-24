@@ -71,7 +71,9 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 
         erFortsattInnvilgetBegrunnelse ||
             erEndretUtbetalingBegrunnelse -> identerMedUtbetalingPåPeriode
-        erReduksjonBegrunnelseMedRedusertPeriode -> identerMedReduksjonPåPeriode
+        triggesAv.gjelderFraInnvilgelsestidspunkt ->
+            if (erReduksjonBegrunnelseMedRedusertPeriode) identerMedReduksjonPåPeriode
+            else emptyList()
 
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(
