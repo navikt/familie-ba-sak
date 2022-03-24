@@ -56,8 +56,6 @@ class LagreMigreringsdatoTest {
 
     private val behandlingService = BehandlingService(
         behandlingRepository,
-        beregningService,
-        personopplysningGrunnlagRepository,
         andelTilkjentYtelseRepository,
         behandlingMetrikker,
         fagsakRepository,
@@ -69,6 +67,7 @@ class LagreMigreringsdatoTest {
         infotrygdService,
         vedtaksperiodeService,
         personidentService,
+        beregningService,
         featureToggleService,
         taskRepository,
         behandlingMigreringsinfoRepository,
