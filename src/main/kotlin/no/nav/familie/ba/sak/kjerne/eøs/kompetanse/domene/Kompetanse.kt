@@ -30,4 +30,4 @@ fun Kompetanse.blankUt() = this.copy(
     primærland = null,
     sekundærland = null,
     status = KompetanseStatus.IKKE_UTFYLT
-)
+).also { it.id = this.id }

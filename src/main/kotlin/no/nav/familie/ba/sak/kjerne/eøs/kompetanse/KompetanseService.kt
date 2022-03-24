@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseUtil.mergeKompetanser
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseUtil.revurderStatus
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseUtil.slåSammenKompetanser
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.blankUt
 import org.springframework.http.HttpStatus
@@ -24,10 +24,9 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
 
         val restKompetanser = KompetanseUtil.finnRestKompetanser(gammelKompetanse, oppdatertKompetanse)
 
-        val revurderteKompetanser = revurderStatus(restKompetanser + oppdatertKompetanse)
-
-        val tilLagring = mergeKompetanser(revurderteKompetanser)
-        val tilSletting = listOf(gammelKompetanse).minus(tilLagring)
+        val revurderteKompetanser = slåSammenKompetanser(revurderStatus(restKompetanser + oppdatertKompetanse))
+        val tilLagring = revurderteKompetanser - gammelKompetanse
+        val tilSletting = listOf(gammelKompetanse) - revurderteKompetanser
 
         if (tilLagring != tilSletting) {
             kompetanseRepository.delete(tilSletting)
@@ -37,7 +36,7 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
     }
 
     @Transactional
-    fun slettKompetamse(kompetanseId: Long): Collection<Kompetanse> {
+    fun slettKompetanse(kompetanseId: Long): Collection<Kompetanse> {
         val gammelKompetanse = kompetanseRepository.hentKompetanse(kompetanseId)
         val behandlingId = gammelKompetanse.behandlingId
         val eksisterendeKompetanser = hentKompetanser(behandlingId)
@@ -46,8 +45,9 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
         val oppdaterteKompetanser =
             eksisterendeKompetanser.minus(gammelKompetanse).plus(blankKompetamse)
 
-        val tilLagring = mergeKompetanser(revurderStatus(oppdaterteKompetanser))
-        val tilSletting = eksisterendeKompetanser.minus(tilLagring)
+        val revurderteKompetanser = slåSammenKompetanser(revurderStatus(oppdaterteKompetanser))
+        val tilLagring = revurderteKompetanser.minus(eksisterendeKompetanser)
+        val tilSletting = eksisterendeKompetanser.minus(revurderteKompetanser)
 
         if (tilLagring != tilSletting) {
             kompetanseRepository.delete(tilSletting)

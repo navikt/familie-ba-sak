@@ -53,21 +53,21 @@ object KompetanseUtil {
             else -> KompetanseStatus.IKKE_UTFYLT
         }
 
-        return kompetanse.copy(status = nyStatus)
+        return kompetanse.copy(status = nyStatus).also { it.id = kompetanse.id }
     }
 
-    fun mergeKompetanser(kompetanser: Collection<Kompetanse>): Collection<Kompetanse> {
+    fun slåSammenKompetanser(kompetanser: Collection<Kompetanse>): Collection<Kompetanse> {
         return kompetanser.map { EnkeltKompetanseTidslinje(it) }
             .let { SlåSammenKompetanserTidslinje(it) }
             .perioder().flatMap { periode -> periode.innhold?.settFomOgTom(periode) ?: emptyList() }
     }
 
     fun Iterable<Kompetanse>?.settFomOgTom(periode: Periode<*, Måned>) =
-        this?.map {
-            it.copy(
+        this?.map { kompetanse ->
+            kompetanse.copy(
                 fom = periode.fraOgMed.tilYearMonthEllerNull(),
                 tom = periode.tilOgMed.tilYearMonthEllerNull()
-            )
+            ).also { it.id = kompetanse.id }
         }
 }
 

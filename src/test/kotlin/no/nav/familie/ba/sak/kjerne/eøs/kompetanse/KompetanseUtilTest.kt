@@ -46,7 +46,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("SSSSSS", barn1)
             .byggKompetanser()
 
-        val faktiskeKompetanser = KompetanseUtil.mergeKompetanser(kompetanser)
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
         assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -61,7 +61,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("SSS SSS", barn1, barn2, barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = KompetanseUtil.mergeKompetanser(kompetanser)
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -76,7 +76,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("->", barn1, barn2, barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = KompetanseUtil.mergeKompetanser(kompetanser)
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
         assertEquals(null, faktiskeKompetanser.first().tom)
     }
@@ -92,7 +92,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("--------", barn1, barn2, barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = KompetanseUtil.mergeKompetanser(kompetanser)
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -107,7 +107,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("->", barn1, barn2, barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = KompetanseUtil.mergeKompetanser(kompetanser)
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
         assertEquals(januar2020, faktiskeKompetanser.first().fom)
         assertEquals(null, faktiskeKompetanser.first().tom)
@@ -131,7 +131,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("-      ", barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = KompetanseUtil.mergeKompetanser(kompetanser)
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
         assertEquals(6, faktiskeKompetanser.size)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }

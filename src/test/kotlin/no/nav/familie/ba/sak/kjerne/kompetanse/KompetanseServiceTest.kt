@@ -18,7 +18,7 @@ internal class KompetanseServiceTest {
         val oppdatertKompetanse = kompetanse.copy(
             fom = kompetanse.fom!!.plusMonths(2),
             tom = kompetanse.tom!!.minusMonths(2),
-        )
+        ).also { it.id = kompetanse.id }
 
         val kompetanserEtterOppdatering = kompetanseService.oppdaterKompetanse(oppdatertKompetanse).toList()
         assertEquals(1, kompetanserEtterOppdatering.size)
@@ -36,12 +36,14 @@ internal class KompetanseServiceTest {
             fom = kompetanse.fom!!.plusMonths(2),
             tom = kompetanse.tom!!.minusMonths(2),
             søkersAktivitet = "Jobb"
-        )
+        ).also { it.id = kompetanse.id }
 
         val kompetanserEtterOppdatering = kompetanseService.oppdaterKompetanse(oppdatertKompetanse).toList()
         assertEquals(3, kompetanserEtterOppdatering.size)
 
-        val kompetanserEtterSletting = kompetanseService.slettKompetamse(kompetanserEtterOppdatering[0].id)
+        val tilSletting = kompetanserEtterOppdatering.find { it.søkersAktivitet == "Jobb" }
+
+        val kompetanserEtterSletting = kompetanseService.slettKompetanse(tilSletting!!.id)
         assertEquals(1, kompetanserEtterSletting.size)
     }
 }
