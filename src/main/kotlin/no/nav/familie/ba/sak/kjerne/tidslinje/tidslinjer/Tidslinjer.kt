@@ -22,44 +22,35 @@ class Tidslinjer(
 ) {
     private val barna = vilkårsvurdering.personResultater.filter { !it.erSøkersResultater() }.map { it.aktør }
     private val søker = vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.aktør
-    private val aktørTilPersonResultater = vilkårsvurdering.personResultater.associateBy { it.aktør }
+    private val aktørTilPersonResultater =
+        vilkårsvurdering.personResultater.associateBy { it.aktør }
 
-    private val barnasVilkårsresultatTidslinjeMap = aktørTilPersonResultater
-        .filter { !it.value.erSøkersResultater() }
+    private val vilkårsresultaterTidslinjeMap = aktørTilPersonResultater
         .entries.associate { (aktør, personResultat) ->
             aktør to personResultat.vilkårResultater.groupBy { it.vilkårType }
                 .map {
-                    val barnFødselsdato = barnOgFødselsdatoer[aktør] ?: throw Feil("Finner ikke fødselsdato på barn")
-                    VilkårResultatTidslinje(
-                        vilkårsresultater = it.value,
-                        praktiskTidligsteDato = barnFødselsdato,
-                        praktiskSenesteDato = barnFødselsdato.til18ÅrsVilkårsdato()
-                        /**.filter { vilkårResultat ->
-
-                         // TODO støtt perioder med uendelig fom og tom, kan komme i kombinasjon med perioder med fom eller tom
-                         vilkårResultat.periodeFom != null || vilkårResultat.periodeTom != null
-                         }*/
-                    )
+                    if (personResultat.erSøkersResultater()) {
+                        VilkårResultatTidslinje(
+                            vilkårsresultater = it.value,
+                            praktiskTidligsteDato = søkersFødselsdato,
+                            praktiskSenesteDato = yngsteBarnSin18årsdag.til18ÅrsVilkårsdato()
+                        )
+                    } else {
+                        val barnFødselsdato =
+                            barnOgFødselsdatoer[aktør] ?: throw Feil("Finner ikke fødselsdato på barn")
+                        VilkårResultatTidslinje(
+                            vilkårsresultater = it.value,
+                            praktiskTidligsteDato = barnFødselsdato,
+                            praktiskSenesteDato = barnFødselsdato.til18ÅrsVilkårsdato()
+                        )
+                    }
                 }
         }
 
-    val søkersVilkårsresultatTidslinjer = aktørTilPersonResultater
-        .filter { it.value.erSøkersResultater() }
-        .flatMap { (_, personResultat) ->
-            personResultat.vilkårResultater
-                .groupBy { it.vilkårType }
-                .map {
-                    VilkårResultatTidslinje(
-                        vilkårsresultater = it.value,
-                        praktiskTidligsteDato = søkersFødselsdato,
-                        praktiskSenesteDato = yngsteBarnSin18årsdag.til18ÅrsVilkårsdato()
-                    )
-                }
-        }
+    private val søkersTidslinje: SøkersTidslinjerTimeline =
+        SøkersTidslinjerTimeline(this, søker)
 
-    val søkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-        søkersVilkårsresultatTidslinjer.map { VilkårsresultatMånedTidslinje(it) }
-            .kombiner(SøkerOppfyllerVilkårKombinator())
+    fun søkersTidslinje(): SøkersTidslinjerTimeline = søkersTidslinje
 
     private val barnasTidslinjer: Map<Aktør, BarnetsTidslinjerTimeline> =
         barna.associateWith { BarnetsTidslinjerTimeline(this, it) }
@@ -69,34 +60,58 @@ class Tidslinjer(
     fun barnasTidslinjer(): Map<Aktør, BarnetsTidslinjerTimeline> =
         barnasTidslinjer.entries.associate { it.key to it.value }
 
+    interface SøkersTidslinjer {
+        val vilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat, Dag>>
+        val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned>
+        val regelverkTidslinje: Tidslinje<Regelverk, Måned>
+    }
+
     interface BarnetsTidslinjer {
-        val barnetsVilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat, Dag>>
-        val barnetOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned>
+        val vilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat, Dag>>
+        val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned>
         val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned>
         val regelverkTidslinje: Tidslinje<Regelverk, Måned>
     }
 
-    class BarnetsTidslinjerTimeline(
+    class SøkersTidslinjerTimeline(
         tidslinjer: Tidslinjer,
-        barnAktør: Aktør,
-    ) : BarnetsTidslinjer {
-        override val barnetsVilkårsresultatTidslinjer = tidslinjer.barnasVilkårsresultatTidslinjeMap[barnAktør]!!
+        aktør: Aktør,
+    ) : SøkersTidslinjer {
+        override val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør]!!
 
-        val barnetsVilkårsresultatMånedTidslinjer =
-            barnetsVilkårsresultatTidslinjer.map {
+        val vilkårsresultatMånedTidslinjer =
+            vilkårsresultatTidslinjer.map {
                 VilkårsresultatMånedTidslinje(it)
             }
 
-        override val barnetOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-            barnetsVilkårsresultatMånedTidslinjer.kombiner(BarnOppfyllerVilkårKombinator())
+        override val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
+            vilkårsresultatMånedTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator())
+
+        override val regelverkTidslinje =
+            vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator())
+    }
+
+    class BarnetsTidslinjerTimeline(
+        tidslinjer: Tidslinjer,
+        aktør: Aktør,
+    ) : BarnetsTidslinjer {
+        override val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør]!!
+
+        val vilkårsresultatMånedTidslinjer =
+            vilkårsresultatTidslinjer.map {
+                VilkårsresultatMånedTidslinje(it)
+            }
+
+        override val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
+            vilkårsresultatMånedTidslinjer.kombiner(BarnOppfyllerVilkårKombinator())
 
         override val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-            barnetOppfyllerVilkårTidslinje.kombinerMed(
-                tidslinjer.søkerOppfyllerVilkårTidslinje,
+            oppfyllerVilkårTidslinje.kombinerMed(
+                tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje,
                 BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()
             )
 
         override val regelverkTidslinje =
-            barnetsVilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator())
+            vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator())
     }
 }

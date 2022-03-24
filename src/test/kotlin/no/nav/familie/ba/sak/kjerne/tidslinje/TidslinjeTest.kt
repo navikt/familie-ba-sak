@@ -48,10 +48,10 @@ internal class TidslinjeTest {
             barnOgFødselsdatoer = mapOf(barn1.aktør to barn1.fødselsdato, barn2.aktør to barn2.fødselsdato)
         )
 
-        tidslinjer.forBarn(barn2).barnetsVilkårsresultatTidslinjer.print()
+        tidslinjer.forBarn(barn2).vilkårsresultatTidslinjer.print()
 
         println("Søker")
-        tidslinjer.søkerOppfyllerVilkårTidslinje.print()
+        tidslinjer.søkersTidslinje().oppfyllerVilkårTidslinje.print()
         println("Barn: ${barn1.aktør.aktivFødselsnummer()}")
         tidslinjer.forBarn(barn1).regelverkTidslinje.print()
         println("Barn: ${barn2.aktør.aktivFødselsnummer()}")
