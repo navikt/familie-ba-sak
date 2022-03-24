@@ -240,12 +240,24 @@ class LoggService(
         )
     }
 
-    fun opprettBrevIkkeDistribuertUkjentAdresseLogg(behandlingId: Long, brevnavn: String, begrunnelse: String) {
+    fun opprettBrevIkkeDistribuertUkjentAdresseLogg(behandlingId: Long, brevnavn: String) {
         lagre(
             Logg(
                 behandlingId = behandlingId,
                 type = LoggType.BREV_IKKE_DISTRIBUERT,
-                tittel = "Brevet ble ikke distribuert fordi $begrunnelse.",
+                tittel = "Brevet ble ikke distribuert fordi mottaker har ukjent adresse",
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
+                tekst = brevnavn
+            )
+        )
+    }
+
+    fun opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(behandlingId: Long, brevnavn: String) {
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.BREV_IKKE_DISTRIBUERT_UKJENT_DØDSBO,
+                tittel = "Mottaker har ukjent dødsboadresse, og brevet blir ikke sendt før adressen er satt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
                 tekst = brevnavn
             )
