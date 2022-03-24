@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.StandardbegrunnelseListConverter
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTriggereOppfyltForEndretUtbetaling
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
@@ -87,7 +87,7 @@ data class EndretUtbetalingAndel(
     val andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf(),
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
-    @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
+    @Convert(converter = StandardbegrunnelseListConverter::class)
     var vedtakBegrunnelseSpesifikasjoner: List<Standardbegrunnelse> = emptyList()
 ) : BaseEntitet() {
 
@@ -185,8 +185,8 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
         .filter { vedtakBegrunnelseSpesifikasjon ->
             vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
         }
-        .filter { vedtakBegrunnelseSpesifikasjon ->
-            val sanityBegrunnelse = vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser)
+        .filter { standardbegrunnelseer ->
+            val sanityBegrunnelse = standardbegrunnelseer.tilSanityBegrunnelse(sanityBegrunnelser)
 
             if (sanityBegrunnelse != null) {
                 val triggesAv = sanityBegrunnelse.tilTriggesAv()

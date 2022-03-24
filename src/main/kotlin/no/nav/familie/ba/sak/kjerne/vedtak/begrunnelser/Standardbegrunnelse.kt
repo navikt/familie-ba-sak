@@ -1149,7 +1149,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
 }
 
 @Converter
-class VedtakBegrunnelseSpesifikasjonListConverter :
+class StandardbegrunnelseListConverter :
     AttributeConverter<List<Standardbegrunnelse>, String> {
 
     override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjoner: List<Standardbegrunnelse>) =

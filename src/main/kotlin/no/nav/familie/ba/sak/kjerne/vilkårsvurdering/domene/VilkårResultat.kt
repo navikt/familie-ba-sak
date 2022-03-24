@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.StandardbegrunnelseListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
@@ -81,7 +81,7 @@ class VilkårResultat(
     var regelOutput: String? = null,
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
-    @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
+    @Convert(converter = StandardbegrunnelseListConverter::class)
     var vedtakBegrunnelseSpesifikasjoner: List<Standardbegrunnelse> = emptyList(),
 
     @Enumerated(EnumType.STRING)

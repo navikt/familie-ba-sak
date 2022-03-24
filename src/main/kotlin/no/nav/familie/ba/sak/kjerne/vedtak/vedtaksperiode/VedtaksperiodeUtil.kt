@@ -55,10 +55,10 @@ fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
                     vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
                         endretUtbetalingAndeler
                             .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
-                            .map { vedtakBegrunnelseSpesifikasjon ->
+                            .map { standardbegrunnelse ->
                                 Vedtaksbegrunnelse(
                                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
-                                    standardbegrunnelse = vedtakBegrunnelseSpesifikasjon,
+                                    standardbegrunnelse = standardbegrunnelse,
                                 )
                             }
                     )

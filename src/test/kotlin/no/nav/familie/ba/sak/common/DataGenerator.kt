@@ -870,6 +870,7 @@ fun lagRestVedtaksbegrunnelse(
 ) = RestVedtaksbegrunnelse(
     standardbegrunnelse = standardbegrunnelse,
     vedtakBegrunnelseType = vedtakBegrunnelseType,
+    vedtakBegrunnelseSpesifikasjon = standardbegrunnelse
 )
 
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(

@@ -285,7 +285,7 @@ object VilkårsvurderingUtils {
     }
 }
 
-fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(
+fun standardbegrunnelserTilNedtrekksmenytekster(
     sanityBegrunnelser: List<SanityBegrunnelse>
 ) =
     Standardbegrunnelse

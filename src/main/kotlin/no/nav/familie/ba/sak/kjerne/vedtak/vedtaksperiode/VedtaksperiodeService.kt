@@ -549,7 +549,7 @@ class VedtaksperiodeService(
 
         val avslagsperioder = periodegrupperteAvslagsvilkår.map { (fellesPeriode, vilkårResultater) ->
 
-            val vedtakBegrunnelseSpesifikasjoner =
+            val standardbegrunnelser =
                 vilkårResultater.map { it.vedtakBegrunnelseSpesifikasjoner }.flatten().toSet().toList()
 
             VedtaksperiodeMedBegrunnelser(
@@ -560,7 +560,7 @@ class VedtaksperiodeService(
             )
                 .apply {
                     begrunnelser.addAll(
-                        vedtakBegrunnelseSpesifikasjoner.map { begrunnelse ->
+                        standardbegrunnelser.map { begrunnelse ->
                             Vedtaksbegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,
                                 standardbegrunnelse = begrunnelse
