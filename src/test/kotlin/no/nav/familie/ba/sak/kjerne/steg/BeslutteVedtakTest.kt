@@ -57,6 +57,7 @@ class BeslutteVedtakTest {
         taskRepository = mockk()
         dokumentService = mockk()
         behandlingService = mockk()
+        beregningService = mockk()
         vilkårsvurderingService = mockk()
         featureToggleService = mockk()
         tilkjentYtelseValideringService = mockk()
