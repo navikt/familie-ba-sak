@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.FerdigstillOppgaver
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
@@ -148,6 +149,40 @@ class BeslutteVedtakTest {
             )
         }
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
+    }
+
+    @Test
+    fun `Skal ikke iverksette hvis mangler utbtalingsperioder`() {
+        val behandling = lagBehandling()
+        val vedtak = lagVedtak(behandling)
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+        every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
+        every { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling) } returns true
+
+        mockkObject(JournalførVedtaksbrevTask.Companion)
+        every {
+            JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+                any(),
+                any(),
+                any(),
+            )
+        } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+
+        val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+
+        verify(exactly = 1) { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling) }
+
+        verify(exactly = 1) {
+            JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+                personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                behandlingId = behandling.id,
+                vedtakId = vedtak.id,
+            )
+        }
+        Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, nesteSteg)
     }
 
     @Test
