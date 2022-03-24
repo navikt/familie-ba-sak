@@ -45,7 +45,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             identerMedUtbetalingPåPeriode
         ),
         triggesAv = triggesAv,
-        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        personIdenterMedUtbetaling = identerMedUtbetalingPåPeriode,
     ).map { person -> person.personIdent }
 
     return when {

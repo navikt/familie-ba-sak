@@ -51,6 +51,10 @@ fun Standardbegrunnelse.triggesForPeriode(
             } else true
         }
 
+    val personIdenterMedUtbetaling = aktuellePersoner.filter { person ->
+        aktørIderMedUtbetaling.contains(person.aktørId)
+    }.map { it.aktivPersonIdent }
+
     val ytelseTyperForPeriode = minimertVedtaksperiode.ytelseTyperForPeriode
 
     fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
@@ -62,7 +66,8 @@ fun Standardbegrunnelse.triggesForPeriode(
         oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
         aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
         triggesAv = triggesAv,
-        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        personIdenterMedUtbetaling = personIdenterMedUtbetaling,
     )
 
     return when {

@@ -34,7 +34,8 @@ fun hentPersonerForAlleUtgjørendeVilkår(
     oppdatertBegrunnelseType: VedtakBegrunnelseType,
     aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
     triggesAv: TriggesAv,
-    erFørsteVedtaksperiodePåFagsak: Boolean
+    erFørsteVedtaksperiodePåFagsak: Boolean,
+    personIdenterMedUtbetaling: List<String>
 ): Set<MinimertRestPerson> {
     return triggesAv.vilkår.fold(setOf()) { acc, vilkår ->
         acc + hentPersonerMedUtgjørendeVilkår(
@@ -44,7 +45,8 @@ fun hentPersonerForAlleUtgjørendeVilkår(
             vilkårGjeldendeForBegrunnelse = vilkår,
             aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
             triggesAv = triggesAv,
-            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+            personIdenterMedUtbetaling = personIdenterMedUtbetaling
         )
     }
 }
@@ -56,7 +58,8 @@ private fun hentPersonerMedUtgjørendeVilkår(
     vilkårGjeldendeForBegrunnelse: Vilkår,
     aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
     triggesAv: TriggesAv,
-    erFørsteVedtaksperiodePåFagsak: Boolean
+    erFørsteVedtaksperiodePåFagsak: Boolean,
+    personIdenterMedUtbetaling: List<String>
 ): List<MinimertRestPerson> {
 
     val aktuellePersonidenter = aktuellePersonerForVedtaksperiode.map { it.personIdent }
@@ -73,7 +76,8 @@ private fun hentPersonerMedUtgjørendeVilkår(
                             begrunnelseType = begrunnelseType,
                             triggesAv = triggesAv,
                             vedtaksperiode = vedtaksperiode,
-                            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+                            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                            personHarUtbetalingIVedtaksperiode = personIdenterMedUtbetaling.contains(personResultat.personIdent)
                         )
                     }
 
@@ -94,6 +98,7 @@ private fun erVilkårResultatUtgjørende(
     triggesAv: TriggesAv,
     vedtaksperiode: Periode,
     erFørsteVedtaksperiodePåFagsak: Boolean,
+    personHarUtbetalingIVedtaksperiode: Boolean,
 ): Boolean {
     if (minimertVilkårResultat.periodeFom == null && begrunnelseType != VedtakBegrunnelseType.AVSLAG) {
         return false
@@ -122,7 +127,8 @@ private fun erVilkårResultatUtgjørende(
             erReduksjonResultatUtgjøreneForPeriode(
                 minimertVilkårResultat = minimertVilkårResultat,
                 triggesAv = triggesAv,
-                vedtaksperiode = vedtaksperiode
+                vedtaksperiode = vedtaksperiode,
+                personHarUtbetalingIVedtaksperiode = personHarUtbetalingIVedtaksperiode
             )
         }
 
@@ -152,7 +158,8 @@ private fun erOpphørResultatUtgjøreneForPeriode(
 private fun erReduksjonResultatUtgjøreneForPeriode(
     minimertVilkårResultat: MinimertVilkårResultat,
     triggesAv: TriggesAv,
-    vedtaksperiode: Periode
+    vedtaksperiode: Periode,
+    personHarUtbetalingIVedtaksperiode: Boolean,
 ): Boolean {
     if (minimertVilkårResultat.periodeTom == null) {
         return false
@@ -169,10 +176,11 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
         .plusDays(if (erStartPåDeltBosted) 1 else 0)
         .plusMonths(if (erOppfyltTomMånedEtter) 1 else 0)
 
-    return triggereForUtdypendeVilkårsvurderingErOppfylt(
+    return triggereForUtdypendeVilkårsvurderingErOppfyltReduksjon(
         triggesAv = triggesAv,
         vilkårResultat = minimertVilkårResultat,
-        erReduksjonStartPåDeltBosted = erStartPåDeltBosted
+        erReduksjonStartPåDeltBosted = erStartPåDeltBosted,
+        personHarUtbetalingIVedtaksperiode = personHarUtbetalingIVedtaksperiode,
     ) &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
         startNestePeriodeEtterVilkår.toYearMonth() == vedtaksperiode.fom.toYearMonth()
@@ -228,18 +236,30 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
         (vilkårIkkeOppfyltForPeriode || vilkårOppfyltRettEtterPeriode)
 }
 
-private fun triggereForUtdypendeVilkårsvurderingErOppfylt(
+private fun triggereForUtdypendeVilkårsvurderingErOppfyltReduksjon(
     triggesAv: TriggesAv,
     vilkårResultat: MinimertVilkårResultat,
-    erReduksjonStartPåDeltBosted: Boolean = false,
+    erReduksjonStartPåDeltBosted: Boolean,
+    personHarUtbetalingIVedtaksperiode: Boolean,
 ): Boolean {
-
     val resultatInneholderDeltBosted =
         vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
     val erDeltBostedOppfylt =
         triggesAv.deltbosted &&
             erReduksjonStartPåDeltBosted != resultatInneholderDeltBosted ||
             !triggesAv.deltbosted
+
+    val delvisReduksjonOppfylt = erReduksjonStartPåDeltBosted == personHarUtbetalingIVedtaksperiode
+
+    return erDeltBostedOppfylt &&
+        delvisReduksjonOppfylt &&
+        triggereForUtdypendeVilkårsvurderingErOppfylt(triggesAv, vilkårResultat)
+}
+
+private fun triggereForUtdypendeVilkårsvurderingErOppfylt(
+    triggesAv: TriggesAv,
+    vilkårResultat: MinimertVilkårResultat,
+): Boolean {
 
     val erDeltBostedSkalIkkDelesOppfylt =
         (
@@ -260,5 +280,5 @@ private fun triggereForUtdypendeVilkårsvurderingErOppfylt(
     val erMedlemskapOppfylt =
         triggesAv.medlemskap == resultatInneholderMedlemsskap
 
-    return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt && erDeltBostedSkalIkkDelesOppfylt
+    return erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt && erDeltBostedSkalIkkDelesOppfylt
 }
