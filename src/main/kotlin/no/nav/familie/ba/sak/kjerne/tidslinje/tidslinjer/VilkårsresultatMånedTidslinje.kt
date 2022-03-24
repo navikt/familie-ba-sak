@@ -11,7 +11,7 @@ class VilkårsresultatMånedTidslinje(
     private val vilkårResultatTidslinje: VilkårResultatTidslinje,
 ) : Tidslinje<VilkårRegelverkResultat, Måned>() {
 
-    override fun fraOgMed() = vilkårResultatTidslinje.fraOgMed().tilInneværendeMåned().neste()
+    override fun fraOgMed() = vilkårResultatTidslinje.fraOgMed().tilInneværendeMåned()
 
     override fun tilOgMed() = vilkårResultatTidslinje.tilOgMed().tilInneværendeMåned()
 

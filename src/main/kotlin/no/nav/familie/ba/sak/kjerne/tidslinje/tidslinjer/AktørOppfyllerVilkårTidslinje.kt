@@ -10,8 +10,6 @@ private val nødvendigeVilkårSøker = listOf(
     Vilkår.BOSATT_I_RIKET
 )
 
-private val nødvendigeVilkårSøkerMedUtvidet = nødvendigeVilkårSøker + Vilkår.UTVIDET_BARNETRYGD
-
 private val nødvendigeVilkårBarn = listOf(
     Vilkår.UNDER_18_ÅR,
     Vilkår.BOR_MED_SØKER,
@@ -22,15 +20,10 @@ private val nødvendigeVilkårBarn = listOf(
 
 class SøkerOppfyllerVilkårKombinator : ListeKombinator<VilkårRegelverkResultat, Resultat> {
     override fun kombiner(liste: Iterable<VilkårRegelverkResultat>): Resultat {
-        val nødvendigeVilkårAvhengigAvVurdering =
-            if (liste.any {
-                it.vilkår == Vilkår.UTVIDET_BARNETRYGD
-            }
-            ) nødvendigeVilkårSøkerMedUtvidet else nødvendigeVilkårSøker
 
         return when {
             liste.all { it.resultat == Resultat.OPPFYLT } &&
-                liste.map { it.vilkår }.distinct().containsAll(nødvendigeVilkårAvhengigAvVurdering) -> Resultat.OPPFYLT
+                liste.map { it.vilkår }.distinct().containsAll(nødvendigeVilkårSøker) -> Resultat.OPPFYLT
             liste.any { it.resultat == Resultat.IKKE_OPPFYLT } -> Resultat.IKKE_OPPFYLT
             else -> Resultat.IKKE_VURDERT
         }

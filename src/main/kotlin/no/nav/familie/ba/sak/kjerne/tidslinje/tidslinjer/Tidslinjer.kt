@@ -63,7 +63,6 @@ class Tidslinjer(
     interface SøkersTidslinjer {
         val vilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat, Dag>>
         val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned>
-        val regelverkTidslinje: Tidslinje<Regelverk, Måned>
     }
 
     interface BarnetsTidslinjer {
@@ -86,9 +85,6 @@ class Tidslinjer(
 
         override val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             vilkårsresultatMånedTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator())
-
-        override val regelverkTidslinje =
-            vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator())
     }
 
     class BarnetsTidslinjerTimeline(

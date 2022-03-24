@@ -2,9 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.rest
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårResultatTidslinje
@@ -26,12 +24,11 @@ fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
         søkersTidslinjer = RestTidslinjerForSøker(
             vilkårTidslinjer = søkersTidslinjer.vilkårsresultatTidslinjer.tilRestVilkårTidslinjer(),
             oppfyllerEgneVilkårTidslinje = søkersTidslinjer.oppfyllerVilkårTidslinje.tilRestOppfyllerVilkårTidslinje(),
-            regelverkTidslinje = søkersTidslinjer.regelverkTidslinje.tilRestRegelverkTidslinje()
         )
     )
 }
 
-fun List<VilkårResultatTidslinje>.tilRestVilkårTidslinjer(): List<List<RestTidslinjePeriode<VilkårRegelverkResultat, Dag>>> =
+fun List<VilkårResultatTidslinje>.tilRestVilkårTidslinjer(): List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>> =
     this.map { vilkårsresultatTidslinje ->
         vilkårsresultatTidslinje.perioder().map { periode ->
             RestTidslinjePeriode(
@@ -42,7 +39,7 @@ fun List<VilkårResultatTidslinje>.tilRestVilkårTidslinjer(): List<List<RestTid
         }
     }
 
-fun Tidslinje<Regelverk, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinjePeriode<Regelverk, Måned>> =
+fun Tidslinje<Regelverk, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinjePeriode<Regelverk>> =
     this.perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
@@ -51,7 +48,7 @@ fun Tidslinje<Regelverk, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinje
         )
     }
 
-fun Tidslinje<Resultat, Måned>.tilRestOppfyllerVilkårTidslinje(): List<RestTidslinjePeriode<Resultat, Måned>> =
+fun Tidslinje<Resultat, Måned>.tilRestOppfyllerVilkårTidslinje(): List<RestTidslinjePeriode<Resultat>> =
     this.perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
@@ -66,18 +63,17 @@ data class RestTidslinjer(
 )
 
 data class RestTidslinjerForBarn(
-    val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat, Dag>>>,
-    val oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje: List<RestTidslinjePeriode<Resultat, Måned>>,
-    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk, Måned>>
+    val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>>,
+    val oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje: List<RestTidslinjePeriode<Resultat>>,
+    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk>>
 )
 
 data class RestTidslinjerForSøker(
-    val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat, Dag>>>,
-    val oppfyllerEgneVilkårTidslinje: List<RestTidslinjePeriode<Resultat, Måned>>,
-    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk, Måned>>
+    val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>>,
+    val oppfyllerEgneVilkårTidslinje: List<RestTidslinjePeriode<Resultat>>,
 )
 
-data class RestTidslinjePeriode<T, I : Tidsenhet>(
+data class RestTidslinjePeriode<T>(
     val fraOgMed: LocalDate,
     val tilOgMed: LocalDate,
     val innhold: T
