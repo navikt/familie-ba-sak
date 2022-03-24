@@ -238,7 +238,11 @@ class DokumentService(
     ) {
         val task = DistribuerDødsfallDokumentPåFagsakTask.opprettTask(journalpostId = journalpostId, brevmal = brevmal)
         taskRepository.save(task)
-        loggBrevIkkeDistribuertUkjentDødsboadresse(journalpostId, behandlingId, brevmal)
+        logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent dødsboadresse.")
+        loggService.opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(
+            behandlingId = behandlingId,
+            brevnavn = brevmal.visningsTekst,
+        )
     }
 
     internal fun loggBrevIkkeDistribuertUkjentAdresse(
@@ -252,18 +256,6 @@ class DokumentService(
             brevnavn = brevMal.visningsTekst,
         )
         antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
-    }
-
-    internal fun loggBrevIkkeDistribuertUkjentDødsboadresse(
-        journalpostId: String,
-        behandlingId: Long,
-        brevMal: Brevmal
-    ) {
-        logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent dødsboadresse.")
-        loggService.opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(
-            behandlingId = behandlingId,
-            brevnavn = brevMal.visningsTekst,
-        )
     }
 
     private fun distribuerBrevOgLoggHendlese(
