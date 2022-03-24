@@ -27,7 +27,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -69,7 +68,6 @@ class BehandlingService(
     private val infotrygdService: InfotrygdService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val personidentService: PersonidentService,
-    private val beregningService: BeregningService,
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
@@ -502,31 +500,7 @@ class BehandlingService(
     fun hentSøknadMottattDato(behandlingId: Long): LocalDateTime? {
         return behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId)?.mottattDato
     }
-
-    fun innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling: Behandling): Boolean {
-        val barnMedUtbetalingSomIkkeBlittEndretISisteBehandling =
-            beregningService.finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandling.id)
-
-        val alleBarnISisteBehanlding = beregningService.finnBarnFraBehandlingMedTilkjentYtsele(behandling.id)
-
-        val alleBarnISistIverksattBehandling =
-            hentForrigeBehandlingSomErIverksatt(behandling)?.let {
-                beregningService.finnBarnFraBehandlingMedTilkjentYtsele(
-                    it.id
-                )
-            }
-                ?: emptyList()
-
-        val nyeBarnISisteBehandling = alleBarnISisteBehanlding.minus(alleBarnISistIverksattBehandling.toSet())
-
-        val nyeBarnMedUtebtalingSomIkkeErEndret =
-            barnMedUtbetalingSomIkkeBlittEndretISisteBehandling.intersect(nyeBarnISisteBehandling)
-
-        return behandling.resultat == BehandlingResultat.INNVILGET_OG_OPPHØRT &&
-            behandling.erSøknad() &&
-            nyeBarnMedUtebtalingSomIkkeErEndret.isEmpty()
-    }
-
+    
     companion object {
 
         private val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)

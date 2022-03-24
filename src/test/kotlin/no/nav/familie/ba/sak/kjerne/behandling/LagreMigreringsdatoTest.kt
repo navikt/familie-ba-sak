@@ -67,7 +67,6 @@ class LagreMigreringsdatoTest {
         infotrygdService,
         vedtaksperiodeService,
         personidentService,
-        beregningService,
         featureToggleService,
         taskRepository,
         behandlingMigreringsinfoRepository,

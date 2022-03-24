@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -48,6 +49,7 @@ import java.time.YearMonth
 class BeregningServiceTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
+    private val behandlingService = mockk<BehandlingService>()
     private val behandlingResultatRepository = mockk<VilkårsvurderingRepository>()
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
@@ -66,6 +68,7 @@ class BeregningServiceTest {
         beregningService = BeregningService(
             andelTilkjentYtelseRepository,
             fagsakService,
+            behandlingService,
             tilkjentYtelseRepository,
             behandlingResultatRepository,
             behandlingRepository,
@@ -77,7 +80,8 @@ class BeregningServiceTest {
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers {
             Ressurs.success(
-                defaultFagsak().tilRestBaseFagsak(false, emptyList(), null, null).tilRestFagsak(emptyList(), emptyList())
+                defaultFagsak().tilRestBaseFagsak(false, emptyList(), null, null)
+                    .tilRestFagsak(emptyList(), emptyList())
             )
         }
         every { featureToggleService.isEnabled(any()) } answers { true }

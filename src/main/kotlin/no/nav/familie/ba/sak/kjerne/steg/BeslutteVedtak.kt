@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -30,6 +31,7 @@ class BeslutteVedtak(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
     private val behandlingService: BehandlingService,
+    private val beregningService: BeregningService,
     private val taskRepository: TaskRepositoryWrapper,
     private val loggService: LoggService,
     private val vilkårsvurderingService: VilkårsvurderingService,
@@ -126,7 +128,7 @@ class BeslutteVedtak(
 
         if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG) {
             val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
-                behandlingService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling)
+                beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling)
 
             if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder) {
                 nesteSteg = StegType.JOURNALFØR_VEDTAKSBREV

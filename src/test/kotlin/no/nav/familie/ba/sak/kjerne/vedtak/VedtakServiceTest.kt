@@ -138,7 +138,6 @@ class VedtakServiceTest(
             infotrygdService,
             vedtaksperiodeService,
             personidentService,
-            beregningService,
             featureToggleService,
             taskRepository,
             behandlingMigreringsinfoRepository,

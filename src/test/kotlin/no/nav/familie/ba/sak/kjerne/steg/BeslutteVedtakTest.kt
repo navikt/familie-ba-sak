@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -40,6 +41,7 @@ class BeslutteVedtakTest {
     private lateinit var beslutteVedtak: BeslutteVedtak
     private lateinit var vedtakService: VedtakService
     private lateinit var behandlingService: BehandlingService
+    private lateinit var beregningService: BeregningService
     private lateinit var taskRepository: TaskRepositoryWrapper
     private lateinit var dokumentService: DokumentService
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
@@ -84,6 +86,7 @@ class BeslutteVedtakTest {
             toTrinnKontrollService,
             vedtakService,
             behandlingService,
+            beregningService,
             taskRepository,
             loggService,
             vilkårsvurderingService,
@@ -103,7 +106,7 @@ class BeslutteVedtakTest {
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every { behandlingService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling) } returns false
+        every { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
