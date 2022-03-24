@@ -57,7 +57,7 @@ fun PersonResultat.tilRestPersonResultat() =
                 endretTidspunkt = vilkårResultat.endretTidspunkt,
                 behandlingId = vilkårResultat.behandlingId,
                 erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0,
-                avslagBegrunnelser = vilkårResultat.vedtakBegrunnelseSpesifikasjoner,
+                avslagBegrunnelser = vilkårResultat.standardbegrunnelser,
                 vurderesEtter = vilkårResultat.vurderesEtter,
                 utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger
             )

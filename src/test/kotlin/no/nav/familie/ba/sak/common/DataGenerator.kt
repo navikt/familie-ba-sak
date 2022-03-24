@@ -957,7 +957,7 @@ fun lagEndretUtbetalingAndel(
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
-    vedtakBegrunnelseSpesifikasjoner: List<Standardbegrunnelse> = emptyList(),
+    standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
     andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf()
 ) =
     EndretUtbetalingAndel(
@@ -971,7 +971,7 @@ fun lagEndretUtbetalingAndel(
         avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
         søknadstidspunkt = søknadstidspunkt,
         begrunnelse = "Test",
-        vedtakBegrunnelseSpesifikasjoner = vedtakBegrunnelseSpesifikasjoner,
+        standardbegrunnelser = standardbegrunnelser,
         andelTilkjentYtelser = andelTilkjentYtelser
     )
 

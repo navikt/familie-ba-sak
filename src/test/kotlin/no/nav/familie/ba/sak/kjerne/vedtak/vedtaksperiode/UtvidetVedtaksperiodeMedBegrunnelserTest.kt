@@ -183,7 +183,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             tom = tom,
             person = barn2,
             prosent = BigDecimal.valueOf(100),
-            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING)
+            standardbegrunnelser = listOf(Standardbegrunnelse.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING)
         )
 
         val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(
@@ -192,7 +192,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             tom = tom,
             person = barn3,
             prosent = BigDecimal.ZERO,
-            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING)
+            standardbegrunnelser = listOf(Standardbegrunnelse.ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING)
         )
 
         val andelerTilkjentYtelse = listOf(

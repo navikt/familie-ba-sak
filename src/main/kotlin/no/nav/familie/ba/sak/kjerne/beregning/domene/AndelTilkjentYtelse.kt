@@ -211,7 +211,7 @@ data class AndelTilkjentYtelse(
     ) = this.endretUtbetalingAndeler.isNotEmpty() &&
         this.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
             val gyldigBegrunnelseForEndretUtbetalingAndel =
-                endretUtbetalingAndel.vedtakBegrunnelseSpesifikasjoner.single()
+                endretUtbetalingAndel.standardbegrunnelser.single()
 
             vedtaksperiodeMedBegrunnelser.begrunnelser.any {
                 it.standardbegrunnelse == gyldigBegrunnelseForEndretUtbetalingAndel

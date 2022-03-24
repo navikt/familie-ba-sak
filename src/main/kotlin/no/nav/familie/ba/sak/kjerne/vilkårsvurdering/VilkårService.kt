@@ -102,7 +102,7 @@ class VilkårService(
             ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
         vilkårResultat.also {
-            it.vedtakBegrunnelseSpesifikasjoner = restVilkårResultat.avslagBegrunnelser ?: emptyList()
+            it.standardbegrunnelser = restVilkårResultat.avslagBegrunnelser ?: emptyList()
         }
 
         validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(vilkårsvurdering, vilkårResultat)

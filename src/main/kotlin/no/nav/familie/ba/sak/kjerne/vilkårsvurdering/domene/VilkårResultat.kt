@@ -82,7 +82,7 @@ class VilkårResultat(
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = StandardbegrunnelseListConverter::class)
-    var vedtakBegrunnelseSpesifikasjoner: List<Standardbegrunnelse> = emptyList(),
+    var standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vurderes_etter")

@@ -54,7 +54,7 @@ fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
                     val endretUtbetalingAndeler = andelerForSegment.flatMap { it.endretUtbetalingAndeler }
                     vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
                         endretUtbetalingAndeler
-                            .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
+                            .flatMap { it.standardbegrunnelser }.toSet()
                             .map { standardbegrunnelse ->
                                 Vedtaksbegrunnelse(
                                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,

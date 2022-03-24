@@ -48,7 +48,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person1,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(
+                            standardbegrunnelser = listOf(
                                 Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
                             )
                         )
@@ -64,7 +64,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person2,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(
+                            standardbegrunnelser = listOf(
                                 Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
                             )
                         )
@@ -100,7 +100,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person1,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(
+                            standardbegrunnelser = listOf(
                                 Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
                             )
                         )
@@ -116,7 +116,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person2,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(
+                            standardbegrunnelser = listOf(
                                 Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
                             )
                         )
@@ -152,7 +152,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person1,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            standardbegrunnelser = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 ),
@@ -166,7 +166,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person2,
                             fom = fom.minusMonths(2),
                             tom = tom.minusMonths(2),
-                            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.AVSLAG_BOR_HOS_SØKER)
+                            standardbegrunnelser = listOf(Standardbegrunnelse.AVSLAG_BOR_HOS_SØKER)
                         )
                     )
                 )
@@ -200,7 +200,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person1,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            standardbegrunnelser = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 ),
@@ -214,7 +214,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person2,
                             fom = fom,
                             tom = tom.plusMonths(2),
-                            vedtakBegrunnelseSpesifikasjoner = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            standardbegrunnelser = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 )

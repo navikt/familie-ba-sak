@@ -1152,8 +1152,8 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
 class StandardbegrunnelseListConverter :
     AttributeConverter<List<Standardbegrunnelse>, String> {
 
-    override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjoner: List<Standardbegrunnelse>) =
-        konverterEnumsTilString(vedtakBegrunnelseSpesifikasjoner)
+    override fun convertToDatabaseColumn(standardbegrunnelser: List<Standardbegrunnelse>) =
+        konverterEnumsTilString(standardbegrunnelser)
 
     override fun convertToEntityAttribute(string: String?): List<Standardbegrunnelse> =
         konverterStringTilEnums(string)

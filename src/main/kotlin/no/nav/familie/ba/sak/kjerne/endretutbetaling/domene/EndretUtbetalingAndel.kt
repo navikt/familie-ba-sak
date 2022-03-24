@@ -88,7 +88,7 @@ data class EndretUtbetalingAndel(
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = StandardbegrunnelseListConverter::class)
-    var vedtakBegrunnelseSpesifikasjoner: List<Standardbegrunnelse> = emptyList()
+    var standardbegrunnelser: List<Standardbegrunnelse> = emptyList()
 ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode)
@@ -182,8 +182,8 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
 ): Standardbegrunnelse {
     val gyldigeBegrunnelser = Standardbegrunnelse.values()
-        .filter { vedtakBegrunnelseSpesifikasjon ->
-            vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
+        .filter { standardbegrunnelse ->
+            standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
         }
         .filter { standardbegrunnelseer ->
             val sanityBegrunnelse = standardbegrunnelseer.tilSanityBegrunnelse(sanityBegrunnelser)
