@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
@@ -13,7 +14,8 @@ import java.time.LocalDate
 data class VilkårRegelverkResultat(
     val vilkår: Vilkår,
     val regelverk: Regelverk?,
-    val resultat: Resultat?
+    val resultat: Resultat?,
+    val personType: PersonType = PersonType.BARN,
 )
 
 class VilkårResultatTidslinje(
@@ -41,5 +43,13 @@ fun VilkårResultat.tilPeriode(
 ): Periode<VilkårRegelverkResultat, Dag> {
     val fom = periodeFom.tilTidspunktEllerDefault { praktiskTidligsteDato }
     val tom = periodeTom.tilTidspunktEllerDefault { praktiskSenesteDato }
-    return Periode(fom, tom, VilkårRegelverkResultat(vilkårType, vurderesEtter, resultat))
+    return Periode(
+        fom, tom,
+        VilkårRegelverkResultat(
+            vilkår = vilkårType,
+            regelverk = vurderesEtter,
+            resultat = resultat,
+            personType = if (personResultat?.erSøkersResultater() == true) PersonType.SØKER else PersonType.BARN
+        )
+    )
 }

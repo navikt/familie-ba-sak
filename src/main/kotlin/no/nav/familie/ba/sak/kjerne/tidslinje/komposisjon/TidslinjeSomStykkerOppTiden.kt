@@ -26,12 +26,10 @@ abstract class TidslinjeSomStykkerOppTiden<I, T : Tidsenhet>(
     }
 
     protected abstract fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): I?
-
-    companion object {
-        private fun <T> Collection<T>.replaceLast(replacement: T) =
-            this.take(this.size - 1) + replacement
-    }
 }
+
+fun <T> Collection<T>.replaceLast(replacement: T) =
+    this.take(this.size - 1) + replacement
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.hentUtsnitt(tidspunkt: Tidspunkt<T>): I? =
     perioder().hentUtsnitt(tidspunkt)
@@ -39,14 +37,14 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.hentUtsnitt(tidspunkt: Tidspunkt<T>): I? 
 fun <I, T : Tidsenhet> Collection<Periode<I, T>>.hentUtsnitt(tidspunkt: Tidspunkt<T>): I? =
     this.firstOrNull { it.fraOgMed <= tidspunkt && it.tilOgMed >= tidspunkt }?.innhold
 
-private fun <I, T : Tidsenhet> Periode<I, T>.kanUtvidesMed(tidspunktMedInnhold: TidspunktMedInnhold<I, T>) =
+fun <I, T : Tidsenhet> Periode<I, T>.kanUtvidesMed(tidspunktMedInnhold: TidspunktMedInnhold<I, T>) =
     this.innhold == tidspunktMedInnhold.innhold &&
         this.tilOgMed.erRettFør(tidspunktMedInnhold.tidspunkt.somEndelig())
 
-private fun <I, T : Tidsenhet> Periode<I, T>.utvidMed(tidspunktMedInnhold: TidspunktMedInnhold<I, T>): Periode<I, T> =
+fun <I, T : Tidsenhet> Periode<I, T>.utvidMed(tidspunktMedInnhold: TidspunktMedInnhold<I, T>): Periode<I, T> =
     this.copy(tilOgMed = tidspunktMedInnhold.tidspunkt)
 
-private data class TidspunktMedInnhold<I, T : Tidsenhet>(
+data class TidspunktMedInnhold<I, T : Tidsenhet>(
     val tidspunkt: Tidspunkt<T>,
     val innhold: I?
 )
