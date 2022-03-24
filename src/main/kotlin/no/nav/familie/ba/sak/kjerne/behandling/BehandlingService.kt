@@ -500,7 +500,7 @@ class BehandlingService(
     fun hentSøknadMottattDato(behandlingId: Long): LocalDateTime? {
         return behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId)?.mottattDato
     }
-    
+
     companion object {
 
         private val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
