@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.eksterne.kontrakter.bisys.BarnEndretOpplysning
@@ -38,8 +38,8 @@ class SendMeldingTilBisysTask(
         val behandling = behandlingRepository.finnBehandling(task.payload.toLong())
 
         // Bisys vil kun ha rene manuelle opphør eller reduksjon
-        if (behandling.resultat == BehandlingResultat.OPPHØRT || behandling.resultat == BehandlingResultat.ENDRET ||
-            behandling.resultat == BehandlingResultat.ENDRET_OG_OPPHØRT
+        if (behandling.resultat == Behandlingsresultat.OPPHØRT || behandling.resultat == Behandlingsresultat.ENDRET ||
+            behandling.resultat == Behandlingsresultat.ENDRET_OG_OPPHØRT
         ) {
             val barnEndretOpplysning = finnBarnEndretOpplysning(behandling)
             val barnetrygdBisysMelding = BarnetrygdBisysMelding(

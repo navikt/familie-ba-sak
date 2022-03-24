@@ -35,17 +35,6 @@ class AvstemmingService(
         økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato)
     }
 
-    @Deprecated("Fjern når konsistensavstemming i batch er testet og virker")
-    fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime) {
-
-        val relevanteBehandlinger = behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
-        val perioderTilAvstemming = hentDataForKonsistensavstemming(avstemmingsdato, relevanteBehandlinger)
-
-        logger.info("Utfører konsisensavstemming for ${perioderTilAvstemming.size} løpende saker")
-
-        økonomiKlient.konsistensavstemOppdrag(avstemmingsdato, perioderTilAvstemming)
-    }
-
     fun sendKonsistensavstemmingStart(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
         økonomiKlient.konsistensavstemOppdragStart(
             avstemmingsdato,

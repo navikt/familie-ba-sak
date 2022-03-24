@@ -15,9 +15,9 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -152,7 +152,7 @@ fun lagBehandling(
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     skalBehandlesAutomatisk: Boolean = false,
     førsteSteg: StegType = FØRSTE_STEG,
-    resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
+    resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
     underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
 ) =
     Behandling(
@@ -740,7 +740,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 
     val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
         behandlingEtterBehandlingsresultat,
-        if (behandlingEtterBehandlingsresultat.resultat != BehandlingResultat.FORTSATT_INNVILGET) RestTilbakekreving(
+        if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) RestTilbakekreving(
             valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
             begrunnelse = "Begrunnelse"
         ) else null

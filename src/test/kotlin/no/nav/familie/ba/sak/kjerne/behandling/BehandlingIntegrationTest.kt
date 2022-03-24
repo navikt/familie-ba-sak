@@ -21,9 +21,9 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -443,31 +443,31 @@ class BehandlingIntegrationTest(
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
-        val behandlingResultat1 =
+        val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
-        behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(
-            behandlingResultat1,
+        vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(
+            vilkårsvurdering,
             søkerAktørId,
             barn1AktørId,
             barn2AktørId,
             januar2020.minusMonths(1).toLocalDate(),
             stønadTom.toLocalDate()
         )
-        vilkårsvurderingRepository.save(behandlingResultat1)
+        vilkårsvurderingRepository.save(vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val behandlingResultat2 =
+        val vilkårsvurdering2 =
             Vilkårsvurdering(behandling = behandling)
-        behandlingResultat2.personResultater = lagPersonResultaterForSøkerOgToBarn(
-            behandlingResultat2,
+        vilkårsvurdering2.personResultater = lagPersonResultaterForSøkerOgToBarn(
+            vilkårsvurdering2,
             søkerAktørId,
             barn1AktørId,
             barn3AktørId,
             januar2021.minusMonths(1).toLocalDate(),
             stønadTom.toLocalDate()
         )
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = behandlingResultat2)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering2)
 
         val satsEndringDatoSeptember2021 =
             SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1654)!!.toYearMonth()
@@ -668,7 +668,7 @@ class BehandlingIntegrationTest(
     }
 
     @Test
-    fun `Skal lagre og sende korrekt sakstatistikk for behandlingresultat`() {
+    fun `Skal lagre og sende korrekt sakstatistikk for behandlingsresultat`() {
         val fnr = "12345678910"
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
@@ -677,7 +677,7 @@ class BehandlingIntegrationTest(
 
         vedtakService.oppdater(vedtak!!)
 
-        behandlingService.lagreEllerOppdater(behandling.also { it.resultat = BehandlingResultat.AVSLÅTT })
+        behandlingService.lagreEllerOppdater(behandling.also { it.resultat = Behandlingsresultat.AVSLÅTT })
 
         val behandlingDvhMeldinger = saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
             .filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }

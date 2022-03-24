@@ -17,13 +17,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
@@ -389,15 +389,15 @@ class BehandlingService(
         return lagreEllerOppdater(behandling)
     }
 
-    fun oppdaterResultatPåBehandling(behandlingId: Long, resultat: BehandlingResultat): Behandling {
+    fun oppdaterBehandlingsresultat(behandlingId: Long, resultat: Behandlingsresultat): Behandling {
         val behandling = hent(behandlingId)
         BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat)
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
         loggService.opprettVilkårsvurderingLogg(
             behandling = behandling,
-            forrigeBehandlingResultat = behandling.resultat,
-            nyttBehandlingResultat = resultat
+            forrigeBehandlingsresultat = behandling.resultat,
+            nyttBehandlingsresultat = resultat
         )
 
         behandling.resultat = resultat
