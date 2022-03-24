@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import java.math.BigDecimal
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockKExtension::class)
@@ -86,14 +87,16 @@ internal class StønadsstatistikkServiceTest(
             periodeIdOffset = 1
 
         )
-        val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelseBarn2PeriodeMed0Beløp = lagAndelTilkjentYtelse(
             barn2.fødselsdato.nesteMåned(),
             barn2.fødselsdato.plusYears(18).forrigeMåned(),
             YtelseType.ORDINÆR_BARNETRYGD,
             behandling = behandling,
             person = barn2,
+            beløp = 0,
             aktør = barn2.aktør,
-            periodeIdOffset = 2
+            prosent = BigDecimal(0),
+            periodeIdOffset = null
         )
 
         val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(
@@ -110,7 +113,7 @@ internal class StønadsstatistikkServiceTest(
             tilkjentYtelse.copy(
                 andelerTilkjentYtelse = mutableSetOf(
                     andelTilkjentYtelseBarn1,
-                    andelTilkjentYtelseBarn2,
+                    andelTilkjentYtelseBarn2PeriodeMed0Beløp,
                     andelTilkjentYtelseSøker
                 )
             )
@@ -124,9 +127,9 @@ internal class StønadsstatistikkServiceTest(
         val vedtak = stønadsstatistikkService.hentVedtak(1L)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
 
-        assertEquals(3, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
+        assertEquals(2, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
         assertEquals(
-            2 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD),
+            1 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD),
             vedtak.utbetalingsperioder[0].utbetaltPerMnd
         )
 
@@ -136,6 +139,15 @@ internal class StønadsstatistikkServiceTest(
             .forEach {
                 assertEquals(0, it.delingsprosentYtelse)
             }
+    }
+
+    @Test
+    fun hentVedtakSomInneholderPerioderSomIkkeErSendtTilOppdrag() {
+        val vedtak = stønadsstatistikkService.hentVedtak(1L)
+        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
+
+        // skal ikke ta med perioder som ikke er sendt til oppdrag
+        assertEquals(2, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
     }
 
     @Test
