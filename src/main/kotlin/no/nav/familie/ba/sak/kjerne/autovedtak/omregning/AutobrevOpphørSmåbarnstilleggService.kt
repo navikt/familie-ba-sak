@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -43,8 +43,8 @@ class AutobrevOpphørSmåbarnstilleggService(
 
         val behandlingsårsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG
         val standardbegrunnelse =
-            if (yngsteBarnFylteTreÅrForrigeMåned) VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
-            else VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
+            if (yngsteBarnFylteTreÅrForrigeMåned) Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
+            else Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
 
         if (!autovedtakBrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = fagsakId,
@@ -81,8 +81,7 @@ class AutobrevOpphørSmåbarnstilleggService(
 
     fun yngsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
         val yngsteBarnSinFødselsdato: YearMonth =
-            personopplysningGrunnlag.barna
-                .maxOf { it.fødselsdato.toYearMonth() }
+            personopplysningGrunnlag.yngsteBarnSinFødselsdato.toYearMonth()
 
         return yngsteBarnSinFødselsdato.plusYears(3) == YearMonth.now().minusMonths(1)
     }

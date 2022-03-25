@@ -5,10 +5,10 @@
   "vedtaksperiodetype": "FORTSATT_INNVILGET",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET"
+      "standardbegrunnelse": "FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET"
     },
     {
-      "vedtakBegrunnelseSpesifikasjon": "FORTSATT_INNVILGET_BOR_MED_SØKER"
+      "standardbegrunnelse": "FORTSATT_INNVILGET_BOR_MED_SØKER"
     }
   ],
   "fritekster": [],
@@ -66,7 +66,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "20.01.20 og 20.12.20",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "20.01.20 og 20.12.20",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 2,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 2,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "fortsattInnvilgetSokerOgBarnBosattIRiket",
@@ -75,7 +79,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "20.01.20 og 20.12.20",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "20.01.20 og 20.12.20",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 2,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 2,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "fortsattInnvilgetBorMedSoker",

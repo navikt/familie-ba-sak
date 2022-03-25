@@ -3,13 +3,13 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 
 data class BrevBegrunnelseGrunnlag(
-    val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
+    val standardbegrunnelse: Standardbegrunnelse,
     val triggesAv: TriggesAv,
 ) {
     fun tilBrevBegrunnelseGrunnlagMedPersoner(
@@ -23,7 +23,7 @@ data class BrevBegrunnelseGrunnlag(
     ): BrevBegrunnelseGrunnlagMedPersoner {
         val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = this.triggesAv,
-            vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
+            vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
             periode = periode,
             vedtaksperiodetype = vedtaksperiodetype,
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
@@ -38,20 +38,20 @@ data class BrevBegrunnelseGrunnlag(
             !this.triggesAv.satsendring
         ) {
             throw Feil(
-                "Begrunnelse '${this.vedtakBegrunnelseSpesifikasjon}' var ikke knyttet til noen personer."
+                "Begrunnelse '${this.standardbegrunnelse}' var ikke knyttet til noen personer."
             )
         }
 
         return BrevBegrunnelseGrunnlagMedPersoner(
-            vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-            vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
+            standardbegrunnelse = this.standardbegrunnelse,
+            vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
             triggesAv = this.triggesAv,
             personIdenter = personidenterGjeldendeForBegrunnelse.toList()
         )
     }
 
     fun tilBrevBegrunnelseGrunnlagForLogging() = BrevBegrunnelseGrunnlagForLogging(
-        vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
+        standardbegrunnelse = this.standardbegrunnelse,
     )
 }
 
@@ -59,9 +59,9 @@ fun RestVedtaksbegrunnelse.tilBrevBegrunnelseGrunnlag(
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): BrevBegrunnelseGrunnlag {
     return BrevBegrunnelseGrunnlag(
-        vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
+        standardbegrunnelse = this.standardbegrunnelse,
         triggesAv = sanityBegrunnelser
-            .firstOrNull { it.apiNavn == this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn }!!
+            .firstOrNull { it.apiNavn == this.standardbegrunnelse.sanityApiNavn }!!
             .tilTriggesAv()
     )
 }

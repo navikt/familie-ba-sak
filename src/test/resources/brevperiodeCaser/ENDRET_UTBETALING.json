@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "ENDRET_UTBETALING",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING"
+      "standardbegrunnelse": "ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING"
     }
   ],
   "fritekster": [],
@@ -67,7 +67,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "20.01.19",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "20.01.19",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 1,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "endretUtbetalingDeltBostedIngenUtbetalingForSoknad",

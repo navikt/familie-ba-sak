@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK"
+      "standardbegrunnelse": "REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK"
     }
   ],
   "fritekster": [],
@@ -48,7 +48,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "03.09.15",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "03.09.15",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 1,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "reduksjonAutovedtakBarn6Aar",

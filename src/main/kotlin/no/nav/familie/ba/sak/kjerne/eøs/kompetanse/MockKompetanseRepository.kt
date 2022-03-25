@@ -27,7 +27,8 @@ class MockKompetanseRepository {
 
         val kompetanserForBehandling = kompetanser.values.filter { it.behandlingId == behandlingId }
         if (kompetanserForBehandling.size == 0) {
-            val kompetanse = malKompetanse.copy(id = kompetanseLøpenummer.neste(), behandlingId = behandlingId)
+            val kompetanse =
+                malKompetanse.copy(behandlingId = behandlingId).also { it.id = kompetanseLøpenummer.neste() }
             kompetanser[kompetanse.id] = kompetanse
         }
 
@@ -47,7 +48,7 @@ class MockKompetanseRepository {
             return kompetanse
         } else {
             val nyId = kompetanseLøpenummer.neste()
-            kompetanser[nyId] = kompetanse.copy(id = nyId)
+            kompetanser[nyId] = kompetanse.copy().also { it.id = nyId }
             return kompetanser[nyId]!!
         }
     }

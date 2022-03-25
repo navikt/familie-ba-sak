@@ -44,7 +44,7 @@ class SettPåVentService(
         val settPåVent = settPåVentRepository.save(SettPåVent(behandling = behandling, frist = frist, årsak = årsak))
         behandlingService.sendTilDvh(behandling)
 
-        oppgaveService.forlengOppgavefristerPåBehandling(
+        oppgaveService.forlengFristÅpneOppgaverPåBehandling(
             behandlingId = behandling.id,
             forlengelse = Period.between(LocalDate.now(), frist)
         )
@@ -75,7 +75,7 @@ class SettPåVentService(
 
         behandlingService.sendTilDvh(behandlingService.hent(behandlingId))
 
-        oppgaveService.forlengOppgavefristerPåBehandling(
+        oppgaveService.forlengFristÅpneOppgaverPåBehandling(
             behandlingId = behandlingId,
             forlengelse = Period.between(gammelFrist, frist)
         )
@@ -85,7 +85,12 @@ class SettPåVentService(
 
     fun gjenopptaBehandling(behandlingId: Long, nå: LocalDate = LocalDate.now()): SettPåVent {
         val behandling = behandlingService.hent(behandlingId)
-        val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
+        val aktivSettPåVent =
+            finnAktivSettPåVentPåBehandling(behandlingId)
+                ?: throw FunksjonellFeil(
+                    melding = "Behandling $behandlingId er ikke satt på vent.",
+                    frontendFeilmelding = "Behandlingen er ikke på vent og det er ikke mulig å gjenoppta behandling."
+                )
 
         loggService.gjenopptaBehandlingLogg(behandling)
         logger.info("Gjenopptar behandling $behandlingId")
@@ -96,7 +101,7 @@ class SettPåVentService(
 
         behandlingService.sendTilDvh(behandling)
 
-        oppgaveService.settOppgavefristerPåBehandlingTil(
+        oppgaveService.settFristÅpneOppgaverPåBehandlingTil(
             behandlingId = behandlingId,
             nyFrist = LocalDate.now().plusDays(1)
         )

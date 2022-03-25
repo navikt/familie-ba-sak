@@ -11,10 +11,10 @@ interface Brev {
 }
 
 enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visningsTekst: String) {
-    INFORMASJONSBREV_DELT_BOSTED(false, "informasjonsbrevDeltBosted", "informasjonsbrev delt bosted"),
-    INNHENTE_OPPLYSNINGER(false, "innhenteOpplysninger", "innhente opplysninger"),
-    HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "henlegge trukket søknad"),
-    VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "varsel om revurdering"),
+    INFORMASJONSBREV_DELT_BOSTED(false, "informasjonsbrevDeltBosted", "Informasjonsbrev delt bosted"),
+    INNHENTE_OPPLYSNINGER(false, "innhenteOpplysninger", "Innhente opplysninger"),
+    HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "Henlegge trukket søknad"),
+    VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "Varsel om revurdering"),
     VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14(
         false,
         "varselOmRevurderingDeltBostedParagrafFjorten",
@@ -56,7 +56,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "Autovedtak - Barn 6 og 18 år og småbarnstillegg"
     ),
     AUTOVEDTAK_NYFØDT_FØRSTE_BARN(true, "autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),
-    AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(true, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før"),
+    AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(true, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før");
 }
 
 interface BrevData {

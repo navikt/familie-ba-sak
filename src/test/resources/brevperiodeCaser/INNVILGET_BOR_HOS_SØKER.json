@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "INNVILGET_BOR_HOS_SØKER"
+      "standardbegrunnelse": "INNVILGET_BOR_HOS_SØKER"
     }
   ],
   "fritekster": [],
@@ -57,7 +57,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "20.01.20",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "20.01.20",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 1,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "innvilgetBorHosSoker",

@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "OPPHØR",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "OPPHØR_BARN_FLYTTET_FRA_SØKER"
+      "standardbegrunnelse": "OPPHØR_BARN_FLYTTET_FRA_SØKER"
     }
   ],
   "fritekster": [],
@@ -50,7 +50,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "20.01.20",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "opphorBarnBorIkkeMedSoker",

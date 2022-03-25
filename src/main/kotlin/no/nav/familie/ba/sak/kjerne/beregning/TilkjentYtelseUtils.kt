@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
+import no.nav.familie.ba.sak.common.erBack2BackIMånedsskifte
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
@@ -308,11 +309,6 @@ object TilkjentYtelseUtils {
         return listOf(satsperioderFørFylte6År, satsperioderEtterFylte6År).flatten()
             .sortedBy { it.fraOgMed }
             .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
-    }
-
-    fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
-        return tilOgMed?.erDagenFør(fraOgMed) == true &&
-            tilOgMed.toYearMonth() != fraOgMed?.toYearMonth()
     }
 
     private fun søkerHarInnvilgetPeriodeEtterBarnsPeriode(

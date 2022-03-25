@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -111,19 +111,19 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
     redusertMånedPeriode: MånedPeriode?,
     vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
 ): VedtaksperiodeMedBegrunnelser {
-    val vedtaksperiodeSomSkalOppdateresOgBegrunnelse: Pair<VedtaksperiodeMedBegrunnelser?, VedtakBegrunnelseSpesifikasjon>? =
+    val vedtaksperiodeSomSkalOppdateresOgBegrunnelse: Pair<VedtaksperiodeMedBegrunnelser?, Standardbegrunnelse>? =
         when {
             innvilgetMånedPeriode == null && redusertMånedPeriode == null -> null
             innvilgetMånedPeriode != null && redusertMånedPeriode == null -> {
                 Pair(
                     vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == innvilgetMånedPeriode.fom && it.type == Vedtaksperiodetype.UTBETALING },
-                    VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG
+                    Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG
                 )
             }
             innvilgetMånedPeriode == null && redusertMånedPeriode != null -> {
                 Pair(
                     vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == redusertMånedPeriode.fom && it.type == Vedtaksperiodetype.UTBETALING },
-                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
+                    Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
                 )
             }
             else -> null
@@ -146,7 +146,7 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
         vedtaksperiodeSomSkalOppdateres.begrunnelser.toList() + listOf(
             Vedtaksbegrunnelse(
                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeSomSkalOppdateres,
-                vedtakBegrunnelseSpesifikasjon = vedtaksperiodeSomSkalOppdateresOgBegrunnelse.second
+                standardbegrunnelse = vedtaksperiodeSomSkalOppdateresOgBegrunnelse.second
             )
         )
     )

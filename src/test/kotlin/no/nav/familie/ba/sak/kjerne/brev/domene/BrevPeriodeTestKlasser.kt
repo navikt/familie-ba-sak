@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
@@ -129,7 +129,11 @@ data class FritekstBegrunnelseTestConfig(val fritekst: String) : TestBegrunnelse
 data class BegrunnelseDataTestConfig(
     val gjelderSoker: Boolean,
     val barnasFodselsdatoer: String,
+    val fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling: String,
+    val fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling: String,
     val antallBarn: Int,
+    val antallBarnOppfyllerTriggereOgHarUtbetaling: Int,
+    val antallBarnOppfyllerTriggereOgHarNullutbetaling: Int,
     val maanedOgAarBegrunnelsenGjelderFor: String?,
     val maalform: String,
     val apiNavn: String,
@@ -140,7 +144,11 @@ data class BegrunnelseDataTestConfig(
         belop = Utils.formaterBeløp(this.belop),
         gjelderSoker = this.gjelderSoker,
         barnasFodselsdatoer = this.barnasFodselsdatoer,
+        fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = this.fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling,
+        fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = this.fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling,
         antallBarn = this.antallBarn,
+        antallBarnOppfyllerTriggereOgHarUtbetaling = this.antallBarnOppfyllerTriggereOgHarUtbetaling,
+        antallBarnOppfyllerTriggereOgHarNullutbetaling = this.antallBarnOppfyllerTriggereOgHarNullutbetaling,
         maanedOgAarBegrunnelsenGjelderFor = this.maanedOgAarBegrunnelsenGjelderFor,
         maalform = this.maalform,
         apiNavn = this.apiNavn,
@@ -158,10 +166,10 @@ data class BrevPeriodeOutput(
 )
 
 data class BrevBegrunnelseGrunnlagConfig(
-    val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
+    val standardbegrunnelse: Standardbegrunnelse,
 ) {
     fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BrevBegrunnelseGrunnlag(
-        vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-        triggesAv = this.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
+        standardbegrunnelse = this.standardbegrunnelse,
+        triggesAv = this.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
     )
 }

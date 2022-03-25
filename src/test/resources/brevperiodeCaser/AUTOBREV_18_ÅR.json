@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "FORTSATT_INNVILGET",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK"
+      "standardbegrunnelse": "REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK"
     }
   ],
   "fritekster": [],
@@ -65,7 +65,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "10.12.03",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "november 2021",
         "maalform": "bokmaal",
         "apiNavn": "reduksjonAutovedtakBarn18Aar",

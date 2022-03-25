@@ -28,7 +28,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
+fun Standardbegrunnelse.triggesForPeriode(
     minimertVedtaksperiode: MinimertVedtaksperiode,
     minimertePersonResultater: List<MinimertRestPersonResultat>,
     minimertePersoner: List<MinimertPerson>,
@@ -136,9 +136,9 @@ private fun erEtterEndretPeriodeAvSammeÅrsak(
         triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }
 
-private val logger = LoggerFactory.getLogger(VedtakBegrunnelseSpesifikasjon::class.java)
+private val logger = LoggerFactory.getLogger(Standardbegrunnelse::class.java)
 
-fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(
+fun Standardbegrunnelse.tilSanityBegrunnelse(
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): SanityBegrunnelse? {
     val sanityBegrunnelse = sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
@@ -150,7 +150,7 @@ fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(
 
 fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
 
-fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
+fun Standardbegrunnelse.tilVedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Vedtaksbegrunnelse {
@@ -167,7 +167,7 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
 
     return Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        vedtakBegrunnelseSpesifikasjon = this,
+        standardbegrunnelse = this,
     )
 }
 

@@ -13,7 +13,7 @@ interface IVedtakBegrunnelse {
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
-enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
+enum class Standardbegrunnelse : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetBosattIRiket"
@@ -569,6 +569,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     REDUKSJON_VURDERING_ANDRE_FORELDER_VAR_IKKE_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonVurderingDenAndreForelderenVarIkkeMedlem"
+    },
+    REDUKSJON_DELT_BOSTED_GENERELL {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonDeltBostedGenerell"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
@@ -1145,12 +1149,12 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 }
 
 @Converter
-class VedtakBegrunnelseSpesifikasjonListConverter :
-    AttributeConverter<List<VedtakBegrunnelseSpesifikasjon>, String> {
+class StandardbegrunnelseListConverter :
+    AttributeConverter<List<Standardbegrunnelse>, String> {
 
-    override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon>) =
-        konverterEnumsTilString(vedtakBegrunnelseSpesifikasjoner)
+    override fun convertToDatabaseColumn(standardbegrunnelser: List<Standardbegrunnelse>) =
+        konverterEnumsTilString(standardbegrunnelser)
 
-    override fun convertToEntityAttribute(string: String?): List<VedtakBegrunnelseSpesifikasjon> =
+    override fun convertToEntityAttribute(string: String?): List<Standardbegrunnelse> =
         konverterStringTilEnums(string)
 }

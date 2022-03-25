@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE"
+      "standardbegrunnelse": "INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE"
     }
   ],
   "fritekster": [],
@@ -48,7 +48,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "01.08.21",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "01.08.21",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 1,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "innvilgetFodselshendelseNyfodtBarnForste",

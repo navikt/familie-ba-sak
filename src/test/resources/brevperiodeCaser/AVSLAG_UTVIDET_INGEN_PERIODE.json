@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "AVSLAG_IKKE_MEKLINGSATTEST"
+      "standardbegrunnelse": "AVSLAG_IKKE_MEKLINGSATTEST"
     }
   ],
   "fritekster": [],
@@ -76,7 +76,11 @@
       {
         "gjelderSoker": true,
         "barnasFodselsdatoer": "02.06.13 og 26.09.17",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 0,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": null,
         "maalform": "bokmaal",
         "apiNavn": "avslagIkkeMeklingsattest",

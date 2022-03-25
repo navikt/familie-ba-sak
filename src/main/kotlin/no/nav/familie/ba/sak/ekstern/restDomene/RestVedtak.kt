@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.time.LocalDateTime
@@ -14,7 +14,7 @@ data class RestVedtak(
 )
 
 data class RestVedtakBegrunnelseTilknyttetVilkår(
-    val id: VedtakBegrunnelseSpesifikasjon,
+    val id: Standardbegrunnelse,
     val navn: String,
     val vilkår: Vilkår?
 )
