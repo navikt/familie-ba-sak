@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -132,6 +133,7 @@ class BeregningService(
             barnMedUtbetalingSomIkkeBlittEndretISisteBehandling.intersect(nyeBarnISisteBehandling)
 
         return behandling.resultat == Behandlingsresultat.INNVILGET_OG_OPPHØRT &&
+            behandling.underkategori == BehandlingUnderkategori.ORDINÆR &&
             behandling.erSøknad() &&
             nyeBarnMedUtebtalingSomIkkeErEndret.isEmpty()
     }
