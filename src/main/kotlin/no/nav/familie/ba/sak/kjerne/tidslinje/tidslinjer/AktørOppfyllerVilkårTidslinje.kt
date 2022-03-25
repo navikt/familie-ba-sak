@@ -13,10 +13,12 @@ private val nødvendigeVilkårBarn = Vilkår.hentVilkårFor(PersonType.BARN)
 class SøkerOppfyllerVilkårKombinator : ListeKombinator<VilkårRegelverkResultat, Resultat> {
     override fun kombiner(liste: Iterable<VilkårRegelverkResultat>): Resultat {
 
+        val listeUtenUtvidetVilkåret = liste.filter { it.vilkår != Vilkår.UTVIDET_BARNETRYGD }
         return when {
-            liste.all { it.resultat == Resultat.OPPFYLT } &&
-                liste.map { it.vilkår }.distinct().containsAll(nødvendigeVilkårSøker) -> Resultat.OPPFYLT
-            liste.any { it.resultat == Resultat.IKKE_OPPFYLT } -> Resultat.IKKE_OPPFYLT
+            listeUtenUtvidetVilkåret.all { it.resultat == Resultat.OPPFYLT } &&
+                listeUtenUtvidetVilkåret.map { it.vilkår }.distinct()
+                    .containsAll(nødvendigeVilkårSøker) -> Resultat.OPPFYLT
+            listeUtenUtvidetVilkåret.any { it.resultat == Resultat.IKKE_OPPFYLT } -> Resultat.IKKE_OPPFYLT
             else -> Resultat.IKKE_VURDERT
         }
     }
