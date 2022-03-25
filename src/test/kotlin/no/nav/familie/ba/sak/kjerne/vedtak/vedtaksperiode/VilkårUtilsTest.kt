@@ -53,7 +53,8 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv
+                triggesAv = triggesAv,
+                erIngenOverlappVedtaksperiodeTogglePå = true,
             )
         )
         Assertions.assertTrue(
@@ -61,7 +62,8 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatIkkeOppfyltDelvisOverlapp.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv
+                triggesAv = triggesAv,
+                erIngenOverlappVedtaksperiodeTogglePå = true,
             )
         )
     }
@@ -73,7 +75,8 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = false,
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv
+                triggesAv = triggesAv,
+                erIngenOverlappVedtaksperiodeTogglePå = true,
             )
         )
     }
@@ -85,7 +88,8 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv
+                triggesAv = triggesAv,
+                erIngenOverlappVedtaksperiodeTogglePå = true,
             )
         )
     }
@@ -97,7 +101,8 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatUtenforPeriode.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv
+                triggesAv = triggesAv,
+                erIngenOverlappVedtaksperiodeTogglePå = true,
             )
         )
     }

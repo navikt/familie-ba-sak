@@ -97,7 +97,8 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
             erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
-            barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon
+            barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
+            erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
         )
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
