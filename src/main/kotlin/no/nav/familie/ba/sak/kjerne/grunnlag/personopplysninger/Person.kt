@@ -104,7 +104,8 @@ data class Person(
     override fun toString(): String {
         return """Person(aktørId=$aktør,
                         |type=$type
-                        |fødselsdato=$fødselsdato)""".trimMargin()
+                        |fødselsdato=$fødselsdato)
+                        |""".trimMargin()
     }
 
     override fun equals(other: Any?): Boolean {

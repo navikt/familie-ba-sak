@@ -79,6 +79,7 @@ open class EksternTjenesteFeilException(
             |   melding='$melding' 
             |   eksternTjeneste=$eksternTjenesteFeil
             |   request=$request
-            |   throwable=$throwable)""".trimMargin()
+            |   throwable=$throwable)
+            |   """.trimMargin()
     }
 }
