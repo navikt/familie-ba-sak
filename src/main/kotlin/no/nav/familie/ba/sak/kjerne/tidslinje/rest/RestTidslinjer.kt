@@ -39,12 +39,12 @@ fun List<VilkårResultatTidslinje>.tilRestVilkårTidslinjer(): List<List<RestTid
         }
     }
 
-fun Tidslinje<Regelverk, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinjePeriode<Regelverk>> =
+fun Tidslinje<Regelverk?, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinjePeriode<Regelverk?>> =
     this.perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
             tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDate(),
-            innhold = periode.innhold!!
+            innhold = periode.innhold
         )
     }
 
@@ -65,7 +65,7 @@ data class RestTidslinjer(
 data class RestTidslinjerForBarn(
     val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>>,
     val oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje: List<RestTidslinjePeriode<Resultat>>,
-    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk>>
+    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk?>>
 )
 
 data class RestTidslinjerForSøker(
