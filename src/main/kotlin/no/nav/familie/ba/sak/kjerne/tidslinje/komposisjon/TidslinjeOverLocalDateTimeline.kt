@@ -1,7 +1,7 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje
+package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeMedAvhengigheter
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.fpsak.tidsserie.LocalDateInterval

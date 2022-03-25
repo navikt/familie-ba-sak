@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 import java.time.YearMonth
 
 data class Kompetanse(
-    val id: Long = 0,
     val behandlingId: Long = 0,
     val fom: YearMonth?,
     val tom: YearMonth?,
@@ -14,7 +13,9 @@ data class Kompetanse(
     val barnetsBostedsland: String? = null,
     val primærland: String? = null,
     val sekundærland: String? = null,
-)
+) {
+    var id: Long = 0
+}
 
 enum class KompetanseStatus {
     IKKE_UTFYLT,
@@ -29,7 +30,4 @@ fun Kompetanse.blankUt() = this.copy(
     primærland = null,
     sekundærland = null,
     status = KompetanseStatus.IKKE_UTFYLT
-)
-
-fun Iterable<Kompetanse>.erPraktiskLik(andre: Iterable<Kompetanse>) =
-    this.map { it.copy(id = 0) } == andre.map { it.copy(id = 0) }
+).also { it.id = this.id }

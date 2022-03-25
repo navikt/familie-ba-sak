@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -486,7 +487,7 @@ class VilkårService(
 
         val tom: LocalDate? =
             if (vilkår == Vilkår.UNDER_18_ÅR) {
-                person.fødselsdato.plusYears(18).minusDays(1)
+                person.fødselsdato.til18ÅrsVilkårsdato()
             } else null
 
         return VilkårResultat(
