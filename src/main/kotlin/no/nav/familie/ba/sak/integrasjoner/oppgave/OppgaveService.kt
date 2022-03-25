@@ -187,35 +187,42 @@ class OppgaveService(
         }
     }
 
-    fun forlengOppgavefristerPåBehandling(behandlingId: Long, forlengelse: Period) {
+    fun forlengFrsitÅpneOppgaverPåBehandling(behandlingId: Long, forlengelse: Period) {
         val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
 
         dbOppgaver.forEach { dbOppgave ->
             val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
+            val oppgaveErÅpen = gammelOppgave.ferdigstiltTidspunkt != null
 
-            if (gammelOppgave.id == null) {
-                logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
-            } else if (gammelOppgave.fristFerdigstillelse == null) {
-                logger.warn("Oppgave ${dbOppgave.gsakId} har ingen oppgavefrist ved oppdatering av frist")
-            } else {
-                val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
-                val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist?.toString())
-                integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
+            when {
+                gammelOppgave.id == null ->
+                    logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+                gammelOppgave.fristFerdigstillelse == null ->
+                    logger.warn("Oppgave ${dbOppgave.gsakId} har ingen oppgavefrist ved oppdatering av frist")
+                !oppgaveErÅpen -> {}
+                else -> {
+                    val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
+                    val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist?.toString())
+                    integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
+                }
             }
         }
     }
 
-    fun settOppgavefristerPåBehandlingTil(behandlingId: Long, nyFrist: LocalDate) {
+    fun settFrsitÅpneOppgaverPåBehandlingTil(behandlingId: Long, nyFrist: LocalDate) {
         val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
 
         dbOppgaver.forEach { dbOppgave ->
             val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
+            val oppgaveErÅpen = gammelOppgave.ferdigstiltTidspunkt != null
 
-            if (gammelOppgave.id == null) {
-                logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
-            } else {
-                val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
-                integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
+            when {
+                gammelOppgave.id == null -> logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+                !oppgaveErÅpen -> {}
+                else -> {
+                    val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
+                    integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
+                }
             }
         }
     }

@@ -44,7 +44,7 @@ class SettPåVentService(
         val settPåVent = settPåVentRepository.save(SettPåVent(behandling = behandling, frist = frist, årsak = årsak))
         behandlingService.sendTilDvh(behandling)
 
-        oppgaveService.forlengOppgavefristerPåBehandling(
+        oppgaveService.forlengFrsitÅpneOppgaverPåBehandling(
             behandlingId = behandling.id,
             forlengelse = Period.between(LocalDate.now(), frist)
         )
@@ -75,7 +75,7 @@ class SettPåVentService(
 
         behandlingService.sendTilDvh(behandlingService.hent(behandlingId))
 
-        oppgaveService.forlengOppgavefristerPåBehandling(
+        oppgaveService.forlengFrsitÅpneOppgaverPåBehandling(
             behandlingId = behandlingId,
             forlengelse = Period.between(gammelFrist, frist)
         )
@@ -101,7 +101,7 @@ class SettPåVentService(
 
         behandlingService.sendTilDvh(behandling)
 
-        oppgaveService.settOppgavefristerPåBehandlingTil(
+        oppgaveService.settFrsitÅpneOppgaverPåBehandlingTil(
             behandlingId = behandlingId,
             nyFrist = LocalDate.now().plusDays(1)
         )
