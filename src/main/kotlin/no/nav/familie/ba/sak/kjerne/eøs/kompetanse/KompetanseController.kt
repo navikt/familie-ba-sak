@@ -63,6 +63,6 @@ class KompetanseController(
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
 
-        return ResponseEntity.ok(Ressurs.success(kompetanseService.slettKompetamse(kompetanseId)))
+        return ResponseEntity.ok(Ressurs.success(kompetanseService.slettKompetanse(kompetanseId)))
     }
 }

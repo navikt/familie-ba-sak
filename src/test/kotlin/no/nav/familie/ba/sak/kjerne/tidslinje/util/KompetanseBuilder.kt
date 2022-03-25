@@ -13,18 +13,25 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import java.time.YearMonth
 
 class KompetanseBuilder(
-    val behandling: Behandling = lagBehandling(),
+    val behandlingId: Long = lagBehandling().id,
     val startMåned: YearMonth = YearMonth.of(2020, 1)
 ) {
+    constructor(behandling: Behandling, startMåned: YearMonth) : this(behandling.id, startMåned)
+
     val kompetanser: MutableList<Kompetanse> = mutableListOf()
 
     fun medKompetanse(k: String, vararg barn: Person): KompetanseBuilder {
         val charTidslinje = k.tilCharTidslinje(startMåned)
-        val kompetanseTidslinje = KompetanseTidslinje(charTidslinje, behandling.id, barn.toList())
+        val kompetanseTidslinje = KompetanseTidslinje(charTidslinje, behandlingId, barn.toList())
 
         kompetanseTidslinje.perioder()
             .filter { it.innhold != null }
-            .map { it.innhold!!.copy(fom = it.fraOgMed.tilYearMonth(), tom = it.tilOgMed.tilYearMonth()) }
+            .map {
+                it.innhold!!.copy(
+                    fom = it.fraOgMed.tilYearMonthEllerNull(),
+                    tom = it.tilOgMed.tilYearMonthEllerNull()
+                )
+            }
             .all { kompetanser.add(it) }
 
         return this

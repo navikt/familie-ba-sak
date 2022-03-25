@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -52,13 +51,13 @@ class AndelTilkjentYtelseUtledRegelverkTest {
     }
 
     @Test
-    fun `Kaste feil om alle relevante vilkår er satt til forskjellig regelverk`() {
+    fun `Default til nasjonale regler om relevante vilkår er satt til forskjellig regelverk`() {
         val personResultat =
             genererPersonresultat(Regelverk.EØS_FORORDNINGEN, Regelverk.NASJONALE_REGLER, Regelverk.NASJONALE_REGLER)
 
-        assertThrows<IllegalStateException> {
-            andelTilkjentYtelse.vurdertEtter(setOf(personResultat))
-        }
+        val regelverk = andelTilkjentYtelse.vurdertEtter(setOf(personResultat))
+
+        assertEquals(Regelverk.NASJONALE_REGLER, regelverk)
     }
 
     private fun genererPersonresultat(

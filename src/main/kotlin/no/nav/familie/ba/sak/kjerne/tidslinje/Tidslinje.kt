@@ -20,7 +20,7 @@ abstract class Tidslinje<I, T : Tidsenhet> {
     protected abstract fun lagPerioder(): Collection<Periode<I, T>>
 
     protected open fun valider(perioder: List<Periode<I, T>>) {
-        perioder.mapIndexed { index, periode ->
+        val perioderMedFeil = perioder.mapIndexed { index, periode ->
             when {
                 index > 0 && periode.fraOgMed.erUendeligLengeSiden() ->
                     TidslinjeFeil(periode, this, TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE)
@@ -32,7 +32,11 @@ abstract class Tidslinje<I, T : Tidsenhet> {
                     TidslinjeFeil(periode, this, TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE)
                 else -> null
             }
-        }.filterNotNull().takeIf { it.isNotEmpty() }?.also { throw TidslinjeFeilException(it) }
+        }.filterNotNull()
+
+        perioderMedFeil.takeIf { it.isNotEmpty() }?.also {
+            throw TidslinjeFeilException(it)
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -45,7 +49,7 @@ abstract class Tidslinje<I, T : Tidsenhet> {
     }
 
     override fun toString(): String =
-        lagPerioder().map { it.toString() }.joinToString(" | ")
+        lagPerioder().joinToString(" | ") { it.toString() }
 
     companion object {
         data class TidslinjeFeil(
