@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -8,159 +9,142 @@ import java.time.YearMonth
 
 internal class KompetanseUtilTest {
 
+    val januar2020 = YearMonth.of(2020, 1)
+    val barn1 = tilfeldigPerson()
+    val barn2 = tilfeldigPerson()
+    val barn3 = tilfeldigPerson()
+
     @Test
     fun testOppdatering() {
+        val kompetanse = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("------", barn1, barn2, barn3)
+            .byggKompetanser().first()
 
-        val kompetanse = Kompetanse(
-            id = 1,
-            behandlingId = 1L,
-            fom = YearMonth.of(2021, 1),
-            tom = YearMonth.of(2021, 12),
-            barnAktørIder = setOf("111", "222", "333")
-        )
+        val oppdatertKompetanse = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("  SS  ", barn1)
+            .byggKompetanser().first()
 
-        val oppdatertKompetanse = Kompetanse(
-            id = 1,
-            behandlingId = 1L,
-            fom = YearMonth.of(2021, 3),
-            tom = YearMonth.of(2021, 10),
-            barnAktørIder = setOf("111")
-        )
+        val forventedeKompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("------", barn2, barn3)
+            .medKompetanse("--  --", barn1)
+            .byggKompetanser()
 
         val restKompetanser = KompetanseUtil.finnRestKompetanser(kompetanse, oppdatertKompetanse)
 
         assertEquals(3, restKompetanser.size)
-        assertTrue(
-            restKompetanser.contains(
-                Kompetanse(
-                    id = 0,
-                    behandlingId = 1L,
-                    fom = YearMonth.of(2021, 1),
-                    tom = YearMonth.of(2021, 2),
-                    barnAktørIder = setOf("111")
-                )
-            )
-
-        )
-        assertTrue(
-            restKompetanser.contains(
-                Kompetanse(
-                    id = 0,
-                    behandlingId = 1L,
-                    fom = YearMonth.of(2021, 11),
-                    tom = YearMonth.of(2021, 12),
-                    barnAktørIder = setOf("111")
-                )
-            )
-        )
-        assertTrue(
-            restKompetanser.contains(
-                Kompetanse(
-                    id = 0,
-                    behandlingId = 1L,
-                    fom = YearMonth.of(2021, 1),
-                    tom = YearMonth.of(2021, 12),
-                    barnAktørIder = setOf("222", "333")
-                )
-            )
-        )
+        assertEqualsUnordered(forventedeKompetanser, restKompetanser)
     }
 
     @Test
     fun testMergePåfølgendePerioder() {
-        val kompetanse1 = Kompetanse(
-            fom = YearMonth.of(2021, 1),
-            tom = YearMonth.of(2021, 12),
-            barnAktørIder = setOf("111", "222", "333")
-        )
-        val kompetanse2 = kompetanse1.copy(
-            fom = YearMonth.of(2022, 1),
-            tom = YearMonth.of(2022, 12),
-        )
+        val kompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("SSS", barn1)
+            .medKompetanse("   SSS", barn1)
+            .byggKompetanser()
 
-        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2))
-        assertEquals(1, merge.size)
+        val forventedeKompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("SSSSSS", barn1)
+            .byggKompetanser()
 
-        assertEquals(YearMonth.of(2021, 1), merge.first().fom)
-        assertEquals(YearMonth.of(2022, 12), merge.first().tom)
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
+        assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun testMergeForPerioderMedMellomrom() {
-        val kompetanse1 = Kompetanse(
-            fom = YearMonth.of(2021, 1),
-            tom = YearMonth.of(2021, 12),
-            barnAktørIder = setOf("111", "222", "333")
-        )
-        val kompetanse2 = kompetanse1.copy(
-            fom = YearMonth.of(2022, 2),
-            tom = YearMonth.of(2022, 12),
-        )
+        val kompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("SSS", barn1, barn2, barn3)
+            .medKompetanse("    SSS", barn1, barn2, barn3)
+            .byggKompetanser()
 
-        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2))
-        assertEquals(2, merge.size)
+        val forventedeKompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("SSS SSS", barn1, barn2, barn3)
+            .byggKompetanser()
 
-        assertEquals(YearMonth.of(2021, 1), merge[0].fom)
-        assertEquals(YearMonth.of(2021, 12), merge[0].tom)
-
-        assertEquals(YearMonth.of(2022, 2), merge[1].fom)
-        assertEquals(YearMonth.of(2022, 12), merge[1].tom)
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun testMergeForPerioderDerTidligstePeriodeHarÅpemTOM() {
-        val kompetanse1 = Kompetanse(
-            fom = YearMonth.of(2021, 1),
-            tom = null,
-            barnAktørIder = setOf("111", "222", "333")
-        )
-        val kompetanse2 = kompetanse1.copy(
-            fom = YearMonth.of(2022, 2),
-            tom = YearMonth.of(2022, 12),
-        )
+        val kompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("->", barn1, barn2, barn3)
+            .medKompetanse("   -----", barn1, barn2, barn3)
+            .byggKompetanser()
 
-        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2))
-        assertEquals(1, merge.size)
+        val forventedeKompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("->", barn1, barn2, barn3)
+            .byggKompetanser()
 
-        assertEquals(YearMonth.of(2021, 1), merge[0].fom)
-        assertEquals(null, merge[0].tom)
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+        assertEquals(null, faktiskeKompetanser.first().tom)
     }
 
     @Test
     fun testMergeForPerioderMedOverlapp() {
-        val kompetanse1 = Kompetanse(
-            fom = YearMonth.of(2021, 1),
-            tom = YearMonth.of(2022, 3),
-            barnAktørIder = setOf("111", "222", "333")
-        )
-        val kompetanse2 = kompetanse1.copy(
-            fom = YearMonth.of(2021, 11),
-            tom = YearMonth.of(2022, 12),
-        )
+        val kompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("-----", barn1, barn2, barn3)
+            .medKompetanse("   -----", barn1, barn2, barn3)
+            .byggKompetanser()
 
-        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2))
-        assertEquals(1, merge.size)
+        val forventedeKompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("--------", barn1, barn2, barn3)
+            .byggKompetanser()
 
-        assertEquals(YearMonth.of(2021, 1), merge[0].fom)
-        assertEquals(YearMonth.of(2022, 12), merge[0].tom)
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
     fun testMergeForPerioderDerSenestePeriodeHarÅpemTOM() {
-        val kompetanse1 = Kompetanse(
-            fom = YearMonth.of(2021, 1),
-            tom = YearMonth.of(2021, 11),
-            barnAktørIder = setOf("111", "222", "333")
-        )
-        val kompetanse2 = kompetanse1.copy(
-            fom = YearMonth.of(2021, 9),
-            tom = null
-        )
+        val kompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("------", barn1, barn2, barn3)
+            .medKompetanse("   ----->", barn1, barn2, barn3)
+            .byggKompetanser()
 
-        val merge = KompetanseUtil.mergeKompetanser(listOf(kompetanse1, kompetanse2))
-        assertEquals(1, merge.size)
+        val forventedeKompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("->", barn1, barn2, barn3)
+            .byggKompetanser()
 
-        assertEquals(YearMonth.of(2021, 1), merge[0].fom)
-        assertEquals(null, merge[0].tom)
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+        assertEquals(januar2020, faktiskeKompetanser.first().fom)
+        assertEquals(null, faktiskeKompetanser.first().tom)
+    }
+
+    @Test
+    fun sammensattTest() {
+        val kompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse("SSSSSSS", barn1)
+            .medKompetanse("SSSPPSS", barn2)
+            .medKompetanse("-SSSSSS", barn3)
+            .byggKompetanser()
+
+        val forventedeKompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse(" SS  SS", barn1, barn2, barn3)
+            .medKompetanse("S      ", barn1, barn2)
+            .medKompetanse("   SS  ", barn1, barn3)
+            .medKompetanse("       ", barn2, barn3)
+            .medKompetanse("       ", barn1)
+            .medKompetanse("   PP  ", barn2)
+            .medKompetanse("-      ", barn3)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = KompetanseUtil.slåSammenKompetanser(kompetanser)
+        assertEquals(6, faktiskeKompetanser.size)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    private fun <T> assertEqualsUnordered(
+        expected: Collection<T>,
+        actual: Collection<T>
+    ) {
+        assertEquals(
+            expected.size, actual.size,
+            "Forskjellig antall. Forventet ${expected.size} men fikk ${actual.size}"
+        )
+        assertTrue(expected.containsAll(actual), "Forvantet liste inneholder ikke alle elementene fra faktisk liste")
+        assertTrue(actual.containsAll(expected), "Faktisk liste inneholder ikke alle elementene fra forventet liste")
     }
 }
