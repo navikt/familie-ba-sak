@@ -81,8 +81,7 @@ class AutobrevOpphørSmåbarnstilleggService(
 
     fun yngsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
         val yngsteBarnSinFødselsdato: YearMonth =
-            personopplysningGrunnlag.barna
-                .maxOf { it.fødselsdato.toYearMonth() }
+            personopplysningGrunnlag.yngsteBarnSinFødselsdato.toYearMonth()
 
         return yngsteBarnSinFødselsdato.plusYears(3) == YearMonth.now().minusMonths(1)
     }

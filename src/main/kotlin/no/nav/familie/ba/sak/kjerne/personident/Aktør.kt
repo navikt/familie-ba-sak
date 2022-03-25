@@ -51,8 +51,8 @@ data class Aktør(
         if (other == null || javaClass != other.javaClass) {
             return false
         }
-        val entitet: Aktør = other as Aktør
-        return Objects.equals(hashCode(), entitet.hashCode())
+        val otherAktør: Aktør = other as Aktør
+        return aktørId == otherAktør.aktørId
     }
 
     override fun hashCode(): Int {
