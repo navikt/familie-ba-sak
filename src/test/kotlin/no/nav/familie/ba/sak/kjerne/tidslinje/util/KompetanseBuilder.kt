@@ -40,7 +40,7 @@ class KompetanseBuilder(
     fun byggKompetanser(): Collection<Kompetanse> = kompetanser
 }
 
-class KompetanseTidslinje(
+internal class KompetanseTidslinje(
     val charTidslinje: Tidslinje<Char, Måned>,
     val behandlingId: Long,
     val barn: List<Person>

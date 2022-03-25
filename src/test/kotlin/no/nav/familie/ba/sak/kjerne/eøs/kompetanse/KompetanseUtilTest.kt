@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.BooleanCharTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -114,7 +116,7 @@ internal class KompetanseUtilTest {
     }
 
     @Test
-    fun sammensattTest() {
+    fun komplekseSlåSammenKommpetanserTest() {
         val kompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
             .medKompetanse("SSSSSSS", barn1)
             .medKompetanse("SSSPPSS", barn2)
@@ -136,6 +138,24 @@ internal class KompetanseUtilTest {
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
+    @Test
+    fun testSjekkKompetanserMotEøs() {
+        val kompetanser = KompetanseBuilder(behandlingId = 1, januar2020)
+            .medKompetanse(" SS  SS", barn1, barn2, barn3)
+            .medKompetanse("S      ", barn1, barn2)
+            .medKompetanse("   SS  ", barn1, barn3)
+            .medKompetanse("   PP  ", barn2)
+            .byggKompetanser()
+
+        val eøsPerioder = mapOf(
+            barn1.aktør to bolskTidslinje("TTTFFFTTT", januar2020),
+            barn2.aktør to bolskTidslinje("FFTTTFFTT", januar2020),
+            barn3.aktør to bolskTidslinje("TTTTTTTTT", januar2020)
+        )
+
+        val faktiskeKompetanser = KompetanseUtil.tilpassKompetanserTilEøsPerioder(kompetanser, eøsPerioder)
+    }
+
     private fun <T> assertEqualsUnordered(
         expected: Collection<T>,
         actual: Collection<T>
@@ -147,4 +167,7 @@ internal class KompetanseUtilTest {
         assertTrue(expected.containsAll(actual), "Forvantet liste inneholder ikke alle elementene fra faktisk liste")
         assertTrue(actual.containsAll(expected), "Faktisk liste inneholder ikke alle elementene fra forventet liste")
     }
+
+    private fun bolskTidslinje(tegn: String, start: YearMonth) =
+        BooleanCharTidslinje(tegn, start.tilTidspunkt())
 }

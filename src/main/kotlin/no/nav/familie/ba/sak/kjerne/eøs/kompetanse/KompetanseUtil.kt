@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Uendelighet
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import java.time.YearMonth
 
 object KompetanseUtil {
@@ -69,7 +70,21 @@ object KompetanseUtil {
                 tom = periode.tilOgMed.tilYearMonthEllerNull()
             ).also { it.id = kompetanse.id }
         }
+
+    fun tilpassKompetanserTilEøsPerioder(
+        kompetanser: Collection<Kompetanse>,
+        barnTilEøsPerioder: Map<String, Tidslinje<Regelverk, Måned>>
+    ): Collection<Kompetanse> {
+        val alleBarnAktørIder =
+            kompetanser.alleBarnasAktørIder() + barnTilEøsPerioder.keys
+
+        val barnaKompetanseDiffer = alleBarnAktørIder.map { aktørId ->
+            aktørId to KompetanseEøsDiffer(kompetanser.tilTidslinjeforBarn(aktørId), barnTilEøsPerioder[aktørId])
+        }
+    }
 }
+
+internal class KompetanseEøsDiffer
 
 internal class EnkeltKompetanseTidslinje(
     val kompetanse: Kompetanse
@@ -116,3 +131,10 @@ private fun YearMonth?.tilTidspunktEllerUendeligLengeTil(default: () -> YearMont
 
 private fun YearMonth?.tilTidspunktEllerUendelig(default: () -> YearMonth, uendelighet: Uendelighet) =
     this?.let { MånedTidspunkt(it, Uendelighet.INGEN) } ?: MånedTidspunkt(default(), uendelighet)
+
+fun Iterable<Kompetanse>.tilTidslinjeforBarn(barnAktørId: String) =
+    this.filter { it.barnAktørIder.contains(barnAktørId) }
+        .let { KompetanseTidslinje(it) }
+
+fun Iterable<Kompetanse>.alleBarnasAktørIder() =
+    this.map { it.barnAktørIder }.reduce { akk, neste -> akk + neste }

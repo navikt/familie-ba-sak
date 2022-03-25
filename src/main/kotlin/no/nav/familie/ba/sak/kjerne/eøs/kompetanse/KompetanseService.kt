@@ -57,6 +57,18 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
         return hentKompetanser(behandlingId)
     }
 
+    @Transactional
+    fun tilpassKompetanserTilEøsPerioder() {
+        // Finn barn
+        // Finn EØS-perioder per barn
+        // Finn kompetanser per barn
+        // Lag kompetanse-diff per barn
+        // Lag blanke kompetanser for perioder det mangler kompetanse
+        // Lag hull der det er for mye = finnRestKompetanser
+        // Lagre tillegg
+        // Fjern gammelt
+    }
+
     private fun validerOppdatering(oppdatertKompetanse: Kompetanse, gammelKompetanse: Kompetanse) {
         if (oppdatertKompetanse.fom == null)
             throw Feil("Manglende fra-og-med", httpStatus = HttpStatus.BAD_REQUEST)
@@ -69,4 +81,8 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
         if (!gammelKompetanse.barnAktørIder.containsAll(oppdatertKompetanse.barnAktørIder))
             throw Feil("Oppdaterer barn som ikke er knyttet til kompetansen", httpStatus = HttpStatus.BAD_REQUEST)
     }
+
+    fun Iterable<Kompetanse>.tilTidslinjeforBarn(barnAktørId: String) =
+        this.filter { it.barnAktørIder.contains(barnAktørId) }
+            .let { KompetanseTidslinje(it) }
 }
