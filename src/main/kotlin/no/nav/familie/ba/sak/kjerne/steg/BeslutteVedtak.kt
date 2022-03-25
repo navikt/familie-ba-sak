@@ -124,14 +124,14 @@ class BeslutteVedtak(
     }
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
-        var nesteSteg = hentNesteStegForNormalFlyt(behandling)
+        val nesteSteg = hentNesteStegForNormalFlyt(behandling)
 
         if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG) {
             val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
                 beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling)
 
             if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder) {
-                nesteSteg = StegType.JOURNALFØR_VEDTAKSBREV
+                return StegType.JOURNALFØR_VEDTAKSBREV
             }
         }
         return nesteSteg
