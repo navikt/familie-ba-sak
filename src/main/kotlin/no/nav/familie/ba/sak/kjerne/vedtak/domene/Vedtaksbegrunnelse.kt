@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
@@ -13,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.beløpUtbetaltFor
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
@@ -21,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegr
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
-import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
@@ -53,30 +51,23 @@ class Vedtaksbegrunnelse(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
-    val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
-
-    @Deprecated(
-        "Skal ikke brukes. Personidenter settes ved opprettelse av brev i " +
-            "BrevPeriodeGrunnlag.tilBrevPeriode funksjonen"
-    )
-    @Column(name = "person_identer", columnDefinition = "TEXT")
-    @Convert(converter = StringListConverter::class)
-    val personIdenter: List<String> = emptyList(),
+    val standardbegrunnelse: Standardbegrunnelse,
 ) {
 
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
+        standardbegrunnelse = this.standardbegrunnelse,
     )
 
     override fun toString(): String {
-        return "Vedtaksbegrunnelse(id=$id, standardbegrunnelse=$vedtakBegrunnelseSpesifikasjon)"
+        return "Vedtaksbegrunnelse(id=$id, standardbegrunnelse=$standardbegrunnelse)"
     }
 }
 
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
-    vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-    vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
+    standardbegrunnelse = this.standardbegrunnelse,
+    vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
+    vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse,
 )
 
 interface Begrunnelse
@@ -141,7 +132,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         antallBarn = antallBarn,
         maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
         maalform = brevMålform.tilSanityFormat(),
-        apiNavn = this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn,
+        apiNavn = this.standardbegrunnelse.sanityApiNavn,
         belop = Utils.formaterBeløp(beløp)
     )
 }

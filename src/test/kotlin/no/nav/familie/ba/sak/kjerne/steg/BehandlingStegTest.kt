@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -33,7 +33,7 @@ class BehandlingStegTest {
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.MIGRERING
                 ).copy(
-                    resultat = BehandlingResultat.INNVILGET
+                    resultat = Behandlingsresultat.INNVILGET
                 ),
                 utførendeStegType = it
             )
@@ -61,7 +61,7 @@ class BehandlingStegTest {
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
                 ).copy(
-                    resultat = BehandlingResultat.INNVILGET
+                    resultat = Behandlingsresultat.INNVILGET
                 ),
                 utførendeStegType = it
             )
@@ -94,7 +94,7 @@ class BehandlingStegTest {
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     årsak = BehandlingÅrsak.SØKNAD
                 ).copy(
-                    resultat = BehandlingResultat.INNVILGET
+                    resultat = Behandlingsresultat.INNVILGET
                 ),
                 utførendeStegType = it
             )
@@ -124,7 +124,7 @@ class BehandlingStegTest {
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     årsak = BehandlingÅrsak.SØKNAD
                 ).copy(
-                    resultat = BehandlingResultat.AVSLÅTT
+                    resultat = Behandlingsresultat.AVSLÅTT
                 ),
                 utførendeStegType = it
             )
@@ -152,7 +152,7 @@ class BehandlingStegTest {
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     årsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                ).copy(resultat = BehandlingResultat.INNVILGET),
+                ).copy(resultat = Behandlingsresultat.INNVILGET),
                 utførendeStegType = it
             )
         }
@@ -174,7 +174,7 @@ class BehandlingStegTest {
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     årsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                ).copy(resultat = BehandlingResultat.AVSLÅTT),
+                ).copy(resultat = Behandlingsresultat.AVSLÅTT),
                 utførendeStegType = it
             )
         }
@@ -275,7 +275,7 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.OMREGNING_18ÅR,
-                ).copy(resultat = BehandlingResultat.INNVILGET),
+                ).copy(resultat = Behandlingsresultat.INNVILGET),
                 utførendeStegType = it
             )
         }
@@ -304,7 +304,7 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
-                ).copy(resultat = BehandlingResultat.INNVILGET),
+                ).copy(resultat = Behandlingsresultat.INNVILGET),
                 utførendeStegType = it
             )
         }
@@ -333,7 +333,7 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
-                ).copy(resultat = BehandlingResultat.INNVILGET),
+                ).copy(resultat = Behandlingsresultat.INNVILGET),
                 utførendeStegType = it
             )
         }
@@ -356,7 +356,7 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.SATSENDRING,
-                ).copy(resultat = BehandlingResultat.ENDRET),
+                ).copy(resultat = Behandlingsresultat.ENDRET),
                 utførendeStegType = it
             )
         }
@@ -377,7 +377,7 @@ class BehandlingStegTest {
                     hentNesteSteg(
                         behandling = lagBehandling(
                             årsak = BehandlingÅrsak.SATSENDRING,
-                        ).copy(resultat = BehandlingResultat.AVSLÅTT_OG_ENDRET),
+                        ).copy(resultat = Behandlingsresultat.AVSLÅTT_OG_ENDRET),
                         utførendeStegType = it
                     )
                 }
@@ -385,7 +385,7 @@ class BehandlingStegTest {
                 steg = hentNesteSteg(
                     behandling = lagBehandling(
                         årsak = BehandlingÅrsak.SATSENDRING,
-                    ).copy(resultat = BehandlingResultat.AVSLÅTT_OG_ENDRET),
+                    ).copy(resultat = Behandlingsresultat.AVSLÅTT_OG_ENDRET),
                     utførendeStegType = it
                 )
             }
@@ -412,7 +412,7 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
-                ).copy(resultat = BehandlingResultat.FORTSATT_INNVILGET),
+                ).copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET),
                 utførendeStegType = it
             )
         }

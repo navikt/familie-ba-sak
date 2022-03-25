@@ -28,10 +28,6 @@ class VilkårsvurderingService(
         return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun hentBehandlingResultatForBehandling(behandlingId: Long): List<Vilkårsvurdering> {
-        return vilkårsvurderingRepository.finnBehandlingResultater(behandlingId = behandlingId)
-    }
-
     fun finnBarnMedEksplisittAvslagPåBehandling(behandlingId: Long): List<Aktør> {
         val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
         return eksplisistteAvslagPåBehandling
@@ -57,10 +53,10 @@ class VilkårsvurderingService(
     fun lagreNyOgDeaktiverGammel(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vilkårsvurdering $vilkårsvurdering")
 
-        val aktivBehandlingResultat = hentAktivForBehandling(vilkårsvurdering.behandling.id)
+        val aktivVilkårsvurdering = hentAktivForBehandling(vilkårsvurdering.behandling.id)
 
-        if (aktivBehandlingResultat != null) {
-            vilkårsvurderingRepository.saveAndFlush(aktivBehandlingResultat.also { it.aktiv = false })
+        if (aktivVilkårsvurdering != null) {
+            vilkårsvurderingRepository.saveAndFlush(aktivVilkårsvurdering.also { it.aktiv = false })
         }
 
         return vilkårsvurderingRepository.save(vilkårsvurdering)
@@ -69,8 +65,8 @@ class VilkårsvurderingService(
     fun lagreInitielt(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vilkårsvurdering $vilkårsvurdering")
 
-        val aktivBehandlingResultat = hentAktivForBehandling(vilkårsvurdering.behandling.id)
-        if (aktivBehandlingResultat != null) {
+        val aktivVilkårsvurdering = hentAktivForBehandling(vilkårsvurdering.behandling.id)
+        if (aktivVilkårsvurdering != null) {
             error("Det finnes allerede et aktivt vilkårsvurdering for behandling ${vilkårsvurdering.behandling.id}")
         }
 
@@ -89,7 +85,7 @@ class VilkårsvurderingService(
     }
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> =
-        vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(sanityService.hentSanityBegrunnelser())
+        standardbegrunnelserTilNedtrekksmenytekster(sanityService.hentSanityBegrunnelser())
 
     fun hentTidligsteVilkårsvurderingKnyttetTilMigrering(behandlingId: Long): YearMonth? {
         val vilkårsvurdering = hentAktivForBehandling(

@@ -6,9 +6,9 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -186,8 +186,8 @@ class SaksstatistikkService(
                         ResultatBegrunnelseDVH(
                             fom = vedtaksperiode.fom,
                             tom = vedtaksperiode.tom,
-                            type = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.name,
-                            vedtakBegrunnelse = it.vedtakBegrunnelseSpesifikasjon.name,
+                            type = it.standardbegrunnelse.vedtakBegrunnelseType.name,
+                            vedtakBegrunnelse = it.standardbegrunnelse.name,
                         )
                     }
             }

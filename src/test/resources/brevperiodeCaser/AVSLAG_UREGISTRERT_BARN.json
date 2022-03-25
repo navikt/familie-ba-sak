@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "AVSLAG_UREGISTRERT_BARN"
+      "standardbegrunnelse": "AVSLAG_UREGISTRERT_BARN"
     }
   ],
   "fritekster": [

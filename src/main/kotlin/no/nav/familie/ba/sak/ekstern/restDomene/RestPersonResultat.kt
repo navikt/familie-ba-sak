@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -29,7 +29,7 @@ data class RestVilkårResultat(
     val erVurdert: Boolean = false,
     val erAutomatiskVurdert: Boolean = false,
     val erEksplisittAvslagPåSøknad: Boolean? = null,
-    val avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = emptyList(),
+    val avslagBegrunnelser: List<Standardbegrunnelse>? = emptyList(),
     val vurderesEtter: Regelverk? = null,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
 ) {
@@ -57,7 +57,7 @@ fun PersonResultat.tilRestPersonResultat() =
                 endretTidspunkt = vilkårResultat.endretTidspunkt,
                 behandlingId = vilkårResultat.behandlingId,
                 erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0,
-                avslagBegrunnelser = vilkårResultat.vedtakBegrunnelseSpesifikasjoner,
+                avslagBegrunnelser = vilkårResultat.standardbegrunnelser,
                 vurderesEtter = vilkårResultat.vurderesEtter,
                 utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger
             )

@@ -19,8 +19,8 @@ import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktSerivce
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -35,7 +35,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
@@ -101,7 +101,7 @@ class VedtaksperiodeService(
 
     fun oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId: Long,
-        standardbegrunnelserFraFrontend: List<VedtakBegrunnelseSpesifikasjon>
+        standardbegrunnelserFraFrontend: List<Standardbegrunnelse>
     ): Vedtak {
         val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
 
@@ -195,9 +195,9 @@ class VedtaksperiodeService(
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(
                 listOf(
                     Vedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
-                            VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
-                        } else VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
+                        standardbegrunnelse = if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
+                            Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
+                        } else Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
                         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     )
                 )
@@ -218,7 +218,7 @@ class VedtaksperiodeService(
                         satsendringsvedtaksperiode.settBegrunnelser(
                             listOf(
                                 Vedtaksbegrunnelse(
-                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING,
+                                    standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                                     vedtaksperiodeMedBegrunnelser = satsendringsvedtaksperiode,
                                 )
                             )
@@ -232,7 +232,7 @@ class VedtaksperiodeService(
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
 
         slettVedtaksperioderFor(vedtak)
-        if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
+        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
 
             val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
@@ -424,7 +424,7 @@ class VedtaksperiodeService(
 
     fun oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
         vedtak: Vedtak,
-        vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon
+        standardbegrunnelse: Standardbegrunnelse
     ) {
         val vedtaksperioder = hentPersisterteVedtaksperioder(vedtak)
 
@@ -436,7 +436,7 @@ class VedtaksperiodeService(
             listOf(
                 Vedtaksbegrunnelse(
                     vedtaksperiodeMedBegrunnelser = fortsattInnvilgetPeriode,
-                    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                    standardbegrunnelse = standardbegrunnelse,
                 )
             )
         )
@@ -466,7 +466,7 @@ class VedtaksperiodeService(
     }
 
     fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
-        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return emptyList()
+        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
 
         val iverksatteBehandlinger =
             behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
@@ -549,8 +549,8 @@ class VedtaksperiodeService(
 
         val avslagsperioder = periodegrupperteAvslagsvilkår.map { (fellesPeriode, vilkårResultater) ->
 
-            val vedtakBegrunnelseSpesifikasjoner =
-                vilkårResultater.map { it.vedtakBegrunnelseSpesifikasjoner }.flatten().toSet().toList()
+            val standardbegrunnelser =
+                vilkårResultater.map { it.standardbegrunnelser }.flatten().toSet().toList()
 
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
@@ -560,10 +560,10 @@ class VedtaksperiodeService(
             )
                 .apply {
                     begrunnelser.addAll(
-                        vedtakBegrunnelseSpesifikasjoner.map { begrunnelse ->
+                        standardbegrunnelser.map { begrunnelse ->
                             Vedtaksbegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,
-                                vedtakBegrunnelseSpesifikasjon = begrunnelse
+                                standardbegrunnelse = begrunnelse
                             )
                         }
                     )
@@ -604,7 +604,7 @@ class VedtaksperiodeService(
                     begrunnelser.add(
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN,
+                            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
                         )
                     )
                 }

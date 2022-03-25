@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunnelse
@@ -27,12 +27,12 @@ class VedtaksperiodeMedBegrunnelseTest {
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
-                        VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+                        Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
+                        Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            vedtakBegrunnelseSpesifikasjon = begrunnelse
+                            standardbegrunnelse = begrunnelse
                         )
                     }
                 )
@@ -41,8 +41,8 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = listOf(
-                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR,
-                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
+                Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR,
+                Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
             ),
             måned = fom
         )
@@ -63,12 +63,12 @@ class VedtaksperiodeMedBegrunnelseTest {
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
-                        VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
+                        Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
+                        Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            vedtakBegrunnelseSpesifikasjon = begrunnelse
+                            standardbegrunnelse = begrunnelse
                         )
                     }
                 )
@@ -76,7 +76,7 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
-            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK),
+            standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK),
             måned = fom
         )
 
@@ -96,11 +96,11 @@ class VedtaksperiodeMedBegrunnelseTest {
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
+                        Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            vedtakBegrunnelseSpesifikasjon = begrunnelse
+                            standardbegrunnelse = begrunnelse
                         )
                     }
                 )
@@ -108,7 +108,7 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
-            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK),
+            standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK),
             måned = fom
         )
 
@@ -127,11 +127,11 @@ class VedtaksperiodeMedBegrunnelseTest {
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
+                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            vedtakBegrunnelseSpesifikasjon = begrunnelse
+                            standardbegrunnelse = begrunnelse
                         )
                     }
                 )
@@ -139,7 +139,7 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
-            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR),
+            standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR),
             måned = YearMonth.now()
         )
 
@@ -158,11 +158,11 @@ class VedtaksperiodeMedBegrunnelseTest {
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
+                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            vedtakBegrunnelseSpesifikasjon = begrunnelse
+                            standardbegrunnelse = begrunnelse
                         )
                     }
                 )
@@ -170,7 +170,7 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
-            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR),
+            standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR),
             måned = YearMonth.now()
         )
 
@@ -189,11 +189,11 @@ class VedtaksperiodeMedBegrunnelseTest {
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD,
+                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD,
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            vedtakBegrunnelseSpesifikasjon = begrunnelse
+                            standardbegrunnelse = begrunnelse
                         )
                     }
                 )
@@ -201,7 +201,7 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
-            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD),
+            standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD),
             måned = YearMonth.now()
         )
 

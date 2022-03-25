@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dataGenerator.brev.lagBrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EndretUtbetalingBrevPeriodeType
@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions
@@ -106,17 +106,17 @@ internal class BrevUtilsTest {
     }
 
     private val støttedeBehandlingsersultaterFørstegangsbehandling = listOf(
-        BehandlingResultat.INNVILGET,
-        BehandlingResultat.INNVILGET_OG_OPPHØRT,
-        BehandlingResultat.DELVIS_INNVILGET,
-        BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT,
-        BehandlingResultat.AVSLÅTT,
+        Behandlingsresultat.INNVILGET,
+        Behandlingsresultat.INNVILGET_OG_OPPHØRT,
+        Behandlingsresultat.DELVIS_INNVILGET,
+        Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
+        Behandlingsresultat.AVSLÅTT,
     )
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for innvilget førstegangsbehandling`() {
 
-        støttedeBehandlingsersultaterFørstegangsbehandling.filterNot { it == BehandlingResultat.AVSLÅTT }.forEach {
+        støttedeBehandlingsersultaterFørstegangsbehandling.filterNot { it == Behandlingsresultat.AVSLÅTT }.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
                 hentManuellVedtaksbrevtype(
@@ -133,7 +133,7 @@ internal class BrevUtilsTest {
             Brevmal.VEDTAK_AVSLAG,
             hentManuellVedtaksbrevtype(
                 BehandlingType.FØRSTEGANGSBEHANDLING,
-                BehandlingResultat.AVSLÅTT
+                Behandlingsresultat.AVSLÅTT
             ),
         )
     }
@@ -141,7 +141,7 @@ internal class BrevUtilsTest {
     @Test
     fun `skal kaste exception for ikke-støttede behandlingsresultater ved førstegangsbehandling`() {
         val ikkeStøttedeBehandlingsersultater =
-            BehandlingResultat.values().subtract(støttedeBehandlingsersultaterFørstegangsbehandling)
+            Behandlingsresultat.values().subtract(støttedeBehandlingsersultaterFørstegangsbehandling)
 
         ikkeStøttedeBehandlingsersultater.forEach {
             assertThrows<Exception> {
@@ -154,12 +154,12 @@ internal class BrevUtilsTest {
     }
 
     private val behandlingsersultaterForVedtakEndring = listOf(
-        BehandlingResultat.INNVILGET,
-        BehandlingResultat.INNVILGET_OG_ENDRET,
-        BehandlingResultat.DELVIS_INNVILGET,
-        BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET,
-        BehandlingResultat.AVSLÅTT_OG_ENDRET,
-        BehandlingResultat.ENDRET
+        Behandlingsresultat.INNVILGET,
+        Behandlingsresultat.INNVILGET_OG_ENDRET,
+        Behandlingsresultat.DELVIS_INNVILGET,
+        Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET,
+        Behandlingsresultat.AVSLÅTT_OG_ENDRET,
+        Behandlingsresultat.ENDRET
     )
 
     @Test
@@ -175,7 +175,7 @@ internal class BrevUtilsTest {
         }
     }
 
-    private val behandlingsersultaterForOpphørt = listOf(BehandlingResultat.OPPHØRT)
+    private val behandlingsersultaterForOpphørt = listOf(Behandlingsresultat.OPPHØRT)
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt'`() {
@@ -191,13 +191,13 @@ internal class BrevUtilsTest {
     }
 
     private val behandlingsersultaterForOpphørMedEndring = listOf(
-        BehandlingResultat.INNVILGET_OG_OPPHØRT,
-        BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT,
-        BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT,
-        BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
-        BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
-        BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-        BehandlingResultat.ENDRET_OG_OPPHØRT,
+        Behandlingsresultat.INNVILGET_OG_OPPHØRT,
+        Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT,
+        Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
+        Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
+        Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
+        Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
+        Behandlingsresultat.ENDRET_OG_OPPHØRT,
     )
 
     @Test
@@ -213,7 +213,7 @@ internal class BrevUtilsTest {
         }
     }
 
-    private val behandlingsersultaterForFortsattInnvilget = listOf(BehandlingResultat.FORTSATT_INNVILGET)
+    private val behandlingsersultaterForFortsattInnvilget = listOf(Behandlingsresultat.FORTSATT_INNVILGET)
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Fortsatt innvilget'`() {
@@ -228,7 +228,7 @@ internal class BrevUtilsTest {
         }
     }
 
-    private val behandlingsersultaterForAvslag = listOf(BehandlingResultat.AVSLÅTT)
+    private val behandlingsersultaterForAvslag = listOf(Behandlingsresultat.AVSLÅTT)
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Avslag'`() {
@@ -246,7 +246,7 @@ internal class BrevUtilsTest {
     @Test
     fun `test hentManuellVedtaksbrevtype kaster exception for ikke-støttede behandlingsresultater ved revurdering`() {
         val ikkeStøttedeBehandlingsersultater =
-            BehandlingResultat.values()
+            Behandlingsresultat.values()
                 .subtract(behandlingsersultaterForVedtakEndring)
                 .subtract(behandlingsersultaterForOpphørt)
                 .subtract(behandlingsersultaterForOpphørMedEndring)
@@ -274,7 +274,7 @@ internal class BrevUtilsTest {
                 skalBehandlesAutomatisk = true,
                 årsak = BehandlingÅrsak.FØDSELSHENDELSE
             ).copy(
-                resultat = BehandlingResultat.INNVILGET
+                resultat = Behandlingsresultat.INNVILGET
             )
         Assertions.assertEquals(
             Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
@@ -291,7 +291,7 @@ internal class BrevUtilsTest {
                 skalBehandlesAutomatisk = true,
                 årsak = BehandlingÅrsak.FØDSELSHENDELSE
             ).copy(
-                resultat = BehandlingResultat.INNVILGET
+                resultat = Behandlingsresultat.INNVILGET
             )
         Assertions.assertEquals(
             Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
@@ -314,13 +314,13 @@ internal class BrevUtilsTest {
         )
         Assertions.assertEquals(
             "Vedtak om endret barnetrygd",
-            hentOverstyrtDokumenttittel(revurdering.copy(resultat = BehandlingResultat.INNVILGET_OG_ENDRET))
+            hentOverstyrtDokumenttittel(revurdering.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET))
         )
         Assertions.assertEquals(
             "Vedtak om fortsatt barnetrygd",
-            hentOverstyrtDokumenttittel(revurdering.copy(resultat = BehandlingResultat.FORTSATT_INNVILGET))
+            hentOverstyrtDokumenttittel(revurdering.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET))
         )
-        assertNull(hentOverstyrtDokumenttittel(revurdering.copy(resultat = BehandlingResultat.OPPHØRT)))
+        assertNull(hentOverstyrtDokumenttittel(revurdering.copy(resultat = Behandlingsresultat.OPPHØRT)))
     }
 
     @Test
@@ -329,7 +329,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -337,7 +337,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -350,11 +350,11 @@ internal class BrevUtilsTest {
                 utvidetVedtaksperioderMedBegrunnelser.map { it.tilMinimertVedtaksperiode(hentSanityBegrunnelser()) },
                 listOf(
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                         hjemler = listOf("10"),
                     )
                 )
@@ -368,7 +368,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -376,7 +376,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -393,11 +393,11 @@ internal class BrevUtilsTest {
                 },
                 sanityBegrunnelser = listOf(
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                         hjemler = listOf("10"),
                     )
                 ),
@@ -412,7 +412,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -420,7 +420,7 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagRestVedtaksbegrunnelse(
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -437,11 +437,11 @@ internal class BrevUtilsTest {
                 },
                 sanityBegrunnelser = listOf(
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                         hjemler = listOf("10"),
                     )
                 ),

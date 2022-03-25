@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
@@ -158,10 +158,10 @@ data class BrevPeriodeOutput(
 )
 
 data class BrevBegrunnelseGrunnlagConfig(
-    val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
+    val standardbegrunnelse: Standardbegrunnelse,
 ) {
     fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BrevBegrunnelseGrunnlag(
-        vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-        triggesAv = this.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
+        standardbegrunnelse = this.standardbegrunnelse,
+        triggesAv = this.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
     )
 }

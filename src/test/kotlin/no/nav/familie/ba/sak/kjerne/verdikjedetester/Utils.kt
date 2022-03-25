@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -38,7 +38,7 @@ fun generellAssertRestUtvidetBehandling(
     restUtvidetBehandling: Ressurs<RestUtvidetBehandling>,
     behandlingStatus: BehandlingStatus,
     behandlingStegType: StegType? = null,
-    behandlingResultat: BehandlingResultat? = null
+    behandlingsresultat: Behandlingsresultat? = null
 ) {
     if (restUtvidetBehandling.status != Ressurs.Status.SUKSESS)
         throw IllegalStateException("generellAssertRestUtvidetBehandling feilet. status: ${restUtvidetBehandling.status.name},  melding: ${restUtvidetBehandling.melding}")
@@ -49,8 +49,8 @@ fun generellAssertRestUtvidetBehandling(
         assertEquals(behandlingStegType, restUtvidetBehandling.data?.steg)
     }
 
-    if (behandlingResultat != null) {
-        assertEquals(behandlingResultat, restUtvidetBehandling.data?.resultat)
+    if (behandlingsresultat != null) {
+        assertEquals(behandlingsresultat, restUtvidetBehandling.data?.resultat)
     }
 }
 
@@ -58,7 +58,7 @@ fun generellAssertFagsak(
     restFagsak: Ressurs<RestFagsak>,
     fagsakStatus: FagsakStatus,
     behandlingStegType: StegType? = null,
-    behandlingResultat: BehandlingResultat? = null,
+    behandlingsresultat: Behandlingsresultat? = null,
     aktivBehandlingId: Long? = null
 ) {
     if (restFagsak.status != Ressurs.Status.SUKSESS) throw IllegalStateException("generellAssertFagsak feilet. status: ${restFagsak.status.name},  melding: ${restFagsak.melding}")
@@ -73,8 +73,8 @@ fun generellAssertFagsak(
     if (behandlingStegType != null) {
         assertEquals(behandlingStegType, aktivBehandling.steg)
     }
-    if (behandlingResultat != null) {
-        assertEquals(behandlingResultat, aktivBehandling.resultat)
+    if (behandlingsresultat != null) {
+        assertEquals(behandlingsresultat, aktivBehandling.resultat)
     }
 }
 

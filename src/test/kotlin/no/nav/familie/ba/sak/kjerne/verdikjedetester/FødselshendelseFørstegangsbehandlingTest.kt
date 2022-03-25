@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
@@ -73,7 +73,7 @@ class FødselshendelseFørstegangsbehandlingTest(
         )
 
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
-        assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
+        assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
 
         val vedtaksperioder = aktivBehandling.vedtak?.vedtaksperioderMedBegrunnelser
 
@@ -93,8 +93,8 @@ class FødselshendelseFørstegangsbehandlingTest(
             desember2021Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt(),
         )
         assertEquals(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
-            desember2021Vedtaksperiode?.begrunnelser?.first()?.vedtakBegrunnelseSpesifikasjon,
+            Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
+            desember2021Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse,
         )
 
         assertEquals(
@@ -102,8 +102,8 @@ class FødselshendelseFørstegangsbehandlingTest(
             januar2022Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt(),
         )
         assertEquals(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING,
-            januar2022Vedtaksperiode?.begrunnelser?.first()?.vedtakBegrunnelseSpesifikasjon,
+            Standardbegrunnelse.INNVILGET_SATSENDRING,
+            januar2022Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse,
         )
     }
 
@@ -148,7 +148,7 @@ class FødselshendelseFørstegangsbehandlingTest(
         )
 
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
-        assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
+        assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
         val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
