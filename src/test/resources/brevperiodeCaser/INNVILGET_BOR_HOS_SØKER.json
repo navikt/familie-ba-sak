@@ -57,7 +57,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "20.01.20",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "20.01.20",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 1,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "innvilgetBorHosSoker",

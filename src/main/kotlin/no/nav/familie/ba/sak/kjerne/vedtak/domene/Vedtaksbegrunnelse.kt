@@ -75,7 +75,11 @@ interface Begrunnelse
 data class BegrunnelseData(
     val gjelderSoker: Boolean,
     val barnasFodselsdatoer: String,
+    val fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling: String,
+    val fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling: String,
     val antallBarn: Int,
+    val antallBarnOppfyllerTriggereOgHarUtbetaling: Int,
+    val antallBarnOppfyllerTriggereOgHarNullutbetaling: Int,
     val maanedOgAarBegrunnelsenGjelderFor: String?,
     val maalform: String,
     val apiNavn: String,
@@ -93,6 +97,13 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
 ): Begrunnelse {
     val personerPåBegrunnelse =
         personerIPersongrunnlag.filter { person -> this.personIdenter.contains(person.personIdent) }
+
+    val barnSomOppfyllerTriggereOgHarUtbetaling = personerPåBegrunnelse.filter { person ->
+        person.type == PersonType.BARN && minimerteUtbetalingsperiodeDetaljer.any { it.utbetaltPerMnd > 0 && it.person.personIdent == person.personIdent }
+    }
+    val barnSomOppfyllerTriggereOgHarNullutbetaling = personerPåBegrunnelse.filter { person ->
+        person.type == PersonType.BARN && minimerteUtbetalingsperiodeDetaljer.any { it.utbetaltPerMnd == 0 && it.person.personIdent == person.personIdent }
+    }
 
     val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
 
@@ -129,7 +140,13 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     return BegrunnelseData(
         gjelderSoker = gjelderSøker,
         barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
+        fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling = barnSomOppfyllerTriggereOgHarUtbetaling.map { it.fødselsdato }
+            .tilBrevTekst(),
+        fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling = barnSomOppfyllerTriggereOgHarNullutbetaling.map { it.fødselsdato }
+            .tilBrevTekst(),
         antallBarn = antallBarn,
+        antallBarnOppfyllerTriggereOgHarUtbetaling = barnSomOppfyllerTriggereOgHarUtbetaling.size,
+        antallBarnOppfyllerTriggereOgHarNullutbetaling = barnSomOppfyllerTriggereOgHarNullutbetaling.size,
         maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
         maalform = brevMålform.tilSanityFormat(),
         apiNavn = this.standardbegrunnelse.sanityApiNavn,

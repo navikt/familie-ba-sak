@@ -50,7 +50,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "10.12.13",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "januar 2021",
         "maalform": "bokmaal",
         "apiNavn": "avslagBorHosSoker",
