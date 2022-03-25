@@ -187,7 +187,7 @@ class OppgaveService(
         }
     }
 
-    fun forlengFrsitÅpneOppgaverPåBehandling(behandlingId: Long, forlengelse: Period) {
+    fun forlengFristÅpneOppgaverPåBehandling(behandlingId: Long, forlengelse: Period) {
         val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
 
         dbOppgaver.forEach { dbOppgave ->
@@ -209,7 +209,7 @@ class OppgaveService(
         }
     }
 
-    fun settFrsitÅpneOppgaverPåBehandlingTil(behandlingId: Long, nyFrist: LocalDate) {
+    fun settFristÅpneOppgaverPåBehandlingTil(behandlingId: Long, nyFrist: LocalDate) {
         val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
 
         dbOppgaver.forEach { dbOppgave ->
