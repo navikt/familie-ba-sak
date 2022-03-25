@@ -63,7 +63,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 0,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2020",
         "maalform": "bokmaal",
         "apiNavn": "innvilgetSatsendring",

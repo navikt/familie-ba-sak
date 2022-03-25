@@ -103,7 +103,11 @@
       {
         "gjelderSoker": true,
         "barnasFodselsdatoer": "10.03.04, 15.04.09 og 06.09.10",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 3,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "oktober 2021",
         "maalform": "bokmaal",
         "apiNavn": "innvilgetTredjelandsborgerLovligOppholdForBosattINorge",

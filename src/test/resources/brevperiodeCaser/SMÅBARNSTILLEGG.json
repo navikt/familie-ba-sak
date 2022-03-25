@@ -93,7 +93,11 @@
       {
         "gjelderSoker": true,
         "barnasFodselsdatoer": "03.09.20 og 03.09.21",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "03.09.20",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 2,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 1,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "reduksjonSmaabarnstilleggIkkeLengerFullOvergangsstonad",
