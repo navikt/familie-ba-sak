@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -157,6 +158,7 @@ class BeregningServiceTest {
     fun `Skal ikke iverksettes i økonomi hvis mangler utbetalins perioder grunnet endret utbetalings periode`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
+            BehandlingUnderkategori.ORDINÆR,
             0,
             true
         )
@@ -168,6 +170,7 @@ class BeregningServiceTest {
     fun `Skal iverksettes i økonomi hvis mangler utbetalins perioder men behandlinsresultat ikke er innvilget og opphørt`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET,
+            BehandlingUnderkategori.ORDINÆR,
             0,
             true
         )
@@ -179,6 +182,7 @@ class BeregningServiceTest {
     fun `Skal iverksettes i økonomi om utbetalins perioder finnes`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
+            BehandlingUnderkategori.ORDINÆR,
             100,
             true
         )
@@ -190,8 +194,21 @@ class BeregningServiceTest {
     fun `Skal iverksettes i økonomi hvis mangler utbetalins perioder men mangler endringsperioder`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
+            BehandlingUnderkategori.ORDINÆR,
             0,
             false
+        )
+
+        Assertions.assertFalse(skalIkkeIverksette)
+    }
+
+    @Test
+    fun `Skal iverksettes i økonomi hvis mangler utbetalins perioder men er av underkategori UTVIDET`() {
+        val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
+            behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
+            BehandlingUnderkategori.UTVIDET,
+            0,
+            true
         )
 
         Assertions.assertFalse(skalIkkeIverksette)
@@ -722,10 +739,11 @@ class BeregningServiceTest {
 
     fun opprettAtyMedEndretUtbetalingsPeriode(
         behandlinsResultat: Behandlingsresultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
+        behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
         beløp: Int,
         endretUtbetaling: Boolean
     ): Boolean {
-        val behandling = lagBehandling(resultat = behandlinsResultat)
+        val behandling = lagBehandling(resultat = behandlinsResultat, underkategori = behandlingUnderkategori)
 
         val barn1Fnr = randomFnr()
 
@@ -735,7 +753,9 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = barn1Fnr,
             barnasIdenter = listOf(barn1Fnr),
-            barnFødselsdato = LocalDate.of(2002, 7, 1)
+            barnFødselsdato = LocalDate.of(
+                2002, 7, 1,
+            )
         )
 
         val periodeFom = LocalDate.now().toYearMonth().minusMonths(1)
