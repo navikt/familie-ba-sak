@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ToveisKombinator
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt

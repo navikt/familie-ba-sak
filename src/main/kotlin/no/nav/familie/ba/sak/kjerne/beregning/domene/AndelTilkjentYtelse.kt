@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -192,7 +193,7 @@ data class AndelTilkjentYtelse(
         } else if (relevanteVilkårsResultaer.all { it.vurderesEtter == Regelverk.NASJONALE_REGLER }) {
             Regelverk.NASJONALE_REGLER
         } else {
-            error("AndelTilkjentYtelse ${this.id} er basert på VilkårsResultater med en blanding av nasjonale og EØS regelverk.")
+            Regelverk.NASJONALE_REGLER
         }
     }
 
@@ -226,7 +227,7 @@ data class AndelTilkjentYtelse(
             .filter { this.aktør == it.aktør }
             .flatMap { it.vilkårResultater }
             .filter {
-                this.stønadFom > it.periodeFom?.toYearMonth() &&
+                this.stønadFom > (it.periodeFom ?: TIDENES_MORGEN).toYearMonth() &&
                     (it.periodeTom == null || this.stønadFom <= it.periodeTom?.toYearMonth())
             }
             .filter { vilkårResultat ->
