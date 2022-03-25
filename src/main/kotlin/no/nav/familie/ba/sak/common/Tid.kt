@@ -19,6 +19,11 @@ fun LocalDate.tilDagMånedÅr() = this.format(DateTimeFormatter.ofPattern("d. MM
 fun LocalDate.tilMånedÅr() = this.format(DateTimeFormatter.ofPattern("MMMM yyyy", nbLocale))
 fun YearMonth.tilMånedÅr() = this.format(DateTimeFormatter.ofPattern("MMMM yyyy", nbLocale))
 
+fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
+    return tilOgMed?.erDagenFør(fraOgMed) == true &&
+        tilOgMed.toYearMonth() != fraOgMed?.toYearMonth()
+}
+
 fun LocalDate.sisteDagIForrigeMåned(): LocalDate {
     val sammeDagForrigeMåned = this.minusMonths(1)
     return sammeDagForrigeMåned.sisteDagIMåned()
