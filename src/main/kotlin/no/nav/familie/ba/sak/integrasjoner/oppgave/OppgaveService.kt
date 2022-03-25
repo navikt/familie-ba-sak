@@ -192,14 +192,14 @@ class OppgaveService(
 
         dbOppgaver.forEach { dbOppgave ->
             val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
-            val oppgaveErÅpen = gammelOppgave.ferdigstiltTidspunkt != null
+            val oppgaveErAvsluttet = gammelOppgave.ferdigstiltTidspunkt != null
 
             when {
                 gammelOppgave.id == null ->
                     logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
                 gammelOppgave.fristFerdigstillelse == null ->
                     logger.warn("Oppgave ${dbOppgave.gsakId} har ingen oppgavefrist ved oppdatering av frist")
-                !oppgaveErÅpen -> {}
+                oppgaveErAvsluttet -> {}
                 else -> {
                     val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
                     val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist?.toString())
@@ -214,11 +214,11 @@ class OppgaveService(
 
         dbOppgaver.forEach { dbOppgave ->
             val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
-            val oppgaveErÅpen = gammelOppgave.ferdigstiltTidspunkt != null
+            val oppgaveErAvsluttet = gammelOppgave.ferdigstiltTidspunkt != null
 
             when {
                 gammelOppgave.id == null -> logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
-                !oppgaveErÅpen -> {}
+                oppgaveErAvsluttet -> {}
                 else -> {
                     val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
                     integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
