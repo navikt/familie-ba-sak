@@ -5,5 +5,5 @@ interface ToveisKombinator<V, H, R> {
 }
 
 interface ListeKombinator<T, R> {
-    fun kombiner(liste: Iterable<T>): R
+    fun kombiner(liste: Iterable<T>): R?
 }

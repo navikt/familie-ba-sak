@@ -1,16 +1,25 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.beregning.AktørId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.blankUt
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.TilpassKompetanserTilEøsPerioder
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.revurderStatus
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammenKompetanser
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammen
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class KompetanseService(val kompetanseRepository: MockKompetanseRepository = MockKompetanseRepository()) {
+class KompetanseService(
+    val tidslinjeService: TidslinjeService,
+    val kompetanseRepository: MockKompetanseRepository = MockKompetanseRepository()
+) {
 
     fun hentKompetanser(behandlingId: Long): Collection<Kompetanse> {
         return kompetanseRepository.hentKompetanser(behandlingId)
@@ -23,14 +32,16 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
         validerOppdatering(oppdatertKompetanse, gammelKompetanse)
 
         val restKompetanser = KompetanseUtil.finnRestKompetanser(gammelKompetanse, oppdatertKompetanse)
+        val revurderteKompetanser =
+            (restKompetanser + oppdatertKompetanse)
+                .slåSammen().vurderStatus().medBehandlingId(gammelKompetanse.behandlingId)
 
-        val revurderteKompetanser = slåSammenKompetanser(revurderStatus(restKompetanser + oppdatertKompetanse))
-        val tilLagring = revurderteKompetanser - gammelKompetanse
+        val tilOppretting = revurderteKompetanser - gammelKompetanse
         val tilSletting = listOf(gammelKompetanse) - revurderteKompetanser
 
-        if (tilLagring != tilSletting) {
+        if (tilOppretting != tilSletting) {
             kompetanseRepository.delete(tilSletting)
-            kompetanseRepository.save(tilLagring)
+            kompetanseRepository.save(tilOppretting)
         }
         return hentKompetanser(oppdatertKompetanse.behandlingId)
     }
@@ -42,31 +53,39 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
         val eksisterendeKompetanser = hentKompetanser(behandlingId)
         val blankKompetamse = gammelKompetanse.blankUt()
 
-        val oppdaterteKompetanser =
+        val revurderteKompetanser =
             eksisterendeKompetanser.minus(gammelKompetanse).plus(blankKompetamse)
+                .slåSammen().vurderStatus().medBehandlingId(behandlingId)
 
-        val revurderteKompetanser = slåSammenKompetanser(revurderStatus(oppdaterteKompetanser))
-        val tilLagring = revurderteKompetanser.minus(eksisterendeKompetanser)
+        val tilOppretting = revurderteKompetanser.minus(eksisterendeKompetanser)
         val tilSletting = eksisterendeKompetanser.minus(revurderteKompetanser)
 
-        if (tilLagring != tilSletting) {
+        if (tilOppretting != tilSletting) {
             kompetanseRepository.delete(tilSletting)
-            kompetanseRepository.save(tilLagring)
+            kompetanseRepository.save(tilOppretting)
         }
 
         return hentKompetanser(behandlingId)
     }
 
     @Transactional
-    fun tilpassKompetanserTilEøsPerioder() {
-        // Finn barn
-        // Finn EØS-perioder per barn
-        // Finn kompetanser per barn
-        // Lag kompetanse-diff per barn
-        // Lag blanke kompetanser for perioder det mangler kompetanse
-        // Lag hull der det er for mye = finnRestKompetanser
-        // Lagre tillegg
-        // Fjern gammelt
+    fun tilpassKompetanserTilEøsPerioder(behandlingId: Long): Collection<Kompetanse> {
+        val kompetanser = hentKompetanser(behandlingId)
+        val barnasRegelverkTidslinjer = tidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId)
+
+        val tilpassKompetanserTilEøsPerioder = TilpassKompetanserTilEøsPerioder(kompetanser, barnasRegelverkTidslinjer)
+        val tilpassedeKompetanser = tilpassKompetanserTilEøsPerioder.tilpassKompetanserTilEøs()
+
+        val tilOppretting = tilpassedeKompetanser.minus(kompetanser)
+            .medBehandlingId(behandlingId).vurderStatus()
+        val tilSletting = kompetanser.minus(tilpassedeKompetanser)
+
+        if (tilOppretting != tilSletting) {
+            kompetanseRepository.delete(tilSletting)
+            kompetanseRepository.save(tilOppretting)
+        }
+
+        return hentKompetanser(behandlingId)
     }
 
     private fun validerOppdatering(oppdatertKompetanse: Kompetanse, gammelKompetanse: Kompetanse) {
@@ -81,4 +100,17 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
         if (!gammelKompetanse.barnAktørIder.containsAll(oppdatertKompetanse.barnAktørIder))
             throw Feil("Oppdaterer barn som ikke er knyttet til kompetansen", httpStatus = HttpStatus.BAD_REQUEST)
     }
+
+    private fun Collection<Kompetanse>.medBehandlingId(behandlingId: Long): Collection<Kompetanse> {
+        this.forEach { it.behandlingId = behandlingId }
+        return this
+    }
+
+    private fun Collection<Kompetanse>.vurderStatus(): Collection<Kompetanse> =
+        this.map { revurderStatus(it) }
+
+    private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<AktørId, Tidslinje<Regelverk, Måned>> =
+        this.hentTidslinjer(behandlingId).barnasTidslinjer()
+            .mapValues { (_, tidslinjer) -> tidslinjer.regelverkTidslinje }
+            .mapKeys { (aktør, _) -> aktør.aktørId }
 }

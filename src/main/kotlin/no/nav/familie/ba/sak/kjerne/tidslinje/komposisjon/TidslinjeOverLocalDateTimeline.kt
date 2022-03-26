@@ -42,7 +42,6 @@ class LocalDatetimeTimelineListeTidslinje<I, R, T : Tidsenhet>(
 
         return tidslinjer.map { it.toLocalDateTimeline() }
             .fold(startVerdi) { acc, neste -> kombinerVerdier(acc, neste) }
-            .compress()
             .toSegments()
             .map { LocalDateSegment(it.fom, it.tom, listeKombinator.kombiner(it.value)) }
             .map { it.tilPeriode(tidslinjer.first().perioder().first().fraOgMed) }
@@ -131,7 +130,7 @@ fun <I, T : Tidsenhet> Periode<I, T>.tilLocalDateSegment(): LocalDateSegment<I> 
         this.innhold
     )
 
-fun <I, T : Tidsenhet> LocalDateSegment<I>.tilPeriode(tidspunktMal: Tidspunkt<T>): Periode<I, T> =
+fun <I, T : Tidsenhet> LocalDateSegment<I?>.tilPeriode(tidspunktMal: Tidspunkt<T>): Periode<I, T> =
     Periode(
         fraOgMed = tidspunktMal.somFraOgMed(this.fom),
         tilOgMed = tidspunktMal.somTilOgMed(this.tom),
