@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseUtil.revurderStatus
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseUtil.slåSammenKompetanser
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.blankUt
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.revurderStatus
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammenKompetanser
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -81,8 +81,4 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
         if (!gammelKompetanse.barnAktørIder.containsAll(oppdatertKompetanse.barnAktørIder))
             throw Feil("Oppdaterer barn som ikke er knyttet til kompetansen", httpStatus = HttpStatus.BAD_REQUEST)
     }
-
-    fun Iterable<Kompetanse>.tilTidslinjeforBarn(barnAktørId: String) =
-        this.filter { it.barnAktørIder.contains(barnAktørId) }
-            .let { KompetanseTidslinje(it) }
 }

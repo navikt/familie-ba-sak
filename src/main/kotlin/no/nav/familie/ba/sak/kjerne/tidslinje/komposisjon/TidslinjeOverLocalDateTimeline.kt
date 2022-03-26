@@ -82,12 +82,40 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(listeKombinator: 
     return LocalDatetimeTimelineListeTidslinje(this, listeKombinator).komprimer()
 }
 
+fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
+    listeKombinator: (Iterable<I>) -> R
+): Tidslinje<R, T> {
+    return LocalDatetimeTimelineListeTidslinje(
+        this,
+        object : ListeKombinator<I, R> {
+            override fun kombiner(liste: Iterable<I>): R {
+                return listeKombinator(liste)
+            }
+        }
+    ).komprimer()
+}
+
 fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
     tidslinje: Tidslinje<H, T>,
     kombinator: ToveisKombinator<V, H, R>
 ): Tidslinje<R, T> {
     // Har ikke fått LocalDateTimeline.compress til å funke helt, og kjører egen komprimering på toppen
     return LocalDatetimeTimelineToveisTidslinje(this, tidslinje, kombinator).komprimer()
+}
+
+fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
+    tidslinje: Tidslinje<H, T>,
+    kombinator: (V?, H?) -> R?
+): Tidslinje<R, T> {
+    // Har ikke fått LocalDateTimeline.compress til å funke helt, og kjører egen komprimering på toppen
+    return LocalDatetimeTimelineToveisTidslinje(
+        this, tidslinje,
+        object : ToveisKombinator<V, H, R> {
+            override fun kombiner(venstre: V?, høyre: H?): R? {
+                return kombinator(venstre, høyre)
+            }
+        }
+    ).komprimer()
 }
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.toLocalDateTimeline(): LocalDateTimeline<I> {

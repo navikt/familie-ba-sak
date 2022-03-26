@@ -87,4 +87,8 @@ data class MånedTidspunkt internal constructor(
     override fun sammenliknMed(tidspunkt: Tidspunkt<Måned>): Int {
         return måned.compareTo(tidspunkt.tilYearMonth())
     }
+
+    companion object {
+        fun nå() = MånedTidspunkt(YearMonth.now(), Uendelighet.INGEN)
+    }
 }
