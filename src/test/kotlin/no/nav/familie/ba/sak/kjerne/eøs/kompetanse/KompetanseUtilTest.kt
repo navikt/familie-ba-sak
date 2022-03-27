@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammenKompetanser
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRegelverk
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.trekkFra
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
@@ -34,7 +35,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("--  --", barn1)
             .byggKompetanser()
 
-        val restKompetanser = kompetanse.minus(oppdatertKompetanse)
+        val restKompetanser = kompetanse.trekkFra(oppdatertKompetanse)
 
         assertEquals(3, restKompetanser.size)
         assertEqualsUnordered(forventedeKompetanser, restKompetanser)
@@ -51,7 +52,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("SSSSSS", barn1)
             .byggKompetanser()
 
-        val faktiskeKompetanser = slåSammenKompetanser(kompetanser)
+        val faktiskeKompetanser = kompetanser.slåSammen()
         assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -66,7 +67,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("SSS SSS", barn1, barn2, barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = slåSammenKompetanser(kompetanser)
+        val faktiskeKompetanser = kompetanser.slåSammen()
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -81,7 +82,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("->", barn1, barn2, barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = slåSammenKompetanser(kompetanser)
+        val faktiskeKompetanser = kompetanser.slåSammen()
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
         assertEquals(null, faktiskeKompetanser.first().tom)
     }
@@ -97,7 +98,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("--------", barn1, barn2, barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = slåSammenKompetanser(kompetanser)
+        val faktiskeKompetanser = kompetanser.slåSammen()
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -112,7 +113,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("->", barn1, barn2, barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = slåSammenKompetanser(kompetanser)
+        val faktiskeKompetanser = kompetanser.slåSammen()
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
         assertEquals(jan2020.tilYearMonth(), faktiskeKompetanser.first().fom)
         assertEquals(null, faktiskeKompetanser.first().tom)
@@ -136,7 +137,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("-      ", barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = slåSammenKompetanser(kompetanser)
+        val faktiskeKompetanser = kompetanser.slåSammen()
         assertEquals(6, faktiskeKompetanser.size)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }

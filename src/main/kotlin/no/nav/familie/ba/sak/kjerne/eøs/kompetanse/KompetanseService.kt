@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.blankUt
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.revurderStatus
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRegelverk
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.trekkFra
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
@@ -31,7 +32,7 @@ class KompetanseService(
 
         validerOppdatering(oppdatertKompetanse, gammelKompetanse)
 
-        val restKompetanser = gammelKompetanse.minus(oppdatertKompetanse)
+        val restKompetanser = gammelKompetanse.trekkFra(oppdatertKompetanse)
         val revurderteKompetanser =
             (restKompetanser + oppdatertKompetanse)
                 .slåSammen().vurderStatus().medBehandlingId(gammelKompetanse.behandlingId)
@@ -57,8 +58,8 @@ class KompetanseService(
             eksisterendeKompetanser.minus(gammelKompetanse).plus(blankKompetamse)
                 .slåSammen().vurderStatus().medBehandlingId(behandlingId)
 
-        val tilOppretting = revurderteKompetanser.minus(eksisterendeKompetanser)
-        val tilSletting = eksisterendeKompetanser.minus(revurderteKompetanser)
+        val tilOppretting = revurderteKompetanser.trekkFra(eksisterendeKompetanser)
+        val tilSletting = eksisterendeKompetanser.trekkFra(revurderteKompetanser)
 
         if (tilOppretting != tilSletting) {
             kompetanseRepository.delete(tilSletting)
@@ -75,9 +76,9 @@ class KompetanseService(
 
         val tilpassedeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, barnasRegelverkTidslinjer)
 
-        val tilOppretting = tilpassedeKompetanser.minus(kompetanser)
+        val tilOppretting = tilpassedeKompetanser.trekkFra(kompetanser)
             .medBehandlingId(behandlingId).vurderStatus()
-        val tilSletting = kompetanser.minus(tilpassedeKompetanser)
+        val tilSletting = kompetanser.trekkFra(tilpassedeKompetanser)
 
         if (tilOppretting != tilSletting) {
             kompetanseRepository.delete(tilSletting)

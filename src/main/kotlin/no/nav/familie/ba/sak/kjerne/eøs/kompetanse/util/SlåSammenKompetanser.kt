@@ -1,24 +1,20 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.tilTidspunktEllerUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.tilTidspunktEllerUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import java.time.YearMonth
 
-fun slåSammenKompetanser(kompetanser: Collection<Kompetanse>): Collection<Kompetanse> {
-    return kompetanser.map { EnkeltKompetanseTidslinje(it) }
+fun Iterable<Kompetanse>.slåSammen() =
+    this.map { EnkeltKompetanseTidslinje(it) }
         .let { SlåSammenKompetanserTidslinje(it) }
         .perioder().flatMap { periode -> periode.innhold?.settFomOgTom(periode) ?: emptyList() }
-}
-
-fun Iterable<Kompetanse>.slåSammen() =
-    slåSammenKompetanser(this.toList())
 
 fun Iterable<Kompetanse>?.settFomOgTom(periode: Periode<*, Måned>) =
     this?.map { kompetanse -> kompetanse.settFomOgTom(periode) }

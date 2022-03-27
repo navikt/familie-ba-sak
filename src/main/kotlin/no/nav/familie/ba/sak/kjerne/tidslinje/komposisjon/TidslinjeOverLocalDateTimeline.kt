@@ -117,6 +117,20 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
     ).komprimer()
 }
 
+fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerMed(
+    tidslinjeMap: Map<K, Tidslinje<H, T>>,
+    mapKombinator: (K) -> (V?, H?) -> R?
+): Map<K, Tidslinje<R, T>> {
+    return this
+        .filterKeys { tidslinjeMap.containsKey(it) }
+        .mapValues { (key, venstre) ->
+            val høyre: Tidslinje<H, T> = tidslinjeMap.getValue(key)
+            val kombinator: (V?, H?) -> R? = mapKombinator(key)
+            val resultat: Tidslinje<R, T> = venstre.kombinerMed(høyre, kombinator)
+            resultat
+        }
+}
+
 fun <I, T : Tidsenhet> Tidslinje<I, T>.toLocalDateTimeline(): LocalDateTimeline<I> {
     return LocalDateTimeline(
         this.perioder().map { it.tilLocalDateSegment() }
