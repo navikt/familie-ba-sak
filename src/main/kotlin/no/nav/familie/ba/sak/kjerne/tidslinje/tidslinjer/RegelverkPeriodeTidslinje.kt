@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ToveisKombinator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-private val nødvendigeVilkår = Vilkår.hentVilkårFor(PersonType.SØKER)
+private val nødvendigeVilkår = Vilkår.hentVilkårFor(PersonType.BARN)
 
 private val eøsVilkår = listOf(
     Vilkår.BOR_MED_SØKER,
