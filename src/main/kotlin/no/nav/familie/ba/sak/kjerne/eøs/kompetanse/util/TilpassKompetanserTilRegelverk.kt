@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
-val overflødigKompetanseMapKombinator = { aktørId: AktørId ->
+val overflødigKompetanseMapKombinator = { _: AktørId ->
     { kompetanse: Kompetanse?, regelverk: Regelverk? ->
         if (regelverk != Regelverk.EØS_FORORDNINGEN && kompetanse != null) kompetanse else null
     }
