@@ -11,10 +11,15 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilT
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import java.time.YearMonth
 
-fun Iterable<Kompetanse>.slåSammen() =
-    this.map { EnkeltKompetanseTidslinje(it) }
-        .let { SlåSammenKompetanserTidslinje(it) }
-        .perioder().flatMap { periode -> periode.innhold?.settFomOgTom(periode) ?: emptyList() }
+fun Collection<Kompetanse>.slåSammen(): Collection<Kompetanse> {
+    return if (this.isEmpty()) {
+        this
+    } else {
+        this.map { EnkeltKompetanseTidslinje(it) }
+            .let { SlåSammenKompetanserTidslinje(it) }
+            .perioder().flatMap { periode -> periode.innhold?.settFomOgTom(periode) ?: emptyList() }
+    }
+}
 
 fun Iterable<Kompetanse>?.settFomOgTom(periode: Periode<*, Måned>) =
     this?.map { kompetanse -> kompetanse.settFomOgTom(periode) }

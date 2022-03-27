@@ -26,19 +26,33 @@ fun tilpassKompetanserTilRegelverk(
     kompetanser: Collection<Kompetanse>,
     barnTilRegelverkTidslinjer: Map<AktørId, Tidslinje<Regelverk, Måned>>
 ): Collection<Kompetanse> {
-    val barnTilKompetanseTidslinje = kompetanser.tilTidslinjerForBarna()
+    val kompetanserUtenOverflødige = fjernOverflødigeKompetanserRekursivt(kompetanser, barnTilRegelverkTidslinjer)
 
-    val overflødigeKompetanser = barnTilKompetanseTidslinje
-        .kombinerMed(barnTilRegelverkTidslinjer, overflødigKompetanseMapKombinator)
-        .slåSammen()
-
-    val kompetanserUtenOverflødige = kompetanser.trekkFra(overflødigeKompetanser)
+    val barnTilKompetanseTidslinje = kompetanserUtenOverflødige.tilTidslinjerForBarna()
 
     val manglendeKompetanser = barnTilKompetanseTidslinje
         .kombinerMed(barnTilRegelverkTidslinjer, manglendeKompetanseMapKombinator)
         .slåSammen()
 
     return (kompetanserUtenOverflødige + manglendeKompetanser).slåSammen()
+}
+
+fun fjernOverflødigeKompetanserRekursivt(
+    kompetanser: Collection<Kompetanse>,
+    barnTilRegelverkTidslinjer: Map<AktørId, Tidslinje<Regelverk, Måned>>
+): Collection<Kompetanse> {
+    val barnTilKompetanseTidslinje = kompetanser.tilTidslinjerForBarna()
+
+    val overflødigeKompetanser = barnTilKompetanseTidslinje
+        .kombinerMed(barnTilRegelverkTidslinjer, overflødigKompetanseMapKombinator)
+        .slåSammen()
+
+    return if (overflødigeKompetanser.isNotEmpty()) {
+        val kompetanserUtenOverflødig = kompetanser.trekkFra(overflødigeKompetanser.first())
+        fjernOverflødigeKompetanserRekursivt(kompetanserUtenOverflødig, barnTilRegelverkTidslinjer)
+    } else {
+        kompetanser
+    }
 }
 
 fun Iterable<Kompetanse>.tilTidslinjerForBarna(): Map<AktørId, Tidslinje<Kompetanse, Måned>> {

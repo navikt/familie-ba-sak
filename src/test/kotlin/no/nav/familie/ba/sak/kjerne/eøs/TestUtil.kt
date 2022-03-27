@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs
 
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import org.junit.jupiter.api.Assertions
 import java.time.YearMonth
 
 object TestUtil {
@@ -20,4 +21,22 @@ object TestUtil {
 
     fun Collection<VilkårResultat>.tilVilkårResultatMåneder() =
         RegelverkPeriodeUtil.lagVilkårResultatMåneder(this)
+}
+
+fun <T> assertEqualsUnordered(
+    expected: Collection<T>,
+    actual: Collection<T>
+) {
+    Assertions.assertEquals(
+        expected.size, actual.size,
+        "Forskjellig antall. Forventet ${expected.size} men fikk ${actual.size}"
+    )
+    Assertions.assertTrue(
+        expected.containsAll(actual),
+        "Forvantet liste inneholder ikke alle elementene fra faktisk liste"
+    )
+    Assertions.assertTrue(
+        actual.containsAll(expected),
+        "Faktisk liste inneholder ikke alle elementene fra forventet liste"
+    )
 }
