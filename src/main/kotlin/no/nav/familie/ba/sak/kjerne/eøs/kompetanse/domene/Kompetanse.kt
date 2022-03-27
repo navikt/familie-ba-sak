@@ -31,3 +31,13 @@ fun Kompetanse.blankUt() = this.copy(
     primærland = null,
     sekundærland = null,
 ).also { it.id = this.id }
+
+fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
+    return this.bareSkjema() == kompetanse.bareSkjema() &&
+        (this.fom == null || this.fom <= kompetanse.fom) &&
+        (this.tom == null || this.tom >= kompetanse.tom) &&
+        this.barnAktørIder.containsAll(kompetanse.barnAktørIder)
+}
+
+fun Kompetanse.bareSkjema() =
+    this.copy(fom = null, tom = null, barnAktørIder = emptySet())

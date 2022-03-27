@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.beregning.AktørId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.blankUt
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.TilpassKompetanserTilEøsPerioder
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.revurderStatus
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammen
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
@@ -31,7 +31,7 @@ class KompetanseService(
 
         validerOppdatering(oppdatertKompetanse, gammelKompetanse)
 
-        val restKompetanser = KompetanseUtil.finnRestKompetanser(gammelKompetanse, oppdatertKompetanse)
+        val restKompetanser = gammelKompetanse.minus(oppdatertKompetanse)
         val revurderteKompetanser =
             (restKompetanser + oppdatertKompetanse)
                 .slåSammen().vurderStatus().medBehandlingId(gammelKompetanse.behandlingId)
@@ -73,8 +73,7 @@ class KompetanseService(
         val kompetanser = hentKompetanser(behandlingId)
         val barnasRegelverkTidslinjer = tidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId)
 
-        val tilpassKompetanserTilEøsPerioder = TilpassKompetanserTilEøsPerioder(kompetanser, barnasRegelverkTidslinjer)
-        val tilpassedeKompetanser = tilpassKompetanserTilEøsPerioder.tilpassKompetanserTilEøs()
+        val tilpassedeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, barnasRegelverkTidslinjer)
 
         val tilOppretting = tilpassedeKompetanser.minus(kompetanser)
             .medBehandlingId(behandlingId).vurderStatus()

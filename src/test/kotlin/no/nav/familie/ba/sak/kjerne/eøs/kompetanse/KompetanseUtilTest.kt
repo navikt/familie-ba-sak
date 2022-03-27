@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.TilpassKompetanserTilEøsPerioder
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammenKompetanser
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
@@ -34,7 +34,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("--  --", barn1)
             .byggKompetanser()
 
-        val restKompetanser = KompetanseUtil.finnRestKompetanser(kompetanse, oppdatertKompetanse)
+        val restKompetanser = kompetanse.minus(oppdatertKompetanse)
 
         assertEquals(3, restKompetanser.size)
         assertEqualsUnordered(forventedeKompetanser, restKompetanser)
@@ -155,8 +155,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("SSS  SS--", barn1)
             .byggKompetanser()
 
-        val tilpasning = TilpassKompetanserTilEøsPerioder(kompetanser, eøsPerioder)
-        val faktiskeKompetanser = tilpasning.tilpassKompetanserTilEøs()
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -191,8 +190,7 @@ internal class KompetanseUtilTest {
             .medKompetanse("-  SS    ", barn3)
             .byggKompetanser().sortedBy { it.fom }
 
-        val tilpasning = TilpassKompetanserTilEøsPerioder(kompetanser, eøsPerioder)
-        val faktiskeKompetanser = tilpasning.tilpassKompetanserTilEøs().sortedBy { it.fom }
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder).sortedBy { it.fom }
         assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 
