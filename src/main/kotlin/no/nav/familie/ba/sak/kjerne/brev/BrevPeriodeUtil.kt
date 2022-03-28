@@ -185,7 +185,11 @@ private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
     return GenerellBrevPeriode(
 
         fom = this.hentFomTekst(brevMålform),
-        tom = if (tomDato.isNullOrBlank()) "" else " til $tomDato",
+        tom = when {
+            this.type == FORTSATT_INNVILGET -> ""
+            tomDato.isNullOrBlank() -> ""
+            else -> " til $tomDato"
+        },
         belop = Utils.formaterBeløp(utbetalingsbeløp),
         begrunnelser = begrunnelserOgFritekster,
         brevPeriodeType = hentPeriodetype(this.fom, this, barnMedUtbetaling, utbetalingsbeløp),

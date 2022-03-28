@@ -97,9 +97,9 @@
   "forventetOutput": {
     "fom": "1. oktober 2021",
     "tom": "",
-    "belop": null,
-    "antallBarn": null,
-    "barnasFodselsdager": null,
+    "belop": 3162,
+    "antallBarn": 0,
+    "barnasFodselsdager": "",
     "begrunnelser": [
       {
         "gjelderSoker": true,
