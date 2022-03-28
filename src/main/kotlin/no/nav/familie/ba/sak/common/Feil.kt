@@ -50,6 +50,8 @@ class RolleTilgangskontrollFeil(
 
 class PdlRequestException(message: String) : Feil(message)
 class PdlNotFoundException : FunksjonellFeil("Fant ikke person")
+class PdlPersonKanIkkeBehandlesIFagsystem(val årsak: String) :
+    FunksjonellFeil("Person kan ikke behandles i fagsystem: $årsak")
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder(value = ["melding", "path", "timestamp", "status", "exception", "stackTrace"])

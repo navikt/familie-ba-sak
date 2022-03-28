@@ -1,6 +1,13 @@
 {
   "data": {
     "person": {
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "1234",
+          "status": "I_BRUK",
+          "type": "FNR"
+        }
+      ],
       "navn": [
         {
           "fornavn": "ENGASJERT",
