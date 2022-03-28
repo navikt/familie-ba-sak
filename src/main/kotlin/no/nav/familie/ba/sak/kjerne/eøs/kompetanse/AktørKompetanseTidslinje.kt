@@ -29,6 +29,6 @@ class AktørKompetanseTidslinje(
     private fun Kompetanse.tilPeriode() = Periode(
         fraOgMed = this.fom.tilTidspunktEllerUendeligLengeSiden { tom ?: YearMonth.now() },
         tilOgMed = this.tom.tilTidspunktEllerUendeligLengeTil { fom ?: YearMonth.now() },
-        innhold = this.copy(fom = null, tom = null, barnAktørIder = setOf(aktørId)).also { id = this.id }
+        innhold = this.copy(fom = null, tom = null, barnAktørIder = setOf(aktørId))
     )
 }

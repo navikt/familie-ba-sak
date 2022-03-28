@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.vurderStatus
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
@@ -33,7 +34,8 @@ class KompetanseController(
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
 
-        return ResponseEntity.ok(Ressurs.success(kompetanseService.hentKompetanser(behandlingId)))
+        val kompetanser = kompetanseService.hentKompetanser(behandlingId).vurderStatus()
+        return ResponseEntity.ok(Ressurs.success(kompetanser))
     }
 
     @PutMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -45,14 +47,13 @@ class KompetanseController(
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
 
-        if (kompetanse.fom == null) {
-            throw Feil(
-                message = "Fra-og-med-dato kan ikke være null",
-                frontendFeilmelding = "Klarte ikke å oppdatere kompetansen. Mangler fra-og-med-dato."
-            )
-        }
+        val gjeldendeKompetanse = kompetanseService.hentKompetanse(kompetanseId)
+        validerOppdatering(gjeldendeKompetanse, kompetanse)
 
-        return ResponseEntity.ok(Ressurs.success(kompetanseService.oppdaterKompetanse(kompetanse)))
+        val oppdaterteKompetanser = kompetanseService.oppdaterKompetanse(kompetanseId, kompetanse)
+            .vurderStatus()
+
+        return ResponseEntity.ok(Ressurs.success(oppdaterteKompetanser))
     }
 
     @DeleteMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -63,6 +64,22 @@ class KompetanseController(
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
 
-        return ResponseEntity.ok(Ressurs.success(kompetanseService.slettKompetanse(kompetanseId)))
+        val oppdaterteKompetanser = kompetanseService.slettKompetanse(kompetanseId)
+            .vurderStatus()
+
+        return ResponseEntity.ok(Ressurs.success(oppdaterteKompetanser))
+    }
+
+    private fun validerOppdatering(gjeldendeKompetanse: Kompetanse, oppdatertKompetanse: Kompetanse) {
+        if (oppdatertKompetanse.fom == null)
+            throw Feil("Manglende fra-og-med", httpStatus = HttpStatus.BAD_REQUEST)
+        if (oppdatertKompetanse.fom > oppdatertKompetanse.tom)
+            throw Feil("Fra-og-med er etter til-og-med", httpStatus = HttpStatus.BAD_REQUEST)
+        if (oppdatertKompetanse.barnAktørIder.size == 0)
+            throw Feil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
+        if (oppdatertKompetanse.fom < gjeldendeKompetanse.fom)
+            throw Feil("Setter fra-og-med tidligere", httpStatus = HttpStatus.BAD_REQUEST)
+        if (!gjeldendeKompetanse.barnAktørIder.containsAll(oppdatertKompetanse.barnAktørIder))
+            throw Feil("Oppdaterer barn som ikke er knyttet til kompetansen", httpStatus = HttpStatus.BAD_REQUEST)
     }
 }
