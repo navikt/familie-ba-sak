@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.blankUt
@@ -26,7 +25,7 @@ class KompetanseService(
     }
 
     fun hentKompetanse(kompetanseId: Long): Kompetanse {
-        return kompetanseRepository.hentKompetanse(kompetanseId)
+        return kompetanseRepository.getById(kompetanseId)
     }
 
     @Transactional
@@ -71,8 +70,8 @@ class KompetanseService(
     }
 
     private fun lagreKompetanseDifferanse(gjeldende: Collection<Kompetanse>, oppdaterte: Collection<Kompetanse>) {
-        kompetanseRepository.delete(gjeldende - oppdaterte)
-        kompetanseRepository.save(oppdaterte - gjeldende)
+        kompetanseRepository.deleteAll(gjeldende - oppdaterte)
+        kompetanseRepository.saveAll(oppdaterte - gjeldende)
     }
 
     private fun Collection<Kompetanse>.medBehandlingId(behandlingId: Long): Collection<Kompetanse> {
@@ -80,7 +79,7 @@ class KompetanseService(
         return this
     }
 
-    private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<AktørId, Tidslinje<Regelverk, Måned>> =
+    private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<Regelverk, Måned>> =
         this.hentTidslinjer(behandlingId).barnasTidslinjer()
             .mapValues { (_, tidslinjer) -> tidslinjer.regelverkTidslinje }
             .mapKeys { (aktør, _) -> aktør }

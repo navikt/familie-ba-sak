@@ -75,11 +75,11 @@ class KompetanseController(
             throw Feil("Manglende fra-og-med", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.fom > oppdatertKompetanse.tom)
             throw Feil("Fra-og-med er etter til-og-med", httpStatus = HttpStatus.BAD_REQUEST)
-        if (oppdatertKompetanse.barnAktørIder.size == 0)
+        if (oppdatertKompetanse.barnAktører.isEmpty())
             throw Feil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.fom < gjeldendeKompetanse.fom)
             throw Feil("Setter fra-og-med tidligere", httpStatus = HttpStatus.BAD_REQUEST)
-        if (!gjeldendeKompetanse.barnAktørIder.containsAll(oppdatertKompetanse.barnAktørIder))
+        if (!gjeldendeKompetanse.barnAktører.containsAll(oppdatertKompetanse.barnAktører))
             throw Feil("Oppdaterer barn som ikke er knyttet til kompetansen", httpStatus = HttpStatus.BAD_REQUEST)
     }
 }
