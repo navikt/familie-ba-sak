@@ -242,7 +242,7 @@ class OppgaveService(
     }
 
     fun ferdigstillOppgave(oppgave: Oppgave) {
-        require(oppgave.id != null) { "Oppgaven må ha en id for å kunne ferdigstilles"}
+        require(oppgave.id != null) { "Oppgaven må ha en id for å kunne ferdigstilles" }
         integrasjonClient.ferdigstillOppgave(oppgaveId = oppgave.id!!)
     }
 
