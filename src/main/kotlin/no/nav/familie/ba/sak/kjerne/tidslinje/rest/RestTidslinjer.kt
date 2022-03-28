@@ -39,7 +39,7 @@ fun List<VilkårsresultatDagTidslinje>.tilRestVilkårTidslinjer(): List<List<Res
         }
     }
 
-fun Tidslinje<Regelverk?, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinjePeriode<Regelverk?>> =
+fun Tidslinje<Regelverk, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinjePeriode<Regelverk?>> =
     this.perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
