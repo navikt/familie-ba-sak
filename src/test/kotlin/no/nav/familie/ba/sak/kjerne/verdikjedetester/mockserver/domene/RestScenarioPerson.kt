@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene
 
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -11,7 +12,8 @@ import java.time.Period
 data class RestScenarioPerson(
     val ident: String? = null, // Settes av mock-server
     val aktørId: String? = null, // Settes av mock-server
-    val forelderBarnRelasjon: List<ForelderBarnRelasjon>? = emptyList(), // Settes av mock-server
+    val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(), // Settes av mock-server
+    val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator> = emptyList(), // Settes av mock-server
     val fødselsdato: String, // yyyy-mm-dd
     val fornavn: String,
     val etternavn: String,
