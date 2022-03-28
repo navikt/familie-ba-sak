@@ -46,12 +46,10 @@ fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring = RestJou
     nyBehandlingsårsak = BehandlingÅrsak.SØKNAD
 )
 
-fun lagInfotrygdSak(beløp: Double, identBarn: String, valg: String? = "OR", undervalg: String? = "OS"): Sak {
+fun lagInfotrygdSak(beløp: Double, identBarn: List<String>, valg: String? = "OR", undervalg: String? = "OS"): Sak {
     return Sak(
         stønad = Stønad(
-            barn = listOf(
-                Barn(identBarn, barnetrygdTom = "000000")
-            ),
+            barn = identBarn.map { Barn(it, barnetrygdTom = "000000") },
             delytelse = listOf(
                 Delytelse(
                     fom = LocalDate.now(),
