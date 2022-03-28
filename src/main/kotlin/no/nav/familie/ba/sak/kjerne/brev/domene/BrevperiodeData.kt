@@ -23,6 +23,7 @@ data class BrevperiodeData(
                 erFørsteVedtaksperiodePåFagsak = this.erFørsteVedtaksperiodePåFagsak,
                 erUregistrerteBarnPåbehandling = this.uregistrerteBarn.isNotEmpty(),
                 barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
+                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
             )
             .byggBegrunnelserOgFritekster(
                 restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,

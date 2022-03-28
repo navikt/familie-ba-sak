@@ -5,10 +5,10 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "standardbegrunnelse": "REDUKSJON_FLYTTET_BARN"
+      "standardbegrunnelse": "INNVILGET_BOR_HOS_SØKER"
     },
     {
-      "standardbegrunnelse": "INNVILGET_BOR_HOS_SØKER"
+      "standardbegrunnelse": "REDUKSJON_FLYTTET_BARN"
     }
   ],
   "fritekster": [],
@@ -76,19 +76,6 @@
     "begrunnelser": [
       {
         "gjelderSoker": false,
-        "barnasFodselsdatoer": "14.03.19",
-        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "14.03.19",
-        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
-        "antallBarn": 1,
-        "antallBarnOppfyllerTriggereOgHarUtbetaling": 1,
-        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
-        "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
-        "maalform": "bokmaal",
-        "apiNavn": "innvilgetBorHosSoker",
-        "belop": 1054
-      },
-      {
-        "gjelderSoker": false,
         "barnasFodselsdatoer": "20.01.20",
         "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
         "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
@@ -99,6 +86,19 @@
         "maalform": "bokmaal",
         "apiNavn": "reduksjonFlyttetBarn",
         "belop": 0
+      },
+      {
+        "gjelderSoker": false,
+        "barnasFodselsdatoer": "14.03.19",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "14.03.19",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
+        "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 1,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
+        "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
+        "maalform": "bokmaal",
+        "apiNavn": "innvilgetBorHosSoker",
+        "belop": 1054
       }
     ],
     "type": "innvilgelse"

@@ -35,7 +35,7 @@ fun hentPersonerForAlleUtgjørendeVilkår(
     aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
     triggesAv: TriggesAv,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    personIdenterMedUtbetaling: List<String>
+    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
 ): Set<MinimertRestPerson> {
     return triggesAv.vilkår.fold(setOf()) { acc, vilkår ->
         acc + hentPersonerMedUtgjørendeVilkår(
@@ -46,7 +46,7 @@ fun hentPersonerForAlleUtgjørendeVilkår(
             aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
             triggesAv = triggesAv,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-            personIdenterMedUtbetaling = personIdenterMedUtbetaling
+            erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
         )
     }
 }
@@ -59,7 +59,7 @@ private fun hentPersonerMedUtgjørendeVilkår(
     aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
     triggesAv: TriggesAv,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    personIdenterMedUtbetaling: List<String>
+    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
 ): List<MinimertRestPerson> {
 
     val aktuellePersonidenter = aktuellePersonerForVedtaksperiode.map { it.personIdent }
@@ -77,7 +77,7 @@ private fun hentPersonerMedUtgjørendeVilkår(
                             triggesAv = triggesAv,
                             vedtaksperiode = vedtaksperiode,
                             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                            personHarUtbetalingIVedtaksperiode = personIdenterMedUtbetaling.contains(personResultat.personIdent)
+                            erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
                         )
                     }
 
@@ -98,7 +98,7 @@ private fun erVilkårResultatUtgjørende(
     triggesAv: TriggesAv,
     vedtaksperiode: Periode,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    personHarUtbetalingIVedtaksperiode: Boolean,
+    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
 ): Boolean {
     if (minimertVilkårResultat.periodeFom == null && begrunnelseType != VedtakBegrunnelseType.AVSLAG) {
         return false
@@ -106,20 +106,27 @@ private fun erVilkårResultatUtgjørende(
 
     return when (begrunnelseType) {
         VedtakBegrunnelseType.INNVILGET ->
-            erInnvilgetVilkårResultatUtgjørende(triggesAv, minimertVilkårResultat, vedtaksperiode)
+            erInnvilgetVilkårResultatUtgjørende(
+                triggesAv,
+                minimertVilkårResultat,
+                vedtaksperiode,
+                erIngenOverlappVedtaksperiodeTogglePå
+            )
 
         VedtakBegrunnelseType.OPPHØR -> if (triggesAv.gjelderFørstePeriode) {
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-                vilkårResultat = minimertVilkårResultat
+                vilkårResultat = minimertVilkårResultat,
+                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
             )
         } else {
             erOpphørResultatUtgjøreneForPeriode(
                 minimertVilkårResultat = minimertVilkårResultat,
                 triggesAv = triggesAv,
-                vedtaksperiode = vedtaksperiode
+                vedtaksperiode = vedtaksperiode,
+                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
             )
         }
 
@@ -128,7 +135,7 @@ private fun erVilkårResultatUtgjørende(
                 minimertVilkårResultat = minimertVilkårResultat,
                 triggesAv = triggesAv,
                 vedtaksperiode = vedtaksperiode,
-                personHarUtbetalingIVedtaksperiode = personHarUtbetalingIVedtaksperiode
+                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
             )
         }
 
@@ -142,14 +149,19 @@ private fun erVilkårResultatUtgjørende(
 private fun erOpphørResultatUtgjøreneForPeriode(
     minimertVilkårResultat: MinimertVilkårResultat,
     triggesAv: TriggesAv,
-    vedtaksperiode: Periode
+    vedtaksperiode: Periode,
+    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
 ): Boolean {
     val erOppfyltTomMånedEtter = erOppfyltTomMånedEtter(minimertVilkårResultat)
 
     val vilkårsluttForForrigePeriode = vedtaksperiode.fom.minusMonths(
         if (erOppfyltTomMånedEtter) 1 else 0
     )
-    return triggereForUtdypendeVilkårsvurderingErOppfylt(triggesAv, minimertVilkårResultat) &&
+    return triggereForUtdypendeVilkårsvurderingErOppfylt(
+        triggesAv = triggesAv,
+        vilkårResultat = minimertVilkårResultat,
+        erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå
+    ) &&
         minimertVilkårResultat.periodeTom != null &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
         minimertVilkårResultat.periodeTom.toYearMonth() == vilkårsluttForForrigePeriode.toYearMonth()
@@ -159,7 +171,7 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
     minimertVilkårResultat: MinimertVilkårResultat,
     triggesAv: TriggesAv,
     vedtaksperiode: Periode,
-    personHarUtbetalingIVedtaksperiode: Boolean,
+    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
 ): Boolean {
     if (minimertVilkårResultat.periodeTom == null) {
         return false
@@ -179,8 +191,8 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
     return triggereForUtdypendeVilkårsvurderingErOppfyltReduksjon(
         triggesAv = triggesAv,
         vilkårResultat = minimertVilkårResultat,
-        erReduksjonStartPåDeltBosted = erStartPåDeltBosted,
-        personHarUtbetalingIVedtaksperiode = personHarUtbetalingIVedtaksperiode,
+        erReduksjonStartPåDeltBosted = erIngenOverlappVedtaksperiodeTogglePå,
+        erIngenOverlappVedtaksperiodeToggelPå = erStartPåDeltBosted
     ) &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
         startNestePeriodeEtterVilkår.toYearMonth() == vedtaksperiode.fom.toYearMonth()
@@ -193,19 +205,24 @@ private fun erOppfyltTomMånedEtter(minimertVilkårResultat: MinimertVilkårResu
 private fun erInnvilgetVilkårResultatUtgjørende(
     triggesAv: TriggesAv,
     minimertVilkårResultat: MinimertVilkårResultat,
-    vedtaksperiode: Periode
+    vedtaksperiode: Periode,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
     val vilkårResultatFomMåned = minimertVilkårResultat.periodeFom!!.toYearMonth()
     val vedtaksperiodeFomMåned = vedtaksperiode.fom.toYearMonth()
 
-    return triggereForUtdypendeVilkårsvurderingErOppfylt(triggesAv, minimertVilkårResultat) &&
+    return triggereForUtdypendeVilkårsvurderingErOppfylt(
+        triggesAv = triggesAv,
+        vilkårResultat = minimertVilkårResultat,
+        erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeToggelPå
+    ) &&
         vilkårResultatFomMåned == vedtaksperiodeFomMåned.minusMonths(1) &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT
 }
 
 private fun vilkårResultatPasserForAvslagsperiode(
     minimertVilkårResultat: MinimertVilkårResultat,
-    vedtaksperiode: Periode
+    vedtaksperiode: Periode,
 ): Boolean {
     val erAvslagUtenFomDato = minimertVilkårResultat.periodeFom == null
 
@@ -221,7 +238,8 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     vedtaksperiode: Periode,
     triggesAv: TriggesAv,
-    vilkårResultat: MinimertVilkårResultat
+    vilkårResultat: MinimertVilkårResultat,
+    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
 ): Boolean {
     val vilkårIkkeOppfyltForPeriode =
         vilkårResultat.resultat == Resultat.IKKE_OPPFYLT &&
@@ -232,11 +250,43 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
             vedtaksperiode.tom.toYearMonth() == vilkårResultat.periodeFom!!.toYearMonth()
 
     return erFørsteVedtaksperiodePåFagsak &&
-        triggereForUtdypendeVilkårsvurderingErOppfylt(triggesAv, vilkårResultat) &&
+        triggereForUtdypendeVilkårsvurderingErOppfylt(
+            triggesAv,
+            vilkårResultat,
+            erIngenOverlappVedtaksperiodeTogglePå
+        ) &&
         (vilkårIkkeOppfyltForPeriode || vilkårOppfyltRettEtterPeriode)
 }
 
+private fun triggereForUtdypendeVilkårsvurderingErOppfylt(
+    triggesAv: TriggesAv,
+    vilkårResultat: MinimertVilkårResultat,
+    erIngenOverlappVedtaksperiodeTogglePå: Boolean
+): Boolean {
+    return if (erIngenOverlappVedtaksperiodeTogglePå) {
+        triggesAv.erUtdypendeVilkårsvurderingOppfylt(vilkårResultat)
+    } else triggereForUtdypendeVilkårsvurderingErOppfyltGammel(
+        triggesAv = triggesAv,
+        vilkårResultat = vilkårResultat,
+        erReduksjonStartPåDeltBosted = false
+    )
+}
+
 private fun triggereForUtdypendeVilkårsvurderingErOppfyltReduksjon(
+    triggesAv: TriggesAv,
+    vilkårResultat: MinimertVilkårResultat,
+    erReduksjonStartPåDeltBosted: Boolean = false,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
+): Boolean {
+    return if (erIngenOverlappVedtaksperiodeToggelPå) {
+        triggesAv.erUtdypendeVilkårsvurderingOppfyltReduksjon(vilkårResultat, erReduksjonStartPåDeltBosted)
+    } else triggereForUtdypendeVilkårsvurderingErOppfyltGammel(triggesAv, vilkårResultat, erReduksjonStartPåDeltBosted)
+}
+
+@Deprecated(
+    "Bruk TriggesAv.erUtdypendeVilkårsvurderingOppfylt. Fjernes etter at INGEN_OVERLAPP_VEDTAKSPERIODER er fjernet"
+)
+private fun triggereForUtdypendeVilkårsvurderingErOppfyltGammel(
     triggesAv: TriggesAv,
     vilkårResultat: MinimertVilkårResultat,
     erReduksjonStartPåDeltBosted: Boolean,

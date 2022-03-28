@@ -141,7 +141,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            personIdenterMedUtbetaling = emptyList(),
+            erIngenOverlappVedtaksperiodeTogglePå = true,
         )
 
         assertEquals(2, personerMedUtgjørendeVilkårLovligOpphold.size)
@@ -161,7 +161,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            personIdenterMedUtbetaling = emptyList(),
+            erIngenOverlappVedtaksperiodeTogglePå = true,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -237,7 +237,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            personIdenterMedUtbetaling = emptyList(),
+            erIngenOverlappVedtaksperiodeTogglePå = true,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -257,7 +257,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            personIdenterMedUtbetaling = emptyList(),
+            erIngenOverlappVedtaksperiodeTogglePå = true,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)
@@ -328,7 +328,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            personIdenterMedUtbetaling = emptyList(),
+            erIngenOverlappVedtaksperiodeTogglePå = true,
         )
 
         val personerMedUtgjørendeVilkårBosattIRiket = hentPersonerForAlleUtgjørendeVilkår(
@@ -342,7 +342,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
-            personIdenterMedUtbetaling = emptyList(),
+            erIngenOverlappVedtaksperiodeTogglePå = true,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiketMedlemskap.size)
