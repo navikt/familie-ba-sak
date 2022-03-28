@@ -1,10 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -27,6 +30,7 @@ import java.time.LocalDateTime
 class BeregningService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingRepository: BehandlingRepository,
@@ -91,7 +95,8 @@ class BeregningService(
 
             if (behandlingSomErSendtTilGodkjenning != null) behandlingSomErSendtTilGodkjenning
             else {
-                val godkjenteBehandlingerSomIkkeErIverksattEnda = behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
+                val godkjenteBehandlingerSomIkkeErIverksattEnda =
+                    behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
                 if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) godkjenteBehandlingerSomIkkeErIverksattEnda
                 else {
                     val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsak.id)
@@ -107,6 +112,30 @@ class BeregningService(
                 ?.contains(barnAktør)
                 ?: false
         }.map { it }
+    }
+
+    fun innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling: Behandling): Boolean {
+        val barnMedUtbetalingSomIkkeBlittEndretISisteBehandling =
+            finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandling.id)
+
+        val alleBarnISisteBehanlding = finnBarnFraBehandlingMedTilkjentYtsele(behandling.id)
+
+        val alleBarnISistIverksattBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)?.let {
+            finnBarnFraBehandlingMedTilkjentYtsele(
+                it.id
+            )
+        }
+            ?: emptyList()
+
+        val nyeBarnISisteBehandling = alleBarnISisteBehanlding.minus(alleBarnISistIverksattBehandling.toSet())
+
+        val nyeBarnMedUtebtalingSomIkkeErEndret =
+            barnMedUtbetalingSomIkkeBlittEndretISisteBehandling.intersect(nyeBarnISisteBehandling)
+
+        return behandling.resultat == Behandlingsresultat.INNVILGET_OG_OPPHØRT &&
+            behandling.underkategori == BehandlingUnderkategori.ORDINÆR &&
+            behandling.erSøknad() &&
+            nyeBarnMedUtebtalingSomIkkeErEndret.isEmpty()
     }
 
     @Transactional
@@ -189,6 +218,33 @@ class BeregningService(
             reduserteMånedPerioder = reduserteMånedPerioder
         )
     }
+
+    /**
+     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse.
+     */
+    fun finnBarnFraBehandlingMedTilkjentYtsele(behandlingId: Long): List<Aktør> =
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
+            ?.filter {
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                    behandlingId,
+                    it
+                )
+                    .isNotEmpty()
+            } ?: emptyList()
+
+    /**
+     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse som ikke er endret til null i utbetaling.
+     */
+    fun finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandlingId: Long): List<Aktør> =
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
+            ?.filter { aktør ->
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                    behandlingId,
+                    aktør
+                ).filter { aty ->
+                    aty.kalkulertUtbetalingsbeløp != 0 || aty.endretUtbetalingAndeler.isEmpty()
+                }.isNotEmpty()
+            } ?: emptyList()
 
     private fun populerTilkjentYtelse(
         behandling: Behandling,

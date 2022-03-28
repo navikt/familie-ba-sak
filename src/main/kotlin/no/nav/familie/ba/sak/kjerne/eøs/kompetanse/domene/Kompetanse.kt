@@ -1,13 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
+import no.nav.familie.ba.sak.kjerne.beregning.AktørId
 import java.time.YearMonth
 
 data class Kompetanse(
-    val behandlingId: Long = 0,
     val fom: YearMonth?,
     val tom: YearMonth?,
-    val barnAktørIder: Set<String>,
-    val status: KompetanseStatus? = KompetanseStatus.IKKE_UTFYLT,
+    val barnAktørIder: Set<AktørId>,
     val søkersAktivitet: String? = null,
     val annenForeldersAktivitet: String? = null,
     val barnetsBostedsland: String? = null,
@@ -15,6 +14,8 @@ data class Kompetanse(
     val sekundærland: String? = null,
 ) {
     var id: Long = 0
+    var status: KompetanseStatus? = KompetanseStatus.IKKE_UTFYLT
+    var behandlingId: Long = 0
 }
 
 enum class KompetanseStatus {
@@ -29,5 +30,14 @@ fun Kompetanse.blankUt() = this.copy(
     barnetsBostedsland = null,
     primærland = null,
     sekundærland = null,
-    status = KompetanseStatus.IKKE_UTFYLT
 ).also { it.id = this.id }
+
+fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
+    return this.bareSkjema() == kompetanse.bareSkjema() &&
+        (this.fom == null || this.fom <= kompetanse.fom) &&
+        (this.tom == null || this.tom >= kompetanse.tom) &&
+        this.barnAktørIder.containsAll(kompetanse.barnAktørIder)
+}
+
+fun Kompetanse.bareSkjema() =
+    this.copy(fom = null, tom = null, barnAktørIder = emptySet())
