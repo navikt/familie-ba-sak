@@ -42,9 +42,12 @@ data class TriggesAv(
 
     fun erUtdypendeVilkårsvurderingOppfyltReduksjon(
         vilkårResultat: MinimertVilkårResultat,
-        erReduksjonStartPåDeltBosted: Boolean,
+        nesteMinimerteVilkårResultat: MinimertVilkårResultat?,
     ): Boolean {
-        return erDeltBostedOppfyltReduksjon(vilkårResultat, erReduksjonStartPåDeltBosted) &&
+        return erDeltBostedOppfyltReduksjon(
+            vilkårResultat = vilkårResultat,
+            nesteMinimerteVilkårResultat = nesteMinimerteVilkårResultat
+        ) &&
             erSkjønnsmessigVurderingOppfylt(vilkårResultat) &&
             erMedlemskapOppfylt(vilkårResultat) &&
             erDeltBostedSkalIkkDelesOppfylt(vilkårResultat)
@@ -84,15 +87,18 @@ data class TriggesAv(
      */
     private fun erDeltBostedOppfyltReduksjon(
         vilkårResultat: MinimertVilkårResultat,
-        erReduksjonStartPåDeltBosted: Boolean
+        nesteMinimerteVilkårResultat: MinimertVilkårResultat?,
     ): Boolean {
         val vilkårResultatInneholderDeltBosted =
             vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
 
-        return if (erReduksjonStartPåDeltBosted) {
-            !vilkårResultatInneholderDeltBosted && this.deltbosted
+        val nesteVilkårResultatInneholderDeltBosted = nesteMinimerteVilkårResultat?.utdypendeVilkårsvurderinger
+            ?.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) ?: false
+
+        return if (this.deltbosted) {
+            vilkårResultatInneholderDeltBosted != nesteVilkårResultatInneholderDeltBosted
         } else {
-            this.deltbosted == vilkårResultatInneholderDeltBosted
+            !vilkårResultatInneholderDeltBosted && !nesteVilkårResultatInneholderDeltBosted
         }
     }
 }

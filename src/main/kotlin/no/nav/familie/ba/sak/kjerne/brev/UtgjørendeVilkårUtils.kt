@@ -71,8 +71,11 @@ private fun hentPersonerMedUtgjørendeVilkår(
                 personResultat.minimerteVilkårResultater
                     .filter { it.vilkårType == vilkårGjeldendeForBegrunnelse }
                     .firstOrNull { minimertVilkårResultat ->
+                        val nesteMinimerteVilkårResultatAvSammeType: MinimertVilkårResultat? =
+                            personResultat.minimerteVilkårResultater.finnEtterfølgende(minimertVilkårResultat)
                         erVilkårResultatUtgjørende(
                             minimertVilkårResultat = minimertVilkårResultat,
+                            nesteMinimerteVilkårResultat = nesteMinimerteVilkårResultatAvSammeType,
                             begrunnelseType = begrunnelseType,
                             triggesAv = triggesAv,
                             vedtaksperiode = vedtaksperiode,
@@ -92,8 +95,14 @@ private fun hentPersonerMedUtgjørendeVilkår(
         }
 }
 
+private fun List<MinimertVilkårResultat>.finnEtterfølgende(
+    minimertVilkårResultat: MinimertVilkårResultat
+): MinimertVilkårResultat? =
+    minimertVilkårResultat.periodeTom?.let { tom -> this.find { it.periodeFom?.isEqual(tom.plusDays(1)) == true } }
+
 private fun erVilkårResultatUtgjørende(
     minimertVilkårResultat: MinimertVilkårResultat,
+    nesteMinimerteVilkårResultat: MinimertVilkårResultat?,
     begrunnelseType: VedtakBegrunnelseType,
     triggesAv: TriggesAv,
     vedtaksperiode: Periode,
@@ -135,6 +144,7 @@ private fun erVilkårResultatUtgjørende(
                 minimertVilkårResultat = minimertVilkårResultat,
                 triggesAv = triggesAv,
                 vedtaksperiode = vedtaksperiode,
+                nesteMinimerteVilkårResultat = nesteMinimerteVilkårResultat,
                 erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
             )
         }
@@ -171,6 +181,7 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
     minimertVilkårResultat: MinimertVilkårResultat,
     triggesAv: TriggesAv,
     vedtaksperiode: Periode,
+    nesteMinimerteVilkårResultat: MinimertVilkårResultat?,
     erIngenOverlappVedtaksperiodeTogglePå: Boolean,
 ): Boolean {
     if (minimertVilkårResultat.periodeTom == null) {
@@ -182,6 +193,7 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
     val erStartPåDeltBosted =
         minimertVilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER &&
             !minimertVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) &&
+            nesteMinimerteVilkårResultat?.utdypendeVilkårsvurderinger?.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) == true &&
             triggesAv.deltbosted
 
     val startNestePeriodeEtterVilkår = minimertVilkårResultat.periodeTom
@@ -191,8 +203,9 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
     return triggereForUtdypendeVilkårsvurderingErOppfyltReduksjon(
         triggesAv = triggesAv,
         vilkårResultat = minimertVilkårResultat,
-        erReduksjonStartPåDeltBosted = erIngenOverlappVedtaksperiodeTogglePå,
-        erIngenOverlappVedtaksperiodeToggelPå = erStartPåDeltBosted
+        erReduksjonStartPåDeltBosted = erStartPåDeltBosted,
+        nesteMinimerteVilkårResultat = nesteMinimerteVilkårResultat,
+        erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeTogglePå,
     ) &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
         startNestePeriodeEtterVilkår.toYearMonth() == vedtaksperiode.fom.toYearMonth()
@@ -275,11 +288,15 @@ private fun triggereForUtdypendeVilkårsvurderingErOppfylt(
 private fun triggereForUtdypendeVilkårsvurderingErOppfyltReduksjon(
     triggesAv: TriggesAv,
     vilkårResultat: MinimertVilkårResultat,
-    erReduksjonStartPåDeltBosted: Boolean = false,
+    erReduksjonStartPåDeltBosted: Boolean,
+    nesteMinimerteVilkårResultat: MinimertVilkårResultat?,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
     return if (erIngenOverlappVedtaksperiodeToggelPå) {
-        triggesAv.erUtdypendeVilkårsvurderingOppfyltReduksjon(vilkårResultat, erReduksjonStartPåDeltBosted)
+        triggesAv.erUtdypendeVilkårsvurderingOppfyltReduksjon(
+            vilkårResultat = vilkårResultat,
+            nesteMinimerteVilkårResultat = nesteMinimerteVilkårResultat
+        )
     } else triggereForUtdypendeVilkårsvurderingErOppfyltGammel(triggesAv, vilkårResultat, erReduksjonStartPåDeltBosted)
 }
 
@@ -290,7 +307,6 @@ private fun triggereForUtdypendeVilkårsvurderingErOppfyltGammel(
     triggesAv: TriggesAv,
     vilkårResultat: MinimertVilkårResultat,
     erReduksjonStartPåDeltBosted: Boolean,
-    personHarUtbetalingIVedtaksperiode: Boolean,
 ): Boolean {
     val resultatInneholderDeltBosted =
         vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
@@ -299,10 +315,7 @@ private fun triggereForUtdypendeVilkårsvurderingErOppfyltGammel(
             erReduksjonStartPåDeltBosted != resultatInneholderDeltBosted ||
             !triggesAv.deltbosted
 
-    val delvisReduksjonOppfylt = erReduksjonStartPåDeltBosted == personHarUtbetalingIVedtaksperiode
-
     return erDeltBostedOppfylt &&
-        delvisReduksjonOppfylt &&
         triggereForUtdypendeVilkårsvurderingErOppfylt(triggesAv, vilkårResultat)
 }
 

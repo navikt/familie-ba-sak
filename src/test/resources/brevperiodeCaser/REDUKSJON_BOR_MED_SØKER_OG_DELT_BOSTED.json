@@ -110,7 +110,7 @@
   "brevMålform": "NB",
   "forventetOutput": {
     "fom": "1. november 2021",
-    "tom": "til 31. desember 2021 ",
+    "tom": " til 31. desember 2021",
     "belop": 2935,
     "antallBarn": 2,
     "barnasFodselsdager": "28.07.11 og 06.09.18",
@@ -118,7 +118,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "30.10.20",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "oktober 2021",
         "maalform": "bokmaal",
         "apiNavn": "reduksjonFlyttetBarn",
@@ -127,7 +131,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "06.09.18",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "06.09.18",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 1,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "oktober 2021",
         "maalform": "bokmaal",
         "apiNavn": "reduksjonDeltBarnetrygdAnnenForelderSokt",
