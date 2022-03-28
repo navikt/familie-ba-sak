@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.YearMonth
-import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
@@ -19,6 +18,7 @@ import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
+import javax.persistence.Transient
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Kompetanse")
@@ -28,22 +28,27 @@ data class Kompetanse(
     @Convert(converter = YearMonthConverter::class)
     val fom: YearMonth?,
 
-    @Column(name = "fom", columnDefinition = "DATE")
+    @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     val tom: YearMonth?,
 
-    @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE], fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "AKTOER_TIL_KOMPETANSE",
         joinColumns = [JoinColumn(name = "fk_kompetanse_id")],
-        inverseJoinColumns = [JoinColumn(name = "aktoer_id")]
+        inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")]
     )
     val barnAktører: Set<Aktør> = emptySet(),
 
+    @Transient
     val søkersAktivitet: String? = null,
+    @Transient
     val annenForeldersAktivitet: String? = null,
+    @Transient
     val barnetsBostedsland: String? = null,
+    @Transient
     val primærland: String? = null,
+    @Transient
     val sekundærland: String? = null,
 ) : BaseEntitet() {
     @Id
@@ -58,6 +63,7 @@ data class Kompetanse(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     var behandlingId: Long = 0
 
+    @Transient
     var status: KompetanseStatus? = KompetanseStatus.IKKE_UTFYLT
 }
 

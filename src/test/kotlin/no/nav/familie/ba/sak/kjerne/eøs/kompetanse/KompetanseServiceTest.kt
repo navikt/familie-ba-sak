@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
