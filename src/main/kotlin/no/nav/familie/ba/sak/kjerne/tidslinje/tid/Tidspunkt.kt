@@ -117,14 +117,7 @@ fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.størsteEllerNull() =
 fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.minsteEllerNull() =
     this.reduceOrNull { acc, neste -> minsteAv(acc, neste) }
 
-fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate) =
-    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeSiden(default())
+fun LocalDate?.tilTidspunktEllerDefault(default: () -> LocalDate) =
+    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: DagTidspunkt(default(), Uendelighet.INGEN)
 
-fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate) =
-    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeTil(default())
-
-fun YearMonth?.tilTidspunktEllerUendeligLengeSiden(default: () -> YearMonth) =
-    this?.let { MånedTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeSiden(default())
-
-fun YearMonth?.tilTidspunktEllerUendeligLengeTil(default: () -> YearMonth) =
-    this?.let { MånedTidspunkt(this, Uendelighet.INGEN) } ?: Tidspunkt.uendeligLengeTil(default())
+fun YearMonth.tilTidspunkt() = MånedTidspunkt(this, Uendelighet.INGEN)

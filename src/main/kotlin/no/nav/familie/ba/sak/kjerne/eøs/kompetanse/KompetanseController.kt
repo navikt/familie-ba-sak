@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class KompetanseController(
     private val featureToggleService: FeatureToggleService,
-    private val kompetanseService: KompetanseService = KompetanseService(MockKompetanseRepository())
+    private val kompetanseService: KompetanseService
 ) {
     @GetMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentKompetanser(
@@ -63,6 +63,6 @@ class KompetanseController(
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
 
-        return ResponseEntity.ok(Ressurs.success(kompetanseService.slettKompetamse(kompetanseId)))
+        return ResponseEntity.ok(Ressurs.success(kompetanseService.slettKompetanse(kompetanseId)))
     }
 }
