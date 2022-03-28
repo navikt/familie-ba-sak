@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtakPeriodeValidering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.FerdigstillOppgaver
@@ -25,10 +26,14 @@ class SendTilBeslutter(
     private val oppgaveService: OppgaveService,
     private val loggService: LoggService,
     private val totrinnskontrollService: TotrinnskontrollService,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val vedtakPeriodeValidering: VedtakPeriodeValidering,
 ) : BehandlingSteg<String> {
 
-    override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
+    override fun preValiderSteg(
+        behandling: Behandling,
+        stegService: StegService?,
+    ) {
 
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
             ?.validerAtAlleAnndreVurderingerErVurdert()
@@ -39,6 +44,8 @@ class SendTilBeslutter(
 
         behandling.validerRekkefølgeOgUnikhetPåSteg()
         behandling.validerMaksimaltEtStegIkkeUtført()
+
+        vedtakPeriodeValidering.validerPerioderInneholderBegrunnelser(behandlingId = behandling.id)
     }
 
     override fun utførStegOgAngiNeste(
