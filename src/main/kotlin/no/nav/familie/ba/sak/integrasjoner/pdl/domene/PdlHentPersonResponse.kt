@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -13,6 +14,7 @@ data class PdlHentPersonResponse(val person: PdlPersonData?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlPersonData(
+    val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>,
     val foedsel: List<PdlFødselsDato>,
     val navn: List<PdlNavn> = emptyList(),
     val kjoenn: List<PdlKjoenn> = emptyList(),
@@ -24,7 +26,24 @@ data class PdlPersonData(
     val statsborgerskap: List<Statsborgerskap> = emptyList(),
     val doedsfall: List<Doedsfall> = emptyList(),
     val kontaktinformasjonForDoedsbo: List<PdlKontaktinformasjonForDødsbo> = emptyList()
+) {
+    fun validerOmPersonKanBehandlesIFagsystem() {
+        if (foedsel.isEmpty()) throw PdlPersonKanIkkeBehandlesIFagsystem("mangler fødselsdato")
+        if (folkeregisteridentifikator.firstOrNull()?.status == FolkeregisteridentifikatorStatus.OPPHOERT) throw PdlPersonKanIkkeBehandlesIFagsystem(
+            "er opphørt"
+        )
+    }
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class PdlFolkeregisteridentifikator(
+    val identifikasjonsnummer: String?,
+    val status: FolkeregisteridentifikatorStatus,
+    val type: FolkeregisteridentifikatorType?
 )
+
+enum class FolkeregisteridentifikatorStatus { I_BRUK, OPPHOERT }
+enum class FolkeregisteridentifikatorType { FNR, DNR }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlFødselsDato(val foedselsdato: String?)

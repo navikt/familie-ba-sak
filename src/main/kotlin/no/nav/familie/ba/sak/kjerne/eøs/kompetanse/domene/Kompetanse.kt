@@ -73,7 +73,7 @@ fun Kompetanse.blankUt() = this.copy(
     barnetsBostedsland = null,
     primærland = null,
     sekundærland = null,
-).also { it.id = this.id }
+)
 
 fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
     return this.bareSkjema() == kompetanse.bareSkjema() &&

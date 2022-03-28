@@ -28,7 +28,7 @@ fun Kompetanse.settFomOgTom(periode: Periode<*, Måned>) =
     this.copy(
         fom = periode.fraOgMed.tilYearMonthEllerNull(),
         tom = periode.tilOgMed.tilYearMonthEllerNull()
-    ).also { it.id = this.id }
+    )
 
 internal class EnkeltKompetanseTidslinje(
     val kompetanse: Kompetanse
@@ -64,5 +64,5 @@ internal class SlåSammenKompetanserTidslinje(
         this.copy(barnAktører = emptySet()) == kompetanse.copy(barnAktører = emptySet())
 
     private fun Kompetanse.leggSammenBarn(kompetanse: Kompetanse) =
-        this.copy(barnAktører = this.barnAktører.plus(kompetanse.barnAktører))
+        this.copy(barnAktørIder = this.barnAktørIder + kompetanse.barnAktørIder)
 }

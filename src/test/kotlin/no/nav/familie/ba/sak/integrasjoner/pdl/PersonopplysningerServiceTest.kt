@@ -11,6 +11,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -92,6 +93,23 @@ internal class PersonopplysningerServiceTest(
     }
 
     @Test
+    fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
+
+        every {
+            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
+        } returns Tilgang(true, null)
+
+        val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+            tilAktør(
+                ID_MOR_3BARN_1OPPHØRT_1UTENFØDSELSDATO
+            )
+        )
+
+        assertEquals(1, personInfo.forelderBarnRelasjon.size)
+        assertEquals(ID_BARN_1, personInfo.forelderBarnRelasjon.single().aktør.aktivFødselsnummer())
+    }
+
+    @Test
     fun `hentStatsborgerskap() skal return riktig statsborgerskap`() {
         val statsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(tilAktør(ID_MOR))
         assert(statsborgerskap.land == "XXX")
@@ -150,6 +168,7 @@ internal class PersonopplysningerServiceTest(
         const val ID_MOR = "22345678901"
         const val ID_MOR_MED_TOM_BOSTEDSADRESSE = "22345678903"
         const val ID_DØD_MOR = "44556612345"
+        const val ID_MOR_3BARN_1OPPHØRT_1UTENFØDSELSDATO = "94556612349"
         const val ID_BARN_1 = "32345678901"
         const val ID_BARN_2 = "32345678902"
         const val ID_UGRADERT_PERSON = "32345678903"
@@ -186,6 +205,12 @@ internal class PersonopplysningerServiceTest(
     private fun lagMockForPersoner() {
         lagMockForPdl(
             "hentperson-med-relasjoner-og-registerinformasjon.graphql",
+            "PdlIntegrasjon/gyldigRequestForMor3Barn1Opphørt1UtenFødselsdato.json",
+            readfile("PdlIntegrasjon/personinfoResponseForMor3Barn1Opphørt1UtenFødselsdato.json")
+        )
+
+        lagMockForPdl(
+            "hentperson-med-relasjoner-og-registerinformasjon.graphql",
             "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
             readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json")
         )
@@ -193,6 +218,16 @@ internal class PersonopplysningerServiceTest(
         lagMockForPdl(
             "hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
             readfile("PdlIntegrasjon/personinfoResponseForBarn.json")
+        )
+
+        lagMockForPdl(
+            "hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarnUtenFødselsdato.json",
+            readfile("PdlIntegrasjon/personinfoResponseForBarnUtenFødselsdato.json")
+        )
+
+        lagMockForPdl(
+            "hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarnMedOpphørtStatus.json",
+            readfile("PdlIntegrasjon/personinfoResponseForBarnMedOpphørtStatus.json")
         )
 
         lagMockForPdl(
