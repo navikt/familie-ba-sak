@@ -18,7 +18,7 @@ data class VilkårRegelverkResultat(
     val personType: PersonType = PersonType.BARN,
 )
 
-class VilkårResultatTidslinje(
+class VilkårsresultatDagTidslinje(
     private val vilkårsresultater: List<VilkårResultat>,
     private val praktiskTidligsteDato: LocalDate,
     private val praktiskSenesteDato: LocalDate

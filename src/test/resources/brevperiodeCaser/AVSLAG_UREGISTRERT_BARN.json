@@ -49,6 +49,11 @@
   "erFørsteVedtaksperiodePåFagsak": true,
   "brevMålform": "NB",
   "forventetOutput": {
+    "fom": "",
+    "tom": "",
+    "barnasFodselsdager": "",
+    "antallBarn": 0,
+    "belop": 0,
     "begrunnelser": [
       {
         "gjelderSoker": false,
