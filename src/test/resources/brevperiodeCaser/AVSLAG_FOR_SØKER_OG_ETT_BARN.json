@@ -25,14 +25,7 @@
       ],
       "andreVurderinger": [],
       "endredeUtbetalinger": [],
-      "utbetalinger": [
-        {
-          "ytelseType": "ORDINÆR_BARNETRYGD",
-          "utbetaltPerMnd": 1054,
-          "erPåvirketAvEndring": false,
-          "prosent": 100
-        }
-      ]
+      "utbetalinger": []
     },
     {
       "fødselsdato": "1969-07-29",
@@ -65,14 +58,7 @@
       "overstyrteVilkårresultater": [],
       "andreVurderinger": [],
       "endredeUtbetalinger": [],
-      "utbetalinger": [
-        {
-          "ytelseType": "ORDINÆR_BARNETRYGD",
-          "utbetaltPerMnd": 1054,
-          "erPåvirketAvEndring": false,
-          "prosent": 100
-        }
-      ]
+      "utbetalinger": []
     },
     {
       "fødselsdato": "2004-03-10",
@@ -80,14 +66,7 @@
       "overstyrteVilkårresultater": [],
       "andreVurderinger": [],
       "endredeUtbetalinger": [],
-      "utbetalinger": [
-        {
-          "ytelseType": "ORDINÆR_BARNETRYGD",
-          "utbetaltPerMnd": 1054,
-          "erPåvirketAvEndring": false,
-          "prosent": 100
-        }
-      ]
+      "utbetalinger": []
     }
   ],
   "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
@@ -97,7 +76,7 @@
   "forventetOutput": {
     "fom": "1. oktober 2021",
     "tom": "",
-    "belop": 3162,
+    "belop": 0,
     "antallBarn": 0,
     "barnasFodselsdager": "",
     "begrunnelser": [
