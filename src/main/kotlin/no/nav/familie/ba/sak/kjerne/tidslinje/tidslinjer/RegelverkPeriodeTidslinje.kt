@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ToveisKombinator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-private val nødvendigeVilkår = Vilkår.hentVilkårFor(PersonType.SØKER)
+private val nødvendigeVilkår = Vilkår.hentVilkårFor(PersonType.BARN)
 
 private val eøsVilkår = listOf(
     Vilkår.BOR_MED_SØKER,
@@ -15,7 +15,7 @@ private val eøsVilkår = listOf(
     Vilkår.BOSATT_I_RIKET
 )
 
-class RegelverkPeriodeKombinator : ListeKombinator<VilkårRegelverkResultat, Regelverk?> {
+class RegelverkPeriodeKombinator : ListeKombinator<VilkårRegelverkResultat, Regelverk> {
     override fun kombiner(alleVilkårResultater: Iterable<VilkårRegelverkResultat>): Regelverk? {
         val oppfyllerNødvendigVilkår = alleVilkårResultater
             .filter { it.resultat == Resultat.OPPFYLT }
@@ -35,7 +35,7 @@ class RegelverkPeriodeKombinator : ListeKombinator<VilkårRegelverkResultat, Reg
     }
 }
 
-class RegelverkOgOppfyltePerioderKombinator : ToveisKombinator<Resultat, Regelverk?, Regelverk?> {
+class RegelverkOgOppfyltePerioderKombinator : ToveisKombinator<Resultat, Regelverk, Regelverk> {
     override fun kombiner(venstre: Resultat?, høyre: Regelverk?): Regelverk? {
         return when {
             høyre == null || venstre == null -> null

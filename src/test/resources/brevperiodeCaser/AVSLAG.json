@@ -43,14 +43,18 @@
   "forventetOutput": {
     "fom": "1. januar 2021",
     "tom": "",
-    "belop": null,
-    "antallBarn": null,
-    "barnasFodselsdager": null,
+    "belop": 0,
+    "antallBarn": 0,
+    "barnasFodselsdager": "",
     "begrunnelser": [
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "10.12.13",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "januar 2021",
         "maalform": "bokmaal",
         "apiNavn": "avslagBorHosSoker",

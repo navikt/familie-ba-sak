@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -38,6 +39,9 @@ class BehandlingServiceTest(
 
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val beregningService: BeregningService,
 
     @Autowired
     private val personidentService: PersonidentService,
@@ -160,7 +164,7 @@ class BehandlingServiceTest(
 
         assertEquals(
             0,
-            behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = behandling.id).size
+            beregningService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = behandling.id).size
         )
     }
 

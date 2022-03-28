@@ -25,14 +25,7 @@
       ],
       "andreVurderinger": [],
       "endredeUtbetalinger": [],
-      "utbetalinger": [
-        {
-          "ytelseType": "ORDINÆR_BARNETRYGD",
-          "utbetaltPerMnd": 1054,
-          "erPåvirketAvEndring": false,
-          "prosent": 100
-        }
-      ]
+      "utbetalinger": []
     },
     {
       "fødselsdato": "1969-07-29",
@@ -65,14 +58,7 @@
       "overstyrteVilkårresultater": [],
       "andreVurderinger": [],
       "endredeUtbetalinger": [],
-      "utbetalinger": [
-        {
-          "ytelseType": "ORDINÆR_BARNETRYGD",
-          "utbetaltPerMnd": 1054,
-          "erPåvirketAvEndring": false,
-          "prosent": 100
-        }
-      ]
+      "utbetalinger": []
     },
     {
       "fødselsdato": "2004-03-10",
@@ -80,14 +66,7 @@
       "overstyrteVilkårresultater": [],
       "andreVurderinger": [],
       "endredeUtbetalinger": [],
-      "utbetalinger": [
-        {
-          "ytelseType": "ORDINÆR_BARNETRYGD",
-          "utbetaltPerMnd": 1054,
-          "erPåvirketAvEndring": false,
-          "prosent": 100
-        }
-      ]
+      "utbetalinger": []
     }
   ],
   "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
@@ -97,14 +76,18 @@
   "forventetOutput": {
     "fom": "1. oktober 2021",
     "tom": "",
-    "belop": null,
-    "antallBarn": null,
-    "barnasFodselsdager": null,
+    "belop": 0,
+    "antallBarn": 0,
+    "barnasFodselsdager": "",
     "begrunnelser": [
       {
         "gjelderSoker": true,
         "barnasFodselsdatoer": "16.03.03, 10.03.04, 15.04.09 og 06.09.10",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 0,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "oktober 2021",
         "maalform": "bokmaal",
         "apiNavn": "avslagBosattIRiket",

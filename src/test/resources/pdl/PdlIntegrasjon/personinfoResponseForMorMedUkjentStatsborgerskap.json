@@ -20,6 +20,13 @@
       ]
     },
     "person": {
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "44556612345",
+          "status": "I_BRUK",
+          "type": "FNR"
+        }
+      ],
       "navn": [
         {
           "fornavn": "ENGASJERT",

@@ -53,16 +53,20 @@
     }
   ],
   "forventetOutput": {
-    "fom": null,
-    "tom": null,
-    "belop": null,
-    "antallBarn": null,
-    "barnasFodselsdager": null,
+    "fom": "",
+    "tom": "",
+    "belop": 0,
+    "antallBarn": 0,
+    "barnasFodselsdager": "",
     "begrunnelser": [
       {
         "gjelderSoker": true,
         "barnasFodselsdatoer": "13.12.10",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 0,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": null,
         "maalform": "bokmaal",
         "apiNavn": "avslagIkkeFlyttetFraEktefelle",
@@ -71,7 +75,11 @@
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "13.12.10",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": null,
         "maalform": "bokmaal",
         "apiNavn": "avslagForeldreneBorSammen",

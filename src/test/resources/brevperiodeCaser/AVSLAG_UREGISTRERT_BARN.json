@@ -49,11 +49,20 @@
   "erFørsteVedtaksperiodePåFagsak": true,
   "brevMålform": "NB",
   "forventetOutput": {
+    "fom": "",
+    "tom": "",
+    "barnasFodselsdager": "",
+    "antallBarn": 0,
+    "belop": 0,
     "begrunnelser": [
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "27.12.17",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": null,
         "maalform": "bokmaal",
         "apiNavn": "avslagUregistrertBarn",

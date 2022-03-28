@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -40,6 +41,7 @@ class StegService(
     private val steg: List<BehandlingSteg<*>>,
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
+    private val beregningService: BeregningService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
@@ -120,7 +122,7 @@ class StegService(
 
     private fun hentBarnFraForrigeAvsluttedeBehandling(behandling: Behandling): List<String> {
         val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
-        return behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
+        return beregningService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
             .map { it.aktivFødselsnummer() }
     }
 

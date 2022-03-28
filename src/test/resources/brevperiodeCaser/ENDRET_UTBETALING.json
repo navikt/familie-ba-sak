@@ -2,7 +2,7 @@
   "beskrivelse": "Innvilget 1 barn bor med søker fra august 2021 på behandling med 1 barn",
   "fom": "2021-09-01",
   "tom": "2021-12-31",
-  "vedtaksperiodetype": "ENDRET_UTBETALING",
+  "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
       "standardbegrunnelse": "ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING"
@@ -59,21 +59,25 @@
   ],
   "forventetOutput": {
     "fom": "1. september 2021",
-    "tom": "til 31. desember 2021 ",
+    "tom": " til 31. desember 2021",
     "belop": 0,
-    "antallBarn": null,
+    "antallBarn": 1,
     "barnasFodselsdager": "20.01.19",
     "begrunnelser": [
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "20.01.19",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "20.01.19",
         "antallBarn": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
+        "antallBarnOppfyllerTriggereOgHarNullutbetaling": 1,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "endretUtbetalingDeltBostedIngenUtbetalingForSoknad",
         "belop": 0
       }
     ],
-    "type": "endretUtbetalingsperiodeIngenUtbetaling"
+    "type": "innvilgelseIngenUtbetaling"
   }
 }
