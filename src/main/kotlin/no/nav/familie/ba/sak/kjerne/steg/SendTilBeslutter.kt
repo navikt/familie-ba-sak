@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -28,6 +30,7 @@ class SendTilBeslutter(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vedtakPeriodeValidering: VedtakPeriodeValidering,
+    private val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(
@@ -45,7 +48,10 @@ class SendTilBeslutter(
         behandling.validerRekkefølgeOgUnikhetPåSteg()
         behandling.validerMaksimaltEtStegIkkeUtført()
 
-        vedtakPeriodeValidering.validerPerioderInneholderBegrunnelser(behandlingId = behandling.id)
+        // Denne valideringen skal ikke være på dersom vi ikke filterer fra første endringstidspunkt.
+        if (featureToggleService.isEnabled(FeatureToggleConfig.FØRSTE_ENDRINGSTIDSPUNKT)) {
+            vedtakPeriodeValidering.validerPerioderInneholderBegrunnelser(behandlingId = behandling.id)
+        }
     }
 
     override fun utførStegOgAngiNeste(
