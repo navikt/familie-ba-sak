@@ -30,7 +30,7 @@ class Tidslinjer(
             aktør to personResultat.vilkårResultater.groupBy { it.vilkårType }
                 .map {
                     if (personResultat.erSøkersResultater()) {
-                        VilkårResultatTidslinje(
+                        VilkårsresultatDagTidslinje(
                             vilkårsresultater = it.value,
                             praktiskTidligsteDato = søkersFødselsdato,
                             praktiskSenesteDato = yngsteBarnFødselsdato.til18ÅrsVilkårsdato()
@@ -38,7 +38,7 @@ class Tidslinjer(
                     } else {
                         val barnFødselsdato =
                             barnOgFødselsdatoer[aktør] ?: throw Feil("Finner ikke fødselsdato på barn")
-                        VilkårResultatTidslinje(
+                        VilkårsresultatDagTidslinje(
                             vilkårsresultater = it.value,
                             praktiskTidligsteDato = barnFødselsdato,
                             praktiskSenesteDato = barnFødselsdato.til18ÅrsVilkårsdato()
