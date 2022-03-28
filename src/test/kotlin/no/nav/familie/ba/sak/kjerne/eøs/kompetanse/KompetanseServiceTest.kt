@@ -1,8 +1,6 @@
-package no.nav.familie.ba.sak.kjerne.kompetanse
+package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.MockKompetanseRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -18,13 +16,14 @@ internal class KompetanseServiceTest {
         val kompetanser = kompetanseService.hentKompetanser(1L)
         assertEquals(1, kompetanser.size)
 
-        val kompetanse = kompetanser.first()
-        val oppdatertKompetanse = kompetanse.copy(
-            fom = kompetanse.fom!!.plusMonths(2),
-            tom = kompetanse.tom!!.minusMonths(2),
-        ).also { it.id = kompetanse.id }
+        val gjeldendeKompetanse = kompetanser.first()
+        val oppdatertKompetanse = gjeldendeKompetanse.copy(
+            fom = gjeldendeKompetanse.fom!!.plusMonths(2),
+            tom = gjeldendeKompetanse.tom!!.minusMonths(2),
+        ).also { it.id = gjeldendeKompetanse.id }
 
-        val kompetanserEtterOppdatering = kompetanseService.oppdaterKompetanse(oppdatertKompetanse).toList()
+        val kompetanserEtterOppdatering =
+            kompetanseService.oppdaterKompetanse(gjeldendeKompetanse.id, oppdatertKompetanse).toList()
         assertEquals(1, kompetanserEtterOppdatering.size)
     }
 
@@ -38,14 +37,15 @@ internal class KompetanseServiceTest {
         val kompetanser = kompetanseService.hentKompetanser(1L)
         assertEquals(1, kompetanser.size)
 
-        val kompetanse = kompetanser.first()
-        val oppdatertKompetanse = kompetanse.copy(
-            fom = kompetanse.fom!!.plusMonths(2),
-            tom = kompetanse.tom!!.minusMonths(2),
+        val gjeldendeKompetanse = kompetanser.first()
+        val oppdatertKompetanse = gjeldendeKompetanse.copy(
+            fom = gjeldendeKompetanse.fom!!.plusMonths(2),
+            tom = gjeldendeKompetanse.tom!!.minusMonths(2),
             søkersAktivitet = "Jobb"
-        ).also { it.id = kompetanse.id }
+        ).also { it.id = gjeldendeKompetanse.id }
 
-        val kompetanserEtterOppdatering = kompetanseService.oppdaterKompetanse(oppdatertKompetanse).toList()
+        val kompetanserEtterOppdatering =
+            kompetanseService.oppdaterKompetanse(gjeldendeKompetanse.id, oppdatertKompetanse).toList()
         assertEquals(3, kompetanserEtterOppdatering.size)
 
         val tilSletting = kompetanserEtterOppdatering.find { it.søkersAktivitet == "Jobb" }

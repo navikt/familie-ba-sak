@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseStatus
 
-fun revurderStatus(kompetanser: List<Kompetanse>): List<Kompetanse> =
-    kompetanser.map { revurderStatus(it) }
+fun Collection<Kompetanse>.vurderStatus(): Collection<Kompetanse> =
+    this.map { revurderStatus(it) }
 
 fun revurderStatus(kompetanse: Kompetanse): Kompetanse {
     val sum = (kompetanse.annenForeldersAktivitet?.let { 1 } ?: 0) +
