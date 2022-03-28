@@ -78,6 +78,10 @@ data class TriggesAv(
         return this.deltbosted == vilkårResultatInneholderDeltBosted
     }
 
+    /*
+     * Dersom det er reduksjon fordi delt bosted starter må vi ha egen logikk for det.
+     * Vi ser da på om forrige periode ikke inneholdt delt bosted og om begrunnelsen trigges av delt bosted.
+     */
     private fun erDeltBostedOppfyltReduksjon(
         vilkårResultat: MinimertVilkårResultat,
         erReduksjonStartPåDeltBosted: Boolean
@@ -85,8 +89,11 @@ data class TriggesAv(
         val vilkårResultatInneholderDeltBosted =
             vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
 
-        return this.deltbosted == vilkårResultatInneholderDeltBosted && !erReduksjonStartPåDeltBosted ||
-            erReduksjonStartPåDeltBosted && !vilkårResultatInneholderDeltBosted && this.deltbosted
+        return if (erReduksjonStartPåDeltBosted) {
+            !vilkårResultatInneholderDeltBosted && this.deltbosted
+        } else {
+            this.deltbosted == vilkårResultatInneholderDeltBosted
+        }
     }
 }
 
