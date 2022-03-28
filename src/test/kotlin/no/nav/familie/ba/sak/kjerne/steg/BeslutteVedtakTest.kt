@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -27,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.FerdigstillOppgaver
+import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
@@ -40,6 +42,7 @@ class BeslutteVedtakTest {
     private lateinit var beslutteVedtak: BeslutteVedtak
     private lateinit var vedtakService: VedtakService
     private lateinit var behandlingService: BehandlingService
+    private lateinit var beregningService: BeregningService
     private lateinit var taskRepository: TaskRepositoryWrapper
     private lateinit var dokumentService: DokumentService
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
@@ -55,6 +58,7 @@ class BeslutteVedtakTest {
         taskRepository = mockk()
         dokumentService = mockk()
         behandlingService = mockk()
+        beregningService = mockk()
         vilkårsvurderingService = mockk()
         featureToggleService = mockk()
         tilkjentYtelseValideringService = mockk()
@@ -84,6 +88,7 @@ class BeslutteVedtakTest {
             toTrinnKontrollService,
             vedtakService,
             behandlingService,
+            beregningService,
             taskRepository,
             loggService,
             vilkårsvurderingService,
@@ -103,6 +108,7 @@ class BeslutteVedtakTest {
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+        every { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -143,6 +149,40 @@ class BeslutteVedtakTest {
             )
         }
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
+    }
+
+    @Test
+    fun `Skal ikke iverksette hvis mangler utbtalingsperioder`() {
+        val behandling = lagBehandling()
+        val vedtak = lagVedtak(behandling)
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+        every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
+        every { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling) } returns true
+
+        mockkObject(JournalførVedtaksbrevTask.Companion)
+        every {
+            JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+                any(),
+                any(),
+                any(),
+            )
+        } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+
+        val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+
+        verify(exactly = 1) { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling) }
+
+        verify(exactly = 1) {
+            JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+                personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                behandlingId = behandling.id,
+                vedtakId = vedtak.id,
+            )
+        }
+        Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, nesteSteg)
     }
 
     @Test

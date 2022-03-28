@@ -66,6 +66,7 @@ class ØkonomiService(
         vedtak: Vedtak,
         saksbehandlerId: String,
         erSimulering: Boolean = false,
+        skalValideres: Boolean = true,
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand =
@@ -131,10 +132,12 @@ class ØkonomiService(
         }
 
         return utbetalingsoppdrag.also {
-            it.valider(
-                behandlingsresultat = vedtak.behandling.resultat,
-                erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-            )
+            if (skalValideres) {
+                it.valider(
+                    behandlingsresultat = vedtak.behandling.resultat,
+                    erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                )
+            }
         }
     }
 
