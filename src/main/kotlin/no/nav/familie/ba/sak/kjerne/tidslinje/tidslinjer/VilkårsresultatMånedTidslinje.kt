@@ -7,16 +7,18 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.replaceLast
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
+fun VilkårsresultatDagTidslinje.tilVilkårsresultaterMånedTidslinje() = VilkårsresultatMånedTidslinje(this)
+
 class VilkårsresultatMånedTidslinje(
-    private val vilkårResultatTidslinje: VilkårResultatTidslinje,
+    private val vilkårsresultatDagTidslinje: VilkårsresultatDagTidslinje,
 ) : Tidslinje<VilkårRegelverkResultat, Måned>() {
 
-    override fun fraOgMed() = vilkårResultatTidslinje.fraOgMed().tilInneværendeMåned()
+    override fun fraOgMed() = vilkårsresultatDagTidslinje.fraOgMed().tilInneværendeMåned()
 
-    override fun tilOgMed() = vilkårResultatTidslinje.tilOgMed().tilInneværendeMåned()
+    override fun tilOgMed() = vilkårsresultatDagTidslinje.tilOgMed().tilInneværendeMåned()
 
     override fun lagPerioder(): Collection<Periode<VilkårRegelverkResultat, Måned>> {
-        return vilkårResultatTidslinje.perioder()
+        return vilkårsresultatDagTidslinje.perioder()
             .fold(emptyList()) { perioder, periode ->
                 val sistePeriode = perioder.lastOrNull()
                 val erBack2BackIMånedsskifte = if (sistePeriode != null) erBack2BackIMånedsskifte(
