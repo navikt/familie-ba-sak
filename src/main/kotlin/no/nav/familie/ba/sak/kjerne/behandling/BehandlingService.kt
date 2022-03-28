@@ -30,9 +30,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -59,7 +57,6 @@ import java.time.YearMonth
 @Service
 class BehandlingService(
     private val behandlingRepository: BehandlingRepository,
-    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingMetrikker: BehandlingMetrikker,
     private val fagsakRepository: FagsakRepository,
@@ -309,19 +306,6 @@ class BehandlingService(
         val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
         return Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
     }
-
-    /**
-     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse.
-     */
-    fun finnBarnFraBehandlingMedTilkjentYtsele(behandlingId: Long): List<Aktør> =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
-            ?.filter {
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                    behandlingId,
-                    it
-                )
-                    .isNotEmpty()
-            } ?: emptyList()
 
     /**
      * Henter siste iverksatte behandling FØR en gitt behandling.
