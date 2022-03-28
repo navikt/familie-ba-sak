@@ -83,10 +83,10 @@
       {
         "gjelderSoker": true,
         "barnasFodselsdatoer": "16.03.03, 10.03.04, 15.04.09 og 06.09.10",
-        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "15.04.09",
+        "fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling": "",
         "fodselsdatoerBarnOppfyllerTriggereOgHarNullutbetaling": "",
         "antallBarn": 0,
-        "antallBarnOppfyllerTriggereOgHarUtbetaling": 1,
+        "antallBarnOppfyllerTriggereOgHarUtbetaling": 0,
         "antallBarnOppfyllerTriggereOgHarNullutbetaling": 0,
         "maanedOgAarBegrunnelsenGjelderFor": "oktober 2021",
         "maalform": "bokmaal",
