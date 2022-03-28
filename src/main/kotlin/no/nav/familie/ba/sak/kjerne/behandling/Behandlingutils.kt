@@ -48,16 +48,15 @@ object Behandlingutils {
             .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 
-    fun bestemKategori(
-        behandlingÅrsak: BehandlingÅrsak,
-        nyBehandlingKategori: BehandlingKategori?,
-        løpendeBehandlingKategori: BehandlingKategori?
-    ): BehandlingKategori {
-        if (behandlingÅrsak !== BehandlingÅrsak.SØKNAD && løpendeBehandlingKategori != null) {
-            return løpendeBehandlingKategori
+    fun bestemKategoriVedOpprettelseAvBehandling(
+        nyBehandling: NyBehandling,
+        sisteBehandlingSomErIverksatt: Behandling?
+    ): BehandlingKategori =
+        when {
+            nyBehandling?.kategori != null -> nyBehandling.kategori
+            sisteBehandlingSomErIverksatt != null -> sisteBehandlingSomErIverksatt.kategori
+            else -> BehandlingKategori.NASJONAL
         }
-        return nyBehandlingKategori ?: BehandlingKategori.NASJONAL
-    }
 
     fun bestemUnderkategori(
         nyUnderkategori: BehandlingUnderkategori?,
