@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class KompetanseController(
     private val featureToggleService: FeatureToggleService,
-    private val kompetanseService: KompetanseService = KompetanseService(MockKompetanseRepository())
+    private val kompetanseService: KompetanseService
 ) {
     @GetMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentKompetanser(
