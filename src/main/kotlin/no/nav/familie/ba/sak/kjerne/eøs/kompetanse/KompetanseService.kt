@@ -1,13 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.beregning.AktørId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.blankUt
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.revurderStatus
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.trekkFra
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
@@ -19,16 +20,16 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class KompetanseService(
     val tidslinjeService: TidslinjeService,
-    val kompetanseRepository: MockKompetanseRepository = MockKompetanseRepository()
+    val kompetanseRepository: KompetanseRepository
 ) {
 
     fun hentKompetanser(behandlingId: Long): Collection<Kompetanse> {
-        return kompetanseRepository.hentKompetanser(behandlingId)
+        return kompetanseRepository.findByBehandlingId(behandlingId)
     }
 
     @Transactional
     fun oppdaterKompetanse(oppdatertKompetanse: Kompetanse): Collection<Kompetanse> {
-        val gammelKompetanse = kompetanseRepository.hentKompetanse(oppdatertKompetanse.id)
+        val gammelKompetanse = kompetanseRepository.getById(oppdatertKompetanse.id)
 
         validerOppdatering(oppdatertKompetanse, gammelKompetanse)
 
@@ -41,15 +42,15 @@ class KompetanseService(
         val tilSletting = listOf(gammelKompetanse) - revurderteKompetanser
 
         if (tilOppretting != tilSletting) {
-            kompetanseRepository.delete(tilSletting)
-            kompetanseRepository.save(tilOppretting)
+            kompetanseRepository.deleteAll(tilSletting)
+            kompetanseRepository.saveAll(tilOppretting)
         }
         return hentKompetanser(oppdatertKompetanse.behandlingId)
     }
 
     @Transactional
     fun slettKompetanse(kompetanseId: Long): Collection<Kompetanse> {
-        val gammelKompetanse = kompetanseRepository.hentKompetanse(kompetanseId)
+        val gammelKompetanse = kompetanseRepository.getById(kompetanseId)
         val behandlingId = gammelKompetanse.behandlingId
         val eksisterendeKompetanser = hentKompetanser(behandlingId)
         val blankKompetamse = gammelKompetanse.blankUt()
@@ -62,8 +63,8 @@ class KompetanseService(
         val tilSletting = eksisterendeKompetanser.trekkFra(revurderteKompetanser)
 
         if (tilOppretting != tilSletting) {
-            kompetanseRepository.delete(tilSletting)
-            kompetanseRepository.save(tilOppretting)
+            kompetanseRepository.deleteAll(tilSletting)
+            kompetanseRepository.saveAll(tilOppretting)
         }
 
         return hentKompetanser(behandlingId)
@@ -81,8 +82,8 @@ class KompetanseService(
         val tilSletting = kompetanser.trekkFra(tilpassedeKompetanser)
 
         if (tilOppretting != tilSletting) {
-            kompetanseRepository.delete(tilSletting)
-            kompetanseRepository.save(tilOppretting)
+            kompetanseRepository.deleteAll(tilSletting)
+            kompetanseRepository.saveAll(tilOppretting)
         }
 
         return hentKompetanser(behandlingId)
@@ -93,11 +94,11 @@ class KompetanseService(
             throw Feil("Manglende fra-og-med", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.fom > oppdatertKompetanse.tom)
             throw Feil("Fra-og-med er etter til-og-med", httpStatus = HttpStatus.BAD_REQUEST)
-        if (oppdatertKompetanse.barnAktørIder.size == 0)
+        if (oppdatertKompetanse.barnAktører.size == 0)
             throw Feil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.fom < gammelKompetanse.fom)
             throw Feil("Setter fra-og-med tidligere", httpStatus = HttpStatus.BAD_REQUEST)
-        if (!gammelKompetanse.barnAktørIder.containsAll(oppdatertKompetanse.barnAktørIder))
+        if (!gammelKompetanse.barnAktører.containsAll(oppdatertKompetanse.barnAktører))
             throw Feil("Oppdaterer barn som ikke er knyttet til kompetansen", httpStatus = HttpStatus.BAD_REQUEST)
     }
 
@@ -109,8 +110,8 @@ class KompetanseService(
     private fun Collection<Kompetanse>.vurderStatus(): Collection<Kompetanse> =
         this.map { revurderStatus(it) }
 
-    private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<AktørId, Tidslinje<Regelverk, Måned>> =
+    private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<Regelverk, Måned>> =
         this.hentTidslinjer(behandlingId).barnasTidslinjer()
             .mapValues { (_, tidslinjer) -> tidslinjer.regelverkTidslinje }
-            .mapKeys { (aktør, _) -> aktør.aktørId }
+            .mapKeys { (aktør, _) -> aktør }
 }

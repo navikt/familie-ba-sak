@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
-import no.nav.familie.ba.sak.kjerne.beregning.AktørId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilT
 import java.time.YearMonth
 
 class AktørKompetanseTidslinje(
-    private val aktørId: AktørId,
+    private val aktør: Aktør,
     private val kompetanser: List<Kompetanse>,
 ) : Tidslinje<Kompetanse, Måned>() {
 
@@ -29,6 +29,6 @@ class AktørKompetanseTidslinje(
     private fun Kompetanse.tilPeriode() = Periode(
         fraOgMed = this.fom.tilTidspunktEllerUendeligLengeSiden { tom ?: YearMonth.now() },
         tilOgMed = this.tom.tilTidspunktEllerUendeligLengeTil { fom ?: YearMonth.now() },
-        innhold = this.copy(fom = null, tom = null, barnAktørIder = setOf(aktørId)).also { id = this.id }
+        innhold = this.copy(fom = null, tom = null, barnAktører = setOf(aktør))
     )
 }

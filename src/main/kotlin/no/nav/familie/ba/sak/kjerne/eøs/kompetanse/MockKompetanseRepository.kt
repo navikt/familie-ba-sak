@@ -1,16 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import org.springframework.stereotype.Repository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.YearMonth
 import java.util.concurrent.atomic.AtomicLong
 
-@Repository
 class MockKompetanseRepository {
 
-    val barn1 = "111111"
-    val barn2 = "222222"
-    val barn3 = "333333"
+    val barn1 = Aktør("111111")
+    val barn2 = Aktør("222222")
+    val barn3 = Aktør("333333")
 
     val kompetanseLøpenummer = AtomicLong()
     fun AtomicLong.neste() = this.addAndGet(1)
@@ -18,7 +17,7 @@ class MockKompetanseRepository {
     private val malKompetanse = Kompetanse(
         fom = YearMonth.of(2021, 2),
         tom = YearMonth.of(2021, 11),
-        barnAktørIder = setOf(barn1, barn2, barn3),
+        barnAktører = setOf(barn1, barn2, barn3),
     )
 
     private val kompetanser = mutableMapOf<Long, Kompetanse>()

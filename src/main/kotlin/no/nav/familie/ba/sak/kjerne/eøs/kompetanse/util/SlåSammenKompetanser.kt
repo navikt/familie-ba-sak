@@ -61,8 +61,8 @@ internal class SlåSammenKompetanserTidslinje(
         this.find { predicate(it) }?.also { this.remove(it) }
 
     private fun Kompetanse.erLikUtenBarn(kompetanse: Kompetanse) =
-        this.copy(barnAktørIder = emptySet()) == kompetanse.copy(barnAktørIder = emptySet())
+        this.copy(barnAktører = emptySet()) == kompetanse.copy(barnAktører = emptySet())
 
     private fun Kompetanse.leggSammenBarn(kompetanse: Kompetanse) =
-        this.copy(barnAktørIder = this.barnAktørIder.plus(kompetanse.barnAktørIder))
+        this.copy(barnAktører = this.barnAktører.plus(kompetanse.barnAktører))
 }
