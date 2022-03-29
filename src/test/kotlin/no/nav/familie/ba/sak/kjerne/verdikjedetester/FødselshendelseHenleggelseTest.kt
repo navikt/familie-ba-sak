@@ -64,7 +64,7 @@ class FødselshendelseHenleggelseTest(
                         bruker = listOf(
                             lagInfotrygdSak(
                                 SatsService.sisteTilleggOrdinærSats.beløp.toDouble(),
-                                "1234",
+                                listOf("1234"),
                                 "OR",
                                 "OS"
                             )
