@@ -45,7 +45,7 @@ class OppgaveControllerTest {
     lateinit var fagsakService: FagsakService
 
     @MockK
-    lateinit var journalføringService: JournalføringService
+    lateinit var lukkOppgaveService: LukkOppgaveService
 
     @MockK
     lateinit var tilgangService: TilgangService

@@ -40,7 +40,7 @@ class OppgaveController(
     private val integrasjonClient: IntegrasjonClient,
     private val personopplysningerService: PersonopplysningerService,
     private val tilgangService: TilgangService,
-    private val journalføringService: JournalføringService,
+    private val lukkOppgaveService: LukkOppgaveService,
 ) {
 
     @PostMapping(
@@ -134,14 +134,7 @@ class OppgaveController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "lukk oppgave og knytt journalpost"
         )
-        val oppgave = oppgaveService.hentOppgave(oppgaveId)
-
-        var fagsakId: String? = null
-        if (request.knyttJournalpostTilFagsak) {
-            fagsakId = journalføringService.knyttJournalpostTilFagsak(request)
-        }
-
-        oppgaveService.ferdigstillOppgave(oppgave)
+        val fagsakId = lukkOppgaveService.lukkOppgaveOgKnyttJournalpostTilBehandling(oppgaveId, request)
 
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Oppgaven $oppgaveId er lukket"))
     }
