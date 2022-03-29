@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.ekstern.restDomene.RestLukkOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
