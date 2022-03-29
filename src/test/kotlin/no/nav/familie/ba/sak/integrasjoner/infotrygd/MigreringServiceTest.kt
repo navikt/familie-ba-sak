@@ -128,8 +128,9 @@ class MigreringServiceTest(
 
     @Autowired
     private val envService: EnvService,
+
     @Autowired
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 
 ) : AbstractMockkSpringRunner() {
 
@@ -174,7 +175,7 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(relaxed = true),
-            mockk(relaxed = true)
+            mockk(relaxed = true),
         ) // => env.erDev() = env.erE2E() = false
     }
 
