@@ -1,15 +1,14 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
+package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.YearMonth
 import java.util.concurrent.atomic.AtomicLong
 
-class MockKompetanseRepository {
+class MinnebasertKompetanseRepository {
 
-    val barn1 = Aktør("111111")
-    val barn2 = Aktør("222222")
-    val barn3 = Aktør("333333")
+    val barn1 = Aktør("1111111111111")
+    val barn2 = Aktør("2222222222222")
+    val barn3 = Aktør("3333333333333")
 
     val kompetanseLøpenummer = AtomicLong()
     fun AtomicLong.neste() = this.addAndGet(1)
@@ -22,7 +21,7 @@ class MockKompetanseRepository {
 
     private val kompetanser = mutableMapOf<Long, Kompetanse>()
 
-    fun hentKompetanser(behandlingId: Long): Collection<Kompetanse> {
+    fun hentKompetanser(behandlingId: Long): List<Kompetanse> {
 
         val kompetanserForBehandling = kompetanser.values.filter { it.behandlingId == behandlingId }
         if (kompetanserForBehandling.size == 0) {
@@ -54,7 +53,7 @@ class MockKompetanseRepository {
         }
     }
 
-    fun delete(tilSletting: List<Kompetanse>) {
+    fun delete(tilSletting: Iterable<Kompetanse>) {
         tilSletting.forEach { kompetanser.remove(it.id) }
     }
 }

@@ -1,20 +1,49 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MinnebasertKompetanseRepository
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class KompetanseServiceTest {
 
-    val mockKompetanseRepository = mockk<KompetanseRepository>(relaxed = true)
+    val minnebasertKompetanseRepository = MinnebasertKompetanseRepository()
+    val mockKompetanseRepository = mockk<KompetanseRepository>()
+
+    val kompetanseService = KompetanseService(
+        mockk(),
+        mockKompetanseRepository
+    )
+
+    @BeforeEach
+    fun init() {
+        val idSlot = slot<Long>()
+        val kompetanseListeSlot = slot<Iterable<Kompetanse>>()
+
+        every { mockKompetanseRepository.findByBehandlingId(capture(idSlot)) } answers {
+            minnebasertKompetanseRepository.hentKompetanser(idSlot.captured)
+        }
+
+        every { mockKompetanseRepository.getById(capture(idSlot)) } answers {
+            minnebasertKompetanseRepository.hentKompetanse(idSlot.captured)
+        }
+
+        every { mockKompetanseRepository.saveAll(capture(kompetanseListeSlot)) } answers {
+            minnebasertKompetanseRepository.save(kompetanseListeSlot.captured)
+        }
+
+        every { mockKompetanseRepository.deleteAll(capture(kompetanseListeSlot)) } answers {
+            minnebasertKompetanseRepository.delete(kompetanseListeSlot.captured)
+        }
+    }
 
     @Test
     fun `bare endring av periode skal ikke ha effekt`() {
-        val kompetanseService = KompetanseService(
-            mockk(),
-            mockKompetanseRepository
-        )
 
         val kompetanser = kompetanseService.hentKompetanser(1L)
         assertEquals(1, kompetanser.size)
@@ -32,10 +61,6 @@ internal class KompetanseServiceTest {
 
     @Test
     fun `oppdatering som splitter kompetanse fulgt av sletting skal returnere til utgangspunktet`() {
-        val kompetanseService = KompetanseService(
-            mockk(),
-            mockKompetanseRepository
-        )
 
         val kompetanser = kompetanseService.hentKompetanser(1L)
         assertEquals(1, kompetanser.size)
