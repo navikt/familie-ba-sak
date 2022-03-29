@@ -141,10 +141,10 @@ private fun erVilkårResultatUtgjørende(
 
         VedtakBegrunnelseType.REDUKSJON -> {
             erReduksjonResultatUtgjøreneForPeriode(
-                minimertVilkårResultat = minimertVilkårResultat,
+                vilkårSomAvsluttesRettFørDennePerioden = minimertVilkårResultat,
                 triggesAv = triggesAv,
                 vedtaksperiode = vedtaksperiode,
-                nesteMinimerteVilkårResultat = nesteMinimerteVilkårResultat,
+                vilkårSomStarterIDennePerioden = nesteMinimerteVilkårResultat,
                 erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
             )
         }
@@ -178,36 +178,36 @@ private fun erOpphørResultatUtgjøreneForPeriode(
 }
 
 private fun erReduksjonResultatUtgjøreneForPeriode(
-    minimertVilkårResultat: MinimertVilkårResultat,
+    vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
     triggesAv: TriggesAv,
     vedtaksperiode: Periode,
-    nesteMinimerteVilkårResultat: MinimertVilkårResultat?,
+    vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
     erIngenOverlappVedtaksperiodeTogglePå: Boolean,
 ): Boolean {
-    if (minimertVilkårResultat.periodeTom == null) {
+    if (vilkårSomAvsluttesRettFørDennePerioden.periodeTom == null) {
         return false
     }
 
-    val erOppfyltTomMånedEtter = erOppfyltTomMånedEtter(minimertVilkårResultat)
+    val erOppfyltTomMånedEtter = erOppfyltTomMånedEtter(vilkårSomAvsluttesRettFørDennePerioden)
 
     val erStartPåDeltBosted =
-        minimertVilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER &&
-            !minimertVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) &&
-            nesteMinimerteVilkårResultat?.utdypendeVilkårsvurderinger?.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) == true &&
+        vilkårSomAvsluttesRettFørDennePerioden.vilkårType == Vilkår.BOR_MED_SØKER &&
+            !vilkårSomAvsluttesRettFørDennePerioden.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) &&
+            vilkårSomStarterIDennePerioden?.utdypendeVilkårsvurderinger?.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) == true &&
             triggesAv.deltbosted
 
-    val startNestePeriodeEtterVilkår = minimertVilkårResultat.periodeTom
+    val startNestePeriodeEtterVilkår = vilkårSomAvsluttesRettFørDennePerioden.periodeTom
         .plusDays(if (erStartPåDeltBosted) 1 else 0)
         .plusMonths(if (erOppfyltTomMånedEtter) 1 else 0)
 
     return triggereForUtdypendeVilkårsvurderingErOppfyltReduksjon(
         triggesAv = triggesAv,
-        vilkårResultat = minimertVilkårResultat,
+        vilkårSomAvsluttesRettFørDennePerioden = vilkårSomAvsluttesRettFørDennePerioden,
         erReduksjonStartPåDeltBosted = erStartPåDeltBosted,
-        nesteMinimerteVilkårResultat = nesteMinimerteVilkårResultat,
+        vilkårSomStarterIDennePerioden = vilkårSomStarterIDennePerioden,
         erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeTogglePå,
     ) &&
-        minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
+        vilkårSomAvsluttesRettFørDennePerioden.resultat == Resultat.OPPFYLT &&
         startNestePeriodeEtterVilkår.toYearMonth() == vedtaksperiode.fom.toYearMonth()
 }
 
@@ -287,17 +287,21 @@ private fun triggereForUtdypendeVilkårsvurderingErOppfylt(
 
 private fun triggereForUtdypendeVilkårsvurderingErOppfyltReduksjon(
     triggesAv: TriggesAv,
-    vilkårResultat: MinimertVilkårResultat,
+    vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
     erReduksjonStartPåDeltBosted: Boolean,
-    nesteMinimerteVilkårResultat: MinimertVilkårResultat?,
+    vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
     return if (erIngenOverlappVedtaksperiodeToggelPå) {
         triggesAv.erUtdypendeVilkårsvurderingOppfyltReduksjon(
-            vilkårResultat = vilkårResultat,
-            nesteMinimerteVilkårResultat = nesteMinimerteVilkårResultat
+            vilkårSomAvsluttesRettFørDennePerioden = vilkårSomAvsluttesRettFørDennePerioden,
+            vilkårSomStarterIDennePerioden = vilkårSomStarterIDennePerioden
         )
-    } else triggereForUtdypendeVilkårsvurderingErOppfyltGammel(triggesAv, vilkårResultat, erReduksjonStartPåDeltBosted)
+    } else triggereForUtdypendeVilkårsvurderingErOppfyltGammel(
+        triggesAv,
+        vilkårSomAvsluttesRettFørDennePerioden,
+        erReduksjonStartPåDeltBosted
+    )
 }
 
 @Deprecated(
