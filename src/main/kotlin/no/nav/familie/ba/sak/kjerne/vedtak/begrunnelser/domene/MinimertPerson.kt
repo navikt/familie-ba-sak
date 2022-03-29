@@ -11,7 +11,7 @@ class MinimertPerson(
     val type: PersonType,
     val fødselsdato: LocalDate,
     val aktørId: String,
-    private val aktivPersonIdent: String,
+    val aktivPersonIdent: String,
 ) {
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 

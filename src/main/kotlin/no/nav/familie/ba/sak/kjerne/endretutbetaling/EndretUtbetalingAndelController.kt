@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -28,8 +28,8 @@ class EndretUtbetalingAndelController(
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,
-    private val vedtakService: VedtakService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) {
 
     @PutMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
@@ -52,7 +52,7 @@ class EndretUtbetalingAndelController(
             restEndretUtbetalingAndel
         )
 
-        vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
+        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId = behandling.id)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -79,7 +79,7 @@ class EndretUtbetalingAndelController(
             endretUtbetalingAndelId
         )
 
-        vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
+        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId = behandling.id)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -101,7 +101,7 @@ class EndretUtbetalingAndelController(
         val behandling = behandlingService.hent(behandlingId)
         endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
 
-        vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
+        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId = behandling.id)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService

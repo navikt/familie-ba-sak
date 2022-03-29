@@ -6,6 +6,8 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MinnebasertKompetanseRepository
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,10 +16,13 @@ internal class KompetanseServiceTest {
 
     val minnebasertKompetanseRepository = MinnebasertKompetanseRepository()
     val mockKompetanseRepository = mockk<KompetanseRepository>()
+    val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk(relaxed = true)
+    val tidslinjeService: TidslinjeService = mockk()
 
     val kompetanseService = KompetanseService(
-        mockk(),
-        mockKompetanseRepository
+        tidslinjeService,
+        mockKompetanseRepository,
+        tilbakestillBehandlingService,
     )
 
     @BeforeEach
@@ -43,8 +48,7 @@ internal class KompetanseServiceTest {
     }
 
     @Test
-    fun `bare endring av periode skal ikke ha effekt`() {
-
+    fun `bare reduksjon av periode skal ikke føre til endring i kompetansen`() {
         val kompetanser = kompetanseService.hentKompetanser(1L)
         assertEquals(1, kompetanser.size)
 

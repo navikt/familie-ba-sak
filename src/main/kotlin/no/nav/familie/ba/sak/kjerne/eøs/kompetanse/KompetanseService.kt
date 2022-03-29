@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.trekkFra
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
@@ -17,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class KompetanseService(
     val tidslinjeService: TidslinjeService,
-    val kompetanseRepository: KompetanseRepository
+    val kompetanseRepository: KompetanseRepository,
+    val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
 
     fun hentKompetanser(behandlingId: Long): Collection<Kompetanse> {
@@ -38,6 +40,8 @@ class KompetanseService(
 
         lagreKompetanseDifferanse(listOf(gjeldendeKompetanse), oppdaterteKompetanser)
 
+        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(gjeldendeKompetanse.behandlingId)
+
         return hentKompetanser(oppdatertKompetanse.behandlingId)
     }
 
@@ -53,11 +57,13 @@ class KompetanseService(
 
         lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
 
+        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId)
+
         return hentKompetanser(behandlingId)
     }
 
     @Transactional
-    fun tilpassKompetanserTilEøsPerioder(behandlingId: Long): Collection<Kompetanse> {
+    fun tilpassKompetanserTilRegelverk(behandlingId: Long): Collection<Kompetanse> {
         val gjeldendeKompetanser = hentKompetanser(behandlingId)
         val barnasRegelverkTidslinjer = tidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId)
 
