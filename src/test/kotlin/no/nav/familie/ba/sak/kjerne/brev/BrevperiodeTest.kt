@@ -61,7 +61,7 @@ class BrevperiodeTest {
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
-                    erIngenOverlappVedtaksperiodeTogglePå = false,
+                    erIngenOverlappVedtaksperiodeTogglePå = true,
                 )
             } catch (e: Exception) {
                 testReporter.publishEntry(

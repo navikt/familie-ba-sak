@@ -276,7 +276,8 @@ class VedtaksperiodeServiceUtilsTest {
                 minimerteEndredeUtbetalingAndeler = emptyList(),
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
-            erFørsteVedtaksperiodePåFagsak = false
+            erFørsteVedtaksperiodePåFagsak = false,
+            erIngenOverlappVedtaksperiodeTogglePå = true,
         )
 
         Assertions.assertEquals(
@@ -327,7 +328,8 @@ class VedtaksperiodeServiceUtilsTest {
                     .map { it.tilMinimertRestEndretUtbetalingAndel() },
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
-            erFørsteVedtaksperiodePåFagsak = false
+            erFørsteVedtaksperiodePåFagsak = false,
+            erIngenOverlappVedtaksperiodeTogglePå = true,
         )
 
         Assertions.assertEquals(

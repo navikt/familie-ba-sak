@@ -99,7 +99,11 @@ class MigreringService(
 
             val løpendeInfotrygdsak = hentLøpendeSakFraInfotrygd(personIdent)
 
-            if (løpendeInfotrygdsak.undervalg == "MD" && !featureToggleService.isEnabled(KAN_MIGRERE_DELT_BOSTED, false)) {
+            if (løpendeInfotrygdsak.undervalg == "MD" && !featureToggleService.isEnabled(
+                    KAN_MIGRERE_DELT_BOSTED,
+                    false
+                )
+            ) {
                 secureLog.warn("Migrering: Kan ikke migrere saker med delt bosted")
                 kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
             }
@@ -395,7 +399,14 @@ class MigreringService(
             val beløpfeilType = if (infotrygdSak.undervalg == "MD")
                 MigreringsfeilType.BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD else
                 MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD
-            secureLog.info("Ulikt beløp ba-sak og infotrygd migrering ${tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse}")
+            secureLog.info(
+                "Ulikt beløp ba-sak og infotrygd migrering ${
+                tilkjentYtelseRepository.findByBehandlingOptional(
+                    behandlingId
+                )?.andelerTilkjentYtelse
+                }"
+            )
+
             kastOgTellMigreringsFeil(
                 beløpfeilType,
                 beløpfeilType.beskrivelse +

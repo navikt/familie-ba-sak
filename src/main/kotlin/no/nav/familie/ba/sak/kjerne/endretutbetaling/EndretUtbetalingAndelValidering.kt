@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.erMellom
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.ba.sak.common.tilKortString
@@ -171,8 +173,8 @@ fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
     endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
         val deltBostedEndringerISammePeriode = endretUtbetalingAndeler.filter {
             it.årsak == Årsak.DELT_BOSTED &&
-                it.fom == endretPåUtvidetUtbetalinger.fom &&
-                it.tom == endretPåUtvidetUtbetalinger.tom &&
+                it.fom!!.isSameOrBefore(endretPåUtvidetUtbetalinger.fom!!) &&
+                it.tom!!.isSameOrAfter(endretPåUtvidetUtbetalinger.tom!!) &&
                 it.id != endretPåUtvidetUtbetalinger.id
         }
 
