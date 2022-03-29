@@ -1,4 +1,9 @@
 query($ident: ID!) {person: hentPerson(ident: $ident) {
+    folkeregisteridentifikator {
+        identifikasjonsnummer
+        status
+        type
+    }
     foedsel {
         foedselsdato
     }
