@@ -56,6 +56,8 @@ fun fjernOverflødigeKompetanserRekursivt(
 }
 
 fun Iterable<Kompetanse>.tilTidslinjerForBarna(): Map<Aktør, Tidslinje<Kompetanse, Måned>> {
+    if (this.toList().isEmpty()) return emptyMap()
+
     val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
 
     return alleBarnAktørIder.associateWith { aktør ->
