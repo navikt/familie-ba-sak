@@ -7,20 +7,20 @@ fun Kompetanse.trekkFra(oppdatertKompetanse: Kompetanse): Collection<Kompetanse>
     val gammelKompetanse = this
     val kompetanseForRestBarn = gammelKompetanse
         .copy(
-            barnAktørIder = gammelKompetanse.barnAktørIder.minus(oppdatertKompetanse.barnAktørIder)
-        ).takeIf { it.barnAktørIder.size > 0 }
+            barnAktører = gammelKompetanse.barnAktører.minus(oppdatertKompetanse.barnAktører)
+        ).takeIf { it.barnAktører.size > 0 }
 
     val kompetanseForForegåendePerioder = gammelKompetanse
         .copy(
             fom = gammelKompetanse.fom,
             tom = oppdatertKompetanse.fom?.minusMonths(1),
-            barnAktørIder = oppdatertKompetanse.barnAktørIder
+            barnAktører = oppdatertKompetanse.barnAktører
         ).takeIf { it.fom != null && it.fom <= it.tom }
 
     val kompetanseForEtterfølgendePerioder = gammelKompetanse.copy(
         fom = oppdatertKompetanse.tom?.plusMonths(1),
         tom = gammelKompetanse.tom,
-        barnAktørIder = oppdatertKompetanse.barnAktørIder
+        barnAktører = oppdatertKompetanse.barnAktører
     ).takeIf { it.fom != null && it.fom <= it.tom }
 
     return listOf(kompetanseForRestBarn, kompetanseForForegåendePerioder, kompetanseForEtterfølgendePerioder)
