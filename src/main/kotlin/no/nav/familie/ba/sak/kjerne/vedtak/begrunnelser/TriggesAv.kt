@@ -80,7 +80,7 @@ data class TriggesAv(
 
         return this.deltbosted == vilkårResultatInneholderDeltBosted
     }
-    
+
     private fun erDeltBostedOppfyltReduksjon(
         vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
         vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
