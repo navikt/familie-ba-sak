@@ -2,14 +2,12 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
-import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Service
@@ -61,32 +59,6 @@ class VedtakService(
         oppdaterVedtakMedStønadsbrev(vedtak)
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
-    }
-
-    /**
-     * Når et vilkår vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
-     */
-    @Transactional
-    fun resettStegVedEndringPåVilkår(behandlingId: Long) {
-        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
-            behandlingId = behandlingId,
-            steg = StegType.VILKÅRSVURDERING
-        )
-        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = hentAktivForBehandlingThrows(behandlingId))
-        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
-    }
-
-    /**
-     * Når en andel vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
-     */
-    @Transactional
-    fun resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId: Long) {
-        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
-            behandlingId = behandlingId,
-            steg = StegType.BEHANDLINGSRESULTAT
-        )
-        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = hentAktivForBehandlingThrows(behandlingId))
-        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
     }
 
     companion object {

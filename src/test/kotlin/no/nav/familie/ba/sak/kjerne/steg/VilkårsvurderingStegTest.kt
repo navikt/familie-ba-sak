@@ -8,11 +8,13 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -31,13 +33,17 @@ class VilkårsvurderingStegTest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val behandlingService: BehandlingService = mockk()
     private val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk()
+    private val kompetanseService: KompetanseService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg = VilkårsvurderingSteg(
         vilkårService,
         beregningService,
         persongrunnlagService,
         behandlingService,
-        tilbakestillBehandlingService
+        tilbakestillBehandlingService,
+        kompetanseService,
+        featureToggleService
     )
 
     val behandling = lagBehandling(
@@ -60,6 +66,9 @@ class VilkårsvurderingStegTest {
         every { beregningService.oppdaterBehandlingMedBeregning(any(), any()) } returns lagInitiellTilkjentYtelse(
             behandling
         )
+
+        every { kompetanseService.tilpassKompetanserTilRegelverk(behandling.id) } returns emptyList()
+        every { featureToggleService.isEnabled(any()) } returns true
     }
 
     @Test

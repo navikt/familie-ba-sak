@@ -1,17 +1,23 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class KompetanseServiceTest {
 
+    val tidslinjeService: TidslinjeService = mockk()
+    val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk(relaxed = true)
+    val kompetanseService = KompetanseService(
+        tidslinjeService,
+        tilbakestillBehandlingService,
+        MockKompetanseRepository()
+    )
+
     @Test
-    fun `bare endring av periode skal ikke ha effekt`() {
-        val kompetanseService = KompetanseService(
-            mockk(),
-            MockKompetanseRepository()
-        )
+    fun `bare reduksjon av periode skal ikke føre til endring i kompetansen`() {
 
         val kompetanser = kompetanseService.hentKompetanser(1L)
         assertEquals(1, kompetanser.size)
@@ -29,10 +35,6 @@ internal class KompetanseServiceTest {
 
     @Test
     fun `oppdatering som splitter kompetanse fulgt av sletting skal returnere til utgangspunktet`() {
-        val kompetanseService = KompetanseService(
-            mockk(),
-            MockKompetanseRepository()
-        )
 
         val kompetanser = kompetanseService.hentKompetanser(1L)
         assertEquals(1, kompetanser.size)
