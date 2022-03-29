@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -39,7 +40,8 @@ class VilkårController(
     private val vedtakService: VedtakService,
     private val tilgangService: TilgangService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) {
 
     @PutMapping(path = ["/{behandlingId}/{vilkaarId}"])
@@ -60,7 +62,7 @@ class VilkårController(
             vilkårId = vilkaarId,
             restPersonResultat = restPersonResultat
         )
-        vedtakService.resettStegVedEndringPåVilkår(behandling.id)
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
@@ -104,7 +106,7 @@ class VilkårController(
             aktør = aktør
         )
 
-        vedtakService.resettStegVedEndringPåVilkår(behandling.id)
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandling.id)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
@@ -121,7 +123,7 @@ class VilkårController(
 
         vilkårService.deleteVilkår(behandlingId, restSlettVilkår)
 
-        vedtakService.resettStegVedEndringPåVilkår(behandlingId)
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
@@ -136,7 +138,7 @@ class VilkårController(
 
         vilkårService.postVilkår(behandlingId, restNyttVilkår)
 
-        vedtakService.resettStegVedEndringPåVilkår(behandlingId)
+        tilbakestillBehandlingService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
