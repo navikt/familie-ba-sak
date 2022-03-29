@@ -68,6 +68,7 @@ class VilkårsvurderingStegTest {
         )
 
         every { kompetanseService.tilpassKompetanserTilRegelverk(behandling.id) } returns emptyList()
+        every { featureToggleService.isEnabled(any()) } returns true
     }
 
     @Test
