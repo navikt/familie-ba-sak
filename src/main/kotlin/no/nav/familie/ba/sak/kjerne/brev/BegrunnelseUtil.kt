@@ -30,8 +30,9 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
-    val erReduksjonBegrunnelseMedRedusertPeriode = vedtaksperiodetype == Vedtaksperiodetype.REDUKSJON &&
-        vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON
+    val erUtbetalingMedReduksjonFraSistIverksatteBehandling =
+        vedtaksperiodetype == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING &&
+            vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON
 
     fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
         minimertePersonResultater = restBehandlingsgrunnlagForBrev.minimertePersonResultater,
@@ -73,7 +74,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 
         erFortsattInnvilgetBegrunnelse ||
             erEndretUtbetalingBegrunnelse -> identerMedUtbetalingPåPeriode
-        erReduksjonBegrunnelseMedRedusertPeriode -> identerMedReduksjonPåPeriode
+        erUtbetalingMedReduksjonFraSistIverksatteBehandling -> identerMedReduksjonPåPeriode
 
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(

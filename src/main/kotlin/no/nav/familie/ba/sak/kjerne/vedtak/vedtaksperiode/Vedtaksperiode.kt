@@ -35,7 +35,10 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: (erIngenOverlappVed
                 utbetalingstyperUtenEndretUtbetaling.plus(VedtakBegrunnelseType.ENDRET_UTBETALING)
         }
     ),
-    REDUKSJON({
+
+    // For å kunne begrunne reduksjon mellom behandlinger i de tilfellene der vi ikke kan bruke den forrige perioden
+    // til å begrunne reduksjonen.
+    UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING({
         listOf(
             VedtakBegrunnelseType.REDUKSJON,
             VedtakBegrunnelseType.INNVILGET,
