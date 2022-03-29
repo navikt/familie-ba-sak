@@ -117,6 +117,9 @@ class MigreringService(
                 secureLog.info("Migrering: $personIdent er lik barn registert på stønad=${løpendeInfotrygdsak.stønad?.id}")
                 kastOgTellMigreringsFeil(MigreringsfeilType.INSTITUSJON)
             }
+            if (løpendeInfotrygdsak.valg == "UT" && løpendeInfotrygdsak.undervalg == "MD" && barnasIdenter.size > 1) {
+                kastOgTellMigreringsFeil(MigreringsfeilType.MER_ENN_ETT_BARN_PÅ_SAK_AV_TYPE_UT_MD)
+            }
 
             val personAktør = personidentService.hentOgLagreAktør(personIdent, true)
             val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
@@ -279,7 +282,7 @@ class MigreringService(
             (sak.valg == "OR" && sak.undervalg in listOf("OS", "MD")) -> {
                 BehandlingUnderkategori.ORDINÆR
             }
-            (sak.valg == "UT" && sak.undervalg == "EF") -> {
+            (sak.valg == "UT" && sak.undervalg in listOf("EF", "MD")) -> {
                 BehandlingUnderkategori.UTVIDET
             }
             else -> {
@@ -451,6 +454,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     MANGLER_ANDEL_TILKJENT_YTELSE("Fant ingen andeler tilkjent ytelse på behandlingen"),
     MANGLER_FØRSTE_UTBETALINGSPERIODE("Tilkjent ytelse er null"),
     MANGLER_VILKÅRSVURDERING("Fant ikke vilkårsvurdering."),
+    MER_ENN_ETT_BARN_PÅ_SAK_AV_TYPE_UT_MD("Migrering av sakstype UT-MD er begrenset til saker med ett barn"),
     MIGRERING_ALLEREDE_PÅBEGYNT("Migrering allerede påbegynt"),
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
     UKJENT("Ukjent migreringsfeil"),
