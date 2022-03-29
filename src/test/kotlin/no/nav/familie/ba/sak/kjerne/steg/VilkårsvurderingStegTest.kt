@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -33,6 +34,7 @@ class VilkårsvurderingStegTest {
     private val behandlingService: BehandlingService = mockk()
     private val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk()
     private val kompetanseService: KompetanseService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg = VilkårsvurderingSteg(
         vilkårService,
@@ -40,7 +42,8 @@ class VilkårsvurderingStegTest {
         persongrunnlagService,
         behandlingService,
         tilbakestillBehandlingService,
-        kompetanseService
+        kompetanseService,
+        featureToggleService
     )
 
     val behandling = lagBehandling(
