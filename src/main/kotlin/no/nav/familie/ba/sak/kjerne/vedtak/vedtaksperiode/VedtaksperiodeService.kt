@@ -49,6 +49,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -229,10 +230,11 @@ class VedtaksperiodeService(
         }
     }
 
-    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
+    @Transactional
+    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak, skalGenererePerioderForFortsattInnvilget: Boolean = false) {
 
         slettVedtaksperioderFor(vedtak)
-        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && !skalGenererePerioderForFortsattInnvilget) {
 
             val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
@@ -255,11 +257,11 @@ class VedtaksperiodeService(
                 )
             )
         } else {
-            lagre(genererVedtaksperioderMedBegrunnelser(vedtak))
+            lagre(genererVedtaksperioderMedBegrunnelser(vedtak, gjelderFortsattInnvilget = skalGenererePerioderForFortsattInnvilget))
         }
     }
 
-    fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
+    fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak, gjelderFortsattInnvilget: Boolean = false): List<VedtaksperiodeMedBegrunnelser> {
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
 
@@ -300,7 +302,7 @@ class VedtaksperiodeService(
             finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
 
         val endringstidspunkt =
-            if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT))
+            if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT) && !gjelderFortsattInnvilget)
                 endringstidspunktSerivce.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
             else TIDENES_MORGEN
 
