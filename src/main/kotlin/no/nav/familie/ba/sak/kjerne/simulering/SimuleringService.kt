@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØknomiSimuleringMottakerRepository
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
@@ -26,6 +27,7 @@ import javax.transaction.Transactional
 class SimuleringService(
     private val økonomiKlient: ØkonomiKlient,
     private val økonomiService: ØkonomiService,
+    private val beregningService: BeregningService,
     private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
     private val vedtakRepository: VedtakRepository,
@@ -34,7 +36,9 @@ class SimuleringService(
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
 
-        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT) return null
+        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
+            beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = vedtak.behandling)
+        ) return null
 
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,

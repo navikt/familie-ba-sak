@@ -24,7 +24,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     identerMedUtbetalingPåPeriode: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    identerMedReduksjonPåPeriode: List<String> = emptyList()
+    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
+    identerMedReduksjonPåPeriode: List<String> = emptyList(),
 ): Set<String> {
 
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
@@ -45,7 +46,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             identerMedUtbetalingPåPeriode
         ),
         triggesAv = triggesAv,
-        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
     ).map { person -> person.personIdent }
 
     return when {

@@ -30,7 +30,7 @@ class Tidslinjer(
             aktør to personResultat.vilkårResultater.groupBy { it.vilkårType }
                 .map {
                     if (personResultat.erSøkersResultater()) {
-                        VilkårResultatTidslinje(
+                        VilkårsresultatDagTidslinje(
                             vilkårsresultater = it.value,
                             praktiskTidligsteDato = søkersFødselsdato,
                             praktiskSenesteDato = yngsteBarnFødselsdato.til18ÅrsVilkårsdato()
@@ -38,7 +38,7 @@ class Tidslinjer(
                     } else {
                         val barnFødselsdato =
                             barnOgFødselsdatoer[aktør] ?: throw Feil("Finner ikke fødselsdato på barn")
-                        VilkårResultatTidslinje(
+                        VilkårsresultatDagTidslinje(
                             vilkårsresultater = it.value,
                             praktiskTidligsteDato = barnFødselsdato,
                             praktiskSenesteDato = barnFødselsdato.til18ÅrsVilkårsdato()
@@ -69,7 +69,7 @@ class Tidslinjer(
         val vilkårsresultatTidslinjer: Collection<Tidslinje<VilkårRegelverkResultat, Dag>>
         val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned>
         val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned>
-        val regelverkTidslinje: Tidslinje<Regelverk?, Måned>
+        val regelverkTidslinje: Tidslinje<Regelverk, Måned>
     }
 
     class SøkersTidslinjerTimeline(
@@ -107,7 +107,7 @@ class Tidslinjer(
                 BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()
             )
 
-        val regelverkMidlertidigTidslinje: Tidslinje<Regelverk?, Måned> =
+        val regelverkMidlertidigTidslinje: Tidslinje<Regelverk, Måned> =
             vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator())
 
         override val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje.kombinerMed(

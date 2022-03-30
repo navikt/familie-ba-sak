@@ -64,10 +64,12 @@ class PdlRestClient(
             ident = aktør.aktivFødselsnummer(),
             pdlResponse = pdlResponse
         ) { pdlPerson ->
+            pdlPerson.person!!.validerOmPersonKanBehandlesIFagsystem()
+
             val forelderBarnRelasjon: Set<ForelderBarnRelasjon> =
                 when (personInfoQuery) {
                     PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON -> {
-                        pdlPerson.person!!.forelderBarnRelasjon.map { relasjon ->
+                        pdlPerson.person.forelderBarnRelasjon.map { relasjon ->
                             val relatertAktør =
                                 personidentService.hentAktør(relasjon.relatertPersonsIdent)
                             ForelderBarnRelasjon(
@@ -79,9 +81,9 @@ class PdlRestClient(
                     else -> emptySet()
                 }
 
-            pdlPerson.person!!.let {
+            pdlPerson.person.let {
                 PersonInfo(
-                    fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato!!),
+                    fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato),
                     navn = it.navn.firstOrNull()?.fulltNavn(),
                     kjønn = it.kjoenn.firstOrNull()?.kjoenn,
                     forelderBarnRelasjon = forelderBarnRelasjon,

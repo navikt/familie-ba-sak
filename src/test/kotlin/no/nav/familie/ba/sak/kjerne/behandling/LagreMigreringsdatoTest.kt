@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -34,6 +35,7 @@ import java.time.YearMonth
 
 class LagreMigreringsdatoTest {
     val behandlingRepository = mockk<BehandlingRepository>()
+    val beregningService = mockk<BeregningService>()
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     val behandlingMetrikker = mockk<BehandlingMetrikker>()
@@ -54,7 +56,6 @@ class LagreMigreringsdatoTest {
 
     private val behandlingService = BehandlingService(
         behandlingRepository,
-        personopplysningGrunnlagRepository,
         andelTilkjentYtelseRepository,
         behandlingMetrikker,
         fagsakRepository,

@@ -1,28 +1,22 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import java.time.YearMonth
 
 class KompetanseBuilder(
-    val behandlingId: Long = lagBehandling().id,
-    val startMåned: YearMonth = YearMonth.of(2020, 1)
+    val startMåned: MånedTidspunkt = jan(2020)
 ) {
-    constructor(behandling: Behandling, startMåned: YearMonth) : this(behandling.id, startMåned)
-
     val kompetanser: MutableList<Kompetanse> = mutableListOf()
 
     fun medKompetanse(k: String, vararg barn: Person): KompetanseBuilder {
         val charTidslinje = k.tilCharTidslinje(startMåned)
-        val kompetanseTidslinje = KompetanseTidslinje(charTidslinje, behandlingId, barn.toList())
+        val kompetanseTidslinje = KompetanseTidslinje(charTidslinje, barn.toList())
 
         kompetanseTidslinje.perioder()
             .filter { it.innhold != null }
@@ -38,22 +32,22 @@ class KompetanseBuilder(
     }
 
     fun byggKompetanser(): Collection<Kompetanse> = kompetanser
+        .mapIndexed { index, kompetanse -> kompetanse.also { it.id = (index + 1).toLong() } }
 }
 
-class KompetanseTidslinje(
+internal class KompetanseTidslinje(
     val charTidslinje: Tidslinje<Char, Måned>,
-    val behandlingId: Long,
     val barn: List<Person>
 ) : TidslinjeSomStykkerOppTiden<Kompetanse, Måned>(charTidslinje) {
     override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): Kompetanse? {
         val tegn = charTidslinje.hentUtsnitt(tidspunkt)
-        val barnAktørIder = barn.map { it.aktør.aktørId }.toSet()
+        val barnAktørIder = barn.map { it.aktør }.toSet()
         val kompetanseMal =
-            Kompetanse(behandlingId = behandlingId, fom = null, tom = null, barnAktørIder = barnAktørIder)
+            Kompetanse(fom = null, tom = null, barnAktører = barnAktørIder)
         return when (tegn) {
             '-' -> kompetanseMal
-            'S' -> kompetanseMal.copy(status = KompetanseStatus.OK, sekundærland = "NORGE")
-            'P' -> kompetanseMal.copy(status = KompetanseStatus.OK, primærland = "NORGE")
+            'S' -> kompetanseMal.copy(sekundærland = "NORGE")
+            'P' -> kompetanseMal.copy(primærland = "NORGE")
             else -> null
         }
     }
