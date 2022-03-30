@@ -7,7 +7,8 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_MIGRERE_DELT_BOSTED
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_UTVIDET_DELT_BOSTED
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
@@ -99,12 +100,8 @@ class MigreringService(
 
             val løpendeInfotrygdsak = hentLøpendeSakFraInfotrygd(personIdent)
 
-            if (løpendeInfotrygdsak.undervalg == "MD" && !featureToggleService.isEnabled(
-                    KAN_MIGRERE_DELT_BOSTED,
-                    false
-                )
-            ) {
-                secureLog.warn("Migrering: Kan ikke migrere saker med delt bosted")
+            if (løpendeInfotrygdsak.undervalg == "MD" && erToggleForDeltBostedAvskrudd(løpendeInfotrygdsak)) {
+                secureLog.warn("Migrering: Kan ikke migrere ${løpendeInfotrygdsak.valg}-saker med delt bosted")
                 kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
             }
             val underkategori = kastFeilEllerHentUnderkategori(løpendeInfotrygdsak)
@@ -198,6 +195,14 @@ class MigreringService(
         } catch (e: Exception) {
             if (e is KanIkkeMigrereException) throw e
             kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT, e.message, e)
+        }
+    }
+
+    private fun erToggleForDeltBostedAvskrudd(infotrygdsak: Sak): Boolean {
+        return when (infotrygdsak.valg) {
+            "OR" -> !featureToggleService.isEnabled(SKAL_MIGRERE_ORDINÆR_DELT_BOSTED, false)
+            "UT" -> !featureToggleService.isEnabled(SKAL_MIGRERE_UTVIDET_DELT_BOSTED, false)
+            else -> true
         }
     }
 
