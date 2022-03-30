@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
-import no.nav.familie.ba.sak.ekstern.restDomene.RestLukkOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
@@ -178,27 +178,33 @@ class JournalføringService(
         return sak.fagsakId ?: ""
     }
 
-    fun knyttJournalpostTilFagsak(request: RestLukkOppgaveKnyttJournalpost): String {
+    fun knyttJournalpostTilFagsakOgFerdigstillOppgave(
+        request: RestFerdigstillOppgaveKnyttJournalpost,
+        oppgaveId: Long
+    ): String {
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
 
-        val journalpost = hentJournalpost(request.journalpostId!!)
+        val journalpost = hentJournalpost(request.journalpostId)
         journalpost.sak?.fagsakId
 
         if (request.opprettOgKnyttTilNyBehandling) {
             val nyBehandling =
                 opprettBehandlingOgEvtFagsakForJournalføring(
-                    personIdent = request.bruker!!.id,
-                    navIdent = request.navIdent!!,
-                    type = request.nyBehandlingstype!!,
-                    årsak = request.nyBehandlingsårsak!!,
-                    kategori = request.kategori!!,
-                    underkategori = request.underkategori!!,
-                    søknadMottattDato = request.datoMottatt?.toLocalDate()
+                    personIdent = request.bruker.id,
+                    navIdent = request.navIdent,
+                    type = request.nyBehandlingstype,
+                    årsak = request.nyBehandlingsårsak,
+                    kategori = request.kategori,
+                    underkategori = request.underkategori,
+                    søknadMottattDato = request.datoMottatt.toLocalDate()
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
 
         val (sak) = lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder, journalpost.journalpostId)
+
+        integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId)
+
         return sak.fagsakId ?: ""
     }
 
