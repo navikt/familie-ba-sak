@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemKategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendekategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
@@ -34,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -73,6 +75,7 @@ class BehandlingService(
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
+    private val tidslinjeService: TidslinjeService,
 ) {
 
     @Transactional
@@ -93,7 +96,8 @@ class BehandlingService(
             val kategori = bestemKategori(
                 behandlingÅrsak = nyBehandling.behandlingÅrsak,
                 nyBehandlingKategori = nyBehandling.kategori,
-                løpendeBehandlingKategori = hentLøpendeKategori(fagsakId = fagsak.id)
+                løpendeBehandlingKategori = hentLøpendeKategori(fagsak.id),
+                utledetBehandlingKategori = null,
             )
 
             val underkategori = bestemUnderkategori(
@@ -162,11 +166,11 @@ class BehandlingService(
         nyUnderkategori: BehandlingUnderkategori,
         manueltOppdatert: Boolean = false
     ): Behandling {
-
         val utledetKategori = bestemKategori(
             behandlingÅrsak = behandling.opprettetÅrsak,
             nyBehandlingKategori = nyKategori,
-            løpendeBehandlingKategori = hentLøpendeKategori(fagsakId = behandling.fagsak.id)
+            løpendeBehandlingKategori = hentLøpendeKategori(fagsakId = behandling.fagsak.id),
+            utledetBehandlingKategori = hentUtledetKategori(fagsakId = behandling.fagsak.id),
         )
 
         val utledetUnderkategori: BehandlingUnderkategori =
@@ -419,22 +423,32 @@ class BehandlingService(
         return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.id)
     }
 
-    fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori? {
-        val forrigeAndeler = hentForrigeAndeler(fagsakId)
+    fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori {
+        return if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
+            val forrigeIverksattBehandling =
+                hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: return BehandlingKategori.NASJONAL
 
-        return if (forrigeAndeler != null) utledLøpendeKategori(forrigeAndeler, fagsakId) else null
+            val barnasTidslinjer =
+                tidslinjeService.hentTidslinjerOrNull(behandlingId = forrigeIverksattBehandling.id)?.barnasTidslinjer()
+            utledLøpendekategori(barnasTidslinjer)
+        } else {
+            BehandlingKategori.NASJONAL
+        }
     }
 
-    fun utledLøpendeKategori(andeler: List<AndelTilkjentYtelse>, fagsakId: Long): BehandlingKategori {
-        val aktivBehandling = hentAktivForFagsak(fagsakId) ?: error("Fant ikke aktiv behandling")
-
-        val personResultater =
-            vilkårsvurderingService.hentAktivForBehandling(aktivBehandling.id)?.personResultater ?: setOf()
-
+    fun hentUtledetKategori(fagsakId: Long): BehandlingKategori {
         return if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            return if (andeler.any { it.erEøs(personResultater) && it.erLøpende() }
-            ) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
-        } else BehandlingKategori.NASJONAL
+            val forrigeIverksattBehandling =
+                hentAktivForFagsak(fagsakId = fagsakId) ?: return BehandlingKategori.NASJONAL
+
+            val barnasTidslinjer =
+                tidslinjeService.hentTidslinjerOrNull(behandlingId = forrigeIverksattBehandling.id)?.barnasTidslinjer()
+                    ?: return BehandlingKategori.NASJONAL
+
+            utledLøpendekategori(barnasTidslinjer)
+        } else {
+            BehandlingKategori.NASJONAL
+        }
     }
 
     fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
@@ -442,7 +456,11 @@ class BehandlingService(
         return if (forrigeAndeler != null) utledLøpendeUnderkategori(forrigeAndeler) else null
     }
 
-    fun harBehandlingsårsakAlleredeKjørt(fagsakId: Long, behandlingÅrsak: BehandlingÅrsak, måned: YearMonth): Boolean {
+    fun harBehandlingsårsakAlleredeKjørt(
+        fagsakId: Long,
+        behandlingÅrsak: BehandlingÅrsak,
+        måned: YearMonth
+    ): Boolean {
         return Behandlingutils.harBehandlingsårsakAlleredeKjørt(
             behandlinger = hentBehandlinger(fagsakId = fagsakId),
             behandlingÅrsak = behandlingÅrsak,

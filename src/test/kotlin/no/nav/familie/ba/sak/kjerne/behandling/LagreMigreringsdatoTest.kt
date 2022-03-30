@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -53,6 +54,7 @@ class LagreMigreringsdatoTest {
     val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
     val behandlingSøknadsinfoRepository = mockk<BehandlingSøknadsinfoRepository>()
     val vilkårsvurderingService = mockk<VilkårsvurderingService>()
+    val tidslinjeService = mockk<TidslinjeService>()
 
     private val behandlingService = BehandlingService(
         behandlingRepository,
@@ -72,6 +74,7 @@ class LagreMigreringsdatoTest {
         behandlingMigreringsinfoRepository,
         behandlingSøknadsinfoRepository,
         vilkårsvurderingService,
+        tidslinjeService,
     )
 
     @Test

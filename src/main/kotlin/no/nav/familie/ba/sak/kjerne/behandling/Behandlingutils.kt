@@ -9,7 +9,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.Tidslinjer
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.YearMonth
 
@@ -51,12 +56,18 @@ object Behandlingutils {
     fun bestemKategori(
         behandlingÅrsak: BehandlingÅrsak,
         nyBehandlingKategori: BehandlingKategori?,
-        løpendeBehandlingKategori: BehandlingKategori?
+        løpendeBehandlingKategori: BehandlingKategori?,
+        utledetBehandlingKategori: BehandlingKategori?,
     ): BehandlingKategori {
-        if (behandlingÅrsak !== BehandlingÅrsak.SØKNAD && løpendeBehandlingKategori != null) {
-            return løpendeBehandlingKategori
+        if (nyBehandlingKategori != null) return nyBehandlingKategori
+
+        return if (behandlingÅrsak.medførerNyVurdering() && løpendeBehandlingKategori != null) {
+            løpendeBehandlingKategori
+        } else if (!behandlingÅrsak.medførerNyVurdering() && utledetBehandlingKategori != null) {
+            utledetBehandlingKategori
+        } else {
+            BehandlingKategori.NASJONAL
         }
-        return nyBehandlingKategori ?: BehandlingKategori.NASJONAL
     }
 
     fun bestemUnderkategori(
@@ -79,6 +90,24 @@ object Behandlingutils {
 
     fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUnderkategori {
         return if (andeler.any { it.erUtvidet() && it.erLøpende() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
+    }
+
+    fun utledLøpendekategori(barnasTidslinjer: Map<Aktør, Tidslinjer.BarnetsTidslinjerTimeline>?): BehandlingKategori {
+        if (barnasTidslinjer == null) return BehandlingKategori.NASJONAL
+
+        val nå = MånedTidspunkt.nå()
+
+        val etBarnHarMinstEnEØSPeriode = barnasTidslinjer
+            .values
+            .map { it.regelverkTidslinje }
+            .map { it.hentUtsnitt(nå) }
+            .any { it == Regelverk.EØS_FORORDNINGEN }
+
+        return if (etBarnHarMinstEnEØSPeriode) {
+            BehandlingKategori.EØS
+        } else {
+            BehandlingKategori.NASJONAL
+        }
     }
 
     fun harBehandlingsårsakAlleredeKjørt(

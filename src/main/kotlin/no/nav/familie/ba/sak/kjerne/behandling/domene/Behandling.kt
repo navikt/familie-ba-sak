@@ -357,6 +357,10 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     }
 
     fun erManuellMigreringsårsak(): Boolean = this == HELMANUELL_MIGRERING || this == ENDRE_MIGRERINGSDATO
+
+    fun medførerNyVurdering(): Boolean = this == SØKNAD || this == FØDSELSHENDELSE || this == FØDSELSHENDELSE ||
+        this == ÅRLIG_KONTROLL || this == NYE_OPPLYSNINGER || this == KLAGE || this == ENDRE_MIGRERINGSDATO ||
+        this == MIGRERING || this == HELMANUELL_MIGRERING
 }
 
 enum class BehandlingType(val visningsnavn: String) {

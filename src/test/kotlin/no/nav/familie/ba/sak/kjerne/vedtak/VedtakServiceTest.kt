@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -111,6 +112,9 @@ class VedtakServiceTest(
     @Autowired
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
 
+    @Autowired
+    private val tidslinjeService: TidslinjeService,
+
 ) : AbstractSpringIntegrationTest() {
 
     lateinit var behandlingService: BehandlingService
@@ -143,6 +147,7 @@ class VedtakServiceTest(
             behandlingMigreringsinfoRepository,
             behandlingSøknadsinfoRepository,
             vilkårsvurderingService,
+            tidslinjeService,
         )
 
         val personAktørId = randomAktørId()
