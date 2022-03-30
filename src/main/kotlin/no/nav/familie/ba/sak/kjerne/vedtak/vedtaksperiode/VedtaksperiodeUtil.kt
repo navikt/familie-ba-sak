@@ -198,7 +198,7 @@ fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
                         vedtak = vedtak,
                         fom = utledFom(gammeltSegment, overlappendePeriode),
                         tom = utledTom(gammeltSegment, overlappendePeriode),
-                        type = Vedtaksperiodetype.REDUKSJON,
+                        type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
                     )
                 }
             }
@@ -304,7 +304,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     return when (minimertVedtaksperiode.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET,
         Vedtaksperiodetype.AVSLAG -> tillateBegrunnelserForVedtakstype
-        Vedtaksperiodetype.REDUKSJON -> velgRedusertBegrunnelser(
+        Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> velgRedusertBegrunnelser(
             tillateBegrunnelserForVedtakstype,
             sanityBegrunnelser,
             minimertVedtaksperiode,

@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRegelverk
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.somRegelverk
@@ -24,7 +23,7 @@ class TilpassKompetanserTilRegelverkTest {
             .byggKompetanser()
 
         val eøsPerioder = mapOf(
-            barn1.aktørId to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk()
+            barn1.aktør to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk()
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
@@ -42,8 +41,8 @@ class TilpassKompetanserTilRegelverkTest {
             .byggKompetanser()
 
         val eøsPerioder = mapOf(
-            barn1.aktørId to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk(),
-            barn2.aktørId to "EEEENNEEE".tilCharTidslinje(jan2020).somRegelverk()
+            barn1.aktør to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk(),
+            barn2.aktør to "EEEENNEEE".tilCharTidslinje(jan2020).somRegelverk()
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
@@ -71,9 +70,9 @@ class TilpassKompetanserTilRegelverkTest {
             .byggKompetanser()
 
         val eøsPerioder = mapOf(
-            barn1.aktørId to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk(),
-            barn2.aktørId to "EEE--NNNN".tilCharTidslinje(jan2020).somRegelverk(),
-            barn3.aktørId to "EEEEEEEEE".tilCharTidslinje(jan2020).somRegelverk()
+            barn1.aktør to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk(),
+            barn2.aktør to "EEE--NNNN".tilCharTidslinje(jan2020).somRegelverk(),
+            barn3.aktør to "EEEEEEEEE".tilCharTidslinje(jan2020).somRegelverk()
         )
 
         // SSS  SS--, barn1
@@ -91,6 +90,3 @@ class TilpassKompetanserTilRegelverkTest {
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 }
-
-private val Person.aktørId
-    get() = this.aktør.aktørId

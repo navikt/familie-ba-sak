@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
-import no.nav.familie.ba.sak.kjerne.beregning.AktørId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.blankUt
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.trekkFra
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
@@ -17,21 +18,21 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class KompetanseService(
     val tidslinjeService: TidslinjeService,
+    val kompetanseRepository: KompetanseRepository,
     val tilbakestillBehandlingService: TilbakestillBehandlingService,
-    val kompetanseRepository: MockKompetanseRepository = MockKompetanseRepository()
 ) {
 
     fun hentKompetanser(behandlingId: Long): Collection<Kompetanse> {
-        return kompetanseRepository.hentKompetanser(behandlingId)
+        return kompetanseRepository.findByBehandlingId(behandlingId)
     }
 
     fun hentKompetanse(kompetanseId: Long): Kompetanse {
-        return kompetanseRepository.hentKompetanse(kompetanseId)
+        return kompetanseRepository.getById(kompetanseId)
     }
 
     @Transactional
     fun oppdaterKompetanse(kompetanseId: Long, oppdatertKompetanse: Kompetanse): Collection<Kompetanse> {
-        val gjeldendeKompetanse = kompetanseRepository.hentKompetanse(kompetanseId)
+        val gjeldendeKompetanse = kompetanseRepository.getById(kompetanseId)
 
         val kompetanserFratrukketOppdatering = gjeldendeKompetanse.trekkFra(oppdatertKompetanse)
         val oppdaterteKompetanser = (kompetanserFratrukketOppdatering + oppdatertKompetanse)
@@ -46,7 +47,7 @@ class KompetanseService(
 
     @Transactional
     fun slettKompetanse(kompetanseId: Long): Collection<Kompetanse> {
-        val kompetanseTilSletting = kompetanseRepository.hentKompetanse(kompetanseId)
+        val kompetanseTilSletting = kompetanseRepository.getById(kompetanseId)
         val behandlingId = kompetanseTilSletting.behandlingId
         val gjeldendeKompetanser = hentKompetanser(behandlingId)
         val blankKompetanse = kompetanseTilSletting.blankUt()
@@ -75,8 +76,8 @@ class KompetanseService(
     }
 
     private fun lagreKompetanseDifferanse(gjeldende: Collection<Kompetanse>, oppdaterte: Collection<Kompetanse>) {
-        kompetanseRepository.delete(gjeldende - oppdaterte)
-        kompetanseRepository.save(oppdaterte - gjeldende)
+        kompetanseRepository.deleteAll(gjeldende - oppdaterte)
+        kompetanseRepository.saveAll(oppdaterte - gjeldende)
     }
 
     private fun Collection<Kompetanse>.medBehandlingId(behandlingId: Long): Collection<Kompetanse> {
@@ -84,8 +85,8 @@ class KompetanseService(
         return this
     }
 
-    private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<AktørId, Tidslinje<Regelverk, Måned>> =
+    private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<Regelverk, Måned>> =
         this.hentTidslinjer(behandlingId).barnasTidslinjer()
             .mapValues { (_, tidslinjer) -> tidslinjer.regelverkTidslinje }
-            .mapKeys { (aktør, _) -> aktør.aktørId }
+            .mapKeys { (aktør, _) -> aktør }
 }
