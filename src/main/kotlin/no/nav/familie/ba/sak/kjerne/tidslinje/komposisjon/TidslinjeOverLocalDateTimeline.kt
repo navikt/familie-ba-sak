@@ -140,16 +140,15 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerMed(
 
 fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerUtvendigMed(
     tidslinjeMap: Map<K, Tidslinje<H, T>>,
-    mapKombinator: (K) -> (V?, H?) -> R?,
-    nå: Tidspunkt<T>
+    mapKombinator: (K) -> (V?, H?) -> R?
 ): Map<K, Tidslinje<R, T>> {
 
     val alleKeys = keys + tidslinjeMap.keys
 
     return alleKeys
         .map {
-            val høyre: Tidslinje<H, T> = tidslinjeMap[it] ?: TomTidslinje(nå)
-            val venstre: Tidslinje<V, T> = this[it] ?: TomTidslinje(nå)
+            val høyre: Tidslinje<H, T> = tidslinjeMap[it] ?: TomTidslinje()
+            val venstre: Tidslinje<V, T> = this[it] ?: TomTidslinje()
             val kombinator: (V?, H?) -> R? = mapKombinator(it)
             val resultat: Tidslinje<R, T> = venstre.kombinerMed(høyre, kombinator)
             it to resultat
