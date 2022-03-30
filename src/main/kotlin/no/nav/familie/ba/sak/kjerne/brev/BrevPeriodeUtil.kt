@@ -37,8 +37,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.AVS
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.ENDRET_UTBETALING
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.FORTSATT_INNVILGET
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.OPPHØR
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.REDUKSJON
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.UTBETALING
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
@@ -133,7 +133,7 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
             begrunnelserOgFritekster = begrunnelserOgFritekster,
             personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
         )
-        REDUKSJON -> brevPeriodeGrunnlagMedPersoner.hentReduksjonBrevPeriode(
+        UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> brevPeriodeGrunnlagMedPersoner.hentReduksjonBrevPeriode(
             tomDato = tomDato,
             begrunnelserOgFritekster = begrunnelserOgFritekster,
             personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
@@ -174,7 +174,9 @@ private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
 
     val barnIPeriode: List<MinimertRestPerson> = when (this.type) {
         UTBETALING -> this.finnBarnIInnvilgelsePeriode(restBehandlingsgrunnlagForBrev.personerPåBehandling)
-        REDUKSJON -> this.finnBarnIReduksjonPeriode(restBehandlingsgrunnlagForBrev.personerPåBehandling)
+        UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> this.finnBarnIUtbetalingMedReduksjonFraForrigeBehandlignPeriode(
+            restBehandlingsgrunnlagForBrev.personerPåBehandling
+        )
         OPPHØR -> emptyList()
         AVSLAG -> emptyList()
         FORTSATT_INNVILGET -> barnMedUtbetaling + barnMedNullutbetaling
@@ -182,17 +184,19 @@ private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
     }
 
     val utbetalingsbeløp = this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()
+    val brevPeriodeType = hentPeriodetype(this.fom, this, barnMedUtbetaling, utbetalingsbeløp)
     return GenerellBrevPeriode(
 
         fom = this.hentFomTekst(brevMålform),
         tom = when {
             this.type == FORTSATT_INNVILGET -> ""
             tomDato.isNullOrBlank() -> ""
-            else -> " til $tomDato"
+            brevPeriodeType == BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING -> " til $tomDato"
+            else -> "til $tomDato "
         },
         belop = Utils.formaterBeløp(utbetalingsbeløp),
         begrunnelser = begrunnelserOgFritekster,
-        brevPeriodeType = hentPeriodetype(this.fom, this, barnMedUtbetaling, utbetalingsbeløp),
+        brevPeriodeType = brevPeriodeType,
         antallBarn = barnIPeriode.size.toString(),
         barnasFodselsdager = barnIPeriode.tilBarnasFødselsdatoer(),
         antallBarnMedUtbetaling = barnMedUtbetaling.size.toString(),
@@ -214,7 +218,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentFomTekst(
     ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling perioder når erIngenOverlappVedtaksperiodeTogglePå=true")
     OPPHØR -> fom!!.tilDagMånedÅr()
     AVSLAG -> if (fom != null) fom.tilDagMånedÅr() else ""
-    REDUKSJON -> fom!!.tilDagMånedÅr()
+    UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> fom!!.tilDagMånedÅr()
 }
 
 private fun hentPeriodetype(
@@ -232,7 +236,7 @@ private fun hentPeriodetype(
     ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling med erIngenOverlappVedtaksperiodeTogglePå=true")
     AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG else BrevPeriodeType.AVSLAG_UTEN_PERIODE
     OPPHØR -> BrevPeriodeType.OPPHOR
-    REDUKSJON -> BrevPeriodeType.INNVILGELSE
+    UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.INNVILGELSE
 }
 
 private fun BrevPeriodeGrunnlagMedPersoner.hentAvslagBrevPeriode(
@@ -301,7 +305,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentReduksjonBrevPeriode(
     begrunnelserOgFritekster: List<Begrunnelse>,
     personerPåBehandling: List<MinimertRestPerson>,
 ): InnvilgelseBrevPeriode {
-    val barnIPeriode = this.finnBarnIReduksjonPeriode(personerPåBehandling)
+    val barnIPeriode = this.finnBarnIUtbetalingMedReduksjonFraForrigeBehandlignPeriode(personerPåBehandling)
 
     return InnvilgelseBrevPeriode(
         fom = this.fom!!.tilDagMånedÅr(),
@@ -332,7 +336,7 @@ fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
     return barnIPeriode
 }
 
-fun BrevPeriodeGrunnlagMedPersoner.finnBarnIReduksjonPeriode(
+fun BrevPeriodeGrunnlagMedPersoner.finnBarnIUtbetalingMedReduksjonFraForrigeBehandlignPeriode(
     personerPåBehandling: List<MinimertRestPerson>,
 ): List<MinimertRestPerson> {
     val identerIBegrunnelsene = this.begrunnelser
