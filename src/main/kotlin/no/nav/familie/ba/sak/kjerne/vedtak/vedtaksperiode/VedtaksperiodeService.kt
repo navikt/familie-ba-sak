@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
@@ -64,6 +65,7 @@ class VedtaksperiodeService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val endringstidspunktSerivce: EndringstidspunktSerivce,
+    private val vedtakService: VedtakService,
     private val featureToggleService: FeatureToggleService,
 ) {
 
@@ -342,7 +344,7 @@ class VedtaksperiodeService(
         return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
-    fun hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak: Vedtak): List<UtvidetVedtaksperiodeMedBegrunnelser> {
+    fun hentUtvidetVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<UtvidetVedtaksperiodeMedBegrunnelser> {
         val vedtaksperioderMedBegrunnelser = hentPersisterteVedtaksperioder(vedtak)
 
         val behandling = vedtak.behandling
@@ -610,6 +612,21 @@ class VedtaksperiodeService(
                 }
             } else it
         }.toList()
+    }
+
+    fun settBegrunnelsePåVedtaksperioderMedKunÉnGyldigBegrunnelse(behandlingId: Long) {
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingId)
+
+        hentUtvidetVedtaksperioderMedBegrunnelser(vedtak).forEach {
+            if (it.gyldigeBegrunnelser.size == 1) {
+                oppdaterVedtaksperiodeMedStandardbegrunnelser(
+                    vedtaksperiodeId = it.id,
+                    standardbegrunnelserFraFrontend = listOf(
+                        it.gyldigeBegrunnelser.single()
+                    )
+                )
+            }
+        }
     }
 
     fun hent(vedtaksperiodeId: Long): VedtaksperiodeMedBegrunnelser =

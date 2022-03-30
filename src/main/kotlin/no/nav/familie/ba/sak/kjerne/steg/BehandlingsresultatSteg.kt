@@ -122,6 +122,10 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
+        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.REVURDERING) {
+            vedtaksperiodeService.settBegrunnelsePåVedtaksperioderMedKunÉnGyldigBegrunnelse(behandling.id)
+        }
+
         return hentNesteStegForNormalFlyt(behandlingMedOppdatertBehandlingsresultat)
     }
 

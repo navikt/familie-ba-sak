@@ -93,7 +93,7 @@ class UtvidetBehandlingService(
                 .map { it.tilRestEndretUtbetalingAndel() },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             vedtak = vedtak?.tilRestVedtak(
-                vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).sortedBy { it.fom },
+                vedtaksperiodeService.hentUtvidetVedtaksperioderMedBegrunnelser(vedtak = vedtak).sortedBy { it.fom },
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
