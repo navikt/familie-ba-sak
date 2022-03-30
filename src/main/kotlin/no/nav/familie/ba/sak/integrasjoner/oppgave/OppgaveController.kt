@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.integrasjoner.oppgave
 
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/api/oppgave")
@@ -36,7 +39,8 @@ class OppgaveController(
     private val personidentService: PersonidentService,
     private val integrasjonClient: IntegrasjonClient,
     private val personopplysningerService: PersonopplysningerService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
+    private val journalføringService: JournalføringService,
 ) {
 
     @PostMapping(
@@ -119,5 +123,34 @@ class OppgaveController(
                 )
             )
         }
+    }
+
+    @GetMapping("/{oppgaveId}/ferdigstill")
+    fun ferdigstillOppgave(@PathVariable oppgaveId: Long): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "ferdigstill oppgave"
+        )
+        val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        oppgaveService.ferdigstillOppgave(oppgave)
+
+        return ResponseEntity.ok(Ressurs.success("Oppgaven lukket"))
+    }
+
+    @PostMapping(path = ["/{oppgaveId}/ferdigstillOgKnyttjournalpost"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun ferdigstillOppgaveOgKnyttJournalpostTilBehandling(
+        @PathVariable oppgaveId: Long,
+        @RequestBody @Valid request: RestFerdigstillOppgaveKnyttJournalpost,
+    ): ResponseEntity<Ressurs<String?>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "ferdigstill oppgave og knytt journalpost"
+        )
+        // Validerer at oppgave med gitt oppgaveId eksisterer
+        oppgaveService.hentOppgave(oppgaveId)
+
+        val fagsakId = journalføringService.knyttJournalpostTilFagsakOgFerdigstillOppgave(request, oppgaveId)
+
+        return ResponseEntity.ok(Ressurs.success(fagsakId, "Oppgaven $oppgaveId er lukket"))
     }
 }
