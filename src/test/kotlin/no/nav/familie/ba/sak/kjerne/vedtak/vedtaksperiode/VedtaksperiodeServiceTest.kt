@@ -304,7 +304,10 @@ class VedtaksperiodeServiceTest(
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(1, redusertePerioder.size)
-        assertEquals(Vedtaksperiodetype.REDUKSJON, redusertePerioder.first().type)
+        assertEquals(
+            Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+            redusertePerioder.first().type
+        )
         assertEquals(LocalDate.of(2021, 4, 1), redusertePerioder.first().fom)
         assertEquals(LocalDate.of(2021, 4, 30), redusertePerioder.first().tom)
     }
@@ -457,7 +460,10 @@ class VedtaksperiodeServiceTest(
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(1, redusertePerioder.size)
-        assertEquals(Vedtaksperiodetype.REDUKSJON, redusertePerioder.first().type)
+        assertEquals(
+            Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+            redusertePerioder.first().type
+        )
         assertEquals(LocalDate.of(2021, 6, 1), redusertePerioder.first().fom)
         assertEquals(LocalDate.of(2021, 7, 31), redusertePerioder.first().tom)
     }
@@ -537,7 +543,7 @@ class VedtaksperiodeServiceTest(
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(2, redusertePerioder.size)
-        assertTrue { redusertePerioder.all { Vedtaksperiodetype.REDUKSJON == it.type } }
+        assertTrue { redusertePerioder.all { Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING == it.type } }
         assertEquals(LocalDate.of(2021, 4, 1), redusertePerioder.first().fom)
         assertEquals(LocalDate.of(2021, 4, 30), redusertePerioder.first().tom)
         assertEquals(LocalDate.of(2021, 6, 1), redusertePerioder.last().fom)

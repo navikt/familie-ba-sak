@@ -57,15 +57,13 @@ fun fjernOverflødigeKompetanserRekursivt(
     }
 }
 
-fun Collection<Kompetanse>.tilTidslinjerForBarna(): Map<Aktør, Tidslinje<Kompetanse, Måned>> {
-    return if (this.isEmpty()) {
-        emptyMap()
-    } else {
-        val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
+fun Iterable<Kompetanse>.tilTidslinjerForBarna(): Map<Aktør, Tidslinje<Kompetanse, Måned>> {
+    if (this.toList().isEmpty()) return emptyMap()
 
-        alleBarnAktørIder.associateWith { aktør ->
-            AktørKompetanseTidslinje(aktør, this.filter { it.barnAktører.contains(aktør) })
-        }
+    val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
+
+    return alleBarnAktørIder.associateWith { aktør ->
+        AktørKompetanseTidslinje(aktør, this.filter { it.barnAktører.contains(aktør) })
     }
 }
 
