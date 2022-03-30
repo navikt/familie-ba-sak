@@ -124,7 +124,7 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
     ).komprimer()
 }
 
-fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerMed(
+fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerInnvendigMed(
     tidslinjeMap: Map<K, Tidslinje<H, T>>,
     mapKombinator: (K) -> (V?, H?) -> R?
 ): Map<K, Tidslinje<R, T>> {

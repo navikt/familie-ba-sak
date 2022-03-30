@@ -68,7 +68,8 @@ abstract class Tidslinje<I, T : Tidsenhet> {
             OVERLAPPER_ETTERFØLGENDE_PERIODE,
         }
 
-        class TidslinjeFeilException(tidslinjeFeil: Collection<TidslinjeFeil>) : IllegalStateException()
+        class TidslinjeFeilException(tidslinjeFeil: Collection<TidslinjeFeil>) :
+            IllegalStateException(tidslinjeFeil.toString())
     }
 }
 
