@@ -241,6 +241,11 @@ class OppgaveService(
         return integrasjonClient.hentOppgaver(finnOppgaveRequest)
     }
 
+    fun ferdigstillOppgave(oppgave: Oppgave) {
+        require(oppgave.id != null) { "Oppgaven må ha en id for å kunne ferdigstilles" }
+        integrasjonClient.ferdigstillOppgave(oppgaveId = oppgave.id!!)
+    }
+
     companion object {
 
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
