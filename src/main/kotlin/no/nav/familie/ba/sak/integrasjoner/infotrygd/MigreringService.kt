@@ -135,7 +135,7 @@ class MigreringService(
                     .also { kastFeilDersomAlleredeMigrert(it) }
             } catch (exception: Exception) {
                 if (exception is ConstraintViolationException) {
-                    logger.warn("Migrering: Klarte ikke å opprette fagsak på grunn av krasj i databasen, prøver igjen om 15 minutter. Feilmelding: ${exception.message}.")
+                    logger.warn("Migrering: Klarte ikke å opprette fagsak på grunn av krasj i databasen, prøver igjen senere. Feilmelding: ${exception.message}.")
                     kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT)
                 }
 
