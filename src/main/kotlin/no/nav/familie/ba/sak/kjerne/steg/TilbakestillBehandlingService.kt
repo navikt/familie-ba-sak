@@ -71,4 +71,30 @@ class TilbakestillBehandlingService(
         endretUtbetalingAndelService.fjernKnytningTilAndelTilkjentYtelse(behandling.id)
         vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id))
     }
+
+    /**
+     * Når et vilkår vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
+     */
+    @Transactional
+    fun resettStegVedEndringPåVilkår(behandlingId: Long) {
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+            behandlingId = behandlingId,
+            steg = StegType.VILKÅRSVURDERING
+        )
+        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId))
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
+    }
+
+    /**
+     * Når en andel vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
+     */
+    @Transactional
+    fun resettStegVedEndringPåBehandlingsresultatSteg(behandlingId: Long) {
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+            behandlingId = behandlingId,
+            steg = StegType.BEHANDLINGSRESULTAT
+        )
+        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId))
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
+    }
 }

@@ -119,3 +119,5 @@ fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.minsteEllerNull() =
 
 fun LocalDate?.tilTidspunktEllerDefault(default: () -> LocalDate) =
     this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: DagTidspunkt(default(), Uendelighet.INGEN)
+
+fun YearMonth.tilTidspunkt() = MånedTidspunkt(this, Uendelighet.INGEN)

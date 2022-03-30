@@ -35,7 +35,20 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: (erIngenOverlappVed
                 utbetalingstyperUtenEndretUtbetaling.plus(VedtakBegrunnelseType.ENDRET_UTBETALING)
         }
     ),
-    REDUKSJON({
+
+    /***
+     * Brukes i de tilfellene det er en reduksjon på tvers av behandlinger som vi ikke kan begrunne på vanlig måte.
+     *
+     * For eksempel: I en behandling har vi to barn med utbetaling fra mai 2020 til januar 2021.
+     * I neste behandling endres det ene barne til å ha utbetaling fra juni 2020 til januar 2021.
+     * Da har det vært en reduksjon fra den første behanglingen til den neste i mai 2020,
+     * og det blir en utbetaling med reduksjon fra sist iverksatte behandling.
+     *
+     * Om det ene barnet hadde mistet juli isteden for mai, altså at det fikk utbetalt 1. mai 2020 til 1. juni 2021 og
+     * fra juli 2020 til januar 2021, ville juni 2020 vært en vanlig utbetalingsperiode fordi vi kan begrunne
+     * reduksjonen uten å se på forrige behandling.
+     ***/
+    UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING({
         listOf(
             VedtakBegrunnelseType.REDUKSJON,
             VedtakBegrunnelseType.INNVILGET,
@@ -52,8 +65,7 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: (erIngenOverlappVed
         listOf(
             VedtakBegrunnelseType.ENDRET_UTBETALING
         )
-    }
-    )
+    })
 }
 
 fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(

@@ -87,4 +87,19 @@ data class MånedTidspunkt internal constructor(
     override fun sammenliknMed(tidspunkt: Tidspunkt<Måned>): Int {
         return måned.compareTo(tidspunkt.tilYearMonth())
     }
+
+    companion object {
+        fun nå() = MånedTidspunkt(YearMonth.now(), Uendelighet.INGEN)
+        internal fun YearMonth?.tilTidspunktEllerUendeligLengeSiden(default: () -> YearMonth?) =
+            this.tilTidspunktEllerUendelig(default, Uendelighet.FORTID)
+
+        internal fun YearMonth?.tilTidspunktEllerUendeligLengeTil(default: () -> YearMonth?) =
+            this.tilTidspunktEllerUendelig(default, Uendelighet.FREMTID)
+
+        private fun YearMonth?.tilTidspunktEllerUendelig(default: () -> YearMonth?, uendelighet: Uendelighet) =
+            this?.let { MånedTidspunkt(it, Uendelighet.INGEN) } ?: MånedTidspunkt(
+                default() ?: YearMonth.now(),
+                uendelighet
+            )
+    }
 }

@@ -76,7 +76,7 @@ data class VilkårsvurderingBuilder(
     }
 }
 
-class VilkårRegelverkResultatTidslinje(
+internal class VilkårRegelverkResultatTidslinje(
     val vilkår: Vilkår,
     val charTidslinje: Tidslinje<Char, Måned>
 ) : TidslinjeSomStykkerOppTiden<VilkårRegelverkResultat, Måned>(charTidslinje) {
@@ -92,7 +92,7 @@ class VilkårRegelverkResultatTidslinje(
     }
 }
 
-fun Periode<VilkårRegelverkResultat, Måned>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> {
+internal fun Periode<VilkårRegelverkResultat, Måned>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> {
     return listOf(
         VilkårResultat(
             personResultat = personResultat,

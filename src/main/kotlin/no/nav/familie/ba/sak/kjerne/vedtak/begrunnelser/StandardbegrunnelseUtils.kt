@@ -62,7 +62,8 @@ fun Standardbegrunnelse.triggesForPeriode(
         oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
         aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
         triggesAv = triggesAv,
-        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeToggelPå,
     )
 
     return when {

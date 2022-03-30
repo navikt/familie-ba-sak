@@ -61,6 +61,7 @@ import java.time.Month.NOVEMBER
 import java.time.Month.OCTOBER
 import java.time.Month.SEPTEMBER
 import java.time.YearMonth
+import javax.validation.ConstraintViolationException
 
 private const val NULLDATO = "000000"
 
@@ -99,7 +100,11 @@ class MigreringService(
 
             val løpendeInfotrygdsak = hentLøpendeSakFraInfotrygd(personIdent)
 
-            if (løpendeInfotrygdsak.undervalg == "MD" && !featureToggleService.isEnabled(KAN_MIGRERE_DELT_BOSTED, false)) {
+            if (løpendeInfotrygdsak.undervalg == "MD" && !featureToggleService.isEnabled(
+                    KAN_MIGRERE_DELT_BOSTED,
+                    false
+                )
+            ) {
                 secureLog.warn("Migrering: Kan ikke migrere saker med delt bosted")
                 kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
             }
@@ -114,8 +119,9 @@ class MigreringService(
                 kastOgTellMigreringsFeil(MigreringsfeilType.INSTITUSJON)
             }
 
-            val personAktør = personidentService.hentOgLagreAktør(personIdent, true)
-            val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
+            // Vi ønsker at steg'ene selv lagrer aktører. De blir cachet i appen så det blir ikke gjort nytt kall mot PDL
+            val personAktør = personidentService.hentOgLagreAktør(personIdent, false)
+            val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, false)
 
             validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
@@ -124,8 +130,17 @@ class MigreringService(
                 validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
             }
 
-            fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
-                .also { kastFeilDersomAlleredeMigrert(it) }
+            try {
+                fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
+                    .also { kastFeilDersomAlleredeMigrert(it) }
+            } catch (exception: Exception) {
+                if (exception is ConstraintViolationException) {
+                    logger.warn("Migrering: Klarte ikke å opprette fagsak på grunn av krasj i databasen, prøver igjen senere. Feilmelding: ${exception.message}.")
+                    kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT)
+                }
+
+                throw exception
+            }
 
             val behandling = runCatching {
                 stegService.håndterNyBehandling(
@@ -395,7 +410,14 @@ class MigreringService(
             val beløpfeilType = if (infotrygdSak.undervalg == "MD")
                 MigreringsfeilType.BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD else
                 MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD
-            secureLog.info("Ulikt beløp ba-sak og infotrygd migrering ${tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse}")
+            secureLog.info(
+                "Ulikt beløp ba-sak og infotrygd migrering ${
+                tilkjentYtelseRepository.findByBehandlingOptional(
+                    behandlingId
+                )?.andelerTilkjentYtelse
+                }"
+            )
+
             kastOgTellMigreringsFeil(
                 beløpfeilType,
                 beløpfeilType.beskrivelse +

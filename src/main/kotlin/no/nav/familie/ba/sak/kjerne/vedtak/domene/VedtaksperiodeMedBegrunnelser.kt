@@ -109,7 +109,7 @@ data class VedtaksperiodeMedBegrunnelser(
         if (this.type == Vedtaksperiodetype.UTBETALING ||
             this.type == Vedtaksperiodetype.ENDRET_UTBETALING ||
             this.type == Vedtaksperiodetype.FORTSATT_INNVILGET ||
-            this.type == Vedtaksperiodetype.REDUKSJON
+            this.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
         ) {
             val andelerForVedtaksperiodetype =
                 if (!erIngenOverlappVedtaksperiodeTogglePå) {

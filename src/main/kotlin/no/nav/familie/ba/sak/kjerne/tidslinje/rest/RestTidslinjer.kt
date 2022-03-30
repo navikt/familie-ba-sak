@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårRegelverkResultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårResultatTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårsresultatDagTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import java.time.LocalDate
 
@@ -28,7 +28,7 @@ fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
     )
 }
 
-fun List<VilkårResultatTidslinje>.tilRestVilkårTidslinjer(): List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>> =
+fun List<VilkårsresultatDagTidslinje>.tilRestVilkårTidslinjer(): List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>> =
     this.map { vilkårsresultatTidslinje ->
         vilkårsresultatTidslinje.perioder().map { periode ->
             RestTidslinjePeriode(
@@ -39,7 +39,7 @@ fun List<VilkårResultatTidslinje>.tilRestVilkårTidslinjer(): List<List<RestTid
         }
     }
 
-fun Tidslinje<Regelverk?, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinjePeriode<Regelverk?>> =
+fun Tidslinje<Regelverk, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinjePeriode<Regelverk?>> =
     this.perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),

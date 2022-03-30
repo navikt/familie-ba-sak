@@ -10,6 +10,13 @@
       ]
     },
     "person": {
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "32345678902",
+          "status": "I_BRUK",
+          "type": "FNR"
+        }
+      ],
       "navn": [
         {
           "fornavn": "REAL",
