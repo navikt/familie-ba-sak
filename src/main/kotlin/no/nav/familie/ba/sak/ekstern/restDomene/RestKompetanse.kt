@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseStatus
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.vurderStatus
 import java.time.YearMonth
 
 data class RestKompetanse(
@@ -12,6 +14,7 @@ data class RestKompetanse(
     val barnetsBostedsland: String? = null,
     val primærland: String? = null,
     val sekundærland: String? = null,
+    val status: KompetanseStatus = KompetanseStatus.IKKE_UTFYLT
 )
 
 fun Kompetanse.tilRestKompetanse() = RestKompetanse(
@@ -23,4 +26,5 @@ fun Kompetanse.tilRestKompetanse() = RestKompetanse(
     barnetsBostedsland = this.barnetsBostedsland,
     primærland = this.primærland,
     sekundærland = this.sekundærland,
+    status = this.vurderStatus()
 )
