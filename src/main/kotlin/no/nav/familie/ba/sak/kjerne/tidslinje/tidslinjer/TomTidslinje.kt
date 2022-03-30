@@ -11,8 +11,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class TomTidslinje<I, T : Tidsenhet> : Tidslinje<I, T>() {
-    override fun fraOgMed(): Tidspunkt<T> = NullTidspunkt.FRA_OG_MED()
-    override fun tilOgMed(): Tidspunkt<T> = NullTidspunkt.TIL_OG_MED()
+    override fun fraOgMed(): Tidspunkt<T> = NullTidspunkt.fraOgMed()
+    override fun tilOgMed(): Tidspunkt<T> = NullTidspunkt.tilOgMed()
 
     override fun lagPerioder(): Collection<Periode<I, T>> = emptyList()
 
@@ -22,9 +22,11 @@ class TomTidslinje<I, T : Tidsenhet> : Tidslinje<I, T>() {
         companion object {
             // Vi plasserer fra-og-med uendelig langt inn i fremtiden og til-og-med uendelig langt bak i fortiden
             // Dermed er tidslinjen "maksimalt tom"
-            fun <T : Tidsenhet> FRA_OG_MED() = NullTidspunkt<T>(uendelighet = Uendelighet.FREMTID)
-            fun <T : Tidsenhet> TIL_OG_MED() = NullTidspunkt<T>(uendelighet = Uendelighet.FORTID)
+            fun <T : Tidsenhet> fraOgMed() = NullTidspunkt<T>(uendelighet = Uendelighet.FREMTID)
+            fun <T : Tidsenhet> tilOgMed() = NullTidspunkt<T>(uendelighet = Uendelighet.FORTID)
         }
+
+        val nullTidspunktException = IllegalStateException("Dette er et NULL-tidspunkt")
 
         override fun tilFørsteDagIMåneden(): Tidspunkt<Dag> {
             return NullTidspunkt(uendelighet)
@@ -43,7 +45,7 @@ class TomTidslinje<I, T : Tidsenhet> : Tidslinje<I, T>() {
         }
 
         override fun tilLocalDate(): LocalDate {
-            throw IllegalStateException("Dette er et NULL-tidspunkt")
+            throw nullTidspunktException
         }
 
         override fun tilYearMonthEllerNull(): YearMonth? {
@@ -51,7 +53,7 @@ class TomTidslinje<I, T : Tidsenhet> : Tidslinje<I, T>() {
         }
 
         override fun tilYearMonth(): YearMonth {
-            throw IllegalStateException("Dette er et NULL-tidspunkt")
+            throw nullTidspunktException
         }
 
         override fun flytt(tidsenheter: Long): Tidspunkt<T> {
@@ -63,34 +65,34 @@ class TomTidslinje<I, T : Tidsenhet> : Tidslinje<I, T>() {
         }
 
         override fun somUendeligLengeSiden(): Tidspunkt<T> {
-            return FRA_OG_MED()
+            return fraOgMed()
         }
 
         override fun somUendeligLengeTil(): Tidspunkt<T> {
-            return TIL_OG_MED()
+            return tilOgMed()
         }
 
         override fun somFraOgMed(): Tidspunkt<T> {
-            return FRA_OG_MED()
+            return fraOgMed()
         }
 
         override fun somFraOgMed(dato: LocalDate): Tidspunkt<T> {
-            throw IllegalStateException("Dette er et NULL-tidspunkt")
+            throw nullTidspunktException
         }
 
         override fun somTilOgMed(): Tidspunkt<T> {
-            return TIL_OG_MED()
+            return tilOgMed()
         }
 
         override fun somTilOgMed(dato: LocalDate): Tidspunkt<T> {
-            throw IllegalStateException("Dette er et NULL-tidspunkt")
+            throw nullTidspunktException
         }
 
         override fun sammenliknMed(tidspunkt: Tidspunkt<T>): Int {
             return when (uendelighet) {
                 Uendelighet.FREMTID -> 1 // Dette skal alltid være det seneste tidspunktet i alle sammenlikninger
                 Uendelighet.FORTID -> -1 // Dette skal alltid være det tidligste tidspunktet i alle sammenlikninger
-                else -> throw IllegalStateException("Dette er et NULL-tidspunkt") // Skal ikke inntreffe
+                else -> throw nullTidspunktException // Skal ikke inntreffe
             }
         }
     }
