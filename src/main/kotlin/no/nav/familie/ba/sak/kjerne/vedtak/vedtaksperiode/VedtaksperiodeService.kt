@@ -615,8 +615,12 @@ class VedtaksperiodeService(
     }
 
     fun settBegrunnelsePåVedtaksperioderMedKunÉnGyldigBegrunnelse(vedtak: Vedtak) {
-        hentUtvidetVedtaksperioderMedBegrunnelser(vedtak).forEach {
-            if (it.gyldigeBegrunnelser.size == 1) {
+        val endringstidspunkt = endringstidspunktSerivce.finnEndringstidpunkForBehandling(vedtak.behandling.id)
+
+        hentUtvidetVedtaksperioderMedBegrunnelser(vedtak)
+            .filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
+            .filter { it.gyldigeBegrunnelser.size == 1 }
+            .forEach {
                 oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = it.id,
                     standardbegrunnelserFraFrontend = listOf(
@@ -624,7 +628,6 @@ class VedtaksperiodeService(
                     )
                 )
             }
-        }
     }
 
     fun hent(vedtaksperiodeId: Long): VedtaksperiodeMedBegrunnelser =
