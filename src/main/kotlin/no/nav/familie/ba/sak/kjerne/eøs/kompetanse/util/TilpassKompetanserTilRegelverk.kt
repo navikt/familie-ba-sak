@@ -5,7 +5,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtvendigMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
 val overflødigKompetanseMapKombinator = { _: Aktør ->
@@ -44,7 +46,7 @@ fun fjernOverflødigeKompetanserRekursivt(
     val barnTilKompetanseTidslinje = kompetanser.tilTidslinjerForBarna()
 
     val overflødigeKompetanser = barnTilKompetanseTidslinje
-        .kombinerMed(barnTilRegelverkTidslinjer, overflødigKompetanseMapKombinator)
+        .kombinerUtvendigMed(barnTilRegelverkTidslinjer, overflødigKompetanseMapKombinator, MånedTidspunkt.nå())
         .slåSammen()
 
     return if (overflødigeKompetanser.isNotEmpty()) {
@@ -55,11 +57,15 @@ fun fjernOverflødigeKompetanserRekursivt(
     }
 }
 
-fun Iterable<Kompetanse>.tilTidslinjerForBarna(): Map<Aktør, Tidslinje<Kompetanse, Måned>> {
-    val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
+fun Collection<Kompetanse>.tilTidslinjerForBarna(): Map<Aktør, Tidslinje<Kompetanse, Måned>> {
+    return if (this.isEmpty()) {
+        emptyMap()
+    } else {
+        val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
 
-    return alleBarnAktørIder.associateWith { aktør ->
-        AktørKompetanseTidslinje(aktør, this.filter { it.barnAktører.contains(aktør) })
+        alleBarnAktørIder.associateWith { aktør ->
+            AktørKompetanseTidslinje(aktør, this.filter { it.barnAktører.contains(aktør) })
+        }
     }
 }
 
