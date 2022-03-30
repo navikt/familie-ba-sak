@@ -614,9 +614,7 @@ class VedtaksperiodeService(
         }.toList()
     }
 
-    fun settBegrunnelsePåVedtaksperioderMedKunÉnGyldigBegrunnelse(behandlingId: Long) {
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingId)
-
+    fun settBegrunnelsePåVedtaksperioderMedKunÉnGyldigBegrunnelse(vedtak: Vedtak) {
         hentUtvidetVedtaksperioderMedBegrunnelser(vedtak).forEach {
             if (it.gyldigeBegrunnelser.size == 1) {
                 oppdaterVedtaksperiodeMedStandardbegrunnelser(

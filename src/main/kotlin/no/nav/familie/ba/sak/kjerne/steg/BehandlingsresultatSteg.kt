@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FØRSTE_ENDRINGSTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -122,8 +123,12 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.REVURDERING) {
-            vedtaksperiodeService.settBegrunnelsePåVedtaksperioderMedKunÉnGyldigBegrunnelse(behandling.id)
+        if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT) &&
+            (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.REVURDERING)
+        ) {
+            vedtaksperiodeService.settBegrunnelsePåVedtaksperioderMedKunÉnGyldigBegrunnelse(
+                vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+            )
         }
 
         return hentNesteStegForNormalFlyt(behandlingMedOppdatertBehandlingsresultat)
