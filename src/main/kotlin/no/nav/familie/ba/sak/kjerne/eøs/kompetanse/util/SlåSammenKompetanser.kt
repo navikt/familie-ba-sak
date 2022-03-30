@@ -15,8 +15,7 @@ fun Collection<Kompetanse>.slåSammen(): Collection<Kompetanse> {
     return if (this.isEmpty()) {
         this
     } else {
-        this.map { EnkeltKompetanseTidslinje(it) }
-            .let { SlåSammenKompetanserTidslinje(it) }
+        SlåSammenKompetanserTidslinje(this.map { EnkeltKompetanseTidslinje(it) })
             .perioder().flatMap { periode -> periode.innhold?.settFomOgTom(periode) ?: emptyList() }
     }
 }
@@ -45,10 +44,9 @@ internal class EnkeltKompetanseTidslinje(
 internal class SlåSammenKompetanserTidslinje(
     val kompetanseTidslinjer: Collection<EnkeltKompetanseTidslinje>
 ) : TidslinjeSomStykkerOppTiden<Set<Kompetanse>, Måned>(kompetanseTidslinjer) {
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): Set<Kompetanse>? {
+    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): Set<Kompetanse> {
         return kompetanseTidslinjer
-            .map { it.hentUtsnitt(tidspunkt) }
-            .filterNotNull()
+            .mapNotNull { it.hentUtsnitt(tidspunkt) }
             .fold(mutableSetOf()) { kompetanser, kompetanse ->
                 val matchendeKompetanse = kompetanser.plukkUtHvis { it.erLikUtenBarn(kompetanse) }
                 val oppdatertKompetanse = matchendeKompetanse?.leggSammenBarn(kompetanse) ?: kompetanse
@@ -61,8 +59,8 @@ internal class SlåSammenKompetanserTidslinje(
         this.find { predicate(it) }?.also { this.remove(it) }
 
     private fun Kompetanse.erLikUtenBarn(kompetanse: Kompetanse) =
-        this.copy(barnAktørIder = emptySet()) == kompetanse.copy(barnAktørIder = emptySet())
+        this.copy(barnAktører = emptySet()) == kompetanse.copy(barnAktører = emptySet())
 
     private fun Kompetanse.leggSammenBarn(kompetanse: Kompetanse) =
-        this.copy(barnAktørIder = this.barnAktørIder + kompetanse.barnAktørIder)
+        this.copy(barnAktører = this.barnAktører + kompetanse.barnAktører)
 }
