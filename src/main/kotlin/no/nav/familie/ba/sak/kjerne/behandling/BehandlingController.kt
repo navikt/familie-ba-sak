@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -21,6 +23,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -35,10 +38,12 @@ import java.time.LocalDate
 @Validated
 class BehandlingController(
     private val stegService: StegService,
-    private val behandlingsService: BehandlingService,
+    private val behandlingService: BehandlingService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilgangService: TilgangService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val beregningService: BeregningService,
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -95,8 +100,8 @@ class BehandlingController(
             handling = "endre behandlingstema"
         )
 
-        val behandling = behandlingsService.oppdaterBehandlingstema(
-            behandling = behandlingsService.hent(behandlingId),
+        val behandling = behandlingService.oppdaterBehandlingstema(
+            behandling = behandlingService.hent(behandlingId),
             nyUnderkategori = endreBehandling.behandlingUnderkategori,
             nyKategori = endreBehandling.behandlingKategori,
             manueltOppdatert = true
@@ -108,6 +113,23 @@ class BehandlingController(
                     .lagRestUtvidetBehandling(behandlingId = behandling.id)
             )
         )
+    }
+
+    @GetMapping(path = ["/{behandlingId}/personer-med-ugyldig-etterbetalingsperiode"])
+    fun hentPersonerMedUgyldigEtterbetalingsperiode(
+        @PathVariable behandlingId: Long
+    ): ResponseEntity<Ressurs<List<String>>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "hent gyldig etterbetaling"
+        )
+
+        val personerMedUgyldigEtterbetalingsperiode = tilkjentYtelseValideringService.finnPersonerMedUgyldigEtterbetalingsperiode(
+            behandlingId = behandlingId
+        )
+
+        return ResponseEntity.ok(Ressurs.success(personerMedUgyldigEtterbetalingsperiode))
     }
 }
 
