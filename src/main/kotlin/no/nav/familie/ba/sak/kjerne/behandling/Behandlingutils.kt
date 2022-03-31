@@ -99,8 +99,7 @@ object Behandlingutils {
 
         val etBarnHarMinstEnEØSPeriode = barnasTidslinjer
             .values
-            .map { it.regelverkTidslinje }
-            .map { it.hentUtsnitt(nå) }
+            .map { it.regelverkTidslinje.hentUtsnitt(nå) }
             .any { it == Regelverk.EØS_FORORDNINGEN }
 
         return if (etBarnHarMinstEnEØSPeriode) {
