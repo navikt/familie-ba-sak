@@ -29,7 +29,9 @@ class TilpassKompetanserTilRegelverkTest {
             barn1.aktør to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk()
         )
 
-        val forventedeKompetanser: List<Kompetanse> = emptyList()
+        val forventedeKompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("---  ----", barn1)
+            .byggKompetanser()
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)

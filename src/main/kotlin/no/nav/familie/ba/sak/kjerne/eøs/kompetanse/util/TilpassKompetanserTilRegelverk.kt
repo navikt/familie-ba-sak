@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.AktørKompetanseTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerInnvendigMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtvendigMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -32,7 +31,7 @@ fun tilpassKompetanserTilRegelverk(
     val barnTilKompetanseTidslinje = kompetanserUtenOverflødige.tilTidslinjerForBarna()
 
     val manglendeKompetanser = barnTilKompetanseTidslinje
-        .kombinerInnvendigMed(barnTilRegelverkTidslinjer, manglendeKompetanseMapKombinator)
+        .kombinerUtvendigMed(barnTilRegelverkTidslinjer, manglendeKompetanseMapKombinator)
         .slåSammen()
 
     return (kompetanserUtenOverflødige + manglendeKompetanser).slåSammen()
