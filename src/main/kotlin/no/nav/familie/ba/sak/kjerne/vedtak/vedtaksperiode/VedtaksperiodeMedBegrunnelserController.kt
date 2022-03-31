@@ -95,7 +95,13 @@ class VedtaksperiodeMedBegrunnelserController(
         return ResponseEntity.ok(Ressurs.Companion.success(begrunnelser))
     }
 
-    @PutMapping("/fortsatt-innvilget")
+    /*
+    * Dette endepunktet brukes for å overstyre hva slags vedtaksperioder man ønsker når resultatet er fortsatt innvilget.
+    * Muligheter:
+    * - skalGenererePerioderForFortsattInnvilget = false -> det blir kun generert 1 periode, uten dato (default valg for fortsatt innvilget)
+    * - skalGenererePerioderForFortsattInnvilget = true -> det blir generert 'vanlige' perioder (overstyrer default for fortsatt innvilget)
+    */
+    @PutMapping("/overstyr-fortsatt-innvilget-vedtaksperioder")
     fun genererFortsattInnvilgetVedtaksperioder(
         @RequestBody restPutGenererFortsattInnvilgetVedtaksperioder: RestPutGenererFortsattInnvilgetVedtaksperioder
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
