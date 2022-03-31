@@ -46,7 +46,7 @@ abstract class Tidslinje<I, T : Tidsenhet> {
         return if (other is Tidslinje<*, *>) {
             fraOgMed() == other.fraOgMed() &&
                 tilOgMed() == other.tilOgMed() &&
-                lagPerioder() == other.lagPerioder()
+                perioder() == other.perioder()
         } else
             false
     }
@@ -68,7 +68,8 @@ abstract class Tidslinje<I, T : Tidsenhet> {
             OVERLAPPER_ETTERFØLGENDE_PERIODE,
         }
 
-        class TidslinjeFeilException(tidslinjeFeil: Collection<TidslinjeFeil>) : IllegalStateException()
+        class TidslinjeFeilException(tidslinjeFeil: Collection<TidslinjeFeil>) :
+            IllegalStateException(tidslinjeFeil.toString())
     }
 }
 

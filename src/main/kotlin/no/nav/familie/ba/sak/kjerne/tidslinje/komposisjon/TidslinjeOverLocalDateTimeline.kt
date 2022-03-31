@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TomTidslinje
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator
@@ -18,13 +19,19 @@ class LocalDatetimeTimelineToveisTidslinje<V, H, R, T : Tidsenhet>(
 
     override fun lagPerioder(): Collection<Periode<R, T>> {
 
+        if (venstre.perioder().isEmpty() && høyre.perioder().isEmpty()) {
+            return emptyList()
+        }
+
+        val periodeMal = venstre.perioder().firstOrNull()?.fraOgMed ?: høyre.perioder().first().fraOgMed
+
         return venstre.toLocalDateTimeline().combine(
             høyre.toLocalDateTimeline(),
             LocalDateSegmentPeriodeKombinator(periodeKombinator),
             LocalDateTimeline.JoinStyle.CROSS_JOIN
         ).compress()
             .toSegments()
-            .map { it.tilPeriode(venstre.perioder().first().fraOgMed) }
+            .map { it.tilPeriode(periodeMal) }
     }
 }
 
@@ -117,7 +124,7 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
     ).komprimer()
 }
 
-fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerMed(
+fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerInnvendigMed(
     tidslinjeMap: Map<K, Tidslinje<H, T>>,
     mapKombinator: (K) -> (V?, H?) -> R?
 ): Map<K, Tidslinje<R, T>> {
@@ -129,6 +136,23 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerMed(
             val resultat: Tidslinje<R, T> = venstre.kombinerMed(høyre, kombinator)
             resultat
         }
+}
+
+fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerUtvendigMed(
+    tidslinjeMap: Map<K, Tidslinje<H, T>>,
+    mapKombinator: (K) -> (V?, H?) -> R?
+): Map<K, Tidslinje<R, T>> {
+
+    val alleKeys = keys + tidslinjeMap.keys
+
+    return alleKeys
+        .map {
+            val høyre: Tidslinje<H, T> = tidslinjeMap[it] ?: TomTidslinje()
+            val venstre: Tidslinje<V, T> = this[it] ?: TomTidslinje()
+            val kombinator: (V?, H?) -> R? = mapKombinator(it)
+            val resultat: Tidslinje<R, T> = venstre.kombinerMed(høyre, kombinator)
+            it to resultat
+        }.toMap()
 }
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.toLocalDateTimeline(): LocalDateTimeline<I> {
