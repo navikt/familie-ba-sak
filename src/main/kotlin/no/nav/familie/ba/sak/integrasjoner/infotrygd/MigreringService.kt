@@ -7,7 +7,8 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_MIGRERE_DELT_BOSTED
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_UTVIDET_DELT_BOSTED
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
@@ -61,6 +62,7 @@ import java.time.Month.NOVEMBER
 import java.time.Month.OCTOBER
 import java.time.Month.SEPTEMBER
 import java.time.YearMonth
+import javax.validation.ConstraintViolationException
 
 private const val NULLDATO = "000000"
 
@@ -99,12 +101,8 @@ class MigreringService(
 
             val løpendeInfotrygdsak = hentLøpendeSakFraInfotrygd(personIdent)
 
-            if (løpendeInfotrygdsak.undervalg == "MD" && !featureToggleService.isEnabled(
-                    KAN_MIGRERE_DELT_BOSTED,
-                    false
-                )
-            ) {
-                secureLog.warn("Migrering: Kan ikke migrere saker med delt bosted")
+            if (løpendeInfotrygdsak.undervalg == "MD" && erToggleForDeltBostedAvskrudd(løpendeInfotrygdsak)) {
+                secureLog.warn("Migrering: Kan ikke migrere ${løpendeInfotrygdsak.valg}-saker med delt bosted")
                 kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
             }
             val underkategori = kastFeilEllerHentUnderkategori(løpendeInfotrygdsak)
@@ -117,9 +115,13 @@ class MigreringService(
                 secureLog.info("Migrering: $personIdent er lik barn registert på stønad=${løpendeInfotrygdsak.stønad?.id}")
                 kastOgTellMigreringsFeil(MigreringsfeilType.INSTITUSJON)
             }
+            if (løpendeInfotrygdsak.valg == "UT" && løpendeInfotrygdsak.undervalg == "MD" && barnasIdenter.size > 1) {
+                kastOgTellMigreringsFeil(MigreringsfeilType.MER_ENN_ETT_BARN_PÅ_SAK_AV_TYPE_UT_MD)
+            }
 
-            val personAktør = personidentService.hentOgLagreAktør(personIdent, true)
-            val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
+            // Vi ønsker at steg'ene selv lagrer aktører. De blir cachet i appen så det blir ikke gjort nytt kall mot PDL
+            val personAktør = personidentService.hentOgLagreAktør(personIdent, false)
+            val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, false)
 
             validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
@@ -128,8 +130,17 @@ class MigreringService(
                 validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
             }
 
-            fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
-                .also { kastFeilDersomAlleredeMigrert(it) }
+            try {
+                fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
+                    .also { kastFeilDersomAlleredeMigrert(it) }
+            } catch (exception: Exception) {
+                if (exception is ConstraintViolationException) {
+                    logger.warn("Migrering: Klarte ikke å opprette fagsak på grunn av krasj i databasen, prøver igjen senere. Feilmelding: ${exception.message}.")
+                    kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT)
+                }
+
+                throw exception
+            }
 
             val behandling = runCatching {
                 stegService.håndterNyBehandling(
@@ -195,6 +206,14 @@ class MigreringService(
         } catch (e: Exception) {
             if (e is KanIkkeMigrereException) throw e
             kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT, e.message, e)
+        }
+    }
+
+    private fun erToggleForDeltBostedAvskrudd(infotrygdsak: Sak): Boolean {
+        return when (infotrygdsak.valg) {
+            "OR" -> !featureToggleService.isEnabled(SKAL_MIGRERE_ORDINÆR_DELT_BOSTED, false)
+            "UT" -> !featureToggleService.isEnabled(SKAL_MIGRERE_UTVIDET_DELT_BOSTED, false)
+            else -> true
         }
     }
 
@@ -279,7 +298,7 @@ class MigreringService(
             (sak.valg == "OR" && sak.undervalg in listOf("OS", "MD")) -> {
                 BehandlingUnderkategori.ORDINÆR
             }
-            (sak.valg == "UT" && sak.undervalg == "EF") -> {
+            (sak.valg == "UT" && sak.undervalg in listOf("EF", "MD")) -> {
                 BehandlingUnderkategori.UTVIDET
             }
             else -> {
@@ -451,6 +470,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     MANGLER_ANDEL_TILKJENT_YTELSE("Fant ingen andeler tilkjent ytelse på behandlingen"),
     MANGLER_FØRSTE_UTBETALINGSPERIODE("Tilkjent ytelse er null"),
     MANGLER_VILKÅRSVURDERING("Fant ikke vilkårsvurdering."),
+    MER_ENN_ETT_BARN_PÅ_SAK_AV_TYPE_UT_MD("Migrering av sakstype UT-MD er begrenset til saker med ett barn"),
     MIGRERING_ALLEREDE_PÅBEGYNT("Migrering allerede påbegynt"),
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
     UKJENT("Ukjent migreringsfeil"),
