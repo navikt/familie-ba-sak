@@ -16,7 +16,7 @@ class TomTidslinje<I, T : Tidsenhet> : Tidslinje<I, T>() {
 
     override fun lagPerioder(): Collection<Periode<I, T>> = emptyList()
 
-    private class NullTidspunkt<T : Tidsenhet> private constructor(private val uendelighet: Uendelighet) :
+    private data class NullTidspunkt<T : Tidsenhet> constructor(val uendelighet: Uendelighet) :
         Tidspunkt<T>(uendelighet) {
 
         companion object {
@@ -89,7 +89,14 @@ class TomTidslinje<I, T : Tidsenhet> : Tidslinje<I, T>() {
         }
 
         override fun sammenliknMed(tidspunkt: Tidspunkt<T>): Int {
-            return when (uendelighet) {
+            return if (tidspunkt is NullTidspunkt) {
+                if (this.uendelighet == tidspunkt.uendelighet)
+                    0
+                else if (this.uendelighet == Uendelighet.FORTID) {
+                    -1
+                } else
+                    1
+            } else when (uendelighet) {
                 Uendelighet.FREMTID -> 1 // Dette skal alltid være det seneste tidspunktet i alle sammenlikninger
                 Uendelighet.FORTID -> -1 // Dette skal alltid være det tidligste tidspunktet i alle sammenlikninger
                 else -> throw nullTidspunktException // Skal ikke inntreffe

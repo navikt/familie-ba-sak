@@ -46,7 +46,7 @@ abstract class Tidslinje<I, T : Tidsenhet> {
         return if (other is Tidslinje<*, *>) {
             fraOgMed() == other.fraOgMed() &&
                 tilOgMed() == other.tilOgMed() &&
-                lagPerioder() == other.lagPerioder()
+                perioder() == other.perioder()
         } else
             false
     }
