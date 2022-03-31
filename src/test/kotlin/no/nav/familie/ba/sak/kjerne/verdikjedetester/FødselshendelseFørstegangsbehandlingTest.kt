@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
@@ -31,7 +32,8 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val mockLocalDateService: LocalDateService
+    @Autowired private val mockLocalDateService: LocalDateService,
+    @Autowired private val vedtaksperiodeService: VedtaksperiodeService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -75,17 +77,18 @@ class FødselshendelseFørstegangsbehandlingTest(
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
         assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
 
-        val vedtaksperioder = aktivBehandling.vedtak?.vedtaksperioderMedBegrunnelser
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.behandlingId)
+        val vedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
 
-        val desember2021Vedtaksperiode = vedtaksperioder?.find { it.fom == LocalDate.of(2021, 12, 1) }
-        val januar2022Vedtaksperiode = vedtaksperioder?.find { it.fom == LocalDate.of(2022, 1, 1) }
+        val desember2021Vedtaksperiode = vedtaksperioder.find { it.fom == LocalDate.of(2021, 12, 1) }
+        val januar2022Vedtaksperiode = vedtaksperioder.find { it.fom == LocalDate.of(2022, 1, 1) }
 
         assertEquals(
             0,
             vedtaksperioder
-                ?.filter { it != desember2021Vedtaksperiode && it != januar2022Vedtaksperiode }
-                ?.flatMap { it.begrunnelser }
-                ?.size
+                .filter { it != desember2021Vedtaksperiode && it != januar2022Vedtaksperiode }
+                .flatMap { it.begrunnelser }
+                .size
         )
 
         assertEquals(
