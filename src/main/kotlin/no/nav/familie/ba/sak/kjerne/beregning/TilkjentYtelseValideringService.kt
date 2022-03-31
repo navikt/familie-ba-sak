@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.hentAktørIderForDenneOgForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -88,15 +88,5 @@ class TilkjentYtelseValideringService(
         }
 
         return personerMedUgyldigEtterbetaling
-    }
-
-    private fun hentAktørIderForDenneOgForrigeBehandling(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?
-    ): Set<String> {
-
-        val aktørIderFraAndeler = andelerTilkjentYtelse.map { it.aktør.aktørId }
-        val aktøerIderFraForrigeAndeler = forrigeAndelerTilkjentYtelse?.map { it.aktør.aktørId } ?: emptyList()
-        return (aktørIderFraAndeler + aktøerIderFraForrigeAndeler).toSet()
     }
 }
