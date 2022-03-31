@@ -9,10 +9,10 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemKategori
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendekategori
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingKategoriutils.bestemKategori
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingKategoriutils.bestemUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingKategoriutils.utledLøpendeUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingKategoriutils.utledLøpendekategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
@@ -90,22 +90,31 @@ class BehandlingService(
 
         val aktivBehandling = hentAktivForFagsak(fagsakId = fagsak.id)
         val sisteBehandlingSomErVedtatt = hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
+        val årsakSomKanEndreBehandlingKategori =
+            aktivBehandling?.opprettetÅrsak?.årsakSomKanEndreBehandlingKategori() ?: true
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
 
-            val kategori = bestemKategori(
-                behandlingÅrsak = nyBehandling.behandlingÅrsak,
-                nyBehandlingKategori = nyBehandling.kategori,
-                løpendeBehandlingKategori = hentLøpendeKategori(fagsak.id),
-                utledetBehandlingKategori = null,
-            )
+            val kategori = if (årsakSomKanEndreBehandlingKategori) {
+                bestemKategori(
+                    nyBehandlingKategori = nyBehandling.kategori,
+                    løpendeBehandlingKategori = hentLøpendeKategori(fagsak.id),
+                    kategoriFraInneværendeBehandling = hentKategoriFraInneværendeBehandling(fagsak.id),
+                )
+            } else {
+                aktivBehandling?.kategori ?: BehandlingKategori.NASJONAL
+            }
 
-            val underkategori = bestemUnderkategori(
-                nyUnderkategori = nyBehandling.underkategori,
-                nyBehandlingType = nyBehandling.behandlingType,
-                nyBehandlingÅrsak = nyBehandling.behandlingÅrsak,
-                løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id)
-            )
+            val underkategori = if (årsakSomKanEndreBehandlingKategori) {
+                bestemUnderkategori(
+                    nyUnderkategori = nyBehandling.underkategori,
+                    nyBehandlingType = nyBehandling.behandlingType,
+                    nyBehandlingÅrsak = nyBehandling.behandlingÅrsak,
+                    løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id)
+                )
+            } else {
+                aktivBehandling?.underkategori ?: BehandlingUnderkategori.ORDINÆR
+            }
 
             sjekkEøsToggleOgThrowHvisBrudd(kategori)
 
@@ -162,25 +171,31 @@ class BehandlingService(
 
     fun oppdaterBehandlingstema(
         behandling: Behandling,
-        nyKategori: BehandlingKategori,
-        nyUnderkategori: BehandlingUnderkategori,
+        nyKategori: BehandlingKategori?,
+        nyUnderkategori: BehandlingUnderkategori?,
         manueltOppdatert: Boolean = false
     ): Behandling {
+
+        if (behandling.opprettetÅrsak.årsakSomKanEndreBehandlingKategori()) return behandling
+
         val utledetKategori = bestemKategori(
-            behandlingÅrsak = behandling.opprettetÅrsak,
             nyBehandlingKategori = nyKategori,
-            løpendeBehandlingKategori = hentLøpendeKategori(fagsakId = behandling.fagsak.id),
-            utledetBehandlingKategori = hentUtledetKategori(fagsakId = behandling.fagsak.id),
+            løpendeBehandlingKategori = hentLøpendeKategori(behandling.fagsak.id),
+            kategoriFraInneværendeBehandling = hentKategoriFraInneværendeBehandling(behandling.fagsak.id),
         )
 
-        val utledetUnderkategori: BehandlingUnderkategori =
-            if (manueltOppdatert) nyUnderkategori
-            else bestemUnderkategori(
+        if (manueltOppdatert && nyUnderkategori == null) FunksjonellFeil("Underkategori er ikke satt.")
+
+        val utledetUnderkategori = if (manueltOppdatert) {
+            nyUnderkategori!!
+        } else {
+            bestemUnderkategori(
                 nyUnderkategori = nyUnderkategori,
                 nyBehandlingType = behandling.type,
                 nyBehandlingÅrsak = behandling.opprettetÅrsak,
                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id)
             )
+        }
 
         sjekkEøsToggleOgThrowHvisBrudd(utledetKategori)
 
@@ -193,7 +208,11 @@ class BehandlingService(
             behandling.apply { kategori = utledetKategori }
         }
         if (skalOppdatereUnderkategori) {
-            behandling.apply { underkategori = utledetUnderkategori }
+            behandling.apply {
+                if (utledetUnderkategori != null) {
+                    underkategori = utledetUnderkategori
+                }
+            }
         }
 
         return lagreEllerOppdater(behandling).also { lagretBehandling ->
@@ -436,7 +455,7 @@ class BehandlingService(
         }
     }
 
-    fun hentUtledetKategori(fagsakId: Long): BehandlingKategori {
+    fun hentKategoriFraInneværendeBehandling(fagsakId: Long): BehandlingKategori {
         return if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
             val forrigeIverksattBehandling =
                 hentAktivForFagsak(fagsakId = fagsakId) ?: return BehandlingKategori.NASJONAL

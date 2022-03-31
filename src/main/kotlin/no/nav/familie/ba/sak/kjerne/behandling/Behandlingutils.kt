@@ -4,17 +4,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.Tidslinjer
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.YearMonth
 
@@ -51,62 +42,6 @@ object Behandlingutils {
     ): List<Behandling> {
         return iverksatteBehandlinger
             .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
-    }
-
-    fun bestemKategori(
-        behandlingÅrsak: BehandlingÅrsak,
-        nyBehandlingKategori: BehandlingKategori?,
-        løpendeBehandlingKategori: BehandlingKategori?,
-        utledetBehandlingKategori: BehandlingKategori?,
-    ): BehandlingKategori {
-        if (nyBehandlingKategori != null) return nyBehandlingKategori
-
-        return if (behandlingÅrsak.medførerNyVurdering() && løpendeBehandlingKategori != null) {
-            løpendeBehandlingKategori
-        } else if (!behandlingÅrsak.medførerNyVurdering() && utledetBehandlingKategori != null) {
-            utledetBehandlingKategori
-        } else {
-            BehandlingKategori.NASJONAL
-        }
-    }
-
-    fun bestemUnderkategori(
-        nyUnderkategori: BehandlingUnderkategori?,
-        nyBehandlingType: BehandlingType,
-        nyBehandlingÅrsak: BehandlingÅrsak,
-        løpendeUnderkategori: BehandlingUnderkategori?
-    ): BehandlingUnderkategori {
-        if (nyUnderkategori == null && løpendeUnderkategori == null) return BehandlingUnderkategori.ORDINÆR
-        return when {
-            nyUnderkategori == BehandlingUnderkategori.UTVIDET -> nyUnderkategori
-
-            nyBehandlingType == BehandlingType.REVURDERING || nyBehandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO ->
-                løpendeUnderkategori
-                    ?: (nyUnderkategori ?: BehandlingUnderkategori.ORDINÆR)
-
-            else -> nyUnderkategori ?: BehandlingUnderkategori.ORDINÆR
-        }
-    }
-
-    fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUnderkategori {
-        return if (andeler.any { it.erUtvidet() && it.erLøpende() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
-    }
-
-    fun utledLøpendekategori(barnasTidslinjer: Map<Aktør, Tidslinjer.BarnetsTidslinjerTimeline>?): BehandlingKategori {
-        if (barnasTidslinjer == null) return BehandlingKategori.NASJONAL
-
-        val nå = MånedTidspunkt.nå()
-
-        val etBarnHarMinstEnEØSPeriode = barnasTidslinjer
-            .values
-            .map { it.regelverkTidslinje.hentUtsnitt(nå) }
-            .any { it == Regelverk.EØS_FORORDNINGEN }
-
-        return if (etBarnHarMinstEnLøpendeEØSPeriode) {
-            BehandlingKategori.EØS
-        } else {
-            BehandlingKategori.NASJONAL
-        }
     }
 
     fun harBehandlingsårsakAlleredeKjørt(

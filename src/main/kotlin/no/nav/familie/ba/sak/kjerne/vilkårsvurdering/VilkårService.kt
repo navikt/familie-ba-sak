@@ -177,14 +177,6 @@ class VilkårService(
             )
         }
 
-        if (restSlettVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
-            behandlingService.oppdaterBehandlingstema(
-                behandling = behandling,
-                nyKategori = behandling.kategori,
-                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
-            )
-        }
-
         personResultat.vilkårResultater.filter { it.vilkårType == restSlettVilkår.vilkårType }
             .forEach { personResultat.removeVilkårResultat(it.id) }
 
@@ -198,17 +190,6 @@ class VilkårService(
                 message = "Fant ikke aktiv vilkårsvurdering ved opprettelse av vilkårsperiode",
                 frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
-        val behandling = vilkårsvurdering.behandling
-
-        if (restNyttVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
-            validerFørLeggeTilUtvidetBarnetrygd(behandling, restNyttVilkår, vilkårsvurdering)
-
-            behandlingService.oppdaterBehandlingstema(
-                behandling = behandling,
-                nyKategori = behandling.kategori,
-                nyUnderkategori = BehandlingUnderkategori.UTVIDET,
-            )
-        }
 
         val personResultat =
             vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == restNyttVilkår.personIdent }

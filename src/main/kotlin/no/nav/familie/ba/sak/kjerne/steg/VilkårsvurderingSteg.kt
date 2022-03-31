@@ -73,6 +73,13 @@ class VilkårsvurderingSteg(
 
         tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+
+        behandlingService.oppdaterBehandlingstema(
+            behandling = behandlingService.hent(behandlingId = behandling.id),
+            nyKategori = null,
+            nyUnderkategori = null
+        )
+
         return hentNesteStegForNormalFlyt(behandling)
     }
 
