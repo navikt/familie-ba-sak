@@ -102,7 +102,7 @@ object Behandlingutils {
             .map { it.regelverkTidslinje.hentUtsnitt(nå) }
             .any { it == Regelverk.EØS_FORORDNINGEN }
 
-        return if (etBarnHarMinstEnEØSPeriode) {
+        return if (etBarnHarMinstEnLøpendeEØSPeriode) {
             BehandlingKategori.EØS
         } else {
             BehandlingKategori.NASJONAL
