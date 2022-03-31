@@ -231,10 +231,10 @@ class VedtaksperiodeService(
     }
 
     @Transactional
-    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak, skalGenererePerioderForFortsattInnvilget: Boolean = false) {
+    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak, skalOverstyreFortsattInnvilget: Boolean = false) {
 
         slettVedtaksperioderFor(vedtak)
-        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && !skalGenererePerioderForFortsattInnvilget) {
+        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && !skalOverstyreFortsattInnvilget) {
 
             val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
@@ -257,7 +257,7 @@ class VedtaksperiodeService(
                 )
             )
         } else {
-            lagre(genererVedtaksperioderMedBegrunnelser(vedtak, gjelderFortsattInnvilget = skalGenererePerioderForFortsattInnvilget))
+            lagre(genererVedtaksperioderMedBegrunnelser(vedtak, gjelderFortsattInnvilget = skalOverstyreFortsattInnvilget))
         }
     }
 

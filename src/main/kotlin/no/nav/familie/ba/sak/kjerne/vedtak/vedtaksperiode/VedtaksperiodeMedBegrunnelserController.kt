@@ -104,7 +104,7 @@ class VedtaksperiodeMedBegrunnelserController(
             handling = "oppdater vedtaksperioder fortsatt innvilget"
         )
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = restPutGenererFortsattInnvilgetVedtaksperioder.behandlingId)
-        vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtak, skalGenererePerioderForFortsattInnvilget = restPutGenererFortsattInnvilgetVedtaksperioder.skalGenererePerioderForFortsattInnvilget)
+        vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtak, skalOverstyreFortsattInnvilget = restPutGenererFortsattInnvilgetVedtaksperioder.skalGenererePerioderForFortsattInnvilget)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
     }
 
