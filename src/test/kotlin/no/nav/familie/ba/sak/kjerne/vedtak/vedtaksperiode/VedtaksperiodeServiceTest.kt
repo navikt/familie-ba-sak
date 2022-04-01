@@ -104,7 +104,7 @@ class VedtaksperiodeServiceTest(
         val behandling = kjørStegprosessForFGB(
             tilSteg = StegType.REGISTRERE_SØKNAD,
             søkerFnr = søkerFnr,
-            barnasIdenter = listOf(randomFnr()),
+            barnasIdenter = listOf(barnFnr),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
@@ -151,7 +151,7 @@ class VedtaksperiodeServiceTest(
         val behandling = kjørStegprosessForFGB(
             tilSteg = StegType.REGISTRERE_SØKNAD,
             søkerFnr = randomFnr(),
-            barnasIdenter = listOf(randomFnr()),
+            barnasIdenter = listOf(barnFnr),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
