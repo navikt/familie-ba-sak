@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.common
 
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
+import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -496,7 +497,7 @@ fun lagPersonResultat(
 }
 
 fun vurderVilkårsvurderingTilInnvilget(vilkårsvurdering: Vilkårsvurdering, barn: Person) {
-    vilkårsvurdering.personResultater.forEach { personResultat ->
+    vilkårsvurdering.personResultater.filter { it.aktør == barn.aktør }.forEach { personResultat ->
         personResultat.vilkårResultater.forEach {
             if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
                 it.resultat = Resultat.OPPFYLT
@@ -566,8 +567,8 @@ fun lagVilkårsvurdering(
  */
 fun kjørStegprosessForFGB(
     tilSteg: StegType,
-    søkerFnr: String,
-    barnasIdenter: List<String>,
+    søkerFnr: String = randomFnr(),
+    barnasIdenter: List<String> = listOf(ClientMocks.barnFnr[0]),
     fagsakService: FagsakService,
     vedtakService: VedtakService,
     persongrunnlagService: PersongrunnlagService,
@@ -606,7 +607,7 @@ fun kjørStegprosessForFGB(
         return behandlingEtterPersongrunnlagSteg
 
     val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
-    persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).barna.forEach { barn ->
+    persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).personer.forEach { barn ->
         vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
     }
     vilkårsvurderingService.oppdater(vilkårsvurdering)

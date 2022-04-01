@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestSettPåVent
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
@@ -42,6 +44,7 @@ class UtvidetBehandlingService(
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val settPåVentService: SettPåVentService,
+    private val kompetanseRepository: KompetanseRepository
 ) {
 
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
@@ -93,9 +96,13 @@ class UtvidetBehandlingService(
                 .map { it.tilRestEndretUtbetalingAndel() },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             vedtak = vedtak?.tilRestVedtak(
-                vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).sortedBy { it.fom },
+                vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
+                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).sortedBy { it.fom }
+                } else emptyList(),
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),
+            kompetanser = kompetanseRepository.findByBehandlingId(behandlingId = behandlingId)
+                .map { it.tilRestKompetanse() },
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
             aktivSettPåVent = settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
                 ?.tilRestSettPåVent(),
