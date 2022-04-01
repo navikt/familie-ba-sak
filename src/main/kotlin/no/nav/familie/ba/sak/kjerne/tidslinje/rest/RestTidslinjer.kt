@@ -43,7 +43,7 @@ fun Tidslinje<Regelverk, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinje
     this.perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
-            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDate(),
+            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
             innhold = periode.innhold
         )
     }
@@ -75,6 +75,6 @@ data class RestTidslinjerForSøker(
 
 data class RestTidslinjePeriode<T>(
     val fraOgMed: LocalDate,
-    val tilOgMed: LocalDate,
+    val tilOgMed: LocalDate?,
     val innhold: T
 )
