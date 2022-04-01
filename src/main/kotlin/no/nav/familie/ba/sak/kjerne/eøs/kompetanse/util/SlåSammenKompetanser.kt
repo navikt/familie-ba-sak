@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
@@ -55,7 +55,7 @@ internal class SlåSammenKompetanserTidslinje(
 ) : TidslinjeSomStykkerOppTiden<Set<Kompetanse>, Måned>(kompetanseTidslinjer) {
     override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): Set<Kompetanse> {
         return kompetanseTidslinjer
-            .mapNotNull { it.innholdForTidspunkt(tidspunkt) }
+            .mapNotNull { it.hentUtsnitt(tidspunkt) }
             .fold(mutableSetOf()) { kompetanser, kompetanse ->
                 val matchendeKompetanse = kompetanser.plukkUtHvis { it.erLikUtenBarn(kompetanse) }
                 val oppdatertKompetanse = matchendeKompetanse?.leggSammenBarn(kompetanse) ?: kompetanse
