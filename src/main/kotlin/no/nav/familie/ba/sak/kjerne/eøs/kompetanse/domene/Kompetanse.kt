@@ -9,6 +9,8 @@ import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -40,15 +42,22 @@ data class Kompetanse(
     )
     val barnAktører: Set<Aktør> = emptySet(),
 
-    @Transient
+    @Enumerated(EnumType.STRING)
+    @Column(name = "soekers_aktivitet")
     val søkersAktivitet: SøkersAktivitet? = null,
-    @Transient
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "annen_forelderes_aktivitet")
     val annenForeldersAktivitet: AnnenForeldersAktivitet? = null,
-    @Transient
+
+    @Column(name = "annen_forelderes_aktivitetsland")
     val annenForeldersAktivitetsland: String? = null,
-    @Transient
+
+    @Column(name = "barnets_bostedsland")
     val barnetsBostedsland: String? = null,
-    @Transient
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "resultat")
     val resultat: KompetanseResultat? = null
 ) : BaseEntitet() {
     @Id
