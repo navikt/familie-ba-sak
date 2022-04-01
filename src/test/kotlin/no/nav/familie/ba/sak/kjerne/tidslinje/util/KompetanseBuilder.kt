@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
@@ -46,8 +47,8 @@ internal class KompetanseTidslinje(
             Kompetanse(fom = null, tom = null, barnAktører = barnAktørIder)
         return when (tegn) {
             '-' -> kompetanseMal
-            'S' -> kompetanseMal.copy(sekundærland = "NORGE")
-            'P' -> kompetanseMal.copy(primærland = "NORGE")
+            'S' -> kompetanseMal.copy(resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND)
+            'P' -> kompetanseMal.copy(resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND)
             else -> null
         }
     }

@@ -14,8 +14,8 @@ fun revurderStatus(kompetanse: Kompetanse): Kompetanse {
 fun Kompetanse.vurderStatus(): KompetanseStatus {
     val sum = (this.annenForeldersAktivitet?.let { 1 } ?: 0) +
         (this.barnetsBostedsland?.let { 1 } ?: 0) +
-        (this.primærland?.let { 1 } ?: 0) +
-        (this.sekundærland?.let { 1 } ?: 0) +
+        (this.annenForeldersAktivitetsland?.let { 1 } ?: 0) +
+        (this.resultat?.let { 1 } ?: 0) +
         (this.søkersAktivitet?.let { 1 } ?: 0)
 
     return when (sum) {

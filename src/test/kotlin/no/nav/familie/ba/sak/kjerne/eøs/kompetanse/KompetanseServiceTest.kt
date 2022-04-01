@@ -6,6 +6,7 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MinnebasertKompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -73,14 +74,14 @@ internal class KompetanseServiceTest {
         val oppdatertKompetanse = gjeldendeKompetanse.copy(
             fom = gjeldendeKompetanse.fom!!.plusMonths(2),
             tom = gjeldendeKompetanse.tom!!.minusMonths(2),
-            søkersAktivitet = "Jobb"
+            søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
         ).also { it.id = gjeldendeKompetanse.id }
 
         val kompetanserEtterOppdatering =
             kompetanseService.oppdaterKompetanse(gjeldendeKompetanse.id, oppdatertKompetanse).toList()
         assertEquals(3, kompetanserEtterOppdatering.size)
 
-        val tilSletting = kompetanserEtterOppdatering.find { it.søkersAktivitet == "Jobb" }
+        val tilSletting = kompetanserEtterOppdatering.find { it.søkersAktivitet == SøkersAktivitet.ARBEIDER_I_NORGE }
 
         val kompetanserEtterSletting = kompetanseService.slettKompetanse(tilSletting!!.id)
         assertEquals(1, kompetanserEtterSletting.size)

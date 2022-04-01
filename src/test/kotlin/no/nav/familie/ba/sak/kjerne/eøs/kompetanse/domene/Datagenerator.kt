@@ -7,18 +7,18 @@ fun lagKompetanse(
     fom: YearMonth? = null,
     tom: YearMonth? = null,
     barnAktører: Set<Aktør> = emptySet(),
-    søkersAktivitet: String? = null,
-    annenForeldersAktivitet: String? = null,
+    søkersAktivitet: SøkersAktivitet? = null,
+    annenForeldersAktivitet: AnnenForeldersAktivitet? = null,
+    annenForeldersAktivitetsland: String? = null,
     barnetsBostedsland: String? = null,
-    primærland: String? = null,
-    sekundærland: String? = null,
+    kompetanseResultat: KompetanseResultat? = null,
 ) = Kompetanse(
     fom = fom,
     tom = tom,
     barnAktører = barnAktører,
     søkersAktivitet = søkersAktivitet,
     annenForeldersAktivitet = annenForeldersAktivitet,
+    annenForeldersAktivitetsland = annenForeldersAktivitetsland,
     barnetsBostedsland = barnetsBostedsland,
-    primærland = primærland,
-    sekundærland = sekundærland
+    resultat = kompetanseResultat
 )

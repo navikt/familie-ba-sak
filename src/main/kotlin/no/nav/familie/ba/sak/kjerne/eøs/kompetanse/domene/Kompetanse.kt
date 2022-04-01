@@ -41,15 +41,15 @@ data class Kompetanse(
     val barnAktører: Set<Aktør> = emptySet(),
 
     @Transient
-    val søkersAktivitet: String? = null,
+    val søkersAktivitet: SøkersAktivitet? = null,
     @Transient
-    val annenForeldersAktivitet: String? = null,
+    val annenForeldersAktivitet: AnnenForeldersAktivitet? = null,
+    @Transient
+    val annenForeldersAktivitetsland: String? = null,
     @Transient
     val barnetsBostedsland: String? = null,
     @Transient
-    val primærland: String? = null,
-    @Transient
-    val sekundærland: String? = null,
+    val resultat: KompetanseResultat? = null
 ) : BaseEntitet() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "kompetanse_seq_generator")
@@ -76,9 +76,9 @@ enum class KompetanseStatus {
 fun Kompetanse.blankUt() = this.copy(
     søkersAktivitet = null,
     annenForeldersAktivitet = null,
+    annenForeldersAktivitetsland = null,
     barnetsBostedsland = null,
-    primærland = null,
-    sekundærland = null,
+    resultat = null
 )
 
 fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
@@ -90,3 +90,27 @@ fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
 
 fun Kompetanse.bareSkjema() =
     this.copy(fom = null, tom = null, barnAktører = emptySet())
+
+enum class SøkersAktivitet {
+    ARBEIDER_I_NORGE,
+    SELVSTENDIG_NÆRINGSDRIVENDE,
+    MOTTAR_UTBETALING_FRA_NAV_SOM_ERSTATTER_LØNN,
+    UTSENDT_ARBEIDSTAKER_FRA_NORGE,
+    MOTTAR_UFØRETRYGD_FRA_NORGE,
+    MOTTAR_PENSJON_FRA_NORGE,
+    INAKTIV
+}
+
+enum class AnnenForeldersAktivitet {
+    I_ARBEID,
+    MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
+    FORSIKRET_I_BOSTEDSLAND,
+    MOTTAR_PENSJON,
+    INAKTIV,
+    IKKE_AKTUELT
+}
+
+enum class KompetanseResultat {
+    NORGE_ER_PRIMÆRLAND,
+    NORGE_ER_SEKUNDÆRLAND
+}
