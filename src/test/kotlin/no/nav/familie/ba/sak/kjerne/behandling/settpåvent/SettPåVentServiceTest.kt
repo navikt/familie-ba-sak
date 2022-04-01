@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -49,8 +48,6 @@ class SettPåVentServiceTest(
     fun `Kan ikke endre på behandling etter at den er satt på vent`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
             tilSteg = StegType.VILKÅRSVURDERING,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(randomFnr()),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
@@ -76,8 +73,6 @@ class SettPåVentServiceTest(
     fun `Kan endre på behandling etter venting er deaktivert`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
             tilSteg = StegType.VILKÅRSVURDERING,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(randomFnr()),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
@@ -115,8 +110,6 @@ class SettPåVentServiceTest(
     fun `Kan ikke sette ventefrist til før dagens dato`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
             tilSteg = StegType.VILKÅRSVURDERING,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(randomFnr()),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
@@ -138,8 +131,6 @@ class SettPåVentServiceTest(
     fun `Kan oppdatare set på vent på behandling`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
             tilSteg = StegType.VILKÅRSVURDERING,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(randomFnr()),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
@@ -174,8 +165,6 @@ class SettPåVentServiceTest(
     fun `Skal gjennopta behandlinger etter ventefristen`() {
         val behandling1 = kjørStegprosessForFGB(
             tilSteg = StegType.VILKÅRSVURDERING,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(randomFnr()),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
@@ -186,8 +175,6 @@ class SettPåVentServiceTest(
 
         val behandling2 = kjørStegprosessForFGB(
             tilSteg = StegType.VILKÅRSVURDERING,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(randomFnr()),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,

@@ -9,3 +9,8 @@ data class RestPutVedtaksperiodeMedFritekster(
 data class RestPutVedtaksperiodeMedStandardbegrunnelser(
     val standardbegrunnelser: List<Standardbegrunnelse>,
 )
+
+data class RestPutGenererFortsattInnvilgetVedtaksperioder(
+    val skalGenererePerioderForFortsattInnvilget: Boolean,
+    val behandlingId: Long
+)

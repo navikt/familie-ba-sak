@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.common
 
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
+import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -566,8 +567,8 @@ fun lagVilkårsvurdering(
  */
 fun kjørStegprosessForFGB(
     tilSteg: StegType,
-    søkerFnr: String,
-    barnasIdenter: List<String>,
+    søkerFnr: String = randomFnr(),
+    barnasIdenter: List<String> = listOf(ClientMocks.barnFnr[0]),
     fagsakService: FagsakService,
     vedtakService: VedtakService,
     persongrunnlagService: PersongrunnlagService,
