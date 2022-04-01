@@ -1178,3 +1178,17 @@ class StandardbegrunnelseListConverter :
     override fun convertToEntityAttribute(string: String?): List<Standardbegrunnelse> =
         konverterStringTilEnums(string)
 }
+
+val gamleEndretUtbetalingsperiodeBegrunnelser = listOf<Standardbegrunnelse>(
+    Standardbegrunnelse.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING,
+    Standardbegrunnelse.ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING,
+    Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALING_UTVIDET,
+    Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_ORDINÆR_OG_ETTERBETALING_UTVIDET
+)
+
+val nyeEndretUtbetalingsperiodeBegrunnelser = listOf<Standardbegrunnelse>(
+    Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY,
+    Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY,
+    Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALT_UTVIDET_NY,
+    Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY
+)
