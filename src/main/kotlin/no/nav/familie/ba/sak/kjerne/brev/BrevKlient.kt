@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import java.net.URI
 
+val FAMILIE_BREV_TJENESTENAVN = "famile-brev"
+
 @Component
 class BrevKlient(
     @Value("\${FAMILIE_BREV_API_URL}") private val familieBrevUri: String,
@@ -23,7 +25,7 @@ class BrevKlient(
         val uri = URI.create("$familieBrevUri/api/$sanityDataset/dokument/$målform/${brev.mal.apiNavn}/pdf")
 
         secureLogger.info("Kaller familie brev($uri) med data ${brev.data.toBrevString()}")
-        return kallEksternTjeneste("famile-brev", uri, "Hente pdf for vedtaksbrev") {
+        return kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Hente pdf for vedtaksbrev") {
             postForEntity(uri, brev.data)
         }
     }
@@ -33,7 +35,7 @@ class BrevKlient(
         val uri = URI.create("$familieBrevUri/ba-sak/begrunnelser")
 
         val restSanityBegrunnelser =
-            kallEksternTjeneste("famile-brev", uri, "Henter begrunnelser fra sanity via familie brev") {
+            kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Henter begrunnelser fra sanity via familie brev") {
                 getForEntity<List<RestSanityBegrunnelse>>(uri)
             }
 
@@ -45,7 +47,7 @@ class BrevKlient(
         val uri = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")
         secureLogger.info("Kaller familie brev($uri) med data $begrunnelseData")
 
-        return kallEksternTjeneste("famile-brev", uri, "Henter begrunnelsestekst") {
+        return kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Henter begrunnelsestekst") {
             postForEntity(uri, begrunnelseData)
         }
     }
