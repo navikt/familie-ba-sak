@@ -96,7 +96,9 @@ class UtvidetBehandlingService(
                 .map { it.tilRestEndretUtbetalingAndel() },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             vedtak = vedtak?.tilRestVedtak(
-                vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).sortedBy { it.fom },
+                vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
+                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).sortedBy { it.fom }
+                } else emptyList(),
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),
             kompetanser = kompetanseRepository.findByBehandlingId(behandlingId = behandlingId)
