@@ -448,7 +448,7 @@ class BehandlingService(
                 hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: return BehandlingKategori.NASJONAL
 
             val barnasTidslinjer =
-                tidslinjeService.hentTidslinjerOrNull(behandlingId = forrigeIverksattBehandling.id)?.barnasTidslinjer()
+                tidslinjeService.hentTidslinjer(behandlingId = forrigeIverksattBehandling.id)?.barnasTidslinjer()
             utledLøpendekategori(barnasTidslinjer)
         } else {
             BehandlingKategori.NASJONAL
@@ -461,7 +461,7 @@ class BehandlingService(
                 hentAktivForFagsak(fagsakId = fagsakId) ?: return BehandlingKategori.NASJONAL
 
             val barnasTidslinjer =
-                tidslinjeService.hentTidslinjerOrNull(behandlingId = forrigeIverksattBehandling.id)?.barnasTidslinjer()
+                tidslinjeService.hentTidslinjer(behandlingId = forrigeIverksattBehandling.id)?.barnasTidslinjer()
                     ?: return BehandlingKategori.NASJONAL
 
             utledLøpendekategori(barnasTidslinjer)

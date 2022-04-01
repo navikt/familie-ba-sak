@@ -110,7 +110,7 @@ class KompetanseService(
         this.map { revurderStatus(it) }
 
     private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<AktørId, Tidslinje<Regelverk, Måned>> =
-        this.hentTidslinjer(behandlingId).barnasTidslinjer()
+        this.hentTidslinjerThrows(behandlingId).barnasTidslinjer()
             .mapValues { (_, tidslinjer) -> tidslinjer.regelverkTidslinje }
             .mapKeys { (aktør, _) -> aktør.aktørId }
 }

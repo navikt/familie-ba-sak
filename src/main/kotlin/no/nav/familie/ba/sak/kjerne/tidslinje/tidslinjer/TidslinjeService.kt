@@ -10,7 +10,7 @@ class TidslinjeService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
-    fun hentTidslinjer(behandlingId: Long): Tidslinjer {
+    fun hentTidslinjerThrows(behandlingId: Long): Tidslinjer {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)!!
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)!!
@@ -23,16 +23,11 @@ class TidslinjeService(
         )
     }
 
-    fun hentTidslinjerOrNull(behandlingId: Long): Tidslinjer? {
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId) ?: return null
-        val personopplysningGrunnlag =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId) ?: return null
-
-        return Tidslinjer(
-            vilkårsvurdering = vilkårsvurdering,
-            søkersFødselsdato = personopplysningGrunnlag.søker.fødselsdato,
-            yngsteBarnFødselsdato = personopplysningGrunnlag.yngsteBarnSinFødselsdato,
-            barnOgFødselsdatoer = personopplysningGrunnlag.barna.associate { it.aktør to it.fødselsdato }
-        )
+    fun hentTidslinjer(behandlingId: Long): Tidslinjer? {
+        return try {
+            hentTidslinjerThrows(behandlingId)
+        } catch (exception: NullPointerException) {
+            return null
+        }
     }
 }
