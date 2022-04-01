@@ -44,8 +44,8 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
     return object : TidslinjeSomStykkerOppTiden<R, T>(venstreTidslinje, høyreTidslinje) {
         override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
             kombinator(
-                venstreTidslinje.hentUtsnitt(tidspunkt),
-                høyreTidslinje.hentUtsnitt(tidspunkt)
+                venstreTidslinje.innholdForTidspunkt(tidspunkt),
+                høyreTidslinje.innholdForTidspunkt(tidspunkt)
             )
     }
 }
@@ -59,9 +59,9 @@ fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.snittKombinerMed(
     return object : TidslinjeSomStykkerOppTiden<R, T>(tidslinjeA, tidslinjeB, tidslinjeC) {
         override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
             kombinator(
-                tidslinjeA.hentUtsnitt(tidspunkt),
-                tidslinjeB.hentUtsnitt(tidspunkt),
-                tidslinjeC.hentUtsnitt(tidspunkt)
+                tidslinjeA.innholdForTidspunkt(tidspunkt),
+                tidslinjeB.innholdForTidspunkt(tidspunkt),
+                tidslinjeC.innholdForTidspunkt(tidspunkt)
             )
     }
 }
