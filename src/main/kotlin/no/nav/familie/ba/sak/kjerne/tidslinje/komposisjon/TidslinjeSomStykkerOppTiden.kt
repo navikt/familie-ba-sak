@@ -31,10 +31,10 @@ abstract class TidslinjeSomStykkerOppTiden<I, T : Tidsenhet>(
 fun <T> Collection<T>.replaceLast(replacement: T) =
     this.take(this.size - 1) + replacement
 
-fun <I, T : Tidsenhet> Tidslinje<I, T>.innholdForTidspunkt(tidspunkt: Tidspunkt<T>): I? =
-    perioder().innholdForTidspunkt(tidspunkt)
+fun <I, T : Tidsenhet> Tidslinje<I, T>.hentUtsnitt(tidspunkt: Tidspunkt<T>): I? =
+    perioder().hentUtsnitt(tidspunkt)
 
-fun <I, T : Tidsenhet> Collection<Periode<I, T>>.innholdForTidspunkt(tidspunkt: Tidspunkt<T>): I? =
+fun <I, T : Tidsenhet> Collection<Periode<I, T>>.hentUtsnitt(tidspunkt: Tidspunkt<T>): I? =
     this.firstOrNull { it.fraOgMed <= tidspunkt && it.tilOgMed >= tidspunkt }?.innhold
 
 fun <I, T : Tidsenhet> Periode<I, T>.kanUtvidesMed(tidspunktMedInnhold: TidspunktMedInnhold<I, T>) =
