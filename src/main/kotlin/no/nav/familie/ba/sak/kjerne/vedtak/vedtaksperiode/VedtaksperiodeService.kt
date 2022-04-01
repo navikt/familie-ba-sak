@@ -272,7 +272,7 @@ class VedtaksperiodeService(
     fun genererVedtaksperioderMedBegrunnelser(
         vedtak: Vedtak,
         gjelderFortsattInnvilget: Boolean = false,
-        førsteEndringstidspunkt: LocalDate? = null
+        manueltOverstyrtEndringstidspunkt: LocalDate? = null
     ): List<VedtaksperiodeMedBegrunnelser> {
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
@@ -313,13 +313,23 @@ class VedtaksperiodeService(
         val oppdatertUtbetalingsperiode =
             finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
 
-        val endringstidspunkt = førsteEndringstidspunkt
-            ?: if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT) && !gjelderFortsattInnvilget)
-                endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
-            else TIDENES_MORGEN
+        return when {
+            manueltOverstyrtEndringstidspunkt != null -> {
+                (oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder).filter {
+                    (it.tom ?: TIDENES_ENDE).isSameOrAfter(manueltOverstyrtEndringstidspunkt)
+                } + avslagsperioder
+            }
+            else -> {
+                val endringstidspunkt =
+                    if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT) && !gjelderFortsattInnvilget)
+                        endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
+                    else TIDENES_MORGEN
 
-        return (oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder).filter {
-            (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
+                (oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder)
+                    .filter {
+                        (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
+                    }
+            }
         }
     }
 
@@ -333,15 +343,12 @@ class VedtaksperiodeService(
             oppdaterVedtakMedVedtaksperioder(vedtak)
         } else {
             slettVedtaksperioderFor(vedtak)
-            val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
             val vedtaksperioder =
                 genererVedtaksperioderMedBegrunnelser(
                     vedtak = vedtak,
-                    førsteEndringstidspunkt = restGenererVedtaksperioder.førsteEndringstidspunkt
+                    manueltOverstyrtEndringstidspunkt = restGenererVedtaksperioder.førsteEndringstidspunkt
                 )
-            val vedtaksperioderMedAvslagsperioder = vedtaksperioder.filterNot { it.type == Vedtaksperiodetype.AVSLAG } +
-                avslagsperioder
-            lagre(vedtaksperioderMedAvslagsperioder.sortedBy { it.fom })
+            lagre(vedtaksperioder.sortedBy { it.fom })
         }
     }
 
