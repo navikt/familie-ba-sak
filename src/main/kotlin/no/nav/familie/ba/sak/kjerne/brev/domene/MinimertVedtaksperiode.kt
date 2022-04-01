@@ -38,6 +38,7 @@ data class MinimertVedtaksperiode(
                     restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                     identerMedUtbetalingPåPeriode = this.minimerteUtbetalingsperiodeDetaljer
                         .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
+                    minimerteUtbetalingsperiodeDetaljer = this.minimerteUtbetalingsperiodeDetaljer,
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                     erUregistrerteBarnPåbehandling = erUregistrerteBarnPåbehandling,
                     barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
