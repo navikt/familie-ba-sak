@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForFørsteEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
@@ -21,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktSerivce
+import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -35,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
@@ -60,11 +62,12 @@ class VedtaksperiodeService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+    private val vedtakRepository: VedtakRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val sanityService: SanityService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val endringstidspunktSerivce: EndringstidspunktSerivce,
+    private val endringstidspunktService: EndringstidspunktService,
     private val featureToggleService: FeatureToggleService,
 ) {
 
@@ -257,11 +260,20 @@ class VedtaksperiodeService(
                 )
             )
         } else {
-            lagre(genererVedtaksperioderMedBegrunnelser(vedtak, gjelderFortsattInnvilget = skalOverstyreFortsattInnvilget))
+            lagre(
+                genererVedtaksperioderMedBegrunnelser(
+                    vedtak,
+                    gjelderFortsattInnvilget = skalOverstyreFortsattInnvilget
+                )
+            )
         }
     }
 
-    fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak, gjelderFortsattInnvilget: Boolean = false): List<VedtaksperiodeMedBegrunnelser> {
+    fun genererVedtaksperioderMedBegrunnelser(
+        vedtak: Vedtak,
+        gjelderFortsattInnvilget: Boolean = false,
+        førsteEndringstidspunkt: LocalDate? = null
+    ): List<VedtaksperiodeMedBegrunnelser> {
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
 
@@ -301,13 +313,35 @@ class VedtaksperiodeService(
         val oppdatertUtbetalingsperiode =
             finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
 
-        val endringstidspunkt =
-            if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT) && !gjelderFortsattInnvilget)
-                endringstidspunktSerivce.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
+        val endringstidspunkt = førsteEndringstidspunkt
+            ?: if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT) && !gjelderFortsattInnvilget)
+                endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
             else TIDENES_MORGEN
 
         return (oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder).filter {
             (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
+        }
+    }
+
+    @Transactional
+    fun genererVedtaksperiodeForFørsteEndringstidspunkt(
+        restGenererVedtaksperioder: RestGenererVedtaksperioderForFørsteEndringstidspunkt
+    ) {
+        val vedtak =
+            vedtakRepository.findByBehandlingAndAktiv(restGenererVedtaksperioder.behandlingId)
+        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+            oppdaterVedtakMedVedtaksperioder(vedtak)
+        } else {
+            slettVedtaksperioderFor(vedtak)
+            val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
+            val vedtaksperioder =
+                genererVedtaksperioderMedBegrunnelser(
+                    vedtak = vedtak,
+                    førsteEndringstidspunkt = restGenererVedtaksperioder.førsteEndringstidspunkt
+                )
+            val vedtaksperioderMedAvslagsperioder = vedtaksperioder.filterNot { it.type == Vedtaksperiodetype.AVSLAG } +
+                avslagsperioder
+            lagre(vedtaksperioderMedAvslagsperioder.sortedBy { it.fom })
         }
     }
 

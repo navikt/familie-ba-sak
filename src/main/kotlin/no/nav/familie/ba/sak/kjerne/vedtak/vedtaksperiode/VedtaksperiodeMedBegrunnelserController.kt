@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForFørsteEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutGenererFortsattInnvilgetVedtaksperioder
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -79,6 +80,19 @@ class VedtaksperiodeMedBegrunnelserController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
     }
 
+    @PutMapping("/førsteEndringstidspunkt")
+    fun genererVedtaksperioderTilOgMedFørsteEndringstidspunkt(
+        @RequestBody restGenererVedtaksperioder: RestGenererVedtaksperioderForFørsteEndringstidspunkt
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        vedtaksperiodeService.genererVedtaksperiodeForFørsteEndringstidspunkt(restGenererVedtaksperioder)
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService
+                    .lagRestUtvidetBehandling(behandlingId = restGenererVedtaksperioder.behandlingId)
+            )
+        )
+    }
+
     @GetMapping("/brevbegrunnelser/{vedtaksperiodeId}")
     fun genererBrevBegrunnelserForPeriode(@PathVariable vedtaksperiodeId: Long): ResponseEntity<Ressurs<List<String>>> {
         tilgangService.verifiserHarTilgangTilHandling(
@@ -111,13 +125,17 @@ class VedtaksperiodeMedBegrunnelserController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "oppdater vedtaksperioder fortsatt innvilget"
         )
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = restPutGenererFortsattInnvilgetVedtaksperioder.behandlingId)
+        val vedtak =
+            vedtakService.hentAktivForBehandlingThrows(behandlingId = restPutGenererFortsattInnvilgetVedtaksperioder.behandlingId)
         if (vedtak.behandling.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
             throw FunksjonellFeil(
                 melding = "Kan ikke overstyre vedtaksperioder når resultatet ikke er fortsatt innvilget."
             )
         }
-        vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtak, skalOverstyreFortsattInnvilget = restPutGenererFortsattInnvilgetVedtaksperioder.skalGenererePerioderForFortsattInnvilget)
+        vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
+            vedtak = vedtak,
+            skalOverstyreFortsattInnvilget = restPutGenererFortsattInnvilgetVedtaksperioder.skalGenererePerioderForFortsattInnvilget
+        )
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
     }
 
