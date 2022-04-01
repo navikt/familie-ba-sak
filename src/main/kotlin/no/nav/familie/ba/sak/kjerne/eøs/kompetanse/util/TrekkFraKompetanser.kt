@@ -8,7 +8,7 @@ fun Kompetanse.trekkFra(oppdatertKompetanse: Kompetanse): Collection<Kompetanse>
     val kompetanseForRestBarn = gammelKompetanse
         .copy(
             barnAktører = gammelKompetanse.barnAktører.minus(oppdatertKompetanse.barnAktører)
-        ).takeIf { it.barnAktører.size > 0 }
+        ).takeIf { it.barnAktører.isNotEmpty() }
 
     val kompetanseForForegåendePerioder = gammelKompetanse
         .copy(
@@ -23,14 +23,8 @@ fun Kompetanse.trekkFra(oppdatertKompetanse: Kompetanse): Collection<Kompetanse>
         barnAktører = oppdatertKompetanse.barnAktører
     ).takeIf { it.fom != null && it.fom <= it.tom }
 
-    return listOf(kompetanseForRestBarn, kompetanseForForegåendePerioder, kompetanseForEtterfølgendePerioder)
-        .filterNotNull()
+    return listOfNotNull(kompetanseForRestBarn, kompetanseForForegåendePerioder, kompetanseForEtterfølgendePerioder)
 }
-
-fun Iterable<Kompetanse>.trekkFra(skalFjernes: Iterable<Kompetanse>) =
-    this.flatMap { kompetanse ->
-        skalFjernes.find { kompetanse.inneholder(it) }?.let { kompetanse.trekkFra(it) } ?: listOf(kompetanse)
-    }
 
 fun Iterable<Kompetanse>.trekkFra(skalFjernes: Kompetanse) =
     this.flatMap { kompetanse ->
