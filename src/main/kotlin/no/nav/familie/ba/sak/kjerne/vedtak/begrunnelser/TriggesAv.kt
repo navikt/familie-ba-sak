@@ -41,13 +41,16 @@ data class TriggesAv(
     }
 
     fun erUtdypendeVilkårsvurderingOppfyltReduksjon(
-        vilkårResultat: MinimertVilkårResultat,
-        erReduksjonStartPåDeltBosted: Boolean,
+        vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
+        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
     ): Boolean {
-        return erDeltBostedOppfyltReduksjon(vilkårResultat, erReduksjonStartPåDeltBosted) &&
-            erSkjønnsmessigVurderingOppfylt(vilkårResultat) &&
-            erMedlemskapOppfylt(vilkårResultat) &&
-            erDeltBostedSkalIkkDelesOppfylt(vilkårResultat)
+        return erDeltBostedOppfyltReduksjon(
+            vilkårSomAvsluttesRettFørDennePerioden = vilkårSomAvsluttesRettFørDennePerioden,
+            vilkårSomStarterIDennePerioden = vilkårSomStarterIDennePerioden
+        ) &&
+            erSkjønnsmessigVurderingOppfylt(vilkårSomAvsluttesRettFørDennePerioden) &&
+            erMedlemskapOppfylt(vilkårSomAvsluttesRettFørDennePerioden) &&
+            erDeltBostedSkalIkkDelesOppfylt(vilkårSomAvsluttesRettFørDennePerioden)
     }
 
     private fun erMedlemskapOppfylt(vilkårResultat: MinimertVilkårResultat): Boolean {
@@ -78,21 +81,20 @@ data class TriggesAv(
         return this.deltbosted == vilkårResultatInneholderDeltBosted
     }
 
-    /*
-     * Dersom det er reduksjon fordi delt bosted starter må vi ha egen logikk for det.
-     * Vi ser da på om forrige periode ikke inneholdt delt bosted og om begrunnelsen trigges av delt bosted.
-     */
     private fun erDeltBostedOppfyltReduksjon(
-        vilkårResultat: MinimertVilkårResultat,
-        erReduksjonStartPåDeltBosted: Boolean
+        vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
+        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
     ): Boolean {
-        val vilkårResultatInneholderDeltBosted =
-            vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
+        val avsluttetVilkårInneholdtDeltBosted =
+            vilkårSomAvsluttesRettFørDennePerioden.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
 
-        return if (erReduksjonStartPåDeltBosted) {
-            !vilkårResultatInneholderDeltBosted && this.deltbosted
+        val påbegyntVilkårInneholderDeltBosted = vilkårSomStarterIDennePerioden?.utdypendeVilkårsvurderinger
+            ?.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) ?: false
+
+        return if (this.deltbosted) {
+            avsluttetVilkårInneholdtDeltBosted != påbegyntVilkårInneholderDeltBosted
         } else {
-            this.deltbosted == vilkårResultatInneholderDeltBosted
+            !avsluttetVilkårInneholdtDeltBosted && !påbegyntVilkårInneholderDeltBosted
         }
     }
 }

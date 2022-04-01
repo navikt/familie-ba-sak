@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_MIGRERE_DELT_BOSTED
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
@@ -128,8 +128,9 @@ class MigreringServiceTest(
 
     @Autowired
     private val envService: EnvService,
+
     @Autowired
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 
 ) : AbstractMockkSpringRunner() {
 
@@ -174,7 +175,7 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(relaxed = true),
-            mockk(relaxed = true)
+            mockk(relaxed = true),
         ) // => env.erDev() = env.erE2E() = false
     }
 
@@ -273,7 +274,7 @@ class MigreringServiceTest(
             listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6 / 2).copy(undervalg = "MD")),
             emptyList()
         )
-        every { featureToggleService.isEnabled(KAN_MIGRERE_DELT_BOSTED, any()) } returns true
+        every { featureToggleService.isEnabled(SKAL_MIGRERE_ORDINÆR_DELT_BOSTED, any()) } returns true
 
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 

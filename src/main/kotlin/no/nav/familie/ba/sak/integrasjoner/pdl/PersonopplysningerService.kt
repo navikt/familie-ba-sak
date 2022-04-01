@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
+import no.nav.familie.ba.sak.common.logger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
@@ -28,19 +30,26 @@ class PersonopplysningerService(
                 familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(it.aktør.aktivFødselsnummer()))
                     .harTilgang
             if (harTilgang) {
-                val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
-                ForelderBarnRelasjon(
-                    aktør = it.aktør,
-                    relasjonsrolle = it.relasjonsrolle,
-                    fødselsdato = relasjonsinfo.fødselsdato,
-                    navn = relasjonsinfo.navn,
-                    adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering
-                )
+                try {
+                    val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
+                    ForelderBarnRelasjon(
+                        aktør = it.aktør,
+                        relasjonsrolle = it.relasjonsrolle,
+                        fødselsdato = relasjonsinfo.fødselsdato,
+                        navn = relasjonsinfo.navn,
+                        adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering
+                    )
+                } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
+                    logger.warn("Ignorerer relasjon: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                    secureLogger.warn("Ignorerer relasjon ${it.aktør.aktivFødselsnummer()} til ${aktør.aktivFødselsnummer()}: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                    null
+                }
             } else {
                 identerMedAdressebeskyttelse.add(Pair(it.aktør, it.relasjonsrolle))
                 null
             }
         }.toSet()
+
         val forelderBarnRelasjonMaskert = identerMedAdressebeskyttelse.map {
             ForelderBarnRelasjonMaskert(
                 relasjonsrolle = it.second,
@@ -93,7 +102,8 @@ class PersonopplysningerService(
     companion object {
 
         const val UKJENT_LANDKODE = "ZZ"
-        val UKJENT_STATSBORGERSKAP = Statsborgerskap(land = "XUK", bekreftelsesdato = null, gyldigFraOgMed = null, gyldigTilOgMed = null)
+        val UKJENT_STATSBORGERSKAP =
+            Statsborgerskap(land = "XUK", bekreftelsesdato = null, gyldigFraOgMed = null, gyldigTilOgMed = null)
     }
 }
 

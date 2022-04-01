@@ -10,6 +10,13 @@
       ]
     },
     "person": {
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "44556612345",
+          "status": "I_BRUK",
+          "type": "FNR"
+        }
+      ],
       "navn": [
         {
           "fornavn": "MOR",
@@ -71,9 +78,11 @@
       ],
       "opphold": [
       ],
-      "doedsfall": [{
-        "doedsdato": "2020-04-04"
-      }],
+      "doedsfall": [
+        {
+          "doedsdato": "2020-04-04"
+        }
+      ],
       "kontaktinformasjonForDoedsbo": [
         {
           "adresse": {
