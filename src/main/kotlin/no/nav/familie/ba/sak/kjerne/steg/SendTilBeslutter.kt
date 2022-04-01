@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
@@ -48,12 +49,14 @@ class SendTilBeslutter(
         behandling.validerRekkefølgeOgUnikhetPåSteg()
         behandling.validerMaksimaltEtStegIkkeUtført()
 
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
-        val utvidetVedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak)
-        utvidetVedtaksperioder.validerPerioderInneholderBegrunnelser(
-            behandlingId = behandling.id,
-            fagsakId = behandling.fagsak.id
-        )
+        if (behandling.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
+            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+            val utvidetVedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak)
+            utvidetVedtaksperioder.validerPerioderInneholderBegrunnelser(
+                behandlingId = behandling.id,
+                fagsakId = behandling.fagsak.id
+            )
+        }
     }
 
     override fun utførStegOgAngiNeste(
