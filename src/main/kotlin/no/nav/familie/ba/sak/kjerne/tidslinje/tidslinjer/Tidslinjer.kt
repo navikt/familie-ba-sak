@@ -111,8 +111,6 @@ class Tidslinjer(
         val regelverkMidlertidigTidslinje: Tidslinje<Regelverk, Måned> =
             RegelverkPeriodeTidslinje(vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator())).komprimer()
 
-        val a = regelverkMidlertidigTidslinje.perioder()
-
         override val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje.kombinerMed(
             regelverkMidlertidigTidslinje,
             RegelverkOgOppfyltePerioderKombinator()
