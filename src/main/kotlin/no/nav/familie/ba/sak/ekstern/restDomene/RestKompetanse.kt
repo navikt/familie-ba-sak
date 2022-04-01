@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.YearMonth
 
 data class RestKompetanse(
+    val id: Long,
     val fom: YearMonth?,
     val tom: YearMonth?,
     val barnIdenter: List<String>,
@@ -19,6 +20,7 @@ data class RestKompetanse(
 )
 
 fun Kompetanse.tilRestKompetanse() = RestKompetanse(
+    id = this.id,
     fom = this.fom,
     tom = this.tom,
     barnIdenter = this.barnAktører.map { it.aktivFødselsnummer() },

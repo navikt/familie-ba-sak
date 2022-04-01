@@ -1,9 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer
 
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ListeKombinator
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ToveisKombinator
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
@@ -14,6 +19,36 @@ private val eøsVilkår = listOf(
     Vilkår.LOVLIG_OPPHOLD,
     Vilkår.BOSATT_I_RIKET
 )
+
+class RegelverkPeriodeTidslinje(
+    val regelverkMidlertidigTidslinje: Tidslinje<Regelverk, Måned>
+) : Tidslinje<Regelverk, Måned>() {
+    override fun fraOgMed() = regelverkMidlertidigTidslinje.fraOgMed()
+
+    override fun tilOgMed(): Tidspunkt<Måned> {
+        return when {
+            regelverkMidlertidigTidslinje.tilOgMed().tilYearMonthEllerNull()
+                ?.isAfter(inneværendeMåned()) == true -> regelverkMidlertidigTidslinje.tilOgMed().somUendeligLengeTil()
+            else -> regelverkMidlertidigTidslinje.tilOgMed()
+        }
+    }
+
+    override fun lagPerioder(): Collection<Periode<Regelverk, Måned>> {
+        return regelverkMidlertidigTidslinje.perioder()
+            .filter { it.fraOgMed.tilYearMonth() <= inneværendeMåned() }
+            .map {
+                val tilOgMedYearMonth = it.tilOgMed.tilYearMonthEllerNull()
+                Periode(
+                    fraOgMed = it.fraOgMed,
+                    tilOgMed = tilOgMedYearMonth?.let { yearMonth ->
+                        if (yearMonth.isAfter(inneværendeMåned())) Tidspunkt.uendeligLengeTil(yearMonth)
+                        else it.tilOgMed
+                    } ?: it.tilOgMed,
+                    innhold = it.innhold
+                )
+            }
+    }
+}
 
 class RegelverkPeriodeKombinator : ListeKombinator<VilkårRegelverkResultat, Regelverk> {
     override fun kombiner(alleVilkårResultater: Iterable<VilkårRegelverkResultat>): Regelverk? {

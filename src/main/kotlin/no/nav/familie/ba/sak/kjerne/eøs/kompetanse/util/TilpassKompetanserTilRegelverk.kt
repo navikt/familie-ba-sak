@@ -70,6 +70,6 @@ fun Map<Aktør, Tidslinje<Kompetanse, Måned>>.slåSammen() =
         .slåSammen()
 
 fun Tidslinje<Kompetanse, Måned>.tilKompetanser() =
-    this.perioder().map { periode ->
+    this.perioder().mapNotNull { periode ->
         periode.innhold?.settFomOgTom(periode)
-    }.filterNotNull()
+    }
