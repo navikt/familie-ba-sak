@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ListeKombinator
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ToveisKombinator
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -50,8 +48,8 @@ class RegelverkPeriodeTidslinje(
     }
 }
 
-class RegelverkPeriodeKombinator : ListeKombinator<VilkårRegelverkResultat, Regelverk> {
-    override fun kombiner(alleVilkårResultater: Iterable<VilkårRegelverkResultat>): Regelverk? {
+class RegelverkPeriodeKombinator {
+    fun kombiner(alleVilkårResultater: Iterable<VilkårRegelverkResultat>): Regelverk? {
         val oppfyllerNødvendigVilkår = alleVilkårResultater
             .filter { it.resultat == Resultat.OPPFYLT }
             .map { it.vilkår }
@@ -70,8 +68,8 @@ class RegelverkPeriodeKombinator : ListeKombinator<VilkårRegelverkResultat, Reg
     }
 }
 
-class RegelverkOgOppfyltePerioderKombinator : ToveisKombinator<Resultat, Regelverk, Regelverk> {
-    override fun kombiner(venstre: Resultat?, høyre: Regelverk?): Regelverk? {
+class RegelverkOgOppfyltePerioderKombinator {
+    fun kombiner(venstre: Resultat?, høyre: Regelverk?): Regelverk? {
         return when {
             høyre == null || venstre == null -> null
             venstre != Resultat.OPPFYLT -> null
