@@ -64,7 +64,8 @@ class BehandlingsresultatSteg(
                 ETTERBETALING_3ÅR
             )
         ) {
-            val personerMedUgyldigEtterbetalingsperiode = tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
+            val personerMedUgyldigEtterbetalingsperiode =
+                tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
             if (personerMedUgyldigEtterbetalingsperiode.isNotEmpty()) {
                 throw UtbetalingsikkerhetFeil(
                     melding = "Utbetalingsperioder for en eller flere personer går mer enn 3 år tilbake i tid.",
@@ -107,7 +108,7 @@ class BehandlingsresultatSteg(
             }
 
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
-            behandlingService.nullstillEndringstidspunkt(behandling)
+            behandlingService.nullstillEndringstidspunkt(behandling.id)
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
                 vedtak = vedtakService.hentAktivForBehandlingThrows(
                     behandlingId = behandling.id
