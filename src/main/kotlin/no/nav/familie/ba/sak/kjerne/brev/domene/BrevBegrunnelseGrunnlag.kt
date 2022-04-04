@@ -21,6 +21,7 @@ data class BrevBegrunnelseGrunnlag(
         erUregistrerteBarnPåbehandling: Boolean,
         barnPersonIdentMedReduksjon: List<String>,
         erIngenOverlappVedtaksperiodeTogglePå: Boolean,
+        minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     ): BrevBegrunnelseGrunnlagMedPersoner {
         val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = this.triggesAv,
@@ -32,6 +33,7 @@ data class BrevBegrunnelseGrunnlag(
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
             identerMedReduksjonPåPeriode = barnPersonIdentMedReduksjon.map { it },
             erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
+            minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
         )
 
         if (
