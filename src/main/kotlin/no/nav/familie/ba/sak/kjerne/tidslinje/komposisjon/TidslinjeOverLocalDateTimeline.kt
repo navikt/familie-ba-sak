@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TomTidslinje
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator
@@ -14,7 +13,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators
 class LocalDatetimeTimelineToveisTidslinje<V, H, R, T : Tidsenhet>(
     val venstre: Tidslinje<V, T>,
     val høyre: Tidslinje<H, T>,
-    val periodeKombinator: ToveisKombinator<V, H, R>,
+    val periodeKombinator: (V?, H?) -> R?,
 ) : TidslinjeMedAvhengigheter<R, T>(listOf(venstre, høyre)) {
 
     override fun lagPerioder(): Collection<Periode<R, T>> {
@@ -37,7 +36,7 @@ class LocalDatetimeTimelineToveisTidslinje<V, H, R, T : Tidsenhet>(
 
 class LocalDatetimeTimelineListeTidslinje<I, R, T : Tidsenhet>(
     val tidslinjer: Collection<Tidslinje<I, T>>,
-    val listeKombinator: ListeKombinator<I, R>,
+    val listeKombinator: (Iterable<I>) -> R?,
 ) : TidslinjeMedAvhengigheter<R, T>(tidslinjer) {
 
     override fun lagPerioder(): Collection<Periode<R, T>> {
@@ -50,7 +49,7 @@ class LocalDatetimeTimelineListeTidslinje<I, R, T : Tidsenhet>(
         return tidslinjer.map { it.toLocalDateTimeline() }
             .fold(startVerdi) { acc, neste -> kombinerVerdier(acc, neste) }
             .toSegments()
-            .map { LocalDateSegment(it.fom, it.tom, listeKombinator.kombiner(it.value)) }
+            .map { LocalDateSegment(it.fom, it.tom, listeKombinator(it.value)) }
             .map { it.tilPeriode(tidslinjer.first().perioder().first().fraOgMed) }
     }
 
@@ -72,41 +71,21 @@ class LocalDatetimeTimelineListeTidslinje<I, R, T : Tidsenhet>(
     }
 }
 
-class LocalDateSegmentPeriodeKombinator<V, H, R>(val periodeKombinator: ToveisKombinator<V, H, R>) :
+class LocalDateSegmentPeriodeKombinator<V, H, R>(val periodeKombinator: (V?, H?) -> R?) :
     LocalDateSegmentCombinator<V, H, R> {
     override fun combine(
         intervall: LocalDateInterval?,
         venstre: LocalDateSegment<V>?,
         høyre: LocalDateSegment<H>?
     ): LocalDateSegment<R> {
-        return LocalDateSegment(intervall, periodeKombinator.kombiner(venstre?.value, høyre?.value))
+        return LocalDateSegment(intervall, periodeKombinator(venstre?.value, høyre?.value))
     }
 }
 
-fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(listeKombinator: ListeKombinator<I, R>): Tidslinje<R, T> {
-    // Har ikke fått LocalDateTimeline.compress til å funke helt, og kjører egen komprimering på toppen
-    return LocalDatetimeTimelineListeTidslinje(this, listeKombinator).komprimer()
-}
-
 fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
-    listeKombinator: (Iterable<I>) -> R
+    listeKombinator: (Iterable<I>) -> R?
 ): Tidslinje<R, T> {
-    return LocalDatetimeTimelineListeTidslinje(
-        this,
-        object : ListeKombinator<I, R> {
-            override fun kombiner(liste: Iterable<I>): R {
-                return listeKombinator(liste)
-            }
-        }
-    ).komprimer()
-}
-
-fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
-    tidslinje: Tidslinje<H, T>,
-    kombinator: ToveisKombinator<V, H, R>
-): Tidslinje<R, T> {
-    // Har ikke fått LocalDateTimeline.compress til å funke helt, og kjører egen komprimering på toppen
-    return LocalDatetimeTimelineToveisTidslinje(this, tidslinje, kombinator).komprimer()
+    return LocalDatetimeTimelineListeTidslinje(this, listeKombinator).komprimer()
 }
 
 fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
@@ -115,44 +94,8 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
 ): Tidslinje<R, T> {
     // Har ikke fått LocalDateTimeline.compress til å funke helt, og kjører egen komprimering på toppen
     return LocalDatetimeTimelineToveisTidslinje(
-        this, tidslinje,
-        object : ToveisKombinator<V, H, R> {
-            override fun kombiner(venstre: V?, høyre: H?): R? {
-                return kombinator(venstre, høyre)
-            }
-        }
+        this, tidslinje, kombinator
     ).komprimer()
-}
-
-fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerInnvendigMed(
-    tidslinjeMap: Map<K, Tidslinje<H, T>>,
-    mapKombinator: (K) -> (V?, H?) -> R?
-): Map<K, Tidslinje<R, T>> {
-    return this
-        .filterKeys { tidslinjeMap.containsKey(it) }
-        .mapValues { (key, venstre) ->
-            val høyre: Tidslinje<H, T> = tidslinjeMap.getValue(key)
-            val kombinator: (V?, H?) -> R? = mapKombinator(key)
-            val resultat: Tidslinje<R, T> = venstre.kombinerMed(høyre, kombinator)
-            resultat
-        }
-}
-
-fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerUtvendigMed(
-    tidslinjeMap: Map<K, Tidslinje<H, T>>,
-    mapKombinator: (K) -> (V?, H?) -> R?
-): Map<K, Tidslinje<R, T>> {
-
-    val alleKeys = keys + tidslinjeMap.keys
-
-    return alleKeys
-        .map {
-            val høyre: Tidslinje<H, T> = tidslinjeMap[it] ?: TomTidslinje()
-            val venstre: Tidslinje<V, T> = this[it] ?: TomTidslinje()
-            val kombinator: (V?, H?) -> R? = mapKombinator(it)
-            val resultat: Tidslinje<R, T> = venstre.kombinerMed(høyre, kombinator)
-            it to resultat
-        }.toMap()
 }
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.toLocalDateTimeline(): LocalDateTimeline<I> {

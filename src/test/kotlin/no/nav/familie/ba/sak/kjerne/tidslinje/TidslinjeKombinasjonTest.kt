@@ -1,12 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.ToveisKombinator
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.StringTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
@@ -15,9 +10,8 @@ import org.junit.jupiter.api.Test
 
 class TidslinjeKombinasjonTest {
 
-    val kombinator = object : ToveisKombinator<Char, Char, String> {
-        override fun kombiner(venstre: Char?, høyre: Char?) =
-            (venstre?.toString() ?: "").trim() + (høyre?.toString() ?: "").trim()
+    val kombinator = { venstre: Char?, høyre: Char? ->
+        (venstre?.toString() ?: "").trim() + (høyre?.toString() ?: "").trim()
     }
 
     @Test
@@ -68,19 +62,5 @@ class TidslinjeKombinasjonTest {
 
         Assertions.assertEquals(k1, k2)
         Assertions.assertEquals(f, k1)
-    }
-}
-
-fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
-    tidslinje: Tidslinje<H, T>,
-    toveisKombinator: ToveisKombinator<V, H, R>
-): Tidslinje<R, T> {
-    val v1 = this
-    return object : TidslinjeSomStykkerOppTiden<R, T>(v1, tidslinje) {
-        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
-            toveisKombinator.kombiner(
-                v1.hentUtsnitt(tidspunkt),
-                tidslinje.hentUtsnitt(tidspunkt)
-            )
     }
 }
