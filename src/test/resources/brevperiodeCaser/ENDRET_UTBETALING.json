@@ -43,7 +43,7 @@
         {
           "ytelseType": "ORDINÆR_BARNETRYGD",
           "utbetaltPerMnd": 0,
-          "erPåvirketAvEndring": false,
+          "erPåvirketAvEndring": true,
           "prosent": 0
         }
       ]

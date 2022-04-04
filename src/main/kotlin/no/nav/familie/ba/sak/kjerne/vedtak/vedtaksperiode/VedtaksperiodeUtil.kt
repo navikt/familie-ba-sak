@@ -29,6 +29,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.gamleEndretUtbetalingsperiodeBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.nyeEndretUtbetalingsperiodeBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -299,6 +301,12 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
                 .type
                 .tillatteBegrunnelsestyper(erIngenOverlappVedtaksperiodeToggelPå)
                 .contains(it.vedtakBegrunnelseType)
+        }.filter {
+            if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
+                if (erIngenOverlappVedtaksperiodeToggelPå) {
+                    nyeEndretUtbetalingsperiodeBegrunnelser.contains(it)
+                } else gamleEndretUtbetalingsperiodeBegrunnelser.contains(it)
+            } else true
         }
 
     return when (minimertVedtaksperiode.type) {
