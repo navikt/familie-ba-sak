@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
@@ -30,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class UtvidetBehandlingService(
@@ -101,11 +103,7 @@ class UtvidetBehandlingService(
             endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
                 .map { it.tilRestEndretUtbetalingAndel() },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
-            endringstidspunkt = when {
-                endringstidspunkt == TIDENES_MORGEN || endringstidspunkt == TIDENES_ENDE -> null
-                behandling.overstyrtEndringstidspunkt != null -> behandling.overstyrtEndringstidspunkt
-                else -> endringstidspunkt
-            },
+            endringstidspunkt = utledEndringstidpunkt(endringstidspunkt, behandling),
             vedtak = vedtak?.tilRestVedtak(
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
                     vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).sortedBy { it.fom }
@@ -119,5 +117,14 @@ class UtvidetBehandlingService(
                 ?.tilRestSettPåVent(),
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId)
         )
+    }
+
+    private fun utledEndringstidpunkt(
+        endringstidspunkt: LocalDate,
+        behandling: Behandling
+    ) = when {
+        endringstidspunkt == TIDENES_MORGEN || endringstidspunkt == TIDENES_ENDE -> null
+        behandling.overstyrtEndringstidspunkt != null -> behandling.overstyrtEndringstidspunkt
+        else -> endringstidspunkt
     }
 }
