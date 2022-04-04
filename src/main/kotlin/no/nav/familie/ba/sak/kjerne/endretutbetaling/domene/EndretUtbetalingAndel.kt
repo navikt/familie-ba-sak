@@ -194,8 +194,8 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
                 triggesAv.erTriggereOppfyltForEndretUtbetaling(
                     utvidetScenario = utvidetScenarioForEndringsperiode,
                     minimertEndretAndel = this.tilMinimertEndretUtbetalingAndel(),
-                    ytelseTyperForPeriode = emptySet(),
-                    erIngenOverlappVedtaksperiodeToggelPå = false
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
+                    minimerteUtbetalingsperiodeDetaljer = emptyList()
                 )
             } else false
         }
