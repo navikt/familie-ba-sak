@@ -55,7 +55,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     ).map { person -> person.personIdent }
 
     return when {
-        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
+        (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg) && !erEndretUtbetalingBegrunnelse ->
             hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
                 identerMedUtbetaling = identerMedUtbetalingPåPeriode,
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
@@ -76,11 +76,11 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
         erFortsattInnvilgetBegrunnelse -> identerMedUtbetalingPåPeriode
-        erEndretUtbetalingBegrunnelse -> hentPersonerForEndretUtbetalingBegrunnelse(
+        erEndretUtbetalingBegrunnelse -> if (erIngenOverlappVedtaksperiodeTogglePå) hentPersonerForEndretUtbetalingBegrunnelse(
             triggesAv = triggesAv,
             endredeUtbetalingAndelerSomOverlapperMedPeriode = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler.filter { it.erOverlappendeMed(nullableMånedPeriode = periode.tilNullableMånedPeriode()) },
-            minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer
-        )
+            minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+        ) else identerMedUtbetalingPåPeriode
         erUtbetalingMedReduksjonFraSistIverksatteBehandling -> identerMedReduksjonPåPeriode
 
         triggesAv.etterEndretUtbetaling ->
@@ -93,7 +93,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
         else -> hentPersonerForUtgjørendeVilkår()
     }.toSet()
 }
-fun hentPersonerForEndretUtbetalingBegrunnelse(triggesAv: TriggesAv, endredeUtbetalingAndelerSomOverlapperMedPeriode: List<MinimertRestEndretAndel>, minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>): List<String> {
+private fun hentPersonerForEndretUtbetalingBegrunnelse(triggesAv: TriggesAv, endredeUtbetalingAndelerSomOverlapperMedPeriode: List<MinimertRestEndretAndel>, minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>): List<String> {
     val personerMedRiktigTypeEndringer = endredeUtbetalingAndelerSomOverlapperMedPeriode.filter { triggesAv.endringsaarsaker.contains(it.årsak) }.map { it.personIdent }
     return minimerteUtbetalingsperiodeDetaljer.filter { it.erPåvirketAvEndring }.filter {
         if (triggesAv.endretUtbetalingSkalUtbetales) {
