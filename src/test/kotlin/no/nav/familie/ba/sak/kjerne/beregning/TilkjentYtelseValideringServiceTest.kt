@@ -122,8 +122,8 @@ class TilkjentYtelseValideringServiceTest {
         every { personidentServiceMock.hentAktør(person1.aktør.aktørId) } answers { person1.aktør }
         every { personidentServiceMock.hentAktør(person2.aktør.aktørId) } answers { person2.aktør }
 
-        Assertions.assertTrue(tilkjentYtelseValideringService.finnPersonerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).size == 1)
-        Assertions.assertEquals(person2.aktør.aktivFødselsnummer(), tilkjentYtelseValideringService.finnPersonerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).single())
+        Assertions.assertTrue(tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).size == 1)
+        Assertions.assertEquals(person2.aktør.aktivFødselsnummer(), tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).single())
     }
 
     companion object {

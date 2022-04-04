@@ -2,9 +2,10 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.hentAktørIderForDenneOgForrigeBehandling
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.finnAktørIderMedUgyldigEtterbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import org.springframework.stereotype.Service
@@ -48,9 +49,9 @@ class TilkjentYtelseValideringService(
         }
     }
 
-    fun finnPersonerMedUgyldigEtterbetalingsperiode(
+    fun finnAktørerMedUgyldigEtterbetalingsperiode(
         behandlingId: Long
-    ): List<String> {
+    ): List<Aktør> {
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
@@ -58,35 +59,12 @@ class TilkjentYtelseValideringService(
         val forrigeAndelerTilkjentYtelse =
             forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }?.andelerTilkjentYtelse?.toList()
 
-        val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList()
+        val aktørIderMedUgyldigEtterbetaling = finnAktørIderMedUgyldigEtterbetalingsperiode(
+            forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
+            andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+            kravDato = tilkjentYtelse.behandling.opprettetTidspunkt
+        )
 
-        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato = tilkjentYtelse.behandling.opprettetTidspunkt)
-
-        val aktørIder =
-            hentAktørIderForDenneOgForrigeBehandling(
-                andelerTilkjentYtelse,
-                forrigeAndelerTilkjentYtelse
-            )
-
-        val personerMedUgyldigEtterbetaling = mutableListOf<String>()
-
-        aktørIder.forEach { aktørId ->
-            val andelerTilkjentYtelseForPerson = andelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
-            val forrigeAndelerTilkjentYtelseForPerson =
-                forrigeAndelerTilkjentYtelse?.filter { it.aktør.aktørId == aktørId }
-
-            val etterbetalingErUgyldig = TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
-                forrigeAndelerTilkjentYtelseForPerson,
-                andelerTilkjentYtelseForPerson,
-                gyldigEtterbetalingFom
-            )
-
-            if (etterbetalingErUgyldig) {
-                val personIdent = personidentService.hentAktør(aktørId).aktivFødselsnummer()
-                personerMedUgyldigEtterbetaling.add(personIdent)
-            }
-        }
-
-        return personerMedUgyldigEtterbetaling
+        return aktørIderMedUgyldigEtterbetaling.map { aktørId -> personidentService.hentAktør(identEllerAktørId = aktørId) }
     }
 }

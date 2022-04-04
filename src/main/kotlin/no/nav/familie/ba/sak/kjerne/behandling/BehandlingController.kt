@@ -125,9 +125,10 @@ class BehandlingController(
             handling = "hent gyldig etterbetaling"
         )
 
-        val personerMedUgyldigEtterbetalingsperiode = tilkjentYtelseValideringService.finnPersonerMedUgyldigEtterbetalingsperiode(
+        val aktørerMedUgyldigEtterbetalingsperiode = tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(
             behandlingId = behandlingId
         )
+        val personerMedUgyldigEtterbetalingsperiode = aktørerMedUgyldigEtterbetalingsperiode.map { it.aktivFødselsnummer() }
 
         return ResponseEntity.ok(Ressurs.success(personerMedUgyldigEtterbetalingsperiode))
     }

@@ -41,6 +41,36 @@ fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) =
  */
 object TilkjentYtelseValidering {
 
+    fun finnAktørIderMedUgyldigEtterbetalingsperiode(
+        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        kravDato: LocalDateTime,
+    ): List<String> {
+        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato)
+
+        val aktørIder =
+            hentAktørIderForDenneOgForrigeBehandling(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
+
+        val personerMedUgyldigEtterbetaling =
+            aktørIder.mapNotNull { aktørId ->
+                val andelerTilkjentYtelseForPerson = andelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
+                val forrigeAndelerTilkjentYtelseForPerson =
+                    forrigeAndelerTilkjentYtelse?.filter { it.aktør.aktørId == aktørId }
+
+                val etterbetalingErUgyldig = erUgyldigEtterbetalingPåPerson(
+                    forrigeAndelerTilkjentYtelseForPerson,
+                    andelerTilkjentYtelseForPerson,
+                    gyldigEtterbetalingFom
+                )
+
+                if (etterbetalingErUgyldig) {
+                    aktørId
+                } else null
+            }
+
+        return personerMedUgyldigEtterbetaling
+    }
+
     fun hentAktørIderForDenneOgForrigeBehandling(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?
@@ -74,7 +104,7 @@ object TilkjentYtelseValidering {
             val erLagtTilSegmentFørGyldigEtterbetalingsdato =
                 segmenterLagtTil.any { it.value.stønadFom < gyldigEtterbetalingFom }
 
-            return erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
+            erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
         }
     }
 
