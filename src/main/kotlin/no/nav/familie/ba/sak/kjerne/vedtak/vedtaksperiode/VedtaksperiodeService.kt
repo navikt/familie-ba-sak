@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
-import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForFørsteEndringstidspunkt
+import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
@@ -334,11 +334,11 @@ class VedtaksperiodeService(
     }
 
     @Transactional
-    fun genererVedtaksperiodeForFørsteEndringstidspunkt(
-        restGenererVedtaksperioder: RestGenererVedtaksperioderForFørsteEndringstidspunkt
+    fun genererVedtaksperiodeForOverstyrtEndringstidspunkt(
+        restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
     ) {
-        val vedtak =
-            vedtakRepository.findByBehandlingAndAktiv(restGenererVedtaksperioder.behandlingId)
+        val vedtak = vedtakRepository.findByBehandlingAndAktiv(restGenererVedtaksperioder.behandlingId)
+        val overstyrtEndringstidspunkt = restGenererVedtaksperioder.overstyrtEndringstidspunkt
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
             oppdaterVedtakMedVedtaksperioder(vedtak)
         } else {
@@ -346,10 +346,17 @@ class VedtaksperiodeService(
             val vedtaksperioder =
                 genererVedtaksperioderMedBegrunnelser(
                     vedtak = vedtak,
-                    manueltOverstyrtEndringstidspunkt = restGenererVedtaksperioder.førsteEndringstidspunkt
+                    manueltOverstyrtEndringstidspunkt = overstyrtEndringstidspunkt
                 )
             lagre(vedtaksperioder.sortedBy { it.fom })
         }
+        lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
+    }
+
+    private fun lagreNedOverstyrtEndringstidspunkt(behandlingId: Long, overstyrtEndringstidspunkt: LocalDate) {
+        val behandling = behandlingRepository.finnBehandling(behandlingId)
+        behandling.overstyrtEndringstidspunkt = overstyrtEndringstidspunkt
+        behandlingRepository.save(behandling)
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {

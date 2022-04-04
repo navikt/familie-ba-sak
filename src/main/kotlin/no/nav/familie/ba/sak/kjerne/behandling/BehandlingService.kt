@@ -214,6 +214,11 @@ class BehandlingService(
         }
     }
 
+    fun nullstillEndringstidspunkt(behandling: Behandling) {
+        behandling.overstyrtEndringstidspunkt = null
+        lagreEllerOppdater(behandling, false)
+    }
+
     private fun sjekkEøsToggleOgThrowHvisBrudd(
         kategori: BehandlingKategori,
     ) {

@@ -37,5 +37,6 @@ data class RestUtvidetBehandling(
     val vedtak: RestVedtak?,
     val totrinnskontroll: RestTotrinnskontroll?,
     val aktivSettPåVent: RestSettPåVent?,
-    val migreringsdato: LocalDate?
+    val migreringsdato: LocalDate?,
+    val endringstidspunkt: LocalDate?
 )

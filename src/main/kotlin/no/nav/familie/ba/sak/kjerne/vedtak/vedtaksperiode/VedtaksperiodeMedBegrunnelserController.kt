@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForFørsteEndringstidspunkt
+import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutGenererFortsattInnvilgetVedtaksperioder
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -80,11 +80,11 @@ class VedtaksperiodeMedBegrunnelserController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
     }
 
-    @PutMapping("/førsteEndringstidspunkt")
+    @PutMapping("/endringstidspunkt")
     fun genererVedtaksperioderTilOgMedFørsteEndringstidspunkt(
-        @RequestBody restGenererVedtaksperioder: RestGenererVedtaksperioderForFørsteEndringstidspunkt
+        @RequestBody restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        vedtaksperiodeService.genererVedtaksperiodeForFørsteEndringstidspunkt(restGenererVedtaksperioder)
+        vedtaksperiodeService.genererVedtaksperiodeForOverstyrtEndringstidspunkt(restGenererVedtaksperioder)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService

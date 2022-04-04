@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
@@ -70,6 +72,8 @@ class UtvidetBehandlingService(
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
+        val endringstidspunkt = endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId)
+
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
             steg = behandling.steg,
@@ -97,8 +101,12 @@ class UtvidetBehandlingService(
             endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
                 .map { it.tilRestEndretUtbetalingAndel() },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
+            endringstidspunkt = when {
+                endringstidspunkt == TIDENES_MORGEN || endringstidspunkt == TIDENES_ENDE -> null
+                behandling.overstyrtEndringstidspunkt != null -> behandling.overstyrtEndringstidspunkt
+                else -> endringstidspunkt
+            },
             vedtak = vedtak?.tilRestVedtak(
-                førsteEndringstidspunkt = endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId),
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
                     vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).sortedBy { it.fom }
                 } else emptyList(),

@@ -11,9 +11,9 @@ data class RestPutVedtaksperiodeMedStandardbegrunnelser(
     val standardbegrunnelser: List<Standardbegrunnelse>,
 )
 
-data class RestGenererVedtaksperioderForFørsteEndringstidspunkt(
+data class RestGenererVedtaksperioderForOverstyrtEndringstidspunkt(
     val behandlingId: Long,
-    val førsteEndringstidspunkt: LocalDate
+    val overstyrtEndringstidspunkt: LocalDate
 )
 
 data class RestPutGenererFortsattInnvilgetVedtaksperioder(
