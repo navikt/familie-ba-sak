@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -117,7 +118,7 @@ fun triggesAvSkalUtbetales(
 fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
     utvidetScenario: UtvidetScenarioForEndringsperiode,
     minimertEndretAndel: MinimertEndretAndel,
-    ytelseTyperForPeriode: Set<YtelseType>,
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
     val hørerTilEtterEndretUtbetaling = this.etterEndretUtbetaling
@@ -126,10 +127,10 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
 
     val oppfyllerUtvidetScenario =
         oppfyllerUtvidetScenario(
-            utvidetScenario,
-            this.vilkår,
-            ytelseTyperForPeriode,
-            erIngenOverlappVedtaksperiodeToggelPå
+            utvidetScenario = utvidetScenario,
+            vilkår = this.vilkår,
+            minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+            erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå
         )
 
     val erAvSammeÅrsak = this.endringsaarsaker.contains(minimertEndretAndel.årsak)
@@ -149,13 +150,17 @@ fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
 private fun oppfyllerUtvidetScenario(
     utvidetScenario: UtvidetScenarioForEndringsperiode,
     vilkår: Set<Vilkår>?,
-    ytelseTyperForPeriode: Set<YtelseType>,
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
     return if (erIngenOverlappVedtaksperiodeToggelPå) {
         val begrunnelseGjelderUtvidet = vilkår?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 
-        begrunnelseGjelderUtvidet == ytelseTyperForPeriode.contains(YtelseType.UTVIDET_BARNETRYGD)
+        val erUtvidetUtenEndring = minimerteUtbetalingsperiodeDetaljer.singleOrNull {
+            it.ytelseType == YtelseType.UTVIDET_BARNETRYGD
+        }?.erPåvirketAvEndring == false
+
+        begrunnelseGjelderUtvidet == erUtvidetUtenEndring
     } else {
         val erUtvidetYtelseUtenEndring =
             utvidetScenario == UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET

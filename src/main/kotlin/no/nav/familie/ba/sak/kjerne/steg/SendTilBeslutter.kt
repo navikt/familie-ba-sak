@@ -7,9 +7,13 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.validerPerioderInneholderBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.FerdigstillOppgaver
@@ -25,10 +29,15 @@ class SendTilBeslutter(
     private val oppgaveService: OppgaveService,
     private val loggService: LoggService,
     private val totrinnskontrollService: TotrinnskontrollService,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val vedtakService: VedtakService,
+    private val vedtaksperiodeService: VedtaksperiodeService,
 ) : BehandlingSteg<String> {
 
-    override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
+    override fun preValiderSteg(
+        behandling: Behandling,
+        stegService: StegService?,
+    ) {
 
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
             ?.validerAtAlleAnndreVurderingerErVurdert()
@@ -39,6 +48,15 @@ class SendTilBeslutter(
 
         behandling.validerRekkefølgeOgUnikhetPåSteg()
         behandling.validerMaksimaltEtStegIkkeUtført()
+
+        if (behandling.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
+            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+            val utvidetVedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak)
+            utvidetVedtaksperioder.validerPerioderInneholderBegrunnelser(
+                behandlingId = behandling.id,
+                fagsakId = behandling.fagsak.id
+            )
+        }
     }
 
     override fun utførStegOgAngiNeste(
