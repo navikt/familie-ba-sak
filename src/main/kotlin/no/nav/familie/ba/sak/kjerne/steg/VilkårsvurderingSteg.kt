@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -57,7 +58,7 @@ class VilkårsvurderingSteg(
         }
 
         // midlertidig validering for helmanuell migrering
-        if (behandling.erHelmanuellMigrering()) {
+        if (behandling.erHelmanuellMigrering() && !featureToggleService.isEnabled(KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED)) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
             val finnesDeltBosted = vilkårsvurdering.personResultater.any {
                 it.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER }
