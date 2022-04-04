@@ -1122,6 +1122,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetFlereBarnErBlittNorskeStatsborgere"
     },
+    FORTSATT_INNVILGET_OPPDATERT_KONTO_OPPLYSNINGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetOppdatertKontoOpplysninger"
+    },
+    FORTSATT_INNVILGET_ADRESSE_REGISTRERT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetAdresseRegistrert"
+    },
     ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingDeltBostedFullUtbetalingForSoknad"
