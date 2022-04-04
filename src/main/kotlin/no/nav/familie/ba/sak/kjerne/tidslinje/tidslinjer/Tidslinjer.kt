@@ -85,7 +85,7 @@ class Tidslinjer(
             }
 
         override val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-            vilkårsresultatMånedTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator())
+            vilkårsresultatMånedTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator()::kombiner)
     }
 
     class BarnetsTidslinjerTimeline(
@@ -100,20 +100,20 @@ class Tidslinjer(
             }
 
         override val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-            vilkårsresultatMånedTidslinjer.kombiner(BarnOppfyllerVilkårKombinator())
+            vilkårsresultatMånedTidslinjer.kombiner(BarnOppfyllerVilkårKombinator()::kombiner)
 
         override val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             oppfyllerVilkårTidslinje.kombinerMed(
                 tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje,
-                BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()
+                BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()::kombiner
             )
 
         val regelverkMidlertidigTidslinje: Tidslinje<Regelverk, Måned> =
-            RegelverkPeriodeTidslinje(vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator())).komprimer()
+            RegelverkPeriodeTidslinje(vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator()::kombiner)).komprimer()
 
         override val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje.kombinerMed(
             regelverkMidlertidigTidslinje,
-            RegelverkOgOppfyltePerioderKombinator()
+            RegelverkOgOppfyltePerioderKombinator()::kombiner
         )
     }
 }
