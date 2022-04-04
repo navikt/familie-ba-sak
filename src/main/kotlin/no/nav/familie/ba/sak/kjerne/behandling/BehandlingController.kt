@@ -119,7 +119,7 @@ class BehandlingController(
     fun hentPersonerMedUgyldigEtterbetalingsperiode(
         @PathVariable behandlingId: Long
     ): ResponseEntity<Ressurs<List<String>>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "hent gyldig etterbetaling"
