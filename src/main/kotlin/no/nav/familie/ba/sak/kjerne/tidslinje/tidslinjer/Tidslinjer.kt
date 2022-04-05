@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -84,7 +85,7 @@ class Tidslinjer(
             }
 
         override val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-            vilkårsresultatMånedTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator())
+            vilkårsresultatMånedTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator()::kombiner)
     }
 
     class BarnetsTidslinjerTimeline(
@@ -99,20 +100,20 @@ class Tidslinjer(
             }
 
         override val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-            vilkårsresultatMånedTidslinjer.kombiner(BarnOppfyllerVilkårKombinator())
+            vilkårsresultatMånedTidslinjer.kombiner(BarnOppfyllerVilkårKombinator()::kombiner)
 
         override val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             oppfyllerVilkårTidslinje.kombinerMed(
                 tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje,
-                BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()
+                BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()::kombiner
             )
 
         val regelverkMidlertidigTidslinje: Tidslinje<Regelverk, Måned> =
-            vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator())
+            RegelverkPeriodeTidslinje(vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator()::kombiner)).komprimer()
 
         override val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje.kombinerMed(
             regelverkMidlertidigTidslinje,
-            RegelverkOgOppfyltePerioderKombinator()
+            RegelverkOgOppfyltePerioderKombinator()::kombiner
         )
     }
 }

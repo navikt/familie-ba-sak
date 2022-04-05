@@ -41,40 +41,37 @@ fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) =
  */
 object TilkjentYtelseValidering {
 
-    fun validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
+    fun finnAktørIderMedUgyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         kravDato: LocalDateTime,
-    ) {
+    ): List<String> {
         val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato)
 
         val aktørIder =
             hentAktørIderForDenneOgForrigeBehandling(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
 
-        val erUgyldigEtterbetaling =
-            aktørIder.any { aktørId ->
+        val personerMedUgyldigEtterbetaling =
+            aktørIder.mapNotNull { aktørId ->
                 val andelerTilkjentYtelseForPerson = andelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
                 val forrigeAndelerTilkjentYtelseForPerson =
                     forrigeAndelerTilkjentYtelse?.filter { it.aktør.aktørId == aktørId }
 
-                erUgyldigEtterbetalingPåPerson(
+                val etterbetalingErUgyldig = erUgyldigEtterbetalingPåPerson(
                     forrigeAndelerTilkjentYtelseForPerson,
                     andelerTilkjentYtelseForPerson,
                     gyldigEtterbetalingFom
                 )
+
+                if (etterbetalingErUgyldig) {
+                    aktørId
+                } else null
             }
 
-        if (erUgyldigEtterbetaling) {
-            throw UtbetalingsikkerhetFeil(
-                melding = "Utbetalingsperioder for en eller flere personer går mer enn 3 år tilbake i tid.",
-                frontendFeilmelding =
-                "Utbetalingsperioder for en eller flere personer går mer enn 3 år tilbake i tid. Du må henlegge " +
-                    "behandlingen og behandle saken i Infotrygd."
-            )
-        }
+        return personerMedUgyldigEtterbetaling
     }
 
-    private fun hentAktørIderForDenneOgForrigeBehandling(
+    fun hentAktørIderForDenneOgForrigeBehandling(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?
     ): Set<String> {
@@ -84,7 +81,7 @@ object TilkjentYtelseValidering {
         return (aktørIderFraAndeler + aktøerIderFraForrigeAndeler).toSet()
     }
 
-    private fun erUgyldigEtterbetalingPåPerson(
+    fun erUgyldigEtterbetalingPåPerson(
         forrigeAndelerForPerson: List<AndelTilkjentYtelse>?,
         andelerForPerson: List<AndelTilkjentYtelse>,
         gyldigEtterbetalingFom: YearMonth?
@@ -107,7 +104,7 @@ object TilkjentYtelseValidering {
             val erLagtTilSegmentFørGyldigEtterbetalingsdato =
                 segmenterLagtTil.any { it.value.stønadFom < gyldigEtterbetalingFom }
 
-            return erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
+            erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
         }
     }
 

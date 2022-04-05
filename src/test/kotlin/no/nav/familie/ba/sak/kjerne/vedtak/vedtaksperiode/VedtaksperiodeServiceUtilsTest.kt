@@ -278,6 +278,7 @@ class VedtaksperiodeServiceUtilsTest {
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
             erIngenOverlappVedtaksperiodeTogglePå = true,
+            minimerteUtbetalingsperiodeDetaljer = listOf()
         )
 
         Assertions.assertEquals(
@@ -330,6 +331,7 @@ class VedtaksperiodeServiceUtilsTest {
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
             erIngenOverlappVedtaksperiodeTogglePå = true,
+            minimerteUtbetalingsperiodeDetaljer = listOf()
         )
 
         Assertions.assertEquals(
