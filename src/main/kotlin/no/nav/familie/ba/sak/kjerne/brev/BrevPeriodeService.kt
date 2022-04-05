@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
-import no.nav.familie.ba.sak.common.erDagenFør
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -91,7 +88,7 @@ class BrevPeriodeService(
                 vedtaksperiodeMedBegrunnelser,
                 andelerTilkjentYtelse
             ),
-            endredeAndeler = endredeUtbetalingAndeler.filter { it.tom?.sisteDagIInneværendeMåned()?.erDagenFør(minimertVedtaksperiode.fom?.førsteDagIInneværendeMåned()) == true }
+            endredeAndeler = endredeUtbetalingAndeler
         )
 
         if (skalLogge) {
