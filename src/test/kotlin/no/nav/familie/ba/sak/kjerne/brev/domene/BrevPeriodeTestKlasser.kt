@@ -106,14 +106,14 @@ data class UtbetalingPåPerson(
 data class EndretRestUtbetalingAndelPåPerson(
     val periode: MånedPeriode,
     val årsak: Årsak,
-    val soknadstidspunkt: LocalDate = LocalDate.now()
+    val søknadstidspunkt: LocalDate = LocalDate.now()
 ) {
     fun tilMinimertRestEndretUtbetalingAndel(personIdent: String) =
         MinimertRestEndretAndel(
             personIdent = personIdent,
             periode = periode,
             årsak = årsak,
-            søknadstidspunkt = soknadstidspunkt
+            søknadstidspunkt = søknadstidspunkt
         )
 }
 
