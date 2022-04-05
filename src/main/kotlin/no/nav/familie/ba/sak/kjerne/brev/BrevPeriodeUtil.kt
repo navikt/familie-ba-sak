@@ -90,7 +90,7 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
     barnPersonIdentMedReduksjon: List<String> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean,
     brevMålform: Målform,
-    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
+    erIngenOverlappVedtaksperiodeTogglePå: Boolean
 ): BrevPeriode? {
     val brevPeriodeGrunnlagMedPersoner =
         this.tilBrevPeriodeGrunnlagMedPersoner(

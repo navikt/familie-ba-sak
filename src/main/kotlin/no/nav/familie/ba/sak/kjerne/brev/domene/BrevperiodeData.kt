@@ -14,7 +14,7 @@ data class BrevperiodeData(
     val brevMålform: Målform,
     val minimertVedtaksperiode: MinimertVedtaksperiode,
     val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
-    val barnPersonIdentMedReduksjon: List<String> = emptyList(),
+    val barnPersonIdentMedReduksjon: List<String> = emptyList()
 ) : Comparable<BrevperiodeData> {
     fun hentBegrunnelserOgFritekster(erIngenOverlappVedtaksperiodeTogglePå: Boolean): List<Begrunnelse> =
         minimertVedtaksperiode
@@ -29,8 +29,7 @@ data class BrevperiodeData(
                 restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
                 uregistrerteBarn = this.uregistrerteBarn,
                 brevMålform = this.brevMålform,
-                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
-
+                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå
             )
 
     fun tilBrevperiodeForLogging() =

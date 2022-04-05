@@ -87,7 +87,7 @@ class BrevPeriodeService(
             barnPersonIdentMedReduksjon = hentBarnsPersonIdentMedRedusertPeriode(
                 vedtaksperiodeMedBegrunnelser,
                 andelerTilkjentYtelse
-            ),
+            )
         )
 
         if (skalLogge) {

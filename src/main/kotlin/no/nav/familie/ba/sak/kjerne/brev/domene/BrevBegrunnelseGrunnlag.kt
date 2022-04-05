@@ -50,7 +50,7 @@ data class BrevBegrunnelseGrunnlag(
             standardbegrunnelse = this.standardbegrunnelse,
             vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
             triggesAv = this.triggesAv,
-            personIdenter = personidenterGjeldendeForBegrunnelse.toList(),
+            personIdenter = personidenterGjeldendeForBegrunnelse.toList()
         )
     }
 
