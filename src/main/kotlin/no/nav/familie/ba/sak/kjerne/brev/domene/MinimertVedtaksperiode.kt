@@ -24,7 +24,7 @@ data class MinimertVedtaksperiode(
         erUregistrerteBarnPåbehandling: Boolean,
         barnPersonIdentMedReduksjon: List<String> = emptyList(),
         erIngenOverlappVedtaksperiodeTogglePå: Boolean,
-        endredeAndelerSomPåvirkerPeriode: List<EndretUtbetalingAndel>
+        endredeAndeler: List<EndretUtbetalingAndel>
     ): BrevPeriodeGrunnlagMedPersoner {
         return BrevPeriodeGrunnlagMedPersoner(
             fom = this.fom,
@@ -45,7 +45,7 @@ data class MinimertVedtaksperiode(
                     erUregistrerteBarnPåbehandling = erUregistrerteBarnPåbehandling,
                     barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
                     erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
-                    endredeAndelerSomPåvirkerPeriode = endredeAndelerSomPåvirkerPeriode
+                    endredeAndeler = endredeAndeler
                 )
             },
             fritekster = this.fritekster,

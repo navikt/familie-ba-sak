@@ -91,7 +91,7 @@ class BrevPeriodeService(
                 vedtaksperiodeMedBegrunnelser,
                 andelerTilkjentYtelse
             ),
-            endredeAndelerSomPåvirkerPeriode = endredeUtbetalingAndeler.filter { it.tom?.sisteDagIInneværendeMåned()?.erDagenFør(minimertVedtaksperiode.fom?.førsteDagIInneværendeMåned()) == true }
+            endredeAndeler = endredeUtbetalingAndeler.filter { it.tom?.sisteDagIInneværendeMåned()?.erDagenFør(minimertVedtaksperiode.fom?.førsteDagIInneværendeMåned()) == true }
         )
 
         if (skalLogge) {

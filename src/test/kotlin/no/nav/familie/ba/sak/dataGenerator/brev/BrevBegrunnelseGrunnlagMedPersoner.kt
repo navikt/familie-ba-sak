@@ -12,13 +12,13 @@ fun lagBrevBegrunnelseGrunnlagMedPersoner(
     vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
     triggesAv: TriggesAv = lagTriggesAv(),
     personIdenter: List<String> = emptyList(),
-    endredeAndelerSomPåvirkerPeriode: List<EndretUtbetalingAndel> = emptyList()
+    endredeAndeler: List<EndretUtbetalingAndel> = emptyList()
 ): BrevBegrunnelseGrunnlagMedPersoner {
     return BrevBegrunnelseGrunnlagMedPersoner(
         standardbegrunnelse = standardbegrunnelse,
         vedtakBegrunnelseType = vedtakBegrunnelseType,
         triggesAv = triggesAv,
         personIdenter = personIdenter,
-        endredeAndelerSomPåvirkerPeriode = endredeAndelerSomPåvirkerPeriode
+        endredeAndeler = endredeAndeler
     )
 }

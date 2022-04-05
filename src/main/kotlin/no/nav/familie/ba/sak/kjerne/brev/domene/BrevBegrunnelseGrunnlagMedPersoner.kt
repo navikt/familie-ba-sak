@@ -14,7 +14,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
     val vedtakBegrunnelseType: VedtakBegrunnelseType,
     val triggesAv: TriggesAv,
     val personIdenter: List<String>,
-    val endredeAndelerSomPåvirkerPeriode: List<EndretUtbetalingAndel>
+    val endredeAndeler: List<EndretUtbetalingAndel>
 ) : Comparable<BrevBegrunnelseGrunnlagMedPersoner> {
     fun hentAntallBarnForBegrunnelse(
         uregistrerteBarn: List<MinimertUregistrertBarn>,

@@ -68,6 +68,6 @@ private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtakspe
             type = type
         ),
         uregistrerteBarn = emptyList(),
-        endredeAndelerSomPåvirkerPeriode = emptyList()
+        endredeAndeler = emptyList()
     )
 }
