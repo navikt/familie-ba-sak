@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class EndringstidspunktSerivce(
+class EndringstidspunktService(
     private val behandlingRepository: BehandlingRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
