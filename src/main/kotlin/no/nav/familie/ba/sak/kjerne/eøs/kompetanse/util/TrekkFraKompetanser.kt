@@ -3,7 +3,12 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.inneholder
 
+/**
+ * Reduser innholdet i this-kompetansen med innholdet i oppdaterKompetanse
+ * En viktig forutsetning er at oppdatertKompetanse alltid er "mindre" enn kompetansen som reduseres
+ */
 fun Kompetanse.trekkFra(oppdatertKompetanse: Kompetanse): Collection<Kompetanse> {
+
     val gammelKompetanse = this
     val kompetanseForRestBarn = gammelKompetanse
         .copy(

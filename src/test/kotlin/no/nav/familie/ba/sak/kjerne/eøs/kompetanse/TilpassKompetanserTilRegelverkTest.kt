@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRe
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.somRegelverk
@@ -26,7 +28,7 @@ class TilpassKompetanserTilRegelverkTest {
         val kompetanser: List<Kompetanse> = emptyList()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk()
+            barn1.aktør to "EEENNEEEE".tilRegelverkTidslinje(jan2020)
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
@@ -58,7 +60,7 @@ class TilpassKompetanserTilRegelverkTest {
             .byggKompetanser()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk()
+            barn1.aktør to "EEENNEEEE".tilRegelverkTidslinje(jan2020)
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
@@ -125,3 +127,6 @@ class TilpassKompetanserTilRegelverkTest {
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 }
+
+fun <T : Tidsenhet> String.tilRegelverkTidslinje(start: Tidspunkt<T>) =
+    this.tilCharTidslinje(start).somRegelverk()

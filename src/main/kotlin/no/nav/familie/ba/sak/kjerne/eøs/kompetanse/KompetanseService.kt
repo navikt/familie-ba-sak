@@ -42,6 +42,7 @@ class KompetanseService(
 
         tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(gjeldendeKompetanse.behandlingId)
 
+        // Denne brukes ikke av controlleren, og bør nok endres til ikke å returnere noe
         return hentKompetanser(oppdatertKompetanse.behandlingId)
     }
 
@@ -59,6 +60,7 @@ class KompetanseService(
 
         tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId)
 
+        // Denne brukes ikke av controlleren, og bør nok endres til ikke å returnere noe
         return hentKompetanser(behandlingId)
     }
 
@@ -72,6 +74,7 @@ class KompetanseService(
 
         lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
 
+        // Denne brukes ikke av klienten, og bør nok endres til ikke å returnere noe
         return hentKompetanser(behandlingId)
     }
 
