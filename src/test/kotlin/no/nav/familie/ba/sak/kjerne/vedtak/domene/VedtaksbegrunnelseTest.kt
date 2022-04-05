@@ -49,6 +49,7 @@ class VedtaksbegrunnelseTest {
             brevMålform = målform,
             uregistrerteBarn = emptyList(),
             minimerteUtbetalingsperiodeDetaljer = emptyList(),
+            minimerteRestEndredeAndeler = emptyList()
         ) as BegrunnelseData
 
         Assertions.assertEquals(true, brevbegrunnelse.gjelderSoker)
@@ -85,6 +86,7 @@ class VedtaksbegrunnelseTest {
             brevMålform = målform,
             uregistrerteBarn = uregistrerteBarn,
             minimerteUtbetalingsperiodeDetaljer = emptyList(),
+            minimerteRestEndredeAndeler = emptyList()
         ) as BegrunnelseData
 
         Assertions.assertEquals(false, brevbegrunnelse.gjelderSoker)
