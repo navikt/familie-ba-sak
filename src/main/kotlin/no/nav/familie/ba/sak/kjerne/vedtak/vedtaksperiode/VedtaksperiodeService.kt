@@ -310,15 +310,35 @@ class VedtaksperiodeService(
             opphørsperioder
         )
 
-        val oppdatertUtbetalingsperiode =
+        val oppdatertUtbetalingsperioder =
             finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
 
-        val endringstidspunkt = if (manueltOverstyrtEndringstidspunkt != null) manueltOverstyrtEndringstidspunkt
-        else if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT) && !gjelderFortsattInnvilget)
-            endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
-        else TIDENES_MORGEN
+        return filtrerUtPerioderBasertPåEndringstidspunkt(
+            vedtak.behandling.id,
+            oppdatertUtbetalingsperioder,
+            endredeUtbetalingsperioder,
+            opphørsperioder,
+            avslagsperioder,
+            gjelderFortsattInnvilget,
+            manueltOverstyrtEndringstidspunkt
+        )
+    }
 
-        return (oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder)
+    fun filtrerUtPerioderBasertPåEndringstidspunkt(
+        behandlingId: Long,
+        oppdatertUtbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
+        endredeUtbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
+        opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
+        avslagsperioder: List<VedtaksperiodeMedBegrunnelser>,
+        gjelderFortsattInnvilget: Boolean = false,
+        manueltOverstyrtEndringstidspunkt: LocalDate? = null
+    ): List<VedtaksperiodeMedBegrunnelser> {
+        val endringstidspunkt = manueltOverstyrtEndringstidspunkt
+            ?: if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT) && !gjelderFortsattInnvilget)
+                endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
+            else TIDENES_MORGEN
+
+        return (oppdatertUtbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder)
             .filter {
                 (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
             } + avslagsperioder

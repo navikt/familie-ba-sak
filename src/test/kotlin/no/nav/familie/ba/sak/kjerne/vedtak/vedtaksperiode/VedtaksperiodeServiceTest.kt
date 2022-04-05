@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -65,7 +66,7 @@ class VedtaksperiodeServiceTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
 
     val søkerFnr = randomFnr()
@@ -548,5 +549,54 @@ class VedtaksperiodeServiceTest(
         assertEquals(LocalDate.of(2021, 4, 30), redusertePerioder.first().tom)
         assertEquals(LocalDate.of(2021, 6, 1), redusertePerioder.last().fom)
         assertEquals(LocalDate.of(2021, 7, 31), redusertePerioder.last().tom)
+    }
+
+    @Test
+    fun `generere vedtaksperioder basert på manuelt overstyrt endringstidspunkt`() {
+        val vedtak = lagVedtak()
+        val behandlingId = vedtak.behandling.id
+        val avslagsperioder = listOf(
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak,
+                LocalDate.of(2021, 1, 1),
+                LocalDate.of(2021, 4, 30),
+                Vedtaksperiodetype.AVSLAG
+            )
+        )
+        val utbetalingsperioder = listOf(
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak,
+                LocalDate.of(2021, 1, 1),
+                LocalDate.of(2021, 2, 28),
+                Vedtaksperiodetype.UTBETALING
+            ),
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak,
+                LocalDate.of(2021, 3, 1),
+                LocalDate.of(2021, 7, 31),
+                Vedtaksperiodetype.UTBETALING
+            )
+        )
+        val vedtaksperioder = vedtaksperiodeService.filtrerUtPerioderBasertPåEndringstidspunkt(
+            behandlingId, utbetalingsperioder, emptyList(),
+            emptyList(), avslagsperioder, false, LocalDate.of(2021, 3, 1)
+        )
+
+        assertNotNull(vedtaksperioder)
+        assertEquals(2, vedtaksperioder.size)
+        assertTrue {
+            vedtaksperioder.any {
+                it.fom == LocalDate.of(2021, 1, 1) &&
+                    it.tom == LocalDate.of(2021, 4, 30) &&
+                    it.type == Vedtaksperiodetype.AVSLAG
+            }
+        }
+        assertTrue {
+            vedtaksperioder.any {
+                it.fom == LocalDate.of(2021, 3, 1) &&
+                    it.tom == LocalDate.of(2021, 7, 31) &&
+                    it.type == Vedtaksperiodetype.UTBETALING
+            }
+        }
     }
 }
