@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
@@ -79,7 +80,7 @@ class BehandlingsresultatSteg(
         val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
         validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler)
-        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndeler)
+        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndelerMedÅrsakDeltBosted = endretUtbetalingAndeler.filter { it.årsak == Årsak.DELT_BOSTED })
 
         if (!featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)) {
             validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
