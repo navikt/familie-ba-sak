@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.dataGenerator.brev
 
 import no.nav.familie.ba.sak.common.lagTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -11,11 +12,13 @@ fun lagBrevBegrunnelseGrunnlagMedPersoner(
     vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
     triggesAv: TriggesAv = lagTriggesAv(),
     personIdenter: List<String> = emptyList(),
+    endredeAndelerSomPåvirkerPeriode: List<EndretUtbetalingAndel> = emptyList()
 ): BrevBegrunnelseGrunnlagMedPersoner {
     return BrevBegrunnelseGrunnlagMedPersoner(
         standardbegrunnelse = standardbegrunnelse,
         vedtakBegrunnelseType = vedtakBegrunnelseType,
         triggesAv = triggesAv,
-        personIdenter = personIdenter
+        personIdenter = personIdenter,
+        endredeAndelerSomPåvirkerPeriode = endredeAndelerSomPåvirkerPeriode
     )
 }

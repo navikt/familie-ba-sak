@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
@@ -84,6 +85,7 @@ data class BegrunnelseData(
     val maalform: String,
     val apiNavn: String,
     val belop: String,
+    val soknadstidspunkt: String
 ) : Begrunnelse
 
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
@@ -132,6 +134,8 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
 
     val beløp = this.hentBeløp(gjelderSøker, minimerteUtbetalingsperiodeDetaljer)
 
+    val søknadstidspunkt = this.endredeAndelerSomPåvirkerPeriode.find { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
+
     this.validerBrevbegrunnelse(
         gjelderSøker = gjelderSøker,
         barnasFødselsdatoer = barnasFødselsdatoer,
@@ -150,7 +154,8 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
         maalform = brevMålform.tilSanityFormat(),
         apiNavn = this.standardbegrunnelse.sanityApiNavn,
-        belop = Utils.formaterBeløp(beløp)
+        belop = Utils.formaterBeløp(beløp),
+        soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: ""
     )
 }
 

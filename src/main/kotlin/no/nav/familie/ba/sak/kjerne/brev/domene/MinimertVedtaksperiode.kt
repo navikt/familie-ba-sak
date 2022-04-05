@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriodeTestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -23,6 +24,7 @@ data class MinimertVedtaksperiode(
         erUregistrerteBarnPåbehandling: Boolean,
         barnPersonIdentMedReduksjon: List<String> = emptyList(),
         erIngenOverlappVedtaksperiodeTogglePå: Boolean,
+        endredeAndelerSomPåvirkerPeriode: List<EndretUtbetalingAndel>
     ): BrevPeriodeGrunnlagMedPersoner {
         return BrevPeriodeGrunnlagMedPersoner(
             fom = this.fom,
@@ -43,6 +45,7 @@ data class MinimertVedtaksperiode(
                     erUregistrerteBarnPåbehandling = erUregistrerteBarnPåbehandling,
                     barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
                     erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
+                    endredeAndelerSomPåvirkerPeriode = endredeAndelerSomPåvirkerPeriode
                 )
             },
             fritekster = this.fritekster,

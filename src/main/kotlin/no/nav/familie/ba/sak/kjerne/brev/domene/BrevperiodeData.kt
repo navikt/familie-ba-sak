@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -14,7 +15,8 @@ data class BrevperiodeData(
     val brevMålform: Målform,
     val minimertVedtaksperiode: MinimertVedtaksperiode,
     val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
-    val barnPersonIdentMedReduksjon: List<String> = emptyList()
+    val barnPersonIdentMedReduksjon: List<String> = emptyList(),
+    val endredeAndelerSomPåvirkerPeriode: List<EndretUtbetalingAndel>
 ) : Comparable<BrevperiodeData> {
     fun hentBegrunnelserOgFritekster(erIngenOverlappVedtaksperiodeTogglePå: Boolean): List<Begrunnelse> =
         minimertVedtaksperiode
@@ -24,12 +26,13 @@ data class BrevperiodeData(
                 erUregistrerteBarnPåbehandling = this.uregistrerteBarn.isNotEmpty(),
                 barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
                 erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
+                endredeAndelerSomPåvirkerPeriode = endredeAndelerSomPåvirkerPeriode
             )
             .byggBegrunnelserOgFritekster(
                 restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
                 uregistrerteBarn = this.uregistrerteBarn,
                 brevMålform = this.brevMålform,
-                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå
+                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
             )
 
     fun tilBrevperiodeForLogging() =
