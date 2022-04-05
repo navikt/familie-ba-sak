@@ -313,24 +313,15 @@ class VedtaksperiodeService(
         val oppdatertUtbetalingsperiode =
             finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
 
-        return when {
-            manueltOverstyrtEndringstidspunkt != null -> {
-                (oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder).filter {
-                    (it.tom ?: TIDENES_ENDE).isSameOrAfter(manueltOverstyrtEndringstidspunkt)
-                } + avslagsperioder
-            }
-            else -> {
-                val endringstidspunkt =
-                    if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT) && !gjelderFortsattInnvilget)
-                        endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
-                    else TIDENES_MORGEN
+        val endringstidspunkt = if (manueltOverstyrtEndringstidspunkt != null) manueltOverstyrtEndringstidspunkt
+        else if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT) && !gjelderFortsattInnvilget)
+            endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
+        else TIDENES_MORGEN
 
-                (oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder)
-                    .filter {
-                        (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
-                    }
-            }
-        }
+        return (oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder)
+            .filter {
+                (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
+            } + avslagsperioder
     }
 
     @Transactional
