@@ -69,7 +69,7 @@ class KompetanseController(
     private fun validerOppdatering(gjeldendeKompetanse: Kompetanse, oppdatertKompetanse: Kompetanse) {
         if (oppdatertKompetanse.fom == null)
             throw FunksjonellFeil("Manglende fra-og-med", httpStatus = HttpStatus.BAD_REQUEST)
-        if (oppdatertKompetanse.fom > oppdatertKompetanse.tom)
+        if (oppdatertKompetanse.tom != null && oppdatertKompetanse.fom > oppdatertKompetanse.tom)
             throw FunksjonellFeil("Fra-og-med er etter til-og-med", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.barnAktører.isEmpty())
             throw FunksjonellFeil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)

@@ -39,4 +39,9 @@ fun RestKompetanse.tilKompetanse(barnAktører: List<Aktør>) = Kompetanse(
     fom = this.fom,
     tom = this.tom,
     barnAktører = barnAktører.toSet(),
+    søkersAktivitet = this.søkersAktivitet,
+    annenForeldersAktivitet = this.annenForeldersAktivitet,
+    annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
+    barnetsBostedsland = this.barnetsBostedsland,
+    resultat = this.resultat,
 )
