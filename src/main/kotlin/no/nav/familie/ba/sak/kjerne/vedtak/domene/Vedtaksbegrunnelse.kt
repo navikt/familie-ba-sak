@@ -139,15 +139,10 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
 
     val beløp = this.hentBeløp(gjelderSøker, minimerteUtbetalingsperiodeDetaljer)
 
-    val endringsperioder = when (this.standardbegrunnelse.vedtakBegrunnelseType) {
-        VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> {
-            minimerteRestEndredeAndeler.filter { it.periode.tom.sisteDagIInneværendeMåned()?.erDagenFør(vedtaksperiode.fom?.førsteDagIInneværendeMåned()) == true }
-        }
-        VedtakBegrunnelseType.ENDRET_UTBETALING -> {
-            minimerteRestEndredeAndeler.filter { it.erOverlappendeMed(vedtaksperiode.tilNullableMånedPeriode()) }
-        }
-        else -> emptyList()
-    }
+    val endringsperioder = this.standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
+        minimerteRestEndredeAndeler = minimerteRestEndredeAndeler,
+        vedtaksperiode = vedtaksperiode
+    )
 
     val søknadstidspunkt = endringsperioder.find { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
 
@@ -172,6 +167,22 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         belop = Utils.formaterBeløp(beløp),
         soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: ""
     )
+}
+
+private fun Standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
+    minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>,
+    vedtaksperiode: NullablePeriode
+) = when (this.vedtakBegrunnelseType) {
+    VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> {
+        minimerteRestEndredeAndeler.filter {
+            it.periode.tom.sisteDagIInneværendeMåned()
+                ?.erDagenFør(vedtaksperiode.fom?.førsteDagIInneværendeMåned()) == true
+        }
+    }
+    VedtakBegrunnelseType.ENDRET_UTBETALING -> {
+        minimerteRestEndredeAndeler.filter { it.erOverlappendeMed(vedtaksperiode.tilNullableMånedPeriode()) }
+    }
+    else -> emptyList()
 }
 
 private fun BrevBegrunnelseGrunnlagMedPersoner.validerBrevbegrunnelse(
