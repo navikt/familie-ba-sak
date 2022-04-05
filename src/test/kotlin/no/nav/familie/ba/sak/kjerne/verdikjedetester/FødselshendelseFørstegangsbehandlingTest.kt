@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -28,7 +28,7 @@ import java.time.LocalDate
 class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
-    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
@@ -60,7 +60,7 @@ class FødselshendelseFørstegangsbehandlingTest(
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
-            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
@@ -136,7 +136,7 @@ class FødselshendelseFørstegangsbehandlingTest(
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
-            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService

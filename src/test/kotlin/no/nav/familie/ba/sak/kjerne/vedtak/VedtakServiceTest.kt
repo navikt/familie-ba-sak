@@ -9,15 +9,17 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -48,6 +50,15 @@ import java.time.LocalDateTime
 class VedtakServiceTest(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
+
+    @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+
+    @Autowired
+    private val behandlingstemaService: BehandlingstemaService,
+
+    @Autowired
+    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
 
     @Autowired
     private val vedtakRepository: VedtakRepository,
@@ -89,9 +100,6 @@ class VedtakServiceTest(
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 
     @Autowired
-    private val oppgaveService: OppgaveService,
-
-    @Autowired
     private val infotrygdService: InfotrygdService,
 
     @Autowired
@@ -131,23 +139,22 @@ class VedtakServiceTest(
     fun setup() {
         behandlingService = BehandlingService(
             behandlingRepository,
-            andelTilkjentYtelseRepository,
+            behandlingHentOgPersisterService,
+            behandlingstemaService,
+            behandlingSøknadsinfoService,
+            behandlingMigreringsinfoRepository,
             behandlingMetrikker,
+            saksstatistikkEventPublisher,
             fagsakRepository,
             vedtakRepository,
             loggService,
             arbeidsfordelingService,
-            saksstatistikkEventPublisher,
-            oppgaveService,
             infotrygdService,
             vedtaksperiodeService,
             personidentService,
             featureToggleService,
             taskRepository,
-            behandlingMigreringsinfoRepository,
-            behandlingSøknadsinfoRepository,
             vilkårsvurderingService,
-            tidslinjeService,
         )
 
         val personAktørId = randomAktørId()

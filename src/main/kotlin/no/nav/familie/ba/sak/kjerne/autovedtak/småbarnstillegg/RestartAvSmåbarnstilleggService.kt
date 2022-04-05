@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -17,10 +17,10 @@ import java.time.YearMonth
 @Service
 class RestartAvSmåbarnstilleggService(
     private val fagsakRepository: FagsakRepository,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val opprettTaskService: OpprettTaskService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val behandlingService: BehandlingService,
 ) {
 
     /**
@@ -33,7 +33,8 @@ class RestartAvSmåbarnstilleggService(
         finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned().forEach { fagsakId ->
             logger.info("Oppretter 'vurder livshendelse'-oppgave på fagsak $fagsakId fordi småbarnstillegg har startet opp igjen denne måneden")
 
-            val sisteIverksatteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
+            val sisteIverksatteBehandling =
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
 
             if (sisteIverksatteBehandling != null) {
                 opprettTaskService.opprettOppgaveTask(
@@ -46,7 +47,7 @@ class RestartAvSmåbarnstilleggService(
     }
 
     fun finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(måned: YearMonth = YearMonth.now()): List<Long> {
-        return behandlingService.partitionByIverksatteBehandlinger {
+        return behandlingHentOgPersisterService.partitionByIverksatteBehandlinger {
             fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
                 iverksatteLøpendeBehandlinger = it,
                 stønadFom = måned
@@ -57,14 +58,15 @@ class RestartAvSmåbarnstilleggService(
     }
 
     private fun periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId: Long, måned: YearMonth): Boolean {
-        val vedtaksperioderForVedtatteBehandlinger = behandlingService.hentBehandlinger(fagsakId = fagsakId)
-            .filter { behandling ->
-                behandling.erVedtatt()
-            }
-            .flatMap { behandling ->
-                val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
-                vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-            }
+        val vedtaksperioderForVedtatteBehandlinger =
+            behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
+                .filter { behandling ->
+                    behandling.erVedtatt()
+                }
+                .flatMap { behandling ->
+                    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+                }
 
         val standardbegrunnelser = listOf(Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG)
 

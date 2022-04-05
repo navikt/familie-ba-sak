@@ -51,7 +51,7 @@ internal class TidslinjeTest {
         tidslinjer.forBarn(barn2).vilkårsresultatTidslinjer.print()
 
         println("Søker")
-        tidslinjer.søkersTidslinje().oppfyllerVilkårTidslinje.print()
+        tidslinjer.søkersTidslinjer().oppfyllerVilkårTidslinje.print()
         println("Barn: ${barn1.aktør.aktivFødselsnummer()}")
         tidslinjer.forBarn(barn1).regelverkTidslinje.print()
         println("Barn: ${barn2.aktør.aktivFødselsnummer()}")

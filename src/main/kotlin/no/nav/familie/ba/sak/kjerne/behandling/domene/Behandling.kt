@@ -372,9 +372,9 @@ enum class BehandlingType(val visningsnavn: String) {
     TEKNISK_ENDRING("Teknisk endring")
 }
 
-enum class BehandlingKategori(val visningsnavn: String) {
-    EØS("EØS"),
-    NASJONAL("Nasjonal");
+enum class BehandlingKategori(val visningsnavn: String, val nivå: Int) {
+    EØS("EØS", 2),
+    NASJONAL("Nasjonal", 1);
 
     fun tilOppgavebehandlingType(): OppgaveBehandlingType {
         return when (this) {
@@ -384,9 +384,11 @@ enum class BehandlingKategori(val visningsnavn: String) {
     }
 }
 
-enum class BehandlingUnderkategori(val visningsnavn: String) {
-    UTVIDET("Utvidet"),
-    ORDINÆR("Ordinær");
+fun List<BehandlingKategori?>.finnHøyesteKategori(): BehandlingKategori? = this.filterNotNull().maxByOrNull { it.nivå }
+
+enum class BehandlingUnderkategori(val visningsnavn: String, val nivå: Int) {
+    UTVIDET("Utvidet", 2),
+    ORDINÆR("Ordinær", 1);
 
     fun tilOppgaveBehandlingTema(): OppgaveBehandlingTema {
         return when (this) {
@@ -395,6 +397,9 @@ enum class BehandlingUnderkategori(val visningsnavn: String) {
         }
     }
 }
+
+fun List<BehandlingUnderkategori?>.finnHøyesteKategori(): BehandlingUnderkategori? =
+    this.filterNotNull().maxByOrNull { it.nivå }
 
 fun initStatus(): BehandlingStatus {
     return BehandlingStatus.UTREDES

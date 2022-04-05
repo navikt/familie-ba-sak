@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TilbakestillBehandlingService(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingService: BehandlingService,
     private val vilkårService: VilkårService,
     private val beregningService: BeregningService,
@@ -32,7 +34,7 @@ class TilbakestillBehandlingService(
         vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = bekreftEndringerViaFrontend,
-            forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
+            forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
                 behandling
             )
         )

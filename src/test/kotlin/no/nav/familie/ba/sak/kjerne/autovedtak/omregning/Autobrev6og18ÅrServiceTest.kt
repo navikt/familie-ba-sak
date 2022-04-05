@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -37,6 +38,7 @@ internal class Autobrev6og18ÅrServiceTest {
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val behandlingService = mockk<BehandlingService>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val infotrygdService = mockk<InfotrygdService>(relaxed = true)
     private val stegService = mockk<StegService>()
@@ -46,6 +48,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     private val autovedtakBrevService = AutovedtakBrevService(
         behandlingService = behandlingService,
+        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         fagsakService = fagsakService,
         autovedtakService = autovedtakService,
         vedtakService = vedtakService,
@@ -56,7 +59,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     private val autobrev6og18ÅrService = Autobrev6og18ÅrService(
         personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-        behandlingService = behandlingService,
+        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         autovedtakBrevService = autovedtakBrevService,
         autovedtakStegService = autovedtakStegService
     )
@@ -182,9 +185,9 @@ internal class Autobrev6og18ÅrServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(alder = alder, behandling)
 
         every { infotrygdService.harSendtbrev(any(), any()) } returns false
-        every { behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns behandling
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns behandling
         every { behandlingService.opprettBehandling(any()) } returns behandling
-        every { behandlingService.hentBehandlinger(any()) } returns emptyList()
+        every { behandlingHentOgPersisterService.hentBehandlinger(any()) } returns emptyList()
         every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns false
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns personopplysningGrunnlag
         return behandling

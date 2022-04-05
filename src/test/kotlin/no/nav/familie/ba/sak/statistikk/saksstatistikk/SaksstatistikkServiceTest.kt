@@ -20,8 +20,9 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
@@ -58,7 +59,10 @@ import java.time.temporal.ChronoUnit
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SaksstatistikkServiceTest(
     @MockK(relaxed = true)
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+
+    @MockK(relaxed = true)
+    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
 
     @MockK
     private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -92,7 +96,8 @@ internal class SaksstatistikkServiceTest(
 ) {
 
     private val sakstatistikkService = SaksstatistikkService(
-        behandlingService,
+        behandlingHentOgPersisterService,
+        behandlingSøknadsinfoService,
         arbeidsfordelingService,
         totrinnskontrollService,
         vedtakService,
@@ -100,7 +105,6 @@ internal class SaksstatistikkServiceTest(
         personopplysningerService,
         persongrunnlagService,
         vedtaksperiodeService,
-        featureToggleService,
         settPåVentService,
     )
 
@@ -132,7 +136,7 @@ internal class SaksstatistikkServiceTest(
             it.resultat = Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
         }
 
-        every { behandlingService.hent(any()) } returns behandling
+        every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
         every { vedtakService.hentAktivForBehandling(any()) } returns null
 
@@ -153,7 +157,7 @@ internal class SaksstatistikkServiceTest(
         val vedtaksperiodeMedBegrunnelser =
             lagVedtaksperiodeMedBegrunnelser()
 
-        every { behandlingService.hent(any()) } returns behandling
+        every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(
             vedtaksperiodeMedBegrunnelser
@@ -223,7 +227,7 @@ internal class SaksstatistikkServiceTest(
         val vedtaksperiodeMedBegrunnelser =
             lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, fom = vedtaksperiodeFom, tom = vedtaksperiodeTom)
 
-        every { behandlingService.hent(any()) } returns behandling
+        every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { persongrunnlagService.hentBarna(any<Behandling>()) } returns listOf(
             tilfeldigPerson()
@@ -236,7 +240,7 @@ internal class SaksstatistikkServiceTest(
         )
 
         val mottattDato = LocalDateTime.now()
-        every { behandlingService.hentSøknadMottattDato(any()) } returns mottattDato
+        every { behandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns mottattDato
 
         every { featureToggleService.isEnabled(any()) } returns true
 
@@ -308,7 +312,7 @@ internal class SaksstatistikkServiceTest(
             )
         )
 
-        every { behandlingService.hentAktivForFagsak(any()) } returns null
+        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
@@ -338,7 +342,7 @@ internal class SaksstatistikkServiceTest(
         )
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(tilAktør("12345678910")) } returns "SE"
 
-        every { behandlingService.hentAktivForFagsak(any()) } returns null
+        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
@@ -365,7 +369,7 @@ internal class SaksstatistikkServiceTest(
             tilfeldigPerson(personType = PersonType.SØKER)
         )
 
-        every { behandlingService.hentAktivForFagsak(any()) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns lagBehandling()
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))

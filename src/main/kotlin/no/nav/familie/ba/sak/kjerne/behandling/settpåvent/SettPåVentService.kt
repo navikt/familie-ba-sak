@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -15,11 +15,11 @@ import java.time.Period
 
 @Service
 class SettPåVentService(
-    val settPåVentRepository: SettPåVentRepository,
-    val behandlingService: BehandlingService,
-    val loggService: LoggService,
-    val oppgaveService: OppgaveService,
-    val toggleService: FeatureToggleService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+    private val settPåVentRepository: SettPåVentRepository,
+    private val loggService: LoggService,
+    private val oppgaveService: OppgaveService
 ) {
     fun finnAktivSettPåVentPåBehandling(behandlingId: Long): SettPåVent? {
         return settPåVentRepository.findByBehandlingIdAndAktiv(behandlingId, true)
@@ -33,28 +33,31 @@ class SettPåVentService(
     }
 
     @Transactional
+    fun lagreEllerOppdater(settPåVent: SettPåVent): SettPåVent {
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId = settPåVent.behandling.id)
+        return settPåVentRepository.save(settPåVent)
+    }
+
+    @Transactional
     fun settBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val gammelSettPåVent: SettPåVent? = finnAktivSettPåVentPåBehandling(behandlingId)
         validerBehandlingKanSettesPåVent(gammelSettPåVent, frist, behandling)
 
         loggService.opprettSettPåVentLogg(behandling, årsak.visningsnavn)
         logger.info("Sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
 
-        val settPåVent = settPåVentRepository.save(SettPåVent(behandling = behandling, frist = frist, årsak = årsak))
-        behandlingService.sendTilDvh(behandling)
-
         oppgaveService.forlengFristÅpneOppgaverPåBehandling(
             behandlingId = behandling.id,
             forlengelse = Period.between(LocalDate.now(), frist)
         )
 
-        return settPåVent
+        return lagreEllerOppdater(SettPåVent(behandling = behandling, frist = frist, årsak = årsak))
     }
 
     @Transactional
     fun oppdaterSettBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
 
         if (frist == aktivSettPåVent.frist && årsak == aktivSettPåVent.årsak) {
@@ -71,20 +74,17 @@ class SettPåVentService(
         val gammelFrist = aktivSettPåVent.frist
         aktivSettPåVent.frist = frist
         aktivSettPåVent.årsak = årsak
-        val settPåVent = settPåVentRepository.save(aktivSettPåVent)
-
-        behandlingService.sendTilDvh(behandlingService.hent(behandlingId))
 
         oppgaveService.forlengFristÅpneOppgaverPåBehandling(
             behandlingId = behandlingId,
             forlengelse = Period.between(gammelFrist, frist)
         )
 
-        return settPåVentRepository.save(settPåVent)
+        return lagreEllerOppdater(aktivSettPåVent)
     }
 
     fun gjenopptaBehandling(behandlingId: Long, nå: LocalDate = LocalDate.now()): SettPåVent {
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val aktivSettPåVent =
             finnAktivSettPåVentPåBehandling(behandlingId)
                 ?: throw FunksjonellFeil(
@@ -97,16 +97,13 @@ class SettPåVentService(
 
         aktivSettPåVent.aktiv = false
         aktivSettPåVent.tidTattAvVent = nå
-        val settPåVent = settPåVentRepository.save(aktivSettPåVent)
-
-        behandlingService.sendTilDvh(behandling)
 
         oppgaveService.settFristÅpneOppgaverPåBehandlingTil(
             behandlingId = behandlingId,
             nyFrist = LocalDate.now().plusDays(1)
         )
 
-        return settPåVent
+        return lagreEllerOppdater(aktivSettPåVent)
     }
 
     companion object {

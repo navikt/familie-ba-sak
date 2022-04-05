@@ -80,6 +80,9 @@ class BehandlingIntegrationTest(
     private val behandlingService: BehandlingService,
 
     @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+
+    @Autowired
     private val personRepository: PersonRepository,
 
     @Autowired
@@ -134,7 +137,7 @@ class BehandlingIntegrationTest(
                 fnr
             )
         )
-        assertEquals(1, behandlingService.hentBehandlinger(fagsak.id).size)
+        assertEquals(1, behandlingHentOgPersisterService.hentBehandlinger(fagsak.id).size)
     }
 
     @Test
@@ -149,7 +152,7 @@ class BehandlingIntegrationTest(
         )
         assertEquals(
             1,
-            behandlingService.hentBehandlinger(fagsak.id).size
+            behandlingHentOgPersisterService.hentBehandlinger(fagsak.id).size
         )
     }
 
@@ -281,7 +284,7 @@ class BehandlingIntegrationTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         behandlingService.opprettBehandling(nyOrdinærBehandling(morId))
 
-        assertEquals(1, behandlingService.hentBehandlinger(fagsakId = fagsak.id).size)
+        assertEquals(1, behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).size)
 
         behandlingService.opprettBehandling(
             NyBehandling(
@@ -294,7 +297,7 @@ class BehandlingIntegrationTest(
             )
         )
 
-        val behandlinger = behandlingService.hentBehandlinger(fagsakId = fagsak.id)
+        val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id)
         assertEquals(1, behandlinger.size)
     }
 
@@ -677,7 +680,11 @@ class BehandlingIntegrationTest(
 
         vedtakService.oppdater(vedtak!!)
 
-        behandlingService.lagreEllerOppdater(behandling.also { it.resultat = Behandlingsresultat.AVSLÅTT })
+        behandlingHentOgPersisterService.lagreEllerOppdater(
+            behandling.also {
+                it.resultat = Behandlingsresultat.AVSLÅTT
+            }
+        )
 
         val behandlingDvhMeldinger = saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
             .filter { it.type == SaksstatistikkMellomlagringType.BEHANDLING }

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.ETTERBETALING_3ÅR
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BehandlingsresultatSteg(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingService: BehandlingService,
     private val simuleringService: SimuleringService,
     private val vedtakService: VedtakService,
@@ -64,7 +66,8 @@ class BehandlingsresultatSteg(
                 ETTERBETALING_3ÅR
             )
         ) {
-            val personerMedUgyldigEtterbetalingsperiode = tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
+            val personerMedUgyldigEtterbetalingsperiode =
+                tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
             if (personerMedUgyldigEtterbetalingsperiode.isNotEmpty()) {
                 throw UtbetalingsikkerhetFeil(
                     melding = "Utbetalingsperioder for en eller flere personer går mer enn 3 år tilbake i tid.",
@@ -97,7 +100,10 @@ class BehandlingsresultatSteg(
 
         val behandlingMedOppdatertBehandlingsresultat =
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
-                settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
+                behandlingService.oppdaterBehandlingsresultat(
+                    behandlingId = behandling.id,
+                    resultat = Behandlingsresultat.INNVILGET
+                )
             } else {
                 val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
                 behandlingService.oppdaterBehandlingsresultat(
@@ -117,7 +123,9 @@ class BehandlingsresultatSteg(
         if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting() ||
             beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
                     behandling = behandlingMedOppdatertBehandlingsresultat,
-                    sistIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandlingMedOppdatertBehandlingsresultat)
+                    sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
+                            behandling = behandlingMedOppdatertBehandlingsresultat
+                        )
                 )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
@@ -137,6 +145,6 @@ class BehandlingsresultatSteg(
 
     private fun settBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat): Behandling {
         behandling.resultat = resultat
-        return behandlingService.lagreEllerOppdater(behandling)
+        return behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
     }
 }

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.finnAktørIderMedUgyldigEtterbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -16,7 +16,7 @@ class TilkjentYtelseValideringService(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val personidentService: PersonidentService,
-    private val behandlingService: BehandlingService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) {
     fun validerAtIngenUtbetalingerOverstiger100Prosent(behandling: Behandling) {
         if (behandling.erMigrering() || behandling.erTekniskEndring()) return
@@ -55,7 +55,12 @@ class TilkjentYtelseValideringService(
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandlingService.hent(behandlingId))
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
+                behandling = behandlingHentOgPersisterService.hent(
+                    behandlingId
+                )
+            )
         val forrigeAndelerTilkjentYtelse =
             forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }?.andelerTilkjentYtelse?.toList()
 
