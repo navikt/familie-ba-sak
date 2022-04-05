@@ -68,6 +68,5 @@ private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtakspe
             type = type
         ),
         uregistrerteBarn = emptyList(),
-        endredeAndeler = emptyList()
     )
 }

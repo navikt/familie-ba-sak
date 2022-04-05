@@ -19,6 +19,5 @@ fun lagBrevBegrunnelseGrunnlagMedPersoner(
         vedtakBegrunnelseType = vedtakBegrunnelseType,
         triggesAv = triggesAv,
         personIdenter = personIdenter,
-        endredeAndeler = endredeAndeler
     )
 }

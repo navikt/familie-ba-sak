@@ -73,7 +73,6 @@ fun hentBrevPerioder(
             brevMålform = it.brevMålform,
             erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
             barnPersonIdentMedReduksjon = it.barnPersonIdentMedReduksjon,
-            endredeAndeler = it.endredeAndeler
         )
     }
 
@@ -92,7 +91,6 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     brevMålform: Målform,
     erIngenOverlappVedtaksperiodeTogglePå: Boolean,
-    endredeAndeler: List<EndretUtbetalingAndel>
 ): BrevPeriode? {
     val brevPeriodeGrunnlagMedPersoner =
         this.tilBrevPeriodeGrunnlagMedPersoner(
@@ -101,7 +99,6 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
             erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
             barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
             erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
-            endredeAndeler = endredeAndeler
         )
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(

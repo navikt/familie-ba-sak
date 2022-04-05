@@ -88,7 +88,6 @@ class BrevPeriodeService(
                 vedtaksperiodeMedBegrunnelser,
                 andelerTilkjentYtelse
             ),
-            endredeAndeler = endredeUtbetalingAndeler
         )
 
         if (skalLogge) {

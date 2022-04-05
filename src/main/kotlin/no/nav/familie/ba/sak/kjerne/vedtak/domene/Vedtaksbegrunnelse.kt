@@ -1,19 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.beløpUtbetaltFor
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
@@ -101,7 +99,8 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     personerIPersongrunnlag: List<MinimertRestPerson>,
     brevMålform: Målform,
     uregistrerteBarn: List<MinimertUregistrertBarn>,
-    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
+    minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>
 ): Begrunnelse {
     val personerPåBegrunnelse =
         personerIPersongrunnlag.filter { person -> this.personIdenter.contains(person.personIdent) }
@@ -142,10 +141,10 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
 
     val endringsperioder = when (this.standardbegrunnelse.vedtakBegrunnelseType) {
         VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> {
-            this.endredeAndeler.filter { it.tom?.sisteDagIInneværendeMåned()?.erDagenFør(vedtaksperiode.fom?.førsteDagIInneværendeMåned()) == true }
+            minimerteRestEndredeAndeler.filter { it.periode.tom.sisteDagIInneværendeMåned()?.erDagenFør(vedtaksperiode.fom?.førsteDagIInneværendeMåned()) == true }
         }
         VedtakBegrunnelseType.ENDRET_UTBETALING -> {
-            this.endredeAndeler.filter { it.overlapperMed(periode = MånedPeriode(fom = (vedtaksperiode.fom ?: TIDENES_MORGEN).toYearMonth(), tom = (vedtaksperiode.tom ?: TIDENES_ENDE).toYearMonth())) }
+            minimerteRestEndredeAndeler.filter { it.erOverlappendeMed(vedtaksperiode.tilNullableMånedPeriode()) }
         }
         else -> emptyList()
     }

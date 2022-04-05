@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -23,7 +22,6 @@ data class BrevBegrunnelseGrunnlag(
         barnPersonIdentMedReduksjon: List<String>,
         erIngenOverlappVedtaksperiodeTogglePå: Boolean,
         minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
-        endredeAndeler: List<EndretUtbetalingAndel>
     ): BrevBegrunnelseGrunnlagMedPersoner {
         val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = this.triggesAv,
@@ -53,7 +51,6 @@ data class BrevBegrunnelseGrunnlag(
             vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
             triggesAv = this.triggesAv,
             personIdenter = personidenterGjeldendeForBegrunnelse.toList(),
-            endredeAndeler = endredeAndeler
         )
     }
 

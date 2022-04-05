@@ -106,12 +106,14 @@ data class UtbetalingPåPerson(
 data class EndretRestUtbetalingAndelPåPerson(
     val periode: MånedPeriode,
     val årsak: Årsak,
+    val soknadstidspunkt: LocalDate = LocalDate.now()
 ) {
     fun tilMinimertRestEndretUtbetalingAndel(personIdent: String) =
         MinimertRestEndretAndel(
             personIdent = personIdent,
             periode = periode,
-            årsak = årsak
+            årsak = årsak,
+            søknadstidspunkt = soknadstidspunkt
         )
 }
 
@@ -138,7 +140,7 @@ data class BegrunnelseDataTestConfig(
     val maalform: String,
     val apiNavn: String,
     val belop: Int,
-    val søknadstidspunkt: String,
+    val soknadstidspunkt: String?,
 ) : TestBegrunnelse {
 
     fun tilBegrunnelseData() = BegrunnelseData(
@@ -153,7 +155,7 @@ data class BegrunnelseDataTestConfig(
         maanedOgAarBegrunnelsenGjelderFor = this.maanedOgAarBegrunnelsenGjelderFor,
         maalform = this.maalform,
         apiNavn = this.apiNavn,
-        soknadstidspunkt = this.søknadstidspunkt
+        soknadstidspunkt = this.soknadstidspunkt ?: ""
     )
 }
 
