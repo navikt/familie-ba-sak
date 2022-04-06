@@ -7,11 +7,11 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
 class KompetanseBuilder(
-    val startMåned: MånedTidspunkt = jan(2020)
+    val startMåned: Tidspunkt<Måned> = jan(2020),
+    val behandlingId: Long = 1
 ) {
     val kompetanser: MutableList<Kompetanse> = mutableListOf()
 
@@ -33,7 +33,7 @@ class KompetanseBuilder(
     }
 
     fun byggKompetanser(): Collection<Kompetanse> = kompetanser
-        .mapIndexed { index, kompetanse -> kompetanse.also { it.id = (index + 1).toLong() } }
+        .map { kompetanse -> kompetanse.also { it.behandlingId = behandlingId } }
 }
 
 internal class KompetanseTidslinje(

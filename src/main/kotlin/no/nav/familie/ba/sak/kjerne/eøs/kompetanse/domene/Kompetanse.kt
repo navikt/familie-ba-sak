@@ -82,7 +82,7 @@ enum class KompetanseStatus {
     OK
 }
 
-fun Kompetanse.blankUt() = this.copy(
+fun Kompetanse.utenSkjema() = this.copy(
     søkersAktivitet = null,
     annenForeldersAktivitet = null,
     annenForeldersAktivitetsland = null,

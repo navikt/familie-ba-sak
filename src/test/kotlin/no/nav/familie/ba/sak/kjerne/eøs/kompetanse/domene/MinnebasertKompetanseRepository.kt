@@ -6,12 +6,12 @@ import java.util.concurrent.atomic.AtomicLong
 
 class MinnebasertKompetanseRepository {
 
-    val barn1 = Aktør("1111111111111")
-    val barn2 = Aktør("2222222222222")
-    val barn3 = Aktør("3333333333333")
+    private val barn1 = Aktør("1111111111111")
+    private val barn2 = Aktør("2222222222222")
+    private val barn3 = Aktør("3333333333333")
 
-    val kompetanseLøpenummer = AtomicLong()
-    fun AtomicLong.neste() = this.addAndGet(1)
+    private val kompetanseLøpenummer = AtomicLong()
+    private fun AtomicLong.neste() = this.addAndGet(1)
 
     private val malKompetanse = Kompetanse(
         fom = YearMonth.of(2021, 2),
@@ -48,7 +48,7 @@ class MinnebasertKompetanseRepository {
             return kompetanse
         } else {
             val nyId = kompetanseLøpenummer.neste()
-            kompetanser[nyId] = kompetanse.copy().also { it.id = nyId }
+            kompetanser[nyId] = kompetanse.also { it.id = nyId }
             return kompetanser[nyId]!!
         }
     }

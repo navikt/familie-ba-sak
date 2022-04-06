@@ -18,6 +18,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteEllerNull
 import java.time.YearMonth
 
 fun Collection<Kompetanse>.slåSammen(): Collection<Kompetanse> {
+
+    if (this.isEmpty())
+        return this
+
     val kompetanseSettTidslinje: Tidslinje<Set<Kompetanse>, Måned> = this.map { KompetanseTidslinje(it) }
         .kombiner {
             it.groupingBy { it.utenBarn() }.reduce { _, acc, kompetanse -> acc.leggSammenBarn(kompetanse) }

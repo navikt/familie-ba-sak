@@ -2,7 +2,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.blankUt
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.inneholder
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenSkjema
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.trekkFra
@@ -32,18 +33,26 @@ class KompetanseService(
 
     @Transactional
     fun oppdaterKompetanse(kompetanseId: Long, oppdatertKompetanse: Kompetanse): Collection<Kompetanse> {
-        val gjeldendeKompetanse = kompetanseRepository.getById(kompetanseId)
+        val kompetanseSomOppdateres = kompetanseRepository.getById(kompetanseId)
 
-        val kompetanserFratrukketOppdatering = gjeldendeKompetanse.trekkFra(oppdatertKompetanse)
-        val oppdaterteKompetanser = (kompetanserFratrukketOppdatering + oppdatertKompetanse)
-            .slåSammen().medBehandlingId(gjeldendeKompetanse.behandlingId)
+        if (!kompetanseSomOppdateres.utenSkjema().inneholder(oppdatertKompetanse.utenSkjema()))
+            throw IllegalArgumentException("Endringen er ikke innenfor kompetansen som endres")
 
-        lagreKompetanseDifferanse(listOf(gjeldendeKompetanse), oppdaterteKompetanser)
+        val behandlingId = kompetanseSomOppdateres.behandlingId
+        val gjeldendeKompetanser = hentKompetanser(behandlingId)
 
-        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(gjeldendeKompetanse.behandlingId)
+        val kompetanseFratrukketOppdatering = kompetanseSomOppdateres.trekkFra(oppdatertKompetanse)
+        val oppdaterteKompetanser =
+            gjeldendeKompetanser.plus(kompetanseFratrukketOppdatering)
+                .plus(oppdatertKompetanse).minus(kompetanseSomOppdateres)
+                .slåSammen().medBehandlingId(behandlingId)
+
+        lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
+
+        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(kompetanseSomOppdateres.behandlingId)
 
         // Denne brukes ikke av controlleren, og bør nok endres til ikke å returnere noe
-        return hentKompetanser(oppdatertKompetanse.behandlingId)
+        return hentKompetanser(behandlingId)
     }
 
     @Transactional
@@ -51,7 +60,7 @@ class KompetanseService(
         val kompetanseTilSletting = kompetanseRepository.getById(kompetanseId)
         val behandlingId = kompetanseTilSletting.behandlingId
         val gjeldendeKompetanser = hentKompetanser(behandlingId)
-        val blankKompetanse = kompetanseTilSletting.blankUt()
+        val blankKompetanse = kompetanseTilSletting.utenSkjema()
 
         val oppdaterteKompetanser = gjeldendeKompetanser.minus(kompetanseTilSletting).plus(blankKompetanse)
             .slåSammen().medBehandlingId(behandlingId)
