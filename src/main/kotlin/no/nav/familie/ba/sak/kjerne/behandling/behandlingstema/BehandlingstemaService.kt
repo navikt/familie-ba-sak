@@ -7,9 +7,8 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.bestemKategori
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.bestemUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.utledKategori
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.utledLøpendeKategori
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.utledLøpendeUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.utledUnderKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -17,6 +16,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 
 @Service
@@ -26,6 +28,7 @@ class BehandlingstemaService(
     private val loggService: LoggService,
     private val oppgaveService: OppgaveService,
     private val tidslinjeService: TidslinjeService,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val featureToggleService: FeatureToggleService
 ) {
 
@@ -35,7 +38,7 @@ class BehandlingstemaService(
         nyUnderkategori: BehandlingUnderkategori?,
         manueltOppdatert: Boolean = false
     ): Behandling {
-        if (!behandling.skalBehandlesAutomatisk) return behandling
+        if (behandling.skalBehandlesAutomatisk) return behandling
         else if (manueltOppdatert && (nyKategori == null || nyUnderkategori == null)) throw FunksjonellFeil("Du må velge behandlingstema.")
 
         val utledetKategori = bestemKategori(
@@ -98,7 +101,7 @@ class BehandlingstemaService(
 
             val barnasTidslinjer =
                 tidslinjeService.hentTidslinjer(behandlingId = forrigeIverksattBehandling.id)?.barnasTidslinjer()
-            utledKategori(barnasTidslinjer)
+            utledLøpendeKategori(barnasTidslinjer)
         } else {
             BehandlingKategori.NASJONAL
         }
@@ -109,12 +112,18 @@ class BehandlingstemaService(
             val aktivBehandling =
                 behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsakId)
                     ?: return BehandlingKategori.NASJONAL
+            val erVilkårMedEØSRegelverkBehandlet =
+                vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
+                    ?.personResultater
+                    ?.flatMap { it.vilkårResultater }
+                    ?.filter { it.behandlingId == aktivBehandling.id }
+                    ?.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
 
-            val barnasTidslinjer =
-                tidslinjeService.hentTidslinjer(behandlingId = aktivBehandling.id)?.barnasTidslinjer()
-                    ?: return BehandlingKategori.NASJONAL
-
-            utledKategori(barnasTidslinjer)
+            return if (erVilkårMedEØSRegelverkBehandlet == true) {
+                BehandlingKategori.EØS
+            } else {
+                BehandlingKategori.NASJONAL
+            }
         } else {
             BehandlingKategori.NASJONAL
         }
@@ -130,11 +139,18 @@ class BehandlingstemaService(
             behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsakId)
                 ?: return BehandlingUnderkategori.ORDINÆR
 
-        val søkersTidslinje =
-            tidslinjeService.hentTidslinjer(behandlingId = aktivBehandling.id)?.søkersTidslinjer()
-                ?: return BehandlingUnderkategori.ORDINÆR
+        val erUtvidetVilkårBehandlet =
+            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
+                ?.personResultater
+                ?.flatMap { it.vilkårResultater }
+                ?.filter { it.behandlingId == aktivBehandling.id }
+                ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
-        return utledUnderKategori(søkersTidslinje)
+        return if (erUtvidetVilkårBehandlet == true) {
+            BehandlingUnderkategori.UTVIDET
+        } else {
+            BehandlingUnderkategori.ORDINÆR
+        }
     }
 
     private fun hentForrigeAndeler(fagsakId: Long): List<AndelTilkjentYtelse>? {

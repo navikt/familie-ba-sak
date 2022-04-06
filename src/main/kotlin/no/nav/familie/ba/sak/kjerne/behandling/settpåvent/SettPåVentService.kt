@@ -47,12 +47,14 @@ class SettPåVentService(
         loggService.opprettSettPåVentLogg(behandling, årsak.visningsnavn)
         logger.info("Sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
 
+        val settPåVent = lagreEllerOppdater(SettPåVent(behandling = behandling, frist = frist, årsak = årsak))
+
         oppgaveService.forlengFristÅpneOppgaverPåBehandling(
             behandlingId = behandling.id,
             forlengelse = Period.between(LocalDate.now(), frist)
         )
 
-        return lagreEllerOppdater(SettPåVent(behandling = behandling, frist = frist, årsak = årsak))
+        return settPåVent
     }
 
     @Transactional
@@ -74,13 +76,14 @@ class SettPåVentService(
         val gammelFrist = aktivSettPåVent.frist
         aktivSettPåVent.frist = frist
         aktivSettPåVent.årsak = årsak
+        val settPåVent = lagreEllerOppdater(aktivSettPåVent)
 
         oppgaveService.forlengFristÅpneOppgaverPåBehandling(
             behandlingId = behandlingId,
             forlengelse = Period.between(gammelFrist, frist)
         )
 
-        return lagreEllerOppdater(aktivSettPåVent)
+        return settPåVent
     }
 
     fun gjenopptaBehandling(behandlingId: Long, nå: LocalDate = LocalDate.now()): SettPåVent {
@@ -97,13 +100,14 @@ class SettPåVentService(
 
         aktivSettPåVent.aktiv = false
         aktivSettPåVent.tidTattAvVent = nå
+        val settPåVent = lagreEllerOppdater(aktivSettPåVent)
 
         oppgaveService.settFristÅpneOppgaverPåBehandlingTil(
             behandlingId = behandlingId,
             nyFrist = LocalDate.now().plusDays(1)
         )
 
-        return lagreEllerOppdater(aktivSettPåVent)
+        return settPåVent
     }
 
     companion object {

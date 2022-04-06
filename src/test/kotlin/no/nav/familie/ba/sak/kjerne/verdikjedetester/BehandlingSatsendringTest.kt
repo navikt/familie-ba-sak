@@ -6,7 +6,6 @@ import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -36,7 +35,6 @@ class BehandlingSatsendringTest(
     @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
-    @Autowired private val behandlingService: BehandlingService,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
@@ -45,7 +43,7 @@ class BehandlingSatsendringTest(
 ) : AbstractVerdikjedetest() {
 
     @Test
-    fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
+    fun `Skal kjøre satsendring på løpende fagsak`() {
         mockkObject(SatsService)
         // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
         // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve

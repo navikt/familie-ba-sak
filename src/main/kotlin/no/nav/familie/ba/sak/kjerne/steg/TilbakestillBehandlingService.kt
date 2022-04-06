@@ -78,25 +78,25 @@ class TilbakestillBehandlingService(
      * Når et vilkår vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
      */
     @Transactional
-    fun resettStegVedEndringPåVilkår(behandlingId: Long) {
-        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+    fun resettStegVedEndringPåVilkår(behandlingId: Long): Behandling {
+        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId))
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
+        return behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandlingId,
             steg = StegType.VILKÅRSVURDERING
         )
-        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId))
-        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
     }
 
     /**
      * Når en andel vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
      */
     @Transactional
-    fun resettStegVedEndringPåBehandlingsresultatSteg(behandlingId: Long) {
-        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+    fun tilbakestillBehandlingTilBehandlingsresultat(behandlingId: Long): Behandling {
+        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId))
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
+        return behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandlingId,
             steg = StegType.BEHANDLINGSRESULTAT
         )
-        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId))
-        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
     }
 }

@@ -17,8 +17,6 @@ internal class TidslinjeTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
-        val personerMedFødselsdato =
-            mapOf(søker.aktør to søker.fødselsdato, barn1.aktør to barn1.fødselsdato, barn2.aktør to barn2.fødselsdato)
 
         val januar2020 = YearMonth.of(2020, 1)
         val behandling = lagBehandling()

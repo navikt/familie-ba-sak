@@ -40,7 +40,7 @@ class KompetanseService(
 
         lagreKompetanseDifferanse(listOf(gjeldendeKompetanse), oppdaterteKompetanser)
 
-        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(gjeldendeKompetanse.behandlingId)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(gjeldendeKompetanse.behandlingId)
 
         return hentKompetanser(oppdatertKompetanse.behandlingId)
     }
@@ -57,7 +57,7 @@ class KompetanseService(
 
         lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
 
-        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
 
         return hentKompetanser(behandlingId)
     }

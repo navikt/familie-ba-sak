@@ -52,7 +52,7 @@ class EndretUtbetalingAndelController(
             restEndretUtbetalingAndel
         )
 
-        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId = behandling.id)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -79,7 +79,7 @@ class EndretUtbetalingAndelController(
             endretUtbetalingAndelId
         )
 
-        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId = behandling.id)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -101,7 +101,7 @@ class EndretUtbetalingAndelController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
 
-        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId = behandling.id)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
