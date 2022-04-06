@@ -11,7 +11,7 @@ class TidslinjeService(
 ) {
 
     fun hentTidslinjerThrows(behandlingId: Long): Tidslinjer {
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)!!
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)!!
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)!!
 

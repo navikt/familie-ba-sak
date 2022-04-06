@@ -35,9 +35,8 @@ class BehandlingstemaService(
         nyUnderkategori: BehandlingUnderkategori?,
         manueltOppdatert: Boolean = false
     ): Behandling {
-        if (manueltOppdatert && !behandling.opprettetÅrsak.årsakSomKanEndreBehandlingKategori()) throw FunksjonellFeil("Du kan ikke endre behandlingstema på behandling med årsak '${behandling.opprettetÅrsak.visningsnavn.lowercase()}'.")
+        if (!behandling.skalBehandlesAutomatisk) return behandling
         else if (manueltOppdatert && (nyKategori == null || nyUnderkategori == null)) throw FunksjonellFeil("Du må velge behandlingstema.")
-        else if (!behandling.opprettetÅrsak.årsakSomKanEndreBehandlingKategori()) return behandling
 
         val utledetKategori = bestemKategori(
             nyBehandlingKategori = nyKategori,

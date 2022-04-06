@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
@@ -81,34 +80,24 @@ class BehandlingService(
         val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)
         val sisteBehandlingSomErVedtatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
-        val årsakSomKanEndreBehandlingKategori =
-            aktivBehandling?.opprettetÅrsak?.årsakSomKanEndreBehandlingKategori() ?: true
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
 
-            val kategori = if (årsakSomKanEndreBehandlingKategori) {
-                bestemKategori(
-                    nyBehandlingKategori = nyBehandling.kategori,
-                    løpendeBehandlingKategori = behandlingstemaService.hentLøpendeKategori(fagsak.id),
-                    kategoriFraInneværendeBehandling = behandlingstemaService.hentKategoriFraInneværendeBehandling(
-                        fagsak.id
-                    ),
-                )
-            } else {
-                aktivBehandling?.kategori ?: BehandlingKategori.NASJONAL
-            }
+            val kategori = bestemKategori(
+                nyBehandlingKategori = nyBehandling.kategori,
+                løpendeBehandlingKategori = behandlingstemaService.hentLøpendeKategori(fagsak.id),
+                kategoriFraInneværendeBehandling = behandlingstemaService.hentKategoriFraInneværendeBehandling(
+                    fagsak.id
+                ),
+            )
 
-            val underkategori = if (årsakSomKanEndreBehandlingKategori) {
-                bestemUnderkategori(
-                    nyUnderkategori = nyBehandling.underkategori,
-                    løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsak.id),
-                    underkategoriFraInneværendeBehandling = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(
-                        fagsak.id
-                    ),
-                )
-            } else {
-                aktivBehandling?.underkategori ?: BehandlingUnderkategori.ORDINÆR
-            }
+            val underkategori = bestemUnderkategori(
+                nyUnderkategori = nyBehandling.underkategori,
+                løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsak.id),
+                underkategoriFraInneværendeBehandling = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(
+                    fagsak.id
+                ),
+            )
 
             sjekkEøsToggleOgThrowHvisBrudd(kategori)
 
