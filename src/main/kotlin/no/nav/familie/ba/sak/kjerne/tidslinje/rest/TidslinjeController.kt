@@ -25,7 +25,7 @@ class TidslinjeController(
     fun hentTidslinjer(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestTidslinjer>> {
         return ResponseEntity.ok(
             success(
-                tidslinjeService.hentTidslinjer(behandlingId).tilRestTidslinjer()
+                tidslinjeService.hentTidslinjerThrows(behandlingId).tilRestTidslinjer()
             )
         )
     }

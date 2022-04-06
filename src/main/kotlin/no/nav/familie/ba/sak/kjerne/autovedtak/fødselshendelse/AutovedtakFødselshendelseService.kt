@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
@@ -42,10 +42,10 @@ import java.time.LocalDate
 
 @Service
 class AutovedtakFødselshendelseService(
+    private val fagsakService: FagsakService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val filtreringsreglerService: FiltreringsreglerService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val persongrunnlagService: PersongrunnlagService,
     private val personidentService: PersonidentService,
@@ -179,7 +179,7 @@ class AutovedtakFødselshendelseService(
 
     private fun hentÅpenBehandling(aktør: Aktør): Behandling? {
         return fagsakService.hent(aktør)?.let {
-            behandlingService.hentAktivOgÅpenForFagsak(it.id)
+            behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(it.id)
         }
     }
 
@@ -193,7 +193,7 @@ class AutovedtakFødselshendelseService(
         ).forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
 
         val barnaSomHarBlittBehandlet =
-            if (fagsak != null) behandlingService.hentBehandlinger(fagsakId = fagsak.id).flatMap {
+            if (fagsak != null) behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).flatMap {
                 persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
             }.distinct() else emptyList()
 
@@ -234,7 +234,7 @@ class AutovedtakFødselshendelseService(
 
     private fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val søker = persongrunnlagService.hentSøker(behandling.id)
         val søkerResultat = vilkårsvurdering?.personResultater?.find { it.aktør == søker?.aktør }
 

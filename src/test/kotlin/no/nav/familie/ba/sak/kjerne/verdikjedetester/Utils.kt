@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -107,7 +107,7 @@ fun behandleFødselshendelse(
     fagsakStatusEtterVurdering: FagsakStatus = FagsakStatus.OPPRETTET,
     behandleFødselshendelseTask: BehandleFødselshendelseTask,
     fagsakService: FagsakService,
-    behandlingService: BehandlingService,
+    behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     personidentService: PersonidentService,
     vedtakService: VedtakService,
     stegService: StegService,
@@ -129,7 +129,7 @@ fun behandleFødselshendelse(
     }
 
     val behandlingEtterVurdering =
-        behandlingService.hentBehandlinger(fagsakId = restMinimalFagsakEtterVurdering.data!!.id)
+        behandlingHentOgPersisterService.hentBehandlinger(fagsakId = restMinimalFagsakEtterVurdering.data!!.id)
             .maxByOrNull { it.opprettetTidspunkt }!!
     if (behandlingEtterVurdering.erHenlagt()) {
         return behandlingEtterVurdering

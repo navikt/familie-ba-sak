@@ -41,6 +41,9 @@ class BehandlingServiceTest(
     private val behandlingService: BehandlingService,
 
     @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+
+    @Autowired
     private val beregningService: BeregningService,
 
     @Autowired
@@ -130,7 +133,7 @@ class BehandlingServiceTest(
             )
 
         val forrigeBehandling =
-            behandlingService.hentForrigeBehandlingSomErVedtatt(behandling = revurderingInnvilgetBehandling)
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = revurderingInnvilgetBehandling)
         Assertions.assertNotNull(forrigeBehandling)
         assertEquals(behandling.id, forrigeBehandling?.id)
     }

@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -39,7 +39,7 @@ import java.time.LocalDate
 
 class RestartAvSmåbarnstilleggTest(
     @Autowired private val fagsakService: FagsakService,
-    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val efSakRestClient: EfSakRestClient,
@@ -186,7 +186,7 @@ class RestartAvSmåbarnstilleggTest(
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 behandlingType = behandlingType
             )
-        val behandling = behandlingService.hent(restBehandling.data!!.behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
@@ -294,7 +294,7 @@ class RestartAvSmåbarnstilleggTest(
                 behandlingType = behandlingType,
                 behandlingÅrsak = behandlingÅrsak
             )
-        return behandlingService.hent(restUtvidetBehandling.data!!.behandlingId)
+        return behandlingHentOgPersisterService.hent(restUtvidetBehandling.data!!.behandlingId)
     }
 
     fun fullførRestenAvBehandlingen(
@@ -373,7 +373,7 @@ class RestartAvSmåbarnstilleggTest(
             }
         )
         return håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)!!,
             søkerFnr = personScenario.søker.ident!!,
             fagsakService = fagsakService,
             vedtakService = vedtakService,

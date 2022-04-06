@@ -7,6 +7,7 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -19,10 +20,11 @@ internal class AutobrevTaskTest {
     val fagsakRepository = mockk<FagsakRepository>()
     val opprettTaskService = mockk<OpprettTaskService>()
     val behandlingService = mockk<BehandlingService>()
+    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
 
     private val autobrevTask = AutobrevTask(
         fagsakRepository = fagsakRepository,
-        behandlingService = behandlingService,
+        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         opprettTaskService = opprettTaskService,
     )
 
@@ -43,7 +45,7 @@ internal class AutobrevTaskTest {
         every { fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(any()) } returns listOf(1L)
         every { opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(any(), any()) } just runs
         every { opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(any()) } just runs
-        every { behandlingService.partitionByIverksatteBehandlinger <Long>(any()) } returns listOf(1L)
+        every { behandlingHentOgPersisterService.partitionByIverksatteBehandlinger<Long>(any()) } returns listOf(1L)
 
         autobrevTask.doTask(autoBrevTask)
 

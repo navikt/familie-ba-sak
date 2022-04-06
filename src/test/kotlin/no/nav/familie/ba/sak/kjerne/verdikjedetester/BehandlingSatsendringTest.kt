@@ -5,7 +5,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -35,7 +35,7 @@ class BehandlingSatsendringTest(
     @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
-    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
@@ -43,7 +43,7 @@ class BehandlingSatsendringTest(
 ) : AbstractVerdikjedetest() {
 
     @Test
-    fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
+    fun `Skal kjøre satsendring på løpende fagsak`() {
         mockkObject(SatsService)
         // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
         // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve
@@ -101,7 +101,7 @@ class BehandlingSatsendringTest(
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
-            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
@@ -111,7 +111,7 @@ class BehandlingSatsendringTest(
         unmockkObject(SatsService)
         autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = behandling.id)
 
-        val satsendingBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
+        val satsendingBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(Behandlingsresultat.ENDRET, satsendingBehandling?.resultat)
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, satsendingBehandling?.steg)
 
@@ -178,7 +178,7 @@ class BehandlingSatsendringTest(
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
-            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
@@ -198,7 +198,7 @@ class BehandlingSatsendringTest(
         unmockkObject(SatsService)
         autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = behandling.id)
 
-        val åpenBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
+        val åpenBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(revurdering.data!!.behandlingId, åpenBehandling!!.id)
         assertEquals(StegType.VILKÅRSVURDERING, åpenBehandling.steg)
     }
@@ -262,7 +262,7 @@ class BehandlingSatsendringTest(
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
-            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
@@ -274,7 +274,7 @@ class BehandlingSatsendringTest(
             .filter { it == behandling.id } // kjør kun satsendring for behandlingen vi tester i dette testcaset
             .forEach { autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = it) }
 
-        val satsendingBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
+        val satsendingBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(Behandlingsresultat.ENDRET, satsendingBehandling?.resultat)
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, satsendingBehandling?.steg)
 

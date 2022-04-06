@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.tilbakekreving
 
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class FagsystemsbehandlingService(
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val vedtakService: VedtakService,
@@ -28,7 +28,7 @@ class FagsystemsbehandlingService(
 
     fun hentFagsystemsbehandling(request: HentFagsystemsbehandlingRequest): HentFagsystemsbehandlingRespons {
         logger.info("Henter behandling for behandlingId=${request.eksternId}")
-        val behandling = behandlingService.hent(request.eksternId.toLong())
+        val behandling = behandlingHentOgPersisterService.hent(request.eksternId.toLong())
 
         return lagRespons(request, behandling)
     }

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -24,7 +24,7 @@ import java.time.LocalDate.now
 class FødselshendelseRevurderingTest(
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
-    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService
@@ -59,7 +59,7 @@ class FødselshendelseRevurderingTest(
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
-            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
@@ -75,7 +75,7 @@ class FødselshendelseRevurderingTest(
             fagsakStatusEtterVurdering = FagsakStatus.LØPENDE,
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
-            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService
@@ -93,7 +93,11 @@ class FødselshendelseRevurderingTest(
 
         val aktivBehandling =
             restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger
-                .single { it.behandlingId == behandlingService.hentAktivForFagsak(restFagsakEtterBehandlingAvsluttet.data!!.id)?.id }
+                .single {
+                    it.behandlingId == behandlingHentOgPersisterService.hentAktivForFagsak(
+                        restFagsakEtterBehandlingAvsluttet.data!!.id
+                    )?.id
+                }
 
         val vurderteVilkårIDenneBehandlingen = aktivBehandling.personResultater.flatMap { it.vilkårResultater }
             .filter { it.behandlingId == aktivBehandling.behandlingId }

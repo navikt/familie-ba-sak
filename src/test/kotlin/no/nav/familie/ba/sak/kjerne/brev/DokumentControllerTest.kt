@@ -5,8 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
-import no.nav.familie.ba.sak.config.RolleConfig
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -20,9 +19,7 @@ class DokumentControllerTest(
     @Autowired
     private val dokumentService: DokumentService,
     @Autowired
-    private val behandlingService: BehandlingService,
-    @Autowired
-    private val rolleConfig: RolleConfig,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractSpringIntegrationTestDev() {
 
     private val mockDokumentService: DokumentService = mockk()
@@ -33,13 +30,12 @@ class DokumentControllerTest(
         DokumentController(
             dokumentService = mockDokumentService,
             vedtakService = vedtakService,
-            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             fagsakService = fagsakService,
             tilgangService = tilgangService,
             persongrunnlagService = mockk(relaxed = true),
             arbeidsfordelingService = mockk(relaxed = true),
             utvidetBehandlingService = mockk(relaxed = true),
-            rolleConfig = rolleConfig,
         )
 
     @Test

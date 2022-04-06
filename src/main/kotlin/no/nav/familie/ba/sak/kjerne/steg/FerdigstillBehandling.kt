@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service
 @Service
 class FerdigstillBehandling(
     private val fagsakService: FagsakService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
     private val behandlingMetrikker: BehandlingMetrikker,
@@ -28,7 +30,7 @@ class FerdigstillBehandling(
     ): StegType {
         logger.info("Forsøker å ferdigstille behandling ${behandling.id}")
 
-        val erHenlagt = behandlingService.hent(behandling.id).erHenlagt()
+        val erHenlagt = behandlingHentOgPersisterService.hent(behandling.id).erHenlagt()
 
         if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK && !erHenlagt) {
             error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
@@ -42,13 +44,13 @@ class FerdigstillBehandling(
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK && behandling.resultat != Behandlingsresultat.AVSLÅTT) {
             oppdaterFagsakStatus(behandling = behandling)
         } else { // Dette betyr henleggelse.
-            if (behandlingService.hentBehandlinger(behandling.fagsak.id).size == 1) {
+            if (behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id).size == 1) {
                 fagsakService.oppdaterStatus(behandling.fagsak, FagsakStatus.AVSLUTTET)
             }
-            behandlingService.hentAktivForFagsak(behandling.fagsak.id)?.aktiv = false
-            behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)?.apply {
+            behandlingHentOgPersisterService.hentAktivForFagsak(behandling.fagsak.id)?.aktiv = false
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)?.apply {
                 aktiv = true
-                behandlingService.lagreEllerOppdater(this)
+                behandlingHentOgPersisterService.lagreEllerOppdater(this)
             }
         }
 
