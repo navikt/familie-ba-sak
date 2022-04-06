@@ -155,7 +155,7 @@ class BehandlingService(
     fun nullstillEndringstidspunkt(behandlingId: Long) {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         behandling.overstyrtEndringstidspunkt = null
-        lagreEllerOppdater(behandling, false)
+        behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
     }
 
     private fun sjekkEøsToggleOgThrowHvisBrudd(
