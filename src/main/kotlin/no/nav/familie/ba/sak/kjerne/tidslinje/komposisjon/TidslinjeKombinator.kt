@@ -5,7 +5,19 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TomTidslinje
 
-fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerInnvendigMed(
+/**
+ * Extension-metode for å kombinere en map av tidslinjer med en annen map av tidslinjer
+ * Nøklene (K), og tidsenhet (T) må være av samme type for alle tidslinjer i begge map'er
+ * Alle tidslinjer i en og samme map må ha innhold av samme type
+ * Tidslinjene i hver av map'ene kan ha ulik innholdstype, hhv V(enstre) og H(øyre)
+ * mapKombinator-funksjonen tar i en nøkkel og returnerer en kombinator-funksjon.
+ * Kombintor-funksjonen tar inn (nullable) av innholdet V og H og returner (nullable) R
+ * Resultatet er en map med settet av nøkler fra BEGGE map'ene.
+ * Resultat-tidslinjene har tidsenheten T og innholdet R
+ * Der hvor den ene map'en mangler tidslinje for en nøkkel, gjøres kombinasjonen med TomTidslinje,
+ * som i praksis betyr kombinator-funksjonen mottar null som innhold
+ */
+fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerForFellesNøklerMed(
     tidslinjeMap: Map<K, Tidslinje<H, T>>,
     mapKombinator: (K) -> (V?, H?) -> R?
 ): Map<K, Tidslinje<R, T>> {
@@ -19,7 +31,17 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerInnvendigMed(
         }
 }
 
-fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerUtvendigMed(
+/**
+ * Extension-metode for å kombinere en map av tidslinjer med en annen map av tidslinjer
+ * Nøklene (K), og tidsenhet (T) må være av samme type for alle tidslinjer i begge map'er
+ * Alle tidslinjer i en og samme map må ha innhold av samme type
+ * Tidslinjene i hver av map'ene kan ha ulik innholdstype, hhv V(enstre) og H(øyre)
+ * mapKombinator-funksjonen tar i en nøkkel og returnerer en kombinator-funksjon.
+ * Kombintor-funksjonen tar inn (nullable) av innholdet V og H og returner (nullable) R
+ * Resultatet er en map med settet av nøkler som er FELLES for begge map'ene.
+ * Resultat-tidslinjene har tidsenheten T og innholdet R
+ */
+fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerForAlleNøklerMed(
     tidslinjeMap: Map<K, Tidslinje<H, T>>,
     mapKombinator: (K) -> (V?, H?) -> R?
 ): Map<K, Tidslinje<R, T>> {
@@ -36,6 +58,15 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerUtvendigMed(
         }.toMap()
 }
 
+/**
+ * Extension-metode for å kombinere to tidslinjer
+ * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
+ * fra minste fraOgMed til største fraOgMed() fra begge tidslinjene
+ * Tidsenhet (T) må være av samme type
+ * Hver av tidslinjene kan ha ulik innholdstype, hhv V og H
+ * Kombintor-funksjonen tar inn (nullable) av V og H og returner (nullable) R
+ * Resultatet er en tidslnije med tidsenhet T og innhold R
+ */
 fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
     høyreTidslinje: Tidslinje<H, T>,
     kombinator: (V?, H?) -> R?
@@ -44,12 +75,21 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
     return object : TidslinjeSomStykkerOppTiden<R, T>(venstreTidslinje, høyreTidslinje) {
         override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
             kombinator(
-                venstreTidslinje.hentUtsnitt(tidspunkt),
-                høyreTidslinje.hentUtsnitt(tidspunkt)
+                venstreTidslinje.innholdForTidspunkt(tidspunkt),
+                høyreTidslinje.innholdForTidspunkt(tidspunkt)
             )
     }
 }
 
+/**
+ * Extension-metode for å kombinere tre tidslinjer
+ * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
+ * fra minste fraOgMed til største fraOgMed() fra alle tidslinjene
+ * Tidsenhet (T) må være av samme type
+ * Hver av tidslinjene kan ha ulik innholdstype, hhv A, B og C
+ * Kombintor-funksjonen tar inn (nullable) av A, B og C og returner (nullable) R
+ * Resultatet er en tidslnije med tidsenhet T og innhold R
+ */
 fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.snittKombinerMed(
     tidslinjeB: Tidslinje<B, T>,
     tidslinjeC: Tidslinje<C, T>,
@@ -59,9 +99,9 @@ fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.snittKombinerMed(
     return object : TidslinjeSomStykkerOppTiden<R, T>(tidslinjeA, tidslinjeB, tidslinjeC) {
         override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
             kombinator(
-                tidslinjeA.hentUtsnitt(tidspunkt),
-                tidslinjeB.hentUtsnitt(tidspunkt),
-                tidslinjeC.hentUtsnitt(tidspunkt)
+                tidslinjeA.innholdForTidspunkt(tidspunkt),
+                tidslinjeB.innholdForTidspunkt(tidspunkt),
+                tidslinjeC.innholdForTidspunkt(tidspunkt)
             )
     }
 }
