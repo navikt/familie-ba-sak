@@ -102,7 +102,7 @@ object TilkjentYtelseValidering {
 
             val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
             val erLagtTilSegmentFørGyldigEtterbetalingsdato =
-                segmenterLagtTil.any { it.value.stønadFom < gyldigEtterbetalingFom }
+                segmenterLagtTil.any { it.value.stønadFom < gyldigEtterbetalingFom && it.value.kalkulertUtbetalingsbeløp > 0 }
 
             erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
         }
