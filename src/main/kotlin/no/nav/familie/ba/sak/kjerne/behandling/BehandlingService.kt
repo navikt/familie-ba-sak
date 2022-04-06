@@ -152,7 +152,6 @@ class BehandlingService(
         }
     }
 
-
     fun nullstillEndringstidspunkt(behandlingId: Long) {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         behandling.overstyrtEndringstidspunkt = null
