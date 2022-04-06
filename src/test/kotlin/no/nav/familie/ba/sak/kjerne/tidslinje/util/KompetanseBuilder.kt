@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
@@ -41,7 +41,7 @@ internal class KompetanseTidslinje(
     val barn: List<Person>
 ) : TidslinjeSomStykkerOppTiden<Kompetanse, Måned>(charTidslinje) {
     override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): Kompetanse? {
-        val tegn = charTidslinje.hentUtsnitt(tidspunkt)
+        val tegn = charTidslinje.innholdForTidspunkt(tidspunkt)
         val barnAktørIder = barn.map { it.aktør }.toSet()
         val kompetanseMal =
             Kompetanse(fom = null, tom = null, barnAktører = barnAktørIder)
