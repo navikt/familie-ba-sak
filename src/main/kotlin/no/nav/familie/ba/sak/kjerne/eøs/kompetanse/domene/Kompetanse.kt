@@ -97,9 +97,6 @@ fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
         this.barnAktører.containsAll(kompetanse.barnAktører)
 }
 
-fun Kompetanse.bareSkjema() =
-    this.copy(fom = null, tom = null, barnAktører = emptySet())
-
 enum class SøkersAktivitet {
     ARBEIDER_I_NORGE,
     SELVSTENDIG_NÆRINGSDRIVENDE,
@@ -123,3 +120,12 @@ enum class KompetanseResultat {
     NORGE_ER_PRIMÆRLAND,
     NORGE_ER_SEKUNDÆRLAND
 }
+
+fun Kompetanse.bareSkjema() =
+    this.copy(fom = null, tom = null, barnAktører = emptySet())
+
+fun Kompetanse.utenBarn() =
+    this.copy(barnAktører = emptySet())
+
+fun Kompetanse.utenPeriode() =
+    this.copy(fom = null, tom = null)
