@@ -32,7 +32,7 @@ class KompetanseService(
     }
 
     @Transactional
-    fun oppdaterKompetanse(kompetanseId: Long, oppdatertKompetanse: Kompetanse): Collection<Kompetanse> {
+    fun oppdaterKompetanse(kompetanseId: Long, oppdatertKompetanse: Kompetanse) {
         val kompetanseSomOppdateres = kompetanseRepository.getById(kompetanseId)
 
         if (!kompetanseSomOppdateres.utenSkjema().inneholder(oppdatertKompetanse.utenSkjema()))
@@ -50,13 +50,10 @@ class KompetanseService(
         lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
 
         tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(kompetanseSomOppdateres.behandlingId)
-
-        // Denne brukes ikke av controlleren, og bør nok endres til ikke å returnere noe
-        return hentKompetanser(behandlingId)
     }
 
     @Transactional
-    fun slettKompetanse(kompetanseId: Long): Collection<Kompetanse> {
+    fun slettKompetanse(kompetanseId: Long) {
         val kompetanseTilSletting = kompetanseRepository.getById(kompetanseId)
         val behandlingId = kompetanseTilSletting.behandlingId
         val gjeldendeKompetanser = hentKompetanser(behandlingId)
@@ -68,13 +65,10 @@ class KompetanseService(
         lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
 
         tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId)
-
-        // Denne brukes ikke av controlleren, og bør nok endres til ikke å returnere noe
-        return hentKompetanser(behandlingId)
     }
 
     @Transactional
-    fun tilpassKompetanserTilRegelverk(behandlingId: Long): Collection<Kompetanse> {
+    fun tilpassKompetanserTilRegelverk(behandlingId: Long) {
         val gjeldendeKompetanser = hentKompetanser(behandlingId)
         val barnasRegelverkTidslinjer = tidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId)
 
@@ -82,9 +76,6 @@ class KompetanseService(
             .medBehandlingId(behandlingId)
 
         lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
-
-        // Denne brukes ikke av klienten, og bør nok endres til ikke å returnere noe
-        return hentKompetanser(behandlingId)
     }
 
     private fun lagreKompetanseDifferanse(gjeldende: Collection<Kompetanse>, oppdaterte: Collection<Kompetanse>) {
