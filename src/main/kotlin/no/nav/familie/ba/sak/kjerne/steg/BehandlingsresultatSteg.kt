@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.ETTERBETALING_3ÅR
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -10,11 +12,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
@@ -38,6 +40,7 @@ class BehandlingsresultatSteg(
     private val beregningService: BeregningService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val featureToggleService: FeatureToggleService,
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -58,21 +61,26 @@ class BehandlingsresultatSteg(
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
-        val forrigeTilkjentYtelse: TilkjentYtelse? =
-            forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
-        if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
-            validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList(),
-                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                kravDato = tilkjentYtelse.behandling.opprettetTidspunkt
+        if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD && !featureToggleService.isEnabled(
+                ETTERBETALING_3ÅR
             )
+        ) {
+            val personerMedUgyldigEtterbetalingsperiode =
+                tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
+            if (personerMedUgyldigEtterbetalingsperiode.isNotEmpty()) {
+                throw UtbetalingsikkerhetFeil(
+                    melding = "Utbetalingsperioder for en eller flere personer går mer enn 3 år tilbake i tid.",
+                    frontendFeilmelding =
+                    "Utbetalingsperioder for en eller flere personer går mer enn 3 år tilbake i tid. Du må henlegge " +
+                        "behandlingen og behandle saken i Infotrygd."
+                )
+            }
         }
 
         val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
         validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler)
-        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndeler)
+        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndelerMedÅrsakDeltBosted = endretUtbetalingAndeler.filter { it.årsak == Årsak.DELT_BOSTED })
 
         if (!featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)) {
             validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
@@ -101,6 +109,7 @@ class BehandlingsresultatSteg(
             }
 
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
+            behandlingService.nullstillEndringstidspunkt(behandling.id)
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
                 vedtak = vedtakService.hentAktivForBehandlingThrows(
                     behandlingId = behandling.id

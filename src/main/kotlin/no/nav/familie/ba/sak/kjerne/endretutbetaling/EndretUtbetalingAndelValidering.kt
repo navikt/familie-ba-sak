@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.finnTilOgMedDato
+import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetalingFom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -30,6 +31,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 object EndretUtbetalingAndelValidering {
@@ -89,6 +92,28 @@ object EndretUtbetalingAndelValidering {
         if (årsak == Årsak.DELT_BOSTED) {
             val deltBostedPerioder = finnDeltBostedPerioder(person = endretUtbetalingAndel.person, vilkårsvurdering = vilkårsvurdering).map { it.tilMånedPeriode() }
             validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, deltBostedPerioder = deltBostedPerioder)
+        } else if (årsak == Årsak.ETTERBETALING_3ÅR) {
+            validerEtterbetaling3År(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                kravDato = vilkårsvurdering?.behandling?.opprettetTidspunkt ?: LocalDateTime.now()
+            )
+        }
+    }
+
+    fun validerEtterbetaling3År(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        kravDato: LocalDateTime
+    ) {
+        if (endretUtbetalingAndel.prosent != BigDecimal.ZERO) {
+            throw FunksjonellFeil(
+                "Du kan ikke sette årsak etterbetaling 3 år når du har valgt at perioden skal utbetales."
+            )
+        } else if (
+            endretUtbetalingAndel.tom?.isAfter(hentGyldigEtterbetalingFom(kravDato = kravDato)) == true
+        ) {
+            throw FunksjonellFeil(
+                "Du kan ikke stoppe etterbetaling for en periode som ikke strekker seg mer enn 3 år tilbake i tid."
+            )
         }
     }
 
@@ -167,15 +192,15 @@ fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
 }
 
 fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+    endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndel>
 ) {
     val endredeUtvidetUtbetalingerAndeler =
-        endretUtbetalingAndeler.filter { endretUtbetaling ->
+        endretUtbetalingAndelerMedÅrsakDeltBosted.filter { endretUtbetaling ->
             endretUtbetaling.andelTilkjentYtelser.any { it.erUtvidet() }
         }
 
     endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
-        val deltBostedEndringerISammePeriode = endretUtbetalingAndeler.filter {
+        val deltBostedEndringerISammePeriode = endretUtbetalingAndelerMedÅrsakDeltBosted.filter {
             it.årsak == Årsak.DELT_BOSTED &&
                 it.fom!!.isSameOrBefore(endretPåUtvidetUtbetalinger.fom!!) &&
                 it.tom!!.isSameOrAfter(endretPåUtvidetUtbetalinger.tom!!) &&
