@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeMedAvhengigheter
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
@@ -89,6 +89,6 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
     val venstre = this
     return object : TidslinjeSomStykkerOppTiden<R, T>(venstre, høyre) {
         override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
-            kombinator(venstre.hentUtsnitt(tidspunkt), høyre.hentUtsnitt(tidspunkt))
+            kombinator(venstre.innholdForTidspunkt(tidspunkt), høyre.innholdForTidspunkt(tidspunkt))
     }
 }
