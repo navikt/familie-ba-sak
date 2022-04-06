@@ -574,6 +574,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonDeltBostedGenerell"
     },
+    REDUKSJON_BARN_DØDE_SAMME_MÅNED_SOM_FØDT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonBarnDodeSammeMaanedSomFoedt"
+    },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagBosattIRiket"
@@ -806,6 +810,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagVurderingBosattUnder12Maaneder"
     },
+    AVSLAG_IKKE_FLYTTET_FRA_TIDLIGERE_EKTEFELLE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeFlyttetFraTidligereEktefelle"
+    },
+    AVSLAG_VURDERING_IKKE_FLYTTET_FRA_TIDLIGERE_EKTEFELLE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingIkkeFlyttetFraTidligereEktefelle"
+    },
     OPPHØR_BARN_FLYTTET_FRA_SØKER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnBorIkkeMedSoker"
@@ -965,6 +977,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_BOSATT_I_NORGE_VAR_IKKE_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBosattINorgeVarIkkeMedlem"
+    },
+    OPPHØR_BARN_DØD_SAMME_MÅNED_SOM_FØDT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorBarnDodSammeMaanedSomFoedt"
     },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
