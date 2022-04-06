@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.steg.SISTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import org.hibernate.annotations.SortComparator
+import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -77,6 +78,8 @@ data class Behandling(
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     var status: BehandlingStatus = initStatus(),
+
+    var overstyrtEndringstidspunkt: LocalDate? = null
 ) : BaseEntitet() {
 
     val steg: StegType

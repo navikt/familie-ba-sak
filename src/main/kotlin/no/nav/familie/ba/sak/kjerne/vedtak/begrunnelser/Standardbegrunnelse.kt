@@ -306,6 +306,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstTransporterklaeringHeleEtterbetalingen"
     },
+    INNVILGET_TILLEGGSTEKST_TRANSPORTERKLÆRING_DELER_AV_ETTERBETALINGEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstTransporterklaeringDelerAvEtterbetalingen"
+    },
     INNVILGET_EØS_BORGER_JOBBER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetEosBorgerJobber"
@@ -1172,6 +1176,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     },
     ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED {
         override val sanityApiNavn = "etterEndretUtbetalingAvtaleDeltBosted"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
+    },
+    ETTER_ENDRET_UTBETALING_ETTERBETALING {
+        override val sanityApiNavn = "etterEndretUtbetalingEtterbetalingTreAarTilbakeITid"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     };
 }

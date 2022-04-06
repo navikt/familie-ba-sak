@@ -192,15 +192,15 @@ fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
 }
 
 fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+    endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndel>
 ) {
     val endredeUtvidetUtbetalingerAndeler =
-        endretUtbetalingAndeler.filter { endretUtbetaling ->
+        endretUtbetalingAndelerMedÅrsakDeltBosted.filter { endretUtbetaling ->
             endretUtbetaling.andelTilkjentYtelser.any { it.erUtvidet() }
         }
 
     endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
-        val deltBostedEndringerISammePeriode = endretUtbetalingAndeler.filter {
+        val deltBostedEndringerISammePeriode = endretUtbetalingAndelerMedÅrsakDeltBosted.filter {
             it.årsak == Årsak.DELT_BOSTED &&
                 it.fom!!.isSameOrBefore(endretPåUtvidetUtbetalinger.fom!!) &&
                 it.tom!!.isSameOrAfter(endretPåUtvidetUtbetalinger.tom!!) &&
