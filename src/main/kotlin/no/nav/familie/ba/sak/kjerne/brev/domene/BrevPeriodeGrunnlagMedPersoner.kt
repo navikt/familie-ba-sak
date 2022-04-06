@@ -37,6 +37,7 @@ data class BrevPeriodeGrunnlagMedPersoner(
                     brevMålform = brevMålform,
                     uregistrerteBarn = uregistrerteBarn,
                     minimerteUtbetalingsperiodeDetaljer = this.minimerteUtbetalingsperiodeDetaljer,
+                    minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler
                 )
             }
 

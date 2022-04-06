@@ -1173,6 +1173,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED {
         override val sanityApiNavn = "etterEndretUtbetalingAvtaleDeltBosted"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
+    },
+    ETTER_ENDRET_UTBETALING_ETTERBETALING {
+        override val sanityApiNavn = "etterEndretUtbetalingEtterbetalingTreAarTilbakeITid"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     };
 }
 
