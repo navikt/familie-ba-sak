@@ -47,7 +47,8 @@ data class Personident(
     override fun toString(): String {
         return """Personident(aktørId=${aktør.aktørId},
                         |aktiv=$aktiv
-                        |gjelderTil=$gjelderTil)""".trimMargin()
+                        |gjelderTil=$gjelderTil)
+        """.trimMargin()
     }
 
     override fun equals(other: Any?): Boolean {
