@@ -57,7 +57,7 @@ internal class StatsborgerskapServiceTest {
     }
 
     @Test
-    fun `Skal evaluere polske statsborgere med ujkent periode som EØS-borgere`() {
+    fun `Skal evaluere polske statsborgere med ukjent periode som EØS-borgere`() {
         val statsborgerPolenUtenPeriode = Statsborgerskap(
             "POL",
             gyldigFraOgMed = null,
@@ -141,7 +141,10 @@ internal class StatsborgerskapServiceTest {
         assertEquals(1, grStatsborgerskapUtenPeriode.size)
         assertEquals(Medlemskap.TREDJELANDSBORGER, grStatsborgerskapUtenPeriode.single().medlemskap)
         assertTrue(grStatsborgerskapUtenPeriode.single().gjeldendeNå())
+    }
 
+    @Test
+    fun `Skal evaluere britiske statsborgere etter brexit som tredjelandsborgere`() {
         val statsborgerStorbritanniaMedPeriodeEtterBrexit = Statsborgerskap(
             "GBR",
             gyldigFraOgMed = LocalDate.of(2022, 3, 1),
@@ -154,8 +157,11 @@ internal class StatsborgerskapServiceTest {
         )
         assertEquals(1, grStatsborgerskapEtterBrexit.size)
         assertEquals(Medlemskap.TREDJELANDSBORGER, grStatsborgerskapEtterBrexit.single().medlemskap)
-        assertTrue(grStatsborgerskapUtenPeriode.single().gjeldendeNå())
+        assertTrue(grStatsborgerskapEtterBrexit.single().gjeldendeNå())
+    }
 
+    @Test
+    fun `Skal evaluere britiske statsborgere under Brexit som først EØS, nå tredjelandsborgere`() {
         val statsborgerStorbritanniaMedPeriodeUnderBrexit = Statsborgerskap(
             "GBR",
             gyldigFraOgMed = LocalDate.of(1989, 3, 1),
