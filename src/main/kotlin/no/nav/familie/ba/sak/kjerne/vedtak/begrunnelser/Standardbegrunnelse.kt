@@ -1166,6 +1166,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingMottattFullOrdinaerFaarEtterbetaltUtvidet"
     },
+    ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingDeltBostedEndretUtbetaling"
+    },
     ETTER_ENDRET_UTBETALING_RETTSAVGJØRELSE_DELT_BOSTED {
         override val sanityApiNavn = "etterEndretUtbetalingRettsavgjorelseDeltBosted"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
@@ -1206,5 +1210,6 @@ val nyeEndretUtbetalingsperiodeBegrunnelser = listOf<Standardbegrunnelse>(
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY,
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY,
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALT_UTVIDET_NY,
-    Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY
+    Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY,
+    Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING
 )
