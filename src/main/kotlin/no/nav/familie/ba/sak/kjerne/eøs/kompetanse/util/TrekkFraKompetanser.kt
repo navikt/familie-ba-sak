@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.inneholder
 
 /**
@@ -26,7 +27,7 @@ fun Kompetanse.trekkFra(oppdatertKompetanse: Kompetanse): Collection<Kompetanse>
         fom = oppdatertKompetanse.tom?.plusMonths(1),
         tom = gammelKompetanse.tom,
         barnAktører = oppdatertKompetanse.barnAktører
-    ).takeIf { it.fom != null && it.fom <= it.tom }
+    ).takeIf { it.fom != null && it.fom <= (it.tom ?: MAX_MÅNED) }
 
     return listOfNotNull(kompetanseForRestBarn, kompetanseForForegåendePerioder, kompetanseForEtterfølgendePerioder)
 }

@@ -75,7 +75,7 @@ class KompetanseController(
             throw FunksjonellFeil("Fra-og-med er etter til-og-med", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.fom < (gjeldendeKompetanse.fom ?: MIN_MÅNED))
             throw FunksjonellFeil("Setter fra-og-med tidligere", httpStatus = HttpStatus.BAD_REQUEST)
-        if ((oppdatertKompetanse.tom ?: MAX_MÅNED) > (gjeldendeKompetanse.fom ?: MAX_MÅNED))
+        if ((oppdatertKompetanse.tom ?: MAX_MÅNED) > (gjeldendeKompetanse.tom ?: MAX_MÅNED))
             throw FunksjonellFeil("Setter til-og-med senere ", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.barnAktører.isEmpty())
             throw FunksjonellFeil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
