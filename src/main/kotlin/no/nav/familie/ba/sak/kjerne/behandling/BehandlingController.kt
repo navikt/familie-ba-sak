@@ -121,7 +121,7 @@ class BehandlingController(
     ): ResponseEntity<Ressurs<List<String>>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hent gyldig etterbetaling"
         )
 
