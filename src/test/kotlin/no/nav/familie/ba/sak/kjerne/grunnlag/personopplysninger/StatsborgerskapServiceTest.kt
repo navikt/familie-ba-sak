@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnSterkesteMedlemskap
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -53,6 +54,24 @@ internal class StatsborgerskapServiceTest {
 
         assertEquals(FOM_2004, grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.last().gyldigPeriode?.fom)
         assertEquals(Medlemskap.EØS, grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.last().medlemskap)
+    }
+
+    @Test
+    fun `Skal evaluere polske statsborgere med ujkent periode som EØS-borgere`() {
+        val statsborgerPolenUtenPeriode = Statsborgerskap(
+            "POL",
+            gyldigFraOgMed = null,
+            gyldigTilOgMed = null,
+            bekreftelsesdato = null
+        )
+
+        val grStatsborgerskapUtenPeriode = statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+            statsborgerskap = statsborgerPolenUtenPeriode,
+            person = lagPerson()
+        )
+        assertEquals(1, grStatsborgerskapUtenPeriode.size)
+        assertEquals(Medlemskap.EØS, grStatsborgerskapUtenPeriode.single().medlemskap)
+        assertTrue(grStatsborgerskapUtenPeriode.single().gjeldendeNå())
     }
 
     @Test
@@ -104,5 +123,54 @@ internal class StatsborgerskapServiceTest {
         assertEquals(Medlemskap.NORDEN, finnSterkesteMedlemskap(medlemskapNorden))
         assertEquals(Medlemskap.UKJENT, finnSterkesteMedlemskap(medlemskapUkjent))
         assertEquals(null, finnSterkesteMedlemskap(medlemskapIngen))
+    }
+
+    @Test
+    fun `Skal evaluere britiske statsborgere med ukjent periode som tredjelandsborgere`() {
+        val statsborgerStorbritanniaUtenPeriode = Statsborgerskap(
+            "GBR",
+            gyldigFraOgMed = null,
+            gyldigTilOgMed = null,
+            bekreftelsesdato = null
+        )
+
+        val grStatsborgerskapUtenPeriode = statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+            statsborgerskap = statsborgerStorbritanniaUtenPeriode,
+            person = lagPerson()
+        )
+        assertEquals(1, grStatsborgerskapUtenPeriode.size)
+        assertEquals(Medlemskap.TREDJELANDSBORGER, grStatsborgerskapUtenPeriode.single().medlemskap)
+        assertTrue(grStatsborgerskapUtenPeriode.single().gjeldendeNå())
+
+        val statsborgerStorbritanniaMedPeriodeEtterBrexit = Statsborgerskap(
+            "GBR",
+            gyldigFraOgMed = LocalDate.of(2022, 3, 1),
+            gyldigTilOgMed = LocalDate.now(),
+            bekreftelsesdato = null
+        )
+        val grStatsborgerskapEtterBrexit = statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+            statsborgerskap = statsborgerStorbritanniaMedPeriodeEtterBrexit,
+            person = lagPerson()
+        )
+        assertEquals(1, grStatsborgerskapEtterBrexit.size)
+        assertEquals(Medlemskap.TREDJELANDSBORGER, grStatsborgerskapEtterBrexit.single().medlemskap)
+        assertTrue(grStatsborgerskapUtenPeriode.single().gjeldendeNå())
+
+        val statsborgerStorbritanniaMedPeriodeUnderBrexit = Statsborgerskap(
+            "GBR",
+            gyldigFraOgMed = LocalDate.of(1989, 3, 1),
+            gyldigTilOgMed = LocalDate.of(2020, 5, 1),
+            bekreftelsesdato = null
+        )
+        val grStatsborgerskapUnderBrexit = statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+            statsborgerskap = statsborgerStorbritanniaMedPeriodeUnderBrexit,
+            person = lagPerson()
+        )
+        assertEquals(2, grStatsborgerskapUnderBrexit.size)
+        assertEquals(Medlemskap.EØS, grStatsborgerskapUnderBrexit.sortedBy { it.gyldigPeriode?.fom }.first().medlemskap)
+        assertEquals(
+            Medlemskap.TREDJELANDSBORGER,
+            grStatsborgerskapUnderBrexit.sortedBy { it.gyldigPeriode?.fom }.last().medlemskap
+        )
     }
 }
