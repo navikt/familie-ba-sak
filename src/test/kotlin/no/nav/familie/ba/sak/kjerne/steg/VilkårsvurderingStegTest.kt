@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -99,6 +100,7 @@ class VilkårsvurderingStegTest {
         )
         vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
+        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED) } returns false
 
         val exception = assertThrows<RuntimeException> { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, "") }
         assertEquals(
