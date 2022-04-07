@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.ETTERBETALING_3ÅR
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BehandlingsresultatSteg(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingService: BehandlingService,
     private val simuleringService: SimuleringService,
     private val vedtakService: VedtakService,
@@ -64,7 +67,8 @@ class BehandlingsresultatSteg(
                 ETTERBETALING_3ÅR
             )
         ) {
-            val personerMedUgyldigEtterbetalingsperiode = tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
+            val personerMedUgyldigEtterbetalingsperiode =
+                tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
             if (personerMedUgyldigEtterbetalingsperiode.isNotEmpty()) {
                 throw UtbetalingsikkerhetFeil(
                     melding = "Utbetalingsperioder for en eller flere personer går mer enn 3 år tilbake i tid.",
@@ -78,7 +82,7 @@ class BehandlingsresultatSteg(
         val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
         validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler)
-        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndeler)
+        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndelerMedÅrsakDeltBosted = endretUtbetalingAndeler.filter { it.årsak == Årsak.DELT_BOSTED })
 
         if (!featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)) {
             validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
@@ -107,6 +111,7 @@ class BehandlingsresultatSteg(
             }
 
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
+            behandlingService.nullstillEndringstidspunkt(behandling.id)
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
                 vedtak = vedtakService.hentAktivForBehandlingThrows(
                     behandlingId = behandling.id
@@ -117,7 +122,9 @@ class BehandlingsresultatSteg(
         if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting() ||
             beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
                     behandling = behandlingMedOppdatertBehandlingsresultat,
-                    sistIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandlingMedOppdatertBehandlingsresultat)
+                    sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
+                            behandling = behandlingMedOppdatertBehandlingsresultat
+                        )
                 )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
@@ -137,6 +144,6 @@ class BehandlingsresultatSteg(
 
     private fun settBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat): Behandling {
         behandling.resultat = resultat
-        return behandlingService.lagreEllerOppdater(behandling)
+        return behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
     }
 }

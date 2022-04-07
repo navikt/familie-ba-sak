@@ -7,7 +7,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.lagMockRestJournalføring
@@ -21,7 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired
 class JournalføringServiceTest(
 
     @Autowired
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+
+    @Autowired
+    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
 
     @Autowired
     private val fagsakService: FagsakService,
@@ -43,7 +47,7 @@ class JournalføringServiceTest(
         val søkerAktør = personidentService.hentAktør(søkerFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService
             .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
@@ -62,7 +66,7 @@ class JournalføringServiceTest(
         val søkerAktør = personidentService.hentAktør(søkerFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
-        behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService
             .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")
@@ -78,12 +82,12 @@ class JournalføringServiceTest(
         val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr))
         val fagsakId = journalføringService.journalfør(request, "123", "mockEnhet", "1")
 
-        val behandling = behandlingService.hentAktivForFagsak(fagsakId.toLong())
+        val behandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId.toLong())
         assertNotNull(behandling)
         assertEquals(request.nyBehandlingstype, behandling!!.type)
         assertEquals(request.nyBehandlingsårsak, behandling.opprettetÅrsak)
 
-        val søknadMottattDato = behandlingService.hentSøknadMottattDato(behandling.id)
+        val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)
         assertNotNull(søknadMottattDato)
         assertEquals(request.datoMottatt!!.toLocalDate(), søknadMottattDato!!.toLocalDate())
     }

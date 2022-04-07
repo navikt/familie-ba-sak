@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårRegelverkResultat
@@ -81,7 +81,7 @@ internal class VilkårRegelverkResultatTidslinje(
     val charTidslinje: Tidslinje<Char, Måned>
 ) : TidslinjeSomStykkerOppTiden<VilkårRegelverkResultat, Måned>(charTidslinje) {
     override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): VilkårRegelverkResultat? {
-        val tegn = charTidslinje.hentUtsnitt(tidspunkt)
+        val tegn = charTidslinje.innholdForTidspunkt(tidspunkt)
 
         return when (tegn) {
             'E' -> VilkårRegelverkResultat(vilkår, Regelverk.EØS_FORORDNINGEN, Resultat.OPPFYLT)

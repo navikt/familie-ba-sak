@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.IverksettMotFamilieTilbakeDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -17,14 +17,14 @@ import java.util.Properties
     maxAntallFeil = 3
 )
 class IverksettMotFamilieTilbakeTask(
-    val behandlingService: BehandlingService,
+    val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     val stegService: StegService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val iverksettMotFamilieTilbake = objectMapper.readValue(task.payload, IverksettMotFamilieTilbakeDTO::class.java)
         stegService.håndterIverksettMotFamilieTilbake(
-            behandling = behandlingService.hent(iverksettMotFamilieTilbake.behandlingsId), task.metadata
+            behandling = behandlingHentOgPersisterService.hent(iverksettMotFamilieTilbake.behandlingsId), task.metadata
         )
     }
 

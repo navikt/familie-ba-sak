@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteUtvidetSatsTilTester
@@ -35,7 +35,7 @@ import java.time.LocalDate
 
 class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     @Autowired private val fagsakService: FagsakService,
-    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val featureToggleService: FeatureToggleService
@@ -199,7 +199,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = fagsakId.data!!.toLong())!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsakId.data!!.toLong())!!,
             søkerFnr = scenario.søker.ident,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
@@ -380,7 +380,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = fagsakId.data!!.toLong())!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsakId.data!!.toLong())!!,
             søkerFnr = scenario.søker.ident,
             fagsakService = fagsakService,
             vedtakService = vedtakService,

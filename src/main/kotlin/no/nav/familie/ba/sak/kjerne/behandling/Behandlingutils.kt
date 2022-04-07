@@ -4,11 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.YearMonth
@@ -46,39 +42,6 @@ object Behandlingutils {
     ): List<Behandling> {
         return iverksatteBehandlinger
             .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
-    }
-
-    fun bestemKategori(
-        behandlingÅrsak: BehandlingÅrsak,
-        nyBehandlingKategori: BehandlingKategori?,
-        løpendeBehandlingKategori: BehandlingKategori?
-    ): BehandlingKategori {
-        if (behandlingÅrsak !== BehandlingÅrsak.SØKNAD && løpendeBehandlingKategori != null) {
-            return løpendeBehandlingKategori
-        }
-        return nyBehandlingKategori ?: BehandlingKategori.NASJONAL
-    }
-
-    fun bestemUnderkategori(
-        nyUnderkategori: BehandlingUnderkategori?,
-        nyBehandlingType: BehandlingType,
-        nyBehandlingÅrsak: BehandlingÅrsak,
-        løpendeUnderkategori: BehandlingUnderkategori?
-    ): BehandlingUnderkategori {
-        if (nyUnderkategori == null && løpendeUnderkategori == null) return BehandlingUnderkategori.ORDINÆR
-        return when {
-            nyUnderkategori == BehandlingUnderkategori.UTVIDET -> nyUnderkategori
-
-            nyBehandlingType == BehandlingType.REVURDERING || nyBehandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO ->
-                løpendeUnderkategori
-                    ?: (nyUnderkategori ?: BehandlingUnderkategori.ORDINÆR)
-
-            else -> nyUnderkategori ?: BehandlingUnderkategori.ORDINÆR
-        }
-    }
-
-    fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUnderkategori {
-        return if (andeler.any { it.erUtvidet() && it.erLøpende() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
     }
 
     fun harBehandlingsårsakAlleredeKjørt(

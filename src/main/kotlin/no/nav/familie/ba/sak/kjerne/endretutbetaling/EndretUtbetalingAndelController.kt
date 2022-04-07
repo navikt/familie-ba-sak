@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 class EndretUtbetalingAndelController(
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val tilgangService: TilgangService,
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) {
@@ -44,7 +44,7 @@ class EndretUtbetalingAndelController(
             handling = "Oppdater endretutbetalingandel"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             behandling,
@@ -52,7 +52,7 @@ class EndretUtbetalingAndelController(
             restEndretUtbetalingAndel
         )
 
-        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId = behandling.id)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -72,14 +72,14 @@ class EndretUtbetalingAndelController(
             handling = "Oppdater endretutbetalingandel"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         endretUtbetalingAndelService.fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             behandling,
             endretUtbetalingAndelId
         )
 
-        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId = behandling.id)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -98,10 +98,10 @@ class EndretUtbetalingAndelController(
             handling = "Opprett endretutbetalingandel"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
 
-        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId = behandling.id)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService

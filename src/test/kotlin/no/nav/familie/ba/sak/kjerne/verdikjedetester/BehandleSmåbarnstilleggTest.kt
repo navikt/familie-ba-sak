@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -64,7 +64,7 @@ import java.time.YearMonth
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class BehandleSmåbarnstilleggTest(
     @Autowired private val fagsakService: FagsakService,
-    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val featureToggleService: FeatureToggleService,
@@ -125,7 +125,7 @@ class BehandleSmåbarnstilleggTest(
             behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
         )
 
-        val behandling = behandlingService.hent(restBehandling.data!!.behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
@@ -265,7 +265,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = fagsak.data!!.id)!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.data!!.id)!!,
             søkerFnr = søkersIdent,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
@@ -286,7 +286,7 @@ class BehandleSmåbarnstilleggTest(
             behandlingsdata = søkersAktør
         )
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         assertEquals(BehandlingStatus.AVSLUTTET, aktivBehandling.status)
         assertNotEquals(BehandlingÅrsak.SMÅBARNSTILLEGG, aktivBehandling.opprettetÅrsak)
@@ -317,7 +317,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         // Vedtaksperioder skal være slettet etter at den er blitt omgjort til manuell behandling
         assertEquals(
@@ -374,7 +374,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
@@ -400,7 +400,7 @@ class BehandleSmåbarnstilleggTest(
         assertTrue(aktuellVedtaksperiode?.begrunnelser?.any { it.standardbegrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD } == true)
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)!!,
             søkerFnr = søkersIdent,
             fagsakService = fagsakService,
             vedtakService = vedtakService,

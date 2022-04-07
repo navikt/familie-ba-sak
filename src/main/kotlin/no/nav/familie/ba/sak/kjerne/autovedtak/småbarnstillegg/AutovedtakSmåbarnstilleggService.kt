@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AutovedtakSmåbarnstilleggService(
     private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val småbarnstilleggService: SmåbarnstilleggService,
@@ -120,7 +120,7 @@ class AutovedtakSmåbarnstilleggService(
         behandlingEtterBehandlingsresultat: Behandling
     ) {
         val sistIverksatteBehandling =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id)
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id)
         val forrigeSmåbarnstilleggAndeler =
             if (sistIverksatteBehandling == null) emptyList()
             else beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(

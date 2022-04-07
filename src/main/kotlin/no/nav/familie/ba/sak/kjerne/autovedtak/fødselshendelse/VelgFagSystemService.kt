@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering.SEND_TIL_BA
@@ -14,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.STØTTET_I_BA_SAK
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.values
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -33,12 +32,11 @@ import org.springframework.stereotype.Service
 @Service
 class VelgFagSystemService(
     private val fagsakService: FagsakService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val infotrygdService: InfotrygdService,
     private val personidentService: PersonidentService,
-    private val behandlingService: BehandlingService,
     private val personopplysningerService: PersonopplysningerService,
-    private val statsborgerskapService: StatsborgerskapService,
-    private val featureToggleService: FeatureToggleService
+    private val statsborgerskapService: StatsborgerskapService
 ) {
 
     val utfallForValgAvFagsystem = mutableMapOf<FagsystemUtfall, Counter>()
@@ -57,10 +55,10 @@ class VelgFagSystemService(
 
     internal fun morHarLøpendeEllerTidligereUtbetalinger(fagsak: Fagsak?): Boolean {
         return if (fagsak == null) false
-        else if (behandlingService.hentBehandlinger(fagsakId = fagsak.id)
+        else if (behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id)
             .any { it.status == BehandlingStatus.UTREDES }
         ) true
-        else behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
+        else behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
     }
 
     internal fun morHarSakerMenIkkeLøpendeIInfotrygd(morsIdent: String): Boolean {

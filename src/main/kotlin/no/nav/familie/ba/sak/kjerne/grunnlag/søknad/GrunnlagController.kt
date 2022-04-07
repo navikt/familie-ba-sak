@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/behandlinger")
 @ProtectedWithClaims(issuer = "azuread")
 class GrunnlagController(
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val persongrunnlagService: PersongrunnlagService,
     private val tilbakestillService: TilbakestillBehandlingService,
@@ -40,7 +40,7 @@ class GrunnlagController(
             handling = "legge til barn"
         )
 
-        val behandling = behandlingService.hent(behandlingId = behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         persongrunnlagService.leggTilBarnIPersonopplysningsgrunnlag(
             behandling = behandling,
             nyttBarnIdent = leggTilBarnDto.barnIdent

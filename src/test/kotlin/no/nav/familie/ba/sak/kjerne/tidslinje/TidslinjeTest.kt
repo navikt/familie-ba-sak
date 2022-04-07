@@ -17,8 +17,6 @@ internal class TidslinjeTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
-        val personerMedFødselsdato =
-            mapOf(søker.aktør to søker.fødselsdato, barn1.aktør to barn1.fødselsdato, barn2.aktør to barn2.fødselsdato)
 
         val januar2020 = YearMonth.of(2020, 1)
         val behandling = lagBehandling()
@@ -51,7 +49,7 @@ internal class TidslinjeTest {
         tidslinjer.forBarn(barn2).vilkårsresultatTidslinjer.print()
 
         println("Søker")
-        tidslinjer.søkersTidslinje().oppfyllerVilkårTidslinje.print()
+        tidslinjer.søkersTidslinjer().oppfyllerVilkårTidslinje.print()
         println("Barn: ${barn1.aktør.aktivFødselsnummer()}")
         tidslinjer.forBarn(barn1).regelverkTidslinje.print()
         println("Barn: ${barn2.aktør.aktivFødselsnummer()}")

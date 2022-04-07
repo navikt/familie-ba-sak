@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -27,6 +28,7 @@ import java.time.YearMonth
 
 @Service
 class ØkonomiService(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val økonomiKlient: ØkonomiKlient,
     private val beregningService: BeregningService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
@@ -88,7 +90,7 @@ class ØkonomiService(
             )
         } else {
             val forrigeBehandling =
-                behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
+                behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
                     ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
 
             val forrigeTilstand =
@@ -121,7 +123,7 @@ class ØkonomiService(
             )
 
             if (!erSimulering && (
-                oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingService.hent(
+                oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
                         oppdatertBehandling.id
                     ).resultat == Behandlingsresultat.OPPHØRT
                 )
@@ -152,14 +154,15 @@ class ØkonomiService(
     }
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-        behandlingService.hentBehandlingerSomErIverksatt(behandling = behandling).mapNotNull { iverksattBehandling ->
+        behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
+            .mapNotNull { iverksattBehandling ->
 
-            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
-                .takeIf { it.isNotEmpty() }
-                ?.let { andelerTilkjentYtelse ->
-                    andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                }
-        }.maxByOrNull { it }
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { andelerTilkjentYtelse ->
+                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
+                    }
+            }.maxByOrNull { it }
 
     fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         if (utbetalingsoppdrag.harLøpendeUtbetaling()) {
@@ -172,7 +175,7 @@ class ØkonomiService(
 
     private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
         val erMigrertSak =
-            behandlingService.hentBehandlinger(behandling.fagsak.id)
+            behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id)
                 .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
 
         if (!erMigrertSak) {

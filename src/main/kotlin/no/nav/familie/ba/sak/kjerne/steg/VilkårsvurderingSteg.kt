@@ -4,7 +4,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -19,10 +20,11 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class VilkårsvurderingSteg(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingstemaService: BehandlingstemaService,
     private val vilkårService: VilkårService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val behandlingService: BehandlingService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val kompetanseService: KompetanseService,
     private val featureToggleService: FeatureToggleService
@@ -51,7 +53,7 @@ class VilkårsvurderingSteg(
             vilkårService.initierVilkårsvurderingForBehandling(
                 behandling = behandling,
                 bekreftEndringerViaFrontend = true,
-                forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
+                forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
                     behandling
                 )
             )
@@ -83,6 +85,13 @@ class VilkårsvurderingSteg(
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
             kompetanseService.tilpassKompetanserTilRegelverk(behandling.id)
         }
+
+        behandlingstemaService.oppdaterBehandlingstema(
+            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
+            nyKategori = null,
+            nyUnderkategori = null
+        )
+
         return hentNesteStegForNormalFlyt(behandling)
     }
 
