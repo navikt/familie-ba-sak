@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -52,6 +53,9 @@ class VilkårServiceTest(
     private val behandlingService: BehandlingService,
 
     @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+
+    @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
 
     @Autowired
@@ -84,7 +88,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val forrigeBehandlingSomErIverksatt =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -117,7 +121,7 @@ class VilkårServiceTest(
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
         val forrigeBehandlingSomErIverksatt =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -167,7 +171,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val forrigeBehandlingSomErIverksatt =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -227,7 +231,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val forrigeBehandlingSomErIverksatt =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -272,7 +276,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
         val forrigeBehandlingSomErIverksatt =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -308,7 +312,7 @@ class VilkårServiceTest(
         }
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
-        behandlingService.lagreEllerOppdater(behandling)
+        behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
 
         val barnFnr2 = randomFnr()
 
@@ -350,7 +354,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val forrigeBehandlingSomErIverksatt =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -371,7 +375,7 @@ class VilkårServiceTest(
 
         vilkårsvurderingService.oppdater(vilkårsvurdering)
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
-        behandlingService.lagreEllerOppdater(behandling)
+        behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
 
         val barnFnr2 = randomFnr()
 
@@ -473,7 +477,7 @@ class VilkårServiceTest(
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
         val forrigeBehandlingSomErIverksatt =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -1119,7 +1123,7 @@ class VilkårServiceTest(
                 )
             )
         )
-        forrigeBehandling = behandlingService.hent(forrigeBehandling.id)
+        forrigeBehandling = behandlingHentOgPersisterService.hent(forrigeBehandling.id)
         forrigeBehandling.behandlingStegTilstand.add(
             BehandlingStegTilstand(
                 behandling = forrigeBehandling,
@@ -1127,7 +1131,7 @@ class VilkårServiceTest(
                 behandlingStegStatus = BehandlingStegStatus.UTFØRT
             )
         )
-        behandlingService.lagreEllerOppdater(forrigeBehandling)
+        behandlingHentOgPersisterService.lagreEllerOppdater(forrigeBehandling)
 
         val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
             behandling = behandling,

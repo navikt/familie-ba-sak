@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -22,7 +22,7 @@ import java.util.Properties
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Iverksett vedtak mot oppdrag", maxAntallFeil = 3)
 class IverksettMotOppdragTask(
     private val stegService: StegService,
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val personidentService: PersonidentService,
     private val taskRepository: TaskRepositoryWrapper
 ) : AsyncTaskStep {
@@ -30,7 +30,7 @@ class IverksettMotOppdragTask(
     override fun doTask(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         stegService.håndterIverksettMotØkonomi(
-            behandling = behandlingService.hent(iverksettingTask.behandlingsId),
+            behandling = behandlingHentOgPersisterService.hent(iverksettingTask.behandlingsId),
             iverksettingTaskDTO = iverksettingTask
         )
     }

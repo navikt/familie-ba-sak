@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -42,6 +43,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val behandlingService = mockk<BehandlingService>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val infotrygdService = mockk<InfotrygdService>(relaxed = true)
     private val stegService = mockk<StegService>()
     private val vedtakService = mockk<VedtakService>(relaxed = true)
@@ -52,6 +54,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     private val autovedtakBrevService = AutovedtakBrevService(
         fagsakService = fagsakService,
         behandlingService = behandlingService,
+        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         infotrygdService = infotrygdService,
         autovedtakService = autovedtakService,
         vedtakService = vedtakService,
@@ -62,7 +65,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(
         autovedtakBrevService = autovedtakBrevService,
         persongrunnlagService = persongrunnlagService,
-        behandlingService = behandlingService,
+        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
         autovedtakStegService = autovedtakStegService
     )
@@ -75,8 +78,8 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ÅrForrigeMåned)
 
-        every { behandlingService.hentAktivForFagsak(any()) } returns behandling
-        every { behandlingService.hentBehandlinger(any()) } returns listOf(behandling)
+        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns behandling
+        every { behandlingHentOgPersisterService.hentBehandlinger(any()) } returns listOf(behandling)
         every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns false
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns emptyList()
@@ -127,8 +130,8 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
             }
         )
 
-        every { behandlingService.hentAktivForFagsak(any()) } returns behandling
-        every { behandlingService.hentBehandlinger(behandling.fagsak.id) } returns listOf(behandling)
+        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns behandling
+        every { behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id) } returns listOf(behandling)
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns vedtaksperioder
         every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns false
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
@@ -158,7 +161,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ÅrForrigeMåned)
 
-        every { behandlingService.hentAktivForFagsak(any()) } returns behandling
+        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns behandling
         every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns true
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns emptyList()

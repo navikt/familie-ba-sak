@@ -914,7 +914,8 @@ fun lagVilkårResultat(
     vilkår: Vilkår,
     vilkårRegelverk: Regelverk? = null,
     fom: YearMonth? = null,
-    tom: YearMonth? = null
+    tom: YearMonth? = null,
+    behandlingId: Long = 0
 ) = VilkårResultat(
     personResultat = null,
     vilkårType = vilkår,
@@ -922,7 +923,7 @@ fun lagVilkårResultat(
     periodeFom = fom?.toLocalDate(),
     periodeTom = tom?.toLocalDate(),
     begrunnelse = "",
-    behandlingId = 0,
+    behandlingId = behandlingId,
     vurderesEtter = vilkårRegelverk
 )
 

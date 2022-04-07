@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.Autobrev6og18ÅrService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -31,7 +31,7 @@ import java.time.YearMonth
 
 class TriggingAvAutobrev6og18ÅrTest(
     @Autowired private val fagsakService: FagsakService,
-    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
@@ -179,7 +179,7 @@ class TriggingAvAutobrev6og18ÅrTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = fagsakId)!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsakId)!!,
             søkerFnr = scenario.søker.ident,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
@@ -194,7 +194,7 @@ class TriggingAvAutobrev6og18ÅrTest(
             )
         )
 
-        var behandlinger = behandlingService.hentBehandlinger(fagsakId)
+        var behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
         // Her forventer vi ikke at autobrev skal trigges pga vedtaksbegrunnelsen som er satt på FGB.
         assertEquals(1, behandlinger.size)
 
@@ -206,15 +206,15 @@ class TriggingAvAutobrev6og18ÅrTest(
             )
         )
 
-        behandlinger = behandlingService.hentBehandlinger(fagsakId)
+        behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
         // Her forventer vi at autobrev skal trigges pga manglende vedtaksbegrunnelse for denne alderen på FGB.
         assertEquals(2, behandlinger.size)
 
         // Skal nye autobrev trigges må aktiv behandling være avsluttet. Gjør dette eksplisitt (og utenfor normal
         // flyt) ettersom dette skjer via en task når autobrev-koden kjøres.
-        val revurderingMedAutobrev = behandlingService.hentAktivForFagsak(fagsakId)!!
+        val revurderingMedAutobrev = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId)!!
         revurderingMedAutobrev.status = BehandlingStatus.AVSLUTTET
-        behandlingService.lagre(revurderingMedAutobrev)
+        behandlingHentOgPersisterService.lagreEllerOppdater(revurderingMedAutobrev)
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(
             autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
@@ -224,7 +224,7 @@ class TriggingAvAutobrev6og18ÅrTest(
             )
         )
 
-        behandlinger = behandlingService.hentBehandlinger(fagsakId)
+        behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
         // Her forventer vi ikke at autobrev skal trigges fordi det har blitt kjørt.
         assertEquals(2, behandlinger.size)
     }

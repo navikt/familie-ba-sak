@@ -11,7 +11,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.REVURDERING
@@ -45,10 +47,12 @@ import java.time.LocalDate
 
 @Service
 class VilkårService(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingstemaService: BehandlingstemaService,
+    private val behandlingService: BehandlingService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
-    private val behandlingService: BehandlingService,
     private val personidentService: PersonidentService,
     private val featureToggleService: FeatureToggleService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
@@ -61,11 +65,6 @@ class VilkårService(
     fun hentVilkårsvurderingThrows(behandlingId: Long): Vilkårsvurdering =
         hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw IllegalStateException("Fant ikke aktiv vilkårsvurdering for behandling $behandlingId")
-
-    companion object {
-        const val fantIkkeAktivVilkårsvurderingFeilmelding = "Fant ikke aktiv vilkårsvurdering"
-        const val fantIkkeVilkårsvurderingForPersonFeilmelding = "Fant ikke vilkårsvurdering for person"
-    }
 
     @Transactional
     fun endreVilkår(
@@ -164,7 +163,7 @@ class VilkårService(
                 message = fantIkkeVilkårsvurderingForPersonFeilmelding,
                 frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restSlettVilkår.personIdent}"
             )
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         if (!behandling.kanLeggeTilOgFjerneUtvidetVilkår() ||
             Vilkår.UTVIDET_BARNETRYGD != restSlettVilkår.vilkårType ||
             finnesUtvidetBarnetrydIForrigeBehandling(behandling, restSlettVilkår.personIdent)
@@ -177,16 +176,16 @@ class VilkårService(
             )
         }
 
+        personResultat.vilkårResultater.filter { it.vilkårType == restSlettVilkår.vilkårType }
+            .forEach { personResultat.removeVilkårResultat(it.id) }
+
         if (restSlettVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
-            behandlingService.oppdaterBehandlingstema(
+            behandlingstemaService.oppdaterBehandlingstema(
                 behandling = behandling,
                 nyKategori = behandling.kategori,
                 nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
         }
-
-        personResultat.vilkårResultater.filter { it.vilkårType == restSlettVilkår.vilkårType }
-            .forEach { personResultat.removeVilkårResultat(it.id) }
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
@@ -198,12 +197,13 @@ class VilkårService(
                 message = "Fant ikke aktiv vilkårsvurdering ved opprettelse av vilkårsperiode",
                 frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
+
         val behandling = vilkårsvurdering.behandling
 
         if (restNyttVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
             validerFørLeggeTilUtvidetBarnetrygd(behandling, restNyttVilkår, vilkårsvurdering)
 
-            behandlingService.oppdaterBehandlingstema(
+            behandlingstemaService.oppdaterBehandlingstema(
                 behandling = behandling,
                 nyKategori = behandling.kategori,
                 nyUnderkategori = BehandlingUnderkategori.UTVIDET,
@@ -300,7 +300,7 @@ class VilkårService(
                 val (initieltSomErOppdatert, aktivtSomErRedusert) = flyttResultaterTilInitielt(
                     initiellVilkårsvurdering = initiellVilkårsvurdering,
                     aktivVilkårsvurdering = aktivVilkårsvurdering,
-                    løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
+                    løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
                     forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) hentVilkårsvurdering(
                         forrigeBehandlingSomErVedtatt.id
                     ) else null
@@ -327,14 +327,14 @@ class VilkårService(
         val annenVilkårsvurdering = hentVilkårsvurdering(behandlingId = annenBehandling.id)
             ?: throw Feil(message = "Finner ikke vilkårsvurdering fra annen behandling.")
 
-        val annenBehandlingErHenlagt = behandlingService.hent(annenBehandling.id).erHenlagt()
+        val annenBehandlingErHenlagt = behandlingHentOgPersisterService.hent(annenBehandling.id).erHenlagt()
 
         if (annenBehandlingErHenlagt)
             throw Feil(message = "vilkårsvurdering skal ikke kopieres fra henlagt behandling.")
         val (oppdatert) = flyttResultaterTilInitielt(
             aktivVilkårsvurdering = annenVilkårsvurdering,
             initiellVilkårsvurdering = initiellVilkårsvurdering,
-            løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
+            løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
             forrigeBehandlingVilkårsvurdering = annenVilkårsvurdering
         )
         return oppdatert
@@ -664,7 +664,8 @@ class VilkårService(
     }
 
     private fun finnesUtvidetBarnetrydIForrigeBehandling(behandling: Behandling, personIdent: String): Boolean {
-        val forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(behandling)
+        val forrigeBehandlingSomErVedtatt =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
         if (forrigeBehandlingSomErVedtatt != null) {
             val forrigeBehandlingsvilkårsvurdering =
                 vilkårsvurderingService.hentAktivForBehandling(forrigeBehandlingSomErVedtatt.id) ?: throw Feil(
@@ -676,6 +677,11 @@ class VilkårService(
                 .vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         }
         return false
+    }
+
+    companion object {
+        const val fantIkkeAktivVilkårsvurderingFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+        const val fantIkkeVilkårsvurderingForPersonFeilmelding = "Fant ikke vilkårsvurdering for person"
     }
 }
 

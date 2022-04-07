@@ -7,12 +7,12 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -35,6 +35,9 @@ import java.time.YearMonth
 
 class LagreMigreringsdatoTest {
     val behandlingRepository = mockk<BehandlingRepository>()
+    val behandlingstemaService = mockk<BehandlingstemaService>()
+    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
+    val behandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
     val beregningService = mockk<BeregningService>()
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
@@ -44,41 +47,40 @@ class LagreMigreringsdatoTest {
     val loggService = mockk<LoggService>()
     val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     val saksstatistikkEventPublisher = mockk<SaksstatistikkEventPublisher>()
-    val oppgaveService = mockk<OppgaveService>()
     val infotrygdService = mockk<InfotrygdService>()
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val personidentService = mockk<PersonidentService>()
     val featureToggleService = mockk<FeatureToggleService>()
     val taskRepository = mockk<TaskRepositoryWrapper>()
     val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
-    val behandlingSøknadsinfoRepository = mockk<BehandlingSøknadsinfoRepository>()
     val vilkårsvurderingService = mockk<VilkårsvurderingService>()
 
     private val behandlingService = BehandlingService(
         behandlingRepository,
-        andelTilkjentYtelseRepository,
+        behandlingHentOgPersisterService,
+        behandlingstemaService,
+        behandlingSøknadsinfoService,
+        behandlingMigreringsinfoRepository,
         behandlingMetrikker,
+        saksstatistikkEventPublisher,
         fagsakRepository,
         vedtakRepository,
         loggService,
         arbeidsfordelingService,
-        saksstatistikkEventPublisher,
-        oppgaveService,
         infotrygdService,
         vedtaksperiodeService,
         personidentService,
         featureToggleService,
         taskRepository,
-        behandlingMigreringsinfoRepository,
-        behandlingSøknadsinfoRepository,
         vilkårsvurderingService,
     )
 
     @Test
     fun `Lagre første migreringstidspunkt skal ikke kaste feil`() {
         every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any()) } returns null
-        every { behandlingRepository.finnBehandlinger(any()) } returns emptyList()
         every { behandlingMigreringsinfoRepository.save(any()) } returns mockk()
+        every { vilkårsvurderingService.hentTidligsteVilkårsvurderingKnyttetTilMigrering(any()) } returns YearMonth.now()
+        every { behandlingHentOgPersisterService.hentBehandlinger(any()) } returns emptyList()
 
         assertDoesNotThrow {
             behandlingService.lagreNedMigreringsdato(
@@ -112,7 +114,7 @@ class LagreMigreringsdatoTest {
     @Test
     fun `Lagre tidligere migreringstidspunkt skal ikke kaste feil`() {
         every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any()) } returns LocalDate.now()
-        every { behandlingRepository.finnBehandlinger(any()) } returns emptyList()
+        every { behandlingHentOgPersisterService.hentBehandlinger(any()) } returns emptyList()
         every { behandlingMigreringsinfoRepository.save(any()) } returns mockk()
 
         assertDoesNotThrow {
@@ -129,7 +131,7 @@ class LagreMigreringsdatoTest {
     @Test
     fun `Lagre tidligere migreringstidspunkt skal kaste feil dersom forrige behandling ikke har lagret migreringsdato`() {
         every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any()) } returns null
-        every { behandlingRepository.finnBehandlinger(any()) } returns listOf(
+        every { behandlingHentOgPersisterService.hentBehandlinger(any()) } returns listOf(
             lagBehandling().also {
                 it.status = BehandlingStatus.AVSLUTTET
                 it.resultat = Behandlingsresultat.INNVILGET

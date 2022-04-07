@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -17,13 +17,17 @@ import java.util.Properties
     maxAntallFeil = 3
 )
 class FerdigstillBehandlingTask(
-    val behandlingService: BehandlingService,
+    val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     val stegService: StegService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val ferdigstillBehandling = objectMapper.readValue(task.payload, FerdigstillBehandlingDTO::class.java)
-        stegService.håndterFerdigstillBehandling(behandling = behandlingService.hent(ferdigstillBehandling.behandlingsId))
+        stegService.håndterFerdigstillBehandling(
+            behandling = behandlingHentOgPersisterService.hent(
+                ferdigstillBehandling.behandlingsId
+            )
+        )
     }
 
     companion object {

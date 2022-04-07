@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -31,6 +32,9 @@ import java.time.LocalDateTime
 class ØkonomiIntegrasjonTest(
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
@@ -139,7 +143,8 @@ class ØkonomiIntegrasjonTest(
         fagsak.status = FagsakStatus.LØPENDE
         fagsakService.lagre(fagsak)
 
-        val behandlingerMedAndelerTilAvstemming = behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
+        val behandlingerMedAndelerTilAvstemming =
+            behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
         Assertions.assertTrue(behandlingerMedAndelerTilAvstemming.contains(behandling.id))
     }
