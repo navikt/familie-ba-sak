@@ -24,7 +24,7 @@
         <spring.cloud.version>3.1.0</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
         <prosessering.version>1.20220321101749_55e4576</prosessering.version>
-        <felles.version>1.20220310100515_c0dcfc1</felles.version>
+        <felles.version>1.20220406145421_5f46d64</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20220316123415_223f003</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>2.0_20220321181602_8d247bd</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
