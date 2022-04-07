@@ -118,7 +118,8 @@ enum class AnnenForeldersAktivitet {
 
 enum class KompetanseResultat {
     NORGE_ER_PRIMÆRLAND,
-    NORGE_ER_SEKUNDÆRLAND
+    NORGE_ER_SEKUNDÆRLAND,
+    NORGE_OG_ANNEN_FORTELDERS_AKTIVITETSLAND_ER_PRIMÆRLAND
 }
 
 fun Kompetanse.bareSkjema() =
