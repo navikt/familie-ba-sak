@@ -14,7 +14,7 @@ data class RestFerdigstillOppgaveKnyttJournalpost(
     val bruker: NavnOgIdent,
     val nyBehandlingstype: BehandlingType,
     val nyBehandlingsårsak: BehandlingÅrsak,
-    val kategori: BehandlingKategori,
-    val underkategori: BehandlingUnderkategori,
-    val datoMottatt: LocalDateTime,
+    val kategori: BehandlingKategori?,
+    val underkategori: BehandlingUnderkategori?,
+    val datoMottatt: LocalDateTime?,
 )
