@@ -28,8 +28,8 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
             BehandlingstemaUtils.bestemUnderkategori(
-                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                løpendeUnderkategori = null,
+                overstyrUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                underkategoriFraLøpendeBehandling = null,
             )
         )
     }
@@ -39,8 +39,8 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             BehandlingstemaUtils.bestemUnderkategori(
-                nyUnderkategori = BehandlingUnderkategori.UTVIDET,
-                løpendeUnderkategori = null
+                overstyrUnderkategori = BehandlingUnderkategori.UTVIDET,
+                underkategoriFraLøpendeBehandling = null
             )
         )
     }
@@ -50,8 +50,8 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             BehandlingstemaUtils.bestemUnderkategori(
-                nyUnderkategori = null,
-                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                overstyrUnderkategori = null,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
                 underkategoriFraInneværendeBehandling = BehandlingUnderkategori.UTVIDET
             )
         )
@@ -62,8 +62,8 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             BehandlingstemaUtils.bestemUnderkategori(
-                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
+                overstyrUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET,
                 underkategoriFraInneværendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
@@ -74,8 +74,8 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             BehandlingstemaUtils.bestemUnderkategori(
-                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET
+                overstyrUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET
             )
         )
     }
@@ -85,8 +85,8 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
             BehandlingstemaUtils.bestemUnderkategori(
-                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
+                overstyrUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
     }
@@ -96,8 +96,8 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             BehandlingstemaUtils.bestemUnderkategori(
-                nyUnderkategori = BehandlingUnderkategori.UTVIDET,
-                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
+                overstyrUnderkategori = BehandlingUnderkategori.UTVIDET,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
     }
@@ -107,15 +107,15 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             BehandlingstemaUtils.bestemUnderkategori(
-                nyUnderkategori = null,
-                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET
+                overstyrUnderkategori = null,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET
             )
         )
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
             BehandlingstemaUtils.bestemUnderkategori(
-                nyUnderkategori = null,
-                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
+                overstyrUnderkategori = null,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
     }

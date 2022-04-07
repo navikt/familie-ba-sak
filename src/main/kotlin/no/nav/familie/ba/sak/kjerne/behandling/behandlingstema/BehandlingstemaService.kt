@@ -5,10 +5,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.bestemKategori
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.bestemUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.utledLøpendeKategori
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -34,63 +30,59 @@ class BehandlingstemaService(
 
     fun oppdaterBehandlingstema(
         behandling: Behandling,
-        nyKategori: BehandlingKategori?,
-        nyUnderkategori: BehandlingUnderkategori?,
+        overstyrKategori: BehandlingKategori? = null,
+        overstyrUnderkategori: BehandlingUnderkategori? = null,
         manueltOppdatert: Boolean = false
     ): Behandling {
         if (behandling.skalBehandlesAutomatisk) return behandling
-        else if (manueltOppdatert && (nyKategori == null || nyUnderkategori == null)) throw FunksjonellFeil("Du må velge behandlingstema.")
+        else if (manueltOppdatert && (overstyrKategori == null || overstyrUnderkategori == null)) throw FunksjonellFeil(
+            "Du må velge behandlingstema."
+        )
 
         val utledetKategori = bestemKategori(
-            nyBehandlingKategori = nyKategori,
-            løpendeBehandlingKategori = hentLøpendeKategori(behandling.fagsak.id),
+            overstyrKategori = overstyrKategori,
+            kategoriFraLøpendeBehandling = hentLøpendeKategori(behandling.fagsak.id),
             kategoriFraInneværendeBehandling = hentKategoriFraInneværendeBehandling(behandling.fagsak.id),
         )
 
-        val utledetUnderkategori = if (manueltOppdatert) {
-            nyUnderkategori!!
-        } else {
-            bestemUnderkategori(
-                nyUnderkategori = nyUnderkategori,
-                løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id),
-                underkategoriFraInneværendeBehandling = hentUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id)
-            )
-        }
+        val utledetUnderkategori = bestemUnderkategori(
+            overstyrUnderkategori = overstyrUnderkategori,
+            underkategoriFraLøpendeBehandling = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id),
+            underkategoriFraInneværendeBehandling = hentUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id)
+        )
 
         val forrigeUnderkategori = behandling.underkategori
         val forrigeKategori = behandling.kategori
         val skalOppdatereKategori = utledetKategori != forrigeKategori
         val skalOppdatereUnderkategori = utledetUnderkategori != forrigeUnderkategori
 
-        if (skalOppdatereKategori) {
-            behandling.apply { kategori = utledetKategori }
-        }
-        if (skalOppdatereUnderkategori) {
+        return if (skalOppdatereKategori || skalOppdatereUnderkategori) {
             behandling.apply {
+                kategori = utledetKategori
                 underkategori = utledetUnderkategori
             }
-        }
 
-        return behandlingHentOgPersisterService.lagreEllerOppdater(behandling).also { lagretBehandling ->
-            oppgaveService.patchOppgaverForBehandling(lagretBehandling) {
-                if (it.behandlingstema != lagretBehandling.underkategori.tilOppgaveBehandlingTema().value || it.behandlingstype != lagretBehandling.kategori.tilOppgavebehandlingType().value) {
-                    it.copy(
-                        behandlingstema = lagretBehandling.underkategori.tilOppgaveBehandlingTema().value,
-                        behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value
+            behandlingHentOgPersisterService.lagreEllerOppdater(behandling).also { lagretBehandling ->
+                oppgaveService.patchOppgaverForBehandling(lagretBehandling) {
+                    if (it.behandlingstema != lagretBehandling.underkategori.tilOppgaveBehandlingTema().value || it.behandlingstype != lagretBehandling.kategori.tilOppgavebehandlingType().value) {
+                        it.copy(
+                            behandlingstema = lagretBehandling.underkategori.tilOppgaveBehandlingTema().value,
+                            behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value
+                        )
+                    } else null
+                }
+
+                if (manueltOppdatert && (skalOppdatereKategori || skalOppdatereUnderkategori)) {
+                    loggService.opprettEndretBehandlingstema(
+                        behandling = lagretBehandling,
+                        forrigeKategori = forrigeKategori,
+                        forrigeUnderkategori = forrigeUnderkategori,
+                        nyKategori = utledetKategori,
+                        nyUnderkategori = utledetUnderkategori
                     )
-                } else null
+                }
             }
-
-            if (manueltOppdatert && (skalOppdatereKategori || skalOppdatereUnderkategori)) {
-                loggService.opprettEndretBehandlingstema(
-                    behandling = lagretBehandling,
-                    forrigeKategori = forrigeKategori,
-                    forrigeUnderkategori = forrigeUnderkategori,
-                    nyKategori = utledetKategori,
-                    nyUnderkategori = utledetUnderkategori
-                )
-            }
-        }
+        } else behandling
     }
 
     fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori {

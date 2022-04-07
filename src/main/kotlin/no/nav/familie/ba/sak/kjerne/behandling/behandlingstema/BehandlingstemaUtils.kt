@@ -10,52 +10,50 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
-object BehandlingstemaUtils {
-    fun bestemKategori(
-        nyBehandlingKategori: BehandlingKategori?,
-        løpendeBehandlingKategori: BehandlingKategori?,
-        kategoriFraInneværendeBehandling: BehandlingKategori? = null,
-    ): BehandlingKategori {
-        if (løpendeBehandlingKategori == BehandlingKategori.EØS) return BehandlingKategori.EØS
+fun bestemKategori(
+    overstyrKategori: BehandlingKategori?,
+    kategoriFraLøpendeBehandling: BehandlingKategori?,
+    kategoriFraInneværendeBehandling: BehandlingKategori? = null,
+): BehandlingKategori {
+    if (kategoriFraLøpendeBehandling == BehandlingKategori.EØS) return BehandlingKategori.EØS
 
-        val oppdatertKategori = listOf(nyBehandlingKategori, kategoriFraInneværendeBehandling).finnHøyesteKategori()
+    val oppdatertKategori = listOf(overstyrKategori, kategoriFraInneværendeBehandling).finnHøyesteKategori()
 
-        return oppdatertKategori ?: BehandlingKategori.NASJONAL
-    }
+    return oppdatertKategori ?: BehandlingKategori.NASJONAL
+}
 
-    fun bestemUnderkategori(
-        nyUnderkategori: BehandlingUnderkategori?,
-        løpendeUnderkategori: BehandlingUnderkategori?,
-        underkategoriFraInneværendeBehandling: BehandlingUnderkategori? = null,
-    ): BehandlingUnderkategori {
-        if (løpendeUnderkategori == BehandlingUnderkategori.UTVIDET) return BehandlingUnderkategori.UTVIDET
+fun bestemUnderkategori(
+    overstyrUnderkategori: BehandlingUnderkategori?,
+    underkategoriFraLøpendeBehandling: BehandlingUnderkategori?,
+    underkategoriFraInneværendeBehandling: BehandlingUnderkategori? = null,
+): BehandlingUnderkategori {
+    if (underkategoriFraLøpendeBehandling == BehandlingUnderkategori.UTVIDET) return BehandlingUnderkategori.UTVIDET
 
-        val oppdatertUnderkategori =
-            listOf(nyUnderkategori, underkategoriFraInneværendeBehandling).finnHøyesteKategori()
+    val oppdatertUnderkategori =
+        listOf(overstyrUnderkategori, underkategoriFraInneværendeBehandling).finnHøyesteKategori()
 
-        return oppdatertUnderkategori ?: BehandlingUnderkategori.ORDINÆR
-    }
+    return oppdatertUnderkategori ?: BehandlingUnderkategori.ORDINÆR
+}
 
-    fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUnderkategori {
-        return if (andeler.any { it.erUtvidet() && it.erLøpende() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
-    }
+fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUnderkategori {
+    return if (andeler.any { it.erUtvidet() && it.erLøpende() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
+}
 
-    fun utledLøpendeKategori(
-        barnasTidslinjer: Map<Aktør, Tidslinjer.BarnetsTidslinjerTimeline>?,
-    ): BehandlingKategori {
-        if (barnasTidslinjer == null) return BehandlingKategori.NASJONAL
+fun utledLøpendeKategori(
+    barnasTidslinjer: Map<Aktør, Tidslinjer.BarnetsTidslinjerTimeline>?,
+): BehandlingKategori {
+    if (barnasTidslinjer == null) return BehandlingKategori.NASJONAL
 
-        val nå = MånedTidspunkt.nå()
+    val nå = MånedTidspunkt.nå()
 
-        val etBarnHarMinstEnLøpendeEØSPeriode = barnasTidslinjer
-            .values
-            .map { it.regelverkTidslinje.innholdForTidspunkt(nå) }
-            .any { it == Regelverk.EØS_FORORDNINGEN }
+    val etBarnHarMinstEnLøpendeEØSPeriode = barnasTidslinjer
+        .values
+        .map { it.regelverkTidslinje.innholdForTidspunkt(nå) }
+        .any { it == Regelverk.EØS_FORORDNINGEN }
 
-        return if (etBarnHarMinstEnLøpendeEØSPeriode) {
-            BehandlingKategori.EØS
-        } else {
-            BehandlingKategori.NASJONAL
-        }
+    return if (etBarnHarMinstEnLøpendeEØSPeriode) {
+        BehandlingKategori.EØS
+    } else {
+        BehandlingKategori.NASJONAL
     }
 }
