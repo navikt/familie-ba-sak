@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
 @Service
 class HenleggBehandling(
     private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val loggService: LoggService,
     private val dokumentService: DokumentService,
     private val oppgaveService: OppgaveService,
@@ -45,7 +47,7 @@ class HenleggBehandling(
         behandling.resultat = data.årsak.tilBehandlingsresultat()
         behandling.leggTilHenleggStegOmDetIkkeFinnesFraFør()
 
-        behandlingService.lagreEllerOppdater(behandling)
+        behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
 
         // Slett migreringsdato
         behandlingService.deleteMigreringsdatoVedHenleggelse(behandling.id)

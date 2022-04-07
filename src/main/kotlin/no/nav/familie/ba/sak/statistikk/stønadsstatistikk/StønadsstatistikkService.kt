@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
@@ -33,7 +33,7 @@ import java.util.UUID
 
 @Service
 class StønadsstatistikkService(
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
     private val vedtakService: VedtakService,
@@ -43,7 +43,7 @@ class StønadsstatistikkService(
 
     fun hentVedtak(behandlingId: Long): VedtakDVH {
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
         // DVH ønsker tidspunkt med klokkeslett
 

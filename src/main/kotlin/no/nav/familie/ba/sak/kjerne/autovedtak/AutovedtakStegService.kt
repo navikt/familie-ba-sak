@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødse
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevBehandlingsdata
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -34,7 +34,7 @@ enum class Autovedtaktype(val displayName: String) {
 @Service
 class AutovedtakStegService(
     private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val oppgaveService: OppgaveService,
     private val autovedtakFødselshendelseService: AutovedtakFødselshendelseService,
     private val autovedtakBrevService: AutovedtakBrevService,
@@ -113,7 +113,7 @@ class AutovedtakStegService(
 
     fun håndterÅpenBehandlingOgAvbrytAutovedtak(aktør: Aktør, autovedtaktype: Autovedtaktype): Boolean {
         val åpenBehandling = fagsakService.hent(aktør)?.let {
-            behandlingService.hentAktivOgÅpenForFagsak(it.id)
+            behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(it.id)
         }
 
         return if (åpenBehandling == null) false

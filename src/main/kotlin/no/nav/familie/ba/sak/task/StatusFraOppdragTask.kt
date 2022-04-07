@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service
 )
 class StatusFraOppdragTask(
     private val stegService: StegService,
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val personidentService: PersonidentService,
     private val taskRepository: TaskRepositoryWrapper
 ) : AsyncTaskStep {
@@ -42,7 +42,7 @@ class StatusFraOppdragTask(
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
 
         stegService.håndterStatusFraØkonomi(
-            behandling = behandlingService.hent(behandlingId = statusFraOppdragDTO.behandlingsId),
+            behandling = behandlingHentOgPersisterService.hent(behandlingId = statusFraOppdragDTO.behandlingsId),
             statusFraOppdragMedTask = StatusFraOppdragMedTask(statusFraOppdragDTO = statusFraOppdragDTO, task = task)
         )
     }

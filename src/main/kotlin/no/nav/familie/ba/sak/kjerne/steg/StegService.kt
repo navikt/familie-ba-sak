@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -41,6 +42,7 @@ class StegService(
     private val steg: List<BehandlingSteg<*>>,
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val beregningService: BeregningService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilgangService: TilgangService,
@@ -108,7 +110,7 @@ class StegService(
     }
 
     private fun validerHelmanuelMigrering(behandling: Behandling) {
-        if (behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) != null) {
+        if (behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) != null) {
             throw FunksjonellFeil(
                 melding = "Det finnes allerede en vedtatt behandling på fagsak ${behandling.fagsak.id}." +
                     "Behandling kan ikke opprettes med årsak " +
@@ -419,7 +421,7 @@ class StegService(
             behandlingSteg.preValiderSteg(behandling, this)
             val nesteSteg = utførendeSteg()
             behandlingSteg.postValiderSteg(behandling)
-            val behandlingEtterUtførtSteg = behandlingService.hent(behandling.id)
+            val behandlingEtterUtførtSteg = behandlingHentOgPersisterService.hent(behandling.id)
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
@@ -488,8 +490,8 @@ class StegService(
     }
 
     private fun hentSisteAvsluttetBehandling(behandling: Behandling): Behandling {
-        return behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-            ?: behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+        return behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+            ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
             ?: throw Feil(
                 "Forsøker å opprette en ${behandling.type.visningsnavn} " +
                     "med årsak ${behandling.opprettetÅrsak.visningsnavn}, " +

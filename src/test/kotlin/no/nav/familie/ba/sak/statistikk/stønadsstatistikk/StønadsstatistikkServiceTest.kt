@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.config.ClientMocks.Companion.barnFnr
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -37,8 +37,8 @@ import java.math.BigDecimal
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockKExtension::class)
 internal class StønadsstatistikkServiceTest(
-    @MockK
-    private val behandlingService: BehandlingService,
+    @MockK(relaxed = true)
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @MockK
     private val persongrunnlagService: PersongrunnlagService,
@@ -58,7 +58,7 @@ internal class StønadsstatistikkServiceTest(
 
     private val stønadsstatistikkService =
         StønadsstatistikkService(
-            behandlingService,
+            behandlingHentOgPersisterService,
             persongrunnlagService,
             beregningService,
             vedtakService,
@@ -108,7 +108,7 @@ internal class StønadsstatistikkServiceTest(
             periodeIdOffset = 3
         )
 
-        every { behandlingService.hent(any()) } returns behandling
+        every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
             tilkjentYtelse.copy(
                 andelerTilkjentYtelse = mutableSetOf(

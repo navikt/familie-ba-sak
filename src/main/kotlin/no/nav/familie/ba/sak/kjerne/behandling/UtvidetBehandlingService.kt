@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
@@ -12,9 +14,11 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
@@ -27,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class UtvidetBehandlingService(
@@ -44,7 +49,8 @@ class UtvidetBehandlingService(
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val settPåVentService: SettPåVentService,
-    private val kompetanseRepository: KompetanseRepository
+    private val kompetanseRepository: KompetanseRepository,
+    private val endringstidspunktService: EndringstidspunktService
 ) {
 
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
@@ -67,6 +73,8 @@ class UtvidetBehandlingService(
             totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+
+        val endringstidspunkt = endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
@@ -95,6 +103,7 @@ class UtvidetBehandlingService(
             endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
                 .map { it.tilRestEndretUtbetalingAndel() },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
+            endringstidspunkt = utledEndringstidpunkt(endringstidspunkt, behandling),
             vedtak = vedtak?.tilRestVedtak(
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
                     vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).sortedBy { it.fom }
@@ -108,5 +117,14 @@ class UtvidetBehandlingService(
                 ?.tilRestSettPåVent(),
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId)
         )
+    }
+
+    private fun utledEndringstidpunkt(
+        endringstidspunkt: LocalDate,
+        behandling: Behandling
+    ) = when {
+        endringstidspunkt == TIDENES_MORGEN || endringstidspunkt == TIDENES_ENDE -> null
+        behandling.overstyrtEndringstidspunkt != null -> behandling.overstyrtEndringstidspunkt
+        else -> endringstidspunkt
     }
 }

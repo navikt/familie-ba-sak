@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.ekstern.bisys
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -13,8 +13,8 @@ import java.time.LocalDate
 
 @Service
 class BisysService(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    private val behandlingService: BehandlingService,
     private val fagsakRepository: FagsakRepository,
     private val personidentService: PersonidentService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
@@ -60,7 +60,7 @@ class BisysService(
         fraDato: LocalDate
     ): List<UtvidetBarnetrygdPeriode> {
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
-        val behandling = fagsak?.let { behandlingService.hentSisteBehandlingSomErIverksatt(it.id) }
+        val behandling = fagsak?.let { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(it.id) }
         if (fagsak == null || behandling == null) {
             return emptyList()
         }

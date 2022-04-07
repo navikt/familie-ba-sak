@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -30,7 +30,7 @@ import java.time.LocalDate
 class TekniskEndringAvFødselshendelseTest(
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
-    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService
@@ -57,7 +57,7 @@ class TekniskEndringAvFødselshendelseTest(
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
-            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService
@@ -159,7 +159,7 @@ class TekniskEndringAvFødselshendelseTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingService.hent(behandlingId = restUtvidetBehandlingEtterIverksetting.data?.behandlingId!!),
+            behandlingEtterVurdering = behandlingHentOgPersisterService.hent(behandlingId = restUtvidetBehandlingEtterIverksetting.data?.behandlingId!!),
             søkerFnr = scenario.søker.ident,
             fagsakStatusEtterIverksetting = FagsakStatus.AVSLUTTET,
             fagsakService = fagsakService,
