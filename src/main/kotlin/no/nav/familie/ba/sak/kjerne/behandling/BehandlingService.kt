@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.bestemKategori
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils.bestemUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategori
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
