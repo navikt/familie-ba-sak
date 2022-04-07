@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.filtrerGjeldendeNå
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.vurderOmPersonerBorSammen
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.vurderOmPersonHarBoddSammenMedAnnenForAllePerioder
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import org.junit.jupiter.api.Assertions
@@ -28,8 +28,10 @@ internal class BostedsadresseTest {
             kommunenummer = "2231"
         )
         val adresseMedNullFom = adresse.copy().apply { periode = DatoIntervallEntitet(fom = null) }
-        val adresseMedEldreDato = adresse.copy().apply { periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(3)) }
-        val adresseMedNyereDato = adresse.copy().apply { periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1)) }
+        val adresseMedEldreDato =
+            adresse.copy().apply { periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(3)) }
+        val adresseMedNyereDato =
+            adresse.copy().apply { periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1)) }
         val adresserTilSortering =
             mutableListOf(adresseMedEldreDato, adresseMedNyereDato, adresseMedNullFom) as MutableList<GrBostedsadresse>
         assertEquals(adresseMedNyereDato, adresserTilSortering.sisteAdresse())
@@ -96,7 +98,7 @@ internal class BostedsadresseTest {
         val p2Adresser = listOf(
             GrBostedsadresse.fraBostedsadresse(person = p2, bostedsadresse = fellesAdresse)
         )
-        Assertions.assertTrue(vurderOmPersonerBorSammen(p1Adresser, p2Adresser))
+        Assertions.assertTrue(vurderOmPersonHarBoddSammenMedAnnenForAllePerioder(p1Adresser, p2Adresser))
     }
 
     @Test
@@ -137,6 +139,48 @@ internal class BostedsadresseTest {
                 )
             )
         )
-        Assertions.assertTrue(vurderOmPersonerBorSammen(p1Adresser.filtrerGjeldendeNå(), p2Adresser.filtrerGjeldendeNå()))
+        Assertions.assertTrue(
+            vurderOmPersonHarBoddSammenMedAnnenForAllePerioder(
+                p1Adresser.filtrerGjeldendeNå(),
+                p2Adresser.filtrerGjeldendeNå()
+            )
+        )
+    }
+
+    @Test
+    fun `Skal returnere at personer bor sammen når en av av adressene ikke har fom dato`() {
+        val søker = lagPerson()
+        val barn = lagPerson(fødselsdato = LocalDate.of(2021, 1, 14))
+        val fellesAdresse = Bostedsadresse(
+            angittFlyttedato = LocalDate.of(2020, 4, 17),
+            gyldigTilOgMed = null,
+            matrikkeladresse = Matrikkeladresse(
+                matrikkelId = 123L,
+                bruksenhetsnummer = "H301",
+                tilleggsnavn = "navn",
+                postnummer = "0202",
+                kommunenummer = "2231"
+            )
+        )
+        val søkerAdresser = listOf(
+            GrBostedsadresse.fraBostedsadresse(
+                person = søker,
+                bostedsadresse = fellesAdresse
+            )
+        )
+        val barnAdresser = listOf(
+            GrBostedsadresse.fraBostedsadresse(
+                person = barn,
+                bostedsadresse = fellesAdresse.copy(
+                    angittFlyttedato = null
+                )
+            ),
+        )
+        Assertions.assertTrue(
+            vurderOmPersonHarBoddSammenMedAnnenForAllePerioder(
+                barnAdresser,
+                søkerAdresser,
+            )
+        )
     }
 }

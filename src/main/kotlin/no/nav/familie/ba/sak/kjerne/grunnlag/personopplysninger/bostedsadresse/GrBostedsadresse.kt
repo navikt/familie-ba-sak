@@ -114,13 +114,17 @@ fun List<GrBostedsadresse>.filtrerGjeldendeNå(): List<GrBostedsadresse> {
     return this.filter { it.gjeldendeNå() }
 }
 
-fun vurderOmPersonerBorSammen(adresser: List<GrBostedsadresse>, andreAdresser: List<GrBostedsadresse>): Boolean {
+fun vurderOmPersonHarBoddSammenMedAnnenForAllePerioder(
+    adresser: List<GrBostedsadresse>,
+    andreAdresser: List<GrBostedsadresse>
+): Boolean {
     return adresser.isNotEmpty() && adresser.any {
         andreAdresser.any { søkerAdresse ->
             val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
             val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
 
-            val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
+            // Bruk barnets fødselsdato som fom dersom ikke perioden har fom dato
+            val barnAdresseFom = it.periode?.fom ?: it.person?.fødselsdato ?: TIDENES_MORGEN
             val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
 
             søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&

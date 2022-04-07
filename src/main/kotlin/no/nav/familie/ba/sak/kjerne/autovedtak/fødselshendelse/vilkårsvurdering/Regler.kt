@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.harLøpendeArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.filtrerGjeldendeNå
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.vurderOmPersonerBorSammen
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.vurderOmPersonHarBoddSammenMedAnnenForAllePerioder
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
@@ -116,7 +116,7 @@ data class VurderBarnErBosattMedSøker(
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
-        return if (vurderOmPersonerBorSammen(
+        return if (vurderOmPersonHarBoddSammenMedAnnenForAllePerioder(
                 adresser = barnAdresser,
                 andreAdresser = søkerAdresser
             )
@@ -196,7 +196,7 @@ private fun vurderLovligOppholdForEØSBorger(
         return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_STATSBORGERSKAP_ANNEN_FORELDER_UKLART)
     }
 
-    if (!vurderOmPersonerBorSammen(
+    if (!vurderOmPersonHarBoddSammenMedAnnenForAllePerioder(
             adresser = morLovligOppholdFaktaEØS.bostedsadresser.filtrerGjeldendeNå(),
             andreAdresser = annenForelderLovligOppholdFaktaEØS.bostedsadresser.filtrerGjeldendeNå()
         )
