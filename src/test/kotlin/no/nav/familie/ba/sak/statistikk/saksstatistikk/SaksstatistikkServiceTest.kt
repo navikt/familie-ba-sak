@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
+import com.fasterxml.jackson.core.JsonFactory
+import com.worldturner.medeia.api.UrlSchemaSource
+import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -22,7 +26,11 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
@@ -37,9 +45,15 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.AktørDVH
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.SettPåVent
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
@@ -49,11 +63,17 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.extension.ExtendWith
+import java.nio.charset.Charset
 import java.time.LocalDate
+import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import java.util.UUID
+import kotlin.random.Random.Default.nextBoolean
+import kotlin.random.Random.Default.nextInt
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -244,8 +264,8 @@ internal class SaksstatistikkServiceTest(
 
         every { featureToggleService.isEnabled(any()) } returns true
 
-        val tidSattPåVent = LocalDate.now()
-        val frist = LocalDate.now().plusWeeks(3)
+        val tidSattPåVent = now()
+        val frist = now().plusWeeks(3)
         every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns lagSettPåVent(
             tidSattPåVent = tidSattPåVent,
             årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
@@ -379,5 +399,109 @@ internal class SaksstatistikkServiceTest(
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(sakDvh?.bostedsland).isEqualTo("SE")
+    }
+
+    @Test
+    fun `Enum-verdier brukt i behandlingDVH skal validere mot json schema`() {
+
+        val enumVerdier = listOf(
+            BehandlingType.values(),
+            BehandlingStatus.values(),
+            BehandlingUnderkategori.values(),
+            BehandlingÅrsak.values(),
+            BehandlingKategori.values(),
+            Behandlingsresultat.values(),
+            SettPåVentÅrsak.values()
+        )
+
+        val alleMuligeResultatBegrunnelser = Standardbegrunnelse.values().map {
+            ResultatBegrunnelseDVH(now(), now(), it.vedtakBegrunnelseType.name, it.name)
+        }
+
+        for (i in 0..enumVerdier.maxOf { it.size }) {
+
+            val enumI = enumVerdier.map { it.getOrElse(i) { _ -> it.first() } }
+            val behandlingType = enumI[0] as BehandlingType
+            val behandlingStatus = enumI[1].name
+            val behandlingUnderkategori = enumI[2].name
+            val behandlingAarsak = enumI[3].name
+            val behandlingKategori = enumI[4].name
+            val behandlingsresultat = enumI[5].name
+            val settPåVentÅrsak = enumI[6].name
+
+            val behandlingDVH = BehandlingDVH(
+                funksjonellTid = ZonedDateTime.now(),
+                tekniskTid = ZonedDateTime.now(),
+                mottattDato = LocalDateTime.now().atZone(SaksstatistikkService.TIMEZONE),
+                registrertDato = LocalDateTime.now().atZone(SaksstatistikkService.TIMEZONE),
+                behandlingId = nextInt(100000000, 999999999).toString(),
+                funksjonellId = UUID.randomUUID().toString(),
+                sakId = nextInt(100000000, 999999999).toString(),
+                behandlingType = behandlingType.name,
+                behandlingStatus = behandlingStatus,
+                behandlingKategori = behandlingUnderkategori,
+                behandlingAarsak = behandlingAarsak,
+                automatiskBehandlet = nextBoolean(),
+                utenlandstilsnitt = behandlingKategori,
+                ansvarligEnhetKode = "EnhetKodeA",
+                behandlendeEnhetKode = "EnhetKodeB",
+                ansvarligEnhetType = "NORG",
+                behandlendeEnhetType = "NORG",
+                totrinnsbehandling = nextBoolean(),
+                avsender = "familie-ba-sak",
+                versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
+                // Ikke påkrevde felt
+                vedtaksDato = now(),
+                relatertBehandlingId = nextInt(100000000, 999999999).toString(),
+                vedtakId = nextInt(100000000, 999999999).toString(),
+                resultat = behandlingsresultat,
+                behandlingTypeBeskrivelse = behandlingType.visningsnavn,
+                resultatBegrunnelser = alleMuligeResultatBegrunnelser,
+                behandlingOpprettetAv = "behandling.opprettetAv",
+                behandlingOpprettetType = "saksbehandlerId",
+                behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
+                beslutter = "beslutterId",
+                saksbehandler = "saksbehandlerId",
+                settPaaVent = SettPåVent(
+                    frist = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
+                    tidSattPaaVent = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
+                    aarsak = settPåVentÅrsak
+                ),
+            )
+            assertDoesNotThrow { validerJsonMotSchema(sakstatistikkObjectMapper.writeValueAsString(behandlingDVH),
+                                                      "/schema/behandling-schema.json") }
+        }
+    }
+
+    @Test
+    fun `Enum-verdier brukt i sakDvh skal validere mot json schema`() {
+        val deltagere = PersonType.values().map { personType -> AktørDVH(randomAktørId().aktørId.toLong(), personType.name) }
+
+        FagsakStatus.values().forEach {
+            val sakDvh = SakDVH(
+                funksjonellTid = ZonedDateTime.now(),
+                tekniskTid = ZonedDateTime.now(),
+                opprettetDato = now(),
+                funksjonellId = UUID.randomUUID().toString(),
+                sakId = nextInt(100000000, 999999999).toString(),
+                aktorId = deltagere.first().aktorId,
+                aktorer = deltagere,
+                sakStatus = it.name,
+                avsender = "familie-ba-sak",
+                versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
+                bostedsland = "NO",
+            )
+            assertDoesNotThrow { validerJsonMotSchema(sakstatistikkObjectMapper.writeValueAsString(sakDvh),
+                                                      "/schema/sak-schema.json") }
+        }
+    }
+
+    fun validerJsonMotSchema(json: String, schemaPath: String) {
+        val api = MedeiaJacksonApi()
+        val behandlingSchemaValidator = api.loadSchema(UrlSchemaSource(
+            object {}::class.java.getResource(schemaPath)!!))
+        val validatedParser = api.decorateJsonParser(behandlingSchemaValidator,
+                                                     JsonFactory().createParser(json.toByteArray(Charset.defaultCharset())))
+        api.parseAll(validatedParser)
     }
 }
