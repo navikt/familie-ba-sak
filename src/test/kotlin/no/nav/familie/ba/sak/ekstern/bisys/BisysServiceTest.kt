@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -27,15 +27,15 @@ internal class BisysServiceTest {
     private lateinit var bisysService: BisysService
     private val mockPersonidentService = mockk<PersonidentService>()
     private val mockFagsakRepository = mockk<FagsakRepository>()
-    private val mockBehandlingService = mockk<BehandlingService>()
+    private val mockBehandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val mockTilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val mockInfotrygdClient = mockk<InfotrygdBarnetrygdClient>()
 
     @BeforeAll
     fun setUp() {
         bisysService = BisysService(
+            mockBehandlingHentOgPersisterService,
             mockInfotrygdClient,
-            mockBehandlingService,
             mockFagsakRepository,
             mockPersonidentService,
             mockTilkjentYtelseRepository
@@ -109,7 +109,7 @@ internal class BisysServiceTest {
         )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
-        every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
+        every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
         every { mockPersonidentService.hentAktør(any()) } answers { behandling.fagsak.aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(behandling.fagsak.aktør.aktivFødselsnummer()) }
@@ -164,7 +164,7 @@ internal class BisysServiceTest {
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
 
-        every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
+        every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
         val response =
@@ -216,7 +216,7 @@ internal class BisysServiceTest {
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
 
-        every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
+        every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
         val response =
@@ -268,7 +268,7 @@ internal class BisysServiceTest {
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
 
-        every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
+        every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
         val response =
@@ -319,7 +319,7 @@ internal class BisysServiceTest {
         )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
-        every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
+        every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
         val response =

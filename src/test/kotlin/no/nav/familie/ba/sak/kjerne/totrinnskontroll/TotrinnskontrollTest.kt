@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -24,6 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired
 class TotrinnskontrollTest(
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @Autowired
     private val totrinnskontrollService: TotrinnskontrollService,
@@ -52,7 +56,7 @@ class TotrinnskontrollTest(
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
-        assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
+        assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
@@ -72,7 +76,7 @@ class TotrinnskontrollTest(
 
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.GODKJENT)
 
-        assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingService.hent(behandling.id).status)
+        assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
 
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
@@ -102,11 +106,11 @@ class TotrinnskontrollTest(
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
-        assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
+        assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.UNDERKJENT)
-        assertEquals(BehandlingStatus.UTREDES, behandlingService.hent(behandling.id).status)
+        assertEquals(BehandlingStatus.UTREDES, behandlingHentOgPersisterService.hent(behandling.id).status)
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,

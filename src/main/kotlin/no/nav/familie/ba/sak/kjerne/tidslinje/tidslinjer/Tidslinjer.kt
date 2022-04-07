@@ -51,7 +51,7 @@ class Tidslinjer(
     private val søkersTidslinje: SøkersTidslinjerTimeline =
         SøkersTidslinjerTimeline(this, søker)
 
-    fun søkersTidslinje(): SøkersTidslinjerTimeline = søkersTidslinje
+    fun søkersTidslinjer(): SøkersTidslinjerTimeline = søkersTidslinje
 
     private val barnasTidslinjer: Map<Aktør, BarnetsTidslinjerTimeline> =
         barna.associateWith { BarnetsTidslinjerTimeline(this, it) }

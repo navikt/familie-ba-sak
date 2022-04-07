@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -18,7 +18,7 @@ import java.util.Properties
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send dokument til Dokdist", maxAntallFeil = 3)
 class DistribuerDokumentTask(
     private val stegService: StegService,
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val dokumentService: DokumentService
 ) : AsyncTaskStep {
 
@@ -34,7 +34,7 @@ class DistribuerDokumentTask(
             )
         } else if (!distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevmal.erVedtaksbrev && distribuerDokumentDTO.behandlingId != null) {
             stegService.håndterDistribuerVedtaksbrev(
-                behandling = behandlingService.hent(distribuerDokumentDTO.behandlingId),
+                behandling = behandlingHentOgPersisterService.hent(distribuerDokumentDTO.behandlingId),
                 distribuerDokumentDTO = distribuerDokumentDTO
             )
         } else {

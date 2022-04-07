@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaUtils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
@@ -27,11 +27,9 @@ class BehandlingUtilsTest {
     fun `Skal velge ordinær ved FGB`() {
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
-            Behandlingutils.bestemUnderkategori(
+            BehandlingstemaUtils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                nyBehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                løpendeUnderkategori = null
+                løpendeUnderkategori = null,
             )
         )
     }
@@ -40,11 +38,33 @@ class BehandlingUtilsTest {
     fun `Skal velge utvidet ved FGB`() {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
-            Behandlingutils.bestemUnderkategori(
+            BehandlingstemaUtils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.UTVIDET,
-                nyBehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 løpendeUnderkategori = null
+            )
+        )
+    }
+
+    @Test
+    fun `Skal velge utvidet når løpende er ordinær, og inneværende er utvidet`() {
+        assertEquals(
+            BehandlingUnderkategori.UTVIDET,
+            BehandlingstemaUtils.bestemUnderkategori(
+                nyUnderkategori = null,
+                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                underkategoriFraInneværendeBehandling = BehandlingUnderkategori.UTVIDET
+            )
+        )
+    }
+
+    @Test
+    fun `Skal beholde utvidet når løpende er utvidet, og ny er ordinær`() {
+        assertEquals(
+            BehandlingUnderkategori.UTVIDET,
+            BehandlingstemaUtils.bestemUnderkategori(
+                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
+                underkategoriFraInneværendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
     }
@@ -53,10 +73,8 @@ class BehandlingUtilsTest {
     fun `Skal velge utvidet ved RV når FGB er utvidet`() {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
-            Behandlingutils.bestemUnderkategori(
+            BehandlingstemaUtils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                nyBehandlingType = BehandlingType.REVURDERING,
-                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 løpendeUnderkategori = BehandlingUnderkategori.UTVIDET
             )
         )
@@ -66,10 +84,8 @@ class BehandlingUtilsTest {
     fun `Skal velge ordinær ved RV når FGB er ordinær`() {
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
-            Behandlingutils.bestemUnderkategori(
+            BehandlingstemaUtils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                nyBehandlingType = BehandlingType.REVURDERING,
-                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
             )
         )
@@ -79,10 +95,8 @@ class BehandlingUtilsTest {
     fun `Skal velge utvidet ved RV når FGB er ordinær`() {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
-            Behandlingutils.bestemUnderkategori(
+            BehandlingstemaUtils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.UTVIDET,
-                nyBehandlingType = BehandlingType.REVURDERING,
-                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
             )
         )
@@ -92,19 +106,15 @@ class BehandlingUtilsTest {
     fun `Skal velge den løpende underkategorien ved 'endre migreringsdato'`() {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
-            Behandlingutils.bestemUnderkategori(
+            BehandlingstemaUtils.bestemUnderkategori(
                 nyUnderkategori = null,
-                nyBehandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                nyBehandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                 løpendeUnderkategori = BehandlingUnderkategori.UTVIDET
             )
         )
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
-            Behandlingutils.bestemUnderkategori(
+            BehandlingstemaUtils.bestemUnderkategori(
                 nyUnderkategori = null,
-                nyBehandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                nyBehandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                 løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
             )
         )
@@ -136,7 +146,7 @@ class BehandlingUtilsTest {
             )
         )
 
-        val løpendeUndekategori = Behandlingutils.utledLøpendeUnderkategori(andelTilkjentYtelse)
+        val løpendeUndekategori = BehandlingstemaUtils.utledLøpendeUnderkategori(andelTilkjentYtelse)
 
         assertEquals(BehandlingUnderkategori.UTVIDET, løpendeUndekategori)
     }
@@ -167,7 +177,7 @@ class BehandlingUtilsTest {
             )
         )
 
-        val løpendeUndekategori = Behandlingutils.utledLøpendeUnderkategori(andelTilkjentYtelse)
+        val løpendeUndekategori = BehandlingstemaUtils.utledLøpendeUnderkategori(andelTilkjentYtelse)
 
         assertEquals(BehandlingUnderkategori.ORDINÆR, løpendeUndekategori)
     }
@@ -198,7 +208,7 @@ class BehandlingUtilsTest {
             )
         )
 
-        val løpendeUndekategori = Behandlingutils.utledLøpendeUnderkategori(andelTilkjentYtelse)
+        val løpendeUndekategori = BehandlingstemaUtils.utledLøpendeUnderkategori(andelTilkjentYtelse)
 
         assertEquals(BehandlingUnderkategori.ORDINÆR, løpendeUndekategori)
     }

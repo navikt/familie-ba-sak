@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.config.AuditLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
@@ -28,7 +28,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 class TilgangServiceTest {
 
     private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient = mockk()
-    private val behandlingService: BehandlingService = mockk()
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val fagsakService: FagsakService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val cacheManager = ConcurrentMapCacheManager()
@@ -39,7 +39,7 @@ class TilgangServiceTest {
     private val tilgangService =
         TilgangService(
             familieIntegrasjonerTilgangskontrollClient = mockFamilieIntegrasjonerTilgangskontrollClient,
-            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             persongrunnlagService = persongrunnlagService,
             fagsakService = fagsakService,
             rolleConfig = rolleConfig,
@@ -62,7 +62,7 @@ class TilgangServiceTest {
         MDC.put(MDCConstants.MDC_CALL_ID, "00001111")
         mockBrukerContext()
         every { fagsakService.hentAktør(fagsak.id) } returns fagsak.aktør
-        every { behandlingService.hent(any()) } returns behandling
+        every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
     }
 

@@ -6,7 +6,7 @@ import io.mockk.slot
 import io.mockk.verify
 import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragDataTask
@@ -24,15 +24,15 @@ import java.util.UUID
 
 class AvstemmingServiceTest {
     val økonomiKlient = mockk<ØkonomiKlient>()
-    val behandlingService = mockk<BehandlingService>()
+    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val beregningService = mockk<BeregningService>()
     val taskRepository = mockk<TaskRepository>(relaxed = true)
     val batchRepository = mockk<BatchRepository>()
     val dataChunkRepository = mockk<DataChunkRepository>(relaxed = true)
 
     val avstemmingService = AvstemmingService(
+        behandlingHentOgPersisterService,
         økonomiKlient,
-        behandlingService,
         beregningService,
         taskRepository,
         batchRepository,
@@ -47,7 +47,7 @@ class AvstemmingServiceTest {
     fun setUp() {
         val page = mockk<Page<BigInteger>>()
         val pageable = Pageable.ofSize(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
-        every { behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable) } returns page
+        every { behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable) } returns page
         every { page.totalPages } returns 1
         every { page.content } returns listOf(BigInteger.ONE)
         every { page.nextPageable() } returns pageable

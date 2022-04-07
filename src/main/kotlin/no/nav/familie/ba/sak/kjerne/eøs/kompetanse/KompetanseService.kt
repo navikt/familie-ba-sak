@@ -40,7 +40,7 @@ class KompetanseService(
 
         lagreKompetanseDifferanse(listOf(gjeldendeKompetanse), oppdaterteKompetanser)
 
-        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(gjeldendeKompetanse.behandlingId)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(gjeldendeKompetanse.behandlingId)
 
         return hentKompetanser(oppdatertKompetanse.behandlingId)
     }
@@ -57,7 +57,7 @@ class KompetanseService(
 
         lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
 
-        tilbakestillBehandlingService.resettStegVedEndringPåBehandlingsresultatSteg(behandlingId)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
 
         return hentKompetanser(behandlingId)
     }
@@ -86,7 +86,7 @@ class KompetanseService(
     }
 
     private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<Regelverk, Måned>> =
-        this.hentTidslinjer(behandlingId).barnasTidslinjer()
+        this.hentTidslinjerThrows(behandlingId).barnasTidslinjer()
             .mapValues { (_, tidslinjer) -> tidslinjer.regelverkTidslinje }
             .mapKeys { (aktør, _) -> aktør }
 }

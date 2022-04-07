@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -17,17 +17,18 @@ import java.time.YearMonth
 
 @Service
 class AutobrevOpphørSmåbarnstilleggService(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val autovedtakBrevService: AutovedtakBrevService,
     private val autovedtakStegService: AutovedtakStegService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val behandlingService: BehandlingService,
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository
 ) {
     @Transactional
     fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId: Long) {
 
         val behandling =
-            behandlingService.hentAktivForFagsak(fagsakId = fagsakId) ?: error("Fant ikke aktiv behandling")
+            behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsakId)
+                ?: error("Fant ikke aktiv behandling")
 
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
             persongrunnlagService.hentAktivThrows(behandling.id)

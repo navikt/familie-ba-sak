@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
@@ -16,10 +16,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class IverksettMotOppdrag(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val økonomiService: ØkonomiService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
-    private val behandlingService: BehandlingService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) : BehandlingSteg<IverksettingTaskDTO> {
@@ -58,7 +58,8 @@ class IverksettMotOppdrag(
             saksbehandlerId = data.saksbehandlerId
         )
 
-        val forrigeIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
+        val forrigeIverksatteBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
         if (forrigeIverksatteBehandling == null ||
             forrigeIverksatteBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
         ) {

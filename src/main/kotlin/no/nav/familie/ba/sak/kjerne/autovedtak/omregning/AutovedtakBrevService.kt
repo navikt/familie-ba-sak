@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -31,8 +32,9 @@ data class AutovedtakBrevBehandlingsdata(
 
 @Service
 class AutovedtakBrevService(
-    private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val autovedtakService: AutovedtakService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -88,14 +90,15 @@ class AutovedtakBrevService(
             return false
         }
 
-        val vedtaksperioderForVedtatteBehandlinger = behandlingService.hentBehandlinger(fagsakId = fagsakId)
-            .filter { behandling ->
-                behandling.erVedtatt()
-            }
-            .flatMap { behandling ->
-                val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
-                vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-            }
+        val vedtaksperioderForVedtatteBehandlinger =
+            behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
+                .filter { behandling ->
+                    behandling.erVedtatt()
+                }
+                .flatMap { behandling ->
+                    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+                }
 
         if (barnAlleredeBegrunnet(
                 vedtaksperioderMedBegrunnelser = vedtaksperioderForVedtatteBehandlinger,

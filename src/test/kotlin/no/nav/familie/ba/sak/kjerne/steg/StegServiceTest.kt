@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -56,6 +57,9 @@ class StegServiceTest(
 
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
@@ -249,7 +253,7 @@ class StegServiceTest(
             RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil")
         )
 
-        val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
+        val behandlingEtterPersongrunnlagSteg = behandlingHentOgPersisterService.hent(behandlingId = behandling.id)
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterPersongrunnlagSteg.steg)
     }
 
@@ -283,7 +287,8 @@ class StegServiceTest(
         val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving()
         stegService.håndterSendTilBeslutter(vilkårsvurdertBehandling, "1234")
 
-        val behandlingEtterSendTilBeslutter = behandlingService.hent(behandlingId = vilkårsvurdertBehandling.id)
+        val behandlingEtterSendTilBeslutter =
+            behandlingHentOgPersisterService.hent(behandlingId = vilkårsvurdertBehandling.id)
 
         assertThrows<FunksjonellFeil> {
             stegService.håndterHenleggBehandling(
