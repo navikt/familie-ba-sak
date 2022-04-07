@@ -468,8 +468,12 @@ internal class SaksstatistikkServiceTest(
                     aarsak = settPåVentÅrsak
                 ),
             )
-            assertDoesNotThrow { validerJsonMotSchema(sakstatistikkObjectMapper.writeValueAsString(behandlingDVH),
-                                                      "/schema/behandling-schema.json") }
+            assertDoesNotThrow {
+                validerJsonMotSchema(
+                    sakstatistikkObjectMapper.writeValueAsString(behandlingDVH),
+                    "/schema/behandling-schema.json"
+                )
+            }
         }
     }
 
@@ -491,17 +495,26 @@ internal class SaksstatistikkServiceTest(
                 versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
                 bostedsland = "NO",
             )
-            assertDoesNotThrow { validerJsonMotSchema(sakstatistikkObjectMapper.writeValueAsString(sakDvh),
-                                                      "/schema/sak-schema.json") }
+            assertDoesNotThrow {
+                validerJsonMotSchema(
+                    sakstatistikkObjectMapper.writeValueAsString(sakDvh),
+                    "/schema/sak-schema.json"
+                )
+            }
         }
     }
 
     fun validerJsonMotSchema(json: String, schemaPath: String) {
         val api = MedeiaJacksonApi()
-        val behandlingSchemaValidator = api.loadSchema(UrlSchemaSource(
-            object {}::class.java.getResource(schemaPath)!!))
-        val validatedParser = api.decorateJsonParser(behandlingSchemaValidator,
-                                                     JsonFactory().createParser(json.toByteArray(Charset.defaultCharset())))
+        val behandlingSchemaValidator = api.loadSchema(
+            UrlSchemaSource(
+                object {}::class.java.getResource(schemaPath)!!
+            )
+        )
+        val validatedParser = api.decorateJsonParser(
+            behandlingSchemaValidator,
+            JsonFactory().createParser(json.toByteArray(Charset.defaultCharset()))
+        )
         api.parseAll(validatedParser)
     }
 }
