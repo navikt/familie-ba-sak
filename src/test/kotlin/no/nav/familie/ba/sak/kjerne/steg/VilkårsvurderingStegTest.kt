@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
@@ -71,7 +73,7 @@ class VilkårsvurderingStegTest {
             behandling
         )
 
-        every { kompetanseService.tilpassKompetanserTilRegelverk(behandling.id) } returns emptyList()
+        every { kompetanseService.tilpassKompetanserTilRegelverk(behandling.id) } just Runs
         every { featureToggleService.isEnabled(any()) } returns true
     }
 
