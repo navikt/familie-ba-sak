@@ -114,4 +114,22 @@ class SlåSammenKompetanserTest {
         Assertions.assertEquals(6, faktiskeKompetanser.size)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
+
+    @Test
+    fun slåSammenEnkeltBarnSomSkillerSegHeltUt() {
+        val kompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("SSS", barn1)
+            .medKompetanse("---------", barn2, barn3)
+            .medKompetanse("   SSSS", barn1)
+            .byggKompetanser()
+
+        val forventedeKompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("SSSSSSS", barn1)
+            .medKompetanse("---------", barn2, barn3)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = kompetanser.slåSammen()
+        Assertions.assertEquals(2, faktiskeKompetanser.size)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
 }
