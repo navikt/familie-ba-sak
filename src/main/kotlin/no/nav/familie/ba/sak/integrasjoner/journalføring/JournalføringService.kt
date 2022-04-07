@@ -196,7 +196,7 @@ class JournalføringService(
                     årsak = request.nyBehandlingsårsak,
                     kategori = request.kategori,
                     underkategori = request.underkategori,
-                    søknadMottattDato = request.datoMottatt.toLocalDate()
+                    søknadMottattDato = request.datoMottatt?.toLocalDate()
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
