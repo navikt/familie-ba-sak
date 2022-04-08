@@ -31,8 +31,8 @@ class FagsakStatusScheduler(val taskRepository: TaskRepositoryWrapper) {
         }
     }
 
-    // Kan fjernes etter 18.04.22 klokka 7.
-    @Scheduled(cron = "0 0 7 18 4 *")
+    // Kan fjernes etter 19.04.22 klokka 7.
+    @Scheduled(cron = "0 0 7 19 4 *")
     fun oppdaterFagsakStatuser18April() {
         oppdaterFagsakStatuser()
     }
