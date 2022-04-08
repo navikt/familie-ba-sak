@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.4</version>
+        <version>2.6.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -17,16 +17,16 @@
 
     <properties>
         <java.version>17</java.version>
-        <kotlin.version>1.6.10</kotlin.version>
+        <kotlin.version>1.6.20</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.1.0</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
         <prosessering.version>1.20220321101749_55e4576</prosessering.version>
-        <felles.version>1.20220310100515_c0dcfc1</felles.version>
+        <felles.version>1.20220406145421_5f46d64</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20220316123415_223f003</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>2.0_20220321181602_8d247bd</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20220407204545_bc684ba</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20220106092651_8730ac3</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
@@ -163,7 +163,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-logback</artifactId>
-            <version>5.7.0</version>
+            <version>5.7.1</version>
         </dependency>
 
         <!-- swagger -->
@@ -380,7 +380,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.7</version>
+                    <version>0.8.8</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -423,7 +423,7 @@
                         <dependency>
                             <groupId>com.pinterest</groupId>
                             <artifactId>ktlint</artifactId>
-                            <version>0.43.2</version>
+                            <version>0.45.2</version>
                         </dependency>
                         <!-- additional 3rd party ruleset(s) can be specified here -->
                     </dependencies>
@@ -464,7 +464,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M5</version>
+                <version>3.0.0-M6</version>
                 <configuration>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
