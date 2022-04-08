@@ -102,8 +102,8 @@ class BehandlingController(
 
         val behandling = behandlingstemaService.oppdaterBehandlingstema(
             behandling = behandlingHentOgPersisterService.hent(behandlingId),
-            nyUnderkategori = endreBehandling.behandlingUnderkategori,
-            nyKategori = endreBehandling.behandlingKategori,
+            overstyrtUnderkategori = endreBehandling.behandlingUnderkategori,
+            overstyrtKategori = endreBehandling.behandlingKategori,
             manueltOppdatert = true
         )
 
