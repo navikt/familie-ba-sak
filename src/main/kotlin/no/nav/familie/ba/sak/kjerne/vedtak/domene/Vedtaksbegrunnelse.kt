@@ -89,7 +89,8 @@ data class BegrunnelseData(
     val maalform: String,
     val apiNavn: String,
     val belop: String,
-    val soknadstidspunkt: String
+    val soknadstidspunkt: String,
+    val belopUtbetaltPaaSokerIPerioden: String
 ) : Begrunnelse
 
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
@@ -146,6 +147,8 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
 
     val søknadstidspunkt = endringsperioder.sortedBy { it.søknadstidspunkt }.firstOrNull { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
 
+    val beløpUtbetaltPåSøkerIPerioden = minimerteUtbetalingsperiodeDetaljer.filter { it.person.type == PersonType.SØKER }.sumOf { it.utbetaltPerMnd }
+
     this.validerBrevbegrunnelse(
         gjelderSøker = gjelderSøker,
         barnasFødselsdatoer = barnasFødselsdatoer,
@@ -165,7 +168,8 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         maalform = brevMålform.tilSanityFormat(),
         apiNavn = this.standardbegrunnelse.sanityApiNavn,
         belop = Utils.formaterBeløp(beløp),
-        soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: ""
+        soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: "",
+        belopUtbetaltPaaSokerIPerioden = Utils.formaterBeløp(beløpUtbetaltPåSøkerIPerioden)
     )
 }
 
