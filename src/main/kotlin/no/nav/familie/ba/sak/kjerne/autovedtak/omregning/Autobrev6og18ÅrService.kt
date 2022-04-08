@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -17,8 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class Autobrev6og18ÅrService(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val behandlingService: BehandlingService,
     private val autovedtakBrevService: AutovedtakBrevService,
     private val autovedtakStegService: AutovedtakStegService
 ) {
@@ -28,7 +28,7 @@ class Autobrev6og18ÅrService(
         logger.info("opprettOmregningsoppgaveForBarnIBrytingsalder for fagsak ${autobrev6og18ÅrDTO.fagsakId}")
 
         val behandling =
-            behandlingService.hentSisteBehandlingSomErVedtatt(autobrev6og18ÅrDTO.fagsakId)
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(autobrev6og18ÅrDTO.fagsakId)
                 ?: error("Fant ikke aktiv behandling")
 
         val behandlingsårsak = finnBehandlingÅrsakForAlder(

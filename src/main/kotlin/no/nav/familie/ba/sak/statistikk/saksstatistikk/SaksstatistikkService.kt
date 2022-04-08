@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
@@ -33,7 +33,8 @@ import java.util.UUID
 
 @Service
 class SaksstatistikkService(
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
@@ -41,18 +42,17 @@ class SaksstatistikkService(
     private val personopplysningerService: PersonopplysningerService,
     private val persongrunnlagService: PersongrunnlagService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val featureToggleService: FeatureToggleService,
-    private val settPåVentService: SettPåVentService,
+    private val settPåVentService: SettPåVentService
 ) {
 
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
-        val behandling = behandlingService.hent(behandlingId)
-        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomErVedtatt(behandling)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val forrigeBehandlingId = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
             .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
-                behandlingService.hentSøknadMottattDato(behandlingId) ?: behandling.opprettetTidspunkt
+                behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId) ?: behandling.opprettetTidspunkt
             }
             else -> behandling.opprettetTidspunkt
         }
@@ -114,7 +114,7 @@ class SaksstatistikkService(
 
     fun mapTilSakDvh(sakId: Long): SakDVH? {
         val fagsak = fagsakService.hentPåFagsakId(sakId)
-        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
+        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)
 
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
 

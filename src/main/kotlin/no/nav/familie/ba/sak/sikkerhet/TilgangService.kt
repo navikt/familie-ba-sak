@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.config.CustomKeyValue
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.Sporingsdata
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 @Service
 class TilgangService(
     private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
     private val rolleConfig: RolleConfig,
     private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
@@ -63,7 +63,7 @@ class TilgangService(
 
     fun validerTilgangTilBehandling(behandlingId: Long, event: AuditLoggerEvent) {
         val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
-            val behandling = behandlingService.hent(behandlingId)
+            val behandling = behandlingHentOgPersisterService.hent(behandlingId)
             val personIdenter =
                 persongrunnlagService.hentAktiv(behandlingId = behandlingId)?.søkerOgBarn?.map { it.aktør.aktivFødselsnummer() }
                     ?: listOf(behandling.fagsak.aktør.aktivFødselsnummer())

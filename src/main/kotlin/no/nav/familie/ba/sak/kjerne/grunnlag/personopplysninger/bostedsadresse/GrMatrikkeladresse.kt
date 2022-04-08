@@ -31,7 +31,8 @@ data class GrMatrikkeladresse(
 
     override fun toSecureString(): String {
         return """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
-|               postnummer=$postnummer,kommunenummer=$kommunenummer""".trimMargin()
+|               postnummer=$postnummer,kommunenummer=$kommunenummer
+        """.trimMargin()
     }
 
     override fun toString(): String {

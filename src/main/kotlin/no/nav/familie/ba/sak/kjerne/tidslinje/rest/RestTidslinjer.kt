@@ -11,7 +11,7 @@ import java.time.LocalDate
 
 fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
     val barnasTidslinjer = this.barnasTidslinjer()
-    val søkersTidslinjer = this.søkersTidslinje()
+    val søkersTidslinjer = this.søkersTidslinjer()
 
     return RestTidslinjer(
         barnasTidslinjer = barnasTidslinjer.entries.associate {

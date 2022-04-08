@@ -104,4 +104,8 @@ data class DagTidspunkt internal constructor(
     override fun sammenliknMed(tidspunkt: Tidspunkt<Dag>): Int {
         return dato.compareTo(tidspunkt.tilLocalDate())
     }
+
+    companion object {
+        fun nå() = DagTidspunkt(LocalDate.now(), Uendelighet.INGEN)
+    }
 }

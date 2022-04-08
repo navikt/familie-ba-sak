@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class ArbeidsfordelingController(
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val tilgangService: TilgangService
@@ -46,7 +46,7 @@ class ArbeidsfordelingController(
             frontendFeilmelding = "Du må skrive en begrunnelse for endring av enhet"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(
             behandling = behandling,
             endreBehandlendeEnhet = endreBehandlendeEnhet

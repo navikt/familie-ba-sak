@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.prosessering.error.RekjørSenereException
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.assertThrows
 
 class AutobrevStegServiceTest {
     private val fagsakService = mockk<FagsakService>()
-    private val behandlingService = mockk<BehandlingService>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val autovedtakFødselshendelseService = mockk<AutovedtakFødselshendelseService>()
     private val autovedtakBrevService = mockk<AutovedtakBrevService>()
@@ -27,7 +27,7 @@ class AutobrevStegServiceTest {
 
     val autovedtakStegService = AutovedtakStegService(
         fagsakService = fagsakService,
-        behandlingService = behandlingService,
+        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         oppgaveService = oppgaveService,
         autovedtakFødselshendelseService = autovedtakFødselshendelseService,
         autovedtakBrevService = autovedtakBrevService,
@@ -44,7 +44,7 @@ class AutobrevStegServiceTest {
 
         every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
         every { fagsakService.hent(aktør) } returns fagsak
-        every { behandlingService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
+        every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
 
         autovedtakStegService.kjørBehandling(
@@ -66,7 +66,7 @@ class AutobrevStegServiceTest {
 
         every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
         every { fagsakService.hent(aktør) } returns fagsak
-        every { behandlingService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
+        every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
 
         assertThrows<RekjørSenereException> {

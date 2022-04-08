@@ -7,12 +7,11 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -33,11 +32,10 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VilkårController(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårService: VilkårService,
     private val annenVurderingService: AnnenVurderingService,
-    private val behandlingService: BehandlingService,
     private val personidentService: PersonidentService,
-    private val vedtakService: VedtakService,
     private val tilgangService: TilgangService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
@@ -56,7 +54,7 @@ class VilkårController(
             handling = "endre vilkår"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         vilkårService.endreVilkår(
             behandlingId = behandling.id,
             vilkårId = vilkaarId,
@@ -99,7 +97,7 @@ class VilkårController(
         )
 
         val aktør = personidentService.hentAktør(personIdent)
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         vilkårService.deleteVilkårsperiode(
             behandlingId = behandling.id,
             vilkårId = vilkaarId,

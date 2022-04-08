@@ -3,7 +3,8 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlag
@@ -14,10 +15,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class RegistrereSøknad(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingstemaService: BehandlingstemaService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val persongrunnlagService: PersongrunnlagService,
     private val loggService: LoggService,
-    private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) : BehandlingSteg<RestRegistrerSøknad> {
@@ -30,10 +32,9 @@ class RegistrereSøknad(
         val søknadDTO: SøknadDTO = data.søknad
         val innsendtSøknad = søknadDTO.writeValueAsString()
 
-        behandlingService.oppdaterBehandlingstema(
-            behandling = behandlingService.hent(behandlingId = behandling.id),
-            nyKategori = behandling.kategori, // Hvis søknadDTO får feltet kategori, så må denne endres til søknadDTO.kategori
-            nyUnderkategori = søknadDTO.underkategori
+        behandlingstemaService.oppdaterBehandlingstema(
+            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
+            overstyrtUnderkategori = søknadDTO.underkategori
         )
 
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)
@@ -45,15 +46,15 @@ class RegistrereSøknad(
         )
 
         val forrigeBehandlingSomErVedtatt =
-            behandlingService.hentForrigeBehandlingSomErVedtatt(behandling = behandling)
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling)
         persongrunnlagService.registrerBarnFraSøknad(
-            behandling = behandlingService.hent(behandlingId = behandling.id),
+            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
             søknadDTO = søknadDTO
         )
 
         tilbakestillBehandlingService.initierOgSettBehandlingTilVilårsvurdering(
-            behandling = behandlingService.hent(behandlingId = behandling.id),
+            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
             bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend
         )
 
@@ -61,7 +62,7 @@ class RegistrereSøknad(
 
         vedtakService.oppdater(vedtak)
 
-        return hentNesteStegForNormalFlyt(behandling = behandlingService.hent(behandlingId = behandling.id))
+        return hentNesteStegForNormalFlyt(behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id))
     }
 
     override fun stegType(): StegType {

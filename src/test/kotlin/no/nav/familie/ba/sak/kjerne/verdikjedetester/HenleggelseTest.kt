@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class HenleggelseTest(
-    @Autowired private val behandlingService: BehandlingService
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) : AbstractVerdikjedetest() {
 
     val restScenario = RestScenario(
@@ -56,7 +56,8 @@ class HenleggelseTest(
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET
         )
 
-        val ferdigstiltBehandling = behandlingService.hent(behandlingId = responseHenlagtSøknad.data!!.behandlingId)
+        val ferdigstiltBehandling =
+            behandlingHentOgPersisterService.hent(behandlingId = responseHenlagtSøknad.data!!.behandlingId)
 
         assertThat(!ferdigstiltBehandling.aktiv)
         assertThat(ferdigstiltBehandling.resultat == Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET)
@@ -102,7 +103,8 @@ class HenleggelseTest(
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET
         )
 
-        val ferdigstiltBehandling = behandlingService.hent(behandlingId = responseHenlagtSøknad.data!!.behandlingId)
+        val ferdigstiltBehandling =
+            behandlingHentOgPersisterService.hent(behandlingId = responseHenlagtSøknad.data!!.behandlingId)
 
         assertThat(!ferdigstiltBehandling.aktiv)
         assertThat(ferdigstiltBehandling.resultat == Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET)
@@ -119,7 +121,7 @@ class HenleggelseTest(
         familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(søkersIdent = søkersIdent)
 
-        val behandling = behandlingService.hent(restFagsakMedBehandling.data!!.behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(restFagsakMedBehandling.data!!.behandlingId)
         val restRegistrerSøknad = RestRegistrerSøknad(
             søknad = lagSøknadDTO(
                 søkerIdent = søkersIdent,

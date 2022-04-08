@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -34,7 +34,7 @@ class FødselshendelseServiceTest {
     val taskRepository = mockk<TaskRepositoryWrapper>()
     val behandlingRepository = mockk<BehandlingRepository>()
     val fagsakService = mockk<FagsakService>()
-    val behandlingService = mockk<BehandlingService>()
+    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     val persongrunnlagService = mockk<PersongrunnlagService>()
     val personidentService = mockk<PersonidentService>()
@@ -52,10 +52,10 @@ class FødselshendelseServiceTest {
     )
 
     private val autovedtakFødselshendelseService = AutovedtakFødselshendelseService(
+        fagsakService,
+        behandlingHentOgPersisterService,
         filtreringsreglerService,
         taskRepository,
-        fagsakService,
-        behandlingService,
         vilkårsvurderingRepository,
         persongrunnlagService,
         personidentService,

@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -20,11 +20,11 @@ import java.time.LocalDate
 
 class TilkjentYtelseValideringServiceTest {
 
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val beregningServiceMock = mockk<BeregningService>()
     private val totrinnskontrollServiceMock = mockk<TotrinnskontrollService>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     private val personidentServiceMock = mockk<PersonidentService>()
-    private val behandlingServiceMock = mockk<BehandlingService>()
 
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
 
@@ -35,14 +35,33 @@ class TilkjentYtelseValideringServiceTest {
             totrinnskontrollService = totrinnskontrollServiceMock,
             persongrunnlagService = persongrunnlagServiceMock,
             personidentService = personidentServiceMock,
-            behandlingService = behandlingServiceMock
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService
         )
 
-        every { beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(barnAktør = barn1.aktør, fagsakId = any()) } answers { emptyList() }
-        every { beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(barnAktør = barn2.aktør, fagsakId = any()) } answers { emptyList() }
-        every { beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(barnAktør = barn3MedUtbetalinger.aktør, fagsakId = any()) } answers {
+        every {
+            beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(
+                barnAktør = barn1.aktør,
+                fagsakId = any()
+            )
+        } answers { emptyList() }
+        every {
+            beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(
+                barnAktør = barn2.aktør,
+                fagsakId = any()
+            )
+        } answers { emptyList() }
+        every {
+            beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(
+                barnAktør = barn3MedUtbetalinger.aktør,
+                fagsakId = any()
+            )
+        } answers {
             listOf(
-                TilkjentYtelse(behandling = lagBehandling(), endretDato = LocalDate.now().minusYears(1), opprettetDato = LocalDate.now().minusYears(1))
+                TilkjentYtelse(
+                    behandling = lagBehandling(),
+                    endretDato = LocalDate.now().minusYears(1),
+                    opprettetDato = LocalDate.now().minusYears(1)
+                )
             )
         }
     }
@@ -116,14 +135,18 @@ class TilkjentYtelseValideringServiceTest {
         )
 
         every { beregningServiceMock.hentTilkjentYtelseForBehandling(behandlingId = behandling.id) } answers { tilkjentYtelse }
-        every { behandlingServiceMock.hent(behandlingId = behandling.id) } answers { behandling }
-        every { behandlingServiceMock.hentForrigeBehandlingSomErIverksatt(behandling = behandling) } answers { forrigeBehandling }
+        every { behandlingHentOgPersisterService.hent(behandlingId = behandling.id) } answers { behandling }
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling) } answers { forrigeBehandling }
         every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeTilkjentYtelse }
         every { personidentServiceMock.hentAktør(person1.aktør.aktørId) } answers { person1.aktør }
         every { personidentServiceMock.hentAktør(person2.aktør.aktørId) } answers { person2.aktør }
 
         Assertions.assertTrue(tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).size == 1)
-        Assertions.assertEquals(person2.aktør, tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).single())
+        Assertions.assertEquals(
+            person2.aktør,
+            tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
+                .single()
+        )
     }
 
     companion object {

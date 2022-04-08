@@ -1,11 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
@@ -33,15 +32,14 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class DokumentController(
+    private val fagsakService: FagsakService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val dokumentService: DokumentService,
     private val vedtakService: VedtakService,
-    private val behandlingService: BehandlingService,
-    private val fagsakService: FagsakService,
     private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val rolleConfig: RolleConfig,
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
@@ -92,7 +90,7 @@ class DokumentController(
             handling = "hente forhåndsvisning brev"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         return dokumentService.genererManueltBrev(
             manueltBrevRequest = manueltBrevRequest.byggMottakerdata(
@@ -116,7 +114,7 @@ class DokumentController(
             handling = "sende brev"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         dokumentService.sendManueltBrev(
             manueltBrevRequest = manueltBrevRequest.byggMottakerdata(

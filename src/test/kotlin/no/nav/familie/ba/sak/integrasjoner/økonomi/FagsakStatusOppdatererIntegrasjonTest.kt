@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -31,6 +32,9 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
@@ -94,7 +98,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
     ): Behandling {
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
         behandling.status = medStatus
-        behandlingService.lagreEllerOppdater(behandling)
+        behandlingRepository.save(behandling)
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
         tilkjentYtelseRepository.save(tilkjentYtelse)
         offsetPåAndeler.forEach {

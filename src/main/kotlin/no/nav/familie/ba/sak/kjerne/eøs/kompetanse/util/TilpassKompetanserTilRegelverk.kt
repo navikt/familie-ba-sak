@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.AktørKompetanseTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtvendigMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerForAlleNøklerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
@@ -31,7 +31,7 @@ fun tilpassKompetanserTilRegelverk(
     val barnTilKompetanseTidslinje = kompetanserUtenOverflødige.tilTidslinjerForBarna()
 
     val manglendeKompetanser = barnTilKompetanseTidslinje
-        .kombinerUtvendigMed(barnTilRegelverkTidslinjer, manglendeKompetanseMapKombinator)
+        .kombinerForAlleNøklerMed(barnTilRegelverkTidslinjer, manglendeKompetanseMapKombinator)
         .slåSammen()
 
     return (kompetanserUtenOverflødige + manglendeKompetanser).slåSammen()
@@ -44,7 +44,7 @@ fun fjernOverflødigeKompetanserRekursivt(
     val barnTilKompetanseTidslinje = kompetanser.tilTidslinjerForBarna()
 
     val overflødigeKompetanser = barnTilKompetanseTidslinje
-        .kombinerUtvendigMed(barnTilRegelverkTidslinjer, overflødigKompetanseMapKombinator)
+        .kombinerForAlleNøklerMed(barnTilRegelverkTidslinjer, overflødigKompetanseMapKombinator)
         .slåSammen()
 
     return if (overflødigeKompetanser.isNotEmpty()) {

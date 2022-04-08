@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
@@ -31,6 +32,9 @@ import java.time.YearMonth
 class RevurderingMedEndredeUtbetalingandelerTest(
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @Autowired
     private val fagsakService: FagsakService,
@@ -144,7 +148,8 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                 behandling = behandling, behandlingSteg = StegType.BEHANDLING_AVSLUTTET
             )
         )
-        val iverksattBehandling = behandlingService.lagreEllerOppdater(behandlingEtterHåndterBehandlingsresultat)
+        val iverksattBehandling =
+            behandlingHentOgPersisterService.lagreEllerOppdater(behandlingEtterHåndterBehandlingsresultat)
 
         val behandlingRevurdering = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 

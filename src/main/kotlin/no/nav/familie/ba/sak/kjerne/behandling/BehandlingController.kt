@@ -7,11 +7,11 @@ import no.nav.familie.ba.sak.common.RessursUtils.ok
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -38,11 +38,11 @@ import java.time.LocalDate
 @Validated
 class BehandlingController(
     private val stegService: StegService,
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingstemaService: BehandlingstemaService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilgangService: TilgangService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val beregningService: BeregningService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) {
 
@@ -100,10 +100,10 @@ class BehandlingController(
             handling = "endre behandlingstema"
         )
 
-        val behandling = behandlingService.oppdaterBehandlingstema(
-            behandling = behandlingService.hent(behandlingId),
-            nyUnderkategori = endreBehandling.behandlingUnderkategori,
-            nyKategori = endreBehandling.behandlingKategori,
+        val behandling = behandlingstemaService.oppdaterBehandlingstema(
+            behandling = behandlingHentOgPersisterService.hent(behandlingId),
+            overstyrtUnderkategori = endreBehandling.behandlingUnderkategori,
+            overstyrtKategori = endreBehandling.behandlingKategori,
             manueltOppdatert = true
         )
 
@@ -121,14 +121,16 @@ class BehandlingController(
     ): ResponseEntity<Ressurs<List<String>>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hent gyldig etterbetaling"
         )
 
-        val aktørerMedUgyldigEtterbetalingsperiode = tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(
-            behandlingId = behandlingId
-        )
-        val personerMedUgyldigEtterbetalingsperiode = aktørerMedUgyldigEtterbetalingsperiode.map { it.aktivFødselsnummer() }
+        val aktørerMedUgyldigEtterbetalingsperiode =
+            tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(
+                behandlingId = behandlingId
+            )
+        val personerMedUgyldigEtterbetalingsperiode =
+            aktørerMedUgyldigEtterbetalingsperiode.map { it.aktivFødselsnummer() }
 
         return ResponseEntity.ok(Ressurs.success(personerMedUgyldigEtterbetalingsperiode))
     }
