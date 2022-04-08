@@ -182,7 +182,7 @@ class VilkårService(
         if (restSlettVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
             behandlingstemaService.oppdaterBehandlingstema(
                 behandling = behandling,
-                overstyrUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
         }
 
@@ -204,7 +204,7 @@ class VilkårService(
 
             behandlingstemaService.oppdaterBehandlingstema(
                 behandling = behandling,
-                overstyrUnderkategori = BehandlingUnderkategori.UTVIDET,
+                overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
         }
 
@@ -238,7 +238,7 @@ class VilkårService(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
         if (personopplysningGrunnlag.søkerOgBarn
-            .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
+                .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",

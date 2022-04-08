@@ -84,7 +84,7 @@ class BehandlingService(
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
 
             val kategori = bestemKategori(
-                overstyrKategori = nyBehandling.kategori,
+                overstyrtKategori = nyBehandling.kategori,
                 kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id),
                 kategoriFraInneværendeBehandling = behandlingstemaService.hentKategoriFraInneværendeBehandling(
                     fagsak.id
@@ -92,7 +92,7 @@ class BehandlingService(
             )
 
             val underkategori = bestemUnderkategori(
-                overstyrUnderkategori = nyBehandling.underkategori,
+                overstyrtUnderkategori = nyBehandling.underkategori,
                 underkategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsak.id),
                 underkategoriFraInneværendeBehandling = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(
                     fagsak.id

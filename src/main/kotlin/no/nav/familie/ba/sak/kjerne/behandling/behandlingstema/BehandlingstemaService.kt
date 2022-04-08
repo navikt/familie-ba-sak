@@ -30,23 +30,23 @@ class BehandlingstemaService(
 
     fun oppdaterBehandlingstema(
         behandling: Behandling,
-        overstyrKategori: BehandlingKategori? = null,
-        overstyrUnderkategori: BehandlingUnderkategori? = null,
+        overstyrtKategori: BehandlingKategori? = null,
+        overstyrtUnderkategori: BehandlingUnderkategori? = null,
         manueltOppdatert: Boolean = false
     ): Behandling {
         if (behandling.skalBehandlesAutomatisk) return behandling
-        else if (manueltOppdatert && (overstyrKategori == null || overstyrUnderkategori == null)) throw FunksjonellFeil(
+        else if (manueltOppdatert && (overstyrtKategori == null || overstyrtUnderkategori == null)) throw FunksjonellFeil(
             "Du må velge behandlingstema."
         )
 
         val utledetKategori = bestemKategori(
-            overstyrKategori = overstyrKategori,
+            overstyrtKategori = overstyrtKategori,
             kategoriFraLøpendeBehandling = hentLøpendeKategori(behandling.fagsak.id),
             kategoriFraInneværendeBehandling = hentKategoriFraInneværendeBehandling(behandling.fagsak.id),
         )
 
         val utledetUnderkategori = bestemUnderkategori(
-            overstyrUnderkategori = overstyrUnderkategori,
+            overstyrtUnderkategori = overstyrtUnderkategori,
             underkategoriFraLøpendeBehandling = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id),
             underkategoriFraInneværendeBehandling = hentUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id)
         )

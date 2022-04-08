@@ -34,7 +34,7 @@ class RegistrereSøknad(
 
         behandlingstemaService.oppdaterBehandlingstema(
             behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
-            overstyrUnderkategori = søknadDTO.underkategori
+            overstyrtUnderkategori = søknadDTO.underkategori
         )
 
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)

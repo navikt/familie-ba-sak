@@ -11,26 +11,26 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
 fun bestemKategori(
-    overstyrKategori: BehandlingKategori?,
+    overstyrtKategori: BehandlingKategori?,
     kategoriFraLøpendeBehandling: BehandlingKategori?,
     kategoriFraInneværendeBehandling: BehandlingKategori? = null,
 ): BehandlingKategori {
     if (kategoriFraLøpendeBehandling == BehandlingKategori.EØS) return BehandlingKategori.EØS
 
-    val oppdatertKategori = listOf(overstyrKategori, kategoriFraInneværendeBehandling).finnHøyesteKategori()
+    val oppdatertKategori = listOf(overstyrtKategori, kategoriFraInneværendeBehandling).finnHøyesteKategori()
 
     return oppdatertKategori ?: BehandlingKategori.NASJONAL
 }
 
 fun bestemUnderkategori(
-    overstyrUnderkategori: BehandlingUnderkategori?,
+    overstyrtUnderkategori: BehandlingUnderkategori?,
     underkategoriFraLøpendeBehandling: BehandlingUnderkategori?,
     underkategoriFraInneværendeBehandling: BehandlingUnderkategori? = null,
 ): BehandlingUnderkategori {
     if (underkategoriFraLøpendeBehandling == BehandlingUnderkategori.UTVIDET) return BehandlingUnderkategori.UTVIDET
 
     val oppdatertUnderkategori =
-        listOf(overstyrUnderkategori, underkategoriFraInneværendeBehandling).finnHøyesteKategori()
+        listOf(overstyrtUnderkategori, underkategoriFraInneværendeBehandling).finnHøyesteKategori()
 
     return oppdatertUnderkategori ?: BehandlingUnderkategori.ORDINÆR
 }

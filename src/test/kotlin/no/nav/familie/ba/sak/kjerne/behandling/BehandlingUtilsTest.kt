@@ -29,7 +29,7 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
             bestemUnderkategori(
-                overstyrUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 underkategoriFraLøpendeBehandling = null,
             )
         )
@@ -40,7 +40,7 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
-                overstyrUnderkategori = BehandlingUnderkategori.UTVIDET,
+                overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
                 underkategoriFraLøpendeBehandling = null
             )
         )
@@ -51,7 +51,7 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
-                overstyrUnderkategori = null,
+                overstyrtUnderkategori = null,
                 underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
                 underkategoriFraInneværendeBehandling = BehandlingUnderkategori.UTVIDET
             )
@@ -63,7 +63,7 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
-                overstyrUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET,
                 underkategoriFraInneværendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
@@ -75,7 +75,7 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
-                overstyrUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET
             )
         )
@@ -86,7 +86,7 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
             bestemUnderkategori(
-                overstyrUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
@@ -97,7 +97,7 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
-                overstyrUnderkategori = BehandlingUnderkategori.UTVIDET,
+                overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
                 underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
@@ -108,14 +108,14 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
-                overstyrUnderkategori = null,
+                overstyrtUnderkategori = null,
                 underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET
             )
         )
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
             bestemUnderkategori(
-                overstyrUnderkategori = null,
+                overstyrtUnderkategori = null,
                 underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
