@@ -52,7 +52,8 @@ abstract class Tidslinje<I, T : Tidsenhet> {
     }
 
     override fun toString(): String =
-        lagPerioder().joinToString(" | ") { it.toString() }
+        "[${fraOgMed()} - ${tilOgMed()}] " +
+            lagPerioder().joinToString(" | ") { it.toString() }
 
     companion object {
         data class TidslinjeFeil(

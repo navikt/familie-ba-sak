@@ -2,18 +2,14 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -41,7 +37,10 @@ data class VilkårsvurderingBuilder(
         private val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat, Måned>> = emptyList(),
     ) {
         fun medVilkår(v: String, vilkår: Vilkår): PersonResultatBuilder {
-            return copy(vilkårsresultatTidslinjer = this.vilkårsresultatTidslinjer + parseVilkår(v, vilkår))
+            return copy(
+                vilkårsresultatTidslinjer = this.vilkårsresultatTidslinjer +
+                    v.tilVilkårRegelverkResultatTidslinje(vilkår, Tidspunkt.med(startMåned))
+            )
         }
 
         fun forPerson(person: Person, startMåned: YearMonth = YearMonth.of(2020, 1)): PersonResultatBuilder {
@@ -50,7 +49,7 @@ data class VilkårsvurderingBuilder(
 
         fun byggVilkårsvurdering(): Vilkårsvurdering = byggPerson().byggVilkårsvurdering()
 
-        private fun byggPerson(): VilkårsvurderingBuilder {
+        fun byggPerson(): VilkårsvurderingBuilder {
 
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurderingBuilder.vilkårsvurdering,
@@ -67,27 +66,6 @@ data class VilkårsvurderingBuilder(
             vilkårsvurderingBuilder.personresultater.add(personResultat)
 
             return vilkårsvurderingBuilder
-        }
-
-        private fun parseVilkår(periodeString: String, vilkår: Vilkår): Tidslinje<VilkårRegelverkResultat, Måned> {
-            val charTidslinje = periodeString.tilCharTidslinje(startMåned)
-            return VilkårRegelverkResultatTidslinje(vilkår, charTidslinje)
-        }
-    }
-}
-
-internal class VilkårRegelverkResultatTidslinje(
-    val vilkår: Vilkår,
-    val charTidslinje: Tidslinje<Char, Måned>
-) : TidslinjeSomStykkerOppTiden<VilkårRegelverkResultat, Måned>(charTidslinje) {
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<Måned>): VilkårRegelverkResultat? {
-        val tegn = charTidslinje.innholdForTidspunkt(tidspunkt)
-
-        return when (tegn) {
-            'E' -> VilkårRegelverkResultat(vilkår, Regelverk.EØS_FORORDNINGEN, Resultat.OPPFYLT)
-            'N' -> VilkårRegelverkResultat(vilkår, Regelverk.NASJONALE_REGLER, Resultat.OPPFYLT)
-            '-' -> VilkårRegelverkResultat(vilkår, null, Resultat.OPPFYLT)
-            else -> null
         }
     }
 }

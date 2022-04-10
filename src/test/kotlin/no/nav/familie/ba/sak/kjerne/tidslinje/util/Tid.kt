@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.TidspunktClosedRange
+import java.time.LocalDate
 import java.time.YearMonth
 
 fun jan(år: Int) = Tidspunkt.med(YearMonth.of(år, 1))
@@ -18,5 +19,8 @@ fun sep(år: Int) = Tidspunkt.med(YearMonth.of(år, 9))
 fun okt(år: Int) = Tidspunkt.med(YearMonth.of(år, 10))
 fun nov(år: Int) = Tidspunkt.med(YearMonth.of(år, 11))
 fun des(år: Int) = Tidspunkt.med(YearMonth.of(år, 12))
+
+fun Int.jan(år: Int) = Tidspunkt.med(LocalDate.of(år, 1, this))
+fun Int.feb(år: Int) = Tidspunkt.med(LocalDate.of(år, 2, this))
 
 fun <T> TidspunktClosedRange<Måned>.med(t: T) = Periode(this, t)
