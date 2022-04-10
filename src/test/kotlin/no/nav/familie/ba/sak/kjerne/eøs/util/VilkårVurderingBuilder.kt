@@ -7,22 +7,21 @@ import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import java.time.YearMonth
 
-data class VilkårsvurderingBuilder(
+data class VilkårsvurderingBuilder<T : Tidsenhet>(
     private val behandling: Behandling = lagBehandling(),
     private val vilkårsvurdering: Vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 ) {
     val personresultater: MutableSet<PersonResultat> = mutableSetOf()
 
-    fun forPerson(person: Person, startMåned: YearMonth = YearMonth.of(2020, 1)): PersonResultatBuilder {
-        return PersonResultatBuilder(this, startMåned, person)
+    fun forPerson(person: Person, startTidspunkt: Tidspunkt<T>): PersonResultatBuilder<T> {
+        return PersonResultatBuilder(this, startTidspunkt, person)
     }
 
     fun byggVilkårsvurdering(): Vilkårsvurdering {
@@ -30,26 +29,26 @@ data class VilkårsvurderingBuilder(
         return vilkårsvurdering
     }
 
-    data class PersonResultatBuilder(
-        val vilkårsvurderingBuilder: VilkårsvurderingBuilder,
-        val startMåned: YearMonth,
+    data class PersonResultatBuilder<T : Tidsenhet>(
+        val vilkårsvurderingBuilder: VilkårsvurderingBuilder<T>,
+        val startTidspunkt: Tidspunkt<T>,
         private val person: Person = tilfeldigPerson(),
-        private val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat, Måned>> = emptyList(),
+        private val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat, T>> = emptyList(),
     ) {
-        fun medVilkår(v: String, vilkår: Vilkår): PersonResultatBuilder {
+        fun medVilkår(v: String, vilkår: Vilkår): PersonResultatBuilder<T> {
             return copy(
                 vilkårsresultatTidslinjer = this.vilkårsresultatTidslinjer +
-                    v.tilVilkårRegelverkResultatTidslinje(vilkår, Tidspunkt.med(startMåned))
+                    v.tilVilkårRegelverkResultatTidslinje(vilkår, startTidspunkt)
             )
         }
 
-        fun forPerson(person: Person, startMåned: YearMonth = YearMonth.of(2020, 1)): PersonResultatBuilder {
-            return byggPerson().forPerson(person, startMåned)
+        fun forPerson(person: Person, startTidspunkt: Tidspunkt<T>): PersonResultatBuilder<T> {
+            return byggPerson().forPerson(person, startTidspunkt)
         }
 
         fun byggVilkårsvurdering(): Vilkårsvurdering = byggPerson().byggVilkårsvurdering()
 
-        fun byggPerson(): VilkårsvurderingBuilder {
+        fun byggPerson(): VilkårsvurderingBuilder<T> {
 
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurderingBuilder.vilkårsvurdering,
@@ -70,7 +69,7 @@ data class VilkårsvurderingBuilder(
     }
 }
 
-internal fun Periode<VilkårRegelverkResultat, Måned>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> {
+internal fun <T : Tidsenhet> Periode<VilkårRegelverkResultat, T>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> {
     return listOf(
         VilkårResultat(
             personResultat = personResultat,
