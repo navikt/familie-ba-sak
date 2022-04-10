@@ -23,7 +23,8 @@ fun <T : Tidsenhet> String.tilVilkårRegelverkResultatTidslinje(vilkår: Vilkår
         when (it?.lowercaseChar()) {
             'e' -> VilkårRegelverkResultat(vilkår, Regelverk.EØS_FORORDNINGEN, Resultat.OPPFYLT)
             'n' -> VilkårRegelverkResultat(vilkår, Regelverk.NASJONALE_REGLER, Resultat.OPPFYLT)
-            '-' -> VilkårRegelverkResultat(vilkår, null, Resultat.OPPFYLT)
+            '+' -> VilkårRegelverkResultat(vilkår, null, Resultat.OPPFYLT)
+            '-' -> VilkårRegelverkResultat(vilkår, null, Resultat.IKKE_OPPFYLT)
             else -> null
         }
     }
@@ -33,6 +34,7 @@ fun <T : Tidsenhet> String.tilVilkårResultatTidslinje(tidspunkt: Tidspunkt<T>):
         when (c?.uppercase()) {
             "+" -> Resultat.OPPFYLT
             "-" -> Resultat.IKKE_OPPFYLT
-            else -> Resultat.IKKE_VURDERT
+            " " -> Resultat.IKKE_VURDERT
+            else -> null
         }
     }
