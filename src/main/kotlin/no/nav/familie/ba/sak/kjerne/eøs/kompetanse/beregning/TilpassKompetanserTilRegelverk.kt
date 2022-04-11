@@ -1,7 +1,7 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util
+package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
 
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.AktørKompetanseTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.AktørKompetanseTidslinje
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerForAlleNøklerMed

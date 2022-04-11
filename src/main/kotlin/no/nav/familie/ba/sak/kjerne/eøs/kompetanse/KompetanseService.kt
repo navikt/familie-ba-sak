@@ -1,17 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.slåSammen
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.tilpassKompetanserTilRegelverk
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.trekkFra
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.inneholder
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenSkjema
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammen
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRegelverk
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.trekkFra
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

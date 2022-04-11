@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.vurderStatus
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseStatus
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.vurderStatus
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.YearMonth
 

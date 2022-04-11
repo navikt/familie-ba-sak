@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util
+package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
