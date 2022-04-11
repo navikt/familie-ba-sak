@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer
+package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository

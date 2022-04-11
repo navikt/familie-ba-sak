@@ -88,6 +88,13 @@ data class MånedTidspunkt internal constructor(
         return måned.compareTo(tidspunkt.tilYearMonth())
     }
 
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is MånedTidspunkt -> compareTo(other) == 0
+            else -> super.equals(other)
+        }
+    }
+
     companion object {
         fun nå() = MånedTidspunkt(YearMonth.now(), Uendelighet.INGEN)
         internal fun YearMonth?.tilTidspunktEllerUendeligLengeSiden(default: () -> YearMonth?) =
