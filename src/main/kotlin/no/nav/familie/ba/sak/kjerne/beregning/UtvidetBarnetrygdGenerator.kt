@@ -47,7 +47,12 @@ data class UtvidetBarnetrygdGenerator(
 
         val utvidaTidslinje = LocalDateTimeline(datoSegmenter)
 
-        val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
+        val andelerBarnaSlåttSammen = slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
+            andelerTilkjentYtelse = andelerBarna.toMutableList(),
+            skalAndelerSlåsSammen = ::skalBarnasAndelerSlåsSammenForUtvidet
+        )
+
+        val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarnaSlåttSammen
             .groupBy { it.aktør }
             .map { identMedAndeler ->
                 LocalDateTimeline(
@@ -103,21 +108,18 @@ data class UtvidetBarnetrygdGenerator(
             )
         }
 
-        return slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
-            andelerTilkjentYtelse = utvidetAndeler.toMutableList(),
-            skalAndelerSlåsSammen = ::skalUtvidetAndelerSlåsSammen
-        )
+        return utvidetAndeler
     }
 
     data class PeriodeData(val aktør: Aktør, val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
 
-    private fun skalUtvidetAndelerSlåsSammen(
+    private fun skalBarnasAndelerSlåsSammenForUtvidet(
         førsteAndel: AndelTilkjentYtelse,
         nesteAndel: AndelTilkjentYtelse
     ): Boolean =
         førsteAndel.stønadTom.sisteDagIInneværendeMåned()
             .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) &&
-            førsteAndel.kalkulertUtbetalingsbeløp == nesteAndel.kalkulertUtbetalingsbeløp
+            førsteAndel.prosent == nesteAndel.prosent
 
     private fun kombinerTidslinjer(
         sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
