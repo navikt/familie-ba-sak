@@ -648,7 +648,6 @@ internal class UtvidetBarnetrygdTest {
         assertThrows<FunksjonellFeil> {
             utvidetVilkårResultat.tilDatoSegment(
                 utvidetVilkår = listOf(utvidetVilkårResultat),
-                søkerAktør = randomAktørId()
             )
         }
     }
@@ -660,7 +659,6 @@ internal class UtvidetBarnetrygdTest {
         assertDoesNotThrow {
             utvidetVilkårResultat.tilDatoSegment(
                 utvidetVilkår = listOf(utvidetVilkårResultat, lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 3, 1), periodeTom = null)),
-                søkerAktør = randomAktørId()
             )
         }
     }

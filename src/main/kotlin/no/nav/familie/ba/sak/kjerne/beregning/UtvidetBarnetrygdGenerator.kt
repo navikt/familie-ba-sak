@@ -86,7 +86,7 @@ data class UtvidetBarnetrygdGenerator(
     }
 
     private fun utledTidslinjeForBarna(andelerBarna: List<AndelTilkjentYtelse>): LocalDateTimeline<List<PeriodeData>> {
-        val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
+        val barnasTidslinjer = andelerBarna
             .groupBy { it.aktør }
             .map { identMedAndeler ->
                 LocalDateTimeline(
@@ -109,9 +109,10 @@ data class UtvidetBarnetrygdGenerator(
             (kombinerTidslinjer(sammenlagt, neste))
         }
 
-        val barnasSegmenterSlåttSammenPåProsent =
+        val barnasSegmenterSlåttSammenHvisLikProsent =
             slåSammenEtterfølgendeSegmenterMedLikProsent(sammenlagtTidslinjeForBarna)
-        return LocalDateTimeline(barnasSegmenterSlåttSammenPåProsent)
+
+        return LocalDateTimeline(barnasSegmenterSlåttSammenHvisLikProsent)
     }
 
     private fun slåSammenEtterfølgendeSegmenterMedLikProsent(sammenlagtTidslinjeForBarna: LocalDateTimeline<List<PeriodeData>>) =
