@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.rest
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.security.token.support.core.api.ProtectedWithClaims

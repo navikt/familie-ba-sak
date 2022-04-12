@@ -4,10 +4,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.finnHøyesteKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
 fun bestemKategori(

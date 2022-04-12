@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer
+package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
