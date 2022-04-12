@@ -5,20 +5,18 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erBack2BackIMånedsskifte
-import no.nav.familie.ba.sak.common.erDagenFør
+import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.slåSammenPerioderSomIkkeSkulleHaVærtSplittet
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -42,34 +40,15 @@ data class UtvidetBarnetrygdGenerator(
         val datoSegmenter = utvidetVilkår
             .filter { it.resultat == Resultat.OPPFYLT }
             .map {
-                it.tilDatoSegment(utvidetVilkår = utvidetVilkår, søkerAktør = søkerAktør)
+                it.tilDatoSegment(utvidetVilkår = utvidetVilkår)
             }
 
         val utvidaTidslinje = LocalDateTimeline(datoSegmenter)
 
-        val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
-            .groupBy { it.aktør }
-            .map { identMedAndeler ->
-                LocalDateTimeline(
-                    identMedAndeler.value.map {
-                        LocalDateSegment(
-                            it.stønadFom.førsteDagIInneværendeMåned(),
-                            it.stønadTom.sisteDagIInneværendeMåned(),
-                            listOf(
-                                PeriodeData(
-                                    aktør = identMedAndeler.key,
-                                    rolle = PersonType.BARN,
-                                    prosent = it.prosent
-                                )
-                            )
-                        )
-                    }
-                )
-            }
+        val barnasTidslinje =
+            utledTidslinjeForBarna(andelerBarna)
 
-        val sammenslåttTidslinje = barnasTidslinjer.fold(utvidaTidslinje) { sammenlagt, neste ->
-            (kombinerTidslinjer(sammenlagt, neste))
-        }
+        val sammenslåttTidslinje = kombinerTidslinjer(utvidaTidslinje, barnasTidslinje)
 
         val utvidetAndeler = sammenslåttTidslinje.toSegments()
             .filter { segment -> segment.value.any { it.rolle == PersonType.BARN } && segment.value.any { it.rolle == PersonType.SØKER } }
@@ -103,21 +82,76 @@ data class UtvidetBarnetrygdGenerator(
             )
         }
 
-        return slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
-            andelerTilkjentYtelse = utvidetAndeler.toMutableList(),
-            skalAndelerSlåsSammen = ::skalUtvidetAndelerSlåsSammen
-        )
+        return utvidetAndeler
     }
 
-    data class PeriodeData(val aktør: Aktør, val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
+    private fun utledTidslinjeForBarna(andelerBarna: List<AndelTilkjentYtelse>): LocalDateTimeline<List<PeriodeData>> {
+        val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
+            .groupBy { it.aktør }
+            .map { identMedAndeler ->
+                LocalDateTimeline(
+                    identMedAndeler.value.map {
+                        LocalDateSegment(
+                            it.stønadFom.førsteDagIInneværendeMåned(),
+                            it.stønadTom.sisteDagIInneværendeMåned(),
+                            listOf(
+                                PeriodeData(
+                                    rolle = PersonType.BARN,
+                                    prosent = it.prosent
+                                )
+                            )
+                        )
+                    }
+                )
+            }
 
-    private fun skalUtvidetAndelerSlåsSammen(
-        førsteAndel: AndelTilkjentYtelse,
-        nesteAndel: AndelTilkjentYtelse
-    ): Boolean =
-        førsteAndel.stønadTom.sisteDagIInneværendeMåned()
-            .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) &&
-            førsteAndel.kalkulertUtbetalingsbeløp == nesteAndel.kalkulertUtbetalingsbeløp
+        val sammenlagtTidslinjeForBarna = barnasTidslinjer.reduce { sammenlagt, neste ->
+            (kombinerTidslinjer(sammenlagt, neste))
+        }
+
+        val barnasSegmenterSlåttSammenPåProsent =
+            slåSammenEtterfølgendeSegmenterMedLikProsent(sammenlagtTidslinjeForBarna)
+        return LocalDateTimeline(barnasSegmenterSlåttSammenPåProsent)
+    }
+
+    private fun slåSammenEtterfølgendeSegmenterMedLikProsent(sammenlagtTidslinjeForBarna: LocalDateTimeline<List<PeriodeData>>) =
+        sammenlagtTidslinjeForBarna.toSegments()
+            .fold(mutableListOf<LocalDateSegment<List<PeriodeData>>>()) { sammenslåttePerioder, nestePeriode ->
+                val sistePeriodeSomErSammenslått = sammenslåttePerioder.lastOrNull()
+                if (sistePeriodeSomErSammenslått?.tom?.toYearMonth() == nestePeriode.fom.forrigeMåned() && sistePeriodeSomErSammenslått.value.maxOf { it.prosent } == nestePeriode.value.maxOf { it.prosent }) {
+                    sammenslåttePerioder.apply {
+                        removeLast()
+                        val prosentForPeriode = sistePeriodeSomErSammenslått.value.maxOf { it.prosent }
+                        add(
+                            LocalDateSegment(
+                                sistePeriodeSomErSammenslått.fom,
+                                nestePeriode.tom,
+                                listOf(
+                                    PeriodeData(
+                                        rolle = PersonType.BARN,
+                                        prosent = prosentForPeriode
+                                    )
+                                )
+                            )
+                        )
+                    }
+                } else sammenslåttePerioder.apply {
+                    add(
+                        LocalDateSegment(
+                            nestePeriode.fom,
+                            nestePeriode.tom,
+                            listOf(
+                                PeriodeData(
+                                    rolle = PersonType.BARN,
+                                    prosent = nestePeriode.value.maxOf { it.prosent }
+                                )
+                            )
+                        )
+                    )
+                }
+            }.toList()
+
+    data class PeriodeData(val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
 
     private fun kombinerTidslinjer(
         sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
@@ -140,7 +174,6 @@ data class UtvidetBarnetrygdGenerator(
 
 fun VilkårResultat.tilDatoSegment(
     utvidetVilkår: List<VilkårResultat>,
-    søkerAktør: Aktør
 ): LocalDateSegment<List<UtvidetBarnetrygdGenerator.PeriodeData>> {
     if (this.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvidet barnetrygd")
     val fraOgMedDato = this.periodeFom!!.førsteDagINesteMåned()
@@ -151,7 +184,7 @@ fun VilkårResultat.tilDatoSegment(
     return LocalDateSegment(
         fraOgMedDato,
         tilOgMedDato,
-        listOf(UtvidetBarnetrygdGenerator.PeriodeData(aktør = søkerAktør, rolle = PersonType.SØKER))
+        listOf(UtvidetBarnetrygdGenerator.PeriodeData(rolle = PersonType.SØKER))
     )
 }
 
