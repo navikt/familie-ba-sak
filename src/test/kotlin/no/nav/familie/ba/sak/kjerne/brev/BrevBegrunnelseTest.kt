@@ -43,6 +43,7 @@ class BrevBegrunnelseTest {
                     ytelserForSøkerForrigeMåned = brevBegrunnelserTestConfig.ytelserForSøkerForrigeMåned,
                     utvidetScenarioForEndringsperiode = brevBegrunnelserTestConfig.utvidetScenarioForEndringsperiode,
                     erIngenOverlappVedtaksperiodeToggelPå = false,
+                    erNyDeltBostedTogglePå = false
                 )
             } catch (e: Exception) {
                 testReporter.publishEntry(

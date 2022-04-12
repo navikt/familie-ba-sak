@@ -89,7 +89,8 @@ data class BegrunnelseData(
     val maalform: String,
     val apiNavn: String,
     val belop: String,
-    val soknadstidspunkt: String
+    val soknadstidspunkt: String,
+    val avtaletidspunktDeltBosted: String,
 ) : Begrunnelse
 
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
@@ -165,11 +166,12 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         maalform = brevMålform.tilSanityFormat(),
         apiNavn = this.standardbegrunnelse.sanityApiNavn,
         belop = Utils.formaterBeløp(beløp),
-        soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: ""
+        soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: "",
+        avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted?.tilKortString() ?: ""
     )
 }
 
-private fun Standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
+fun Standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
     minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>,
     vedtaksperiode: NullablePeriode
 ) = when (this.vedtakBegrunnelseType) {
