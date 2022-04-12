@@ -34,6 +34,68 @@ class StatsborgerskapService(
             )
         }
 
+        val historiskEØSMedlemsskapForLand =
+            integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land] ?: emptyList()
+
+        var datoFra = statsborgerskap.hentFom()
+
+        return if (datoFra == null && statsborgerskap.gyldigTilOgMed == null) {
+            val idag = LocalDate.now()
+            listOf(
+                GrStatsborgerskap(
+                    gyldigPeriode = DatoIntervallEntitet(
+                        fom = idag,
+                        tom = null
+                    ),
+                    landkode = statsborgerskap.land,
+                    medlemskap = finnMedlemskap(
+                        statsborgerskap,
+                        historiskEØSMedlemsskapForLand,
+                        idag
+                    ),
+                    person = person
+                )
+            )
+        } else {
+            hentMedlemskapsDatoIntervaller(
+                historiskEØSMedlemsskapForLand,
+                datoFra,
+                statsborgerskap.gyldigTilOgMed
+            ).fold(emptyList<GrStatsborgerskap>()) { medlemskapsperioder, periode ->
+                val medlemskapsperiode = GrStatsborgerskap(
+                    gyldigPeriode = periode,
+                    landkode = statsborgerskap.land,
+                    medlemskap = finnMedlemskap(
+                        statsborgerskap,
+                        historiskEØSMedlemsskapForLand,
+                        periode.fom
+                    ),
+                    person = person
+                )
+                medlemskapsperioder + listOf(medlemskapsperiode)
+            }
+        }
+    }
+
+    fun gammelHentStatsborgerskapMedMedlemskap(
+        statsborgerskap: Statsborgerskap,
+        person: Person
+    ): List<GrStatsborgerskap> {
+
+        if (statsborgerskap.iNordiskLand()) {
+            return listOf(
+                GrStatsborgerskap(
+                    gyldigPeriode = DatoIntervallEntitet(
+                        fom = statsborgerskap.hentFom(),
+                        tom = statsborgerskap.gyldigTilOgMed
+                    ),
+                    landkode = statsborgerskap.land,
+                    medlemskap = Medlemskap.NORDEN,
+                    person = person
+                )
+            )
+        }
+
         val alleEØSLandInkludertHistoriske =
             integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land] ?: emptyList()
         val grStatsborgerskap = ArrayList<GrStatsborgerskap>()
@@ -145,6 +207,49 @@ class StatsborgerskapService(
             (fra == null || datoForEndringIMedlemskap.isAfter(fra)) &&
                 (til == null || datoForEndringIMedlemskap.isBefore(til))
         }
+
+    private fun hentMedlemskapsDatoIntervaller(
+        medlemsland: List<BetydningDto>,
+        fra: LocalDate?,
+        til: LocalDate?
+    ): List<DatoIntervallEntitet> {
+        val filtrerteEndringsdatoer = medlemsland.flatMap {
+            listOf(it.gyldigFra, it.gyldigTil)
+        }.filter { datoForEndringIMedlemskap ->
+            erInnenforDatoerSomBetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
+        }
+
+        return listOf(
+            fra,
+            filtrerteEndringsdatoer.first(),
+            filtrerteEndringsdatoer.lastOrNull(),
+            til
+        ).filterNotNull().windowed(2, 1)
+            .map { DatoIntervallEntitet(it[0], it[1]) }
+    }
+
+    fun testHentMedlemskapsIntervaller(
+        medlemsland: List<BetydningDto>,
+        fra: LocalDate?,
+        til: LocalDate?
+    ): List<DatoIntervallEntitet> {
+        val filtrerteEndringsdatoerMedlemskap = medlemsland.flatMap {
+            listOf(it.gyldigFra, it.gyldigTil)
+        }.filter { datoForEndringIMedlemskap ->
+            erInnenforDatoerSomBetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
+        }
+
+        return listOf(
+            fra,
+            filtrerteEndringsdatoerMedlemskap.first(),
+            filtrerteEndringsdatoerMedlemskap.lastOrNull(),
+            til
+        ).filterNotNull().windowed(
+            2,
+            1
+        )
+            .map { DatoIntervallEntitet(it[0], it[1]) }
+    }
 
     private fun finnMedlemskap(
         statsborgerskap: Statsborgerskap,
