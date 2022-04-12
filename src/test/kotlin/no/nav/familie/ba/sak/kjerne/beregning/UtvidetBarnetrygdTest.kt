@@ -451,7 +451,7 @@ internal class UtvidetBarnetrygdTest {
     }
 
     @Test
-    fun `Utvidet andel blir splittet opp basert på utvidet vilkår-segmenter uavhengig om de henger sammen eller ikke`() {
+    fun `Utvidet andel blir splittet opp på endring i utvidet vilkåret`() {
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 10, 15))
         val barnOppfylt =
