@@ -132,14 +132,16 @@ class BehandlingstemaService(
             behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsakId)
                 ?: return BehandlingUnderkategori.ORDINÆR
 
-        val erUtvidetVilkårBehandlet =
-            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
-                ?.personResultater
-                ?.flatMap { it.vilkårResultater }
-                ?.filter { it.behandlingId == aktivBehandling.id }
-                ?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }?.all { it.resultat == Resultat.OPPFYLT }
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
+            ?: return BehandlingUnderkategori.ORDINÆR
 
-        return if (erUtvidetVilkårBehandlet == true) {
+        val erUtvidetVilkårBehandlet = vilkårsvurdering.personResultater
+            .flatMap { it.vilkårResultater }
+            .filter { it.behandlingId == aktivBehandling.id }
+            .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            .any { it.resultat == Resultat.OPPFYLT }
+
+        return if (erUtvidetVilkårBehandlet) {
             BehandlingUnderkategori.UTVIDET
         } else {
             BehandlingUnderkategori.ORDINÆR
