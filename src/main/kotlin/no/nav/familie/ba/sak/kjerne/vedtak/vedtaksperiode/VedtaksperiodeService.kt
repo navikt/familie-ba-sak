@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FØRSTE_ENDRINGSTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_DELT_BOSTED_BEGRUNNELSE
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
@@ -451,8 +452,6 @@ class VedtaksperiodeService(
             behandling.id
         )
 
-        val erIngenOverlappVedtaksperiodeToggelPå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
-
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
             val aktørIderMedUtbetaling =
                 hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }
@@ -466,7 +465,8 @@ class VedtaksperiodeService(
                     aktørIderMedUtbetaling = aktørIderMedUtbetaling,
                     endretUtbetalingAndeler = endretUtbetalingAndeler,
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
-                    erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå
+                    erIngenOverlappVedtaksperiodeToggelPå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER),
+                    erNyDeltBostedTogglePå = featureToggleService.isEnabled(NY_DELT_BOSTED_BEGRUNNELSE)
                 )
             )
         }
