@@ -268,6 +268,12 @@ class MigreringService(
                     }
                 }
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.AKTIV_BEHANDLING)
+
+            // Ikke migrer hvis det er en annen dagsaktuell migreringsebehandling. Infotrygd leser ikke fra feed før om kvelden.
+            // For å forhindre dobbelt migrerte saker, som at saksbehandler migrer og henlegger sak samme dag, og den automatisk migreres senere
+            if (behandlinger.any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD && it.opprettetTidspunkt.toLocalDate() == LocalDate.now() }) {
+                kastOgTellMigreringsFeil(MigreringsfeilType.KUN_ETT_MIGRERINGFORSØK_PER_DAG)
+            }
         }
     }
 
@@ -476,6 +482,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     UKJENT("Ukjent migreringsfeil"),
     ÅPEN_SAK_INFOTRYGD("Bruker har åpen behandling i Infotrygd"),
     INSTITUSJON("Midlertidig ignoerert fordi det er en institusjon"),
+    KUN_ETT_MIGRERINGFORSØK_PER_DAG("Migrering allerede påbegynt i dag. Vent minst en dag før man prøver igjen"),
 }
 
 open class KanIkkeMigrereException(
