@@ -236,7 +236,12 @@ object VilkårsvurderingUtils {
                     forrigeBehandlingVilkårsvurdering?.personResultater
                         ?.firstOrNull { it.aktør == personFraInit.aktør }
                         ?.vilkårResultater
-                        ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } ?: false
+                        ?.any {
+                            it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
+                                it.resultat == Resultat.OPPFYLT &&
+                                // forrige behandling har ubetalt utvidet barnetrygd
+                                løpendeUnderkategori == BehandlingUnderkategori.UTVIDET
+                        } ?: false
 
                 // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
                 // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
