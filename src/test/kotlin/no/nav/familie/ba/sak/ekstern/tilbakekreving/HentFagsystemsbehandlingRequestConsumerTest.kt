@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -44,7 +44,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
 
     private lateinit var acknowledgment: Acknowledgment
 
-    private val behandlingService: BehandlingService = mockk(relaxed = true)
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk(relaxed = true)
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
     private val vedtakService: VedtakService = mockk()
@@ -64,7 +64,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
     fun init() {
         fagsystemsbehandlingService = spyk(
             FagsystemsbehandlingService(
-                behandlingService,
+                behandlingHentOgPersisterService,
                 persongrunnlagService,
                 arbeidsfordelingService,
                 vedtakService,
@@ -77,7 +77,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
         acknowledgment = mockk()
         every { acknowledgment.acknowledge() } returns Unit
 
-        every { behandlingService.hent(any()) } returns behandling
+        every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { persongrunnlagService.hentAktivThrows(any()) } returns lagTestPersonopplysningGrunnlag(
             behandling.id,
             tilfeldigPerson(personType = PersonType.BARN),

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragDataTask
@@ -23,12 +23,12 @@ import java.util.UUID
 
 @Service
 class AvstemmingService(
-    val økonomiKlient: ØkonomiKlient,
-    val behandlingService: BehandlingService,
-    val beregningService: BeregningService,
-    val taskRepository: TaskRepository,
-    val batchRepository: BatchRepository,
-    val dataChunkRepository: DataChunkRepository,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val økonomiKlient: ØkonomiKlient,
+    private val beregningService: BeregningService,
+    private val taskRepository: TaskRepository,
+    private val batchRepository: BatchRepository,
+    private val dataChunkRepository: DataChunkRepository,
 ) {
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime) {
 
@@ -101,7 +101,7 @@ class AvstemmingService(
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(
         pageable: Pageable = Pageable.ofSize(KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
     ) =
-        behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable)
+        behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettKonsistensavstemmingDataTask(

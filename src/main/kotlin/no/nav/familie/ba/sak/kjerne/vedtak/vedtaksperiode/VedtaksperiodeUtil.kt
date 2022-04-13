@@ -29,6 +29,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.gamleEndretUtbetalingsperiodeBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.nyeEndretUtbetalingsperiodeBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -198,7 +200,7 @@ fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
                         vedtak = vedtak,
                         fom = utledFom(gammeltSegment, overlappendePeriode),
                         tom = utledTom(gammeltSegment, overlappendePeriode),
-                        type = Vedtaksperiodetype.REDUKSJON,
+                        type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
                     )
                 }
             }
@@ -256,7 +258,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
+    erNyDeltBostedTogglePå: Boolean
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
     sanityBegrunnelser = sanityBegrunnelser,
@@ -278,7 +281,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
         .hentUtvidetScenarioForEndringsperiode(
             utvidetVedtaksperiodeMedBegrunnelser.hentMånedPeriode()
         ),
-    erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå
+    erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
+    erNyDeltBostedTogglePå = erNyDeltBostedTogglePå
 )
 
 fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
@@ -292,6 +296,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean,
+    erNyDeltBostedTogglePå: Boolean
 ): List<Standardbegrunnelse> {
     val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.values()
         .filter {
@@ -299,12 +304,22 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
                 .type
                 .tillatteBegrunnelsestyper(erIngenOverlappVedtaksperiodeToggelPå)
                 .contains(it.vedtakBegrunnelseType)
+        }.filter {
+            if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
+                if (erIngenOverlappVedtaksperiodeToggelPå) {
+                    nyeEndretUtbetalingsperiodeBegrunnelser.filter { standardbegrunnelse ->
+                        if (!erNyDeltBostedTogglePå)
+                            standardbegrunnelse != Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING
+                        else true
+                    }.contains(it)
+                } else gamleEndretUtbetalingsperiodeBegrunnelser.contains(it)
+            } else true
         }
 
     return when (minimertVedtaksperiode.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET,
         Vedtaksperiodetype.AVSLAG -> tillateBegrunnelserForVedtakstype
-        Vedtaksperiodetype.REDUKSJON -> velgRedusertBegrunnelser(
+        Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> velgRedusertBegrunnelser(
             tillateBegrunnelserForVedtakstype,
             sanityBegrunnelser,
             minimertVedtaksperiode,

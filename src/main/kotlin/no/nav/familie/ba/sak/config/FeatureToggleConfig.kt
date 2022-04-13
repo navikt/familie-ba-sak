@@ -108,6 +108,8 @@ class FeatureToggleConfig(
         const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER =
             "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
         const val FØRSTE_ENDRINGSTIDSPUNKT = "familie-ba-sak.behandling.forste-endringstidspunkt.utgivelse"
+        const val ETTERBETALING_3ÅR = "familie-ba-sak.utgivelse.behandling.etterbetaling-3-aar"
+        const val NY_DELT_BOSTED_BEGRUNNELSE = "familie-ba-sak.utgivelse.behandling.delt-bosted-begrunnelse-avtaletidspunkt"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 
@@ -120,7 +122,11 @@ class FeatureToggleConfig(
 
         const val SKAL_MIGRERE_FOSTERBARN = "familie-ba-sak.migrer-fosterbarn"
 
-        const val KAN_MIGRERE_DELT_BOSTED = "familie-ba-sak.migrer-delt-bosted"
+        const val SKAL_MIGRERE_ORDINÆR_DELT_BOSTED = "familie-ba-sak.migrer-delt-bosted"
+
+        const val SKAL_MIGRERE_UTVIDET_DELT_BOSTED = "familie-ba-sak.migrer-utvidet-delt-bosted"
+
+        const val KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED = "familie-ba-sak.manuell-migrering-ikke-delt-bosted"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

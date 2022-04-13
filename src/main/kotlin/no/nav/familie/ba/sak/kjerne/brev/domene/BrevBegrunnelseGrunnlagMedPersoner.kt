@@ -13,6 +13,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
     val vedtakBegrunnelseType: VedtakBegrunnelseType,
     val triggesAv: TriggesAv,
     val personIdenter: List<String>,
+    val avtaletidspunktDeltBosted: LocalDate? = null
 ) : Comparable<BrevBegrunnelseGrunnlagMedPersoner> {
     fun hentAntallBarnForBegrunnelse(
         uregistrerteBarn: List<MinimertUregistrertBarn>,
@@ -39,7 +40,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
         this.standardbegrunnelse == Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN ->
             uregistrerteBarn.mapNotNull { it.fødselsdato }
 
-        gjelderSøker -> {
+        gjelderSøker && this.vedtakBegrunnelseType != VedtakBegrunnelseType.ENDRET_UTBETALING -> {
             if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG) {
                 personerIBehandling
                     .filter { it.type == PersonType.BARN }

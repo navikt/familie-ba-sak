@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import java.time.LocalDate
 
 /**
  * NB: Bør ikke brukes internt, men kun ut mot eksterne tjenester siden klassen
@@ -18,6 +19,8 @@ data class MinimertRestEndretAndel(
     val periode: MånedPeriode,
     val personIdent: String,
     val årsak: Årsak,
+    val søknadstidspunkt: LocalDate,
+    val avtaletidspunktDeltBosted: LocalDate?
 ) {
     fun erOverlappendeMed(nullableMånedPeriode: NullableMånedPeriode): Boolean {
         return MånedPeriode(
@@ -44,5 +47,15 @@ fun EndretUtbetalingAndel.tilMinimertRestEndretUtbetalingAndel() = MinimertRestE
     årsak = this.årsak ?: throw Feil(
         "Har ikke årsak på endretUtbetalingsandel ${this.id} " +
             "ved konvertering til minimertRestEndretUtbetalingsandel"
-    )
+    ),
+    søknadstidspunkt = this.søknadstidspunkt ?: throw Feil(
+        "Har ikke søknadstidspunk på endretUtbetalingsandel  ${this.id} " +
+            "ved konvertering til minimertRestEndretUtbetalingsandel"
+    ),
+    avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: (
+        if (this.årsakErDeltBosted()) throw Feil(
+            "Har ikke avtaletidspunktDeltBosted på endretUtbetalingsandel  ${this.id} " +
+                "ved konvertering til minimertRestEndretUtbetalingsandel"
+        ) else null
+        )
 )

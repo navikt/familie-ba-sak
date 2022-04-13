@@ -32,9 +32,11 @@ data class RestUtvidetBehandling(
     val utbetalingsperioder: List<Utbetalingsperiode>,
     val personerMedAndelerTilkjentYtelse: List<RestPersonMedAndeler>,
     val endretUtbetalingAndeler: List<RestEndretUtbetalingAndel>,
+    val kompetanser: List<RestKompetanse>,
     val tilbakekreving: RestTilbakekreving?,
     val vedtak: RestVedtak?,
     val totrinnskontroll: RestTotrinnskontroll?,
     val aktivSettPåVent: RestSettPåVent?,
-    val migreringsdato: LocalDate?
+    val migreringsdato: LocalDate?,
+    val endringstidspunkt: LocalDate?
 )

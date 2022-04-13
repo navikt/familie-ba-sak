@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
@@ -38,6 +39,9 @@ class DokumentServiceTest(
 
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @Autowired
     private val personidentService: PersonidentService,
@@ -181,7 +185,7 @@ class DokumentServiceTest(
         )
         val behandlingEtterSendTilBeslutter =
             behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
-        behandlingService.lagreEllerOppdater(behandlingEtterSendTilBeslutter)
+        behandlingHentOgPersisterService.lagreEllerOppdater(behandlingEtterSendTilBeslutter)
 
         val vedtakEtterSendTilBeslutter =
             vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.id)!!

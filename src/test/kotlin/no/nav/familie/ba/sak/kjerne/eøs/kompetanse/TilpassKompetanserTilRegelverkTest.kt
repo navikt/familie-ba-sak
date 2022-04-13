@@ -2,11 +2,15 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.tilpassKompetanserTilRegelverk
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.tilpassKompetanserTilRegelverk
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.somRegelverk
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkTidslinje
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -17,13 +21,43 @@ class TilpassKompetanserTilRegelverkTest {
     val barn3 = tilfeldigPerson()
 
     @Test
+    fun testTilpassKompetanserUtenKompetanser() {
+        val kompetanser: List<Kompetanse> = emptyList()
+
+        val eøsPerioder = mapOf(
+            barn1.aktør to "EEENNEEEE".tilRegelverkTidslinje(jan2020)
+        )
+
+        val forventedeKompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("---  ----", barn1)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun testTilpassKompetanserUtenEøsPerioder() {
+        val kompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("SSSSSSS", barn1)
+            .byggKompetanser()
+
+        val eøsPerioder = emptyMap<Aktør, Tidslinje<Regelverk, Måned>>()
+
+        val forventedeKompetanser = emptyList<Kompetanse>()
+
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
     fun testTilpassKompetanserMotEøsEttBarn() {
         val kompetanser = KompetanseBuilder(jan2020)
             .medKompetanse("SSSSSSS", barn1)
             .byggKompetanser()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk()
+            barn1.aktør to "EEENNEEEE".tilRegelverkTidslinje(jan2020)
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
@@ -41,8 +75,8 @@ class TilpassKompetanserTilRegelverkTest {
             .byggKompetanser()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk(),
-            barn2.aktør to "EEEENNEEE".tilCharTidslinje(jan2020).somRegelverk()
+            barn1.aktør to "EEENNEEEE".tilRegelverkTidslinje(jan2020),
+            barn2.aktør to "EEEENNEEE".tilRegelverkTidslinje(jan2020)
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
@@ -70,9 +104,9 @@ class TilpassKompetanserTilRegelverkTest {
             .byggKompetanser()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEENNEEEE".tilCharTidslinje(jan2020).somRegelverk(),
-            barn2.aktør to "EEE--NNNN".tilCharTidslinje(jan2020).somRegelverk(),
-            barn3.aktør to "EEEEEEEEE".tilCharTidslinje(jan2020).somRegelverk()
+            barn1.aktør to "EEENNEEEE".tilRegelverkTidslinje(jan2020),
+            barn2.aktør to "EEE--NNNN".tilRegelverkTidslinje(jan2020),
+            barn3.aktør to "EEEEEEEEE".tilRegelverkTidslinje(jan2020)
         )
 
         // SSS  SS--, barn1

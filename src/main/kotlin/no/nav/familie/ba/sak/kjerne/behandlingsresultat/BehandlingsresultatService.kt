@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class BehandlingsresultatService(
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val personidentService: PersonidentService,
     private val beregningService: BeregningService,
@@ -34,8 +34,8 @@ class BehandlingsresultatService(
 ) {
 
     fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
-        val behandling = behandlingService.hent(behandlingId = behandlingId)
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
         val forrigeTilkjentYtelse: TilkjentYtelse? =

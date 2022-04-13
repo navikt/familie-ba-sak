@@ -5,8 +5,13 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.erDagenFør
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.beløpUtbetaltFor
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
@@ -84,6 +89,8 @@ data class BegrunnelseData(
     val maalform: String,
     val apiNavn: String,
     val belop: String,
+    val soknadstidspunkt: String,
+    val avtaletidspunktDeltBosted: String,
 ) : Begrunnelse
 
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
@@ -93,7 +100,8 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     personerIPersongrunnlag: List<MinimertRestPerson>,
     brevMålform: Målform,
     uregistrerteBarn: List<MinimertUregistrertBarn>,
-    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
+    minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>
 ): Begrunnelse {
     val personerPåBegrunnelse =
         personerIPersongrunnlag.filter { person -> this.personIdenter.contains(person.personIdent) }
@@ -132,6 +140,13 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
 
     val beløp = this.hentBeløp(gjelderSøker, minimerteUtbetalingsperiodeDetaljer)
 
+    val endringsperioder = this.standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
+        minimerteRestEndredeAndeler = minimerteRestEndredeAndeler,
+        vedtaksperiode = vedtaksperiode
+    )
+
+    val søknadstidspunkt = endringsperioder.sortedBy { it.søknadstidspunkt }.firstOrNull { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
+
     this.validerBrevbegrunnelse(
         gjelderSøker = gjelderSøker,
         barnasFødselsdatoer = barnasFødselsdatoer,
@@ -150,8 +165,26 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
         maalform = brevMålform.tilSanityFormat(),
         apiNavn = this.standardbegrunnelse.sanityApiNavn,
-        belop = Utils.formaterBeløp(beløp)
+        belop = Utils.formaterBeløp(beløp),
+        soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: "",
+        avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted?.tilKortString() ?: ""
     )
+}
+
+fun Standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
+    minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>,
+    vedtaksperiode: NullablePeriode
+) = when (this.vedtakBegrunnelseType) {
+    VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> {
+        minimerteRestEndredeAndeler.filter {
+            it.periode.tom.sisteDagIInneværendeMåned()
+                ?.erDagenFør(vedtaksperiode.fom?.førsteDagIInneværendeMåned()) == true
+        }
+    }
+    VedtakBegrunnelseType.ENDRET_UTBETALING -> {
+        minimerteRestEndredeAndeler.filter { it.erOverlappendeMed(vedtaksperiode.tilNullableMånedPeriode()) }
+    }
+    else -> emptyList()
 }
 
 private fun BrevBegrunnelseGrunnlagMedPersoner.validerBrevbegrunnelse(

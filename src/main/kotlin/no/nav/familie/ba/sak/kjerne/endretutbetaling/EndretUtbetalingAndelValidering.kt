@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Periode
@@ -12,20 +13,26 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedPeriode
+import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.finnTilOgMedDato
+import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetalingFom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 object EndretUtbetalingAndelValidering {
@@ -85,6 +92,28 @@ object EndretUtbetalingAndelValidering {
         if (årsak == Årsak.DELT_BOSTED) {
             val deltBostedPerioder = finnDeltBostedPerioder(person = endretUtbetalingAndel.person, vilkårsvurdering = vilkårsvurdering).map { it.tilMånedPeriode() }
             validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, deltBostedPerioder = deltBostedPerioder)
+        } else if (årsak == Årsak.ETTERBETALING_3ÅR) {
+            validerEtterbetaling3År(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                kravDato = vilkårsvurdering?.behandling?.opprettetTidspunkt ?: LocalDateTime.now()
+            )
+        }
+    }
+
+    fun validerEtterbetaling3År(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        kravDato: LocalDateTime
+    ) {
+        if (endretUtbetalingAndel.prosent != BigDecimal.ZERO) {
+            throw FunksjonellFeil(
+                "Du kan ikke sette årsak etterbetaling 3 år når du har valgt at perioden skal utbetales."
+            )
+        } else if (
+            endretUtbetalingAndel.tom?.isAfter(hentGyldigEtterbetalingFom(kravDato = kravDato)) == true
+        ) {
+            throw FunksjonellFeil(
+                "Du kan ikke stoppe etterbetaling for en periode som ikke strekker seg mer enn 3 år tilbake i tid."
+            )
         }
     }
 
@@ -163,15 +192,15 @@ fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
 }
 
 fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+    endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndel>
 ) {
     val endredeUtvidetUtbetalingerAndeler =
-        endretUtbetalingAndeler.filter { endretUtbetaling ->
+        endretUtbetalingAndelerMedÅrsakDeltBosted.filter { endretUtbetaling ->
             endretUtbetaling.andelTilkjentYtelser.any { it.erUtvidet() }
         }
 
     endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
-        val deltBostedEndringerISammePeriode = endretUtbetalingAndeler.filter {
+        val deltBostedEndringerISammePeriode = endretUtbetalingAndelerMedÅrsakDeltBosted.filter {
             it.årsak == Årsak.DELT_BOSTED &&
                 it.fom!!.isSameOrBefore(endretPåUtvidetUtbetalinger.fom!!) &&
                 it.tom!!.isSameOrAfter(endretPåUtvidetUtbetalinger.tom!!) &&
@@ -300,4 +329,33 @@ fun finnDeltBostedPerioder(
     return slåSammenDeltBostedPerioderSomHengerSammen(
         perioder = deltBostedPerioder.toMutableList()
     )
+}
+
+fun validerBarnasVilkår(barna: List<Person>, vilkårsvurdering: Vilkårsvurdering) {
+    val listeAvFeil = mutableListOf<String>()
+
+    barna.map { barn ->
+        vilkårsvurdering.personResultater
+            .flatMap { it.vilkårResultater }
+            .filter { it.personResultat?.aktør == barn.aktør }
+            .forEach { vilkårResultat ->
+                if (vilkårResultat.resultat == Resultat.OPPFYLT && vilkårResultat.periodeFom == null) {
+                    listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} mangler fom dato.")
+                }
+                if (vilkårResultat.periodeFom != null && vilkårResultat.toPeriode().fom.isBefore(barn.fødselsdato)) {
+                    listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} har fra-og-med dato før barnets fødselsdato.")
+                }
+                if (vilkårResultat.periodeFom != null &&
+                    vilkårResultat.toPeriode().fom.isAfter(barn.fødselsdato.plusYears(18)) &&
+                    vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
+                    vilkårResultat.erEksplisittAvslagPåSøknad != true
+                ) {
+                    listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} har fra-og-med dato etter barnet har fylt 18.")
+                }
+            }
+    }
+
+    if (listeAvFeil.isNotEmpty()) {
+        throw Feil(listeAvFeil.joinToString(separator = "\n"))
+    }
 }

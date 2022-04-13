@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeMedAvhengigheter
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
@@ -46,13 +46,14 @@ abstract class Tidslinje<I, T : Tidsenhet> {
         return if (other is Tidslinje<*, *>) {
             fraOgMed() == other.fraOgMed() &&
                 tilOgMed() == other.tilOgMed() &&
-                lagPerioder() == other.lagPerioder()
+                perioder() == other.perioder()
         } else
             false
     }
 
     override fun toString(): String =
-        lagPerioder().joinToString(" | ") { it.toString() }
+        "[${fraOgMed()} - ${tilOgMed()}] " +
+            lagPerioder().joinToString(" | ") { it.toString() }
 
     companion object {
         data class TidslinjeFeil(
@@ -68,7 +69,8 @@ abstract class Tidslinje<I, T : Tidsenhet> {
             OVERLAPPER_ETTERFØLGENDE_PERIODE,
         }
 
-        class TidslinjeFeilException(tidslinjeFeil: Collection<TidslinjeFeil>) : IllegalStateException()
+        class TidslinjeFeilException(tidslinjeFeil: Collection<TidslinjeFeil>) :
+            IllegalStateException(tidslinjeFeil.toString())
     }
 }
 
@@ -88,6 +90,6 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
     val venstre = this
     return object : TidslinjeSomStykkerOppTiden<R, T>(venstre, høyre) {
         override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
-            kombinator(venstre.hentUtsnitt(tidspunkt), høyre.hentUtsnitt(tidspunkt))
+            kombinator(venstre.innholdForTidspunkt(tidspunkt), høyre.innholdForTidspunkt(tidspunkt))
     }
 }

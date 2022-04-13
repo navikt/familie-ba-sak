@@ -36,14 +36,15 @@
             "fom": "2021-09",
             "tom": "2021-12"
           },
-          "årsak": "DELT_BOSTED"
+          "årsak": "DELT_BOSTED",
+          "søknadstidspunkt": "2021-01-31"
         }
       ],
       "utbetalinger": [
         {
           "ytelseType": "ORDINÆR_BARNETRYGD",
           "utbetaltPerMnd": 0,
-          "erPåvirketAvEndring": false,
+          "erPåvirketAvEndring": true,
           "prosent": 0
         }
       ]
@@ -75,7 +76,8 @@
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "endretUtbetalingDeltBostedIngenUtbetalingForSoknad",
-        "belop": 0
+        "belop": 0,
+        "soknadstidspunkt": "31.01.21"
       }
     ],
     "type": "innvilgelseIngenUtbetaling"

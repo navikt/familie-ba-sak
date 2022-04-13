@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -17,6 +18,7 @@ import java.time.LocalDate
 @Service
 class RegistrerPersongrunnlag(
     private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val personidentService: PersonidentService,
@@ -28,7 +30,7 @@ class RegistrerPersongrunnlag(
         behandling: Behandling,
         data: RegistrerPersongrunnlagDTO
     ): StegType {
-        val forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
+        val forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
             behandling
         )
         val aktør = personidentService.hentOgLagreAktør(data.ident, true)
@@ -59,7 +61,9 @@ class RegistrerPersongrunnlag(
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
                 vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                     behandling = behandling,
-                    forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(behandling),
+                    forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
+                        behandling
+                    ),
                     nyMigreringsdato = data.nyMigreringsdato!!
                 )
                 // Lagre ned migreringsdato
@@ -77,7 +81,7 @@ class RegistrerPersongrunnlag(
                 vilkårService.initierVilkårsvurderingForBehandling(
                     behandling = behandling,
                     bekreftEndringerViaFrontend = true,
-                    forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
+                    forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
                         behandling
                     )
                 )

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.lagTriggesAv
+import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.dataGenerator.endretUtbetaling.lagMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
@@ -76,8 +77,8 @@ class TriggesAvTest {
         val erEtterEndretUbetaling = triggesAvEtterEndretUtbetaling.erTriggereOppfyltForEndretUtbetaling(
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
             minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-            ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
             erIngenOverlappVedtaksperiodeToggelPå = false,
+            minimerteUtbetalingsperiodeDetaljer = emptyList()
         )
 
         Assertions.assertFalse(erEtterEndretUbetaling)
@@ -85,8 +86,13 @@ class TriggesAvTest {
         val erEtterEndretUbetalingMedToggle = triggesAvEtterEndretUtbetaling.erTriggereOppfyltForEndretUtbetaling(
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
             minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-            ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
             erIngenOverlappVedtaksperiodeToggelPå = true,
+            minimerteUtbetalingsperiodeDetaljer = listOf(
+                lagMinimertUtbetalingsperiodeDetalj(
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                )
+            )
+
         )
 
         Assertions.assertFalse(erEtterEndretUbetalingMedToggle)
@@ -97,31 +103,35 @@ class TriggesAvTest {
         val skalUtbetalesMedUtbetaling = triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
             minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-            ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
             erIngenOverlappVedtaksperiodeToggelPå = false,
+            minimerteUtbetalingsperiodeDetaljer = emptyList()
+
         )
 
         val skalUtbetalesUtenUtbetaling = triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
             minimertEndretAndel = endretUtbetalingAndelNull,
-            ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
             erIngenOverlappVedtaksperiodeToggelPå = false,
+            minimerteUtbetalingsperiodeDetaljer = emptyList()
+
         )
 
         val skalIkkeUtbetalesUtenUtbetaling =
             triggesIkkeAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
                 minimertEndretAndel = endretUtbetalingAndelNull,
-                ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
                 erIngenOverlappVedtaksperiodeToggelPå = false,
+                minimerteUtbetalingsperiodeDetaljer = emptyList()
+
             )
 
         val skalIkkeUtbetalesMedUtbetaling =
             triggesIkkeAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
                 erIngenOverlappVedtaksperiodeToggelPå = false,
+                minimerteUtbetalingsperiodeDetaljer = emptyList()
+
             )
 
         Assertions.assertTrue(skalUtbetalesMedUtbetaling)
@@ -133,32 +143,51 @@ class TriggesAvTest {
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
                 erIngenOverlappVedtaksperiodeToggelPå = true,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                    )
+                )
+
             )
 
         val skalUtbetalesUtenUtbetalingMedToggle =
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
                 minimertEndretAndel = endretUtbetalingAndelNull,
-                ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
                 erIngenOverlappVedtaksperiodeToggelPå = true,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                    )
+                )
+
             )
 
         val skalIkkeUtbetalesUtenUtbetalingMedToggle =
             triggesIkkeAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
                 minimertEndretAndel = endretUtbetalingAndelNull,
-                ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
                 erIngenOverlappVedtaksperiodeToggelPå = true,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                    )
+                )
+
             )
 
         val skalIkkeUtbetalesMedUtbetalingMedToggle =
             triggesIkkeAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
                 erIngenOverlappVedtaksperiodeToggelPå = true,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                    )
+                )
             )
 
         Assertions.assertTrue(skalUtbetalesMedUtbetalingMedToggle)
@@ -172,29 +201,33 @@ class TriggesAvTest {
         val utvidetScenarioUtvidetVilkår = triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
             minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-            ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
             erIngenOverlappVedtaksperiodeToggelPå = false,
+            minimerteUtbetalingsperiodeDetaljer = emptyList()
+
         )
         val utvidetScenarioIkkeUtvidetVilkår =
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioIkkeUtvidet,
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                ytelseTyperForPeriode = setOf(),
                 erIngenOverlappVedtaksperiodeToggelPå = false,
+                minimerteUtbetalingsperiodeDetaljer = emptyList()
+
             )
         val ikkeUtvidetScenarioIkkeUtvidetVilkår =
             triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioIkkeUtvidet,
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                ytelseTyperForPeriode = setOf(),
                 erIngenOverlappVedtaksperiodeToggelPå = false,
+                minimerteUtbetalingsperiodeDetaljer = emptyList()
+
             )
         val ikkeUtvidetScenarioUtvidetVilkår =
             triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
                 erIngenOverlappVedtaksperiodeToggelPå = false,
+                minimerteUtbetalingsperiodeDetaljer = emptyList()
+
             )
 
         Assertions.assertTrue(utvidetScenarioUtvidetVilkår)
@@ -206,29 +239,49 @@ class TriggesAvTest {
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
                 erIngenOverlappVedtaksperiodeToggelPå = true,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                    )
+                )
+
             )
         val utvidetScenarioIkkeUtvidetVilkårMedToggle =
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioIkkeUtvidet,
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                ytelseTyperForPeriode = setOf(),
                 erIngenOverlappVedtaksperiodeToggelPå = true,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                    )
+                )
+
             )
         val ikkeUtvidetScenarioIkkeUtvidetVilkårMedToggle =
             triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioIkkeUtvidet,
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                ytelseTyperForPeriode = setOf(),
                 erIngenOverlappVedtaksperiodeToggelPå = true,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                    )
+                )
+
             )
         val ikkeUtvidetScenarioUtvidetVilkårMedToggle =
             triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
-                ytelseTyperForPeriode = setOf(YtelseType.UTVIDET_BARNETRYGD),
                 erIngenOverlappVedtaksperiodeToggelPå = true,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                    )
+                )
+
             )
 
         Assertions.assertTrue(utvidetScenarioUtvidetVilkårMedToggle)
@@ -248,8 +301,9 @@ class TriggesAvTest {
             triggesIkkeAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioIkkeUtvidet,
                 minimertEndretAndel = endretUtbetalingAndel,
-                ytelseTyperForPeriode = setOf(),
                 erIngenOverlappVedtaksperiodeToggelPå = false,
+                minimerteUtbetalingsperiodeDetaljer = emptyList()
+
             )
         )
 
@@ -257,8 +311,13 @@ class TriggesAvTest {
             triggesIkkeAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioIkkeUtvidet,
                 minimertEndretAndel = endretUtbetalingAndel,
-                ytelseTyperForPeriode = setOf(),
                 erIngenOverlappVedtaksperiodeToggelPå = true,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                    )
+                )
+
             )
         )
     }

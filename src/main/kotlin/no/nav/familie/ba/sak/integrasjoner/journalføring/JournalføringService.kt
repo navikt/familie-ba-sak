@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -13,7 +14,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournal
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.GENERELL_SAK
 import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -41,7 +42,7 @@ import javax.transaction.Transactional
 class JournalføringService(
     private val integrasjonClient: IntegrasjonClient,
     private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val journalføringRepository: JournalføringRepository,
     private val loggService: LoggService,
     private val stegService: StegService,
@@ -177,13 +178,43 @@ class JournalføringService(
         return sak.fagsakId ?: ""
     }
 
+    fun knyttJournalpostTilFagsakOgFerdigstillOppgave(
+        request: RestFerdigstillOppgaveKnyttJournalpost,
+        oppgaveId: Long
+    ): String {
+        val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
+
+        val journalpost = hentJournalpost(request.journalpostId)
+        journalpost.sak?.fagsakId
+
+        if (request.opprettOgKnyttTilNyBehandling) {
+            val nyBehandling =
+                opprettBehandlingOgEvtFagsakForJournalføring(
+                    personIdent = request.bruker.id,
+                    navIdent = request.navIdent,
+                    type = request.nyBehandlingstype,
+                    årsak = request.nyBehandlingsårsak,
+                    kategori = request.kategori,
+                    underkategori = request.underkategori,
+                    søknadMottattDato = request.datoMottatt?.toLocalDate()
+                )
+            tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
+        }
+
+        val (sak) = lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder, journalpost.journalpostId)
+
+        integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId)
+
+        return sak.fagsakId ?: ""
+    }
+
     fun lagreJournalpostOgKnyttFagsakTilJournalpost(
         tilknyttedeBehandlingIder: List<String>,
         journalpostId: String
     ): Pair<Sak, List<Behandling>> {
 
         val behandlinger = tilknyttedeBehandlingIder.map {
-            behandlingService.hent(it.toLong())
+            behandlingHentOgPersisterService.hent(it.toLong())
         }
 
         val journalpost = hentJournalpost(journalpostId)

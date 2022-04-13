@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.harPersonerSomManglerOpplysninger
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -96,7 +97,6 @@ fun Standardbegrunnelse.triggesForPeriode(
             minimertVedtaksperiode = minimertVedtaksperiode,
             utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
             erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
-            ytelseTyperForPeriode = ytelseTyperForPeriode,
         )
         triggesAv.gjelderFraInnvilgelsestidspunkt -> false
         else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
@@ -109,7 +109,6 @@ private fun erEndretTriggerErOppfylt(
     minimertVedtaksperiode: MinimertVedtaksperiode,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean,
-    ytelseTyperForPeriode: Set<YtelseType>
 ): Boolean {
     val endredeAndelerSomOverlapperVedtaksperiode = minimertVedtaksperiode
         .finnEndredeAndelerISammePeriode(minimerteEndredeUtbetalingAndeler)
@@ -119,8 +118,8 @@ private fun erEndretTriggerErOppfylt(
             triggesAv.erTriggereOppfyltForEndretUtbetaling(
                 utvidetScenario = utvidetScenarioForEndringsperiode,
                 minimertEndretAndel = it,
-                ytelseTyperForPeriode = ytelseTyperForPeriode,
                 erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
+                minimerteUtbetalingsperiodeDetaljer = minimertVedtaksperiode.utbetalingsperioder.map { it.tilMinimertUtbetalingsperiodeDetalj() }
             )
         }
 }

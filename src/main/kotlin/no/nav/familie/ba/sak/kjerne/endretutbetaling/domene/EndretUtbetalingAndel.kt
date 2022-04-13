@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.StandardbegrunnelseListConverter
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTriggereOppfyltForEndretUtbetaling
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.gamleEndretUtbetalingsperiodeBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
@@ -131,6 +132,7 @@ data class EndretUtbetalingAndel(
 
 enum class Årsak(val visningsnavn: String) {
     DELT_BOSTED("Delt bosted"),
+    ETTERBETALING_3ÅR("Etterbetaling 3 år"),
     ENDRE_MOTTAKER("Foreldrene bor sammen, endret mottaker"),
     ALLEREDE_UTBETALT("Allerede utbetalt"),
     EØS_SEKUNDÆRLAND("Eøs sekundærland");
@@ -184,7 +186,7 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
     val gyldigeBegrunnelser = Standardbegrunnelse.values()
         .filter { standardbegrunnelse ->
             standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
-        }
+        }.filter { gamleEndretUtbetalingsperiodeBegrunnelser.contains(it) }
         .filter { standardbegrunnelseer ->
             val sanityBegrunnelse = standardbegrunnelseer.tilSanityBegrunnelse(sanityBegrunnelser)
 
@@ -193,8 +195,8 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
                 triggesAv.erTriggereOppfyltForEndretUtbetaling(
                     utvidetScenario = utvidetScenarioForEndringsperiode,
                     minimertEndretAndel = this.tilMinimertEndretUtbetalingAndel(),
-                    ytelseTyperForPeriode = emptySet(),
-                    erIngenOverlappVedtaksperiodeToggelPå = false
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
+                    minimerteUtbetalingsperiodeDetaljer = emptyList()
                 )
             } else false
         }

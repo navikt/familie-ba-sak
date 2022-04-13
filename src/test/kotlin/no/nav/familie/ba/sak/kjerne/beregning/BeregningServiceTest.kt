@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -52,11 +52,11 @@ class BeregningServiceTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
-    private val behandlingService = mockk<BehandlingService>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
-    val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
+    private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -70,7 +70,7 @@ class BeregningServiceTest {
         beregningService = BeregningService(
             andelTilkjentYtelseRepository,
             fagsakService,
-            behandlingService,
+            behandlingHentOgPersisterService,
             tilkjentYtelseRepository,
             vilkårsvurderingRepository,
             behandlingRepository,
@@ -785,7 +785,7 @@ class BeregningServiceTest {
                 barn1AktørId
             )
         } returns listOf(aty)
-        every { behandlingService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
 
         return beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(
             behandling = behandling,

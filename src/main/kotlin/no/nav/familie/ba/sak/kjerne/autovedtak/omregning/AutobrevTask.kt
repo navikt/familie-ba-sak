@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -22,7 +22,7 @@ import java.time.LocalDate
 )
 class AutobrevTask(
     private val fagsakRepository: FagsakRepository,
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val opprettTaskService: OpprettTaskService
 ) : AsyncTaskStep {
 
@@ -45,7 +45,7 @@ class AutobrevTask(
     }
 
     private fun opprettTaskerForReduksjonSmåbarnstillegg() {
-        behandlingService.partitionByIverksatteBehandlinger {
+        behandlingHentOgPersisterService.partitionByIverksatteBehandlinger {
             fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
                 iverksatteLøpendeBehandlinger = it,
             )

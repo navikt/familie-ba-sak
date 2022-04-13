@@ -1,17 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.rest
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårsresultatDagTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.Tidslinjer
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårRegelverkResultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårsresultatDagTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import java.time.LocalDate
 
 fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
     val barnasTidslinjer = this.barnasTidslinjer()
-    val søkersTidslinjer = this.søkersTidslinje()
+    val søkersTidslinjer = this.søkersTidslinjer()
 
     return RestTidslinjer(
         barnasTidslinjer = barnasTidslinjer.entries.associate {
@@ -43,7 +43,7 @@ fun Tidslinje<Regelverk, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinje
     this.perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
-            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDate(),
+            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
             innhold = periode.innhold
         )
     }
@@ -75,6 +75,6 @@ data class RestTidslinjerForSøker(
 
 data class RestTidslinjePeriode<T>(
     val fraOgMed: LocalDate,
-    val tilOgMed: LocalDate,
+    val tilOgMed: LocalDate?,
     val innhold: T
 )

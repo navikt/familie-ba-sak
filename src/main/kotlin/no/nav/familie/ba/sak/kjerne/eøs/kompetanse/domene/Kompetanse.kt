@@ -9,6 +9,8 @@ import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -40,16 +42,23 @@ data class Kompetanse(
     )
     val barnAktører: Set<Aktør> = emptySet(),
 
-    @Transient
-    val søkersAktivitet: String? = null,
-    @Transient
-    val annenForeldersAktivitet: String? = null,
-    @Transient
+    @Enumerated(EnumType.STRING)
+    @Column(name = "soekers_aktivitet")
+    val søkersAktivitet: SøkersAktivitet? = null,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "annen_forelderes_aktivitet")
+    val annenForeldersAktivitet: AnnenForeldersAktivitet? = null,
+
+    @Column(name = "annen_forelderes_aktivitetsland")
+    val annenForeldersAktivitetsland: String? = null,
+
+    @Column(name = "barnets_bostedsland")
     val barnetsBostedsland: String? = null,
-    @Transient
-    val primærland: String? = null,
-    @Transient
-    val sekundærland: String? = null,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "resultat")
+    val resultat: KompetanseResultat? = null
 ) : BaseEntitet() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "kompetanse_seq_generator")
@@ -73,12 +82,12 @@ enum class KompetanseStatus {
     OK
 }
 
-fun Kompetanse.blankUt() = this.copy(
+fun Kompetanse.utenSkjema() = this.copy(
     søkersAktivitet = null,
     annenForeldersAktivitet = null,
+    annenForeldersAktivitetsland = null,
     barnetsBostedsland = null,
-    primærland = null,
-    sekundærland = null,
+    resultat = null
 )
 
 fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
@@ -88,5 +97,36 @@ fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
         this.barnAktører.containsAll(kompetanse.barnAktører)
 }
 
+enum class SøkersAktivitet {
+    ARBEIDER_I_NORGE,
+    SELVSTENDIG_NÆRINGSDRIVENDE,
+    MOTTAR_UTBETALING_FRA_NAV_SOM_ERSTATTER_LØNN,
+    UTSENDT_ARBEIDSTAKER_FRA_NORGE,
+    MOTTAR_UFØRETRYGD_FRA_NORGE,
+    MOTTAR_PENSJON_FRA_NORGE,
+    INAKTIV
+}
+
+enum class AnnenForeldersAktivitet {
+    I_ARBEID,
+    MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
+    FORSIKRET_I_BOSTEDSLAND,
+    MOTTAR_PENSJON,
+    INAKTIV,
+    IKKE_AKTUELT
+}
+
+enum class KompetanseResultat {
+    NORGE_ER_PRIMÆRLAND,
+    NORGE_ER_SEKUNDÆRLAND,
+    TO_PRIMÆRLAND
+}
+
 fun Kompetanse.bareSkjema() =
     this.copy(fom = null, tom = null, barnAktører = emptySet())
+
+fun Kompetanse.utenBarn() =
+    this.copy(barnAktører = emptySet())
+
+fun Kompetanse.utenPeriode() =
+    this.copy(fom = null, tom = null)

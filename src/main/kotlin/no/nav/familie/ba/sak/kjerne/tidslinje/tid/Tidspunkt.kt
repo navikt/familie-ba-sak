@@ -23,9 +23,9 @@ class Måned : Tidsenhet
 abstract class Tidspunkt<T : Tidsenhet> internal constructor(
     private val uendelighet: Uendelighet
 ) : Comparable<Tidspunkt<T>> {
-    abstract fun tilFørsteDagIMåneden(): DagTidspunkt
-    abstract fun tilSisteDagIMåneden(): DagTidspunkt
-    abstract fun tilInneværendeMåned(): MånedTidspunkt
+    abstract fun tilFørsteDagIMåneden(): Tidspunkt<Dag>
+    abstract fun tilSisteDagIMåneden(): Tidspunkt<Dag>
+    abstract fun tilInneværendeMåned(): Tidspunkt<Måned>
     abstract fun tilLocalDateEllerNull(): LocalDate?
     abstract fun tilLocalDate(): LocalDate
     abstract fun tilYearMonthEllerNull(): YearMonth?
@@ -67,6 +67,7 @@ abstract class Tidspunkt<T : Tidsenhet> internal constructor(
 
         fun med(dato: LocalDate) = DagTidspunkt(dato, Uendelighet.INGEN)
         fun med(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.INGEN)
+        fun med(år: Int, måned: Int) = MånedTidspunkt(YearMonth.of(år, måned), Uendelighet.INGEN)
     }
 
     // Betrakter to uendeligheter som like, selv underliggende tidspunkt kan være forskjellig
@@ -87,6 +88,13 @@ abstract class Tidspunkt<T : Tidsenhet> internal constructor(
             sammenliknMed(other)
 
     protected abstract fun sammenliknMed(tidspunkt: Tidspunkt<T>): Int
+
+    override fun equals(other: Any?): Boolean {
+        return if (other is Tidspunkt<*>) {
+            this.uendelighet != Uendelighet.INGEN && this.uendelighet == other.uendelighet
+        } else
+            super.equals(other)
+    }
 }
 
 fun <T : Tidsenhet> størsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =

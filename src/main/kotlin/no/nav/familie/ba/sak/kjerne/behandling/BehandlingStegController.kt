@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/behandlinger/{behandlingId}/steg")
 @ProtectedWithClaims(issuer = "azuread")
 class BehandlingStegController(
-    private val behandlingService: BehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val stegService: StegService,
     private val tilgangService: TilgangService,
@@ -51,7 +51,7 @@ class BehandlingStegController(
             handling = "registrere søknad"
         )
 
-        val behandling = behandlingService.hent(behandlingId = behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
         stegService.håndterSøknad(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -64,7 +64,7 @@ class BehandlingStegController(
             handling = "vurdere vilkårsvurdering"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         stegService.håndterVilkårsvurdering(behandling)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -77,7 +77,7 @@ class BehandlingStegController(
             handling = "validere behandlingsresultat"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val behandlingSteg: BehandlingsresultatSteg =
             stegService.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
 
@@ -100,7 +100,7 @@ class BehandlingStegController(
             handling = "vurdere behandlingsresultat"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         stegService.håndterBehandlingsresultat(behandling)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -116,7 +116,7 @@ class BehandlingStegController(
             handling = "vurdere tilbakekreving"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         stegService.håndterVurderTilbakekreving(behandling, restTilbakekreving)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -132,7 +132,7 @@ class BehandlingStegController(
             handling = "foreslå vedtak"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -148,7 +148,7 @@ class BehandlingStegController(
             handling = "iverksette vedtak"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -164,7 +164,7 @@ class BehandlingStegController(
             handling = "henlegge behandling"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         validerhenleggelsestype(
             henleggÅrsak = henleggInfo.årsak,

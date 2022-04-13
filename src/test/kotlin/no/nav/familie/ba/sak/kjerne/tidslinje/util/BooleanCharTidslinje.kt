@@ -1,19 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.hentUtsnitt
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
-class BooleanCharTidslinje<T : Tidsenhet>(
-    val charTidslinje: CharTidslinje<T>
-) : TidslinjeSomStykkerOppTiden<Boolean, T>(charTidslinje) {
-    constructor(tegn: String, startTidspunkt: Tidspunkt<T>) : this(CharTidslinje(tegn, startTidspunkt))
+fun <T : Tidsenhet> String.somBolskTidslinje(t: Tidspunkt<T>) = this.tilCharTidslinje(t).somBolsk()
 
-    override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>) =
-        when (charTidslinje.hentUtsnitt(tidspunkt)?.lowercaseChar()) {
-            't' -> true
-            'f' -> false
-            else -> null
-        }
+fun <T : Tidsenhet> Tidslinje<Char, T>.somBolsk() = this.map {
+    when (it?.lowercaseChar()) {
+        't' -> true
+        'f' -> false
+        else -> null
+    }
 }

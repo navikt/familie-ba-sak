@@ -4,7 +4,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
@@ -27,11 +28,9 @@ class BehandlingUtilsTest {
     fun `Skal velge ordinær ved FGB`() {
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
-            Behandlingutils.bestemUnderkategori(
-                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                nyBehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                løpendeUnderkategori = null
+            bestemUnderkategori(
+                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                underkategoriFraLøpendeBehandling = null,
             )
         )
     }
@@ -40,11 +39,33 @@ class BehandlingUtilsTest {
     fun `Skal velge utvidet ved FGB`() {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
-            Behandlingutils.bestemUnderkategori(
-                nyUnderkategori = BehandlingUnderkategori.UTVIDET,
-                nyBehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                løpendeUnderkategori = null
+            bestemUnderkategori(
+                overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
+                underkategoriFraLøpendeBehandling = null
+            )
+        )
+    }
+
+    @Test
+    fun `Skal velge utvidet når løpende er ordinær, og inneværende er utvidet`() {
+        assertEquals(
+            BehandlingUnderkategori.UTVIDET,
+            bestemUnderkategori(
+                overstyrtUnderkategori = null,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
+                underkategoriFraInneværendeBehandling = BehandlingUnderkategori.UTVIDET
+            )
+        )
+    }
+
+    @Test
+    fun `Skal beholde utvidet når løpende er utvidet, og ny er ordinær`() {
+        assertEquals(
+            BehandlingUnderkategori.UTVIDET,
+            bestemUnderkategori(
+                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET,
+                underkategoriFraInneværendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
     }
@@ -53,11 +74,9 @@ class BehandlingUtilsTest {
     fun `Skal velge utvidet ved RV når FGB er utvidet`() {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
-            Behandlingutils.bestemUnderkategori(
-                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                nyBehandlingType = BehandlingType.REVURDERING,
-                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET
+            bestemUnderkategori(
+                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET
             )
         )
     }
@@ -66,11 +85,9 @@ class BehandlingUtilsTest {
     fun `Skal velge ordinær ved RV når FGB er ordinær`() {
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
-            Behandlingutils.bestemUnderkategori(
-                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                nyBehandlingType = BehandlingType.REVURDERING,
-                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
+            bestemUnderkategori(
+                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
     }
@@ -79,11 +96,9 @@ class BehandlingUtilsTest {
     fun `Skal velge utvidet ved RV når FGB er ordinær`() {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
-            Behandlingutils.bestemUnderkategori(
-                nyUnderkategori = BehandlingUnderkategori.UTVIDET,
-                nyBehandlingType = BehandlingType.REVURDERING,
-                nyBehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
+            bestemUnderkategori(
+                overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
     }
@@ -92,20 +107,16 @@ class BehandlingUtilsTest {
     fun `Skal velge den løpende underkategorien ved 'endre migreringsdato'`() {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
-            Behandlingutils.bestemUnderkategori(
-                nyUnderkategori = null,
-                nyBehandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                nyBehandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET
+            bestemUnderkategori(
+                overstyrtUnderkategori = null,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET
             )
         )
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
-            Behandlingutils.bestemUnderkategori(
-                nyUnderkategori = null,
-                nyBehandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                nyBehandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
+            bestemUnderkategori(
+                overstyrtUnderkategori = null,
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
             )
         )
     }
@@ -136,7 +147,7 @@ class BehandlingUtilsTest {
             )
         )
 
-        val løpendeUndekategori = Behandlingutils.utledLøpendeUnderkategori(andelTilkjentYtelse)
+        val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
 
         assertEquals(BehandlingUnderkategori.UTVIDET, løpendeUndekategori)
     }
@@ -167,7 +178,7 @@ class BehandlingUtilsTest {
             )
         )
 
-        val løpendeUndekategori = Behandlingutils.utledLøpendeUnderkategori(andelTilkjentYtelse)
+        val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
 
         assertEquals(BehandlingUnderkategori.ORDINÆR, løpendeUndekategori)
     }
@@ -198,7 +209,7 @@ class BehandlingUtilsTest {
             )
         )
 
-        val løpendeUndekategori = Behandlingutils.utledLøpendeUnderkategori(andelTilkjentYtelse)
+        val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
 
         assertEquals(BehandlingUnderkategori.ORDINÆR, løpendeUndekategori)
     }

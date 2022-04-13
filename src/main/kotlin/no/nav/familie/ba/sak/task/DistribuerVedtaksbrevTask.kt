@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTask.Companion.TASK_STEP_TYPE
@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send vedtaksbrev til Dokdist", maxAntallFeil = 3)
 class DistribuerVedtaksbrevTask(
     private val stegService: StegService,
-    private val behandlingService: BehandlingService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val distribuerVedtaksbrevDTO = objectMapper.readValue(task.payload, DistribuerVedtaksbrevDTO::class.java)
 
-        val behandling = behandlingService.hent(distribuerVedtaksbrevDTO.behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(distribuerVedtaksbrevDTO.behandlingId)
         val distribuerDokumentDTO = DistribuerDokumentDTO(
             behandlingId = distribuerVedtaksbrevDTO.behandlingId,
             journalpostId = distribuerVedtaksbrevDTO.journalpostId,
@@ -29,7 +29,7 @@ class DistribuerVedtaksbrevTask(
             erManueltSendt = false
         )
         stegService.håndterDistribuerVedtaksbrev(
-            behandling = behandlingService.hent(distribuerVedtaksbrevDTO.behandlingId),
+            behandling = behandlingHentOgPersisterService.hent(distribuerVedtaksbrevDTO.behandlingId),
             distribuerDokumentDTO = distribuerDokumentDTO
         )
     }

@@ -39,6 +39,24 @@ class StatsborgerskapService(
         val grStatsborgerskap = ArrayList<GrStatsborgerskap>()
         var datoFra = statsborgerskap.hentFom()
 
+        if (datoFra == null && statsborgerskap.gyldigTilOgMed == null) {
+            val idag = LocalDate.now()
+            grStatsborgerskap += GrStatsborgerskap(
+                gyldigPeriode = DatoIntervallEntitet(
+                    fom = idag,
+                    tom = null
+                ),
+                landkode = statsborgerskap.land,
+                medlemskap = finnMedlemskap(
+                    statsborgerskap,
+                    alleEØSLandInkludertHistoriske,
+                    idag
+                ),
+                person = person
+            )
+            return grStatsborgerskap
+        }
+
         hentMedlemskapsIntervaller(
             alleEØSLandInkludertHistoriske,
             statsborgerskap.hentFom(),
