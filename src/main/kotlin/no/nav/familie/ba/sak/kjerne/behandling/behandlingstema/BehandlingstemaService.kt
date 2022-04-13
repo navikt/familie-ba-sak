@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -132,16 +131,14 @@ class BehandlingstemaService(
             behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsakId)
                 ?: return BehandlingUnderkategori.ORDINÆR
 
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
-            ?: return BehandlingUnderkategori.ORDINÆR
+        val erUtvidetVilkårBehandlet =
+            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
+                ?.personResultater
+                ?.flatMap { it.vilkårResultater }
+                ?.filter { it.behandlingId == aktivBehandling.id }
+                ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
-        val erUtvidetVilkårBehandlet = vilkårsvurdering.personResultater
-            .flatMap { it.vilkårResultater }
-            .filter { it.behandlingId == aktivBehandling.id }
-            .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-            .any { it.resultat == Resultat.OPPFYLT }
-
-        return if (erUtvidetVilkårBehandlet) {
+        return if (erUtvidetVilkårBehandlet == true) {
             BehandlingUnderkategori.UTVIDET
         } else {
             BehandlingUnderkategori.ORDINÆR
