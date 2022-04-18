@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
@@ -19,10 +21,12 @@ internal class TidslinjerTest {
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
 
-        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>()
+        val behandling = lagBehandling()
+
+        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>(behandling)
             .forPerson(søker, jan(2020))
-            .medVilkår("+++++++++++++++++++++", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("+++++++++++++++++++++", Vilkår.LOVLIG_OPPHOLD)
+            .medVilkår("EEEEEEEEEEEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("EEEEEEEEEEEEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
             .byggPerson()
         val søkerResult = " ++++++++++++++++++++".tilVilkårResultatTidslinje(jan(2020))
 
@@ -44,12 +48,9 @@ internal class TidslinjerTest {
             .byggPerson()
         val barn2Result = "  EE    EEEEEEEEEEEEE >".tilRegelverkTidslinje(jan(2020))
 
-        val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
         val tidslinjer = Tidslinjer(
-            vilkårsvurdering = vilkårsvurdering,
-            søkersFødselsdato = søker.fødselsdato,
-            yngsteBarnFødselsdato = maxOf(barn1.fødselsdato, barn2.fødselsdato),
-            barnOgFødselsdatoer = mapOf(barn1.aktør to barn1.fødselsdato, barn2.aktør to barn2.fødselsdato)
+            vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
         )
 
         assertEquals(søkerResult, tidslinjer.søkersTidslinjer().oppfyllerVilkårTidslinje)

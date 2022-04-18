@@ -17,9 +17,7 @@ class TidslinjeService(
 
         return Tidslinjer(
             vilkårsvurdering = vilkårsvurdering,
-            søkersFødselsdato = personopplysningGrunnlag.søker.fødselsdato,
-            yngsteBarnFødselsdato = personopplysningGrunnlag.yngsteBarnSinFødselsdato,
-            barnOgFødselsdatoer = personopplysningGrunnlag.barna.associate { it.aktør to it.fødselsdato }
+            personopplysningGrunnlag
         )
     }
 

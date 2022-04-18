@@ -40,7 +40,7 @@ fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUn
 }
 
 fun utledLøpendeKategori(
-    barnasTidslinjer: Map<Aktør, Tidslinjer.BarnetsTidslinjerTimeline>?,
+    barnasTidslinjer: Map<Aktør, Tidslinjer.BarnetsTidslinjer>?,
 ): BehandlingKategori {
     if (barnasTidslinjer == null) return BehandlingKategori.NASJONAL
 
