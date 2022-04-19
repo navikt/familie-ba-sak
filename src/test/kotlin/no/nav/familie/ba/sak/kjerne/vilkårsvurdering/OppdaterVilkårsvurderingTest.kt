@@ -242,7 +242,8 @@ class OppdaterVilkårsvurderingTest {
         val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivMedUtvidetVilkår,
-            forrigeBehandlingVilkårsvurdering = aktivMedUtvidetVilkår
+            forrigeBehandlingVilkårsvurdering = aktivMedUtvidetVilkår,
+            løpendeUnderkategori = BehandlingUnderkategori.UTVIDET
         )
 
         val nyInitInnholderUtvidetVilkår =
