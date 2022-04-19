@@ -116,6 +116,8 @@ data class UtvidetBarnetrygdGenerator(
         )
     }
 
+    data class PeriodeData(val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
+
     private fun skalUtvidetAndelerSlåsSammen(
         førsteAndel: AndelTilkjentYtelse,
         nesteAndel: AndelTilkjentYtelse
@@ -190,8 +192,6 @@ data class UtvidetBarnetrygdGenerator(
                     )
                 }
             }.toList()
-
-    data class PeriodeData(val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
 
     private fun kombinerTidslinjer(
         sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
