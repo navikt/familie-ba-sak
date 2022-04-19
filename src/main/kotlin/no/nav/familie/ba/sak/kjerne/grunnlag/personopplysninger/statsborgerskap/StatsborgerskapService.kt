@@ -213,8 +213,8 @@ class StatsborgerskapService(
         fra: LocalDate?,
         til: LocalDate?
     ): List<DatoIntervallEntitet> {
-        val filtrerteEndringsdatoer = medlemsland.flatMap {
-            listOf(it.gyldigFra, it.gyldigTil)
+        val filtrerteEndringsdatoerMedlemskap = medlemsland.flatMap {
+            listOf(it.gyldigFra, it.gyldigTil.plusDays(1))
         }.filter { datoForEndringIMedlemskap ->
             erInnenforDatoerSomBetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
         }
