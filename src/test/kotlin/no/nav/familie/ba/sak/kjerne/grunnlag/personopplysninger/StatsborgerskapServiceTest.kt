@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnNåværendeMedlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnSterkesteMedlemskap
-import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -179,55 +178,5 @@ internal class StatsborgerskapServiceTest {
             Medlemskap.TREDJELANDSBORGER,
             grStatsborgerskapUnderBrexit.sortedBy { it.gyldigPeriode?.fom }.last().medlemskap
         )
-    }
-
-    @Test
-    fun `Ny og gammel metode skal returnere det samme`() {
-        val sb1 = Statsborgerskap(
-            "GBR",
-            gyldigFraOgMed = null, // LocalDate.of(1989, 3, 1),
-            gyldigTilOgMed = LocalDate.of(2020, 5, 1),
-            bekreftelsesdato = null
-        )
-        val nySb1 = statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-            statsborgerskap = sb1,
-            person = lagPerson()
-        )
-        val gammelSb1 = statsborgerskapService.gammelHentStatsborgerskapMedMedlemskap(
-            statsborgerskap = sb1,
-            person = lagPerson()
-        )
-        println(nySb1.map { it.gyldigPeriode })
-        println(gammelSb1.map { it.gyldigPeriode })
-        assertEquals(nySb1.first().medlemskap, gammelSb1.first().medlemskap)
-        assertEquals(nySb1.last().medlemskap, gammelSb1.last().medlemskap)
-    }
-
-    @Test
-    fun `Skal lage riktige perioder`() {
-        val jan1900 = LocalDate.of(1900, 1, 1)
-        val jan1989 = LocalDate.of(1989, 1, 1)
-
-        val des2009 = LocalDate.of(2009, 12, 1)
-        val jan2021 = LocalDate.of(2021, 1, 1)
-
-        val betydningGBR = BetydningDto(jan1900, des2009, mapOf())
-        val medGyldigeDatoerGBR = statsborgerskapService.testHentMedlemskapsIntervaller(
-            listOf(betydningGBR),
-            jan1989,
-            jan2021
-        )
-        assertEquals(
-            DatoIntervallEntitet(jan1989, des2009),
-            medGyldigeDatoerGBR.first()
-        )
-        assertEquals(DatoIntervallEntitet(des2009, jan2021), medGyldigeDatoerGBR.last())
-
-        val ugyldigeDatoer = statsborgerskapService.testHentMedlemskapsIntervaller(
-            listOf(betydningGBR),
-            null,
-            jan2021
-        )
-        assertEquals(DatoIntervallEntitet(null, des2009), ugyldigeDatoer.first())
     }
 }
