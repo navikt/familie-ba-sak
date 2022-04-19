@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
+import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -121,9 +122,10 @@ class PersongrunnlagService(
             målform = personopplysningGrunnlag.søker.målform
         )
 
-        val barnLagtTil = oppdatertGrunnlag.barna.singleOrNull { nyttbarnAktør == it.aktør }
-            ?: throw Feil("Nytt barn ikke lagt til i personopplysningsgrunnlag ${personopplysningGrunnlag.id}")
-        loggService.opprettBarnLagtTilLogg(behandling, barnLagtTil)
+        oppdatertGrunnlag.barna.singleOrNull { nyttbarnAktør == it.aktør }?.also { loggService.opprettBarnLagtTilLogg(behandling, it) } ?: run {
+            secureLogger.info("Klarte ikke legge til barn med aktør $nyttbarnAktør på personopplysningsgrunnlag ${personopplysningGrunnlag.id}")
+            throw Feil("Nytt barn ikke lagt til i personopplysningsgrunnlag ${personopplysningGrunnlag.id}. Se securelog for mer informasjon.")
+        }
     }
 
     fun finnNyeBarn(behandling: Behandling, forrigeBehandling: Behandling?): List<Person> {

@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer
+package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje

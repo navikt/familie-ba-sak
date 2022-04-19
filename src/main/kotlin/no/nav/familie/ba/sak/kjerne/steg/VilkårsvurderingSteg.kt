@@ -88,8 +88,6 @@ class VilkårsvurderingSteg(
 
         behandlingstemaService.oppdaterBehandlingstema(
             behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
-            nyKategori = null,
-            nyUnderkategori = null
         )
 
         return hentNesteStegForNormalFlyt(behandling)

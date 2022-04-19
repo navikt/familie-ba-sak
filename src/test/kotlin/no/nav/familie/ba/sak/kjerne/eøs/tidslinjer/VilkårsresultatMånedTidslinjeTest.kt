@@ -1,10 +1,8 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje
+package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.VilkårsresultatDagTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.tilVilkårsresultaterMånedTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

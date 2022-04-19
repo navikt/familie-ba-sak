@@ -105,6 +105,13 @@ data class DagTidspunkt internal constructor(
         return dato.compareTo(tidspunkt.tilLocalDate())
     }
 
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is DagTidspunkt -> compareTo(other) == 0
+            else -> super.equals(other)
+        }
+    }
+
     companion object {
         fun nå() = DagTidspunkt(LocalDate.now(), Uendelighet.INGEN)
     }
