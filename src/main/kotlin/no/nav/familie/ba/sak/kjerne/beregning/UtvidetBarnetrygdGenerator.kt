@@ -156,8 +156,8 @@ data class UtvidetBarnetrygdGenerator(
         return LocalDateTimeline(barnasSegmenterSlåttSammenHvisLikProsent)
     }
 
-    private fun slåSammenEtterfølgendeSegmenterMedLikProsent(sammenlagtTidslinjeForBarna: LocalDateTimeline<List<PeriodeData>>) =
-        sammenlagtTidslinjeForBarna.toSegments()
+    private fun slåSammenEtterfølgendeSegmenterMedLikProsent(sammenlagtTidslinjeForBarna: LocalDateTimeline<List<PeriodeData>>): List<LocalDateSegment<List<PeriodeData>>> {
+        return sammenlagtTidslinjeForBarna.toSegments()
             .fold(mutableListOf<LocalDateSegment<List<PeriodeData>>>()) { sammenslåttePerioder, nestePeriode ->
                 val sistePeriodeSomErSammenslått = sammenslåttePerioder.lastOrNull()
                 if (sistePeriodeSomErSammenslått?.tom?.toYearMonth() == nestePeriode.fom.forrigeMåned() && sistePeriodeSomErSammenslått.value.maxOf { it.prosent } == nestePeriode.value.maxOf { it.prosent }) {
@@ -192,6 +192,7 @@ data class UtvidetBarnetrygdGenerator(
                     )
                 }
             }.toList()
+    }
 
     private fun kombinerTidslinjer(
         sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
