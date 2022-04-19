@@ -63,7 +63,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.extension.ExtendWith
 import java.nio.charset.Charset
 import java.time.LocalDate
@@ -468,11 +467,13 @@ internal class SaksstatistikkServiceTest(
                     aarsak = settPåVentÅrsak
                 ),
             )
-            assertDoesNotThrow {
+            try {
                 validerJsonMotSchema(
                     sakstatistikkObjectMapper.writeValueAsString(behandlingDVH),
                     "/schema/behandling-schema.json"
                 )
+            } catch (e: Exception) {
+                throw IllegalStateException("Skjema til saksstatistikk validerer ikke etter endringer blant enum-verdier. Sjekk feilmelding og oppdater enten enum til å passe skjema eller skjema til å passe enum.", e)
             }
         }
     }
@@ -495,11 +496,13 @@ internal class SaksstatistikkServiceTest(
                 versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
                 bostedsland = "NO",
             )
-            assertDoesNotThrow {
+            try {
                 validerJsonMotSchema(
                     sakstatistikkObjectMapper.writeValueAsString(sakDvh),
                     "/schema/sak-schema.json"
                 )
+            } catch (e: Exception) {
+                throw IllegalStateException("Skjema til saksstatistikk validerer ikke etter endringer blant enum-verdier. Sjekk feilmelding og oppdater enten enum til å passe skjema eller skjema til å passe enum.", e)
             }
         }
     }
