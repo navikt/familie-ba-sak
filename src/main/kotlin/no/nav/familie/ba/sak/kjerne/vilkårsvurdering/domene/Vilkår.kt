@@ -81,10 +81,10 @@ enum class Vilkår(
         }
     }
 
-    fun defaultRegelverk(personResultat: PersonResultat): Regelverk? {
+    fun defaultRegelverk(behandlingKategori: BehandlingKategori): Regelverk? {
         return when (this) {
             BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD, UTVIDET_BARNETRYGD -> {
-                if (personResultat.vilkårsvurdering.behandling.kategori == BehandlingKategori.EØS)
+                if (behandlingKategori == BehandlingKategori.EØS)
                     Regelverk.EØS_FORORDNINGEN else Regelverk.NASJONALE_REGLER
             }
             UNDER_18_ÅR, GIFT_PARTNERSKAP -> null
