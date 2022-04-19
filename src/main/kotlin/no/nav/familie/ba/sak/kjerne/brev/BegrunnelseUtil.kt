@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
@@ -96,9 +97,13 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 private fun hentPersonerForEndretUtbetalingBegrunnelse(triggesAv: TriggesAv, endredeUtbetalingAndelerSomOverlapperMedPeriode: List<MinimertRestEndretAndel>, minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>): List<String> {
     val personerMedRiktigTypeEndringer = endredeUtbetalingAndelerSomOverlapperMedPeriode.filter { triggesAv.endringsaarsaker.contains(it.årsak) }.map { it.personIdent }
     return minimerteUtbetalingsperiodeDetaljer.filter { it.erPåvirketAvEndring }.filter {
-        if (triggesAv.endretUtbetalingSkalUtbetales) {
-            it.utbetaltPerMnd > 0
-        } else it.utbetaltPerMnd == 0
+        when (triggesAv.endretUtbetalingSkalUtbetales) {
+            EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT -> true
+            EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES -> {
+                it.utbetaltPerMnd > 0
+            }
+            EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES -> it.utbetaltPerMnd == 0
+        }
     }.map { it.person.personIdent }.filter { personerMedRiktigTypeEndringer.contains(it) }
 }
 /**
