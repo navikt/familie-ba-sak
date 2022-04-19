@@ -217,14 +217,14 @@ class StatsborgerskapService(
             listOf(it.gyldigFra, it.gyldigTil.plusDays(1))
         }.filter { datoForEndringIMedlemskap ->
             erInnenforDatoerSomBetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
+        }.filter { datoForEndringIMedlemskap ->
+            (fra == null || datoForEndringIMedlemskap.isAfter(fra)) &&
+                (til == null || datoForEndringIMedlemskap.isBefore(til))
         }
 
-        return listOf(
-            fra,
-            filtrerteEndringsdatoer.first(),
-            filtrerteEndringsdatoer.lastOrNull(),
-            til
-        ).filterNotNull().windowed(2, 1)
+        val endringsDatoerMedlemskapOgStatsborgerskap = listOf(fra) + filtrerteEndringsdatoerMedlemskap + listOf(til)
+
+        return endringsDatoerMedlemskapOgStatsborgerskap.windowed(2, 1)
             .map { DatoIntervallEntitet(it[0], it[1]) }
     }
 
