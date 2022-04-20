@@ -81,7 +81,6 @@ class BehandlingsresultatSteg(
         validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler)
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndelerMedÅrsakDeltBosted = endretUtbetalingAndeler.filter { it.årsak == Årsak.DELT_BOSTED })
-
     }
 
     @Transactional
