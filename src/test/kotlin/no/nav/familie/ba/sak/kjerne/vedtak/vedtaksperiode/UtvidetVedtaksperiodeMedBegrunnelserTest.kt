@@ -84,7 +84,6 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
-                erIngenOverlappVedtaksperiodeTogglePå = false,
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -151,7 +150,6 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
                 andelerTilkjentYtelse,
-                erIngenOverlappVedtaksperiodeTogglePå = false,
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -237,7 +235,6 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
                 andelerTilkjentYtelse,
-                erIngenOverlappVedtaksperiodeTogglePå = false,
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)

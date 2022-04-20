@@ -53,8 +53,8 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv,
-                erIngenOverlappVedtaksperiodeTogglePå = true,
+                begrunnelseTriggere = triggesAv,
+
             )
         )
         Assertions.assertTrue(
@@ -62,8 +62,8 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatIkkeOppfyltDelvisOverlapp.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv,
-                erIngenOverlappVedtaksperiodeTogglePå = true,
+                begrunnelseTriggere = triggesAv,
+
             )
         )
     }
@@ -75,8 +75,8 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = false,
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv,
-                erIngenOverlappVedtaksperiodeTogglePå = true,
+                begrunnelseTriggere = triggesAv,
+
             )
         )
     }
@@ -88,8 +88,8 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv,
-                erIngenOverlappVedtaksperiodeTogglePå = true,
+                begrunnelseTriggere = triggesAv,
+
             )
         )
     }
@@ -101,8 +101,8 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatUtenforPeriode.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv,
-                erIngenOverlappVedtaksperiodeTogglePå = true,
+                begrunnelseTriggere = triggesAv,
+
             )
         )
     }

@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
-import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -24,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtakspe
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.harBarnMedSeksårsdagPåFom
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -38,8 +36,6 @@ fun Standardbegrunnelse.triggesForPeriode(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
-    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
 
     val triggesAv = this.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
@@ -62,9 +58,8 @@ fun Standardbegrunnelse.triggesForPeriode(
         ),
         oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
         aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
-        triggesAv = triggesAv,
+        begrunnelseTriggere = triggesAv,
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-        erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeToggelPå,
     )
 
     return when {
@@ -83,7 +78,7 @@ fun Standardbegrunnelse.triggesForPeriode(
             minimertePersoner.harBarnMedSeksårsdagPåFom(minimertVedtaksperiode.fom)
         triggesAv.satsendring -> fomErPåSatsendring(minimertVedtaksperiode.fom ?: TIDENES_MORGEN)
 
-        triggesAv.etterEndretUtbetaling && minimertVedtaksperiode.type != Vedtaksperiodetype.ENDRET_UTBETALING ->
+        triggesAv.etterEndretUtbetaling ->
             erEtterEndretPeriodeAvSammeÅrsak(
                 minimerteEndredeUtbetalingAndeler,
                 minimertVedtaksperiode,
@@ -92,11 +87,9 @@ fun Standardbegrunnelse.triggesForPeriode(
             )
 
         triggesAv.erEndret() && !triggesAv.etterEndretUtbetaling -> erEndretTriggerErOppfylt(
-            triggesAv = triggesAv,
+            begrunnelseTriggere = triggesAv,
             minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
             minimertVedtaksperiode = minimertVedtaksperiode,
-            utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
-            erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
         )
         triggesAv.gjelderFraInnvilgelsestidspunkt -> false
         else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
@@ -104,36 +97,32 @@ fun Standardbegrunnelse.triggesForPeriode(
 }
 
 private fun erEndretTriggerErOppfylt(
-    triggesAv: TriggesAv,
+    begrunnelseTriggere: BegrunnelseTriggere,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
-    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
     val endredeAndelerSomOverlapperVedtaksperiode = minimertVedtaksperiode
         .finnEndredeAndelerISammePeriode(minimerteEndredeUtbetalingAndeler)
 
-    return (erIngenOverlappVedtaksperiodeToggelPå || minimertVedtaksperiode.type == Vedtaksperiodetype.ENDRET_UTBETALING) &&
-        endredeAndelerSomOverlapperVedtaksperiode.any {
-            triggesAv.erTriggereOppfyltForEndretUtbetaling(
-                utvidetScenario = utvidetScenarioForEndringsperiode,
-                minimertEndretAndel = it,
-                erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
-                minimerteUtbetalingsperiodeDetaljer = minimertVedtaksperiode.utbetalingsperioder.map { it.tilMinimertUtbetalingsperiodeDetalj() }
-            )
-        }
+    return endredeAndelerSomOverlapperVedtaksperiode.any { minimertEndretAndel ->
+        begrunnelseTriggere.erTriggereOppfyltForEndretUtbetaling(
+            minimertEndretAndel = minimertEndretAndel,
+            minimerteUtbetalingsperiodeDetaljer = minimertVedtaksperiode
+                .utbetalingsperioder.map { it.tilMinimertUtbetalingsperiodeDetalj() }
+        )
+    }
 }
 
 private fun erEtterEndretPeriodeAvSammeÅrsak(
     endretUtbetalingAndeler: List<MinimertEndretAndel>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
     aktuellePersoner: List<MinimertPerson>,
-    triggesAv: TriggesAv
+    begrunnelseTriggere: BegrunnelseTriggere
 ) = endretUtbetalingAndeler.any { endretUtbetalingAndel ->
     endretUtbetalingAndel.månedPeriode().tom.sisteDagIInneværendeMåned()
         .erDagenFør(minimertVedtaksperiode.fom) &&
         aktuellePersoner.any { person -> person.aktørId == endretUtbetalingAndel.aktørId } &&
-        triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
+        begrunnelseTriggere.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }
 
 private val logger = LoggerFactory.getLogger(Standardbegrunnelse::class.java)
@@ -152,11 +141,10 @@ fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map 
 
 fun Standardbegrunnelse.tilVedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Vedtaksbegrunnelse {
     if (!vedtaksperiodeMedBegrunnelser
         .type
-        .tillatteBegrunnelsestyper(erIngenOverlappVedtaksperiodeToggelPå)
+        .tillatteBegrunnelsestyper
         .contains(this.vedtakBegrunnelseType)
     ) {
         throw Feil(

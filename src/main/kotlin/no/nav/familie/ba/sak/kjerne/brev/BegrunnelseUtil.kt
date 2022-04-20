@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.harPersonerSomManglerOpplysninge
 import no.nav.familie.ba.sak.kjerne.brev.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BegrunnelseTriggere
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
@@ -19,14 +19,13 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun hentPersonidenterGjeldendeForBegrunnelse(
-    triggesAv: TriggesAv,
+    begrunnelseTriggere: BegrunnelseTriggere,
     periode: NullablePeriode,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     vedtaksperiodetype: Vedtaksperiodetype,
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     identerMedUtbetalingPåPeriode: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
     identerMedReduksjonPåPeriode: List<String> = emptyList(),
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
 ): Set<String> {
@@ -49,58 +48,69 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             vedtakBegrunnelseType,
             identerMedUtbetalingPåPeriode
         ),
-        triggesAv = triggesAv,
+        begrunnelseTriggere = begrunnelseTriggere,
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-        erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
     ).map { person -> person.personIdent }
 
     return when {
-        (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg) && !erEndretUtbetalingBegrunnelse ->
+        (begrunnelseTriggere.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || begrunnelseTriggere.småbarnstillegg) && !erEndretUtbetalingBegrunnelse ->
             hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
                 identerMedUtbetaling = identerMedUtbetalingPåPeriode,
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 periode = periode,
             ) + when {
-                triggesAv.vilkår.any { it != Vilkår.UTVIDET_BARNETRYGD } -> hentPersonerForUtgjørendeVilkår()
+                begrunnelseTriggere.vilkår.any { it != Vilkår.UTVIDET_BARNETRYGD } -> hentPersonerForUtgjørendeVilkår()
                 else -> emptyList()
             }
 
-        triggesAv.barnMedSeksårsdag ->
+        begrunnelseTriggere.barnMedSeksårsdag ->
             restBehandlingsgrunnlagForBrev.personerPåBehandling.barnMedSeksårsdagPåFom(periode.fom)
                 .map { person -> person.personIdent }
 
-        triggesAv.personerManglerOpplysninger ->
+        begrunnelseTriggere.personerManglerOpplysninger ->
             if (restBehandlingsgrunnlagForBrev.minimertePersonResultater.harPersonerSomManglerOpplysninger())
                 emptyList()
             else
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
         erFortsattInnvilgetBegrunnelse -> identerMedUtbetalingPåPeriode
-        erEndretUtbetalingBegrunnelse -> if (erIngenOverlappVedtaksperiodeTogglePå) hentPersonerForEndretUtbetalingBegrunnelse(
-            triggesAv = triggesAv,
-            endredeUtbetalingAndelerSomOverlapperMedPeriode = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler.filter { it.erOverlappendeMed(nullableMånedPeriode = periode.tilNullableMånedPeriode()) },
+        erEndretUtbetalingBegrunnelse -> hentPersonerForEndretUtbetalingBegrunnelse(
+            begrunnelseTriggere = begrunnelseTriggere,
+            endredeUtbetalingAndelerSomOverlapperMedPeriode = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler.filter {
+                it.erOverlappendeMed(
+                    nullableMånedPeriode = periode.tilNullableMånedPeriode()
+                )
+            },
             minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
-        ) else identerMedUtbetalingPåPeriode
+        )
         erUtbetalingMedReduksjonFraSistIverksatteBehandling -> identerMedReduksjonPåPeriode
 
-        triggesAv.etterEndretUtbetaling ->
+        begrunnelseTriggere.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(
                 minimerteEndredeUtbetalingAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
                 fom = periode.fom,
-                endringsaarsaker = triggesAv.endringsaarsaker
+                endringsaarsaker = begrunnelseTriggere.endringsaarsaker
             )
 
         else -> hentPersonerForUtgjørendeVilkår()
     }.toSet()
 }
-private fun hentPersonerForEndretUtbetalingBegrunnelse(triggesAv: TriggesAv, endredeUtbetalingAndelerSomOverlapperMedPeriode: List<MinimertRestEndretAndel>, minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>): List<String> {
-    val personerMedRiktigTypeEndringer = endredeUtbetalingAndelerSomOverlapperMedPeriode.filter { triggesAv.endringsaarsaker.contains(it.årsak) }.map { it.personIdent }
+
+private fun hentPersonerForEndretUtbetalingBegrunnelse(
+    begrunnelseTriggere: BegrunnelseTriggere,
+    endredeUtbetalingAndelerSomOverlapperMedPeriode: List<MinimertRestEndretAndel>,
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
+): List<String> {
+    val personerMedRiktigTypeEndringer =
+        endredeUtbetalingAndelerSomOverlapperMedPeriode.filter { begrunnelseTriggere.endringsaarsaker.contains(it.årsak) }
+            .map { it.personIdent }
     return minimerteUtbetalingsperiodeDetaljer.filter { it.erPåvirketAvEndring }.filter {
-        if (triggesAv.endretUtbetalingSkalUtbetales) {
+        if (begrunnelseTriggere.endretUtbetalingSkalUtbetales) {
             it.utbetaltPerMnd > 0
         } else it.utbetaltPerMnd == 0
     }.map { it.person.personIdent }.filter { personerMedRiktigTypeEndringer.contains(it) }
 }
+
 /**
  * Selv om utvidet kun gjelder for søker ønsker vi å si noe om hvilke barn søker får utvidet for.
  * Dette vil være alle barn med utbetaling og alle barn med endret utbetaling i samme periode.

@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
@@ -38,7 +37,6 @@ data class BrevPeriodeTestConfig(
 
     val personerPåBehandling: List<BrevPeriodeTestPerson>,
 
-    val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     val uregistrerteBarn: List<MinimertUregistrertBarn>,
     val erFørsteVedtaksperiodePåFagsak: Boolean = false,
     val brevMålform: Målform,
@@ -178,6 +176,6 @@ data class BrevBegrunnelseGrunnlagConfig(
 ) {
     fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BrevBegrunnelseGrunnlag(
         standardbegrunnelse = this.standardbegrunnelse,
-        triggesAv = this.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
+        begrunnelseTriggere = this.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
     )
 }

@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -16,238 +14,16 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BegrunnelseTriggere
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.YearMonth
 
 class VedtaksperiodeServiceUtilsTest {
-    @Test
-    fun `skal slå sammen endrede utbetalingsandeler med samme prosent som overlapper`() {
-        val person1 = lagPerson()
-        val person2 = lagPerson()
-        val fom = YearMonth.now().minusMonths(1)
-        val tom = YearMonth.now()
-
-        val andelTilkjentYtelser =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    person = person1,
-                    fom = fom,
-                    tom = tom,
-                    prosent = BigDecimal(0),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person1,
-                            fom = fom,
-                            tom = tom,
-                            standardbegrunnelser = listOf(
-                                Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
-                            )
-                        )
-                    )
-                ),
-                lagAndelTilkjentYtelse(
-                    person = person2,
-                    fom = fom,
-                    tom = tom,
-                    prosent = BigDecimal(0),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person2,
-                            fom = fom,
-                            tom = tom,
-                            standardbegrunnelser = listOf(
-                                Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
-                            )
-                        )
-                    )
-                )
-            )
-        val vedtak = lagVedtak()
-        val endredeUtbetalingsperioderMedBegrunnelser =
-            hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
-                vedtak = vedtak,
-                andelerTilkjentYtelse = andelTilkjentYtelser
-            )
-
-        Assertions.assertEquals(1, endredeUtbetalingsperioderMedBegrunnelser.size)
-    }
-
-    @Test
-    fun `Skal ikke slå sammen endrede utbetalingsperioder som overlapper, men har ulik prosent`() {
-        val person1 = lagPerson()
-        val person2 = lagPerson()
-        val fom = YearMonth.now().minusMonths(1)
-        val tom = YearMonth.now()
-
-        val andelTilkjentYtelser =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    person = person1,
-                    fom = fom,
-                    tom = tom,
-                    prosent = BigDecimal(100),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person1,
-                            fom = fom,
-                            tom = tom,
-                            standardbegrunnelser = listOf(
-                                Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
-                            )
-                        )
-                    )
-                ),
-                lagAndelTilkjentYtelse(
-                    person = person2,
-                    fom = fom,
-                    tom = tom,
-                    prosent = BigDecimal(0),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person2,
-                            fom = fom,
-                            tom = tom,
-                            standardbegrunnelser = listOf(
-                                Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
-                            )
-                        )
-                    )
-                )
-            )
-        val vedtak = lagVedtak()
-        val endredeUtbetalingsperioderMedBegrunnelser =
-            hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
-                vedtak = vedtak,
-                andelerTilkjentYtelse = andelTilkjentYtelser
-            )
-
-        Assertions.assertEquals(2, endredeUtbetalingsperioderMedBegrunnelser.size)
-    }
-
-    @Test
-    fun `skal ikke slå sammen endrede utbetalingsandeler med ulik fom og tom`() {
-        val person1 = lagPerson()
-        val person2 = lagPerson()
-        val fom = YearMonth.now().minusMonths(1)
-        val tom = YearMonth.now()
-
-        val andelTilkjentYtelser =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    person = person1,
-                    fom = fom,
-                    tom = tom,
-                    prosent = BigDecimal(0),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person1,
-                            fom = fom,
-                            tom = tom,
-                            standardbegrunnelser = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
-                        )
-                    )
-                ),
-                lagAndelTilkjentYtelse(
-                    person = person2,
-                    fom = fom.minusMonths(2),
-                    tom = tom.minusMonths(2),
-                    prosent = BigDecimal(0),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person2,
-                            fom = fom.minusMonths(2),
-                            tom = tom.minusMonths(2),
-                            standardbegrunnelser = listOf(Standardbegrunnelse.AVSLAG_BOR_HOS_SØKER)
-                        )
-                    )
-                )
-            )
-
-        val vedtak = lagVedtak()
-        val endredeUtbetalingsperioderMedBegrunnelser = hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
-            vedtak = vedtak,
-            andelerTilkjentYtelse = andelTilkjentYtelser
-        )
-
-        Assertions.assertEquals(2, endredeUtbetalingsperioderMedBegrunnelser.size)
-    }
-
-    @Test
-    fun `Skal slå sammen endrede utbetalingsperioder med samme prosent som delvis overlapper`() {
-        val person1 = lagPerson()
-        val person2 = lagPerson()
-        val fom = YearMonth.now().minusMonths(1)
-        val tom = YearMonth.now()
-
-        val andelTilkjentYtelser =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    person = person1,
-                    fom = fom,
-                    tom = tom,
-                    prosent = BigDecimal(0),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person1,
-                            fom = fom,
-                            tom = tom,
-                            standardbegrunnelser = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
-                        )
-                    )
-                ),
-                lagAndelTilkjentYtelse(
-                    person = person2,
-                    fom = fom,
-                    tom = tom.plusMonths(2),
-                    prosent = BigDecimal(0),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person2,
-                            fom = fom,
-                            tom = tom.plusMonths(2),
-                            standardbegrunnelser = listOf(Standardbegrunnelse.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
-                        )
-                    )
-                )
-            )
-        val vedtak = lagVedtak()
-        val endredeUtbetalingsperioderMedBegrunnelser =
-            hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
-                vedtak = vedtak,
-                andelerTilkjentYtelse = andelTilkjentYtelser
-            ).sortedBy { it.fom }
-
-        Assertions.assertEquals(2, endredeUtbetalingsperioderMedBegrunnelser.size)
-
-        Assertions.assertEquals(
-            fom,
-            endredeUtbetalingsperioderMedBegrunnelser.first().fom!!.toYearMonth()
-        )
-
-        Assertions.assertEquals(
-            tom,
-            endredeUtbetalingsperioderMedBegrunnelser.first().tom!!.toYearMonth()
-        )
-
-        Assertions.assertEquals(
-            tom.plusMonths(1),
-            endredeUtbetalingsperioderMedBegrunnelser.last().fom!!.toYearMonth()
-        )
-
-        Assertions.assertEquals(
-            tom.plusMonths(2),
-            endredeUtbetalingsperioderMedBegrunnelser.last().tom!!.toYearMonth()
-        )
-    }
 
     @Test
     fun `Skal legge til alle barn med utbetaling ved utvidet barnetrygd`() {
@@ -257,7 +33,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn))
-        val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
+        val begrunnelseTriggere = BegrunnelseTriggere(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
             behandling = behandling,
@@ -266,7 +42,7 @@ class VedtaksperiodeServiceUtilsTest {
         val identerMedUtbetaling = listOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer())
 
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
-            triggesAv = triggesAv,
+            begrunnelseTriggere = begrunnelseTriggere,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
             periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
@@ -277,7 +53,7 @@ class VedtaksperiodeServiceUtilsTest {
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
-            erIngenOverlappVedtaksperiodeTogglePå = true,
+
             minimerteUtbetalingsperiodeDetaljer = listOf()
         )
 
@@ -301,7 +77,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn2))
-        val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
+        val begrunnelseTriggere = BegrunnelseTriggere(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
             behandling = behandling,
@@ -318,7 +94,7 @@ class VedtaksperiodeServiceUtilsTest {
         )
 
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
-            triggesAv = triggesAv,
+            begrunnelseTriggere = begrunnelseTriggere,
             periode = NullablePeriode(fom, tom),
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
@@ -330,7 +106,7 @@ class VedtaksperiodeServiceUtilsTest {
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
-            erIngenOverlappVedtaksperiodeTogglePå = true,
+
             minimerteUtbetalingsperiodeDetaljer = listOf()
         )
 

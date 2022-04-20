@@ -1216,13 +1216,20 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     override val kanDelesOpp: Boolean = false
 }
 
-fun Standardbegrunnelse.delOpp(restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev, triggesAv: TriggesAv, periode: NullablePeriode): List<BrevBegrunnelseGrunnlagMedPersoner> {
+fun Standardbegrunnelse.delOpp(
+    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
+    begrunnelseTriggere: BegrunnelseTriggere,
+    periode: NullablePeriode
+): List<BrevBegrunnelseGrunnlagMedPersoner> {
     if (!this.kanDelesOpp) {
         throw Feil("Begrunnelse $this kan ikke deles opp.")
     }
     return when (this) {
         Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING -> {
-            val deltBostedEndringsperioder = this.hentRelevanteEndringsperioderForBegrunnelse(minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler, vedtaksperiode = periode)
+            val deltBostedEndringsperioder = this.hentRelevanteEndringsperioderForBegrunnelse(
+                minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
+                vedtaksperiode = periode
+            )
                 .filter { it.årsak == Årsak.DELT_BOSTED }
                 .filter { endringsperiode ->
                     endringsperiodeGjelderBarn(
@@ -1236,7 +1243,7 @@ fun Standardbegrunnelse.delOpp(restBehandlingsgrunnlagForBrev: RestBehandlingsgr
                 BrevBegrunnelseGrunnlagMedPersoner(
                     standardbegrunnelse = this,
                     vedtakBegrunnelseType = this.vedtakBegrunnelseType,
-                    triggesAv = triggesAv,
+                    begrunnelseTriggere = begrunnelseTriggere,
                     personIdenter = it.value.map { endringsperiode -> endringsperiode.personIdent },
                     avtaletidspunktDeltBosted = it.key
                 )
@@ -1262,14 +1269,7 @@ class StandardbegrunnelseListConverter :
         konverterStringTilEnums(string)
 }
 
-val gamleEndretUtbetalingsperiodeBegrunnelser = listOf<Standardbegrunnelse>(
-    Standardbegrunnelse.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING,
-    Standardbegrunnelse.ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING,
-    Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALING_UTVIDET,
-    Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_ORDINÆR_OG_ETTERBETALING_UTVIDET
-)
-
-val nyeEndretUtbetalingsperiodeBegrunnelser = listOf<Standardbegrunnelse>(
+val endretUtbetalingsperiodeBegrunnelser: List<Standardbegrunnelse> = listOf(
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY,
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY,
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALT_UTVIDET_NY,

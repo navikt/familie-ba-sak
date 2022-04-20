@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.ETTERBETALING_3ÅR
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -20,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -84,20 +82,10 @@ class BehandlingsresultatSteg(
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler)
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndelerMedÅrsakDeltBosted = endretUtbetalingAndeler.filter { it.årsak == Årsak.DELT_BOSTED })
 
-        if (!featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)) {
-            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
-                endretUtbetalingAndeler,
-                tilkjentYtelse.andelerTilkjentYtelse.toList()
-            )
-        }
     }
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-
-        if (!featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)) {
-            endretUtbetalingAndelService.oppdaterEndreteUtbetalingsandelerMedBegrunnelser(behandling)
-        }
 
         val behandlingMedOppdatertBehandlingsresultat =
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {

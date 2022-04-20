@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
@@ -12,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 
-data class TriggesAv(
+data class BegrunnelseTriggere(
     val vilkår: Set<Vilkår> = emptySet(),
     val personTyper: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
     val personerManglerOpplysninger: Boolean = false,
@@ -102,24 +101,23 @@ data class TriggesAv(
 
 fun triggesAvSkalUtbetales(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    triggesAv: TriggesAv
+    begrunnelseTriggere: BegrunnelseTriggere
 ): Boolean {
-    if (triggesAv.etterEndretUtbetaling) return false
+    if (begrunnelseTriggere.etterEndretUtbetaling) return false
 
     val inneholderAndelSomSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! != BigDecimal.ZERO }
     val inneholderAndelSomIkkeSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! == BigDecimal.ZERO }
 
-    return if (triggesAv.endretUtbetalingSkalUtbetales) {
+    return if (begrunnelseTriggere.endretUtbetalingSkalUtbetales) {
         inneholderAndelSomSkalUtbetales
     } else {
         inneholderAndelSomIkkeSkalUtbetales
     }
 }
-fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
-    utvidetScenario: UtvidetScenarioForEndringsperiode,
+
+fun BegrunnelseTriggere.erTriggereOppfyltForEndretUtbetaling(
     minimertEndretAndel: MinimertEndretAndel,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
     val hørerTilEtterEndretUtbetaling = this.etterEndretUtbetaling
 
@@ -127,10 +125,8 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
 
     val oppfyllerUtvidetScenario =
         oppfyllerUtvidetScenario(
-            utvidetScenario = utvidetScenario,
-            vilkår = this.vilkår,
+            vilkårBegrunnelsenGjelderFor = this.vilkår,
             minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
-            erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå
         )
 
     val erAvSammeÅrsak = this.endringsaarsaker.contains(minimertEndretAndel.årsak)
@@ -141,33 +137,22 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
 }
 
 fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
-    triggesAv: TriggesAv
+    begrunnelseTriggere: BegrunnelseTriggere
 ): Boolean {
     val inneholderAndelSomSkalUtbetales = this.prosent!! != BigDecimal.ZERO
-    return triggesAv.endretUtbetalingSkalUtbetales == inneholderAndelSomSkalUtbetales
+    return begrunnelseTriggere.endretUtbetalingSkalUtbetales == inneholderAndelSomSkalUtbetales
 }
 
 private fun oppfyllerUtvidetScenario(
-    utvidetScenario: UtvidetScenarioForEndringsperiode,
-    vilkår: Set<Vilkår>?,
+    vilkårBegrunnelsenGjelderFor: Set<Vilkår>?,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
-    return if (erIngenOverlappVedtaksperiodeToggelPå) {
-        val begrunnelseGjelderUtvidet = vilkår?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 
-        val erUtvidetUtenEndring = minimerteUtbetalingsperiodeDetaljer.singleOrNull {
-            it.ytelseType == YtelseType.UTVIDET_BARNETRYGD
-        }?.erPåvirketAvEndring == false
+    val begrunnelseGjelderUtvidet = vilkårBegrunnelsenGjelderFor?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 
-        begrunnelseGjelderUtvidet == erUtvidetUtenEndring
-    } else {
-        val erUtvidetYtelseUtenEndring =
-            utvidetScenario == UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET
+    val periodeInneholderUtvidetUtenEndring = minimerteUtbetalingsperiodeDetaljer.singleOrNull {
+        it.ytelseType == YtelseType.UTVIDET_BARNETRYGD
+    }?.erPåvirketAvEndring == false
 
-        val begrunnelseSkalVisesVedutvidetYtelseUtenEndring =
-            vilkår?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
-
-        erUtvidetYtelseUtenEndring == begrunnelseSkalVisesVedutvidetYtelseUtenEndring
-    }
+    return begrunnelseGjelderUtvidet == periodeInneholderUtvidetUtenEndring
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
@@ -9,18 +10,9 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
-import no.nav.familie.ba.sak.kjerne.brev.domene.antallBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EndretUtbetalingBrevPeriodeType
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.AvslagBrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.AvslagUtenPeriodeBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.EndretUtbetalingBarnetrygdType
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.EndretUtbetalingBrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.GenerellBrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.InnvilgelseBrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.OpphørBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
@@ -41,7 +33,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.UTB
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
-import java.math.BigDecimal
 import java.time.LocalDate
 
 private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -60,7 +51,6 @@ fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
 
 fun hentBrevPerioder(
     brevperioderData: List<BrevperiodeData>,
-    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
 ) = brevperioderData
     .sorted()
     .mapNotNull {
@@ -68,29 +58,18 @@ fun hentBrevPerioder(
         it.minimertVedtaksperiode.tilBrevPeriode(
             restBehandlingsgrunnlagForBrev = it.restBehandlingsgrunnlagForBrev,
             uregistrerteBarn = it.uregistrerteBarn,
-            utvidetScenarioForEndringsperiode = it.utvidetScenarioForEndringsperiode,
             erFørsteVedtaksperiodePåFagsak = it.erFørsteVedtaksperiodePåFagsak,
             brevMålform = it.brevMålform,
-            erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
             barnPersonIdentMedReduksjon = it.barnPersonIdentMedReduksjon,
         )
     }
 
-@Deprecated("Kan fjernes når INGEN_OVERLAPP_VEDTAKSPERIODER-toggle fjernes. Kan utledes fra perioden.")
-enum class UtvidetScenarioForEndringsperiode {
-    IKKE_UTVIDET_YTELSE,
-    UTVIDET_YTELSE_ENDRET,
-    UTVIDET_YTELSE_IKKE_ENDRET
-}
-
 fun MinimertVedtaksperiode.tilBrevPeriode(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     barnPersonIdentMedReduksjon: List<String> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean,
     brevMålform: Målform,
-    erIngenOverlappVedtaksperiodeTogglePå: Boolean
 ): BrevPeriode? {
     val brevPeriodeGrunnlagMedPersoner =
         this.tilBrevPeriodeGrunnlagMedPersoner(
@@ -98,14 +77,12 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
             erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
             barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
-            erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
         )
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
         uregistrerteBarn = uregistrerteBarn,
         restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
         brevMålform = brevMålform,
-        erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
     )
 
     if (begrunnelserOgFritekster.isEmpty()) return null
@@ -115,52 +92,16 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
             brevPeriodeGrunnlagMedPersoner.tom.tilDagMånedÅr()
         else null
 
-    return if (erIngenOverlappVedtaksperiodeTogglePå) {
-        brevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
-            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-            brevMålform = brevMålform,
-            tomDato = tomDato,
-            begrunnelserOgFritekster = begrunnelserOgFritekster
-        )
-    } else when (brevPeriodeGrunnlagMedPersoner.type) {
-        FORTSATT_INNVILGET -> brevPeriodeGrunnlagMedPersoner.hentFortsattInnvilgetBrevPeriode(
-            målform = brevMålform,
-            begrunnelserOgFritekster = begrunnelserOgFritekster
-        )
-
-        UTBETALING -> brevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
-            tomDato = tomDato,
-            begrunnelserOgFritekster = begrunnelserOgFritekster,
-            personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
-        )
-        UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> brevPeriodeGrunnlagMedPersoner.hentReduksjonBrevPeriode(
-            tomDato = tomDato,
-            begrunnelserOgFritekster = begrunnelserOgFritekster,
-            personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
-        )
-
-        ENDRET_UTBETALING -> brevPeriodeGrunnlagMedPersoner.hentEndretUtbetalingBrevPeriode(
-            tomDato = tomDato,
-            begrunnelserOgFritekster = begrunnelserOgFritekster,
-            utvidetScenario = utvidetScenarioForEndringsperiode,
-            målform = brevMålform
-        )
-
-        AVSLAG -> brevPeriodeGrunnlagMedPersoner.hentAvslagBrevPeriode(
-            tomDato = tomDato,
-            begrunnelserOgFritekster = begrunnelserOgFritekster
-        )
-
-        OPPHØR -> OpphørBrevPeriode(
-            fom = brevPeriodeGrunnlagMedPersoner.fom!!.tilDagMånedÅr(),
-            tom = tomDato,
-            begrunnelser = begrunnelserOgFritekster
-        )
-    }
+    return brevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
+        personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
+        brevMålform = brevMålform,
+        tomDato = tomDato,
+        begrunnelserOgFritekster = begrunnelserOgFritekster
+    )
 }
 
-private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
-    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
+internal fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
+    personerPåBehandling: List<MinimertRestPerson>,
     brevMålform: Målform,
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>
@@ -173,14 +114,14 @@ private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
     val barnMedNullutbetaling = nullutbetalingerBarn.map { it.person }
 
     val barnIPeriode: List<MinimertRestPerson> = when (this.type) {
-        UTBETALING -> this.finnBarnIInnvilgelsePeriode(restBehandlingsgrunnlagForBrev.personerPåBehandling)
+        UTBETALING -> this.finnBarnIInnvilgelsePeriode(personerPåBehandling)
         UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> this.finnBarnIUtbetalingMedReduksjonFraForrigeBehandlignPeriode(
-            restBehandlingsgrunnlagForBrev.personerPåBehandling
+            personerPåBehandling
         )
         OPPHØR -> emptyList()
         AVSLAG -> emptyList()
         FORTSATT_INNVILGET -> barnMedUtbetaling + barnMedNullutbetaling
-        ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling perioder når erIngenOverlappVedtaksperiodeTogglePå=true")
+        ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
     }
 
     val utbetalingsbeløp = this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()
@@ -215,7 +156,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentFomTekst(
         this.begrunnelser.map { it.standardbegrunnelse }
     ) ?: "Du får:"
     UTBETALING -> fom!!.tilDagMånedÅr()
-    ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling perioder når erIngenOverlappVedtaksperiodeTogglePå=true")
+    ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
     OPPHØR -> fom!!.tilDagMånedÅr()
     AVSLAG -> if (fom != null) fom.tilDagMånedÅr() else ""
     UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> fom!!.tilDagMånedÅr()
@@ -233,88 +174,10 @@ private fun hentPeriodetype(
         barnMedUtbetaling.isEmpty() -> BrevPeriodeType.INNVILGELSE_KUN_UTBETALING_PÅ_SØKER
         else -> BrevPeriodeType.INNVILGELSE
     }
-    ENDRET_UTBETALING -> error("Skal ikke være endret utbetaling med erIngenOverlappVedtaksperiodeTogglePå=true")
+    ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
     AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG else BrevPeriodeType.AVSLAG_UTEN_PERIODE
     OPPHØR -> BrevPeriodeType.OPPHOR
     UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.INNVILGELSE
-}
-
-private fun BrevPeriodeGrunnlagMedPersoner.hentAvslagBrevPeriode(
-    tomDato: String?,
-    begrunnelserOgFritekster: List<Begrunnelse>,
-) =
-    if (this.fom != null)
-        AvslagBrevPeriode(
-            fom = fom.tilDagMånedÅr(),
-            tom = tomDato,
-            begrunnelser = begrunnelserOgFritekster
-        )
-    else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
-
-fun BrevPeriodeGrunnlagMedPersoner.hentEndretUtbetalingBrevPeriode(
-    tomDato: String?,
-    begrunnelserOgFritekster: List<Begrunnelse>,
-    utvidetScenario: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
-    målform: Målform = Målform.NB,
-): EndretUtbetalingBrevPeriode {
-    val ingenUtbetalingForEndringsperioden =
-        minimerteUtbetalingsperiodeDetaljer.all { it.prosent == BigDecimal.ZERO }
-
-    return EndretUtbetalingBrevPeriode(
-        fom = this.fom!!.tilDagMånedÅr(),
-        tom = tomDato,
-        barnasFodselsdager = this.minimerteUtbetalingsperiodeDetaljer.map { it.person }.tilBarnasFødselsdatoer(),
-        begrunnelser = begrunnelserOgFritekster,
-        belop = Utils.formaterBeløp(this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()),
-        type = when {
-            ingenUtbetalingForEndringsperioden && utvidetScenario == UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET ->
-                EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING
-            ingenUtbetalingForEndringsperioden ->
-                EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING
-            else ->
-                EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE
-        },
-        typeBarnetrygd = if (utvidetScenario == UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE)
-            EndretUtbetalingBarnetrygdType.DELT
-        else when (målform) {
-            Målform.NB -> EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB
-            Målform.NN -> EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NN
-        }
-    )
-}
-
-private fun BrevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
-    tomDato: String?,
-    begrunnelserOgFritekster: List<Begrunnelse>,
-    personerPåBehandling: List<MinimertRestPerson>,
-): InnvilgelseBrevPeriode {
-    val barnIPeriode = this.finnBarnIInnvilgelsePeriode(personerPåBehandling)
-
-    return InnvilgelseBrevPeriode(
-        fom = this.fom!!.tilDagMånedÅr(),
-        tom = tomDato,
-        belop = Utils.formaterBeløp(this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()),
-        antallBarn = barnIPeriode.size.toString(),
-        barnasFodselsdager = barnIPeriode.tilBarnasFødselsdatoer(),
-        begrunnelser = begrunnelserOgFritekster
-    )
-}
-
-private fun BrevPeriodeGrunnlagMedPersoner.hentReduksjonBrevPeriode(
-    tomDato: String?,
-    begrunnelserOgFritekster: List<Begrunnelse>,
-    personerPåBehandling: List<MinimertRestPerson>,
-): InnvilgelseBrevPeriode {
-    val barnIPeriode = this.finnBarnIUtbetalingMedReduksjonFraForrigeBehandlignPeriode(personerPåBehandling)
-
-    return InnvilgelseBrevPeriode(
-        fom = this.fom!!.tilDagMånedÅr(),
-        tom = tomDato,
-        belop = Utils.formaterBeløp(this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()),
-        antallBarn = barnIPeriode.size.toString(),
-        barnasFodselsdager = barnIPeriode.tilBarnasFødselsdatoer(),
-        begrunnelser = begrunnelserOgFritekster
-    )
 }
 
 fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
@@ -353,25 +216,6 @@ fun BrevPeriodeGrunnlagMedPersoner.finnBarnIUtbetalingMedReduksjonFraForrigeBeha
         .filter { it.type == PersonType.BARN }
 
     return barnIPeriode
-}
-
-private fun BrevPeriodeGrunnlagMedPersoner.hentFortsattInnvilgetBrevPeriode(
-    målform: Målform,
-    begrunnelserOgFritekster: List<Begrunnelse>
-): FortsattInnvilgetBrevPeriode {
-
-    val fom = hentFomtekstFortsattInnvilget(
-        målform = målform,
-        fom = this.fom,
-        begrunnelser = this.begrunnelser.map { it.standardbegrunnelse }
-    )
-    return FortsattInnvilgetBrevPeriode(
-        fom = fom ?: "Du får:",
-        belop = Utils.formaterBeløp(this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()),
-        antallBarn = this.minimerteUtbetalingsperiodeDetaljer.antallBarn().toString(),
-        barnasFodselsdager = this.minimerteUtbetalingsperiodeDetaljer.map { it.person }.tilBarnasFødselsdatoer(),
-        begrunnelser = begrunnelserOgFritekster
-    )
 }
 
 private fun hentFomtekstFortsattInnvilget(
