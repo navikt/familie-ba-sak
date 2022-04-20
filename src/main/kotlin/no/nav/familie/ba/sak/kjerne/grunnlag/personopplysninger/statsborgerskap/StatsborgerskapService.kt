@@ -95,29 +95,19 @@ class StatsborgerskapService(
             )
         } else {
 
-            val alleMedlemskap = hentMedlemskapsIntervaller(
+            val alleMedlemskap = hentMedlemskapsDatoIntervaller(
                 historiskEØSMedlemsskapForLand,
-                statsborgerskap.hentFom(),
+                datoFra,
                 statsborgerskap.gyldigTilOgMed
-            ).fold(mutableSetOf<Medlemskap>()) { acc, dato ->
-                acc.add(
+            ).fold(emptyList<Medlemskap>()) { acc, periode ->
+                acc + listOf(
                     finnMedlemskap(
                         statsborgerskap,
                         historiskEØSMedlemsskapForLand,
-                        datoFra
+                        periode.fom
                     )
                 )
-                datoFra = dato
-                acc
             }
-
-            alleMedlemskap.add(
-                finnMedlemskap(
-                    statsborgerskap,
-                    historiskEØSMedlemsskapForLand,
-                    datoFra
-                )
-            )
 
             finnSterkesteMedlemskap(alleMedlemskap.toList())
         }
