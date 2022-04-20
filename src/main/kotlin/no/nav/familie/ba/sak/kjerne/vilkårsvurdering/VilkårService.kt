@@ -75,12 +75,13 @@ class VilkårService(
         restPersonResultat: RestPersonResultat
     ): List<RestPersonResultat> {
 
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            if (restPersonResultat.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN })
-                throw Feil(
-                    message = "EØS er ikke togglet på",
-                    frontendFeilmelding = "Funksjonalitet for EØS er ikke lansert."
-                )
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) &&
+            restPersonResultat.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
+        ) {
+            throw Feil(
+                message = "EØS er ikke togglet på",
+                frontendFeilmelding = "Funksjonalitet for EØS er ikke lansert."
+            )
         }
 
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)

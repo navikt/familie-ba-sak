@@ -393,22 +393,11 @@ fun genererPersonResultatForPerson(
                 Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> true
                 else -> false
             },
-            resultat = when (vilkår) {
-                Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
-                Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true)
-                    Resultat.OPPFYLT else Resultat.IKKE_VURDERT
-                else -> Resultat.IKKE_VURDERT
-            },
+            resultat = utledResultat(vilkår, person),
             vilkårType = vilkår,
             periodeFom = fom,
             periodeTom = tom,
-            begrunnelse = when (vilkår) {
-                Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
-                Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
-                    "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
-                        "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
-                else -> ""
-            },
+            begrunnelse = utledBegrunnelse(vilkår, person),
             behandlingId = personResultat.vilkårsvurdering.behandling.id
         )
     }.toSortedSet(VilkårResultat.VilkårResultatComparator)
@@ -416,6 +405,30 @@ fun genererPersonResultatForPerson(
     personResultat.setSortedVilkårResultater(vilkårResultater)
 
     return personResultat
+}
+
+private fun utledResultat(
+    vilkår: Vilkår,
+    person: Person
+) = when (vilkår) {
+    Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
+    Vilkår.GIFT_PARTNERSKAP -> utledResultatForGiftPartnerskap(person)
+    else -> Resultat.IKKE_VURDERT
+}
+
+private fun utledResultatForGiftPartnerskap(person: Person) =
+    if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true)
+        Resultat.OPPFYLT else Resultat.IKKE_VURDERT
+
+private fun utledBegrunnelse(
+    vilkår: Vilkår,
+    person: Person
+) = when (vilkår) {
+    Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
+    Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
+        "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
+            "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
+    else -> ""
 }
 
 fun validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(
