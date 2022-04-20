@@ -7,37 +7,22 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 
-interface BrevPeriode {
+const val BEGRUNNELSE_ERROR_MSG = "Begrunnelse er ikke string eller begrunnelseData"
 
-    val fom: Flettefelt
-    val tom: Flettefelt
-    val belop: Flettefelt
-    val antallBarn: Flettefelt
-    val barnasFodselsdager: Flettefelt
-    val begrunnelser: List<Any>
-    val type: Flettefelt
-
-    companion object {
-
-        const val BEGRUNNELSE_ERROR_MSG = "Begrunnelse er ikke string eller begrunnelseData"
-    }
-}
-
-// Kan omdøpes til BrevPeriode når alle perioder    bruker denne klassen
-data class GenerellBrevPeriode(
-    override val fom: Flettefelt,
-    override val tom: Flettefelt,
-    override val belop: Flettefelt,
-    override val antallBarn: Flettefelt,
-    override val barnasFodselsdager: Flettefelt,
-    override val begrunnelser: List<Any>,
-    override val type: Flettefelt,
+data class BrevPeriode(
+    val fom: Flettefelt,
+    val tom: Flettefelt,
+    val belop: Flettefelt,
+    val antallBarn: Flettefelt,
+    val barnasFodselsdager: Flettefelt,
+    val begrunnelser: List<Any>,
+    val type: Flettefelt,
 
     val antallBarnMedUtbetaling: Flettefelt,
     val antallBarnMedNullutbetaling: Flettefelt,
     val fodselsdagerBarnMedUtbetaling: Flettefelt,
     val fodselsdagerBarnMedNullutbetaling: Flettefelt,
-) : BrevPeriode {
+) {
 
     constructor(
         fom: String,
@@ -65,7 +50,7 @@ data class GenerellBrevPeriode(
             when (it) {
                 is FritekstBegrunnelse -> it.fritekst
                 is BegrunnelseData -> it
-                else -> error(BrevPeriode.BEGRUNNELSE_ERROR_MSG)
+                else -> error(BEGRUNNELSE_ERROR_MSG)
             }
         },
         type = flettefelt(brevPeriodeType.apiNavn),
