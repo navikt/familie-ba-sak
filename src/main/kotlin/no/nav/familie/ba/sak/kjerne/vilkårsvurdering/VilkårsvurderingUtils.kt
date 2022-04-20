@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.kanErstatte
 import no.nav.familie.ba.sak.common.kanFlytteFom
 import no.nav.familie.ba.sak.common.kanFlytteTom
 import no.nav.familie.ba.sak.common.kanSplitte
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
@@ -415,4 +416,25 @@ fun genererPersonResultatForPerson(
     personResultat.setSortedVilkårResultater(vilkårResultater)
 
     return personResultat
+}
+
+fun validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(
+    vilkårsvurdering: Vilkårsvurdering,
+    vilkårResultat: VilkårResultat,
+    migreringsdato: LocalDate?
+) {
+    val behandling = vilkårsvurdering.behandling
+    if (migreringsdato != null &&
+        vilkårResultat.vilkårType !in listOf(Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP) &&
+        vilkårResultat.periodeFom?.isBefore(migreringsdato) == true
+    ) {
+        throw FunksjonellFeil(
+            melding = "${vilkårResultat.vilkårType} kan ikke endres før $migreringsdato " +
+                "for fagsak=${behandling.fagsak.id}",
+            frontendFeilmelding = "F.o.m. kan ikke settes tidligere " +
+                "enn migreringsdato ${migreringsdato.tilKortString()}. " +
+                "Ved behov for vurdering før dette, må behandlingen henlegges, " +
+                "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling."
+        )
+    }
 }
