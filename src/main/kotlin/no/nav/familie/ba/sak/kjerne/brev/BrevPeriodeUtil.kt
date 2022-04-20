@@ -126,7 +126,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
 
     val utbetalingsbeløp = this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()
     val brevPeriodeType = hentPeriodetype(this.fom, this, barnMedUtbetaling, utbetalingsbeløp)
-    return GenerellBrevPeriode(
+    return BrevPeriode(
 
         fom = this.hentFomTekst(brevMålform),
         tom = when {
