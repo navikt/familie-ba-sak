@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.GenerellBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
@@ -105,7 +104,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
     brevMålform: Målform,
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>
-): GenerellBrevPeriode {
+): BrevPeriode {
     val (utbetalingerBarn, nullutbetalingerBarn) = this.minimerteUtbetalingsperiodeDetaljer
         .filter { it.person.type == PersonType.BARN }
         .partition { it.utbetaltPerMnd != 0 }
