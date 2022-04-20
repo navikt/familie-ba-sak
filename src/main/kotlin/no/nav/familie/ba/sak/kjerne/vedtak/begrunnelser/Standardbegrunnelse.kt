@@ -1218,7 +1218,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
 
 fun Standardbegrunnelse.delOpp(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-    begrunnelseTriggere: BegrunnelseTriggere,
+    triggesAv: TriggesAv,
     periode: NullablePeriode
 ): List<BrevBegrunnelseGrunnlagMedPersoner> {
     if (!this.kanDelesOpp) {
@@ -1243,7 +1243,7 @@ fun Standardbegrunnelse.delOpp(
                 BrevBegrunnelseGrunnlagMedPersoner(
                     standardbegrunnelse = this,
                     vedtakBegrunnelseType = this.vedtakBegrunnelseType,
-                    begrunnelseTriggere = begrunnelseTriggere,
+                    triggesAv = triggesAv,
                     personIdenter = it.value.map { endringsperiode -> endringsperiode.personIdent },
                     avtaletidspunktDeltBosted = it.key
                 )

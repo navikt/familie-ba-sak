@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonerForAlleUtgjørendeVilkår
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BegrunnelseTriggere
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -137,7 +137,7 @@ class UtgjørendePersonerTest {
                 tom = LocalDate.of(2010, 6, 1)
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-            begrunnelseTriggere = BegrunnelseTriggere(setOf(Vilkår.LOVLIG_OPPHOLD)),
+            triggesAv = TriggesAv(setOf(Vilkår.LOVLIG_OPPHOLD)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
@@ -157,7 +157,7 @@ class UtgjørendePersonerTest {
                 tom = LocalDate.of(2010, 6, 1)
             ),
             oppdatertBegrunnelseType = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.vedtakBegrunnelseType,
-            begrunnelseTriggere = BegrunnelseTriggere(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
+            triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
@@ -232,7 +232,7 @@ class UtgjørendePersonerTest {
                 tom = TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = Standardbegrunnelse.REDUKSJON_BOSATT_I_RIKTET.vedtakBegrunnelseType,
-            begrunnelseTriggere = BegrunnelseTriggere(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
+            triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
@@ -252,7 +252,7 @@ class UtgjørendePersonerTest {
                 tom = TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = Standardbegrunnelse.OPPHØR_UTVANDRET.vedtakBegrunnelseType,
-            begrunnelseTriggere = BegrunnelseTriggere(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
+            triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
@@ -323,7 +323,7 @@ class UtgjørendePersonerTest {
                 tom = TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-            begrunnelseTriggere = BegrunnelseTriggere(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true),
+            triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
@@ -337,7 +337,7 @@ class UtgjørendePersonerTest {
                 tom = TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-            begrunnelseTriggere = BegrunnelseTriggere(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
+            triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,

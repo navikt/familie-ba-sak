@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
-class BegrunnelseTriggereTest {
+class TriggesAvTest {
 
     val vilkårUtenUtvidetBarnetrygd: Set<Vilkår> = emptySet()
     val vilkårMedUtvidetBarnetrygd: Set<Vilkår> = setOf(Vilkår.UTVIDET_BARNETRYGD)

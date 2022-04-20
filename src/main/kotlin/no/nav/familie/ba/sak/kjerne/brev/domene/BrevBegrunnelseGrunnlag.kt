@@ -3,15 +3,15 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BegrunnelseTriggere
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.delOpp
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 
 data class BrevBegrunnelseGrunnlag(
     val standardbegrunnelse: Standardbegrunnelse,
-    val begrunnelseTriggere: BegrunnelseTriggere,
+    val triggesAv: TriggesAv,
 ) {
     fun tilBrevBegrunnelseGrunnlagMedPersoner(
         periode: NullablePeriode,
@@ -27,12 +27,12 @@ data class BrevBegrunnelseGrunnlag(
         return if (this.standardbegrunnelse.kanDelesOpp) {
             this.standardbegrunnelse.delOpp(
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                begrunnelseTriggere = this.begrunnelseTriggere,
+                triggesAv = this.triggesAv,
                 periode = periode
             )
         } else {
             val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
-                begrunnelseTriggere = this.begrunnelseTriggere,
+                triggesAv = this.triggesAv,
                 vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
                 periode = periode,
                 vedtaksperiodetype = vedtaksperiodetype,
@@ -46,7 +46,7 @@ data class BrevBegrunnelseGrunnlag(
             if (
                 personidenterGjeldendeForBegrunnelse.isEmpty() &&
                 !erUregistrerteBarnPåbehandling &&
-                !this.begrunnelseTriggere.satsendring
+                !this.triggesAv.satsendring
             ) {
                 throw Feil(
                     "Begrunnelse '${this.standardbegrunnelse}' var ikke knyttet til noen personer."
@@ -57,7 +57,7 @@ data class BrevBegrunnelseGrunnlag(
                 BrevBegrunnelseGrunnlagMedPersoner(
                     standardbegrunnelse = this.standardbegrunnelse,
                     vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
-                    begrunnelseTriggere = this.begrunnelseTriggere,
+                    triggesAv = this.triggesAv,
                     personIdenter = personidenterGjeldendeForBegrunnelse.toList()
                 )
             )
@@ -74,7 +74,7 @@ fun RestVedtaksbegrunnelse.tilBrevBegrunnelseGrunnlag(
 ): BrevBegrunnelseGrunnlag {
     return BrevBegrunnelseGrunnlag(
         standardbegrunnelse = this.standardbegrunnelse,
-        begrunnelseTriggere = sanityBegrunnelser
+        triggesAv = sanityBegrunnelser
             .firstOrNull { it.apiNavn == this.standardbegrunnelse.sanityApiNavn }!!
             .tilTriggesAv()
     )

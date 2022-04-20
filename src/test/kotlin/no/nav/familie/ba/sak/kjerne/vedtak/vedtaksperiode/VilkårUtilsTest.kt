@@ -53,7 +53,7 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                begrunnelseTriggere = triggesAv,
+                triggesAv = triggesAv,
 
             )
         )
@@ -62,7 +62,7 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatIkkeOppfyltDelvisOverlapp.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                begrunnelseTriggere = triggesAv,
+                triggesAv = triggesAv,
 
             )
         )
@@ -75,7 +75,7 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = false,
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                begrunnelseTriggere = triggesAv,
+                triggesAv = triggesAv,
 
             )
         )
@@ -88,7 +88,7 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                begrunnelseTriggere = triggesAv,
+                triggesAv = triggesAv,
 
             )
         )
@@ -101,7 +101,7 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatUtenforPeriode.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                begrunnelseTriggere = triggesAv,
+                triggesAv = triggesAv,
 
             )
         )

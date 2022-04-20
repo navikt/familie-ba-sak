@@ -59,8 +59,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BegrunnelseTriggere
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
@@ -1067,7 +1067,7 @@ fun lagTriggesAv(
     etterEndretUtbetaling: Boolean = false,
     endretUtbetalingSkalUtbetales: Boolean = false,
     småbarnstillegg: Boolean = false
-): BegrunnelseTriggere = BegrunnelseTriggere(
+): TriggesAv = TriggesAv(
     vilkår = vilkår,
     personTyper = personTyper,
     personerManglerOpplysninger = personerManglerOpplysninger,

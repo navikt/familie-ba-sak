@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 
-data class BegrunnelseTriggere(
+data class TriggesAv(
     val vilkår: Set<Vilkår> = emptySet(),
     val personTyper: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
     val personerManglerOpplysninger: Boolean = false,
@@ -101,21 +101,21 @@ data class BegrunnelseTriggere(
 
 fun triggesAvSkalUtbetales(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    begrunnelseTriggere: BegrunnelseTriggere
+    triggesAv: TriggesAv
 ): Boolean {
-    if (begrunnelseTriggere.etterEndretUtbetaling) return false
+    if (triggesAv.etterEndretUtbetaling) return false
 
     val inneholderAndelSomSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! != BigDecimal.ZERO }
     val inneholderAndelSomIkkeSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! == BigDecimal.ZERO }
 
-    return if (begrunnelseTriggere.endretUtbetalingSkalUtbetales) {
+    return if (triggesAv.endretUtbetalingSkalUtbetales) {
         inneholderAndelSomSkalUtbetales
     } else {
         inneholderAndelSomIkkeSkalUtbetales
     }
 }
 
-fun BegrunnelseTriggere.erTriggereOppfyltForEndretUtbetaling(
+fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
     minimertEndretAndel: MinimertEndretAndel,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
 ): Boolean {
@@ -137,10 +137,10 @@ fun BegrunnelseTriggere.erTriggereOppfyltForEndretUtbetaling(
 }
 
 fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
-    begrunnelseTriggere: BegrunnelseTriggere
+    triggesAv: TriggesAv
 ): Boolean {
     val inneholderAndelSomSkalUtbetales = this.prosent!! != BigDecimal.ZERO
-    return begrunnelseTriggere.endretUtbetalingSkalUtbetales == inneholderAndelSomSkalUtbetales
+    return triggesAv.endretUtbetalingSkalUtbetales == inneholderAndelSomSkalUtbetales
 }
 
 private fun oppfyllerUtvidetScenario(

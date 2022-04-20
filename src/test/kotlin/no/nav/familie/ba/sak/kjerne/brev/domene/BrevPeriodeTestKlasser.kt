@@ -176,6 +176,6 @@ data class BrevBegrunnelseGrunnlagConfig(
 ) {
     fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BrevBegrunnelseGrunnlag(
         standardbegrunnelse = this.standardbegrunnelse,
-        begrunnelseTriggere = this.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
+        triggesAv = this.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
     )
 }

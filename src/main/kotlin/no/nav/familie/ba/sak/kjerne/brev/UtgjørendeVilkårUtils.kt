@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BegrunnelseTriggere
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
  * @param vedtaksperiode - Perioden det skal sjekkes for
  * @param oppdatertBegrunnelseType - Begrunnelsestype det skal sjekkes for
  * @param aktuellePersonerForVedtaksperiode - Personer på behandlingen som er aktuelle for vedtaksperioden
- * @param begrunnelseTriggere -  Hva som trigger en vedtaksbegrynnelse.
+ * @param triggesAv -  Hva som trigger en vedtaksbegrynnelse.
  * @param erFørsteVedtaksperiodePåFagsak - Om vedtaksperioden er første periode på fagsak.
  *        Brukes for opphør som har egen logikk dersom det er første periode.
  * @return List med personene det trigges endring på
@@ -33,17 +33,17 @@ fun hentPersonerForAlleUtgjørendeVilkår(
     vedtaksperiode: Periode,
     oppdatertBegrunnelseType: VedtakBegrunnelseType,
     aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
-    begrunnelseTriggere: BegrunnelseTriggere,
+    triggesAv: TriggesAv,
     erFørsteVedtaksperiodePåFagsak: Boolean,
 ): Set<MinimertRestPerson> {
-    return begrunnelseTriggere.vilkår.fold(setOf()) { acc, vilkår ->
+    return triggesAv.vilkår.fold(setOf()) { acc, vilkår ->
         acc + hentPersonerMedUtgjørendeVilkår(
             minimertRestPersonResultater = minimertePersonResultater,
             vedtaksperiode = vedtaksperiode,
             begrunnelseType = oppdatertBegrunnelseType,
             vilkårGjeldendeForBegrunnelse = vilkår,
             aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
-            begrunnelseTriggere = begrunnelseTriggere,
+            triggesAv = triggesAv,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         )
     }
@@ -55,7 +55,7 @@ private fun hentPersonerMedUtgjørendeVilkår(
     begrunnelseType: VedtakBegrunnelseType,
     vilkårGjeldendeForBegrunnelse: Vilkår,
     aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
-    begrunnelseTriggere: BegrunnelseTriggere,
+    triggesAv: TriggesAv,
     erFørsteVedtaksperiodePåFagsak: Boolean,
 ): List<MinimertRestPerson> {
 
@@ -74,7 +74,7 @@ private fun hentPersonerMedUtgjørendeVilkår(
                             minimertVilkårResultat = minimertVilkårResultat,
                             nesteMinimerteVilkårResultat = nesteMinimerteVilkårResultatAvSammeType,
                             begrunnelseType = begrunnelseType,
-                            begrunnelseTriggere = begrunnelseTriggere,
+                            triggesAv = triggesAv,
                             vedtaksperiode = vedtaksperiode,
                             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                         )
@@ -100,7 +100,7 @@ private fun erVilkårResultatUtgjørende(
     minimertVilkårResultat: MinimertVilkårResultat,
     nesteMinimerteVilkårResultat: MinimertVilkårResultat?,
     begrunnelseType: VedtakBegrunnelseType,
-    begrunnelseTriggere: BegrunnelseTriggere,
+    triggesAv: TriggesAv,
     vedtaksperiode: Periode,
     erFørsteVedtaksperiodePåFagsak: Boolean,
 ): Boolean {
@@ -111,22 +111,22 @@ private fun erVilkårResultatUtgjørende(
     return when (begrunnelseType) {
         VedtakBegrunnelseType.INNVILGET ->
             erInnvilgetVilkårResultatUtgjørende(
-                begrunnelseTriggere,
+                triggesAv,
                 minimertVilkårResultat,
                 vedtaksperiode,
             )
 
-        VedtakBegrunnelseType.OPPHØR -> if (begrunnelseTriggere.gjelderFørstePeriode) {
+        VedtakBegrunnelseType.OPPHØR -> if (triggesAv.gjelderFørstePeriode) {
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 vedtaksperiode = vedtaksperiode,
-                begrunnelseTriggere = begrunnelseTriggere,
+                triggesAv = triggesAv,
                 vilkårResultat = minimertVilkårResultat,
             )
         } else {
             erOpphørResultatUtgjøreneForPeriode(
                 minimertVilkårResultat = minimertVilkårResultat,
-                begrunnelseTriggere = begrunnelseTriggere,
+                triggesAv = triggesAv,
                 vedtaksperiode = vedtaksperiode,
             )
         }
@@ -134,7 +134,7 @@ private fun erVilkårResultatUtgjørende(
         VedtakBegrunnelseType.REDUKSJON -> {
             erReduksjonResultatUtgjøreneForPeriode(
                 vilkårSomAvsluttesRettFørDennePerioden = minimertVilkårResultat,
-                begrunnelseTriggere = begrunnelseTriggere,
+                triggesAv = triggesAv,
                 vedtaksperiode = vedtaksperiode,
                 vilkårSomStarterIDennePerioden = nesteMinimerteVilkårResultat,
             )
@@ -149,7 +149,7 @@ private fun erVilkårResultatUtgjørende(
 
 private fun erOpphørResultatUtgjøreneForPeriode(
     minimertVilkårResultat: MinimertVilkårResultat,
-    begrunnelseTriggere: BegrunnelseTriggere,
+    triggesAv: TriggesAv,
     vedtaksperiode: Periode,
 ): Boolean {
     val erOppfyltTomMånedEtter = erOppfyltTomMånedEtter(minimertVilkårResultat)
@@ -157,7 +157,7 @@ private fun erOpphørResultatUtgjøreneForPeriode(
     val vilkårsluttForForrigePeriode = vedtaksperiode.fom.minusMonths(
         if (erOppfyltTomMånedEtter) 1 else 0
     )
-    return begrunnelseTriggere.erUtdypendeVilkårsvurderingOppfylt(minimertVilkårResultat) &&
+    return triggesAv.erUtdypendeVilkårsvurderingOppfylt(minimertVilkårResultat) &&
         minimertVilkårResultat.periodeTom != null &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
         minimertVilkårResultat.periodeTom.toYearMonth() == vilkårsluttForForrigePeriode.toYearMonth()
@@ -165,7 +165,7 @@ private fun erOpphørResultatUtgjøreneForPeriode(
 
 private fun erReduksjonResultatUtgjøreneForPeriode(
     vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
-    begrunnelseTriggere: BegrunnelseTriggere,
+    triggesAv: TriggesAv,
     vedtaksperiode: Periode,
     vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
 ): Boolean {
@@ -179,13 +179,13 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
         vilkårSomAvsluttesRettFørDennePerioden.vilkårType == Vilkår.BOR_MED_SØKER &&
             !vilkårSomAvsluttesRettFørDennePerioden.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) &&
             vilkårSomStarterIDennePerioden?.utdypendeVilkårsvurderinger?.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) == true &&
-            begrunnelseTriggere.deltbosted
+            triggesAv.deltbosted
 
     val startNestePeriodeEtterVilkår = vilkårSomAvsluttesRettFørDennePerioden.periodeTom
         .plusDays(if (erStartPåDeltBosted) 1 else 0)
         .plusMonths(if (erOppfyltTomMånedEtter) 1 else 0)
 
-    return begrunnelseTriggere.erUtdypendeVilkårsvurderingOppfyltReduksjon(
+    return triggesAv.erUtdypendeVilkårsvurderingOppfyltReduksjon(
         vilkårSomAvsluttesRettFørDennePerioden = vilkårSomAvsluttesRettFørDennePerioden,
         vilkårSomStarterIDennePerioden = vilkårSomStarterIDennePerioden
     ) &&
@@ -198,14 +198,14 @@ private fun erOppfyltTomMånedEtter(minimertVilkårResultat: MinimertVilkårResu
         minimertVilkårResultat.periodeTom == minimertVilkårResultat.periodeTom?.sisteDagIMåned()
 
 private fun erInnvilgetVilkårResultatUtgjørende(
-    begrunnelseTriggere: BegrunnelseTriggere,
+    triggesAv: TriggesAv,
     minimertVilkårResultat: MinimertVilkårResultat,
     vedtaksperiode: Periode,
 ): Boolean {
     val vilkårResultatFomMåned = minimertVilkårResultat.periodeFom!!.toYearMonth()
     val vedtaksperiodeFomMåned = vedtaksperiode.fom.toYearMonth()
 
-    return begrunnelseTriggere.erUtdypendeVilkårsvurderingOppfylt(minimertVilkårResultat) &&
+    return triggesAv.erUtdypendeVilkårsvurderingOppfylt(minimertVilkårResultat) &&
         vilkårResultatFomMåned == vedtaksperiodeFomMåned.minusMonths(1) &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT
 }
@@ -227,7 +227,7 @@ private fun vilkårResultatPasserForAvslagsperiode(
 fun erFørstePeriodeOgVilkårIkkeOppfylt(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     vedtaksperiode: Periode,
-    begrunnelseTriggere: BegrunnelseTriggere,
+    triggesAv: TriggesAv,
     vilkårResultat: MinimertVilkårResultat,
 ): Boolean {
     val vilkårIkkeOppfyltForPeriode =
@@ -239,6 +239,6 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
             vedtaksperiode.tom.toYearMonth() == vilkårResultat.periodeFom!!.toYearMonth()
 
     return erFørsteVedtaksperiodePåFagsak &&
-        begrunnelseTriggere.erUtdypendeVilkårsvurderingOppfylt(vilkårResultat) &&
+        triggesAv.erUtdypendeVilkårsvurderingOppfylt(vilkårResultat) &&
         (vilkårIkkeOppfyltForPeriode || vilkårOppfyltRettEtterPeriode)
 }

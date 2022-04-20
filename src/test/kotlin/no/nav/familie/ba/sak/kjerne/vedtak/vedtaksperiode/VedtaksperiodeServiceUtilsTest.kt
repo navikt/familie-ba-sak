@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BegrunnelseTriggere
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
@@ -33,7 +33,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn))
-        val begrunnelseTriggere = BegrunnelseTriggere(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
+        val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
             behandling = behandling,
@@ -42,7 +42,7 @@ class VedtaksperiodeServiceUtilsTest {
         val identerMedUtbetaling = listOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer())
 
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
-            begrunnelseTriggere = begrunnelseTriggere,
+            triggesAv = triggesAv,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
             periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
@@ -77,7 +77,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn2))
-        val begrunnelseTriggere = BegrunnelseTriggere(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
+        val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
             behandling = behandling,
@@ -94,7 +94,7 @@ class VedtaksperiodeServiceUtilsTest {
         )
 
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
-            begrunnelseTriggere = begrunnelseTriggere,
+            triggesAv = triggesAv,
             periode = NullablePeriode(fom, tom),
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,

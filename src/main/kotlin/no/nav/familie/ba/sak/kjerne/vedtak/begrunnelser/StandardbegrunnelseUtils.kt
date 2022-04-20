@@ -58,7 +58,7 @@ fun Standardbegrunnelse.triggesForPeriode(
         ),
         oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
         aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
-        begrunnelseTriggere = triggesAv,
+        triggesAv = triggesAv,
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
     )
 
@@ -87,7 +87,7 @@ fun Standardbegrunnelse.triggesForPeriode(
             )
 
         triggesAv.erEndret() && !triggesAv.etterEndretUtbetaling -> erEndretTriggerErOppfylt(
-            begrunnelseTriggere = triggesAv,
+            triggesAv = triggesAv,
             minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
             minimertVedtaksperiode = minimertVedtaksperiode,
         )
@@ -97,7 +97,7 @@ fun Standardbegrunnelse.triggesForPeriode(
 }
 
 private fun erEndretTriggerErOppfylt(
-    begrunnelseTriggere: BegrunnelseTriggere,
+    triggesAv: TriggesAv,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
 ): Boolean {
@@ -105,7 +105,7 @@ private fun erEndretTriggerErOppfylt(
         .finnEndredeAndelerISammePeriode(minimerteEndredeUtbetalingAndeler)
 
     return endredeAndelerSomOverlapperVedtaksperiode.any { minimertEndretAndel ->
-        begrunnelseTriggere.erTriggereOppfyltForEndretUtbetaling(
+        triggesAv.erTriggereOppfyltForEndretUtbetaling(
             minimertEndretAndel = minimertEndretAndel,
             minimerteUtbetalingsperiodeDetaljer = minimertVedtaksperiode
                 .utbetalingsperioder.map { it.tilMinimertUtbetalingsperiodeDetalj() }
@@ -117,12 +117,12 @@ private fun erEtterEndretPeriodeAvSammeÅrsak(
     endretUtbetalingAndeler: List<MinimertEndretAndel>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
     aktuellePersoner: List<MinimertPerson>,
-    begrunnelseTriggere: BegrunnelseTriggere
+    triggesAv: TriggesAv
 ) = endretUtbetalingAndeler.any { endretUtbetalingAndel ->
     endretUtbetalingAndel.månedPeriode().tom.sisteDagIInneværendeMåned()
         .erDagenFør(minimertVedtaksperiode.fom) &&
         aktuellePersoner.any { person -> person.aktørId == endretUtbetalingAndel.aktørId } &&
-        begrunnelseTriggere.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
+        triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }
 
 private val logger = LoggerFactory.getLogger(Standardbegrunnelse::class.java)

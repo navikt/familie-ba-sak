@@ -274,7 +274,7 @@ internal class StandardbegrunnelseTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    begrunnelseTriggere = BegrunnelseTriggere(endretUtbetalingSkalUtbetales = true),
+                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = true),
                 )
         )
 
@@ -282,7 +282,7 @@ internal class StandardbegrunnelseTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    begrunnelseTriggere = BegrunnelseTriggere(endretUtbetalingSkalUtbetales = false),
+                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = false),
                 )
         )
     }
@@ -293,7 +293,7 @@ internal class StandardbegrunnelseTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    begrunnelseTriggere = BegrunnelseTriggere(endretUtbetalingSkalUtbetales = false),
+                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = false),
                 )
         )
 
@@ -301,7 +301,7 @@ internal class StandardbegrunnelseTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    begrunnelseTriggere = BegrunnelseTriggere(endretUtbetalingSkalUtbetales = true),
+                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = true),
                 )
         )
     }

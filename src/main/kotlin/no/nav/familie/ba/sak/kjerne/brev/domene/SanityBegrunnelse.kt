@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.BARN
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.SOKER
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BegrunnelseTriggere
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -159,9 +159,9 @@ enum class UtvidetBarnetrygdTrigger {
     SMÅBARNSTILLEGG,
 }
 
-fun SanityBegrunnelse.tilTriggesAv(): BegrunnelseTriggere {
+fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
 
-    return BegrunnelseTriggere(
+    return TriggesAv(
         vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
         personTyper = if (this.rolle.isEmpty()) {
             when {
