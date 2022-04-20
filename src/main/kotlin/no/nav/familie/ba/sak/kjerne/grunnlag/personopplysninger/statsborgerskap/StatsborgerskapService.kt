@@ -137,8 +137,7 @@ class StatsborgerskapService(
         }.filter { datoForEndringIMedlemskap ->
             erInnenforDatoerSomBetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
         }.filter { datoForEndringIMedlemskap ->
-            (fra == null || datoForEndringIMedlemskap.isAfter(fra)) &&
-                (til == null || datoForEndringIMedlemskap.isBefore(til))
+            erInnenforDatoerForStatsborgerskapet(datoForEndringIMedlemskap, fra, til)
         }
 
         val endringsDatoerMedlemskapOgStatsborgerskap = listOf(fra) + filtrerteEndringsdatoerMedlemskap + listOf(til)
@@ -173,6 +172,14 @@ class StatsborgerskapService(
 
     private fun erInnenforDatoerSomBetegnerUendelighetIKodeverk(dato: LocalDate) =
         dato.isAfter(TIDLIGSTE_DATO_I_KODEVERK) && dato.isBefore(SENESTE_DATO_I_KODEVERK)
+
+    private fun erInnenforDatoerForStatsborgerskapet(
+        dato: LocalDate,
+        statsborgerFra: LocalDate?,
+        statsborgerTil: LocalDate?
+    ) =
+        (statsborgerFra == null || dato.isAfter(statsborgerFra)) &&
+            (statsborgerTil == null || dato.isBefore(statsborgerTil))
 
     companion object {
 
