@@ -113,20 +113,6 @@ class StatsborgerskapService(
         }
     }
 
-    private fun hentMedlemskapsIntervaller(
-        eøsLand: List<BetydningDto>,
-        fra: LocalDate?,
-        til: LocalDate?
-    ): List<LocalDate> =
-        eøsLand.flatMap {
-            listOf(it.gyldigFra, it.gyldigTil.plusDays(1))
-        }.filter { datoForEndringIMedlemskap ->
-            erInnenforDatoerSomBetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
-        }.filter { datoForEndringIMedlemskap ->
-            (fra == null || datoForEndringIMedlemskap.isAfter(fra)) &&
-                (til == null || datoForEndringIMedlemskap.isBefore(til))
-        }
-
     private fun hentMedlemskapsDatoIntervaller(
         medlemsland: List<BetydningDto>,
         fra: LocalDate?,
