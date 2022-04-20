@@ -179,4 +179,58 @@ internal class StatsborgerskapServiceTest {
             grStatsborgerskapUnderBrexit.sortedBy { it.gyldigPeriode?.fom }.last().medlemskap
         )
     }
+
+    @Test
+    fun `hentSterkesteMedlemskap - skal finne sterkeste medlemskap i statsborgerperioden`() {
+        val statsborgerStorbritannia = Statsborgerskap(
+            "GBR",
+            gyldigFraOgMed = LocalDate.of(1990, 4, 1),
+            gyldigTilOgMed = null,
+            bekreftelsesdato = null
+        )
+        val statsborgerPolen = Statsborgerskap(
+            "POL",
+            gyldigFraOgMed = LocalDate.of(1990, 4, 1),
+            gyldigTilOgMed = null,
+            bekreftelsesdato = null
+        )
+        val statsborgerSerbia = Statsborgerskap(
+            "SRB",
+            gyldigFraOgMed = LocalDate.of(1990, 4, 1),
+            gyldigTilOgMed = null,
+            bekreftelsesdato = null
+        )
+        val statsborgerNorge = Statsborgerskap(
+            "NOR",
+            gyldigFraOgMed = LocalDate.of(1990, 4, 1),
+            gyldigTilOgMed = null,
+            bekreftelsesdato = null
+        )
+
+        assertEquals(Medlemskap.EØS, statsborgerskapService.hentSterkesteMedlemskap(statsborgerStorbritannia))
+        assertEquals(Medlemskap.EØS, statsborgerskapService.hentSterkesteMedlemskap(statsborgerPolen))
+        assertEquals(Medlemskap.TREDJELANDSBORGER, statsborgerskapService.hentSterkesteMedlemskap(statsborgerSerbia))
+        assertEquals(Medlemskap.NORDEN, statsborgerskapService.hentSterkesteMedlemskap(statsborgerNorge))
+    }
+
+    @Test
+    fun `hentSterkesteMedlemskap - om statsborgerperiode er ukjent vurderer vi basert på dagens medlemskap`() {
+        val statsborgerStorbritanniaMedNullDatoer = Statsborgerskap(
+            "GBR",
+            gyldigFraOgMed = null,
+            gyldigTilOgMed = null,
+            bekreftelsesdato = null
+        )
+        val statsborgerPolenMedNullDatoer = Statsborgerskap(
+            "POL",
+            gyldigFraOgMed = null,
+            gyldigTilOgMed = null,
+            bekreftelsesdato = null
+        )
+        assertEquals(
+            Medlemskap.TREDJELANDSBORGER,
+            statsborgerskapService.hentSterkesteMedlemskap(statsborgerStorbritanniaMedNullDatoer)
+        )
+        assertEquals(Medlemskap.EØS, statsborgerskapService.hentSterkesteMedlemskap(statsborgerPolenMedNullDatoer))
+    }
 }
