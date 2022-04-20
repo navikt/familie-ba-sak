@@ -82,35 +82,45 @@ class StatsborgerskapService(
             return Medlemskap.NORDEN
         }
 
-        val alleEØSLandInkludertHistoriske =
+        val historiskEØSMedlemsskapForLand =
             integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land] ?: emptyList()
         var datoFra = statsborgerskap.hentFom()
 
-        val alleMedlemskap = hentMedlemskapsIntervaller(
-            alleEØSLandInkludertHistoriske,
-            statsborgerskap.hentFom(),
-            statsborgerskap.gyldigTilOgMed
-        ).fold(mutableSetOf<Medlemskap>()) { acc, dato ->
-            acc.add(
+        return if (datoFra == null && statsborgerskap.gyldigTilOgMed == null) {
+            val idag = LocalDate.now()
+            finnMedlemskap(
+                statsborgerskap,
+                historiskEØSMedlemsskapForLand,
+                idag
+            )
+        } else {
+
+            val alleMedlemskap = hentMedlemskapsIntervaller(
+                historiskEØSMedlemsskapForLand,
+                statsborgerskap.hentFom(),
+                statsborgerskap.gyldigTilOgMed
+            ).fold(mutableSetOf<Medlemskap>()) { acc, dato ->
+                acc.add(
+                    finnMedlemskap(
+                        statsborgerskap,
+                        historiskEØSMedlemsskapForLand,
+                        datoFra
+                    )
+                )
+                datoFra = dato
+                acc
+            }
+
+            alleMedlemskap.add(
                 finnMedlemskap(
                     statsborgerskap,
-                    alleEØSLandInkludertHistoriske,
+                    historiskEØSMedlemsskapForLand,
                     datoFra
                 )
             )
-            datoFra = dato
-            acc
+
+            finnSterkesteMedlemskap(alleMedlemskap.toList())
         }
-
-        alleMedlemskap.add(
-            finnMedlemskap(
-                statsborgerskap,
-                alleEØSLandInkludertHistoriske,
-                datoFra
-            )
-        )
-
-        return finnSterkesteMedlemskap(alleMedlemskap.toList())
     }
 
     private fun hentMedlemskapsIntervaller(
