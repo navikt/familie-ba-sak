@@ -93,15 +93,15 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
         else null
 
     return brevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
-        personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
+        restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
         brevMålform = brevMålform,
         tomDato = tomDato,
         begrunnelserOgFritekster = begrunnelserOgFritekster
     )
 }
 
-internal fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
-    personerPåBehandling: List<MinimertRestPerson>,
+private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
+    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     brevMålform: Målform,
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>
@@ -114,9 +114,9 @@ internal fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
     val barnMedNullutbetaling = nullutbetalingerBarn.map { it.person }
 
     val barnIPeriode: List<MinimertRestPerson> = when (this.type) {
-        UTBETALING -> this.finnBarnIInnvilgelsePeriode(personerPåBehandling)
+        UTBETALING -> this.finnBarnIInnvilgelsePeriode(restBehandlingsgrunnlagForBrev.personerPåBehandling)
         UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> this.finnBarnIUtbetalingMedReduksjonFraForrigeBehandlignPeriode(
-            personerPåBehandling
+            restBehandlingsgrunnlagForBrev.personerPåBehandling
         )
         OPPHØR -> emptyList()
         AVSLAG -> emptyList()
