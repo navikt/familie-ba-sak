@@ -89,7 +89,7 @@ class VilkårService(
         val restVilkårResultat = restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
             ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved opppdatering av vikår")
         val personResultat =
-            finnPersonResultatForPerson(vilkårsvurdering.personResultater, restPersonResultat.personIdent)
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restPersonResultat.personIdent)
 
         muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
 
@@ -115,7 +115,7 @@ class VilkårService(
     fun deleteVilkårsperiode(behandlingId: Long, vilkårId: Long, aktør: Aktør): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
-        val personResultat = finnPersonResultatForPerson(vilkårsvurdering.personResultater, aktør.aktivFødselsnummer())
+        val personResultat = finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, aktør.aktivFødselsnummer())
 
         muterPersonResultatDelete(personResultat, vilkårId)
 
@@ -125,7 +125,7 @@ class VilkårService(
     @Transactional
     fun deleteVilkår(behandlingId: Long, restSlettVilkår: RestSlettVilkår): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
-        val personResultat = finnPersonResultatForPerson(vilkårsvurdering.personResultater, restSlettVilkår.personIdent)
+        val personResultat = finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restSlettVilkår.personIdent)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         if (!behandling.kanLeggeTilOgFjerneUtvidetVilkår() ||
             Vilkår.UTVIDET_BARNETRYGD != restSlettVilkår.vilkårType ||
@@ -167,7 +167,7 @@ class VilkårService(
             )
         }
 
-        val personResultat = finnPersonResultatForPerson(vilkårsvurdering.personResultater, restNyttVilkår.personIdent)
+        val personResultat = finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restNyttVilkår.personIdent)
 
         muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
 
@@ -188,7 +188,7 @@ class VilkårService(
             )
         }
 
-        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlag(behandling.id)
+        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlagThrows(behandling.id)
         if (personopplysningGrunnlag.søkerOgBarn
             .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
         ) {
@@ -208,7 +208,7 @@ class VilkårService(
         bekreftEndringerViaFrontend: Boolean,
         forrigeBehandlingSomErVedtatt: Behandling? = null
     ): Vilkårsvurdering {
-        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlag(behandling.id)
+        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlagThrows(behandling.id)
 
         if (behandling.skalBehandlesAutomatisk && personopplysningGrunnlag.barna.isEmpty()) {
             throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
@@ -332,7 +332,7 @@ class VilkårService(
     }
 
     private fun lagTomVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
-        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlag(vilkårsvurdering.behandling.id)
+        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlagThrows(vilkårsvurdering.behandling.id)
 
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
@@ -357,7 +357,7 @@ class VilkårService(
     }
 
     private fun lagManuellVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
-        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlag(vilkårsvurdering.behandling.id)
+        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlagThrows(vilkårsvurdering.behandling.id)
 
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             genererPersonResultatForPerson(vilkårsvurdering, person)
@@ -370,7 +370,7 @@ class VilkårService(
     ): Set<PersonResultat> {
         val barnaAktørSomAlleredeErVurdert = personidentService.hentAktørIder(barnaSomAlleredeErVurdert)
 
-        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlag(vilkårsvurdering.behandling.id)
+        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlagThrows(vilkårsvurdering.behandling.id)
         val annenForelder = personopplysningGrunnlag.annenForelder
         val eldsteBarnSomVurderesSinFødselsdato =
             personopplysningGrunnlag.barna.filter { !barnaAktørSomAlleredeErVurdert.contains(it.aktør) }
@@ -433,7 +433,7 @@ class VilkårService(
     }
 
     private fun lagVilkårsvurderingForMigreringsbehandling(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
-        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlag(vilkårsvurdering.behandling.id)
+        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlagThrows(vilkårsvurdering.behandling.id)
 
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
@@ -483,7 +483,7 @@ class VilkårService(
                 "Kan ikke kopiere vilkårsvurdering fra forrige behandling ${forrigeBehandlingSomErVedtatt.id}" +
                     "til behandling ${vilkårsvurdering.behandling.id}"
             )
-        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlag(vilkårsvurdering.behandling.id)
+        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlagThrows(vilkårsvurdering.behandling.id)
 
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
@@ -528,7 +528,7 @@ class VilkårService(
         vilkårsvurdering: Vilkårsvurdering,
         nyMigreringsdato: LocalDate
     ): Set<PersonResultat> {
-        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlag(vilkårsvurdering.behandling.id)
+        val personopplysningGrunnlag = hentAktivPersonopplysningGrunnlagThrows(vilkårsvurdering.behandling.id)
 
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
@@ -587,12 +587,12 @@ class VilkårService(
         return false
     }
 
-    private fun hentAktivPersonopplysningGrunnlag(behandlingId: Long): PersonopplysningGrunnlag {
+    private fun hentAktivPersonopplysningGrunnlagThrows(behandlingId: Long): PersonopplysningGrunnlag {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling $behandlingId")
     }
 
-    private fun finnPersonResultatForPerson(
+    private fun finnPersonResultatForPersonThrows(
         personResultater: Set<PersonResultat>,
         personIdent: String
     ): PersonResultat {
