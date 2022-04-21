@@ -4,16 +4,18 @@ import no.nav.familie.ba.sak.common.erBack2BackIMånedsskifte
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.replaceLast
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-fun VilkårsresultatDagTidslinje.tilVilkårsresultaterMånedTidslinje() = VilkårsresultatMånedTidslinje(this)
+fun Tidslinje<VilkårRegelverkResultat, Dag>.tilVilkårsresultaterMånedTidslinje() =
+    VilkårsresultatMånedTidslinje(this)
 
 class VilkårsresultatMånedTidslinje(
-    private val vilkårsresultatDagTidslinje: VilkårsresultatDagTidslinje,
+    private val vilkårsresultatDagTidslinje: Tidslinje<VilkårRegelverkResultat, Dag>,
 ) : Tidslinje<VilkårRegelverkResultat, Måned>() {
 
-    override fun fraOgMed() = vilkårsresultatDagTidslinje.fraOgMed().tilInneværendeMåned()
+    override fun fraOgMed() = vilkårsresultatDagTidslinje.fraOgMed().tilInneværendeMåned().neste()
 
     override fun tilOgMed() = vilkårsresultatDagTidslinje.tilOgMed().tilInneværendeMåned()
 

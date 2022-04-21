@@ -22,5 +22,9 @@ fun des(år: Int) = Tidspunkt.med(YearMonth.of(år, 12))
 
 fun Int.jan(år: Int) = Tidspunkt.med(LocalDate.of(år, 1, this))
 fun Int.feb(år: Int) = Tidspunkt.med(LocalDate.of(år, 2, this))
+fun Int.mar(år: Int) = Tidspunkt.med(LocalDate.of(år, 3, this))
+fun Int.apr(år: Int) = Tidspunkt.med(LocalDate.of(år, 4, this))
+fun Int.mai(år: Int) = Tidspunkt.med(LocalDate.of(år, 5, this))
+fun Int.des(år: Int) = Tidspunkt.med(LocalDate.of(år, 12, this))
 
 fun <T> TidspunktClosedRange<Måned>.med(t: T) = Periode(this, t)

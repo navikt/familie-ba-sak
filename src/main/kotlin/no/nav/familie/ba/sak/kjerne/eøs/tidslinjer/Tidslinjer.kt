@@ -2,17 +2,22 @@ package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.filtrerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import java.time.LocalDate
 
 class Tidslinjer(
     vilkårsvurdering: Vilkårsvurdering,
@@ -70,9 +75,7 @@ class Tidslinjer(
         val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør]!!
 
         private val vilkårsresultatMånedTidslinjer =
-            vilkårsresultatTidslinjer.map {
-                VilkårsresultatMånedTidslinje(it)
-            }
+            vilkårsresultatTidslinjer.map { it.tilVilkårsresultaterMånedTidslinje() }
 
         val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             vilkårsresultatMånedTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator()::kombiner)
@@ -85,12 +88,12 @@ class Tidslinjer(
         val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør]!!
 
         private val vilkårsresultatMånedTidslinjer: List<Tidslinje<VilkårRegelverkResultat, Måned>> =
-            vilkårsresultatTidslinjer.map {
-                VilkårsresultatMånedTidslinje(it)
-            }
+            vilkårsresultatTidslinjer.map { it.tilVilkårsresultaterMånedTidslinje() }
 
         val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-            vilkårsresultatMånedTidslinjer.kombiner(BarnOppfyllerVilkårKombinator()::kombiner)
+            vilkårsresultatMånedTidslinjer
+                .kombiner(BarnOppfyllerVilkårKombinator()::kombiner)
+                .filtrerMed(erUnder18ÅrVilkårTidslinje(tidslinjer.barnOgFødselsdatoer.getValue(aktør)))
 
         val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             oppfyllerVilkårTidslinje.kombinerMed(
@@ -104,6 +107,18 @@ class Tidslinjer(
         val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje.kombinerMed(
             regelverkMidlertidigTidslinje,
             RegelverkOgOppfyltePerioderKombinator()::kombiner
+        )
+    }
+}
+
+fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> {
+
+    return object : Tidslinje<Boolean, Måned>() {
+        override fun fraOgMed() = Tidspunkt.med(fødselsdato.toYearMonth()).neste()
+        override fun tilOgMed() = Tidspunkt.med(fødselsdato.til18ÅrsVilkårsdato().toYearMonth()).forrige()
+
+        override fun lagPerioder(): Collection<Periode<Boolean, Måned>> = listOf(
+            Periode(fraOgMed(), tilOgMed(), true)
         )
     }
 }

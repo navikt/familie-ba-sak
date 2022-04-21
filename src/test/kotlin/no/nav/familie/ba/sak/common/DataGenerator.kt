@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -1082,3 +1083,10 @@ fun lagTriggesAv(
     endretUtbetalingSkalUtbetales = endretUtbetalingSkalUtbetales,
     småbarnstillegg = småbarnstillegg,
 )
+
+fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
+    VilkårRegelverkResultat(
+        vilkår = vilkår,
+        resultat = Resultat.OPPFYLT,
+        regelverk = regelverk
+    )

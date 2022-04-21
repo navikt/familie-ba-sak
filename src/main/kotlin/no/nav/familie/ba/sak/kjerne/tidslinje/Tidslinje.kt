@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeMedAvhengigheter
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.TidspunktClosedRange
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 
 abstract class Tidslinje<I, T : Tidsenhet> {
     private var periodeCache: List<Periode<I, T>>? = null
@@ -83,13 +84,49 @@ fun <I, T : Tidsenhet, R> Tidslinje<I, T>.map(mapper: (I?) -> R?): Tidslinje<R, 
     }
 }
 
-fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
-    høyre: Tidslinje<H, T>,
-    kombinator: (V?, H?) -> R?
-): Tidslinje<R, T> {
-    val venstre = this
-    return object : TidslinjeSomStykkerOppTiden<R, T>(venstre, høyre) {
-        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
-            kombinator(venstre.innholdForTidspunkt(tidspunkt), høyre.innholdForTidspunkt(tidspunkt))
+fun <T : Tidsenhet, I> TidspunktClosedRange<T>.tilTidslinje(innhold: () -> I): Tidslinje<I, T> {
+    val fom = this.start
+    val tom = this.endInclusive
+    return object : Tidslinje<I, T>() {
+        override fun fraOgMed() = fom
+        override fun tilOgMed() = tom
+        override fun lagPerioder(): Collection<Periode<I, T>> {
+            return listOf(Periode(fom, tom, innhold()))
+        }
+    }
+}
+
+fun <T : Tidsenhet, I> Tidspunkt<T>.tilTidslinje(innhold: () -> I): Tidslinje<I, T> =
+    this.rangeTo(this).tilTidslinje(innhold)
+
+fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerMed(bolskTidslinje: Tidslinje<Boolean, T>): Tidslinje<I, T> {
+    return this.kombinerMed(bolskTidslinje) { innhold, erSann ->
+        when (erSann) {
+            true -> innhold
+            else -> null
+        }
+    }.beskjærEtter(this)
+}
+
+fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærEtter(beskjæring: Tidslinje<*, T>): Tidslinje<I, T> {
+
+    val tidslinje = this
+    return object : Tidslinje<I, T>() {
+        override fun fraOgMed() = beskjæring.fraOgMed()
+        override fun tilOgMed() = beskjæring.tilOgMed()
+
+        override fun lagPerioder(): Collection<Periode<I, T>> {
+            return tidslinje.perioder()
+                .filter { it.fraOgMed <= tilOgMed() && it.tilOgMed >= fraOgMed() }
+                .map {
+                    when {
+                        it.fraOgMed == tidslinje.fraOgMed() -> Periode(fraOgMed(), it.tilOgMed, it.innhold)
+                        it.fraOgMed < fraOgMed() -> Periode(fraOgMed(), it.tilOgMed, it.innhold)
+                        it.tilOgMed == tidslinje.tilOgMed() -> Periode(it.fraOgMed, tilOgMed(), it.innhold)
+                        it.tilOgMed > tilOgMed() -> Periode(it.fraOgMed, tilOgMed(), it.innhold)
+                        else -> it
+                    }
+                }
+        }
     }
 }

@@ -34,7 +34,7 @@ fun <T : Tidsenhet> String.tilVilkårResultatTidslinje(tidspunkt: Tidspunkt<T>):
         when (c) {
             '+' -> Resultat.OPPFYLT
             '-' -> Resultat.IKKE_OPPFYLT
-            ' ' -> Resultat.IKKE_VURDERT
+            '?' -> Resultat.IKKE_VURDERT
             else -> null
         }
     }
