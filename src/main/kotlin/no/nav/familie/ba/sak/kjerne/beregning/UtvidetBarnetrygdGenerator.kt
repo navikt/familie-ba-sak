@@ -158,39 +158,32 @@ data class UtvidetBarnetrygdGenerator(
 
     private fun slåSammenEtterfølgendeSegmenterMedLikProsent(sammenlagtTidslinjeForBarna: LocalDateTimeline<List<PeriodeData>>): List<LocalDateSegment<List<PeriodeData>>> {
         return sammenlagtTidslinjeForBarna.toSegments()
-            .fold(mutableListOf<LocalDateSegment<List<PeriodeData>>>()) { sammenslåttePerioder, nestePeriode ->
+            .fold(listOf<LocalDateSegment<List<PeriodeData>>>()) { sammenslåttePerioder, nestePeriode ->
                 val sistePeriodeSomErSammenslått = sammenslåttePerioder.lastOrNull()
-                if (sistePeriodeSomErSammenslått?.tom?.toYearMonth() == nestePeriode.fom.forrigeMåned() && sistePeriodeSomErSammenslått.value.maxOf { it.prosent } == nestePeriode.value.maxOf { it.prosent }) {
-                    sammenslåttePerioder.apply {
-                        removeLast()
-                        val prosentForPeriode = sistePeriodeSomErSammenslått.value.maxOf { it.prosent }
-                        add(
-                            LocalDateSegment(
-                                sistePeriodeSomErSammenslått.fom,
-                                nestePeriode.tom,
-                                listOf(
-                                    PeriodeData(
-                                        rolle = PersonType.BARN,
-                                        prosent = prosentForPeriode
-                                    )
-                                )
-                            )
-                        )
-                    }
-                } else sammenslåttePerioder.apply {
-                    add(
-                        LocalDateSegment(
-                            nestePeriode.fom,
-                            nestePeriode.tom,
-                            listOf(
-                                PeriodeData(
-                                    rolle = PersonType.BARN,
-                                    prosent = nestePeriode.value.maxOf { it.prosent }
-                                )
+                val segmenterErEtterfølgendeOgHarSammeProsent = sistePeriodeSomErSammenslått?.tom?.toYearMonth() == nestePeriode.fom.forrigeMåned() && sistePeriodeSomErSammenslått.value.maxOf { it.prosent } == nestePeriode.value.maxOf { it.prosent }
+                if (sistePeriodeSomErSammenslått != null && segmenterErEtterfølgendeOgHarSammeProsent) {
+                    val prosentForPeriode = sistePeriodeSomErSammenslått.value.maxOf { it.prosent }
+                    sammenslåttePerioder.dropLast(1) + LocalDateSegment(
+                        sistePeriodeSomErSammenslått.fom,
+                        nestePeriode.tom,
+                        listOf(
+                            PeriodeData(
+                                rolle = PersonType.BARN,
+                                prosent = prosentForPeriode
                             )
                         )
                     )
-                }
+                } else
+                    sammenslåttePerioder + LocalDateSegment(
+                        nestePeriode.fom,
+                        nestePeriode.tom,
+                        listOf(
+                            PeriodeData(
+                                rolle = PersonType.BARN,
+                                prosent = nestePeriode.value.maxOf { it.prosent }
+                            )
+                        )
+                    )
             }.toList()
     }
 
