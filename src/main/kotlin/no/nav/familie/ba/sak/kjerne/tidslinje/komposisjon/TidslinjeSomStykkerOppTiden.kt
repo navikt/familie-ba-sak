@@ -31,6 +31,9 @@ abstract class TidslinjeSomStykkerOppTiden<I, T : Tidsenhet>(
 fun <T> Collection<T>.replaceLast(replacement: T) =
     this.take(this.size - 1) + replacement
 
+fun <T> Collection<T>.replaceLast(replacer: (T) -> T) =
+    this.take(this.size - 1) + replacer(this.last())
+
 fun <I, T : Tidsenhet> Tidslinje<I, T>.innholdForTidspunkt(tidspunkt: Tidspunkt<T>): I? =
     perioder().innholdForTidspunkt(tidspunkt)
 
