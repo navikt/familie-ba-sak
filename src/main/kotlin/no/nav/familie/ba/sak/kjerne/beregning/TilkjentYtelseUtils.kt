@@ -40,7 +40,8 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
-        hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() }
+        skalBrukeNyMåteÅLageUtvidetAndeler: Boolean = true,
+        hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
 
@@ -91,7 +92,8 @@ object TilkjentYtelseUtils {
 
         val andelerTilkjentYtelseSøker = UtvidetBarnetrygdGenerator(
             behandlingId = vilkårsvurdering.behandling.id,
-            tilkjentYtelse = tilkjentYtelse
+            tilkjentYtelse = tilkjentYtelse,
+            skalBrukeNyMåteÅLageUtvidetAndeler = skalBrukeNyMåteÅLageUtvidetAndeler
         )
             .lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = vilkårsvurdering.personResultater
@@ -253,7 +255,7 @@ object TilkjentYtelseUtils {
             minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
 
         val barnetsPeriodeLøperVidere =
-            if (periodeResultatBarn.periodeTom == null) true else periodeResultatBarn.periodeTom.toYearMonth() > minsteTom.toYearMonth()
+            periodeResultatBarn.periodeTom == null || periodeResultatBarn.periodeTom.toYearMonth() > minsteTom.toYearMonth()
 
         val skalVidereføresEnMånedEkstra =
             innvilgedePeriodeResultatBarna.any { periodeResultat ->
