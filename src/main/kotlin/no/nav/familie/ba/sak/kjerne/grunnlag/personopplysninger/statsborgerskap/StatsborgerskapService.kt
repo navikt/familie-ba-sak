@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -177,7 +178,10 @@ class StatsborgerskapService(
         return intervaller.mapIndexed { index, endringsdatoPar ->
             val fra = endringsdatoPar[0]
             val nesteEndringsdato = endringsdatoPar[1]
-            if (index != (intervaller.size - 1) && nesteEndringsdato != null) {
+            if (index != (intervaller.size - 1)) {
+                if (nesteEndringsdato == null) {
+                    throw Feil("EØS-medlemskap skal ikke kunne ha null som fra/til-dato")
+                }
                 DatoIntervallEntitet(fra, nesteEndringsdato.minusDays(1))
             } else {
                 DatoIntervallEntitet(fra, nesteEndringsdato)
