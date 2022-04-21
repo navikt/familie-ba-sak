@@ -31,10 +31,10 @@ fun <T : Tidsenhet> String.tilVilkårRegelverkResultatTidslinje(vilkår: Vilkår
 
 fun <T : Tidsenhet> String.tilVilkårResultatTidslinje(tidspunkt: Tidspunkt<T>): Tidslinje<Resultat, T> =
     this.tilCharTidslinje(tidspunkt).map { c ->
-        when (c?.uppercase()) {
-            "+" -> Resultat.OPPFYLT
-            "-" -> Resultat.IKKE_OPPFYLT
-            " " -> Resultat.IKKE_VURDERT
+        when (c) {
+            '+' -> Resultat.OPPFYLT
+            '-' -> Resultat.IKKE_OPPFYLT
+            ' ' -> Resultat.IKKE_VURDERT
             else -> null
         }
     }
