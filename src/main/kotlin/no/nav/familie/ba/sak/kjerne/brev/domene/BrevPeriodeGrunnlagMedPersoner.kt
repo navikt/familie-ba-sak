@@ -22,14 +22,9 @@ data class BrevPeriodeGrunnlagMedPersoner(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
         brevMålform: Målform,
-        erIngenOverlappVedtaksperiodeTogglePå: Boolean,
     ): List<Begrunnelse> {
 
-        val sorterteBegrunnelser =
-            if (erIngenOverlappVedtaksperiodeTogglePå) this.begrunnelser.sorted()
-            else this.begrunnelser.sortedBy { it.vedtakBegrunnelseType }
-
-        val brevBegrunnelser = sorterteBegrunnelser
+        val brevBegrunnelser = this.begrunnelser.sorted()
             .map {
                 it.tilBrevBegrunnelse(
                     vedtaksperiode = NullablePeriode(this.fom, this.tom),

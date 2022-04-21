@@ -89,8 +89,7 @@
       ]
     }
   ],
-  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
-  "uregistrerteBarn": [],
+   "uregistrerteBarn": [],
   "erFørsteVedtaksperiodePåFagsak": false,
   "brevMålform": "NB",
   "forventetOutput": {

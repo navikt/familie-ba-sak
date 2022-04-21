@@ -38,8 +38,7 @@
       "utbetalinger": []
     }
   ],
-  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
-  "uregistrerteBarn": [
+   "uregistrerteBarn": [
     {
       "personIdent": "",
       "navn": "Barn Barnesen",

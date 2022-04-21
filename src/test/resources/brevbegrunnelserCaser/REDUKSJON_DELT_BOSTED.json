@@ -7,8 +7,7 @@
   "ytelserForBarnOgSøkerIPeriode": [
     "ORDINÆR_BARNETRYGD"
   ],
-  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
-  "personerPåBehandling": [
+   "personerPåBehandling": [
     {
       "fødselsdato": "1990-02-19",
       "type": "SØKER",

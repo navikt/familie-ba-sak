@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertPerson
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -50,7 +49,7 @@ internal class StandardbegrunnelseTest {
         assertTrue(
             Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
                 .triggesForPeriode(
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
+
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -58,7 +57,6 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -68,7 +66,7 @@ internal class StandardbegrunnelseTest {
         assertFalse(
             Standardbegrunnelse.OPPHØR_UTVANDRET
                 .triggesForPeriode(
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
+
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -76,7 +74,6 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -86,7 +83,7 @@ internal class StandardbegrunnelseTest {
         assertFalse(
             Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
+
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -94,7 +91,6 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -110,7 +106,7 @@ internal class StandardbegrunnelseTest {
         assertTrue(
             Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
+
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -118,7 +114,6 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -134,7 +129,7 @@ internal class StandardbegrunnelseTest {
         assertTrue(
             Standardbegrunnelse.INNVILGET_SATSENDRING
                 .triggesForPeriode(
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
+
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = vedtaksperiodeMedBegrunnelserSatsEndring.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -142,7 +137,6 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -158,7 +152,7 @@ internal class StandardbegrunnelseTest {
         assertFalse(
             Standardbegrunnelse.INNVILGET_SATSENDRING
                 .triggesForPeriode(
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
+
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = vedtaksperiodeMedBegrunnelserSatsEndring.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -166,7 +160,6 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -178,7 +171,7 @@ internal class StandardbegrunnelseTest {
         assertFalse(
             Standardbegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
+
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -186,7 +179,6 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -198,7 +190,7 @@ internal class StandardbegrunnelseTest {
         assertTrue(
             Standardbegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
+
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -206,7 +198,6 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -218,7 +209,7 @@ internal class StandardbegrunnelseTest {
         assertTrue(
             Standardbegrunnelse.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
+
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -240,7 +231,6 @@ internal class StandardbegrunnelseTest {
                     ).map { it.tilMinimertEndretUtbetalingAndel() },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -252,7 +242,7 @@ internal class StandardbegrunnelseTest {
         assertFalse(
             Standardbegrunnelse.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
+
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -274,7 +264,6 @@ internal class StandardbegrunnelseTest {
                     ).map { it.tilMinimertEndretUtbetalingAndel() },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
