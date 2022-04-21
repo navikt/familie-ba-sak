@@ -42,7 +42,8 @@ data class GrVegadresse(
 
     override fun toSecureString(): String {
         return """VegadresseDao(husnummer=$husnummer,husbokstav=$husbokstav,matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,
-|           adressenavn=$adressenavn,kommunenummer=$kommunenummer,tilleggsnavn=$tilleggsnavn,postnummer=$postnummer""".trimMargin()
+|           adressenavn=$adressenavn,kommunenummer=$kommunenummer,tilleggsnavn=$tilleggsnavn,postnummer=$postnummer
+        """.trimMargin()
     }
 
     override fun toString(): String {

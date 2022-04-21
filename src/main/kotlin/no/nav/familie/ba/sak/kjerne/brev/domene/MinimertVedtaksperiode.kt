@@ -28,7 +28,7 @@ data class MinimertVedtaksperiode(
             fom = this.fom,
             tom = this.tom,
             type = this.type,
-            begrunnelser = this.begrunnelser.map {
+            begrunnelser = this.begrunnelser.flatMap {
                 it.tilBrevBegrunnelseGrunnlagMedPersoner(
                     periode = NullablePeriode(
                         fom = this.fom,

@@ -206,62 +206,16 @@ object VilkårsvurderingUtils {
                 )
             } else {
                 // Fyll inn den initierte med person fra aktiv
-                val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
-                val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
-                personFraInit.vilkårResultater.forEach { vilkårFraInit ->
-                    val vilkårSomFinnes =
-                        personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
-
-                    val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
-                        kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
-                    )
-                    val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
-                    personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
-
-                    if (vilkårSomSkalKopieresOver.isEmpty()) {
-                        // Legg til nytt vilkår på person
-                        personsVilkårOppdatert.add(vilkårFraInit.kopierMedParent(personTilOppdatert))
-                    } else {
-                        /*  Vilkår er vurdert på person - flytt fra aktivt og overskriv initierte
-                            ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
-                            periode eksisterer. */
-
-                        personsVilkårOppdatert.addAll(
-                            vilkårSomSkalKopieresOver.map { it.kopierMedParent(personTilOppdatert) }
-                        )
-                        personsVilkårAktivt.removeAll(vilkårSomSkalKopieresOver)
-                    }
-                }
-                val eksistererUtvidetVilkårPåForrigeBehandling =
-                    forrigeBehandlingVilkårsvurdering?.personResultater
-                        ?.firstOrNull { it.aktør == personFraInit.aktør }
-                        ?.vilkårResultater
-                        ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } ?: false
-
-                // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
-                // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
-                if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
-                    (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
-                ) {
-                    val utvidetVilkår =
-                        personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-                    if (utvidetVilkår.isNotEmpty()) {
-                        personsVilkårOppdatert.addAll(
-                            utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id)
-                                .map { it.kopierMedParent(personTilOppdatert) }
-                        )
-                        personsVilkårAktivt.removeAll(utvidetVilkår)
-                    }
-                }
-
-                personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
-
-                // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
-                if (personsVilkårAktivt.isEmpty()) {
-                    personResultaterAktivt.remove(personenSomFinnes)
-                } else {
-                    personenSomFinnes.setSortedVilkårResultater(personsVilkårAktivt.toSet())
-                }
+                oppdaterEksisterendePerson(
+                    personenSomFinnes,
+                    personFraInit,
+                    initiellVilkårsvurdering,
+                    aktivVilkårsvurdering,
+                    personTilOppdatert,
+                    forrigeBehandlingVilkårsvurdering,
+                    løpendeUnderkategori,
+                    personResultaterAktivt
+                )
             }
             personResultaterOppdatert.add(personTilOppdatert)
         }
@@ -269,6 +223,79 @@ object VilkårsvurderingUtils {
         initiellVilkårsvurdering.personResultater = personResultaterOppdatert
 
         return Pair(initiellVilkårsvurdering, aktivVilkårsvurdering)
+    }
+
+    private fun oppdaterEksisterendePerson(
+        personenSomFinnes: PersonResultat,
+        personFraInit: PersonResultat,
+        initiellVilkårsvurdering: Vilkårsvurdering,
+        aktivVilkårsvurdering: Vilkårsvurdering,
+        personTilOppdatert: PersonResultat,
+        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering?,
+        løpendeUnderkategori: BehandlingUnderkategori?,
+        personResultaterAktivt: MutableSet<PersonResultat>
+    ) {
+        val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
+        val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
+        personFraInit.vilkårResultater.forEach { vilkårFraInit ->
+            val vilkårSomFinnes =
+                personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
+
+            val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
+                kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
+            )
+            val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
+            personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
+
+            if (vilkårSomSkalKopieresOver.isEmpty()) {
+                // Legg til nytt vilkår på person
+                personsVilkårOppdatert.add(vilkårFraInit.kopierMedParent(personTilOppdatert))
+            } else {
+                /*  Vilkår er vurdert på person - flytt fra aktivt og overskriv initierte
+                            ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
+                            periode eksisterer. */
+
+                personsVilkårOppdatert.addAll(
+                    vilkårSomSkalKopieresOver.map { it.kopierMedParent(personTilOppdatert) }
+                )
+                personsVilkårAktivt.removeAll(vilkårSomSkalKopieresOver)
+            }
+        }
+        val eksistererUtvidetVilkårPåForrigeBehandling =
+            forrigeBehandlingVilkårsvurdering?.personResultater
+                ?.firstOrNull { it.aktør == personFraInit.aktør }
+                ?.vilkårResultater
+                ?.any {
+                    it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
+                        it.resultat == Resultat.OPPFYLT &&
+                        // forrige behandling har ubetalt utvidet barnetrygd
+                        løpendeUnderkategori == BehandlingUnderkategori.UTVIDET
+                } ?: false
+
+        // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
+        // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
+        if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
+            (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
+        ) {
+            val utvidetVilkår =
+                personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            if (utvidetVilkår.isNotEmpty()) {
+                personsVilkårOppdatert.addAll(
+                    utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id)
+                        .map { it.kopierMedParent(personTilOppdatert) }
+                )
+                personsVilkårAktivt.removeAll(utvidetVilkår)
+            }
+        }
+
+        personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
+
+        // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
+        if (personsVilkårAktivt.isEmpty()) {
+            personResultaterAktivt.remove(personenSomFinnes)
+        } else {
+            personenSomFinnes.setSortedVilkårResultater(personsVilkårAktivt.toSet())
+        }
     }
 
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {

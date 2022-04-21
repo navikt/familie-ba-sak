@@ -182,8 +182,7 @@ class VilkårService(
         if (restSlettVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
             behandlingstemaService.oppdaterBehandlingstema(
                 behandling = behandling,
-                nyKategori = behandling.kategori,
-                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
         }
 
@@ -205,8 +204,7 @@ class VilkårService(
 
             behandlingstemaService.oppdaterBehandlingstema(
                 behandling = behandling,
-                nyKategori = behandling.kategori,
-                nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
         }
 

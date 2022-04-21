@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinjer.TomTidslinje
 
 /**
  * Extension-metode for å kombinere en map av tidslinjer med en annen map av tidslinjer

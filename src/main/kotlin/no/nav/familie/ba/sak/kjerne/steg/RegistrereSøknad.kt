@@ -32,11 +32,12 @@ class RegistrereSøknad(
         val søknadDTO: SøknadDTO = data.søknad
         val innsendtSøknad = søknadDTO.writeValueAsString()
 
-        behandlingstemaService.oppdaterBehandlingstema(
-            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
-            nyKategori = behandling.kategori, // Hvis søknadDTO får feltet kategori, så må denne endres til søknadDTO.kategori
-            nyUnderkategori = søknadDTO.underkategori
-        )
+        if (behandling.underkategori != søknadDTO.underkategori) {
+            behandlingstemaService.oppdaterBehandlingstema(
+                behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
+                overstyrtUnderkategori = søknadDTO.underkategori
+            )
+        }
 
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)
         søknadGrunnlagService.lagreOgDeaktiverGammel(

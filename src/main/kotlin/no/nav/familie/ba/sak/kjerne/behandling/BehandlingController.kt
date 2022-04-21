@@ -102,8 +102,8 @@ class BehandlingController(
 
         val behandling = behandlingstemaService.oppdaterBehandlingstema(
             behandling = behandlingHentOgPersisterService.hent(behandlingId),
-            nyUnderkategori = endreBehandling.behandlingUnderkategori,
-            nyKategori = endreBehandling.behandlingKategori,
+            overstyrtUnderkategori = endreBehandling.behandlingUnderkategori,
+            overstyrtKategori = endreBehandling.behandlingKategori,
             manueltOppdatert = true
         )
 
@@ -121,7 +121,7 @@ class BehandlingController(
     ): ResponseEntity<Ressurs<List<String>>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hent gyldig etterbetaling"
         )
 

@@ -19,7 +19,8 @@ data class MinimertRestEndretAndel(
     val periode: MånedPeriode,
     val personIdent: String,
     val årsak: Årsak,
-    val søknadstidspunkt: LocalDate
+    val søknadstidspunkt: LocalDate,
+    val avtaletidspunktDeltBosted: LocalDate?
 ) {
     fun erOverlappendeMed(nullableMånedPeriode: NullableMånedPeriode): Boolean {
         return MånedPeriode(
@@ -50,5 +51,11 @@ fun EndretUtbetalingAndel.tilMinimertRestEndretUtbetalingAndel() = MinimertRestE
     søknadstidspunkt = this.søknadstidspunkt ?: throw Feil(
         "Har ikke søknadstidspunk på endretUtbetalingsandel  ${this.id} " +
             "ved konvertering til minimertRestEndretUtbetalingsandel"
-    )
+    ),
+    avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: (
+        if (this.årsakErDeltBosted()) throw Feil(
+            "Har ikke avtaletidspunktDeltBosted på endretUtbetalingsandel  ${this.id} " +
+                "ved konvertering til minimertRestEndretUtbetalingsandel"
+        ) else null
+        )
 )

@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
+package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør

@@ -1,9 +1,15 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util
+package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.inneholder
 
+/**
+ * Reduser innholdet i this-kompetansen med innholdet i oppdaterKompetanse
+ * En viktig forutsetning er at oppdatertKompetanse alltid er "mindre" enn kompetansen som reduseres
+ */
 fun Kompetanse.trekkFra(oppdatertKompetanse: Kompetanse): Collection<Kompetanse> {
+
     val gammelKompetanse = this
     val kompetanseForRestBarn = gammelKompetanse
         .copy(
@@ -21,7 +27,7 @@ fun Kompetanse.trekkFra(oppdatertKompetanse: Kompetanse): Collection<Kompetanse>
         fom = oppdatertKompetanse.tom?.plusMonths(1),
         tom = gammelKompetanse.tom,
         barnAktører = oppdatertKompetanse.barnAktører
-    ).takeIf { it.fom != null && it.fom <= it.tom }
+    ).takeIf { it.fom != null && it.fom <= (it.tom ?: MAX_MÅNED) }
 
     return listOfNotNull(kompetanseForRestBarn, kompetanseForForegåendePerioder, kompetanseForEtterfølgendePerioder)
 }

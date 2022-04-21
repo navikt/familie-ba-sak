@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.util.slåSammen
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Assertions
@@ -112,6 +112,24 @@ class SlåSammenKompetanserTest {
 
         val faktiskeKompetanser = kompetanser.slåSammen()
         Assertions.assertEquals(6, faktiskeKompetanser.size)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun slåSammenEnkeltBarnSomSkillerSegHeltUt() {
+        val kompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("SSS", barn1)
+            .medKompetanse("---------", barn2, barn3)
+            .medKompetanse("   SSSS", barn1)
+            .byggKompetanser()
+
+        val forventedeKompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("SSSSSSS", barn1)
+            .medKompetanse("---------", barn2, barn3)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = kompetanser.slåSammen()
+        Assertions.assertEquals(2, faktiskeKompetanser.size)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 }

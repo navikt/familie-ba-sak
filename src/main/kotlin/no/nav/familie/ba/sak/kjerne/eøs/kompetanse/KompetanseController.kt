@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanse
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MAX_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -69,12 +71,14 @@ class KompetanseController(
     private fun validerOppdatering(gjeldendeKompetanse: Kompetanse, oppdatertKompetanse: Kompetanse) {
         if (oppdatertKompetanse.fom == null)
             throw FunksjonellFeil("Manglende fra-og-med", httpStatus = HttpStatus.BAD_REQUEST)
-        if (oppdatertKompetanse.fom > oppdatertKompetanse.tom)
+        if (oppdatertKompetanse.tom != null && oppdatertKompetanse.fom > oppdatertKompetanse.tom)
             throw FunksjonellFeil("Fra-og-med er etter til-og-med", httpStatus = HttpStatus.BAD_REQUEST)
+        if (oppdatertKompetanse.fom < (gjeldendeKompetanse.fom ?: MIN_MÅNED))
+            throw FunksjonellFeil("Setter fra-og-med tidligere", httpStatus = HttpStatus.BAD_REQUEST)
+        if ((oppdatertKompetanse.tom ?: MAX_MÅNED) > (gjeldendeKompetanse.tom ?: MAX_MÅNED))
+            throw FunksjonellFeil("Setter til-og-med senere ", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.barnAktører.isEmpty())
             throw FunksjonellFeil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
-        if (oppdatertKompetanse.fom < gjeldendeKompetanse.fom)
-            throw FunksjonellFeil("Setter fra-og-med tidligere", httpStatus = HttpStatus.BAD_REQUEST)
         if (!gjeldendeKompetanse.barnAktører.containsAll(oppdatertKompetanse.barnAktører))
             throw FunksjonellFeil(
                 "Oppdaterer barn som ikke er knyttet til kompetansen",

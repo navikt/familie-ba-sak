@@ -258,7 +258,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
+    erNyDeltBostedTogglePå: Boolean
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
     sanityBegrunnelser = sanityBegrunnelser,
@@ -280,7 +281,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
         .hentUtvidetScenarioForEndringsperiode(
             utvidetVedtaksperiodeMedBegrunnelser.hentMånedPeriode()
         ),
-    erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå
+    erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
+    erNyDeltBostedTogglePå = erNyDeltBostedTogglePå
 )
 
 fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
@@ -294,6 +296,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
     erIngenOverlappVedtaksperiodeToggelPå: Boolean,
+    erNyDeltBostedTogglePå: Boolean
 ): List<Standardbegrunnelse> {
     val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.values()
         .filter {
@@ -304,7 +307,11 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
         }.filter {
             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
                 if (erIngenOverlappVedtaksperiodeToggelPå) {
-                    nyeEndretUtbetalingsperiodeBegrunnelser.contains(it)
+                    nyeEndretUtbetalingsperiodeBegrunnelser.filter { standardbegrunnelse ->
+                        if (!erNyDeltBostedTogglePå)
+                            standardbegrunnelse != Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING
+                        else true
+                    }.contains(it)
                 } else gamleEndretUtbetalingsperiodeBegrunnelser.contains(it)
             } else true
         }
