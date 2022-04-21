@@ -104,3 +104,22 @@ fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.snittKombinerMed(
             )
     }
 }
+
+/**
+ * Extension-metode for å kombinere liste av tidslinjer
+ * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
+ * fra minste fraOgMed til største fraOgMed() fra alle tidslinjene
+ * Innhold (I) og tidsenhet (T) må være av samme type
+ * Kombintor-funksjonen tar inn Iterable<I> og returner (nullable) R
+ * Null-verdier fjernes før de sendes til kombinator-funksjonen, som betyr at en tom iterator kan bli sendt
+ * Resultatet er en tidslnije med tidsenhet T og innhold R
+ */
+fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.snittKombinerUtenNull(
+    listeKombinator: (Iterable<I>) -> R?
+): Tidslinje<R, T> {
+    val tidslinjer = this
+    return object : TidslinjeSomStykkerOppTiden<R, T>(tidslinjer) {
+        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
+            listeKombinator(tidslinjer.map { it.innholdForTidspunkt(tidspunkt) }.filterNotNull())
+    }
+}
