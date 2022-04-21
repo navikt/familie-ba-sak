@@ -1,10 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeMedAvhengigheter
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.TidspunktClosedRange
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 
 abstract class Tidslinje<I, T : Tidsenhet> {
     private var periodeCache: List<Periode<I, T>>? = null
@@ -73,27 +70,3 @@ abstract class Tidslinje<I, T : Tidsenhet> {
             IllegalStateException(tidslinjeFeil.toString())
     }
 }
-
-fun <I, T : Tidsenhet, R> Tidslinje<I, T>.map(mapper: (I?) -> R?): Tidslinje<R, T> {
-    val avhengighet = this
-    return object : TidslinjeMedAvhengigheter<R, T>(listOf(avhengighet)) {
-        override fun lagPerioder() = avhengighet.perioder().map {
-            Periode(it.fraOgMed, it.tilOgMed, mapper(it.innhold))
-        }
-    }
-}
-
-fun <T : Tidsenhet, I> TidspunktClosedRange<T>.tilTidslinje(innhold: () -> I): Tidslinje<I, T> {
-    val fom = this.start
-    val tom = this.endInclusive
-    return object : Tidslinje<I, T>() {
-        override fun fraOgMed() = fom
-        override fun tilOgMed() = tom
-        override fun lagPerioder(): Collection<Periode<I, T>> {
-            return listOf(Periode(fom, tom, innhold()))
-        }
-    }
-}
-
-fun <T : Tidsenhet, I> Tidspunkt<T>.tilTidslinje(innhold: () -> I): Tidslinje<I, T> =
-    this.rangeTo(this).tilTidslinje(innhold)
