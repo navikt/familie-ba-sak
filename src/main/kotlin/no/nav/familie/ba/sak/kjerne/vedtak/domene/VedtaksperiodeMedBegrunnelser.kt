@@ -104,39 +104,21 @@ data class VedtaksperiodeMedBegrunnelser(
     fun hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        erIngenOverlappVedtaksperiodeTogglePå: Boolean,
     ): List<UtbetalingsperiodeDetalj> =
-        if (this.type == Vedtaksperiodetype.UTBETALING ||
-            this.type == Vedtaksperiodetype.ENDRET_UTBETALING ||
+        if (andelerTilkjentYtelse.isEmpty()) emptyList()
+        else if (this.type == Vedtaksperiodetype.UTBETALING ||
             this.type == Vedtaksperiodetype.FORTSATT_INNVILGET ||
             this.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
         ) {
-            val andelerForVedtaksperiodetype =
-                if (!erIngenOverlappVedtaksperiodeTogglePå) {
-                    andelerTilkjentYtelse.filter {
-                        if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
-                            it.harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(this)
-                        } else {
-                            it.endretUtbetalingAndeler.isEmpty()
-                        }
-                    }
-                } else {
-                    andelerTilkjentYtelse
-                }
-            if (andelerForVedtaksperiodetype.isEmpty()) emptyList()
-            else {
-                val vertikaltSegmentForVedtaksperiode =
-                    if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
-                        hentLøpendeAndelForVedtaksperiode(andelerForVedtaksperiodetype)
-                    else hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
+            val vertikaltSegmentForVedtaksperiode =
+                if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
+                    hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse)
+                else hentVertikaltSegmentForVedtaksperiode(andelerTilkjentYtelse)
 
-                run {
-                    val andelerForSegment =
-                        andelerForVedtaksperiodetype.hentAndelerForSegment(vertikaltSegmentForVedtaksperiode)
+            val andelerForSegment =
+                andelerTilkjentYtelse.hentAndelerForSegment(vertikaltSegmentForVedtaksperiode)
 
-                    andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
-                }
-            }
+            andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
         } else {
             emptyList()
         }

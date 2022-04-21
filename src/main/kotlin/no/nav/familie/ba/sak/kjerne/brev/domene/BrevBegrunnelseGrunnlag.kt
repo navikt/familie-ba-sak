@@ -21,12 +21,15 @@ data class BrevBegrunnelseGrunnlag(
         erFørsteVedtaksperiodePåFagsak: Boolean,
         erUregistrerteBarnPåbehandling: Boolean,
         barnPersonIdentMedReduksjon: List<String>,
-        erIngenOverlappVedtaksperiodeTogglePå: Boolean,
         minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
 
         return if (this.standardbegrunnelse.kanDelesOpp) {
-            this.standardbegrunnelse.delOpp(restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev, triggesAv = this.triggesAv, periode = periode)
+            this.standardbegrunnelse.delOpp(
+                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+                triggesAv = this.triggesAv,
+                periode = periode
+            )
         } else {
             val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
                 triggesAv = this.triggesAv,
@@ -37,7 +40,6 @@ data class BrevBegrunnelseGrunnlag(
                 identerMedUtbetalingPåPeriode = identerMedUtbetalingPåPeriode,
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 identerMedReduksjonPåPeriode = barnPersonIdentMedReduksjon.map { it },
-                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
                 minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
             )
 

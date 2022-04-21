@@ -20,20 +20,15 @@ interface Vedtaksperiode {
     val vedtaksperiodetype: Vedtaksperiodetype
 }
 
-enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: (erIngenOverlappVedtaksperiodeToggelPå: Boolean) -> List<VedtakBegrunnelseType>) {
+enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunnelseType>) {
     UTBETALING(
-        { erIngenOverlappVedtaksperiodeToggelPå ->
-            val utbetalingstyperUtenEndretUtbetaling = listOf(
-                VedtakBegrunnelseType.INNVILGET,
-                VedtakBegrunnelseType.REDUKSJON,
-                VedtakBegrunnelseType.FORTSATT_INNVILGET,
-                VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
-            )
-            if (!erIngenOverlappVedtaksperiodeToggelPå)
-                utbetalingstyperUtenEndretUtbetaling
-            else
-                utbetalingstyperUtenEndretUtbetaling.plus(VedtakBegrunnelseType.ENDRET_UTBETALING)
-        }
+        listOf(
+            VedtakBegrunnelseType.INNVILGET,
+            VedtakBegrunnelseType.REDUKSJON,
+            VedtakBegrunnelseType.FORTSATT_INNVILGET,
+            VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
+            VedtakBegrunnelseType.ENDRET_UTBETALING,
+        )
     ),
 
     /***
@@ -48,24 +43,20 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: (erIngenOverlappVed
      * fra juli 2020 til januar 2021, ville juni 2020 vært en vanlig utbetalingsperiode fordi vi kan begrunne
      * reduksjonen uten å se på forrige behandling.
      ***/
-    UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING({
+    UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING(
         listOf(
             VedtakBegrunnelseType.REDUKSJON,
             VedtakBegrunnelseType.INNVILGET,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
             VedtakBegrunnelseType.ENDRET_UTBETALING
         )
-    }),
-    OPPHØR({ listOf(VedtakBegrunnelseType.OPPHØR) }),
-    AVSLAG({ listOf(VedtakBegrunnelseType.AVSLAG) }),
-    FORTSATT_INNVILGET({ listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET) }),
+    ),
+    OPPHØR(listOf(VedtakBegrunnelseType.OPPHØR)),
+    AVSLAG(listOf(VedtakBegrunnelseType.AVSLAG)),
+    FORTSATT_INNVILGET(listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET)),
 
-    @Deprecated("Skal ikke brukes lenger. Fjernes når INGEN_OVERLAPP_VEDTAKSPERIODER-triggeren fjernes.")
-    ENDRET_UTBETALING({
-        listOf(
-            VedtakBegrunnelseType.ENDRET_UTBETALING
-        )
-    })
+    @Deprecated("Legacy")
+    ENDRET_UTBETALING(emptyList()),
 }
 
 fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(

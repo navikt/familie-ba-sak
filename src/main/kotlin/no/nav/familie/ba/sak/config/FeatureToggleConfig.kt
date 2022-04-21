@@ -104,12 +104,12 @@ class FeatureToggleConfig(
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
         const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
-        const val INGEN_OVERLAPP_VEDTAKSPERIODER = "familie-ba-sak.ingen-overlapp-vedtaksperioder.utgivelse"
         const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER =
             "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
         const val FØRSTE_ENDRINGSTIDSPUNKT = "familie-ba-sak.behandling.forste-endringstidspunkt.utgivelse"
         const val ETTERBETALING_3ÅR = "familie-ba-sak.utgivelse.behandling.etterbetaling-3-aar"
         const val NY_DELT_BOSTED_BEGRUNNELSE = "familie-ba-sak.utgivelse.behandling.delt-bosted-begrunnelse-avtaletidspunkt"
+        const val NY_MÅTE_Å_GENERERE_UTVIDET_ANDELER = "familie-ba-sak.utgivelse.behandling.generer-utvidet-andeler"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 

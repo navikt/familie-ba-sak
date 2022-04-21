@@ -54,7 +54,7 @@ class VilkårUtilsTest {
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-                erIngenOverlappVedtaksperiodeTogglePå = true,
+
             )
         )
         Assertions.assertTrue(
@@ -63,7 +63,7 @@ class VilkårUtilsTest {
                 vilkårResultat = vilkårResultatIkkeOppfyltDelvisOverlapp.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-                erIngenOverlappVedtaksperiodeTogglePå = true,
+
             )
         )
     }
@@ -76,7 +76,7 @@ class VilkårUtilsTest {
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-                erIngenOverlappVedtaksperiodeTogglePå = true,
+
             )
         )
     }
@@ -89,7 +89,7 @@ class VilkårUtilsTest {
                 vilkårResultat = vilkårResultatOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-                erIngenOverlappVedtaksperiodeTogglePå = true,
+
             )
         )
     }
@@ -102,7 +102,7 @@ class VilkårUtilsTest {
                 vilkårResultat = vilkårResultatUtenforPeriode.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-                erIngenOverlappVedtaksperiodeTogglePå = true,
+
             )
         )
     }

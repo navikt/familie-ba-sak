@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
-import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriodeTestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -22,7 +21,6 @@ data class MinimertVedtaksperiode(
         erFørsteVedtaksperiodePåFagsak: Boolean,
         erUregistrerteBarnPåbehandling: Boolean,
         barnPersonIdentMedReduksjon: List<String> = emptyList(),
-        erIngenOverlappVedtaksperiodeTogglePå: Boolean,
     ): BrevPeriodeGrunnlagMedPersoner {
         return BrevPeriodeGrunnlagMedPersoner(
             fom = this.fom,
@@ -42,7 +40,6 @@ data class MinimertVedtaksperiode(
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                     erUregistrerteBarnPåbehandling = erUregistrerteBarnPåbehandling,
                     barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
-                    erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå,
                 )
             },
             fritekster = this.fritekster,
@@ -67,7 +64,6 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
 
 fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean = false,
     brevMålform: Målform
@@ -85,7 +81,6 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev
             )
         },
-        utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
         uregistrerteBarn = uregistrerteBarn.map { it.copy(personIdent = "", navn = "") },
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         brevMålform = brevMålform,
