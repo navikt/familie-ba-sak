@@ -4,15 +4,11 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.oppfyltVilkår
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatener
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
@@ -30,7 +26,7 @@ class VilkårsresultatMånedTidslinjeTest {
     @Test
     fun `Virkningstidspunkt fra vilkårsvurdering er måneden etter at normalt vilkår er oppfylt`() {
         val dagTidslinje = (15.apr(2022)..14.apr(2040)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
-        val faktiskMånedTidslinje = dagTidslinje.tilMånedTidslinje()
+        val faktiskMånedTidslinje = dagTidslinje.tilVilkårsresultaterMånedTidslinje()
         val forventetMånedTidslinje = (mai(2022)..apr(2040)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
 
         assertEquals(
@@ -59,7 +55,7 @@ class VilkårsresultatMånedTidslinjeTest {
             ),
             praktiskTidligsteDato = periodeFom,
             praktiskSenesteDato = senesteDato
-        ).tilMånedTidslinje().also { it.print() }
+        ).tilVilkårsresultaterMånedTidslinje().also { it.print() }
 
         val forventetMånedstidslinje: Tidslinje<VilkårRegelverkResultat, Måned> =
             (mai(2022)..apr(2040)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) }
@@ -75,7 +71,7 @@ class VilkårsresultatMånedTidslinjeTest {
         val forventetMånedstidslinje: Tidslinje<VilkårRegelverkResultat, Måned> =
             (mar(2020)..mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
 
-        val faktiskMånedstidslinje = dagvilkårtidslinje.tilMånedTidslinje()
+        val faktiskMånedstidslinje = dagvilkårtidslinje.tilVilkårsresultaterMånedTidslinje()
         assertEquals(forventetMånedstidslinje, faktiskMånedstidslinje)
     }
 
@@ -91,16 +87,7 @@ class VilkårsresultatMånedTidslinjeTest {
             (apr(2020)..mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
         ).also { it.print() }
 
-        val faktiskMånedstidslinje = dagvilkårtidslinje.tilMånedTidslinje().also { it.print() }
+        val faktiskMånedstidslinje = dagvilkårtidslinje.tilVilkårsresultaterMånedTidslinje().also { it.print() }
         assertEquals(forventetMånedstidslinje, faktiskMånedstidslinje)
     }
-}
-
-fun Tidslinje<VilkårRegelverkResultat, Dag>.tilMånedTidslinje(): Tidslinje<VilkårRegelverkResultat, Måned> {
-
-    return this
-        .tilMåned { it.last() } // Månedsverdien er verdien fra siste dag i måneden
-        .komprimer() // Slå sammen perioder som nå er like
-        .filtrerIkkeNull() // Ta bort alle perioder som har null-verdi
-        .forskyv(1) // Flytt alt én måned senere
 }

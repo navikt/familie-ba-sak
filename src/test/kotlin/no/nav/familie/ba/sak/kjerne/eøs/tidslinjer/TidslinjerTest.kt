@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.flyttFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
@@ -35,7 +35,7 @@ internal class TidslinjerTest {
             .medVilkår("EEEEEEEEEEEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
             .medVilkår("EEEEEEEEEEEEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
             .byggPerson()
-        val søkerResult = " ++++++++++++++++++++".tilVilkårResultatTidslinje(startMåned).flyttFraOgMed(1)
+        val søkerResult = "+++++++++++++++++++++".tilVilkårResultatTidslinje(startMåned).forskyv(1)
 
         vilkårsvurderingBygger.forPerson(barn1, startMåned)
             .medVilkår("++++++++++++++++     ", Vilkår.UNDER_18_ÅR)
@@ -44,7 +44,7 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = "         N    E      ".tilRegelverkTidslinje(startMåned).flyttFraOgMed(1)
+        val barn1Result = "     N NNNN  EEE     ".tilRegelverkTidslinje(startMåned).forskyv(1)
 
         vilkårsvurderingBygger.forPerson(barn2, startMåned)
             .medVilkår("+++++++++>", Vilkår.UNDER_18_ÅR)
@@ -53,7 +53,7 @@ internal class TidslinjerTest {
             .medVilkår("EEEENNEEE>", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++>", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn2Result = "  EE    EEEEEEEEEEEEE >".tilRegelverkTidslinje(startMåned).flyttFraOgMed(1)
+        val barn2Result = " EEENNNEEEEEEEEEEEEEE >".tilRegelverkTidslinje(startMåned).forskyv(1)
 
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
@@ -67,26 +67,28 @@ internal class TidslinjerTest {
 
     @Test
     fun `lag en søker med ett barn og søker går fra EØS-regelverk til nasjonalt`() {
+        val barnsFødselsdato = 13.jan(2020)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
 
         val behandling = lagBehandling()
+        val startMåned = barnsFødselsdato.tilInneværendeMåned()
 
         val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>(behandling)
-            .forPerson(søker, jan(2020))
+            .forPerson(søker, startMåned)
             .medVilkår("EEEEEEEEEEEEENNNNNNNN", Vilkår.BOSATT_I_RIKET)
             .medVilkår("EEEEEEEEEEEEENNNNNNNN", Vilkår.LOVLIG_OPPHOLD)
             .byggPerson()
-        val søkerResult = " ++++++++++++++++++++".tilVilkårResultatTidslinje(jan(2020)).flyttFraOgMed(1)
+        val søkerResult = "+++++++++++++++++++++".tilVilkårResultatTidslinje(startMåned).forskyv(1)
 
-        vilkårsvurderingBygger.forPerson(barn1, jan(2020))
+        vilkårsvurderingBygger.forPerson(barn1, startMåned)
             .medVilkår("++++++++++++++++     ", Vilkår.UNDER_18_ÅR)
             .medVilkår("   EEEENNNNEEEEEEEE ", Vilkår.BOSATT_I_RIKET)
             .medVilkår("     EEENNEEEEEEEEE  ", Vilkår.LOVLIG_OPPHOLD)
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = "         N    E      ".tilRegelverkTidslinje(jan(2020)).flyttFraOgMed(1)
+        val barn1Result = "     NNNNNNEEEEE     ".tilRegelverkTidslinje(startMåned).forskyv(1)
 
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
