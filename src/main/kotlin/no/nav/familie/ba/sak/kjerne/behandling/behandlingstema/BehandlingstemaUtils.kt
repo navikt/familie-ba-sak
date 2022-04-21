@@ -29,8 +29,7 @@ fun bestemUnderkategori(
 ): BehandlingUnderkategori {
     if (underkategoriFraLøpendeBehandling == BehandlingUnderkategori.UTVIDET) return BehandlingUnderkategori.UTVIDET
 
-    val oppdatertUnderkategori =
-        listOf(overstyrtUnderkategori, underkategoriFraInneværendeBehandling).finnHøyesteKategori()
+    val oppdatertUnderkategori = overstyrtUnderkategori ?: underkategoriFraInneværendeBehandling
 
     return oppdatertUnderkategori ?: BehandlingUnderkategori.ORDINÆR
 }
