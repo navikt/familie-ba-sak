@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -68,7 +67,6 @@ class BrevPeriodeService(
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
                 behandlingId
             ),
-            erIngenOverlappVedtaksperiodeTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.INGEN_OVERLAPP_VEDTAKSPERIODER)
         )
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
@@ -131,11 +129,9 @@ class BrevPeriodeService(
     }
 
     fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
-        val erIngenOverlappVedtaksperiodeTogglePå =
-            featureToggleService.isEnabled(FeatureToggleConfig.INGEN_OVERLAPP_VEDTAKSPERIODER)
 
         val begrunnelseDataForVedtaksperiode = hentBrevperiodeData(vedtaksperiodeId)
-        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster(erIngenOverlappVedtaksperiodeTogglePå)
+        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
     }
 
     companion object {

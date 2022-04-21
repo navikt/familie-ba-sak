@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -25,8 +24,6 @@ data class BrevBegrunnelserTestConfig(
 
     // Brukes for å se om det er en reduksjon i småbarnstillegg eller utvidet
     val ytelserForSøkerForrigeMåned: List<YtelseType>,
-
-    val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
 
     val ytelserForBarnOgSøkerIPeriode: List<YtelseType>,
     val erFørsteVedtaksperiodePåFagsak: Boolean,

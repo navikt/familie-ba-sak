@@ -8,11 +8,8 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
-import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.erStartPåUtvidetSammeMåned
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -207,18 +204,6 @@ data class AndelTilkjentYtelse(
     fun harEndringsutbetalingIPerioden(fom: YearMonth?, tom: YearMonth?) =
         endretUtbetalingAndeler.any { it.fom == fom && it.tom == tom }
 
-    fun harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(
-        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-    ) = this.endretUtbetalingAndeler.isNotEmpty() &&
-        this.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
-            val gyldigBegrunnelseForEndretUtbetalingAndel =
-                endretUtbetalingAndel.standardbegrunnelser.single()
-
-            vedtaksperiodeMedBegrunnelser.begrunnelser.any {
-                it.standardbegrunnelse == gyldigBegrunnelseForEndretUtbetalingAndel
-            }
-        }
-
     private fun finnRelevanteVilkårsresulaterForRegelverk(
         personResultater: Set<PersonResultat>
     ): List<VilkårResultat> =
@@ -305,24 +290,6 @@ fun List<AndelTilkjentYtelse>.finnesUtvidetEndringsutbetalingIPerioden(
 ) = this.any { andelTilkjentYtelse ->
     andelTilkjentYtelse.erUtvidet() &&
         andelTilkjentYtelse.harEndringsutbetalingIPerioden(fom, tom)
-}
-
-/**
- * Brukes for endringsperioder.
- * Endringspeiroder påvirkes dersom det er en utvidet periode i samme tidsrom.
- */
-fun List<AndelTilkjentYtelse>.hentUtvidetScenarioForEndringsperiode(
-    månedPeriode: MånedPeriode,
-): UtvidetScenarioForEndringsperiode = when {
-    !erStartPåUtvidetSammeMåned(
-        this,
-        månedPeriode.fom
-    ) -> UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE
-    this.finnesUtvidetEndringsutbetalingIPerioden(
-        månedPeriode.fom,
-        månedPeriode.tom,
-    ) -> UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_ENDRET
-    else -> UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET
 }
 
 fun List<AndelTilkjentYtelse>.erUlike(andreAndeler: List<AndelTilkjentYtelse>): Boolean {

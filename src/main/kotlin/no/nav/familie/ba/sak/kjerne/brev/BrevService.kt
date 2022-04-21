@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -172,12 +171,10 @@ class BrevService(
             )
         }
 
-        val erIngenOverlappVedtaksperiodeTogglePå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
-
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
         val brevPerioderData =
             utvidetVedtaksperioderMedBegrunnelser.map { brevPeriodeService.hentBrevperiodeData(it.id) }
-        val brevperioder = hentBrevPerioder(brevPerioderData, erIngenOverlappVedtaksperiodeTogglePå)
+        val brevperioder = hentBrevPerioder(brevPerioderData)
 
         val hjemler = hentHjemler(
             behandlingId = vedtak.behandling.id,

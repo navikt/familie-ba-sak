@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
@@ -115,11 +114,10 @@ fun triggesAvSkalUtbetales(
         inneholderAndelSomIkkeSkalUtbetales
     }
 }
+
 fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
-    utvidetScenario: UtvidetScenarioForEndringsperiode,
     minimertEndretAndel: MinimertEndretAndel,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
     val hørerTilEtterEndretUtbetaling = this.etterEndretUtbetaling
 
@@ -127,10 +125,8 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
 
     val oppfyllerUtvidetScenario =
         oppfyllerUtvidetScenario(
-            utvidetScenario = utvidetScenario,
-            vilkår = this.vilkår,
+            vilkårBegrunnelsenGjelderFor = this.vilkår,
             minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
-            erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå
         )
 
     val erAvSammeÅrsak = this.endringsaarsaker.contains(minimertEndretAndel.årsak)
@@ -148,26 +144,15 @@ fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
 }
 
 private fun oppfyllerUtvidetScenario(
-    utvidetScenario: UtvidetScenarioForEndringsperiode,
-    vilkår: Set<Vilkår>?,
+    vilkårBegrunnelsenGjelderFor: Set<Vilkår>?,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
-    return if (erIngenOverlappVedtaksperiodeToggelPå) {
-        val begrunnelseGjelderUtvidet = vilkår?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 
-        val erUtvidetUtenEndring = minimerteUtbetalingsperiodeDetaljer.singleOrNull {
-            it.ytelseType == YtelseType.UTVIDET_BARNETRYGD
-        }?.erPåvirketAvEndring == false
+    val begrunnelseGjelderUtvidet = vilkårBegrunnelsenGjelderFor?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 
-        begrunnelseGjelderUtvidet == erUtvidetUtenEndring
-    } else {
-        val erUtvidetYtelseUtenEndring =
-            utvidetScenario == UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET
+    val periodeInneholderUtvidetUtenEndring = minimerteUtbetalingsperiodeDetaljer.singleOrNull {
+        it.ytelseType == YtelseType.UTVIDET_BARNETRYGD
+    }?.erPåvirketAvEndring == false
 
-        val begrunnelseSkalVisesVedutvidetYtelseUtenEndring =
-            vilkår?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
-
-        erUtvidetYtelseUtenEndring == begrunnelseSkalVisesVedutvidetYtelseUtenEndring
-    }
+    return begrunnelseGjelderUtvidet == periodeInneholderUtvidetUtenEndring
 }
