@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -57,20 +58,7 @@ data class UtvidetBarnetrygdGenerator(
             val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
                 .groupBy { it.aktør }
                 .map { identMedAndeler ->
-                    LocalDateTimeline(
-                        identMedAndeler.value.map {
-                            LocalDateSegment(
-                                it.stønadFom.førsteDagIInneværendeMåned(),
-                                it.stønadTom.sisteDagIInneværendeMåned(),
-                                listOf(
-                                    PeriodeData(
-                                        rolle = PersonType.BARN,
-                                        prosent = it.prosent
-                                    )
-                                )
-                            )
-                        }
-                    )
+                    lagTidslinjeForBarn(identMedAndeler)
                 }
 
             barnasTidslinjer.fold(utvidaTidslinje) { sammenlagt, neste ->
@@ -129,22 +117,7 @@ data class UtvidetBarnetrygdGenerator(
     private fun utledTidslinjeForBarna(andelerBarna: List<AndelTilkjentYtelse>): LocalDateTimeline<List<PeriodeData>> {
         val barnasTidslinjer = andelerBarna
             .groupBy { it.aktør }
-            .map { identMedAndeler ->
-                LocalDateTimeline(
-                    identMedAndeler.value.map {
-                        LocalDateSegment(
-                            it.stønadFom.førsteDagIInneværendeMåned(),
-                            it.stønadTom.sisteDagIInneværendeMåned(),
-                            listOf(
-                                PeriodeData(
-                                    rolle = PersonType.BARN,
-                                    prosent = it.prosent
-                                )
-                            )
-                        )
-                    }
-                )
-            }
+            .map { lagTidslinjeForBarn(identMedAndeler = it) }
 
         val sammenlagtTidslinjeForBarna = barnasTidslinjer.reduce { sammenlagt, neste ->
             (kombinerTidslinjer(sammenlagt, neste))
@@ -156,36 +129,59 @@ data class UtvidetBarnetrygdGenerator(
         return LocalDateTimeline(barnasSegmenterSlåttSammenHvisLikProsent)
     }
 
+    private fun lagTidslinjeForBarn(identMedAndeler: Map.Entry<Aktør, List<AndelTilkjentYtelse>>) =
+        LocalDateTimeline(
+            identMedAndeler.value.map {
+                lagSegmentMedPeriodeData(
+                    fom = it.stønadFom.førsteDagIInneværendeMåned(),
+                    tom = it.stønadTom.sisteDagIInneværendeMåned(),
+                    prosentForPeriode = it.prosent,
+                    personType = PersonType.BARN
+                )
+            }
+        )
+
     private fun slåSammenEtterfølgendeSegmenterMedLikProsent(sammenlagtTidslinjeForBarna: LocalDateTimeline<List<PeriodeData>>): List<LocalDateSegment<List<PeriodeData>>> {
         return sammenlagtTidslinjeForBarna.toSegments()
             .fold(listOf<LocalDateSegment<List<PeriodeData>>>()) { sammenslåttePerioder, nestePeriode ->
                 val sistePeriodeSomErSammenslått = sammenslåttePerioder.lastOrNull()
-                val segmenterErEtterfølgendeOgHarSammeProsent = sistePeriodeSomErSammenslått?.tom?.toYearMonth() == nestePeriode.fom.forrigeMåned() && sistePeriodeSomErSammenslått.value.maxOf { it.prosent } == nestePeriode.value.maxOf { it.prosent }
+                val segmenterErEtterfølgendeOgHarSammeProsent =
+                    sistePeriodeSomErSammenslått?.tom?.toYearMonth() == nestePeriode.fom.forrigeMåned() &&
+                        sistePeriodeSomErSammenslått.value.maxOf { it.prosent } == nestePeriode.value.maxOf { it.prosent }
+
                 if (sistePeriodeSomErSammenslått != null && segmenterErEtterfølgendeOgHarSammeProsent) {
                     val prosentForPeriode = sistePeriodeSomErSammenslått.value.maxOf { it.prosent }
-                    sammenslåttePerioder.dropLast(1) + LocalDateSegment(
-                        sistePeriodeSomErSammenslått.fom,
-                        nestePeriode.tom,
-                        listOf(
-                            PeriodeData(
-                                rolle = PersonType.BARN,
-                                prosent = prosentForPeriode
-                            )
-                        )
+                    sammenslåttePerioder.dropLast(1) + lagSegmentMedPeriodeData(
+                        fom = sistePeriodeSomErSammenslått.fom,
+                        tom = nestePeriode.tom,
+                        prosentForPeriode = prosentForPeriode,
+                        personType = PersonType.BARN
                     )
                 } else
-                    sammenslåttePerioder + LocalDateSegment(
-                        nestePeriode.fom,
-                        nestePeriode.tom,
-                        listOf(
-                            PeriodeData(
-                                rolle = PersonType.BARN,
-                                prosent = nestePeriode.value.maxOf { it.prosent }
-                            )
-                        )
+                    sammenslåttePerioder + lagSegmentMedPeriodeData(
+                        fom = nestePeriode.fom,
+                        tom = nestePeriode.tom,
+                        prosentForPeriode = nestePeriode.value.maxOf { it.prosent },
+                        personType = PersonType.BARN
                     )
-            }.toList()
+            }
     }
+
+    private fun lagSegmentMedPeriodeData(
+        fom: LocalDate,
+        tom: LocalDate,
+        prosentForPeriode: BigDecimal,
+        personType: PersonType
+    ) = LocalDateSegment(
+        fom,
+        tom,
+        listOf(
+            PeriodeData(
+                rolle = personType,
+                prosent = prosentForPeriode
+            )
+        )
+    )
 
     private fun kombinerTidslinjer(
         sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
