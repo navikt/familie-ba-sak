@@ -1,6 +1,6 @@
 ### 💰 Hva skal gjøres, og hvorfor?
-_Skriv 1 eller 2 setninger om hvilken funksjonell endring som blir implementert. Ta med en **lenke til Favro** og/eller
-beskriv bakgrunnen for endringen._
+_Skriv 1 eller 2 setninger om hvilken funksjonell endring som blir implementert. Ta med en **lenke til Favro** og
+skriv en kort beskrivelse av hvorfor endringen skal gjøres._
 
 ### 🔎️ Er det noe spesielt du ønsker tilbakemelding om?
 _Er det noe du er usikker på eller ønsker å diskutere? Beskriv det gjerne her eller kommenter koden det gjelder._
