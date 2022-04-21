@@ -45,11 +45,12 @@ class AvstemmingServiceTest {
 
     @BeforeEach
     fun setUp() {
+        val behandlingId = BigInteger.ONE
         val page = mockk<Page<BigInteger>>()
         val pageable = Pageable.ofSize(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
         every { behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable) } returns page
         every { page.totalPages } returns 1
-        every { page.content } returns listOf(BigInteger.ONE)
+        every { page.content } returns listOf(behandlingId)
         every { page.nextPageable() } returns pageable
 
         every {
@@ -62,7 +63,7 @@ class AvstemmingServiceTest {
                 fom = YearMonth.now().minusMonths(4),
                 tom = YearMonth.now(),
                 periodeIdOffset = 0
-            )
+            ).also { it.kildeBehandlingId = behandlingId.toLong() }
         )
         every { batchRepository.getById(batchId) } returns Batch(id = batchId, kjøreDato = LocalDate.now())
         every { taskRepository.save(any()) } returns Task(type = "dummy", payload = "")
@@ -71,6 +72,8 @@ class AvstemmingServiceTest {
             chunkNr = 1,
             transaksjonsId = transaksjonsId
         )
+        val aktivFødselsnummere = mapOf(behandlingId.toLong() to "test")
+        every { behandlingHentOgPersisterService.hentAktivFødselsnummerForBehandlinger(any()) } returns aktivFødselsnummere
     }
 
     @Test
