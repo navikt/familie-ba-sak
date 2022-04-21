@@ -255,7 +255,7 @@ object TilkjentYtelseUtils {
             minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
 
         val barnetsPeriodeLøperVidere =
-            if (periodeResultatBarn.periodeTom == null) true else periodeResultatBarn.periodeTom.toYearMonth() > minsteTom.toYearMonth()
+            periodeResultatBarn.periodeTom == null || periodeResultatBarn.periodeTom.toYearMonth() > minsteTom.toYearMonth()
 
         val skalVidereføresEnMånedEkstra =
             innvilgedePeriodeResultatBarna.any { periodeResultat ->
