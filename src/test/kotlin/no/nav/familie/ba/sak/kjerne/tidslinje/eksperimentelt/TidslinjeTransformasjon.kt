@@ -4,6 +4,12 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 
+/**
+ * Extension-metode for å kombinere et "vindu" med størrelse size i hver periode
+ * Fungerer helt likt som (og bruker) Iterable.windowed
+ * mapper-nmetoden må passe på ikke å skape overlapp mellom perioder (gir exception)
+ * Forsøk på å flytte perioder utenfor tidslinjen, vil gi exception
+ */
 fun <I, T : Tidsenhet, R> Tidslinje<I, T>.windowed(
     size: Int,
     step: Int = 1,
@@ -19,7 +25,10 @@ fun <I, T : Tidsenhet, R> Tidslinje<I, T>.windowed(
 
         override fun lagPerioder(): Collection<Periode<R, T>> =
             tidslinje.perioder().windowed(size, step, partialWindows) { perioder ->
-                mapper(perioder)
+                val periode = mapper(perioder)
+                if (periode.fraOgMed < fraOgMed() || periode.tilOgMed > tilOgMed())
+                    throw IllegalArgumentException("Forsøk på å flytte perioden utenfor grensene for tidslinjen")
+                periode
             }
     }
 }

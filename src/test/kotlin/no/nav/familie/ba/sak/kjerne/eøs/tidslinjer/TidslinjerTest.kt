@@ -129,38 +129,5 @@ internal class TidslinjerTest {
             tidslinjer.forBarn(barn1).oppfyllerVilkårTidslinje.filtrerIkkeNull()
                 .perioder().maxOf { it.tilOgMed.tilYearMonth() }
         )
-
-/*
-
-        assertEquals(søkerResult, tidslinjer.søkersTidslinjer().oppfyllerVilkårTidslinje)
-        assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkTidslinje)
-
-
-        val periodeFom = LocalDate.of(2022, 4, 15)
-
-        val dagvilkårtidslinje = konkatener(
-            (26.feb(2020)..7.mar(2020)).tilTidslinje { oppfyltVilkår(Vilkår.BOSATT_I_RIKET, Regelverk.EØS_FORORDNINGEN) },
-            (21.mar(2020)..13.mai(2020)).tilTidslinje { oppfyltVilkår(Vilkår.BOSATT_I_RIKET, Regelverk.NASJONALE_REGLER) },
-        ).also { it.print() }
-
-
-        val vilkårsresultatMånedTidslinje = VilkårsresultatDagTidslinje(
-            vilkårsresultater = listOf(
-                lagVilkårResultat(
-                    vilkårType = Vilkår.UNDER_18_ÅR,
-                    periodeFom = periodeFom,
-                    periodeTom = periodeFom.til18ÅrsVilkårsdato()
-                )
-            ),
-            praktiskTidligsteDato = periodeFom,
-            praktiskSenesteDato = periodeFom.til18ÅrsVilkårsdato()
-        ).tilVilkårsresultaterMånedTidslinje()
-
-        assertEquals(
-            periodeFom.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(),
-            vilkårsresultatMånedTidslinje.perioder().toList().maxOf { it.tilOgMed.tilYearMonth() }
-        )
-    }
-*/
     }
 }

@@ -4,6 +4,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 
+/**
+ * Extension-metode for å forskyve tidslinjen <tidsenheter> frem eller tilbake
+ * Negative <tidsenheter> flytter tidslinjen tilbake
+ */
 fun <I, T : Tidsenhet> Tidslinje<I, T>.forskyv(tidsenheter: Long): Tidslinje<I, T> {
 
     val tidslinje = this

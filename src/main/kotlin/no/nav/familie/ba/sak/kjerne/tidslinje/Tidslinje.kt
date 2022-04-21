@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeMedAvhengigheter
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.TidspunktClosedRange
@@ -98,35 +97,3 @@ fun <T : Tidsenhet, I> TidspunktClosedRange<T>.tilTidslinje(innhold: () -> I): T
 
 fun <T : Tidsenhet, I> Tidspunkt<T>.tilTidslinje(innhold: () -> I): Tidslinje<I, T> =
     this.rangeTo(this).tilTidslinje(innhold)
-
-fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerMed(bolskTidslinje: Tidslinje<Boolean, T>): Tidslinje<I, T> {
-    return this.kombinerMed(bolskTidslinje) { innhold, erSann ->
-        when (erSann) {
-            true -> innhold
-            else -> null
-        }
-    }.beskjærEtter(this)
-}
-
-fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærEtter(beskjæring: Tidslinje<*, T>): Tidslinje<I, T> {
-
-    val tidslinje = this
-    return object : Tidslinje<I, T>() {
-        override fun fraOgMed() = beskjæring.fraOgMed()
-        override fun tilOgMed() = beskjæring.tilOgMed()
-
-        override fun lagPerioder(): Collection<Periode<I, T>> {
-            return tidslinje.perioder()
-                .filter { it.fraOgMed <= tilOgMed() && it.tilOgMed >= fraOgMed() }
-                .map {
-                    when {
-                        it.fraOgMed == tidslinje.fraOgMed() -> Periode(fraOgMed(), it.tilOgMed, it.innhold)
-                        it.fraOgMed < fraOgMed() -> Periode(fraOgMed(), it.tilOgMed, it.innhold)
-                        it.tilOgMed == tidslinje.tilOgMed() -> Periode(it.fraOgMed, tilOgMed(), it.innhold)
-                        it.tilOgMed > tilOgMed() -> Periode(it.fraOgMed, tilOgMed(), it.innhold)
-                        else -> it
-                    }
-                }
-        }
-    }
-}

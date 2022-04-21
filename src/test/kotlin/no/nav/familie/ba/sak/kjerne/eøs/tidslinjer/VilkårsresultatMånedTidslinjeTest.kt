@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.oppfyltVilkår
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatener
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatenerTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
@@ -77,12 +77,12 @@ class VilkårsresultatMånedTidslinjeTest {
 
     @Test
     fun `Bytte av regelverk innen en måned skal gi kontinuerlig oppfylt tidslinje`() {
-        val dagvilkårtidslinje = konkatener(
+        val dagvilkårtidslinje = konkatenerTidslinjer(
             (26.feb(2020)..7.mar(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
             (21.mar(2020)..13.mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
         ).also { it.print() }
 
-        val forventetMånedstidslinje = konkatener(
+        val forventetMånedstidslinje = konkatenerTidslinjer(
             mar(2020).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
             (apr(2020)..mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
         ).also { it.print() }

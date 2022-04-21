@@ -62,7 +62,6 @@ fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.snittKombinerMed(
  * Kombintor-funksjonen tar inn en Iterable av (nullable) I og returner (nullable) R
  * Resultatet er en tidslinje med tidsenhet T og innhold R
  */
-
 fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.snittKombiner(kombinator: (Iterable<I?>) -> R?): Tidslinje<R, T> {
     val tidslinjer = this
     return object : TidslinjeSomStykkerOppTiden<R, T>(tidslinjer) {
