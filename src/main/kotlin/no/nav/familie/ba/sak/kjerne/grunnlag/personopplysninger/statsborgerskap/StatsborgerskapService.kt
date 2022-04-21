@@ -140,25 +140,25 @@ class StatsborgerskapService(
 
     private fun finnMedlemskap(
         statsborgerskap: Statsborgerskap,
-        perioderEØSLand: List<BetydningDto>,
+        eøsMedlemskapsperioderForValgtLand: List<BetydningDto>,
         gyldigFraOgMed: LocalDate?
     ): Medlemskap =
         when {
             statsborgerskap.iNordiskLand() -> Medlemskap.NORDEN
-            erEØS(perioderEØSLand, gyldigFraOgMed) -> Medlemskap.EØS
+            erEØSMedlemPåGittDato(eøsMedlemskapsperioderForValgtLand, gyldigFraOgMed) -> Medlemskap.EØS
             statsborgerskap.iTredjeland() -> Medlemskap.TREDJELANDSBORGER
             statsborgerskap.erStatsløs() -> Medlemskap.STATSLØS
             else -> Medlemskap.UKJENT
         }
 
-    private fun erEØS(
-        perioderEØSLand: List<BetydningDto>,
-        fraDato: LocalDate?
+    private fun erEØSMedlemPåGittDato(
+        eøsMedlemskapsperioderForValgtLand: List<BetydningDto>,
+        gjeldendeDato: LocalDate?
     ): Boolean =
-        perioderEØSLand.any {
-            fraDato == null || (
-                it.gyldigFra <= fraDato &&
-                    it.gyldigTil >= fraDato
+        eøsMedlemskapsperioderForValgtLand.any {
+            gjeldendeDato == null || (
+                it.gyldigFra <= gjeldendeDato &&
+                    it.gyldigTil >= gjeldendeDato
                 )
         }
 
