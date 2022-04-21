@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.lagTriggesAv
 import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.dataGenerator.endretUtbetaling.lagMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
@@ -27,7 +28,7 @@ class TriggesAvTest {
         )
 
     val triggesAvEtterEndretUtbetaling = lagTriggesAv(
-        etterEndretUtbetaling = true, endretUtbetalingSkalUtbetales = true,
+        etterEndretUtbetaling = true, endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES,
         endringsaarsaker = setOf(
             Årsak.DELT_BOSTED
         ),
@@ -36,7 +37,7 @@ class TriggesAvTest {
 
     val triggesIkkeAvSkalUtbetalesMedUtvidetVilkår =
         lagTriggesAv(
-            endretUtbetalingSkalUtbetales = false, etterEndretUtbetaling = false,
+            endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES, etterEndretUtbetaling = false,
             endringsaarsaker = setOf(
                 Årsak.DELT_BOSTED
             ),
@@ -45,7 +46,7 @@ class TriggesAvTest {
 
     val triggesIkkeAvSkalUtbetalesUtenUtvidetVilkår =
         lagTriggesAv(
-            endretUtbetalingSkalUtbetales = false, etterEndretUtbetaling = false,
+            endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES, etterEndretUtbetaling = false,
             endringsaarsaker = setOf(
                 Årsak.DELT_BOSTED
             ),
@@ -53,7 +54,7 @@ class TriggesAvTest {
         )
 
     val triggesAvSkalUtbetalesMedUtvidetVilkår = lagTriggesAv(
-        endretUtbetalingSkalUtbetales = true, etterEndretUtbetaling = false,
+        endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES, etterEndretUtbetaling = false,
         endringsaarsaker = setOf(
             Årsak.DELT_BOSTED
         ),
@@ -61,7 +62,7 @@ class TriggesAvTest {
     )
 
     val triggesAvSkalUtbetalesUtenUtvidetVilkår = lagTriggesAv(
-        endretUtbetalingSkalUtbetales = true, etterEndretUtbetaling = false,
+        endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES, etterEndretUtbetaling = false,
         endringsaarsaker = setOf(
             Årsak.DELT_BOSTED
         ),
