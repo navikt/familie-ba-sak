@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -24,7 +24,7 @@ data class TriggesAv(
     val valgbar: Boolean = true,
     val endringsaarsaker: Set<Årsak> = emptySet(),
     val etterEndretUtbetaling: Boolean = false,
-    val endretUtbetalingSkalUtbetales: Boolean = false,
+    val endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere = EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
     val småbarnstillegg: Boolean = false,
     val gjelderFørstePeriode: Boolean = false,
     val gjelderFraInnvilgelsestidspunkt: Boolean = false,
@@ -99,22 +99,6 @@ data class TriggesAv(
     }
 }
 
-fun triggesAvSkalUtbetales(
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    triggesAv: TriggesAv
-): Boolean {
-    if (triggesAv.etterEndretUtbetaling) return false
-
-    val inneholderAndelSomSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! != BigDecimal.ZERO }
-    val inneholderAndelSomIkkeSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! == BigDecimal.ZERO }
-
-    return if (triggesAv.endretUtbetalingSkalUtbetales) {
-        inneholderAndelSomSkalUtbetales
-    } else {
-        inneholderAndelSomIkkeSkalUtbetales
-    }
-}
-
 fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
     minimertEndretAndel: MinimertEndretAndel,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
@@ -124,10 +108,11 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
     val oppfyllerSkalUtbetalesTrigger = minimertEndretAndel.oppfyllerSkalUtbetalesTrigger(this)
 
     val oppfyllerUtvidetScenario =
-        oppfyllerUtvidetScenario(
-            vilkårBegrunnelsenGjelderFor = this.vilkår,
-            minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
-        )
+        this.endretUtbetalingSkalUtbetales == EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT ||
+            oppfyllerUtvidetScenario(
+                vilkårBegrunnelsenGjelderFor = this.vilkår,
+                minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+            )
 
     val erAvSammeÅrsak = this.endringsaarsaker.contains(minimertEndretAndel.årsak)
 
@@ -140,14 +125,17 @@ fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
     triggesAv: TriggesAv
 ): Boolean {
     val inneholderAndelSomSkalUtbetales = this.prosent!! != BigDecimal.ZERO
-    return triggesAv.endretUtbetalingSkalUtbetales == inneholderAndelSomSkalUtbetales
+    return when (triggesAv.endretUtbetalingSkalUtbetales) {
+        EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT -> true
+        EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES -> inneholderAndelSomSkalUtbetales
+        EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES -> !inneholderAndelSomSkalUtbetales
+    }
 }
 
 private fun oppfyllerUtvidetScenario(
     vilkårBegrunnelsenGjelderFor: Set<Vilkår>?,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
 ): Boolean {
-
     val begrunnelseGjelderUtvidet = vilkårBegrunnelsenGjelderFor?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 
     val periodeInneholderUtvidetUtenEndring = minimerteUtbetalingsperiodeDetaljer.singleOrNull {

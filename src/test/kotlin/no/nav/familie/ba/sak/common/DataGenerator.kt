@@ -1005,7 +1005,7 @@ fun lagRestSanityBegrunnelse(
     ovrigeTriggere: List<String>? = emptyList(),
     endringsaarsaker: List<String>? = emptyList(),
     hjemler: List<String> = emptyList(),
-    endretUtbetalingsperiodeDeltBostedTriggere: List<String>? = emptyList(),
+    endretUtbetalingsperiodeDeltBostedTriggere: String = "",
     endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
     apiNavn = apiNavn,
@@ -1019,7 +1019,7 @@ fun lagRestSanityBegrunnelse(
     ovrigeTriggere = ovrigeTriggere,
     endringsaarsaker = endringsaarsaker,
     hjemler = hjemler,
-    endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere,
+    endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
 )
 
@@ -1035,7 +1035,7 @@ fun lagSanityBegrunnelse(
     ovrigeTriggere: List<ØvrigTrigger>? = null,
     endringsaarsaker: List<Årsak>? = null,
     hjemler: List<String> = emptyList(),
-    endretUtbetalingsperiodeDeltBostedTriggere: List<EndretUtbetalingsperiodeDeltBostedTriggere>? = null,
+    endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
@@ -1049,7 +1049,7 @@ fun lagSanityBegrunnelse(
     ovrigeTriggere = ovrigeTriggere,
     endringsaarsaker = endringsaarsaker,
     hjemler = hjemler,
-    endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere,
+    endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
 )
 
@@ -1065,7 +1065,7 @@ fun lagTriggesAv(
     valgbar: Boolean = true,
     endringsaarsaker: Set<Årsak> = emptySet(),
     etterEndretUtbetaling: Boolean = false,
-    endretUtbetalingSkalUtbetales: Boolean = false,
+    endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere = EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
     småbarnstillegg: Boolean = false
 ): TriggesAv = TriggesAv(
     vilkår = vilkår,
