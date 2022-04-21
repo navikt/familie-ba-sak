@@ -7,8 +7,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 
-const val BEGRUNNELSE_ERROR_MSG = "Begrunnelse er ikke string eller begrunnelseData"
-
 data class BrevPeriode(
     val fom: Flettefelt,
     val tom: Flettefelt,
@@ -50,7 +48,7 @@ data class BrevPeriode(
             when (it) {
                 is FritekstBegrunnelse -> it.fritekst
                 is BegrunnelseData -> it
-                else -> error(BEGRUNNELSE_ERROR_MSG)
+                else -> error("Begrunnelse er ikke string eller begrunnelseData")
             }
         },
         type = flettefelt(brevPeriodeType.apiNavn),
