@@ -41,8 +41,6 @@ class BrevBegrunnelseTest {
                     minimerteEndredeUtbetalingAndeler = brevBegrunnelserTestConfig.hentEndretUtbetalingAndeler(),
                     erFørsteVedtaksperiodePåFagsak = brevBegrunnelserTestConfig.erFørsteVedtaksperiodePåFagsak,
                     ytelserForSøkerForrigeMåned = brevBegrunnelserTestConfig.ytelserForSøkerForrigeMåned,
-                    utvidetScenarioForEndringsperiode = brevBegrunnelserTestConfig.utvidetScenarioForEndringsperiode,
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
                     erNyDeltBostedTogglePå = false
                 )
             } catch (e: Exception) {

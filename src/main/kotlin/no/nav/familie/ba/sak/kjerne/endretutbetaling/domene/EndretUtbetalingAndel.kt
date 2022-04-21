@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
@@ -10,18 +9,10 @@ import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.StandardbegrunnelseListConverter
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTriggereOppfyltForEndretUtbetaling
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.gamleEndretUtbetalingsperiodeBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -177,36 +168,3 @@ fun hentPersonerForEtterEndretUtbetalingsperiode(
         .erDagenFør(fom) &&
         endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }.map { it.personIdent }
-
-@Deprecated("Kan fjernes når INGEN_OVERLAPP_VEDTAKSPERIODER -toggle fjernes .")
-fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
-    sanityBegrunnelser: List<SanityBegrunnelse>,
-    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
-): Standardbegrunnelse {
-    val gyldigeBegrunnelser = Standardbegrunnelse.values()
-        .filter { standardbegrunnelse ->
-            standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
-        }.filter { gamleEndretUtbetalingsperiodeBegrunnelser.contains(it) }
-        .filter { standardbegrunnelseer ->
-            val sanityBegrunnelse = standardbegrunnelseer.tilSanityBegrunnelse(sanityBegrunnelser)
-
-            if (sanityBegrunnelse != null) {
-                val triggesAv = sanityBegrunnelse.tilTriggesAv()
-                triggesAv.erTriggereOppfyltForEndretUtbetaling(
-                    utvidetScenario = utvidetScenarioForEndringsperiode,
-                    minimertEndretAndel = this.tilMinimertEndretUtbetalingAndel(),
-                    erIngenOverlappVedtaksperiodeToggelPå = false,
-                    minimerteUtbetalingsperiodeDetaljer = emptyList()
-                )
-            } else false
-        }
-
-    if (gyldigeBegrunnelser.size != 1) {
-        throw Feil(
-            "Endret utbetalingandel skal ha nøyaktig én begrunnelse, " +
-                "men ${gyldigeBegrunnelser.size} gyldigeBegrunnelser ble funnet"
-        )
-    }
-
-    return gyldigeBegrunnelser.single()
-}

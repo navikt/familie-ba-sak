@@ -11,9 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
-import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -29,58 +27,14 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.gamleEndretUtbetalingsperiodeBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.nyeEndretUtbetalingsperiodeBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.endretUtbetalingsperiodeBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
-
-fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    vedtak: Vedtak,
-) = andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isNotEmpty() }.groupBy { it.prosent }
-    .flatMap { (_, andeler) ->
-        andeler.lagVertikaleSegmenter()
-            .map { (segmenter, andelerForSegment) ->
-                VedtaksperiodeMedBegrunnelser(
-                    fom = segmenter.fom,
-                    tom = segmenter.tom,
-                    vedtak = vedtak,
-                    type = Vedtaksperiodetype.ENDRET_UTBETALING
-                ).also { vedtaksperiodeMedBegrunnelse ->
-                    val endretUtbetalingAndeler = andelerForSegment.flatMap { it.endretUtbetalingAndeler }
-                    vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
-                        endretUtbetalingAndeler
-                            .flatMap { it.standardbegrunnelser }.toSet()
-                            .map { standardbegrunnelse ->
-                                Vedtaksbegrunnelse(
-                                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
-                                    standardbegrunnelse = standardbegrunnelse,
-                                )
-                            }
-                    )
-                }
-            }
-    }
-
-@Deprecated("Bruk hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder")
-fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioderGammel(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    vedtak: Vedtak
-) = andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isEmpty() }.lagVertikaleSegmenter()
-    .map { (segmenter, _) ->
-        VedtaksperiodeMedBegrunnelser(
-            fom = segmenter.fom,
-            tom = segmenter.tom,
-            vedtak = vedtak,
-            type = Vedtaksperiodetype.UTBETALING
-        )
-    }
 
 fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
@@ -151,7 +105,6 @@ fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
     vedtak: Vedtak,
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    erIngenOverlappVedtaksperiodeTogglePå: Boolean,
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
 ): List<VedtaksperiodeMedBegrunnelser> {
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
@@ -184,7 +137,6 @@ fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
                                         utbetalingsperiode.hentUtbetalingsperiodeDetaljer(
                                             andelerTilkjentYtelse,
                                             personopplysningGrunnlag,
-                                            erIngenOverlappVedtaksperiodeTogglePå
                                         )
                                             .any {
                                                 it.person.personIdent ==
@@ -258,7 +210,6 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
     erNyDeltBostedTogglePå: Boolean
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
@@ -277,11 +228,6 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
         andelerTilkjentYtelse,
         utvidetVedtaksperiodeMedBegrunnelser
     ),
-    utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
-        .hentUtvidetScenarioForEndringsperiode(
-            utvidetVedtaksperiodeMedBegrunnelser.hentMånedPeriode()
-        ),
-    erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
     erNyDeltBostedTogglePå = erNyDeltBostedTogglePå
 )
 
@@ -294,25 +240,21 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
-    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
     erNyDeltBostedTogglePå: Boolean
 ): List<Standardbegrunnelse> {
     val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.values()
         .filter {
             minimertVedtaksperiode
                 .type
-                .tillatteBegrunnelsestyper(erIngenOverlappVedtaksperiodeToggelPå)
+                .tillatteBegrunnelsestyper
                 .contains(it.vedtakBegrunnelseType)
         }.filter {
             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
-                if (erIngenOverlappVedtaksperiodeToggelPå) {
-                    nyeEndretUtbetalingsperiodeBegrunnelser.filter { standardbegrunnelse ->
-                        if (!erNyDeltBostedTogglePå)
-                            standardbegrunnelse != Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING
-                        else true
-                    }.contains(it)
-                } else gamleEndretUtbetalingsperiodeBegrunnelser.contains(it)
+                endretUtbetalingsperiodeBegrunnelser.filter { standardbegrunnelse ->
+                    if (!erNyDeltBostedTogglePå)
+                        standardbegrunnelse != Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING
+                    else true
+                }.contains(it)
             } else true
         }
 
@@ -329,8 +271,6 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
             minimerteEndredeUtbetalingAndeler,
             erFørsteVedtaksperiodePåFagsak,
             ytelserForSøkerForrigeMåned,
-            utvidetScenarioForEndringsperiode,
-            erIngenOverlappVedtaksperiodeToggelPå
         )
         else -> {
             velgUtbetalingsbegrunnelser(
@@ -343,8 +283,6 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
                 minimerteEndredeUtbetalingAndeler,
                 erFørsteVedtaksperiodePåFagsak,
                 ytelserForSøkerForrigeMåned,
-                utvidetScenarioForEndringsperiode,
-                erIngenOverlappVedtaksperiodeToggelPå
             )
         }
     }
@@ -360,8 +298,6 @@ private fun velgRedusertBegrunnelser(
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
-    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean
 ): List<Standardbegrunnelse> {
     val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
         it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
@@ -377,8 +313,6 @@ private fun velgRedusertBegrunnelser(
             minimerteEndredeUtbetalingAndeler,
             erFørsteVedtaksperiodePåFagsak,
             ytelserForSøkerForrigeMåned,
-            utvidetScenarioForEndringsperiode,
-            erIngenOverlappVedtaksperiodeToggelPå
         )
         return redusertBegrunnelser + utbetalingsbegrunnelser
     }
@@ -395,8 +329,6 @@ private fun velgUtbetalingsbegrunnelser(
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
-    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean
 ): List<Standardbegrunnelse> {
     val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype
@@ -412,8 +344,6 @@ private fun velgUtbetalingsbegrunnelser(
                         sanityBegrunnelser = sanityBegrunnelser,
                         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                         ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
-                        utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
-                        erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
                     )
                 ) {
                     acc.add(standardBegrunnelse)

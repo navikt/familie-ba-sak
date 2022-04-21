@@ -5,8 +5,7 @@
   "vedtaksperiodetype": "OPPHØR",
   "ytelserForSøkerForrigeMåned": [],
   "ytelserForBarnOgSøkerIPeriode": [],
-  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
-  "personerPåBehandling": [
+   "personerPåBehandling": [
     {
       "type": "BARN",
       "fødselsdato": "2017-09-03",
