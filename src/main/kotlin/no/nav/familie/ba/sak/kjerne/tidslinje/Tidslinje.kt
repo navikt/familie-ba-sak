@@ -20,16 +20,16 @@ abstract class Tidslinje<I, T : Tidsenhet> {
     protected abstract fun lagPerioder(): Collection<Periode<I, T>>
 
     protected open fun valider(perioder: List<Periode<I, T>>) {
-        val perioderMedFeil = perioder.mapIndexed { index, periode ->
+        val perioderMedFeil = perioder.windowed(2) { (periode1, periode2) ->
             when {
-                index > 0 && periode.fraOgMed.erUendeligLengeSiden() ->
-                    TidslinjeFeil(periode, this, TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE)
-                index < perioder.size - 1 && periode.tilOgMed.erUendeligLengeTil() ->
-                    TidslinjeFeil(periode, this, TidslinjeFeilType.UENDELIG_FREMTID_FØR_SISTE_PERIODE)
-                periode.fraOgMed > periode.tilOgMed ->
-                    TidslinjeFeil(periode, this, TidslinjeFeilType.TOM_ER_FØR_FOM)
-                index < index - 1 && perioder[index].tilOgMed > perioder[index + 1].fraOgMed ->
-                    TidslinjeFeil(periode, this, TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE)
+                periode2.fraOgMed.erUendeligLengeSiden() ->
+                    TidslinjeFeil(periode2, this, TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE)
+                periode1.tilOgMed.erUendeligLengeTil() ->
+                    TidslinjeFeil(periode1, this, TidslinjeFeilType.UENDELIG_FREMTID_FØR_SISTE_PERIODE)
+                periode1.fraOgMed > periode1.tilOgMed ->
+                    TidslinjeFeil(periode1, this, TidslinjeFeilType.TOM_ER_FØR_FOM)
+                periode1.tilOgMed >= periode2.fraOgMed ->
+                    TidslinjeFeil(periode1, this, TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE)
                 else -> null
             }
         }.filterNotNull()
