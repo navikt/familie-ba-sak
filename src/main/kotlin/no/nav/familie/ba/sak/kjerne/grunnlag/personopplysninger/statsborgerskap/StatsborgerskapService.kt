@@ -34,7 +34,7 @@ class StatsborgerskapService(
             )
         }
 
-        val historiskEØSMedlemsskapForLand =
+        val eøsMedlemskapsPerioderForValgtLand =
             integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land] ?: emptyList()
 
         var datoFra = statsborgerskap.hentFom()
@@ -50,24 +50,24 @@ class StatsborgerskapService(
                     landkode = statsborgerskap.land,
                     medlemskap = finnMedlemskap(
                         statsborgerskap,
-                        historiskEØSMedlemsskapForLand,
+                        eøsMedlemskapsPerioderForValgtLand,
                         idag
                     ),
                     person = person
                 )
             )
         } else {
-            hentMedlemskapsDatoIntervaller(
-                historiskEØSMedlemsskapForLand,
+            hentMedlemskapsperioderUnderStatsborgerskapsperioden(
+                eøsMedlemskapsPerioderForValgtLand,
                 datoFra,
                 statsborgerskap.gyldigTilOgMed
-            ).fold(emptyList<GrStatsborgerskap>()) { medlemskapsperioder, periode ->
+            ).fold(emptyList()) { medlemskapsperioder, periode ->
                 val medlemskapsperiode = GrStatsborgerskap(
                     gyldigPeriode = periode,
                     landkode = statsborgerskap.land,
                     medlemskap = finnMedlemskap(
                         statsborgerskap,
-                        historiskEØSMedlemsskapForLand,
+                        eøsMedlemskapsPerioderForValgtLand,
                         periode.fom
                     ),
                     person = person
@@ -82,7 +82,7 @@ class StatsborgerskapService(
             return Medlemskap.NORDEN
         }
 
-        val historiskEØSMedlemsskapForLand =
+        val eøsMedlemskapsPerioderForValgtLand =
             integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land] ?: emptyList()
         var datoFra = statsborgerskap.hentFom()
 
@@ -90,20 +90,20 @@ class StatsborgerskapService(
             val idag = LocalDate.now()
             finnMedlemskap(
                 statsborgerskap,
-                historiskEØSMedlemsskapForLand,
+                eøsMedlemskapsPerioderForValgtLand,
                 idag
             )
         } else {
 
-            val alleMedlemskap = hentMedlemskapsDatoIntervaller(
-                historiskEØSMedlemsskapForLand,
+            val alleMedlemskap = hentMedlemskapsperioderUnderStatsborgerskapsperioden(
+                eøsMedlemskapsPerioderForValgtLand,
                 datoFra,
                 statsborgerskap.gyldigTilOgMed
             ).fold(emptyList<Medlemskap>()) { acc, periode ->
                 acc + listOf(
                     finnMedlemskap(
                         statsborgerskap,
-                        historiskEØSMedlemsskapForLand,
+                        eøsMedlemskapsPerioderForValgtLand,
                         periode.fom
                     )
                 )
@@ -113,31 +113,29 @@ class StatsborgerskapService(
         }
     }
 
-    private fun hentMedlemskapsDatoIntervaller(
-        medlemsland: List<BetydningDto>,
-        fra: LocalDate?,
-        til: LocalDate?
+    private fun hentMedlemskapsperioderUnderStatsborgerskapsperioden(
+        medlemskapsperioderForValgtLand: List<BetydningDto>,
+        statsborgerFra: LocalDate?,
+        statsborgerTil: LocalDate?
     ): List<DatoIntervallEntitet> {
-        val filtrerteEndringsdatoerMedlemskap = medlemsland.flatMap {
-            listOf(it.gyldigFra, it.gyldigTil.plusDays(1))
-        }.filter { datoForEndringIMedlemskap ->
-            erInnenforDatoerSomBetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
-        }.filter { datoForEndringIMedlemskap ->
-            erInnenforDatoerForStatsborgerskapet(datoForEndringIMedlemskap, fra, til)
-        }
-
-        val endringsDatoerMedlemskapOgStatsborgerskap = listOf(fra) + filtrerteEndringsdatoerMedlemskap + listOf(til)
-        val datoPar = endringsDatoerMedlemskapOgStatsborgerskap.windowed(2, 1)
-        return datoPar
-            .mapIndexed { index, par ->
-                val fra = par[0]
-                val nesteEndringsdato = par[1]
-                if (index != (datoPar.size - 1) && nesteEndringsdato != null) {
-                    DatoIntervallEntitet(fra, nesteEndringsdato.minusDays(1))
-                } else {
-                    DatoIntervallEntitet(fra, nesteEndringsdato)
-                }
+        val datoerMedlemskapEndrerSeg = medlemskapsperioderForValgtLand
+            .flatMap {
+                listOf(
+                    it.gyldigFra,
+                    it.gyldigTil.plusDays(1)
+                )
             }
+        val endringsdatoerUnderStatsborgerskapsperioden = datoerMedlemskapEndrerSeg
+            .filter { datoForEndringIMedlemskap ->
+                erInnenforDatoerSomBetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
+            }.filter { datoForEndringIMedlemskap ->
+                erInnenforDatoerForStatsborgerskapet(datoForEndringIMedlemskap, statsborgerFra, statsborgerTil)
+            }
+
+        val datoerMedlemskapEllerStatsborgerskapEndrerSeg =
+            listOf(statsborgerFra) + endringsdatoerUnderStatsborgerskapsperioden + listOf(statsborgerTil)
+        val naivePerioder = datoerMedlemskapEllerStatsborgerskapEndrerSeg.windowed(2, 1)
+        return hentDatointervallerMedSluttdatoFørNesteStarter(naivePerioder)
     }
 
     private fun finnMedlemskap(
@@ -174,6 +172,18 @@ class StatsborgerskapService(
     ) =
         (statsborgerFra == null || dato.isAfter(statsborgerFra)) &&
             (statsborgerTil == null || dato.isBefore(statsborgerTil))
+
+    private fun hentDatointervallerMedSluttdatoFørNesteStarter(intervaller: List<List<LocalDate?>>): List<DatoIntervallEntitet> {
+        return intervaller.mapIndexed { index, endringsdatoPar ->
+            val fra = endringsdatoPar[0]
+            val nesteEndringsdato = endringsdatoPar[1]
+            if (index != (intervaller.size - 1) && nesteEndringsdato != null) {
+                DatoIntervallEntitet(fra, nesteEndringsdato.minusDays(1))
+            } else {
+                DatoIntervallEntitet(fra, nesteEndringsdato)
+            }
+        }
+    }
 
     companion object {
 
