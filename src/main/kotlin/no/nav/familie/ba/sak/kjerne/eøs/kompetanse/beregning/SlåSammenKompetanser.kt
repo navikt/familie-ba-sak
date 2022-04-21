@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
 
-import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenBarn
@@ -64,10 +63,8 @@ private fun Kompetanse.leggSammenBarn(kompetanse: Kompetanse) =
 private fun Kompetanse.fraOgMedTidspunkt(): Tidspunkt<Måned> =
     this.fom.tilTidspunktEllerUendeligLengeSiden { this.tom ?: YearMonth.now() }
 
-private fun Kompetanse.tilOgMedTidspunkt(): Tidspunkt<Måned> = when {
-    this.tom != null && this.tom.isAfter(inneværendeMåned()) -> Tidspunkt.uendeligLengeTil(this.tom)
-    else -> this.tom.tilTidspunktEllerUendeligLengeTil { this.fom ?: YearMonth.now() }
-}
+private fun Kompetanse.tilOgMedTidspunkt(): Tidspunkt<Måned> =
+    this.tom.tilTidspunktEllerUendeligLengeTil { this.fom ?: YearMonth.now() }
 
 fun Iterable<Kompetanse>?.settFomOgTom(periode: Periode<*, Måned>) =
     this?.map { kompetanse -> kompetanse.settFomOgTom(periode) }
