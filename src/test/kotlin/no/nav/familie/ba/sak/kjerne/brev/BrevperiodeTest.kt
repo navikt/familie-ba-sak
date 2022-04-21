@@ -57,11 +57,9 @@ class BrevperiodeTest {
             val brevperiode = try {
                 minimertVedtaksperiode.tilBrevPeriode(
                     restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                    utvidetScenarioForEndringsperiode = behandlingsresultatPersonTestConfig.utvidetScenarioForEndringsperiode,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
-                    erIngenOverlappVedtaksperiodeTogglePå = true,
                 )
             } catch (e: Exception) {
                 testReporter.publishEntry(

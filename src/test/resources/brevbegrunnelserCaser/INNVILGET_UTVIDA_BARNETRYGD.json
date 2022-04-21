@@ -8,7 +8,6 @@
     "ORDINÆR_BARNETRYGD",
     "UTVIDET_BARNETRYGD"
   ],
-  "utvidetScenarioForEndringsperiode": "UTVIDET_YTELSE_IKKE_ENDRET",
   "personerPåBehandling": [
     {
       "fødselsdato": "1990-02-19",

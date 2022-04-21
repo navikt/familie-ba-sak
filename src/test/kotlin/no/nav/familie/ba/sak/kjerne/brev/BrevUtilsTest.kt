@@ -7,28 +7,21 @@ import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.dataGenerator.brev.lagBrevPeriodeGrunnlagMedPersoner
-import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EndretUtbetalingBrevPeriodeType
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.EndretUtbetalingBarnetrygdType
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class BrevUtilsTest {
@@ -447,148 +440,6 @@ internal class BrevUtilsTest {
                 ),
                 opplysningspliktHjemlerSkalMedIBrev = true
             )
-        )
-    }
-
-    @Test
-    fun `hentEndretUtbetalingBrevPeriode skal gi riktig periodetype`() {
-        val utvidetVedtaksperiodMedBegrunnelserFullUtbetaling =
-            lagBrevPeriodeGrunnlagMedPersoner(
-                minimertUtbetalingsperiodeDetalj = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        prosent = BigDecimal.valueOf(100)
-                    ),
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        prosent = BigDecimal.valueOf(100)
-                    )
-                )
-            )
-        val utvidetVedtaksperiodMedBegrunnelserForskjelligUtbetaling =
-            lagBrevPeriodeGrunnlagMedPersoner(
-                minimertUtbetalingsperiodeDetalj = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        prosent = BigDecimal.valueOf(100)
-                    ),
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        prosent = BigDecimal.ZERO
-                    )
-                )
-
-            )
-        val utvidetVedtaksperiodMedBegrunnelserIngenUtbetaling =
-            lagBrevPeriodeGrunnlagMedPersoner(
-                minimertUtbetalingsperiodeDetalj = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        prosent = BigDecimal.ZERO
-                    ),
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        prosent = BigDecimal.ZERO
-                    )
-                )
-            )
-
-        Assertions.assertEquals(
-            flettefelt(EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn),
-            utvidetVedtaksperiodMedBegrunnelserFullUtbetaling
-                .hentEndretUtbetalingBrevPeriode(
-                    "",
-                    emptyList(),
-                    UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE
-                ).type
-        )
-
-        Assertions.assertEquals(
-            flettefelt(EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn),
-            utvidetVedtaksperiodMedBegrunnelserForskjelligUtbetaling
-                .hentEndretUtbetalingBrevPeriode(
-                    "",
-                    emptyList(),
-                    UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE
-                ).type
-        )
-
-        Assertions.assertEquals(
-            flettefelt(EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING.apiNavn),
-            utvidetVedtaksperiodMedBegrunnelserIngenUtbetaling
-                .hentEndretUtbetalingBrevPeriode(
-                    "",
-                    emptyList(),
-                    UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE
-                ).type
-        )
-    }
-
-    @Test
-    fun `skal gi riktig brevperiode for endret utbetaling for forskjellige utvidet scenarioer`() {
-
-        val utvidetVedtaksperiodeMedBegrunnelserIngenUtbetaling =
-            lagBrevPeriodeGrunnlagMedPersoner(
-                type = Vedtaksperiodetype.ENDRET_UTBETALING,
-                minimertUtbetalingsperiodeDetalj = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(prosent = BigDecimal.ZERO)
-                )
-            )
-        val utvidetVedtaksperiodeMedBegrunnelserFullUtbetaling =
-            lagBrevPeriodeGrunnlagMedPersoner(
-                type = Vedtaksperiodetype.ENDRET_UTBETALING,
-                minimertUtbetalingsperiodeDetalj = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(prosent = BigDecimal.valueOf(100))
-                )
-            )
-
-        val begrunnelser = listOf(
-            UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
-            UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_ENDRET,
-            UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET
-        ).map {
-            utvidetVedtaksperiodeMedBegrunnelserIngenUtbetaling.hentEndretUtbetalingBrevPeriode(
-                "",
-                emptyList(),
-                utvidetScenario = it
-            )
-        }
-
-        Assertions.assertEquals(
-            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING.apiNavn,
-            begrunnelser[0].type?.single()
-        )
-        Assertions.assertEquals(
-            EndretUtbetalingBarnetrygdType.DELT.navn + " ",
-            begrunnelser[0].typeBarnetrygd?.single()
-        )
-
-        Assertions.assertEquals(
-            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING.apiNavn,
-            begrunnelser[1].type?.single()
-        )
-        Assertions.assertEquals(
-            EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB.navn + " ",
-            begrunnelser[1].typeBarnetrygd?.single()
-        )
-
-        Assertions.assertEquals(
-            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING.apiNavn,
-            begrunnelser[2].type?.single()
-        )
-        Assertions.assertEquals(
-            EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB.navn + " ",
-            begrunnelser[2].typeBarnetrygd?.single()
-        )
-
-        val deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring =
-            utvidetVedtaksperiodeMedBegrunnelserFullUtbetaling.hentEndretUtbetalingBrevPeriode(
-                "",
-                emptyList(),
-                utvidetScenario = UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET
-            )
-
-        Assertions.assertEquals(
-            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn,
-            deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring.type?.single()
-        )
-        Assertions.assertEquals(
-            EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB.navn + " ",
-            deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring.typeBarnetrygd?.single()
         )
     }
 

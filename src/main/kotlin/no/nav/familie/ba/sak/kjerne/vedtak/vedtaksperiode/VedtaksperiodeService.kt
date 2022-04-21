@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FØRSTE_ENDRINGSTIDSPUNKT
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_DELT_BOSTED_BEGRUNNELSE
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -116,8 +115,6 @@ class VedtaksperiodeService(
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
-        val erIngenOverlappVedtaksperiodeToggelPå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
-
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
 
@@ -133,13 +130,12 @@ class VedtaksperiodeService(
                     )
                 }
 
-                it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser, erIngenOverlappVedtaksperiodeToggelPå)
+                it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser)
             }
         )
 
         if (
-            standardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING } &&
-            !featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
+            standardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING }
         ) {
             val andelerTilkjentYtelse =
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
@@ -161,7 +157,6 @@ class VedtaksperiodeService(
             vedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 personopplysningGrunnlag = persongrunnlag,
-                erIngenOverlappVedtaksperiodeTogglePå = false,
             )
         } catch (e: Exception) {
             throw FunksjonellFeil(
@@ -278,23 +273,10 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
 
-        val erIngenOverlappVedtaksperiodeTogglePå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
-
-        val utbetalingsperioder = if (!erIngenOverlappVedtaksperiodeTogglePå) {
-            hentVedtaksperioderMedBegrunnelserForUtbetalingsperioderGammel(
-                andelerTilkjentYtelse,
-                vedtak
-            )
-        } else hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
+        val utbetalingsperioder = hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
             andelerTilkjentYtelse,
             vedtak
         )
-
-        val endredeUtbetalingsperioder =
-            if (!erIngenOverlappVedtaksperiodeTogglePå) hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                vedtak = vedtak,
-            ) else emptyList()
 
         val opphørsperioder =
             hentOpphørsperioder(vedtak.behandling).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
@@ -304,31 +286,28 @@ class VedtaksperiodeService(
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
 
         val reduksjonsperioder = hentReduksjonsperioderFraInnvilgelsesTidspunkt(
-            vedtak,
-            utbetalingsperioder,
-            personopplysningGrunnlag,
-            erIngenOverlappVedtaksperiodeTogglePå,
-            opphørsperioder
+            vedtak = vedtak,
+            utbetalingsperioder = utbetalingsperioder,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            opphørsperioder = opphørsperioder
         )
 
         val oppdatertUtbetalingsperioder =
             finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
 
         return filtrerUtPerioderBasertPåEndringstidspunkt(
-            vedtak.behandling.id,
-            oppdatertUtbetalingsperioder,
-            endredeUtbetalingsperioder,
-            opphørsperioder,
-            avslagsperioder,
-            gjelderFortsattInnvilget,
-            manueltOverstyrtEndringstidspunkt
+            behandlingId = vedtak.behandling.id,
+            oppdatertUtbetalingsperioder = oppdatertUtbetalingsperioder,
+            opphørsperioder = opphørsperioder,
+            avslagsperioder = avslagsperioder,
+            gjelderFortsattInnvilget = gjelderFortsattInnvilget,
+            manueltOverstyrtEndringstidspunkt = manueltOverstyrtEndringstidspunkt
         )
     }
 
     fun filtrerUtPerioderBasertPåEndringstidspunkt(
         behandlingId: Long,
         oppdatertUtbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
-        endredeUtbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
         avslagsperioder: List<VedtaksperiodeMedBegrunnelser>,
         gjelderFortsattInnvilget: Boolean = false,
@@ -339,7 +318,7 @@ class VedtaksperiodeService(
                 endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
             else TIDENES_MORGEN
 
-        return (oppdatertUtbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder)
+        return (oppdatertUtbetalingsperioder + opphørsperioder)
             .filter {
                 (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
             } + avslagsperioder
@@ -414,13 +393,10 @@ class VedtaksperiodeService(
         val persongrunnlag =
             persongrunnlagService.hentAktivThrows(behandling.id)
 
-        val erIngenOverlappVedtaksperiodeTogglePå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
-
         val utvidetVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 personopplysningGrunnlag = persongrunnlag,
-                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå
             )
         }
 
@@ -465,7 +441,6 @@ class VedtaksperiodeService(
                     aktørIderMedUtbetaling = aktørIderMedUtbetaling,
                     endretUtbetalingAndeler = endretUtbetalingAndeler,
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
-                    erIngenOverlappVedtaksperiodeToggelPå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER),
                     erNyDeltBostedTogglePå = featureToggleService.isEnabled(NY_DELT_BOSTED_BEGRUNNELSE)
                 )
             )
@@ -565,7 +540,6 @@ class VedtaksperiodeService(
         vedtak: Vedtak,
         utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        erIngenOverlappVedtaksperiodeTogglePå: Boolean,
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
         val erToggelenPå = featureToggleService.isEnabled(LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT)
@@ -585,13 +559,12 @@ class VedtaksperiodeService(
             }
 
         return identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
-            forrigeAndelerTilkjentYtelse,
-            andelerTilkjentYtelse,
-            vedtak,
-            utbetalingsperioder,
-            personopplysningGrunnlag,
-            erIngenOverlappVedtaksperiodeTogglePå,
-            opphørsperioder
+            forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            vedtak = vedtak,
+            utbetalingsperioder = utbetalingsperioder,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            opphørsperioder = opphørsperioder
         )
     }
 
