@@ -49,26 +49,26 @@ class StatsborgerskapService(
                     ),
                     landkode = statsborgerskap.land,
                     medlemskap = finnMedlemskap(
-                        statsborgerskap,
-                        eøsMedlemskapsPerioderForValgtLand,
-                        idag
+                        statsborgerskap = statsborgerskap,
+                        eøsMedlemskapsperioderForValgtLand = eøsMedlemskapsPerioderForValgtLand,
+                        gyldigFraOgMed = idag
                     ),
                     person = person
                 )
             )
         } else {
             hentMedlemskapsperioderUnderStatsborgerskapsperioden(
-                eøsMedlemskapsPerioderForValgtLand,
-                datoFra,
-                statsborgerskap.gyldigTilOgMed
+                medlemskapsperioderForValgtLand = eøsMedlemskapsPerioderForValgtLand,
+                statsborgerFra = datoFra,
+                statsborgerTil = statsborgerskap.gyldigTilOgMed
             ).fold(emptyList()) { medlemskapsperioder, periode ->
                 val medlemskapsperiode = GrStatsborgerskap(
                     gyldigPeriode = periode,
                     landkode = statsborgerskap.land,
                     medlemskap = finnMedlemskap(
-                        statsborgerskap,
-                        eøsMedlemskapsPerioderForValgtLand,
-                        periode.fom
+                        statsborgerskap = statsborgerskap,
+                        eøsMedlemskapsperioderForValgtLand = eøsMedlemskapsPerioderForValgtLand,
+                        gyldigFraOgMed = periode.fom
                     ),
                     person = person
                 )
@@ -89,9 +89,9 @@ class StatsborgerskapService(
         return if (datoFra == null && statsborgerskap.gyldigTilOgMed == null) {
             val idag = LocalDate.now()
             finnMedlemskap(
-                statsborgerskap,
-                eøsMedlemskapsPerioderForValgtLand,
-                idag
+                statsborgerskap = statsborgerskap,
+                eøsMedlemskapsperioderForValgtLand = eøsMedlemskapsPerioderForValgtLand,
+                gyldigFraOgMed = idag
             )
         } else {
 
@@ -102,9 +102,9 @@ class StatsborgerskapService(
             ).fold(emptyList<Medlemskap>()) { acc, periode ->
                 acc + listOf(
                     finnMedlemskap(
-                        statsborgerskap,
-                        eøsMedlemskapsPerioderForValgtLand,
-                        periode.fom
+                        statsborgerskap = statsborgerskap,
+                        eøsMedlemskapsperioderForValgtLand = eøsMedlemskapsPerioderForValgtLand,
+                        gyldigFraOgMed = periode.fom
                     )
                 )
             }
