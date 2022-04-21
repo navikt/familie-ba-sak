@@ -47,11 +47,15 @@ internal class StatsborgerskapServiceTest {
 
         assertEquals(2, grStatsborgerskap.size)
         assertEquals(FOM_1990, grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.first().gyldigPeriode?.fom)
+        val dagenFørPolenBleMedlemAvEØS = FOM_2004.minusDays(1)
+        assertEquals(
+            dagenFørPolenBleMedlemAvEØS,
+            grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.first().gyldigPeriode?.tom
+        )
         assertEquals(
             Medlemskap.TREDJELANDSBORGER,
             grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.first().medlemskap
         )
-
         assertEquals(FOM_2004, grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.last().gyldigPeriode?.fom)
         assertEquals(Medlemskap.EØS, grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.last().medlemskap)
     }
@@ -162,10 +166,13 @@ internal class StatsborgerskapServiceTest {
 
     @Test
     fun `Skal evaluere britiske statsborgere under Brexit som først EØS, nå tredjelandsborgere`() {
+        val datoFørBrexit = LocalDate.of(1989, 3, 1)
+        val datoEtterBrexit = LocalDate.of(2020, 5, 1)
+
         val statsborgerStorbritanniaMedPeriodeUnderBrexit = Statsborgerskap(
             "GBR",
-            gyldigFraOgMed = LocalDate.of(1989, 3, 1),
-            gyldigTilOgMed = LocalDate.of(2020, 5, 1),
+            gyldigFraOgMed = datoFørBrexit,
+            gyldigTilOgMed = datoEtterBrexit,
             bekreftelsesdato = null
         )
         val grStatsborgerskapUnderBrexit = statsborgerskapService.hentStatsborgerskapMedMedlemskap(
@@ -173,6 +180,8 @@ internal class StatsborgerskapServiceTest {
             person = lagPerson()
         )
         assertEquals(2, grStatsborgerskapUnderBrexit.size)
+        assertEquals(datoFørBrexit, grStatsborgerskapUnderBrexit.first().gyldigPeriode?.fom)
+        assertEquals(TOM_2010, grStatsborgerskapUnderBrexit.first().gyldigPeriode?.tom)
         assertEquals(Medlemskap.EØS, grStatsborgerskapUnderBrexit.sortedBy { it.gyldigPeriode?.fom }.first().medlemskap)
         assertEquals(
             Medlemskap.TREDJELANDSBORGER,

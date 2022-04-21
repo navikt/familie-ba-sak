@@ -127,9 +127,17 @@ class StatsborgerskapService(
         }
 
         val endringsDatoerMedlemskapOgStatsborgerskap = listOf(fra) + filtrerteEndringsdatoerMedlemskap + listOf(til)
-
-        return endringsDatoerMedlemskapOgStatsborgerskap.windowed(2, 1)
-            .map { DatoIntervallEntitet(it[0], it[1]) }
+        val datoPar = endringsDatoerMedlemskapOgStatsborgerskap.windowed(2, 1)
+        return datoPar
+            .mapIndexed { index, par ->
+                val fra = par[0]
+                val nesteEndringsdato = par[1]
+                if (index != (datoPar.size - 1) && nesteEndringsdato != null) {
+                    DatoIntervallEntitet(fra, nesteEndringsdato.minusDays(1))
+                } else {
+                    DatoIntervallEntitet(fra, nesteEndringsdato)
+                }
+            }
     }
 
     private fun finnMedlemskap(
