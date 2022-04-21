@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
 /**
  * Extension-metode for å kombinere en map av tidslinjer med en annen map av tidslinjer
@@ -54,4 +55,23 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerForAlleNøklerMe
             val resultat: Tidslinje<R, T> = venstre.kombinerMed(høyre, kombinator)
             it to resultat
         }.toMap()
+}
+
+/**
+ * Extension-metode for å kombinere liste av tidslinjer
+ * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
+ * fra minste fraOgMed til største fraOgMed() fra alle tidslinjene
+ * Innhold (I) og tidsenhet (T) må være av samme type
+ * Kombintor-funksjonen tar inn Iterable<I> og returner (nullable) R
+ * Null-verdier fjernes før de sendes til kombinator-funksjonen, som betyr at en tom iterator kan bli sendt
+ * Resultatet er en tidslnije med tidsenhet T og innhold R
+ */
+fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.snittKombinerUtenNull(
+    listeKombinator: (Iterable<I>) -> R?
+): Tidslinje<R, T> {
+    val tidslinjer = this
+    return object : TidslinjeSomStykkerOppTiden<R, T>(tidslinjer) {
+        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
+            listeKombinator(tidslinjer.map { it.innholdForTidspunkt(tidspunkt) }.filterNotNull())
+    }
 }
