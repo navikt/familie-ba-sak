@@ -115,7 +115,8 @@ class VilkårService(
     fun deleteVilkårsperiode(behandlingId: Long, vilkårId: Long, aktør: Aktør): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
-        val personResultat = finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, aktør.aktivFødselsnummer())
+        val personResultat =
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, aktør.aktivFødselsnummer())
 
         muterPersonResultatDelete(personResultat, vilkårId)
 
@@ -125,7 +126,8 @@ class VilkårService(
     @Transactional
     fun deleteVilkår(behandlingId: Long, restSlettVilkår: RestSlettVilkår): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
-        val personResultat = finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restSlettVilkår.personIdent)
+        val personResultat =
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restSlettVilkår.personIdent)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         if (!behandling.kanLeggeTilOgFjerneUtvidetVilkår() ||
             Vilkår.UTVIDET_BARNETRYGD != restSlettVilkår.vilkårType ||
@@ -167,7 +169,8 @@ class VilkårService(
             )
         }
 
-        val personResultat = finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restNyttVilkår.personIdent)
+        val personResultat =
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restNyttVilkår.personIdent)
 
         muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
 
