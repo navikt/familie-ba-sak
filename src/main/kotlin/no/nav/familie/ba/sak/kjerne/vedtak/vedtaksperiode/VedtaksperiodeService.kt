@@ -295,21 +295,15 @@ class VedtaksperiodeService(
         val oppdatertUtbetalingsperioder =
             finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
 
-        return filtrerUtPerioderBasertPåEndringstidspunkt(
+        return (oppdatertUtbetalingsperioder + opphørsperioder).filtrerUtPerioderBasertPåEndringstidspunkt(
             behandlingId = vedtak.behandling.id,
-            oppdatertUtbetalingsperioder = oppdatertUtbetalingsperioder,
-            opphørsperioder = opphørsperioder,
-            avslagsperioder = avslagsperioder,
             gjelderFortsattInnvilget = gjelderFortsattInnvilget,
             manueltOverstyrtEndringstidspunkt = manueltOverstyrtEndringstidspunkt
-        )
+        ) + avslagsperioder
     }
 
-    fun filtrerUtPerioderBasertPåEndringstidspunkt(
+    private fun List<VedtaksperiodeMedBegrunnelser>.filtrerUtPerioderBasertPåEndringstidspunkt(
         behandlingId: Long,
-        oppdatertUtbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
-        opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
-        avslagsperioder: List<VedtaksperiodeMedBegrunnelser>,
         gjelderFortsattInnvilget: Boolean = false,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
     ): List<VedtaksperiodeMedBegrunnelser> {
@@ -318,10 +312,7 @@ class VedtaksperiodeService(
                 endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
             else TIDENES_MORGEN
 
-        return (oppdatertUtbetalingsperioder + opphørsperioder)
-            .filter {
-                (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
-            } + avslagsperioder
+        return this.filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
     }
 
     @Transactional
