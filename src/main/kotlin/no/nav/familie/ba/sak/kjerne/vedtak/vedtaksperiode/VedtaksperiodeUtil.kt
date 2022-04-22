@@ -174,11 +174,11 @@ private fun utledTom(
 
 fun finnOgOppdaterOverlappendeUtbetalingsperiode(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
-    reduksjonsperioder: List<VedtaksperiodeMedBegrunnelser>
+    perioderMedReduksjonFraSistIverksatteBehandling: List<VedtaksperiodeMedBegrunnelser>
 ): List<VedtaksperiodeMedBegrunnelser> {
     val overlappendePerioder =
         utbetalingsperioder.filter {
-            reduksjonsperioder.any { reduksjonsperiode ->
+            perioderMedReduksjonFraSistIverksatteBehandling.any { reduksjonsperiode ->
                 reduksjonsperiode.fom!!.isSameOrAfter(it.fom!!) && reduksjonsperiode.tom!!.isSameOrBefore(
                     it.tom!!
                 )
@@ -190,7 +190,7 @@ fun finnOgOppdaterOverlappendeUtbetalingsperiode(
             overlappendePerioder.firstOrNull { periode -> it.fom == periode.fom && it.tom == periode.tom }
         if (overlappendePeriode != null) {
             oppdatertUtbetalingsperioder.addAll(
-                reduksjonsperioder.filter { reduksjonsperiode ->
+                perioderMedReduksjonFraSistIverksatteBehandling.filter { reduksjonsperiode ->
                     reduksjonsperiode.fom!! >= overlappendePeriode.fom &&
                         reduksjonsperiode.tom!! <= overlappendePeriode.tom
                 }

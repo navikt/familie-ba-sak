@@ -285,7 +285,7 @@ class VedtaksperiodeService(
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
 
-        val reduksjonsperioder = hentReduksjonsperioderFraInnvilgelsesTidspunkt(
+        val perioderMedReduksjonFraSistIverksatteBehandling = hentPerioderMedReduksjonFraSistIverksatteBehandling(
             vedtak = vedtak,
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -293,7 +293,10 @@ class VedtaksperiodeService(
         )
 
         val oppdatertUtbetalingsperioder =
-            finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
+            finnOgOppdaterOverlappendeUtbetalingsperiode(
+                utbetalingsperioder,
+                perioderMedReduksjonFraSistIverksatteBehandling
+            )
 
         return (oppdatertUtbetalingsperioder + opphørsperioder).filtrerUtPerioderBasertPåEndringstidspunkt(
             behandlingId = vedtak.behandling.id,
@@ -527,7 +530,7 @@ class VedtaksperiodeService(
         )
     }
 
-    fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
+    fun hentPerioderMedReduksjonFraSistIverksatteBehandling(
         vedtak: Vedtak,
         utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
