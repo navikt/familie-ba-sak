@@ -49,10 +49,10 @@ abstract class Tidspunkt<T : Tidsenhet> internal constructor(
     abstract fun somTilOgMed(dato: LocalDate): Tidspunkt<T>
 
     companion object {
-        fun uendeligLengeSiden(dato: LocalDate) = DagTidspunkt(dato, uendelighet = Uendelighet.FORTID)
-        fun uendeligLengeSiden(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.FORTID)
-        fun uendeligLengeTil(dato: LocalDate) = DagTidspunkt(dato, uendelighet = Uendelighet.FREMTID)
-        fun uendeligLengeTil(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.FREMTID)
+        fun uendeligLengeSiden(dato: LocalDate = LocalDate.now()) = DagTidspunkt(dato, uendelighet = Uendelighet.FORTID)
+        fun uendeligLengeSiden(måned: YearMonth = YearMonth.now()) = MånedTidspunkt(måned, Uendelighet.FORTID)
+        fun uendeligLengeTil(dato: LocalDate = LocalDate.now()) = DagTidspunkt(dato, uendelighet = Uendelighet.FREMTID)
+        fun uendeligLengeTil(måned: YearMonth = YearMonth.now()) = MånedTidspunkt(måned, Uendelighet.FREMTID)
         fun fraOgMed(fraOgMed: LocalDate?, praktiskMinsteFraOgMed: LocalDate): DagTidspunkt =
             if (fraOgMed == null || fraOgMed < PRAKTISK_TIDLIGSTE_DAG)
                 uendeligLengeSiden(maxOf(praktiskMinsteFraOgMed, PRAKTISK_TIDLIGSTE_DAG))
@@ -124,8 +124,3 @@ fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.størsteEllerNull() =
 
 fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.minsteEllerNull() =
     this.reduceOrNull { acc, neste -> minsteAv(acc, neste) }
-
-fun LocalDate?.tilTidspunktEllerDefault(default: () -> LocalDate) =
-    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: DagTidspunkt(default(), Uendelighet.INGEN)
-
-fun YearMonth.tilTidspunkt() = MånedTidspunkt(this, Uendelighet.INGEN)

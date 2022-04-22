@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -37,23 +36,7 @@ class Tidslinjer(
     private val vilkårsresultaterTidslinjeMap = aktørTilPersonResultater
         .entries.associate { (aktør, personResultat) ->
             aktør to personResultat.vilkårResultater.groupBy { it.vilkårType }
-                .map {
-                    if (personResultat.erSøkersResultater()) {
-                        VilkårsresultatDagTidslinje(
-                            vilkårsresultater = it.value,
-                            praktiskTidligsteDato = søkersFødselsdato,
-                            praktiskSenesteDato = yngsteBarnFødselsdato.til18ÅrsVilkårsdato()
-                        )
-                    } else {
-                        val barnFødselsdato =
-                            barnOgFødselsdatoer[aktør] ?: throw Feil("Finner ikke fødselsdato på barn")
-                        VilkårsresultatDagTidslinje(
-                            vilkårsresultater = it.value,
-                            praktiskTidligsteDato = barnFødselsdato,
-                            praktiskSenesteDato = barnFødselsdato.til18ÅrsVilkårsdato()
-                        )
-                    }
-                }
+                .map { VilkårsresultatDagTidslinje(vilkårsresultater = it.value) }
         }
 
     private val søkersTidslinje: SøkersTidslinjer =

@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilT
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteEllerNull
-import java.time.YearMonth
 
 internal class KompetanseTidslinje(
     val kompetanser: List<Kompetanse>
@@ -31,7 +30,7 @@ internal class KompetanseTidslinje(
 }
 
 private fun Kompetanse.fraOgMedTidspunkt(): Tidspunkt<Måned> =
-    this.fom.tilTidspunktEllerUendeligLengeSiden { this.tom ?: YearMonth.now() }
+    this.fom.tilTidspunktEllerUendeligLengeSiden { this.tom }
 
 private fun Kompetanse.tilOgMedTidspunkt(): Tidspunkt<Måned> =
-    this.tom.tilTidspunktEllerUendeligLengeTil { this.fom ?: YearMonth.now() }
+    this.tom.tilTidspunktEllerUendeligLengeTil { this.fom }

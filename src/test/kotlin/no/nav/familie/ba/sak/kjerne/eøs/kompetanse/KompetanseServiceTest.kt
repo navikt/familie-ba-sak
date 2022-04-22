@@ -134,7 +134,7 @@ internal class KompetanseServiceTest {
     }
 
     @Test
-    fun `skal tilpasse kompetanse med regelverk-tidslinjer som har blitt forlenget til uendelig`() {
+    fun `kompetanse skal vare uendelig når til regelverk-tidslinjer fortsetter etter nåtidspunktet`() {
         val behandlingId = 10L
 
         val treMånederSiden = MånedTidspunkt.nå().flytt(-3)
@@ -142,27 +142,27 @@ internal class KompetanseServiceTest {
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = treMånederSiden.tilLocalDate())
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = treMånederSiden.tilLocalDate())
 
-        KompetanseBuilder(treMånederSiden, behandlingId)
-            .medKompetanse("---", barn1, barn2)
-            .lagreTil(mockKompetanseRepository)
-
         val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>()
-            .forPerson(søker, treMånederSiden)
+            .forPerson(søker, treMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
             .medVilkår("+++++++++++", Vilkår.BOSATT_I_RIKET)
             .medVilkår("+++++++++++", Vilkår.LOVLIG_OPPHOLD)
-            .forPerson(barn1, treMånederSiden)
+            .forPerson(barn1, treMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
             .medVilkår("+++++++++++", Vilkår.UNDER_18_ÅR)
             .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
             .medVilkår("EEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
             .medVilkår("EEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++", Vilkår.GIFT_PARTNERSKAP)
-            .forPerson(barn2, treMånederSiden)
+            .forPerson(barn2, treMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
             .medVilkår("+++++++", Vilkår.UNDER_18_ÅR)
             .medVilkår("EEEEEEE", Vilkår.BOSATT_I_RIKET)
             .medVilkår("EEEEEEE", Vilkår.LOVLIG_OPPHOLD)
             .medVilkår("EEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
+
+        val forventedeKompetanser = KompetanseBuilder(treMånederSiden.neste(), behandlingId)
+            .medKompetanse("->", barn1, barn2)
+            .byggKompetanser()
 
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
@@ -173,9 +173,50 @@ internal class KompetanseServiceTest {
 
         kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
 
-        val forventedeKompetanser = KompetanseBuilder(treMånederSiden.neste(), behandlingId)
-            .medKompetanse("->", barn1, barn2)
+        val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `kompetanse skal ha sluttdato når til regelverk-tidslinjer avsluttes før nåtidspunktet`() {
+        val behandlingId = 10L
+
+        val seksMånederSiden = MånedTidspunkt.nå().flytt(-6)
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = seksMånederSiden.tilLocalDate())
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = seksMånederSiden.tilLocalDate())
+
+        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>()
+            .forPerson(søker, seksMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
+            .medVilkår("+++++++++++", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("+++++++++++", Vilkår.LOVLIG_OPPHOLD)
+            .forPerson(barn1, seksMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
+            .medVilkår("+++++++++++", Vilkår.UNDER_18_ÅR)
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("EEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
+            .medVilkår("+++++++++++", Vilkår.GIFT_PARTNERSKAP)
+            .forPerson(barn2, seksMånederSiden) // Regelverk-tidslinje avslutter FØR nå-tidspunkt
+            .medVilkår("+++", Vilkår.UNDER_18_ÅR)
+            .medVilkår("EEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("EEE", Vilkår.LOVLIG_OPPHOLD)
+            .medVilkår("EEE", Vilkår.BOR_MED_SØKER)
+            .medVilkår("+++", Vilkår.GIFT_PARTNERSKAP)
+            .byggPerson()
+
+        val forventedeKompetanser = KompetanseBuilder(seksMånederSiden.neste(), behandlingId)
+            .medKompetanse("---", barn1, barn2) // Begge barna har 3 mnd EØS-regelverk før nå-tidspunktet
+            .medKompetanse("   ->", barn1) // Bare barn 1 har EØS-regelverk etter nå-tidspunktet
             .byggKompetanser()
+
+        val tidslinjer = Tidslinjer(
+            vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2)
+        )
+
+        every { tidslinjeService.hentTidslinjerThrows(behandlingId) } returns tidslinjer
+
+        kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
 
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
