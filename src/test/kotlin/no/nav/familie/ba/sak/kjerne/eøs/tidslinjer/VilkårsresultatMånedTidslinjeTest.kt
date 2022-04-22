@@ -58,7 +58,7 @@ class VilkårsresultatMånedTidslinjeTest {
         ).tilVilkårsresultaterMånedTidslinje().also { it.print() }
 
         val forventetMånedstidslinje: Tidslinje<VilkårRegelverkResultat, Måned> =
-            (mai(2022)..apr(2040)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) }
+            (mai(2022)..apr(2040)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
 
         assertEquals(forventetMånedstidslinje, vilkårsresultatMånedTidslinje)
     }
