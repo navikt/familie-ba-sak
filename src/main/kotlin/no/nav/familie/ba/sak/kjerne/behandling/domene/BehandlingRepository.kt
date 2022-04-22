@@ -151,5 +151,5 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
             "INNER JOIN Personident p on p.aktør.aktørId = a.aktørId " +
             "where b.id in (:behandlingIder) AND b.aktiv = true AND p.aktiv=true AND f.status = 'LØPENDE' "
     )
-    fun finnAktivFødselsnummerForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
+    fun finnAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
 }

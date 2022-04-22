@@ -73,7 +73,7 @@ class AvstemmingServiceTest {
             transaksjonsId = transaksjonsId
         )
         val aktivFødselsnummere = mapOf(behandlingId.toLong() to "test")
-        every { behandlingHentOgPersisterService.hentAktivFødselsnummerForBehandlinger(any()) } returns aktivFødselsnummere
+        every { behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(any()) } returns aktivFødselsnummere
     }
 
     @Test

@@ -25,7 +25,7 @@ class BehandlingHentOgPersisterServiceTest(
         fagsakService.oppdaterStatus(fagsak2, FagsakStatus.LØPENDE)
         val behandling2 = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak2), false)
 
-        val aktivFødselsnummere = behandlingHentOgPersisterService.hentAktivFødselsnummerForBehandlinger(
+        val aktivFødselsnummere = behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
             listOf(
                 behandling1.id,
                 behandling2.id
