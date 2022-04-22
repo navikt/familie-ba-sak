@@ -5,18 +5,17 @@
   "vedtaksperiodetype": "ENDRET_UTBETALING",
   "ytelserForSøkerForrigeMåned": [],
   "ytelserForBarnOgSøkerIPeriode": [],
-  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
-  "personerPåBehandling": [
-    {
-      "endredeUtbetalinger": [
-        {
-          "fom": "2021-02",
-          "tom": "2021-12",
-          "årsak": "DELT_BOSTED",
-          "prosent": 0
-        }
-      ],
-      "type": "BARN",
+   "personerPåBehandling": [
+     {
+       "endredeUtbetalinger": [
+         {
+           "fom": "2021-02",
+           "tom": "2021-12",
+           "årsak": "DELT_BOSTED",
+           "prosent": 0
+         }
+       ],
+       "type": "BARN",
       "fødselsdato": "2017-09-03",
       "overstyrteVilkårresultater": [
         {

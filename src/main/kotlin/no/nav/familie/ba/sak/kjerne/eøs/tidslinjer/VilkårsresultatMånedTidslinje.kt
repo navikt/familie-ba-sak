@@ -21,10 +21,10 @@ class VilkårsresultatMånedTidslinje(
         return vilkårsresultatDagTidslinje.perioder()
             .fold(emptyList()) { perioder, periode ->
                 val sistePeriode = perioder.lastOrNull()
-                val erBack2BackIMånedsskifte = if (sistePeriode != null) erBack2BackIMånedsskifte(
+                val erBack2BackIMånedsskifte = sistePeriode != null && erBack2BackIMånedsskifte(
                     tilOgMed = sistePeriode.tilOgMed.tilLocalDate(),
                     fraOgMed = periode.fraOgMed.tilLocalDate()
-                ) else false
+                )
 
                 val oppdatertFraOgMed = periode.fraOgMed.tilInneværendeMåned().neste()
                 val oppdatertTilOgMed = when (periode.innhold?.vilkår) {

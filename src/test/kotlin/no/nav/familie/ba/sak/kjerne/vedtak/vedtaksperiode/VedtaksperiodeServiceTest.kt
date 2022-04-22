@@ -300,7 +300,7 @@ class VedtaksperiodeServiceTest(
             vedtak = vedtak,
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            erIngenOverlappVedtaksperiodeTogglePå = true,
+
             opphørsperioder = emptyList()
         )
         assertTrue { redusertePerioder.isNotEmpty() }
@@ -373,7 +373,7 @@ class VedtaksperiodeServiceTest(
             vedtak = vedtak,
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            erIngenOverlappVedtaksperiodeTogglePå = true,
+
             opphørsperioder = emptyList()
         )
         assertTrue { redusertePerioder.isEmpty() }
@@ -456,7 +456,7 @@ class VedtaksperiodeServiceTest(
             vedtak = vedtak,
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            erIngenOverlappVedtaksperiodeTogglePå = true,
+
             opphørsperioder = listOf(opphørsperiode)
         )
         assertTrue { redusertePerioder.isNotEmpty() }
@@ -539,7 +539,7 @@ class VedtaksperiodeServiceTest(
             vedtak = vedtak,
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            erIngenOverlappVedtaksperiodeTogglePå = true,
+
             opphørsperioder = listOf(opphørsperiode)
         )
         assertTrue { redusertePerioder.isNotEmpty() }
@@ -578,8 +578,12 @@ class VedtaksperiodeServiceTest(
             )
         )
         val vedtaksperioder = vedtaksperiodeService.filtrerUtPerioderBasertPåEndringstidspunkt(
-            behandlingId, utbetalingsperioder, emptyList(),
-            emptyList(), avslagsperioder, false, LocalDate.of(2021, 3, 1)
+            behandlingId = behandlingId,
+            oppdatertUtbetalingsperioder = utbetalingsperioder,
+            opphørsperioder = emptyList(),
+            avslagsperioder = avslagsperioder,
+            gjelderFortsattInnvilget = false,
+            manueltOverstyrtEndringstidspunkt = LocalDate.of(2021, 3, 1)
         )
 
         assertNotNull(vedtaksperioder)

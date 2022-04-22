@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -36,7 +38,8 @@ class BeregningService(
     private val behandlingRepository: BehandlingRepository,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val småbarnstilleggService: SmåbarnstilleggService
+    private val småbarnstilleggService: SmåbarnstilleggService,
+    private val featureToggleService: FeatureToggleService
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
@@ -164,7 +167,8 @@ class BeregningService(
             .beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandling
+                behandling = behandling,
+                skalBrukeNyMåteÅLageUtvidetAndeler = featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_UTVIDET_ANDELER)
             ) { aktørId ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     aktør = aktørId,

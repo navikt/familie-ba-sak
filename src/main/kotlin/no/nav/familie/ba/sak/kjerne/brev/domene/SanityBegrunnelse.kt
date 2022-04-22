@@ -27,7 +27,7 @@ data class SanityBegrunnelse(
     val ovrigeTriggere: List<ØvrigTrigger>? = null,
     val endringsaarsaker: List<Årsak>? = null,
     val hjemler: List<String> = emptyList(),
-    val endretUtbetalingsperiodeDeltBostedTriggere: List<EndretUtbetalingsperiodeDeltBostedTriggere>? = null,
+    val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
 )
@@ -44,7 +44,7 @@ data class RestSanityBegrunnelse(
     val ovrigeTriggere: List<String>? = emptyList(),
     val endringsaarsaker: List<String>? = emptyList(),
     val hjemler: List<String>? = emptyList(),
-    val endretUtbetalingsperiodeDeltBostedTriggere: List<String>? = emptyList(),
+    val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: String?,
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
 ) {
@@ -75,9 +75,8 @@ data class RestSanityBegrunnelse(
                 finnEnumverdi(it, Årsak.values(), apiNavn)
             },
             hjemler = hjemler ?: emptyList(),
-            endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere?.mapNotNull {
-                finnEnumverdi(it, EndretUtbetalingsperiodeDeltBostedTriggere.values(), apiNavn)
-            },
+            endretUtbetalingsperiodeDeltBostedUtbetalingTrigger =
+            finnEnumverdi(endretUtbetalingsperiodeDeltBostedUtbetalingTrigger ?: "", EndretUtbetalingsperiodeDeltBostedTriggere.values(), apiNavn),
             endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {
                 finnEnumverdi(it, EndretUtbetalingsperiodeTrigger.values(), apiNavn)
             },
@@ -153,6 +152,8 @@ enum class EndretUtbetalingsperiodeTrigger {
 
 enum class EndretUtbetalingsperiodeDeltBostedTriggere {
     SKAL_UTBETALES,
+    SKAL_IKKE_UTBETALES,
+    UTBETALING_IKKE_RELEVANT
 }
 
 enum class UtvidetBarnetrygdTrigger {
@@ -190,10 +191,7 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
         etterEndretUtbetaling = this.endretUtbetalingsperiodeTriggere
             ?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
-        endretUtbetalingSkalUtbetales = this.endretUtbetalingsperiodeDeltBostedTriggere?.contains(
-            EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES
-        )
-            ?: false,
+        endretUtbetalingSkalUtbetales = this.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger ?: EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
         endringsaarsaker = this.endringsaarsaker?.toSet() ?: emptySet(),
         småbarnstillegg = this.inneholderUtvidetBarnetrygdTrigger(UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG),
         gjelderFørstePeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FØRSTE_PERIODE),

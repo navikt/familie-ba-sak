@@ -145,7 +145,8 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         vedtaksperiode = vedtaksperiode
     )
 
-    val søknadstidspunkt = endringsperioder.sortedBy { it.søknadstidspunkt }.firstOrNull { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
+    val søknadstidspunkt = endringsperioder.sortedBy { it.søknadstidspunkt }
+        .firstOrNull { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
 
     this.validerBrevbegrunnelse(
         gjelderSøker = gjelderSøker,

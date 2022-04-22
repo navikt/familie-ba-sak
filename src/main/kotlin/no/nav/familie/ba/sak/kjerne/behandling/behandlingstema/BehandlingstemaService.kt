@@ -55,8 +55,9 @@ class BehandlingstemaService(
         val forrigeKategori = behandling.kategori
         val skalOppdatereKategori = utledetKategori != forrigeKategori
         val skalOppdatereUnderkategori = utledetUnderkategori != forrigeUnderkategori
+        val skalOppdatereKategoriEllerUnderkategori = skalOppdatereKategori || skalOppdatereUnderkategori
 
-        return if (skalOppdatereKategori || skalOppdatereUnderkategori) {
+        return if (skalOppdatereKategoriEllerUnderkategori) {
             behandling.apply {
                 kategori = utledetKategori
                 underkategori = utledetUnderkategori
@@ -72,7 +73,7 @@ class BehandlingstemaService(
                     } else null
                 }
 
-                if (manueltOppdatert && (skalOppdatereKategori || skalOppdatereUnderkategori)) {
+                if (manueltOppdatert && skalOppdatereKategoriEllerUnderkategori) {
                     loggService.opprettEndretBehandlingstema(
                         behandling = lagretBehandling,
                         forrigeKategori = forrigeKategori,
