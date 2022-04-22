@@ -124,10 +124,10 @@ data class UtvidetBarnetrygdGenerator(
             error("Finner ikke sats for periode fom=${segment.fom}, tom=${segment.tom}")
         }
 
-        return ordinæreSatserForPeriode.map { satsperiode ->
-            val prosentForPeriode =
-                segment.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
+        val prosentForPeriode =
+            segment.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent for periode fom=${segment.fom}, tom=${segment.tom}")
 
+        return ordinæreSatserForPeriode.map { satsperiode ->
             AndelTilkjentYtelse(
                 behandlingId = behandlingId,
                 tilkjentYtelse = tilkjentYtelse,
