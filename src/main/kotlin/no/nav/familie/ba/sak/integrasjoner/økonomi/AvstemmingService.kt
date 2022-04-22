@@ -145,7 +145,8 @@ class AvstemmingService(
                     behandlingIder = chunk,
                     avstemmingstidspunkt = avstemmingstidspunkt
                 )
-                val aktiveFødselsnummere = behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(chunk)
+                val aktiveFødselsnummere =
+                    behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(chunk)
 
                 relevanteAndeler.groupBy { it.kildeBehandlingId }
                     .map { (kildeBehandlingId, andeler) ->
