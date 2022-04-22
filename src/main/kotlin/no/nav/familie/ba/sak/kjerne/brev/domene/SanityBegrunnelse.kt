@@ -76,7 +76,7 @@ data class RestSanityBegrunnelse(
             },
             hjemler = hjemler ?: emptyList(),
             endretUtbetalingsperiodeDeltBostedUtbetalingTrigger =
-            finnEnumverdi(endretUtbetalingsperiodeDeltBostedUtbetalingTrigger ?: "", EndretUtbetalingsperiodeDeltBostedTriggere.values(), apiNavn),
+            if (endretUtbetalingsperiodeDeltBostedUtbetalingTrigger != null) finnEnumverdi(endretUtbetalingsperiodeDeltBostedUtbetalingTrigger, EndretUtbetalingsperiodeDeltBostedTriggere.values(), apiNavn) else null,
             endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {
                 finnEnumverdi(it, EndretUtbetalingsperiodeTrigger.values(), apiNavn)
             },
