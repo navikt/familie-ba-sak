@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -934,6 +935,47 @@ internal class UtvidetBarnetrygdTest {
                 andelerBarna = barnasAndeler
             )
         }
+    }
+
+    @Test
+    fun `Skal dele opp utvidet-segment ved endring i sats`() {
+        val behandling = lagBehandling()
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+        val søkerAktør = randomAktørId()
+
+        val utvidetVilkår = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2016, 2, 1), periodeTom = LocalDate.of(2022, 2, 28), personResultat = PersonResultat(aktør = søkerAktør, vilkårsvurdering = lagVilkårsvurdering(søkerAktør = søkerAktør, behandling = behandling, resultat = Resultat.OPPFYLT)))
+
+        val barnasAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2015, 10),
+                tom = YearMonth.of(2022, 2),
+                person = tilfeldigPerson(personType = PersonType.BARN),
+                prosent = BigDecimal(100),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                tilkjentYtelse = tilkjentYtelse
+            )
+        )
+
+        val utvidetAndeler = UtvidetBarnetrygdGenerator(
+            behandlingId = behandling.id,
+            tilkjentYtelse = tilkjentYtelse
+        ).lagUtvidetBarnetrygdAndeler(
+            utvidetVilkår = listOf(utvidetVilkår),
+            andelerBarna = barnasAndeler
+        )
+
+        assertEquals(2, utvidetAndeler.size)
+
+        val andelEtterSatsendring = utvidetAndeler[0]
+        val andelFørSatsendring = utvidetAndeler[1]
+
+        val datoForSatsendring = SatsService.hentDatoForSatsendring(satstype = SatsType.ORBA, oppdatertBeløp = 1054)
+
+        assertEquals(970, andelFørSatsendring.sats)
+        assertEquals(datoForSatsendring?.minusDays(1)?.toYearMonth(), andelFørSatsendring.stønadTom)
+
+        assertEquals(1054, andelEtterSatsendring.sats)
+        assertEquals(datoForSatsendring?.toYearMonth(), andelEtterSatsendring.stønadFom)
     }
 
     private data class OppfyltPeriode(

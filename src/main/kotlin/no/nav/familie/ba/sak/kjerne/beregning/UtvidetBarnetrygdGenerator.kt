@@ -49,11 +49,17 @@ data class UtvidetBarnetrygdGenerator(
 
         val utvidaTidslinje = LocalDateTimeline(datoSegmenter)
 
-        val sammenslåttTidslinje = if (skalBrukeNyMåteÅLageUtvidetAndeler) {
+        val utvidetAndeler: List<AndelTilkjentYtelse> = if (skalBrukeNyMåteÅLageUtvidetAndeler) {
             val barnasTidslinje =
                 utledTidslinjeForBarna(andelerBarna)
 
-            kombinerTidslinjer(utvidaTidslinje, barnasTidslinje)
+            val sammenslåttTidslinje = kombinerTidslinjer(utvidaTidslinje, barnasTidslinje)
+
+            sammenslåttTidslinje.toSegments()
+                .filter { segment -> segment.value.any { it.rolle == PersonType.BARN } && segment.value.any { it.rolle == PersonType.SØKER } }
+                .flatMap { segment ->
+                    lagAndelerForSegmentBasertPåSatsperioder(segment, søkerAktør)
+                }
         } else {
             val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
                 .groupBy { it.aktør }
@@ -61,35 +67,35 @@ data class UtvidetBarnetrygdGenerator(
                     lagTidslinjeForBarn(identMedAndeler)
                 }
 
-            barnasTidslinjer.fold(utvidaTidslinje) { sammenlagt, neste ->
+            val sammenslåttTidslinje = barnasTidslinjer.fold(utvidaTidslinje) { sammenlagt, neste ->
                 (kombinerTidslinjer(sammenlagt, neste))
             }
-        }
 
-        val utvidetAndeler = sammenslåttTidslinje.toSegments()
-            .filter { segment -> segment.value.any { it.rolle == PersonType.BARN } && segment.value.any { it.rolle == PersonType.SØKER } }
-            .map {
-                val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(
-                    satstype = SatsType.ORBA,
-                    stønadFraOgMed = it.fom.toYearMonth(),
-                    stønadTilOgMed = it.tom.toYearMonth()
-                )
-                    .singleOrNull()?.sats
-                    ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
-                val prosentForPeriode =
-                    it.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
-                AndelTilkjentYtelse(
-                    behandlingId = behandlingId,
-                    tilkjentYtelse = tilkjentYtelse,
-                    aktør = søkerAktør,
-                    stønadFom = it.fom.toYearMonth(),
-                    stønadTom = it.tom.toYearMonth(),
-                    kalkulertUtbetalingsbeløp = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosentForPeriode),
-                    type = YtelseType.UTVIDET_BARNETRYGD,
-                    sats = ordinærSatsForPeriode,
-                    prosent = prosentForPeriode
-                )
-            }
+            sammenslåttTidslinje.toSegments()
+                .filter { segment -> segment.value.any { it.rolle == PersonType.BARN } && segment.value.any { it.rolle == PersonType.SØKER } }
+                .map {
+                    val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(
+                        satstype = SatsType.ORBA,
+                        stønadFraOgMed = it.fom.toYearMonth(),
+                        stønadTilOgMed = it.tom.toYearMonth()
+                    )
+                        .singleOrNull()?.sats
+                        ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
+                    val prosentForPeriode =
+                        it.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
+                    AndelTilkjentYtelse(
+                        behandlingId = behandlingId,
+                        tilkjentYtelse = tilkjentYtelse,
+                        aktør = søkerAktør,
+                        stønadFom = it.fom.toYearMonth(),
+                        stønadTom = it.tom.toYearMonth(),
+                        kalkulertUtbetalingsbeløp = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosentForPeriode),
+                        type = YtelseType.UTVIDET_BARNETRYGD,
+                        sats = ordinærSatsForPeriode,
+                        prosent = prosentForPeriode
+                    )
+                }
+        }
 
         if (utvidetAndeler.isEmpty()) {
             throw FunksjonellFeil(
@@ -102,6 +108,38 @@ data class UtvidetBarnetrygdGenerator(
             andelerTilkjentYtelse = utvidetAndeler.toMutableList(),
             skalAndelerSlåsSammen = ::skalUtvidetAndelerSlåsSammen
         )
+    }
+
+    private fun lagAndelerForSegmentBasertPåSatsperioder(
+        segment: LocalDateSegment<List<PeriodeData>>,
+        søkerAktør: Aktør
+    ): List<AndelTilkjentYtelse> {
+        val ordinæreSatserForPeriode = SatsService.hentGyldigSatsFor(
+            satstype = SatsType.ORBA,
+            stønadFraOgMed = segment.fom.toYearMonth(),
+            stønadTilOgMed = segment.tom.toYearMonth()
+        )
+
+        if (ordinæreSatserForPeriode.isEmpty()) {
+            error("Finner ikke sats for periode fom=${segment.fom}, tom=${segment.tom}")
+        }
+
+        return ordinæreSatserForPeriode.map { satsperiode ->
+            val prosentForPeriode =
+                segment.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
+
+            AndelTilkjentYtelse(
+                behandlingId = behandlingId,
+                tilkjentYtelse = tilkjentYtelse,
+                aktør = søkerAktør,
+                stønadFom = satsperiode.fraOgMed,
+                stønadTom = satsperiode.tilOgMed,
+                kalkulertUtbetalingsbeløp = satsperiode.sats.avrundetHeltallAvProsent(prosentForPeriode),
+                type = YtelseType.UTVIDET_BARNETRYGD,
+                sats = satsperiode.sats,
+                prosent = prosentForPeriode
+            )
+        }
     }
 
     data class PeriodeData(val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
