@@ -554,9 +554,6 @@ class VedtaksperiodeService(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
         // henter andel tilkjent ytelse for barn som finnes i forrige behandling
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-            .filter {
-                forrigePersonopplysningGrunnlag.søkerOgBarn.any { forrige -> forrige.aktør == it.aktør }
-            }
 
         return identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
@@ -564,7 +561,8 @@ class VedtaksperiodeService(
             vedtak = vedtak,
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            opphørsperioder = opphørsperioder
+            opphørsperioder = opphørsperioder,
+            forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag
         )
     }
 
