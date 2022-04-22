@@ -14,7 +14,7 @@ const val hentDokumenter =
         "borMedSokerTriggere," +
         "ovrigeTriggere," +
         "endretUtbetalingsperiodeTriggere," +
-        "endretUtbetalingsperiodeDeltBostedTriggere," +
+        "endretUtbetalingsperiodeDeltBostedUtbetalingTrigger," +
         "endringsaarsaker," +
         "utvidetBarnetrygdTriggere" +
         "}"
