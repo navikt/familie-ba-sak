@@ -58,6 +58,29 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerForAlleNøklerMe
 }
 
 /**
+ * Extension-metode for å kombinere to tidslinjer
+ * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
+ * fra minste fraOgMed til største fraOgMed() fra begge tidslinjene
+ * Tidsenhet (T) må være av samme type
+ * Hver av tidslinjene kan ha ulik innholdstype, hhv V og H
+ * Kombintor-funksjonen tar inn (nullable) av V og H og returner (nullable) R
+ * Resultatet er en tidslinje med tidsenhet T og innhold R
+ */
+fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
+    høyreTidslinje: Tidslinje<H, T>,
+    kombinator: (V?, H?) -> R?
+): Tidslinje<R, T> {
+    val venstreTidslinje = this
+    return object : TidslinjeSomStykkerOppTiden<R, T>(venstreTidslinje, høyreTidslinje) {
+        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
+            kombinator(
+                venstreTidslinje.innholdForTidspunkt(tidspunkt),
+                høyreTidslinje.innholdForTidspunkt(tidspunkt)
+            )
+    }
+}
+
+/**
  * Extension-metode for å kombinere liste av tidslinjer
  * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
  * fra minste fraOgMed til største fraOgMed() fra alle tidslinjene

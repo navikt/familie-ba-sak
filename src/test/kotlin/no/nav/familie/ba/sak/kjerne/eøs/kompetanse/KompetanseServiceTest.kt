@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -19,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.print
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -36,11 +36,6 @@ internal class KompetanseServiceTest {
         mockKompetanseRepository,
         tilbakestillBehandlingService,
     )
-
-    val søker = tilfeldigPerson(personType = PersonType.SØKER)
-    val barn1 = tilfeldigPerson(personType = PersonType.BARN)
-    val barn2 = tilfeldigPerson(personType = PersonType.BARN)
-    val barn3 = tilfeldigPerson(personType = PersonType.BARN)
 
     @BeforeEach
     fun init() {
@@ -67,6 +62,7 @@ internal class KompetanseServiceTest {
     @Test
     fun `bare reduksjon av periode skal ikke føre til endring i kompetansen`() {
         val behandlingId = 10L
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
 
         val lagretKompetanse = kompetanse(jan(2020), behandlingId, "SSSSSSSS", barn1)
             .lagreTil(mockKompetanseRepository)
@@ -82,6 +78,9 @@ internal class KompetanseServiceTest {
     @Test
     fun `oppdatering som splitter kompetanse fulgt av sletting skal returnere til utgangspunktet`() {
         val behandlingId = 10L
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
 
         val lagretKompetanse = kompetanse(jan(2020), behandlingId, "---------", barn1, barn2, barn3)
             .lagreTil(mockKompetanseRepository)
@@ -108,6 +107,9 @@ internal class KompetanseServiceTest {
     @Test
     fun `oppdatering som endrer deler av en kompetanse, skal resultarere i en splitt`() {
         val behandlingId = 10L
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
 
         KompetanseBuilder(jan(2020), behandlingId)
             .medKompetanse("SSS", barn1)
@@ -136,6 +138,9 @@ internal class KompetanseServiceTest {
         val behandlingId = 10L
 
         val treMånederSiden = MånedTidspunkt.nå().flytt(-3)
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = treMånederSiden.tilLocalDate())
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = treMånederSiden.tilLocalDate())
 
         KompetanseBuilder(treMånederSiden, behandlingId)
             .medKompetanse("---", barn1, barn2)
@@ -159,22 +164,17 @@ internal class KompetanseServiceTest {
             .medVilkår("+++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
 
-        val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
         val tidslinjer = Tidslinjer(
-            vilkårsvurdering = vilkårsvurdering,
-            søkersFødselsdato = søker.fødselsdato,
-            yngsteBarnFødselsdato = maxOf(barn1.fødselsdato, barn2.fødselsdato),
-            barnOgFødselsdatoer = mapOf(barn1.aktør to barn1.fødselsdato, barn2.aktør to barn2.fødselsdato)
+            vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2)
         )
-
-        tidslinjer.forBarn(barn1).regelverkTidslinje.print()
 
         every { tidslinjeService.hentTidslinjerThrows(behandlingId) } returns tidslinjer
 
         kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
 
-        val forventedeKompetanser = KompetanseBuilder(treMånederSiden, behandlingId)
-            .medKompetanse("--", barn1, barn2)
+        val forventedeKompetanser = KompetanseBuilder(treMånederSiden.neste(), behandlingId)
+            .medKompetanse("->", barn1, barn2)
             .byggKompetanser()
 
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)

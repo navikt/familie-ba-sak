@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.replaceLast
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
@@ -95,7 +96,11 @@ class KompetanseService(
 
     private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<Regelverk, Måned>> =
         this.hentTidslinjerThrows(behandlingId).barnasTidslinjer()
-            .mapValues { (_, tidslinjer) -> tidslinjer.regelverkTidslinje.forlengFremtidTilUendelig(MånedTidspunkt.nå()) }
+            .mapValues { (_, tidslinjer) ->
+                tidslinjer.regelverkTidslinje
+                    .filtrerIkkeNull()
+                    .forlengFremtidTilUendelig(MånedTidspunkt.nå())
+            }
             .mapKeys { (aktør, _) -> aktør }
 }
 
