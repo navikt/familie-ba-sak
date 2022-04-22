@@ -9,12 +9,18 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MinnebasertKompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.print
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -31,9 +37,10 @@ internal class KompetanseServiceTest {
         tilbakestillBehandlingService,
     )
 
-    val barn1 = tilfeldigPerson()
-    val barn2 = tilfeldigPerson()
-    val barn3 = tilfeldigPerson()
+    val søker = tilfeldigPerson(personType = PersonType.SØKER)
+    val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+    val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+    val barn3 = tilfeldigPerson(personType = PersonType.BARN)
 
     @BeforeEach
     fun init() {
@@ -122,6 +129,56 @@ internal class KompetanseServiceTest {
             .byggKompetanser()
 
         assertEqualsUnordered(forventedeKompetanser, kompetanseService.hentKompetanser(behandlingId))
+    }
+
+    @Test
+    fun `skal tilpasse kompetanse med regelverk-tidslinjer som har blitt forlenget til uendelig`() {
+        val behandlingId = 10L
+
+        val treMånederSiden = MånedTidspunkt.nå().flytt(-3)
+
+        KompetanseBuilder(treMånederSiden, behandlingId)
+            .medKompetanse("---", barn1, barn2)
+            .lagreTil(mockKompetanseRepository)
+
+        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>()
+            .forPerson(søker, treMånederSiden)
+            .medVilkår("+++++++++++", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("+++++++++++", Vilkår.LOVLIG_OPPHOLD)
+            .forPerson(barn1, treMånederSiden)
+            .medVilkår("+++++++++++", Vilkår.UNDER_18_ÅR)
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("EEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
+            .medVilkår("+++++++++++", Vilkår.GIFT_PARTNERSKAP)
+            .forPerson(barn2, treMånederSiden)
+            .medVilkår("+++++++", Vilkår.UNDER_18_ÅR)
+            .medVilkår("EEEEEEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("EEEEEEE", Vilkår.LOVLIG_OPPHOLD)
+            .medVilkår("EEEEEEE", Vilkår.BOR_MED_SØKER)
+            .medVilkår("+++++++", Vilkår.GIFT_PARTNERSKAP)
+            .byggPerson()
+
+        val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
+        val tidslinjer = Tidslinjer(
+            vilkårsvurdering = vilkårsvurdering,
+            søkersFødselsdato = søker.fødselsdato,
+            yngsteBarnFødselsdato = maxOf(barn1.fødselsdato, barn2.fødselsdato),
+            barnOgFødselsdatoer = mapOf(barn1.aktør to barn1.fødselsdato, barn2.aktør to barn2.fødselsdato)
+        )
+
+        tidslinjer.forBarn(barn1).regelverkTidslinje.print()
+
+        every { tidslinjeService.hentTidslinjerThrows(behandlingId) } returns tidslinjer
+
+        kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
+
+        val forventedeKompetanser = KompetanseBuilder(treMånederSiden, behandlingId)
+            .medKompetanse("--", barn1, barn2)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 }
 

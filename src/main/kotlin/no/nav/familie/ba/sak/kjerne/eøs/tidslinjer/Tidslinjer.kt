@@ -105,7 +105,7 @@ class Tidslinjer(
             )
 
         val regelverkMidlertidigTidslinje: Tidslinje<Regelverk, Måned> =
-            RegelverkPeriodeTidslinje(vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator()::kombiner)).komprimer()
+            vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator()::kombiner).komprimer()
 
         val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje.kombinerMed(
             regelverkMidlertidigTidslinje,
