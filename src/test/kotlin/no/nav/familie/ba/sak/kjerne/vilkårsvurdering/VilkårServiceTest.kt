@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
@@ -7,6 +8,7 @@ import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -16,7 +18,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -28,9 +32,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -73,6 +81,17 @@ class VilkårServiceTest(
     @Autowired
     private val personidentService: PersonidentService,
 
+    @Autowired
+    private val behandlingstemaService: BehandlingstemaService,
+
+    @Autowired
+    private val vedtakService: VedtakService,
+
+    @Autowired
+    private val vedtaksperiodeService: VedtaksperiodeService,
+
+    @Autowired
+    private val stegService: StegService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -1480,6 +1499,52 @@ class VilkårServiceTest(
                 "for fagsak=${behandling.fagsak.id}",
             exception.message
         )
+    }
+
+    @Test
+    fun `skal sette vurderes etter basert på behandlingstema`() {
+        val behandling = kjørStegprosessForFGB(
+            tilSteg = StegType.BEHANDLINGSRESULTAT,
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            stegService = stegService
+        )
+        var vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
+        assertTrue {
+            vilkårsvurdering.personResultater.all { personResultat ->
+                personResultat.vilkårResultater.filter {
+                    it.vilkårType !in listOf(Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+                }.all { it.vurderesEtter == Regelverk.NASJONALE_REGLER }
+            }
+        }
+
+        behandlingstemaService.oppdaterBehandlingstema(
+            behandling,
+            BehandlingKategori.EØS,
+            BehandlingUnderkategori.ORDINÆR
+        )
+        vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
+        assertTrue {
+            vilkårsvurdering.personResultater.all { personResultat ->
+                personResultat.vilkårResultater.filter {
+                    it.vilkårType !in listOf(Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+                }.all { it.vurderesEtter == Regelverk.NASJONALE_REGLER }
+            }
+        }
+
+        vilkårService.postVilkår(behandling.id, RestNyttVilkår(ClientMocks.barnFnr[0], Vilkår.BOR_MED_SØKER))
+
+        vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
+        assertTrue {
+            vilkårsvurdering.personResultater.all { personResultat ->
+                personResultat.vilkårResultater.filter {
+                    it.vilkårType == Vilkår.BOR_MED_SØKER && it.resultat == Resultat.IKKE_VURDERT
+                }.all { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
+            }
+        }
     }
 
     private fun lagMigreringsbehandling(
