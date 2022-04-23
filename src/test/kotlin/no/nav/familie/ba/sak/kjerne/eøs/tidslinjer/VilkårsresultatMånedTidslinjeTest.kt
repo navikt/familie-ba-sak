@@ -85,5 +85,6 @@ class VilkårsresultatMånedTidslinjeTest {
 
         val faktiskMånedstidslinje =
             dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
+        assertEquals(forventetMånedstidslinje, faktiskMånedstidslinje)
     }
 }
