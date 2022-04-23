@@ -118,14 +118,7 @@ fun <T : Tidsenhet> minsteAv(t1: Tidspunkt<T>, t2: Tidspunkt<T>): Tidspunkt<T> =
         minOf(t1, t2)
 
 fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.størsteEllerNull() =
-    this.reduceOrNull { acc, neste ->
-        størsteAv(acc, neste)
-    }
+    this.reduceOrNull { acc, neste -> størsteAv(acc, neste) }
 
 fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.minsteEllerNull() =
     this.reduceOrNull { acc, neste -> minsteAv(acc, neste) }
-
-fun LocalDate?.tilTidspunktEllerDefault(default: () -> LocalDate) =
-    this?.let { DagTidspunkt(this, Uendelighet.INGEN) } ?: DagTidspunkt(default(), Uendelighet.INGEN)
-
-fun YearMonth.tilTidspunkt() = MånedTidspunkt(this, Uendelighet.INGEN)

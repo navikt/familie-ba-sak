@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -28,9 +27,7 @@ class Tidslinjer(
     private val barna: List<Aktør> = personopplysningGrunnlag.barna.map { it.aktør }
     private val søker: Aktør = personopplysningGrunnlag.søker.aktør
 
-    val søkersFødselsdato = personopplysningGrunnlag.søker.fødselsdato
-    val yngsteBarnFødselsdato = personopplysningGrunnlag.yngsteBarnSinFødselsdato
-    val barnOgFødselsdatoer = personopplysningGrunnlag.barna.associate { it.aktør to it.fødselsdato }
+    internal val barnOgFødselsdatoer = personopplysningGrunnlag.barna.associate { it.aktør to it.fødselsdato }
 
     private val aktørTilPersonResultater =
         vilkårsvurdering.personResultater.associateBy { it.aktør }
@@ -39,21 +36,7 @@ class Tidslinjer(
         .entries.associate { (aktør, personResultat) ->
             aktør to personResultat.vilkårResultater.groupBy { it.vilkårType }
                 .map {
-                    if (personResultat.erSøkersResultater()) {
-                        VilkårsresultatDagTidslinje(
-                            vilkårsresultater = it.value,
-                            praktiskTidligsteDato = søkersFødselsdato,
-                            praktiskSenesteDato = yngsteBarnFødselsdato.til18ÅrsVilkårsdato()
-                        )
-                    } else {
-                        val barnFødselsdato =
-                            barnOgFødselsdatoer[aktør] ?: throw Feil("Finner ikke fødselsdato på barn")
-                        VilkårsresultatDagTidslinje(
-                            vilkårsresultater = it.value,
-                            praktiskTidligsteDato = barnFødselsdato,
-                            praktiskSenesteDato = barnFødselsdato.til18ÅrsVilkårsdato()
-                        )
-                    }
+                    VilkårsresultatDagTidslinje(vilkårsresultater = it.value)
                 }
         }
 
