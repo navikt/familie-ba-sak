@@ -26,7 +26,7 @@ class VilkårsresultatMånedTidslinjeTest {
     @Test
     fun `Virkningstidspunkt fra vilkårsvurdering er måneden etter at normalt vilkår er oppfylt`() {
         val dagTidslinje = (15.apr(2022)..14.apr(2040)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
-        val faktiskMånedTidslinje = dagTidslinje.tilVilkårsresultaterMånedTidslinje()
+        val faktiskMånedTidslinje = dagTidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
         val forventetMånedTidslinje = (mai(2022)..apr(2040)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
 
         assertEquals(
@@ -55,7 +55,7 @@ class VilkårsresultatMånedTidslinjeTest {
             ),
             praktiskTidligsteDato = periodeFom,
             praktiskSenesteDato = senesteDato
-        ).tilVilkårsresultaterMånedTidslinje().also { it.print() }
+        ).tilMånedsbasertTidslinjeForVilkårRegelverkResultat().also { it.print() }
 
         val forventetMånedstidslinje: Tidslinje<VilkårRegelverkResultat, Måned> =
             (mai(2022)..apr(2040)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
@@ -71,7 +71,7 @@ class VilkårsresultatMånedTidslinjeTest {
         val forventetMånedstidslinje: Tidslinje<VilkårRegelverkResultat, Måned> =
             (mar(2020)..mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
 
-        val faktiskMånedstidslinje = dagvilkårtidslinje.tilVilkårsresultaterMånedTidslinje()
+        val faktiskMånedstidslinje = dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
         assertEquals(forventetMånedstidslinje, faktiskMånedstidslinje)
     }
 
@@ -87,7 +87,8 @@ class VilkårsresultatMånedTidslinjeTest {
             (apr(2020)..mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
         ).also { it.print() }
 
-        val faktiskMånedstidslinje = dagvilkårtidslinje.tilVilkårsresultaterMånedTidslinje().also { it.print() }
+        val faktiskMånedstidslinje =
+            dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat().also { it.print() }
         assertEquals(forventetMånedstidslinje, faktiskMånedstidslinje)
     }
 }

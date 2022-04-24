@@ -77,7 +77,7 @@ class Tidslinjer(
         val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør]!!
 
         private val vilkårsresultatMånedTidslinjer =
-            vilkårsresultatTidslinjer.map { it.tilVilkårsresultaterMånedTidslinje() }
+            vilkårsresultatTidslinjer.map { it.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() }
 
         val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             vilkårsresultatMånedTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator()::kombiner)
@@ -91,7 +91,7 @@ class Tidslinjer(
             tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
 
         private val vilkårsresultatMånedTidslinjer: List<Tidslinje<VilkårRegelverkResultat, Måned>> =
-            vilkårsresultatTidslinjer.map { it.tilVilkårsresultaterMånedTidslinje() }
+            vilkårsresultatTidslinjer.map { it.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() }
 
         val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             vilkårsresultatMånedTidslinjer
