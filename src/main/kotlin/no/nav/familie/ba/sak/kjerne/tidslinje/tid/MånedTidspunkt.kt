@@ -108,5 +108,11 @@ data class MånedTidspunkt internal constructor(
                 default() ?: YearMonth.now(),
                 uendelighet
             )
+
+        fun månedForUendeligLengeSiden(måned: YearMonth = YearMonth.now()) =
+            MånedTidspunkt(måned, uendelighet = Uendelighet.FORTID)
+
+        fun månedOmUendeligLenge(måned: YearMonth = YearMonth.now()) =
+            MånedTidspunkt(måned, uendelighet = Uendelighet.FREMTID)
     }
 }
