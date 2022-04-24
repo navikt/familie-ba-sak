@@ -10,9 +10,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
@@ -63,7 +62,7 @@ class Tidslinjer(
             vilkårsresultatTidslinjer.map { it.tilVilkårsresultaterMånedTidslinje() }
 
         val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-            vilkårsresultatMånedTidslinjer.kombiner(SøkerOppfyllerVilkårKombinator()::kombiner)
+            vilkårsresultatMånedTidslinjer.snittKombinerUtenNull(SøkerOppfyllerVilkårKombinator()::kombiner)
     }
 
     class BarnetsTidslinjer(
@@ -78,19 +77,21 @@ class Tidslinjer(
 
         val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             vilkårsresultatMånedTidslinjer
-                .kombiner(BarnOppfyllerVilkårKombinator()::kombiner)
+                .snittKombinerUtenNull(BarnOppfyllerVilkårKombinator()::kombiner)
                 .filtrerMed(erUnder18ÅrVilkårTidslinje(tidslinjer.barnOgFødselsdatoer.getValue(aktør)))
 
         val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-            oppfyllerVilkårTidslinje.kombinerMed(
+            oppfyllerVilkårTidslinje.snittKombinerMed(
                 tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje,
                 BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()::kombiner
             )
 
         val regelverkMidlertidigTidslinje: Tidslinje<Regelverk, Måned> =
-            RegelverkPeriodeTidslinje(vilkårsresultatMånedTidslinjer.kombiner(RegelverkPeriodeKombinator()::kombiner)).komprimer()
+            RegelverkPeriodeTidslinje(
+                vilkårsresultatMånedTidslinjer.snittKombinerUtenNull(RegelverkPeriodeKombinator()::kombiner)
+            )
 
-        val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje.kombinerMed(
+        val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje.snittKombinerMed(
             regelverkMidlertidigTidslinje,
             RegelverkOgOppfyltePerioderKombinator()::kombiner
         )
