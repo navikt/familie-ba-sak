@@ -87,9 +87,7 @@ class Tidslinjer(
             )
 
         val regelverkMidlertidigTidslinje: Tidslinje<Regelverk, Måned> =
-            RegelverkPeriodeTidslinje(
-                vilkårsresultatMånedTidslinjer.snittKombinerUtenNull(RegelverkPeriodeKombinator()::kombiner)
-            )
+            vilkårsresultatMånedTidslinjer.snittKombinerUtenNull(RegelverkPeriodeKombinator()::kombiner)
 
         val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje.snittKombinerMed(
             regelverkMidlertidigTidslinje,

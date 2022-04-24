@@ -122,4 +122,23 @@ class TilpassKompetanserTilRegelverkTest {
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder).sortedBy { it.fom }
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
+
+    @Test
+    fun `tilpass kompetanser til barn med åpne regelverkstidslinjer`() {
+
+        val kompetanser: List<Kompetanse> = emptyList()
+
+        val eøsPerioder = mapOf(
+            barn1.aktør to "EEEEEEEEE>".tilRegelverkTidslinje(jan2020),
+            barn2.aktør to "  EEEEEEEEE>".tilRegelverkTidslinje(jan2020),
+        )
+
+        val forventedeKompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("--", barn1)
+            .medKompetanse("  ->", barn1, barn2)
+            .byggKompetanser().sortedBy { it.fom }
+
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder).sortedBy { it.fom }
+        Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
+    }
 }
