@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenBarn
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenPeriode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
@@ -23,7 +23,7 @@ fun Collection<Kompetanse>.slåSammen(): Collection<Kompetanse> {
         return this
 
     val kompetanseSettTidslinje: Tidslinje<Set<Kompetanse>, Måned> = this.map { KompetanseTidslinje(it) }
-        .kombiner {
+        .snittKombinerUtenNull {
             it.groupingBy { it.utenBarn() }.reduce { _, acc, kompetanse -> acc.leggSammenBarn(kompetanse) }
                 .values.toSet()
         }
