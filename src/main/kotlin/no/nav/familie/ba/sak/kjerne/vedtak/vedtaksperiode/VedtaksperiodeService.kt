@@ -575,7 +575,7 @@ class VedtaksperiodeService(
 
         val forrigeAndelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
-        // henter andel tilkjent ytelse for barn som finnes i forrige behandling
+
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
         return identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(

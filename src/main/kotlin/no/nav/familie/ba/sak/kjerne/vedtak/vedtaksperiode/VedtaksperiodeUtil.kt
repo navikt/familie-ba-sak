@@ -109,9 +109,12 @@ fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
     forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag
 ): List<VedtaksperiodeMedBegrunnelser> {
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
+
+    // henter segmenter for barn som finnes i forrige behandling
     val nåværendeSegmenter = andelerTilkjentYtelse.filter {
         forrigePersonopplysningGrunnlag.søkerOgBarn.any { forrige -> forrige.aktør == it.aktør }
     }.lagVertikaleSegmenter()
+
     val segmenter = forrigeSegmenter.filterNot { (forrigeSegment, _) ->
         nåværendeSegmenter.any { (nyttSegment, _) ->
             forrigeSegment.fom == nyttSegment.fom &&
