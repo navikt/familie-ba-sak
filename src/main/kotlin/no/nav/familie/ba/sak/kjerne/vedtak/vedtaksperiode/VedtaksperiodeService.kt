@@ -293,12 +293,13 @@ class VedtaksperiodeService(
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = opphørsperioder
         )
-        val oppdatertUtbetalingsperioder = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER)) {
-            val utbetalingsperioderTidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
-            val reduksjonsperioderTidslinje = ReduksjonsperioderFraForrigeBehandlingTidslinje(reduksjonsperioder)
 
-            val kombinertTidslinje = utbetalingsperioderTidslinje.kombinerMed(reduksjonsperioderTidslinje, UtbetalingsperiodeOgReduksjonsperiodeKombinator()::kombiner)
-            kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
+        // Når toggle fjernes flyttes hentingen av utbetalingsperioder og reduksjonsperioder inn i genererUtbetalingsperioder-funksjonen
+        val oppdatertUtbetalingsperioder = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER)) {
+            genererUtbetalingsperioder(
+                utbetalingsperioder = utbetalingsperioder,
+                reduksjonsperioder = reduksjonsperioder
+            )
         } else {
             finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
         }
@@ -311,6 +312,20 @@ class VedtaksperiodeService(
             gjelderFortsattInnvilget = gjelderFortsattInnvilget,
             manueltOverstyrtEndringstidspunkt = manueltOverstyrtEndringstidspunkt
         )
+    }
+
+    private fun genererUtbetalingsperioder(
+        utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
+        reduksjonsperioder: List<VedtaksperiodeMedBegrunnelser>
+    ): List<VedtaksperiodeMedBegrunnelser> {
+        val utbetalingsperioderTidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
+        val reduksjonsperioderTidslinje = ReduksjonsperioderFraForrigeBehandlingTidslinje(reduksjonsperioder)
+
+        val kombinertTidslinje = utbetalingsperioderTidslinje.kombinerMed(
+            reduksjonsperioderTidslinje,
+            UtbetalingsperiodeOgReduksjonsperiodeKombinator()::kombiner
+        )
+        return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
     }
 
     fun filtrerUtPerioderBasertPåEndringstidspunkt(
