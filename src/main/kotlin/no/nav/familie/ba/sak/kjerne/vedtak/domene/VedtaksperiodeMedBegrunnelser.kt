@@ -3,7 +3,11 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentAndelerForSegment
@@ -128,7 +132,7 @@ data class VedtaksperiodeMedBegrunnelser(
     ) = andelerTilkjentYtelse
         .utledSegmenter()
         .find { localDateSegment ->
-            localDateSegment.fom == this.fom || localDateSegment.tom == this.tom
+            localDateSegment.fom.isSameOrBefore(this.fom ?: TIDENES_MORGEN) && localDateSegment.tom.isSameOrAfter(this.tom ?: TIDENES_ENDE)
         } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
 
     companion object {
