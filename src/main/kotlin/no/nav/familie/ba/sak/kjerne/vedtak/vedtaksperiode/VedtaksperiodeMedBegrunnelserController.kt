@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutGenererFortsattInnvilgetVedtaksperioder
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
@@ -20,6 +21,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -39,6 +41,16 @@ class VedtaksperiodeMedBegrunnelserController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val brevPeriodeService: BrevPeriodeService,
 ) {
+    @ExceptionHandler(FantIkkeVedtaksperiodeFeil::class)
+    fun handleFantIkkeVedtaksperiodeFeil(feil: FantIkkeVedtaksperiodeFeil): ResponseEntity<Ressurs<Nothing>> {
+
+        return RessursUtils.funksjonellFeil(
+            FunksjonellFeil(
+                melding = feil.message!!,
+                frontendFeilmelding = feil.frontendFeilmelding
+            )
+        )
+    }
 
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
     fun oppdaterVedtaksperiodeStandardbegrunnelser(
