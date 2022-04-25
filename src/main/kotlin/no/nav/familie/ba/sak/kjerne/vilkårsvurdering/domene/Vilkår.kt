@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderin
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderBarnHarLovligOpphold
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderPersonErBosattIRiket
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderPersonHarLovligOpphold
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -80,9 +81,12 @@ enum class Vilkår(
         }
     }
 
-    fun defaultRegelverk(): Regelverk? {
+    fun defaultRegelverk(behandlingKategori: BehandlingKategori): Regelverk? {
         return when (this) {
-            BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD, UTVIDET_BARNETRYGD -> Regelverk.NASJONALE_REGLER
+            BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD, UTVIDET_BARNETRYGD -> {
+                if (behandlingKategori == BehandlingKategori.EØS)
+                    Regelverk.EØS_FORORDNINGEN else Regelverk.NASJONALE_REGLER
+            }
             UNDER_18_ÅR, GIFT_PARTNERSKAP -> null
         }
     }

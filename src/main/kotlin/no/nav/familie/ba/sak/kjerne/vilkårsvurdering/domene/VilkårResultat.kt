@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.StandardbegrunnelseListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
+import java.time.Period
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
@@ -86,7 +87,7 @@ class VilkårResultat(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vurderes_etter")
-    var vurderesEtter: Regelverk? = vilkårType.defaultRegelverk(),
+    var vurderesEtter: Regelverk? = personResultat?.let { vilkårType.defaultRegelverk(it.vilkårsvurdering.behandling.kategori) },
 
     @Column(name = "utdypende_vilkarsvurderinger")
     @Convert(converter = UtdypendeVilkårsvurderingerConverter::class)
@@ -167,6 +168,12 @@ class VilkårResultat(
         this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
 
     fun harFremtidigTom() = this.periodeTom == null || this.periodeTom!!.isAfter(LocalDate.now().sisteDagIMåned())
+
+    fun differanseIPeriode(): Period = when {
+        this.periodeFom != null && this.periodeTom == null -> Period.ofMonths(18 * 12)
+        this.periodeFom != null && this.periodeTom != null -> Period.between(this.periodeFom, this.periodeTom)
+        else -> Period.ZERO
+    }
 
     companion object {
 
