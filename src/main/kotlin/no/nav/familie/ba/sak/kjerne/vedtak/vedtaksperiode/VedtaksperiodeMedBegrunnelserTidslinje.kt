@@ -43,7 +43,7 @@ class UtbetalingsperiodeOgReduksjonsperiodeKombinator {
     fun kombiner(periode1: VedtaksperiodeMedBegrunnelser?, periode2: VedtaksperiodeMedBegrunnelser?): VedtaksperiodeMedBegrunnelser? {
         return when {
             periode1 == null && periode2 == null -> null
-            periode2 != null -> periode2
+            periode2 != null -> periode2 // hvis reduksjonsperiode finnes skal vi bruke innhold fra den
             else -> periode1
         }
     }
