@@ -106,11 +106,11 @@ fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
-    forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? = null
+    forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag
 ): List<VedtaksperiodeMedBegrunnelser> {
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
     val nåværendeSegmenter = andelerTilkjentYtelse.filter {
-        forrigePersonopplysningGrunnlag!!.søkerOgBarn.any { forrige -> forrige.aktør == it.aktør }
+        forrigePersonopplysningGrunnlag.søkerOgBarn.any { forrige -> forrige.aktør == it.aktør }
     }.lagVertikaleSegmenter()
     val segmenter = forrigeSegmenter.filterNot { (forrigeSegment, _) ->
         nåværendeSegmenter.any { (nyttSegment, _) ->
