@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.ETTERBETALING_3ÅR
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -60,22 +58,6 @@ class BehandlingsresultatSteg(
             tilkjentYtelse = tilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag
         )
-
-        if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD && !featureToggleService.isEnabled(
-                ETTERBETALING_3ÅR
-            )
-        ) {
-            val personerMedUgyldigEtterbetalingsperiode =
-                tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
-            if (personerMedUgyldigEtterbetalingsperiode.isNotEmpty()) {
-                throw UtbetalingsikkerhetFeil(
-                    melding = "Utbetalingsperioder for en eller flere personer går mer enn 3 år tilbake i tid.",
-                    frontendFeilmelding =
-                    "Utbetalingsperioder for en eller flere personer går mer enn 3 år tilbake i tid. Du må henlegge " +
-                        "behandlingen og behandle saken i Infotrygd."
-                )
-            }
-        }
 
         val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
         validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
