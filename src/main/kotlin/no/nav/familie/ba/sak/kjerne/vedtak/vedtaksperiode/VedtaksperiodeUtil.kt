@@ -107,7 +107,8 @@ fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
-    aktørerIForrigePersonopplysningGrunnlag: List<Aktør>
+    aktørerIForrigePersonopplysningGrunnlag: List<Aktør>,
+    skalBrukeNyMåteÅGenerereVedtaksperioder: Boolean
 ): List<VedtaksperiodeMedBegrunnelser> {
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
 
@@ -142,8 +143,9 @@ fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
                                 utbetalingsperioder.none { utbetalingsperiode ->
                                     utbetalingsperiode.tom == fom.minusDays(1) &&
                                         utbetalingsperiode.hentUtbetalingsperiodeDetaljer(
-                                            andelerTilkjentYtelse,
-                                            personopplysningGrunnlag,
+                                            andelerTilkjentYtelse = andelerTilkjentYtelse,
+                                            personopplysningGrunnlag = personopplysningGrunnlag,
+                                            skalBrukeNyMåteÅGenerereVedtaksperioder = skalBrukeNyMåteÅGenerereVedtaksperioder
                                         )
                                             .any {
                                                 it.person.personIdent ==

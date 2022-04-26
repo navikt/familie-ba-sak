@@ -301,7 +301,8 @@ class VedtaksperiodeServiceTest(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = emptyList(),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
+            skalBrukeNyMåteÅGenerereVedtaksperioder = true
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(1, redusertePerioder.size)
@@ -374,7 +375,8 @@ class VedtaksperiodeServiceTest(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = emptyList(),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
+            skalBrukeNyMåteÅGenerereVedtaksperioder = true
         )
         assertTrue { redusertePerioder.isEmpty() }
     }
@@ -457,7 +459,8 @@ class VedtaksperiodeServiceTest(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = listOf(opphørsperiode),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
+            skalBrukeNyMåteÅGenerereVedtaksperioder = true
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(1, redusertePerioder.size)
@@ -540,7 +543,8 @@ class VedtaksperiodeServiceTest(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = listOf(opphørsperiode),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
+            skalBrukeNyMåteÅGenerereVedtaksperioder = true
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(2, redusertePerioder.size)
