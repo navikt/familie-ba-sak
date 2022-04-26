@@ -50,7 +50,7 @@ object YtelsePersonUtils {
             if (erYtelsenOpphørt(
                     andeler = behandlingsresultatPerson.andeler,
                     inneværendeMåned = inneværendeMåned
-                ) && (segmenterFjernet + segmenterLagtTil).isNotEmpty()
+                )
             ) {
                 resultater.add(YtelsePersonResultat.OPPHØRT)
             }
