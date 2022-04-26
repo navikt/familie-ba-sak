@@ -36,7 +36,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
-fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
+fun hentPerioderMedUtbetaling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak
 ) = andelerTilkjentYtelse.lagVertikaleSegmenter()
@@ -99,7 +99,7 @@ fun erFørsteVedtaksperiodePåFagsak(
     )
 }
 
-fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
+fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak,

@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FØRSTE_ENDRINGSTIDSPUNKT
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_DELT_BOSTED_BEGRUNNELSE
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -45,6 +44,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingspreiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -69,6 +69,7 @@ class VedtaksperiodeService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val endringstidspunktService: EndringstidspunktService,
     private val featureToggleService: FeatureToggleService,
+    private val utbetalingspreiodeMedBegrunnelserService: UtbetalingspreiodeMedBegrunnelserService,
 ) {
 
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
@@ -270,42 +271,25 @@ class VedtaksperiodeService(
         gjelderFortsattInnvilget: Boolean = false,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
     ): List<VedtaksperiodeMedBegrunnelser> {
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
-
-        val utbetalingsperioder = hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
-            andelerTilkjentYtelse,
-            vedtak
-        )
 
         val opphørsperioder =
             hentOpphørsperioder(vedtak.behandling).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
 
+        val utbetalingsperioder =
+            utbetalingspreiodeMedBegrunnelserService.hentUtbealtingsperioder(vedtak, opphørsperioder)
+
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
-
-        val perioderMedReduksjonFraSistIverksatteBehandling = hentPerioderMedReduksjonFraSistIverksatteBehandling(
-            vedtak = vedtak,
-            utbetalingsperioder = utbetalingsperioder,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            opphørsperioder = opphørsperioder
-        )
-
-        val oppdatertUtbetalingsperioder =
-            finnOgOppdaterOverlappendeUtbetalingsperiode(
-                utbetalingsperioder,
-                perioderMedReduksjonFraSistIverksatteBehandling
-            )
-
-        return (oppdatertUtbetalingsperioder + opphørsperioder).filtrerUtPerioderBasertPåEndringstidspunkt(
+        return filtrerUtPerioderBasertPåEndringstidspunkt(
+            vedtaksperioderMedBegrunnelsers = (utbetalingsperioder + opphørsperioder),
             behandlingId = vedtak.behandling.id,
             gjelderFortsattInnvilget = gjelderFortsattInnvilget,
             manueltOverstyrtEndringstidspunkt = manueltOverstyrtEndringstidspunkt
         ) + avslagsperioder
     }
 
-    private fun List<VedtaksperiodeMedBegrunnelser>.filtrerUtPerioderBasertPåEndringstidspunkt(
+    fun filtrerUtPerioderBasertPåEndringstidspunkt(
+        vedtaksperioderMedBegrunnelsers: List<VedtaksperiodeMedBegrunnelser>,
         behandlingId: Long,
         gjelderFortsattInnvilget: Boolean = false,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
@@ -315,7 +299,7 @@ class VedtaksperiodeService(
                 endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
             else TIDENES_MORGEN
 
-        return this.filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
+        return vedtaksperioderMedBegrunnelsers.filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
     }
 
     @Transactional
@@ -530,38 +514,6 @@ class VedtaksperiodeService(
         )
     }
 
-    fun hentPerioderMedReduksjonFraSistIverksatteBehandling(
-        vedtak: Vedtak,
-        utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
-        opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
-    ): List<VedtaksperiodeMedBegrunnelser> {
-        val erToggelenPå = featureToggleService.isEnabled(LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT)
-        if (!erToggelenPå) return emptyList()
-        val behandling = vedtak.behandling
-        if (behandling.skalBehandlesAutomatisk) return emptyList()
-        val forrigeIverksatteBehandling: Behandling = hentForrigeIverksatteBehandling(behandling) ?: return emptyList()
-        val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag =
-            forrigeIverksatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
-
-        val forrigeAndelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
-        // henter andel tilkjent ytelse for barn som finnes i forrige behandling
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-            .filter {
-                forrigePersonopplysningGrunnlag.søkerOgBarn.any { forrige -> forrige.aktør == it.aktør }
-            }
-
-        return identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
-            forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            vedtak = vedtak,
-            utbetalingsperioder = utbetalingsperioder,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            opphørsperioder = opphørsperioder
-        )
-    }
-
     private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         val behandling = vedtak.behandling
         val vilkårsvurdering =
@@ -642,17 +594,6 @@ class VedtaksperiodeService(
 
     fun hent(vedtaksperiodeId: Long): VedtaksperiodeMedBegrunnelser =
         vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
-
-    private fun hentForrigeIverksatteBehandling(behandling: Behandling): Behandling? {
-        val iverksatteBehandlinger =
-            behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
-
-        val forrigeIverksatteBehandling: Behandling? = Behandlingutils.hentForrigeIverksatteBehandling(
-            iverksatteBehandlinger = iverksatteBehandlinger,
-            behandlingFørFølgende = behandling
-        )
-        return forrigeIverksatteBehandling
-    }
 
     companion object {
 

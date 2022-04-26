@@ -294,7 +294,7 @@ class VedtaksperiodeServiceTest(
             )
         )
 
-        val redusertePerioder = identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
+        val redusertePerioder = identifiserReduksjonsperioderFraSistIverksatteBehandling(
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndelTilkjentYtelse1, forrigeAndelTilkjentYtelse2),
             andelerTilkjentYtelse = listOf(andelTilkjentYtelse1, andelTilkjentYtelse2),
             vedtak = vedtak,
@@ -367,7 +367,7 @@ class VedtaksperiodeServiceTest(
             )
         )
 
-        val redusertePerioder = identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
+        val redusertePerioder = identifiserReduksjonsperioderFraSistIverksatteBehandling(
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndelTilkjentYtelse1, forrigeAndelTilkjentYtelse2),
             andelerTilkjentYtelse = listOf(andelTilkjentYtelse1, andelTilkjentYtelse2, andelTilkjentYtelse3),
             vedtak = vedtak,
@@ -445,7 +445,7 @@ class VedtaksperiodeServiceTest(
             )
         )
 
-        val redusertePerioder = identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
+        val redusertePerioder = identifiserReduksjonsperioderFraSistIverksatteBehandling(
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndelTilkjentYtelse1, forrigeAndelTilkjentYtelse2),
             andelerTilkjentYtelse = listOf(
                 andelTilkjentYtelse1,
@@ -529,7 +529,7 @@ class VedtaksperiodeServiceTest(
             )
         )
 
-        val redusertePerioder = identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
+        val redusertePerioder = identifiserReduksjonsperioderFraSistIverksatteBehandling(
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndelTilkjentYtelse1, forrigeAndelTilkjentYtelse2),
             andelerTilkjentYtelse = listOf(
                 andelTilkjentYtelse1,
@@ -579,12 +579,10 @@ class VedtaksperiodeServiceTest(
         )
         val vedtaksperioder = vedtaksperiodeService.filtrerUtPerioderBasertPåEndringstidspunkt(
             behandlingId = behandlingId,
-            oppdatertUtbetalingsperioder = utbetalingsperioder,
-            opphørsperioder = emptyList(),
-            avslagsperioder = avslagsperioder,
+            vedtaksperioderMedBegrunnelsers = utbetalingsperioder,
             gjelderFortsattInnvilget = false,
             manueltOverstyrtEndringstidspunkt = LocalDate.of(2021, 3, 1)
-        )
+        ) + avslagsperioder
 
         assertNotNull(vedtaksperioder)
         assertEquals(2, vedtaksperioder.size)
