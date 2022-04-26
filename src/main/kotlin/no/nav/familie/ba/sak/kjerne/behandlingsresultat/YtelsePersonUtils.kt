@@ -47,6 +47,9 @@ object YtelsePersonUtils {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
 
+            // segmenterLagtTil og segmenterFjernet 
+            // kan være tom når forrigeBehandling og nåværendeBehandling har samme tidslinje, 
+            // men ytelsen er opphørt ved dødsfall
             if (erYtelsenOpphørt(
                     andeler = behandlingsresultatPerson.andeler,
                     inneværendeMåned = inneværendeMåned
