@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -49,6 +50,23 @@ fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
             type = Vedtaksperiodetype.UTBETALING
         )
     }
+
+fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
+    utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
+    reduksjonsperioder: List<VedtaksperiodeMedBegrunnelser>
+): List<VedtaksperiodeMedBegrunnelser> {
+    if (reduksjonsperioder.isNotEmpty()) {
+        val utbetalingsperioderTidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
+        val reduksjonsperioderTidslinje = ReduksjonsperioderFraForrigeBehandlingTidslinje(reduksjonsperioder)
+
+        val kombinertTidslinje = utbetalingsperioderTidslinje.snittKombinerMed(
+            reduksjonsperioderTidslinje,
+            ::kombinerUtbetalingsperiodeOgReduksjonsperiode
+        )
+        return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
+    }
+    return utbetalingsperioder
+}
 
 fun validerSatsendring(fom: LocalDate?, harBarnMedSeksårsdagPåFom: Boolean) {
     val satsendring = SatsService

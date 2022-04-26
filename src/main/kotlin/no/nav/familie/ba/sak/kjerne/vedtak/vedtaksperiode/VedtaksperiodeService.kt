@@ -36,7 +36,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.tidslinje.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -312,23 +311,6 @@ class VedtaksperiodeService(
             gjelderFortsattInnvilget = gjelderFortsattInnvilget,
             manueltOverstyrtEndringstidspunkt = manueltOverstyrtEndringstidspunkt
         )
-    }
-
-    private fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
-        utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
-        reduksjonsperioder: List<VedtaksperiodeMedBegrunnelser>
-    ): List<VedtaksperiodeMedBegrunnelser> {
-        if (reduksjonsperioder.isNotEmpty()) {
-            val utbetalingsperioderTidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
-            val reduksjonsperioderTidslinje = ReduksjonsperioderFraForrigeBehandlingTidslinje(reduksjonsperioder)
-
-            val kombinertTidslinje = utbetalingsperioderTidslinje.snittKombinerMed(
-                reduksjonsperioderTidslinje,
-                ::kombinerUtbetalingsperiodeOgReduksjonsperiode
-            )
-            return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
-        }
-        return utbetalingsperioder
     }
 
     fun filtrerUtPerioderBasertPåEndringstidspunkt(
