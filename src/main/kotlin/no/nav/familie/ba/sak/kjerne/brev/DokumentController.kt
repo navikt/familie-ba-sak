@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -15,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.FantIkkeVedtaksperiodeFeil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -23,7 +20,6 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -45,17 +41,6 @@ class DokumentController(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
-
-    @ExceptionHandler(FantIkkeVedtaksperiodeFeil::class)
-    fun handleFantIkkeVedtaksperiodeFeil(feil: FantIkkeVedtaksperiodeFeil): ResponseEntity<Ressurs<Nothing>> {
-
-        return RessursUtils.funksjonellFeil(
-            FunksjonellFeil(
-                melding = feil.message!!,
-                frontendFeilmelding = feil.frontendFeilmelding
-            )
-        )
-    }
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun genererVedtaksbrev(@PathVariable vedtakId: Long): Ressurs<ByteArray> {

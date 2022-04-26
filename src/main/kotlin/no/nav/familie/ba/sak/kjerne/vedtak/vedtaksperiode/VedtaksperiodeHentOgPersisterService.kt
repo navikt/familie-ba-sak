@@ -6,12 +6,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import org.springframework.stereotype.Service
 
-class FantIkkeVedtaksperiodeFeil(vedtaksperiodeId: Long) :
-    Feil(
-        message = "Fant ingen vedtaksperiode med id $vedtaksperiodeId",
-        frontendFeilmelding = "Fant ikke vedtaksperiode"
-    )
-
 @Service
 class VedtaksperiodeHentOgPersisterService(
 
@@ -20,7 +14,10 @@ class VedtaksperiodeHentOgPersisterService(
 
     fun hentVedtaksperiodeThrows(vedtaksperiodeId: Long): VedtaksperiodeMedBegrunnelser =
         vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
-            ?: throw FantIkkeVedtaksperiodeFeil(vedtaksperiodeId)
+            ?: throw Feil(
+                message = "Fant ingen vedtaksperiode med id $vedtaksperiodeId",
+                frontendFeilmelding = "Fant ikke vedtaksperiode"
+            )
 
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
         validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser)
