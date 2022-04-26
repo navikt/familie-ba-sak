@@ -40,11 +40,11 @@ fun Tidslinje<VedtaksperiodeMedBegrunnelser, Dag>.lagVedtaksperioderMedBegrunnel
     this.perioder().mapNotNull { it.innhold?.copy(fom = it.fraOgMed.tilLocalDate(), tom = it.tilOgMed.tilLocalDate()) }
 
 class UtbetalingsperiodeOgReduksjonsperiodeKombinator {
-    fun kombiner(periode1: VedtaksperiodeMedBegrunnelser?, periode2: VedtaksperiodeMedBegrunnelser?): VedtaksperiodeMedBegrunnelser? {
+    fun kombiner(utbetalingsperiode: VedtaksperiodeMedBegrunnelser?, reduksjonsperiode: VedtaksperiodeMedBegrunnelser?): VedtaksperiodeMedBegrunnelser? {
         return when {
-            periode1 == null && periode2 == null -> null
-            periode2 != null -> periode2 // hvis reduksjonsperiode finnes skal vi bruke innhold fra den
-            else -> periode1
+            utbetalingsperiode == null && reduksjonsperiode == null -> null
+            reduksjonsperiode != null -> reduksjonsperiode // hvis reduksjonsperiode finnes skal vi bruke innhold fra den
+            else -> utbetalingsperiode
         }
     }
 }
