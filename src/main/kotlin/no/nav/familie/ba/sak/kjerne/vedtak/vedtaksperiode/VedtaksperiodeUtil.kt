@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -106,13 +107,13 @@ fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
-    forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag
+    aktørerIForrigePersonopplysningGrunnlag: List<Aktør>
 ): List<VedtaksperiodeMedBegrunnelser> {
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
 
-    // henter segmenter for barn som finnes i forrige behandling
+    // henter segmenter for personer som finnes i forrige behandling
     val nåværendeSegmenter = andelerTilkjentYtelse.filter {
-        forrigePersonopplysningGrunnlag.søkerOgBarn.any { forrige -> forrige.aktør == it.aktør }
+        aktørerIForrigePersonopplysningGrunnlag.any { forrigeAktør -> forrigeAktør == it.aktør }
     }.lagVertikaleSegmenter()
 
     val segmenter = forrigeSegmenter.filterNot { (forrigeSegment, _) ->
