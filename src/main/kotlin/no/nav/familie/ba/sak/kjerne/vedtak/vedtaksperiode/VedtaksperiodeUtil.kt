@@ -278,9 +278,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
         }.filter {
             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
                 endretUtbetalingsperiodeBegrunnelser.filter { standardbegrunnelse ->
-                    if (!erNyDeltBostedTogglePå)
-                        standardbegrunnelse != Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING
-                    else true
+                    erNyDeltBostedTogglePå || standardbegrunnelse != Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING
                 }.contains(it)
             } else true
         }
