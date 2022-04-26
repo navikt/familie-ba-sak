@@ -107,7 +107,6 @@ class FeatureToggleConfig(
         const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER =
             "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
         const val FØRSTE_ENDRINGSTIDSPUNKT = "familie-ba-sak.behandling.forste-endringstidspunkt.utgivelse"
-        const val ETTERBETALING_3ÅR = "familie-ba-sak.utgivelse.behandling.etterbetaling-3-aar"
         const val NY_DELT_BOSTED_BEGRUNNELSE = "familie-ba-sak.utgivelse.behandling.delt-bosted-begrunnelse-avtaletidspunkt"
         const val NY_MÅTE_Å_GENERERE_UTVIDET_ANDELER = "familie-ba-sak.utgivelse.behandling.generer-utvidet-andeler"
         const val NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER = "familie-ba-sak.utgivelse.behandling.generer-vedtaksperioder"
