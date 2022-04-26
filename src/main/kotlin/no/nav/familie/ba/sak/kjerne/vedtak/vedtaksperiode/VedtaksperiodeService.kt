@@ -36,7 +36,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -322,9 +322,9 @@ class VedtaksperiodeService(
             val utbetalingsperioderTidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
             val reduksjonsperioderTidslinje = ReduksjonsperioderFraForrigeBehandlingTidslinje(reduksjonsperioder)
 
-            val kombinertTidslinje = utbetalingsperioderTidslinje.kombinerMed(
+            val kombinertTidslinje = utbetalingsperioderTidslinje.snittKombinerMed(
                 reduksjonsperioderTidslinje,
-                UtbetalingsperiodeOgReduksjonsperiodeKombinator()::kombiner
+                ::kombinerUtbetalingsperiodeOgReduksjonsperiode
             )
             return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
         }

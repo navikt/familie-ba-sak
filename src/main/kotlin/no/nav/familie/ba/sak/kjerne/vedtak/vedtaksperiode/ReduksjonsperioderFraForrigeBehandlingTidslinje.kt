@@ -12,16 +12,11 @@ class ReduksjonsperioderFraForrigeBehandlingTidslinje(
 ) : VedtaksperiodeMedBegrunnelserTidslinje(vedtaksperioderMedBegrunnelser) {
 
     override fun lagPerioder(): List<Periode<VedtaksperiodeMedBegrunnelser, Dag>> =
-        vedtaksperioderMedBegrunnelser.map { it.tilPeriode() }
-
-    private fun VedtaksperiodeMedBegrunnelser.tilPeriode(): Periode<VedtaksperiodeMedBegrunnelser, Dag> {
-        val fom = this.fom
-        val tom = this.tom
-
-        return Periode(
-            fraOgMed = fom.tilTidspunktEllerDefault { PRAKTISK_TIDLIGSTE_DAG },
-            tilOgMed = tom.tilTidspunktEllerDefault { PRAKTISK_SENESTE_DAG },
-            innhold = this.copy(fom = null, tom = null) // Gjør at perioder med samme innhold blir slått sammen
-        )
-    }
+        vedtaksperioderMedBegrunnelser.map {
+            Periode(
+                fraOgMed = it.fom.tilTidspunktEllerDefault { PRAKTISK_TIDLIGSTE_DAG },
+                tilOgMed = it.tom.tilTidspunktEllerDefault { PRAKTISK_SENESTE_DAG },
+                innhold = it.copy(fom = null, tom = null) // Gjør at perioder med samme innhold blir slått sammen
+            )
+        }
 }
