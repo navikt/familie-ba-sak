@@ -55,11 +55,10 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
         val splitter = listOf(start, split1, split2, split3, split4)
 
         Assertions.assertEquals(5, utbetalingsperiodeMedKompetanseSplitter.size)
-        utbetalingsperiodeMedKompetanseSplitter.forEachIndexed { index, vedtaksperiodeMedBegrunnelse ->
-            Assertions.assertEquals(
-                splitter[index],
-                vedtaksperiodeMedBegrunnelse.fom
-            )
-        }
+        utbetalingsperiodeMedKompetanseSplitter
+            .zip(splitter)
+            .forEach { (utbetalingsperiode, fom) ->
+                Assertions.assertEquals(fom, utbetalingsperiode.fom)
+            }
     }
 }
