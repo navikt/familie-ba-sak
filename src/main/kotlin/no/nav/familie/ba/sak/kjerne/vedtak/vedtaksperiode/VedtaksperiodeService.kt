@@ -295,7 +295,6 @@ class VedtaksperiodeService(
             opphørsperioder = opphørsperioder
         )
 
-        // Når toggle fjernes flyttes hentingen av utbetalingsperioder og reduksjonsperioder inn i genererUtbetalingsperioder-funksjonen
         val oppdatertUtbetalingsperioder = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER)) {
             oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
                 utbetalingsperioder = utbetalingsperioder,
