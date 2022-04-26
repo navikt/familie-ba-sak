@@ -318,14 +318,17 @@ class VedtaksperiodeService(
         utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
         reduksjonsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
-        val utbetalingsperioderTidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
-        val reduksjonsperioderTidslinje = ReduksjonsperioderFraForrigeBehandlingTidslinje(reduksjonsperioder)
+        if (reduksjonsperioder.isNotEmpty()) {
+            val utbetalingsperioderTidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
+            val reduksjonsperioderTidslinje = ReduksjonsperioderFraForrigeBehandlingTidslinje(reduksjonsperioder)
 
-        val kombinertTidslinje = utbetalingsperioderTidslinje.kombinerMed(
-            reduksjonsperioderTidslinje,
-            UtbetalingsperiodeOgReduksjonsperiodeKombinator()::kombiner
-        )
-        return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
+            val kombinertTidslinje = utbetalingsperioderTidslinje.kombinerMed(
+                reduksjonsperioderTidslinje,
+                UtbetalingsperiodeOgReduksjonsperiodeKombinator()::kombiner
+            )
+            return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
+        }
+        return utbetalingsperioder
     }
 
     fun filtrerUtPerioderBasertPåEndringstidspunkt(
@@ -585,7 +588,7 @@ class VedtaksperiodeService(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = opphørsperioder,
-            forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag
+            aktørerIForrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag.søkerOgBarn.map { it.aktør }
         )
     }
 
