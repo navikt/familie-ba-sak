@@ -149,7 +149,6 @@ class AvstemmingService(
                     behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
                         relevanteAndeler.mapNotNull { it.kildeBehandlingId }
                     )
-                logger.info("Size ->{} data={}", aktiveFødselsnummere.size, aktiveFødselsnummere.keys)
 
                 relevanteAndeler.groupBy { it.kildeBehandlingId }
                     .map { (kildeBehandlingId, andeler) ->
