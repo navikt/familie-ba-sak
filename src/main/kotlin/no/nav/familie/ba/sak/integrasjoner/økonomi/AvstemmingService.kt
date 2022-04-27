@@ -145,10 +145,15 @@ class AvstemmingService(
                     behandlingIder = chunk,
                     avstemmingstidspunkt = avstemmingstidspunkt
                 )
+                val aktiveFødselsnummere =
+                    behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(chunk)
+
                 relevanteAndeler.groupBy { it.kildeBehandlingId }
                     .map { (kildeBehandlingId, andeler) ->
                         PerioderForBehandling(
                             behandlingId = kildeBehandlingId.toString(),
+                            aktivFødselsnummer = aktiveFødselsnummere[kildeBehandlingId]
+                                ?: error("Finnes ikke et aktivt fødselsnummer for behandling $kildeBehandlingId"),
                             perioder = andeler
                                 .map {
                                     it.periodeOffset
