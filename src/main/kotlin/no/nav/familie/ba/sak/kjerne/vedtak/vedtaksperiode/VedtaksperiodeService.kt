@@ -43,7 +43,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
@@ -61,7 +60,7 @@ class VedtaksperiodeService(
     private val personidentService: PersonidentService,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val vedtakRepository: VedtakRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val sanityService: SanityService,
@@ -71,23 +70,12 @@ class VedtaksperiodeService(
     private val featureToggleService: FeatureToggleService,
 ) {
 
-    fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
-        validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser)
-        return vedtaksperiodeRepository.save(vedtaksperiodeMedBegrunnelser)
-    }
-
-    fun lagre(vedtaksperiodeMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): List<VedtaksperiodeMedBegrunnelser> =
-        vedtaksperiodeRepository.saveAll(vedtaksperiodeMedBegrunnelser)
-
-    fun slettVedtaksperioderFor(vedtak: Vedtak) {
-        vedtaksperiodeRepository.slettVedtaksperioderFor(vedtak)
-    }
-
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
         restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster
     ): Vedtak {
-        val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
+        val vedtaksperiodeMedBegrunnelser =
+            vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
         vedtaksperiodeMedBegrunnelser.settFritekster(
             restPutVedtaksperiodeMedFritekster.fritekster.map {
@@ -98,7 +86,7 @@ class VedtaksperiodeService(
             }
         )
 
-        lagre(vedtaksperiodeMedBegrunnelser)
+        vedtaksperiodeHentOgPersisterService.lagre(vedtaksperiodeMedBegrunnelser)
 
         return vedtaksperiodeMedBegrunnelser.vedtak
     }
@@ -107,7 +95,8 @@ class VedtaksperiodeService(
         vedtaksperiodeId: Long,
         standardbegrunnelserFraFrontend: List<Standardbegrunnelse>
     ): Vedtak {
-        val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
+        val vedtaksperiodeMedBegrunnelser =
+            vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
 
@@ -143,7 +132,7 @@ class VedtaksperiodeService(
             validerEndretUtbetalingsbegrunnelse(vedtaksperiodeMedBegrunnelser, andelerTilkjentYtelse, persongrunnlag)
         }
 
-        lagre(vedtaksperiodeMedBegrunnelser)
+        vedtaksperiodeHentOgPersisterService.lagre(vedtaksperiodeMedBegrunnelser)
 
         return vedtaksperiodeMedBegrunnelser.vedtak
     }
@@ -168,7 +157,8 @@ class VedtaksperiodeService(
     fun oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak: Vedtak, barnaSomVurderes: List<String>) {
         val barnaAktørSomVurderes = personidentService.hentAktørIder(barnaSomVurderes)
 
-        val vedtaksperioderMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
+        val vedtaksperioderMedBegrunnelser =
+            vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
         val vurderteBarnSomPersoner =
             barnaAktørSomVurderes.map { barnAktørSomVurderes ->
@@ -202,7 +192,7 @@ class VedtaksperiodeService(
                     )
                 )
             )
-            lagre(vedtaksperiodeMedBegrunnelser)
+            vedtaksperiodeHentOgPersisterService.lagre(vedtaksperiodeMedBegrunnelser)
 
             /**
              * Hvis barn(a) er født før desember påvirkes vedtaket av satsendring januar 2022
@@ -223,7 +213,7 @@ class VedtaksperiodeService(
                                 )
                             )
                         )
-                        lagre(satsendringsvedtaksperiode)
+                        vedtaksperiodeHentOgPersisterService.lagre(satsendringsvedtaksperiode)
                     }
             }
         }
@@ -232,7 +222,7 @@ class VedtaksperiodeService(
     @Transactional
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak, skalOverstyreFortsattInnvilget: Boolean = false) {
 
-        slettVedtaksperioderFor(vedtak)
+        vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && !skalOverstyreFortsattInnvilget) {
 
             val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
@@ -247,7 +237,7 @@ class VedtaksperiodeService(
                 finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(vedtak.behandling.id)
             } else null
 
-            lagre(
+            vedtaksperiodeHentOgPersisterService.lagre(
                 VedtaksperiodeMedBegrunnelser(
                     fom = fom,
                     tom = tom,
@@ -256,7 +246,7 @@ class VedtaksperiodeService(
                 )
             )
         } else {
-            lagre(
+            vedtaksperiodeHentOgPersisterService.lagre(
                 genererVedtaksperioderMedBegrunnelser(
                     vedtak,
                     gjelderFortsattInnvilget = skalOverstyreFortsattInnvilget
@@ -333,13 +323,13 @@ class VedtaksperiodeService(
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
             oppdaterVedtakMedVedtaksperioder(vedtak)
         } else {
-            slettVedtaksperioderFor(vedtak)
+            vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
             val vedtaksperioder =
                 genererVedtaksperioderMedBegrunnelser(
                     vedtak = vedtak,
                     manueltOverstyrtEndringstidspunkt = overstyrtEndringstidspunkt
                 )
-            lagre(vedtaksperioder.sortedBy { it.fom })
+            vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioder.sortedBy { it.fom })
         }
         lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
     }
@@ -352,10 +342,10 @@ class VedtaksperiodeService(
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
         val gamleVedtaksperioderMedBegrunnelser =
-            vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = deaktivertVedtak.id)
+            vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = deaktivertVedtak.id)
 
         gamleVedtaksperioderMedBegrunnelser.forEach { vedtaksperiodeMedBegrunnelser ->
-            val nyVedtaksperiodeMedBegrunnelser = lagre(
+            val nyVedtaksperiodeMedBegrunnelser = vedtaksperiodeHentOgPersisterService.lagre(
                 VedtaksperiodeMedBegrunnelser(
                     vedtak = aktivtVedtak,
                     fom = vedtaksperiodeMedBegrunnelser.fom,
@@ -375,12 +365,12 @@ class VedtaksperiodeService(
                 }
             )
 
-            lagre(nyVedtaksperiodeMedBegrunnelser)
+            vedtaksperiodeHentOgPersisterService.lagre(nyVedtaksperiodeMedBegrunnelser)
         }
     }
 
     fun hentPersisterteVedtaksperioder(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
-        return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
+        return vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
     fun hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak: Vedtak): List<UtvidetVedtaksperiodeMedBegrunnelser> {
@@ -477,7 +467,7 @@ class VedtaksperiodeService(
             )
         )
 
-        lagre(fortsattInnvilgetPeriode)
+        vedtaksperiodeHentOgPersisterService.lagre(fortsattInnvilgetPeriode)
     }
 
     private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
@@ -645,9 +635,6 @@ class VedtaksperiodeService(
             } else it
         }.toList()
     }
-
-    fun hent(vedtaksperiodeId: Long): VedtaksperiodeMedBegrunnelser =
-        vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
 
     private fun hentForrigeIverksatteBehandling(behandling: Behandling): Behandling? {
         val iverksatteBehandlinger =
