@@ -41,7 +41,7 @@ class VedtaksperiodeMedBegrunnelserTidslinje(
     }
 }
 
-data class UtbetalingsperiodeMedKompetanse(
+data class UtbetalingsperiodeMedOverlappendeKompetanse(
     val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
     val kompetanse: Kompetanse?,
 )
@@ -49,8 +49,8 @@ data class UtbetalingsperiodeMedKompetanse(
 fun kombinerUtbetalingsperiodeMedKompetanse(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser?,
     kompetanse: Kompetanse?,
-): UtbetalingsperiodeMedKompetanse? = when {
+): UtbetalingsperiodeMedOverlappendeKompetanse? = when {
     vedtaksperiodeMedBegrunnelser == null && kompetanse == null -> null
     vedtaksperiodeMedBegrunnelser == null -> throw Feil("Kan ikke ha kompetanse uten utbetalingsperiode")
-    else -> UtbetalingsperiodeMedKompetanse(vedtaksperiodeMedBegrunnelser, kompetanse)
+    else -> UtbetalingsperiodeMedOverlappendeKompetanse(vedtaksperiodeMedBegrunnelser, kompetanse)
 }
