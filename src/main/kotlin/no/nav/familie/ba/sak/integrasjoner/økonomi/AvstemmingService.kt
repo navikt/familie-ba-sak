@@ -146,7 +146,9 @@ class AvstemmingService(
                     avstemmingstidspunkt = avstemmingstidspunkt
                 )
                 val aktiveFødselsnummere =
-                    behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(chunk)
+                    behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
+                        relevanteAndeler.mapNotNull { it.kildeBehandlingId }
+                    )
                 logger.info("Size ->{} data={}", aktiveFødselsnummere.size, aktiveFødselsnummere.keys)
 
                 relevanteAndeler.groupBy { it.kildeBehandlingId }
