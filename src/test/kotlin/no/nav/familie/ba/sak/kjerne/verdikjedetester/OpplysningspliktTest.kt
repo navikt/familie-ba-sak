@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
@@ -35,6 +36,7 @@ class OpplysningspliktTest(
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     @Autowired private val dokumentService: DokumentService,
     @Autowired private val brevService: BrevService,
     @Autowired private val settPåVentService: SettPåVentService
@@ -126,7 +128,8 @@ class OpplysningspliktTest(
             )
         )
 
-        val vedtak = vedtaksperiodeService.hent(vedtaksperiodeId = vedtaksperiode.id).vedtak
+        val vedtak =
+            vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId = vedtaksperiode.id).vedtak
 
         val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak)
 
