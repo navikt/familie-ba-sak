@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -68,6 +69,7 @@ class BrevPeriodeService(
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
                 behandlingId
             ),
+            skalBrukeNyMåteÅGenerereVedtaksperioder = featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER)
         )
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
