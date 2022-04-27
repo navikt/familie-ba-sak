@@ -32,11 +32,3 @@ open class VedtaksperiodeMedBegrunnelserTidslinje(
 
 fun Tidslinje<VedtaksperiodeMedBegrunnelser, Dag>.lagVedtaksperioderMedBegrunnelser(): List<VedtaksperiodeMedBegrunnelser> =
     this.perioder().mapNotNull { it.innhold?.copy(fom = it.fraOgMed.tilLocalDateEllerNull(), tom = it.tilOgMed.tilLocalDateEllerNull()) }
-
-fun kombinerUtbetalingsperiodeOgReduksjonsperiode(utbetalingsperiode: VedtaksperiodeMedBegrunnelser?, reduksjonsperiode: VedtaksperiodeMedBegrunnelser?): VedtaksperiodeMedBegrunnelser? {
-    return when {
-        utbetalingsperiode == null && reduksjonsperiode == null -> null
-        reduksjonsperiode != null -> reduksjonsperiode // hvis reduksjonsperiode finnes skal vi bruke innhold fra den
-        else -> utbetalingsperiode
-    }
-}

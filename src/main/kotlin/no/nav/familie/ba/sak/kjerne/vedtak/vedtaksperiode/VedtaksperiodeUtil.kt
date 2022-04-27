@@ -60,9 +60,11 @@ fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
         val reduksjonsperioderTidslinje = ReduksjonsperioderFraForrigeBehandlingTidslinje(reduksjonsperioder)
 
         val kombinertTidslinje = utbetalingsperioderTidslinje.snittKombinerMed(
-            reduksjonsperioderTidslinje,
-            ::kombinerUtbetalingsperiodeOgReduksjonsperiode
-        )
+            reduksjonsperioderTidslinje
+        ) {
+            utbetalingsperiode, reduksjonsperiode ->
+            reduksjonsperiode ?: utbetalingsperiode
+        }
         return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
     }
     return utbetalingsperioder
