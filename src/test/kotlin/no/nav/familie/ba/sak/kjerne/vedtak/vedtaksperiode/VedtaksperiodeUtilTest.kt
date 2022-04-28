@@ -88,7 +88,7 @@ class VedtaksperiodeUtilTest {
     }
 
     @Test
-    fun `Skal kun lage en vedtaksperiode med type UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING hvis reduksjonsperiodene er sammenhengende`() {
+    fun `Skal kun lage en vedtaksperiode med type UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING hvis reduksjonsperiodene er sammenhengende og ikke krysser utbetalingsperiode-splitt`() {
         val vedtak = lagVedtak()
 
         val b2bFomUtbetalingsperiode = LocalDate.now().minusYears(2).førsteDagIInneværendeMåned()
