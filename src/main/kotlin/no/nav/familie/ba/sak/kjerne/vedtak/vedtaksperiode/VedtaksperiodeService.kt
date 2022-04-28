@@ -272,24 +272,6 @@ class VedtaksperiodeService(
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
-
-        val reduksjonsperioder = hentReduksjonsperioderFraInnvilgelsesTidspunkt(
-            vedtak = vedtak,
-            utbetalingsperioder = utbetalingsperioder,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            opphørsperioder = opphørsperioder
-        )
-
-        val oppdatertUtbetalingsperioder = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER)) {
-            oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
-                utbetalingsperioder = utbetalingsperioder,
-                reduksjonsperioder = reduksjonsperioder
-            )
-        } else {
-            finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
-        }
-
         return filtrerUtPerioderBasertPåEndringstidspunkt(
             vedtaksperioderMedBegrunnelsers = (utbetalingsperioder + opphørsperioder),
             behandlingId = vedtak.behandling.id,
@@ -522,37 +504,6 @@ class VedtaksperiodeService(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
-        )
-    }
-
-    fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
-        vedtak: Vedtak,
-        utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
-        opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
-    ): List<VedtaksperiodeMedBegrunnelser> {
-        val erToggelenPå = featureToggleService.isEnabled(LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT)
-        if (!erToggelenPå) return emptyList()
-        val behandling = vedtak.behandling
-        if (behandling.skalBehandlesAutomatisk) return emptyList()
-        val forrigeIverksatteBehandling: Behandling = hentForrigeIverksatteBehandling(behandling) ?: return emptyList()
-        val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag =
-            forrigeIverksatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
-
-        val forrigeAndelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
-
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-
-        return identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
-            forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            vedtak = vedtak,
-            utbetalingsperioder = utbetalingsperioder,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            opphørsperioder = opphørsperioder,
-            aktørerIForrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag.søkerOgBarn.map { it.aktør },
-            skalBrukeNyMåteÅGenerereVedtaksperioder = featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER)
         )
     }
 

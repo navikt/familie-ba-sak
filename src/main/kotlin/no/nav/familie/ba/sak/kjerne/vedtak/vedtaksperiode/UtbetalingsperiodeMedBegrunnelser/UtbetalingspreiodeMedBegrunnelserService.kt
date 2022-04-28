@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMed
 
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_BEHANDLE_EØS
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.finnOgOppdaterOverlappendeUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentPerioderMedUtbetaling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.identifiserReduksjonsperioderFraSistIverksatteBehandling
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling
 import org.springframework.stereotype.Service
 
 @Service
@@ -38,16 +40,24 @@ class UtbetalingspreiodeMedBegrunnelserService(
         )
 
         val perioderMedReduksjonFraSistIverksatteBehandling =
-            hentPerioderMedReduksjonFraSistIverksatteBehandling(
+            hentReduksjonsperioderFraInnvilgelsesTidspunkt(
                 vedtak = vedtak,
                 utbetalingsperioder = utbetalingsperioder,
                 opphørsperioder = opphørsperioder
             )
 
-        val utbetalingsperioderMedReduksjon = finnOgOppdaterOverlappendeUtbetalingsperiode(
-            utbetalingsperioder,
-            perioderMedReduksjonFraSistIverksatteBehandling
-        )
+        val utbetalingsperioderMedReduksjon =
+            if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER)) {
+                oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
+                    utbetalingsperioder = utbetalingsperioder,
+                    reduksjonsperioder = perioderMedReduksjonFraSistIverksatteBehandling
+                )
+            } else {
+                finnOgOppdaterOverlappendeUtbetalingsperiode(
+                    utbetalingsperioder,
+                    perioderMedReduksjonFraSistIverksatteBehandling
+                )
+            }
 
         return if (featureToggleService.isEnabled(KAN_BEHANDLE_EØS)) {
             val kompetanser = kompetanseRepository.findByBehandlingId(vedtak.behandling.id)
@@ -59,13 +69,12 @@ class UtbetalingspreiodeMedBegrunnelserService(
         } else utbetalingsperioderMedReduksjon
     }
 
-    fun hentPerioderMedReduksjonFraSistIverksatteBehandling(
+    fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
         vedtak: Vedtak,
         utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
-        val erToggelenPå =
-            featureToggleService.isEnabled(FeatureToggleConfig.LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT)
+        val erToggelenPå = featureToggleService.isEnabled(LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT)
         if (!erToggelenPå) return emptyList()
         val behandling = vedtak.behandling
         if (behandling.skalBehandlesAutomatisk) return emptyList()
@@ -74,25 +83,25 @@ class UtbetalingspreiodeMedBegrunnelserService(
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
                 ?: return emptyList()
 
-        val personopplysningGrunnlag: PersonopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag =
-            persongrunnlagService.hentAktivThrows(forrigeIverksatteBehandling.id)
+            forrigeIverksatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
 
         val forrigeAndelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
-        val andelerTilkjentYtelseForBarnMedIForrigeBehandling =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-                .filter {
-                    forrigePersonopplysningGrunnlag.søkerOgBarn.any { forrige -> forrige.aktør == it.aktør }
-                }
+
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
 
         return identifiserReduksjonsperioderFraSistIverksatteBehandling(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
-            andelerTilkjentYtelse = andelerTilkjentYtelseForBarnMedIForrigeBehandling,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
             vedtak = vedtak,
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            opphørsperioder = opphørsperioder
+            opphørsperioder = opphørsperioder,
+            aktørerIForrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag.søkerOgBarn.map { it.aktør },
+            skalBrukeNyMåteÅGenerereVedtaksperioder = featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER)
         )
     }
 }

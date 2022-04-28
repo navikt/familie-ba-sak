@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
@@ -33,18 +31,9 @@ open class VedtaksperiodeMedBegrunnelserTidslinje(
 }
 
 fun Tidslinje<VedtaksperiodeMedBegrunnelser, Dag>.lagVedtaksperioderMedBegrunnelser(): List<VedtaksperiodeMedBegrunnelser> =
-    this.perioder().mapNotNull { it.innhold?.copy(fom = it.fraOgMed.tilLocalDateEllerNull(), tom = it.tilOgMed.tilLocalDateEllerNull()) }
-
-data class UtbetalingsperiodeMedOverlappendeKompetanse(
-    val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-    val kompetanse: Kompetanse?,
-)
-
-fun kombinerUtbetalingsperiodeMedKompetanse(
-    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser?,
-    kompetanse: Kompetanse?,
-): UtbetalingsperiodeMedOverlappendeKompetanse? = when {
-    vedtaksperiodeMedBegrunnelser == null && kompetanse == null -> null
-    vedtaksperiodeMedBegrunnelser == null -> throw Feil("Kan ikke ha kompetanse uten utbetalingsperiode")
-    else -> UtbetalingsperiodeMedOverlappendeKompetanse(vedtaksperiodeMedBegrunnelser, kompetanse)
-}
+    this.perioder().mapNotNull {
+        it.innhold?.copy(
+            fom = it.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
+            tom = it.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull()
+        )
+    }
