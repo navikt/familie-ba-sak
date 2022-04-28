@@ -273,7 +273,7 @@ class VedtaksperiodeService(
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
         return filtrerUtPerioderBasertPåEndringstidspunkt(
-            vedtaksperioderMedBegrunnelsers = (utbetalingsperioder + opphørsperioder),
+            vedtaksperioderMedBegrunnelser = (utbetalingsperioder + opphørsperioder),
             behandlingId = vedtak.behandling.id,
             gjelderFortsattInnvilget = gjelderFortsattInnvilget,
             manueltOverstyrtEndringstidspunkt = manueltOverstyrtEndringstidspunkt
@@ -281,7 +281,7 @@ class VedtaksperiodeService(
     }
 
     fun filtrerUtPerioderBasertPåEndringstidspunkt(
-        vedtaksperioderMedBegrunnelsers: List<VedtaksperiodeMedBegrunnelser>,
+        vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
         behandlingId: Long,
         gjelderFortsattInnvilget: Boolean = false,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
@@ -291,7 +291,7 @@ class VedtaksperiodeService(
                 endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
             else TIDENES_MORGEN
 
-        return vedtaksperioderMedBegrunnelsers.filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
+        return vedtaksperioderMedBegrunnelser.filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
     }
 
     @Transactional

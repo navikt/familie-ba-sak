@@ -583,7 +583,7 @@ class VedtaksperiodeServiceTest(
         )
         val vedtaksperioder = vedtaksperiodeService.filtrerUtPerioderBasertPåEndringstidspunkt(
             behandlingId = behandlingId,
-            vedtaksperioderMedBegrunnelsers = utbetalingsperioder,
+            vedtaksperioderMedBegrunnelser = utbetalingsperioder,
             gjelderFortsattInnvilget = false,
             manueltOverstyrtEndringstidspunkt = LocalDate.of(2021, 3, 1)
         ) + avslagsperioder
