@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,7 +20,7 @@ class TilbakestillBehandlingService(
     private val behandlingService: BehandlingService,
     private val vilkårService: VilkårService,
     private val beregningService: BeregningService,
-    private val vedtaksperiodeService: VedtaksperiodeService,
+    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val vedtakRepository: VedtakRepository,
     private val tilbakekrevingService: TilbakekrevingService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService
@@ -42,7 +42,7 @@ class TilbakestillBehandlingService(
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
         beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtak)
+        vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak = vedtak)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandling.id,
@@ -59,7 +59,11 @@ class TilbakestillBehandlingService(
 
         endretUtbetalingAndelService.fjernKnytningTilAndelTilkjentYtelse(behandling.id)
         beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id))
+        vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
+            vedtak = vedtakRepository.findByBehandlingAndAktiv(
+                behandlingId = behandling.id
+            )
+        )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
@@ -71,7 +75,11 @@ class TilbakestillBehandlingService(
     @Transactional
     fun tilbakestillDataTilVilkårsvurderingssteg(behandling: Behandling) {
         endretUtbetalingAndelService.fjernKnytningTilAndelTilkjentYtelse(behandling.id)
-        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id))
+        vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
+            vedtak = vedtakRepository.findByBehandlingAndAktiv(
+                behandlingId = behandling.id
+            )
+        )
     }
 
     /**
@@ -79,7 +87,11 @@ class TilbakestillBehandlingService(
      */
     @Transactional
     fun resettStegVedEndringPåVilkår(behandlingId: Long): Behandling {
-        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId))
+        vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
+            vedtak = vedtakRepository.findByBehandlingAndAktiv(
+                behandlingId
+            )
+        )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
         return behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandlingId,
@@ -92,7 +104,11 @@ class TilbakestillBehandlingService(
      */
     @Transactional
     fun tilbakestillBehandlingTilBehandlingsresultat(behandlingId: Long): Behandling {
-        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId))
+        vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
+            vedtak = vedtakRepository.findByBehandlingAndAktiv(
+                behandlingId
+            )
+        )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
         return behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandlingId,

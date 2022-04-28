@@ -20,6 +20,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -48,6 +50,24 @@ fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
             type = Vedtaksperiodetype.UTBETALING
         )
     }
+
+fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
+    utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
+    reduksjonsperioder: List<VedtaksperiodeMedBegrunnelser>
+): List<VedtaksperiodeMedBegrunnelser> {
+    if (reduksjonsperioder.isNotEmpty()) {
+        val utbetalingsperioderTidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
+        val reduksjonsperioderTidslinje = ReduksjonsperioderFraForrigeBehandlingTidslinje(reduksjonsperioder)
+
+        val kombinertTidslinje = utbetalingsperioderTidslinje.snittKombinerMed(
+            reduksjonsperioderTidslinje
+        ) { utbetalingsperiode, reduksjonsperiode ->
+            reduksjonsperiode ?: utbetalingsperiode
+        }
+        return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
+    }
+    return utbetalingsperioder
+}
 
 fun validerSatsendring(fom: LocalDate?, harBarnMedSeksårsdagPåFom: Boolean) {
     val satsendring = SatsService
@@ -105,10 +125,17 @@ fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
     vedtak: Vedtak,
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
+    opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
+    aktørerIForrigePersonopplysningGrunnlag: List<Aktør>,
+    skalBrukeNyMåteÅGenerereVedtaksperioder: Boolean
 ): List<VedtaksperiodeMedBegrunnelser> {
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
-    val nåværendeSegmenter = andelerTilkjentYtelse.lagVertikaleSegmenter()
+
+    // henter segmenter for personer som finnes i forrige behandling
+    val nåværendeSegmenter = andelerTilkjentYtelse.filter {
+        aktørerIForrigePersonopplysningGrunnlag.any { forrigeAktør -> forrigeAktør == it.aktør }
+    }.lagVertikaleSegmenter()
+
     val segmenter = forrigeSegmenter.filterNot { (forrigeSegment, _) ->
         nåværendeSegmenter.any { (nyttSegment, _) ->
             forrigeSegment.fom == nyttSegment.fom &&
@@ -135,8 +162,9 @@ fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
                                 utbetalingsperioder.none { utbetalingsperiode ->
                                     utbetalingsperiode.tom == fom.minusDays(1) &&
                                         utbetalingsperiode.hentUtbetalingsperiodeDetaljer(
-                                            andelerTilkjentYtelse,
-                                            personopplysningGrunnlag,
+                                            andelerTilkjentYtelse = andelerTilkjentYtelse,
+                                            personopplysningGrunnlag = personopplysningGrunnlag,
+                                            skalBrukeNyMåteÅGenerereVedtaksperioder = skalBrukeNyMåteÅGenerereVedtaksperioder
                                         )
                                             .any {
                                                 it.person.personIdent ==
@@ -251,9 +279,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
         }.filter {
             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
                 endretUtbetalingsperiodeBegrunnelser.filter { standardbegrunnelse ->
-                    if (!erNyDeltBostedTogglePå)
-                        standardbegrunnelse != Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING
-                    else true
+                    erNyDeltBostedTogglePå || standardbegrunnelse != Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING
                 }.contains(it)
             } else true
         }

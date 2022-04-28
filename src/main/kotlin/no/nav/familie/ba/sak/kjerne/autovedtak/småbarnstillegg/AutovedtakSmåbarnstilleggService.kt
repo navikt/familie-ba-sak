@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -38,7 +39,8 @@ class AutovedtakSmåbarnstilleggService(
     private val taskRepository: TaskRepository,
     private val beregningService: BeregningService,
     private val autovedtakService: AutovedtakService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
+    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
 ) : AutovedtakBehandlingService<Aktør> {
 
     private val antallVedtakOmOvergangsstønad: Counter =
@@ -138,7 +140,7 @@ class AutovedtakSmåbarnstilleggService(
             nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
         )
 
-        vedtaksperiodeService.lagre(
+        vedtaksperiodeHentOgPersisterService.lagre(
             finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
                 innvilgetMånedPeriode = innvilgedeMånedPerioder.singleOrNull(),
                 redusertMånedPeriode = reduserteMånedPerioder.singleOrNull(),

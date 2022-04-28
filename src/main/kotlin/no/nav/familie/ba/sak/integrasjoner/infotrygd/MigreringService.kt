@@ -314,8 +314,16 @@ class MigreringService(
     }
 
     private fun kastfeilHvisIkkeEnDelytelseIInfotrygd(sak: Sak) {
-        when (sak.stønad!!.delytelse.filter { it.tom == null }.size) {
-            1 -> return
+        when {
+            sak.valg == "OR" && sak.stønad!!.delytelse.filter { it.tom == null }.size == 1 -> {
+                return
+            }
+            sak.valg == "UT" && sak.stønad!!.delytelse.filter { it.tom == null }.size == 1 -> {
+                return
+            }
+            sak.valg == "UT" && sak.stønad!!.delytelse.filter { it.tom == null }.size == 2 -> {
+                return
+            }
             else -> {
                 kastOgTellMigreringsFeil(MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD)
             }
@@ -417,8 +425,7 @@ class MigreringService(
         val førsteutbetalingsperiode = finnFørsteUtbetalingsperiode(behandlingId)
         val førsteUtbetalingsbeløp = førsteutbetalingsperiode.value
         val beløpFraInfotrygd =
-            infotrygdSak.stønad!!.delytelse.singleOrNull { it.tom == null }?.beløp?.toInt()
-                ?: kastOgTellMigreringsFeil(MigreringsfeilType.FLERE_DELYTELSER_I_INFOTRYGD)
+            infotrygdSak.stønad!!.delytelse.filter { it.tom == null }.sumOf { it.beløp }.toInt()
 
         if (førsteUtbetalingsbeløp != beløpFraInfotrygd) {
             val beløpfeilType = if (infotrygdSak.undervalg == "MD")
