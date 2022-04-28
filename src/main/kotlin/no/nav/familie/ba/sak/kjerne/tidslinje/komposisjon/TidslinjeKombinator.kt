@@ -57,50 +57,13 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerForAlleNøklerMe
         }.toMap()
 }
 
-/**
- * Extension-metode for å kombinere to tidslinjer
- * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
- * fra minste fraOgMed til største fraOgMed() fra begge tidslinjene
- * Tidsenhet (T) må være av samme type
- * Hver av tidslinjene kan ha ulik innholdstype, hhv V og H
- * Kombintor-funksjonen tar inn (nullable) av V og H og returner (nullable) R
- * Resultatet er en tidslnije med tidsenhet T og innhold R
- */
 fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
-    høyreTidslinje: Tidslinje<H, T>,
+    høyre: Tidslinje<H, T>,
     kombinator: (V?, H?) -> R?
 ): Tidslinje<R, T> {
-    val venstreTidslinje = this
-    return object : TidslinjeSomStykkerOppTiden<R, T>(venstreTidslinje, høyreTidslinje) {
+    val venstre = this
+    return object : TidslinjeSomStykkerOppTiden<R, T>(venstre, høyre) {
         override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
-            kombinator(
-                venstreTidslinje.innholdForTidspunkt(tidspunkt),
-                høyreTidslinje.innholdForTidspunkt(tidspunkt)
-            )
-    }
-}
-
-/**
- * Extension-metode for å kombinere tre tidslinjer
- * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
- * fra minste fraOgMed til største fraOgMed() fra alle tidslinjene
- * Tidsenhet (T) må være av samme type
- * Hver av tidslinjene kan ha ulik innholdstype, hhv A, B og C
- * Kombintor-funksjonen tar inn (nullable) av A, B og C og returner (nullable) R
- * Resultatet er en tidslnije med tidsenhet T og innhold R
- */
-fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.snittKombinerMed(
-    tidslinjeB: Tidslinje<B, T>,
-    tidslinjeC: Tidslinje<C, T>,
-    kombinator: (A?, B?, C?) -> R?
-): Tidslinje<R, T> {
-    val tidslinjeA = this
-    return object : TidslinjeSomStykkerOppTiden<R, T>(tidslinjeA, tidslinjeB, tidslinjeC) {
-        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
-            kombinator(
-                tidslinjeA.innholdForTidspunkt(tidspunkt),
-                tidslinjeB.innholdForTidspunkt(tidspunkt),
-                tidslinjeC.innholdForTidspunkt(tidspunkt)
-            )
+            kombinator(venstre.innholdForTidspunkt(tidspunkt), høyre.innholdForTidspunkt(tidspunkt))
     }
 }

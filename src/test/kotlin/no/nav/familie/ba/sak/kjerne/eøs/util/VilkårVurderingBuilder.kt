@@ -76,8 +76,8 @@ internal fun <T : Tidsenhet> Periode<VilkårRegelverkResultat, T>.tilVilkårResu
             vilkårType = this.innhold?.vilkår!!,
             resultat = this.innhold?.resultat!!,
             vurderesEtter = this.innhold?.regelverk,
-            periodeFom = this.fraOgMed.tilLocalDateEllerNull(),
-            periodeTom = this.tilOgMed.tilLocalDateEllerNull(),
+            periodeFom = this.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
+            periodeTom = this.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
             begrunnelse = "",
             behandlingId = 0
         )

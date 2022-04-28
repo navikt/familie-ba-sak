@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.util
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
@@ -34,7 +34,7 @@ fun <T : Tidsenhet> String.tilVilkårResultatTidslinje(tidspunkt: Tidspunkt<T>):
         when (c) {
             '+' -> Resultat.OPPFYLT
             '-' -> Resultat.IKKE_OPPFYLT
-            ' ' -> Resultat.IKKE_VURDERT
+            '?' -> Resultat.IKKE_VURDERT
             else -> null
         }
     }
