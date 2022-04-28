@@ -62,7 +62,9 @@ fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
         val kombinertTidslinje = utbetalingsperioderTidslinje.snittKombinerMed(
             reduksjonsperioderTidslinje
         ) { utbetalingsperiode, reduksjonsperiode ->
-            reduksjonsperiode ?: utbetalingsperiode
+            if (reduksjonsperiode != null && utbetalingsperiode == null) reduksjonsperiode
+            else if (reduksjonsperiode != null && utbetalingsperiode != null) utbetalingsperiode.copy(type = reduksjonsperiode.type)
+            else utbetalingsperiode
         }
         return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
     }
