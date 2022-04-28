@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -22,7 +22,7 @@ class UtbetalingspreiodeMedBegrunnelserService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val kompetanseService: KompetanseService,
+    private val kompetanseRepository: KompetanseRepository,
 ) {
 
     fun hentUtbealtingsperioder(
@@ -50,7 +50,7 @@ class UtbetalingspreiodeMedBegrunnelserService(
         )
 
         return if (featureToggleService.isEnabled(KAN_BEHANDLE_EØS)) {
-            val kompetanser = kompetanseService.hentKompetanser(vedtak.behandling.id)
+            val kompetanser = kompetanseRepository.findByBehandlingId(vedtak.behandling.id)
 
             slåSammenUtbetalingsperioderMedKompetanse(
                 utbetalingsperioder = utbetalingsperioderMedReduksjon,
