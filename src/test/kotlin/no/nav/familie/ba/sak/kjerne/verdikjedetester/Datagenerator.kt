@@ -66,3 +66,34 @@ fun lagInfotrygdSak(beløp: Double, identBarn: List<String>, valg: String? = "OR
         undervalg = undervalg
     )
 }
+
+fun lagInfotrygdSakMedSmåbarnstillegg(
+    beløp: Double,
+    identBarn: List<String>,
+): Sak {
+    return Sak(
+        stønad = Stønad(
+            barn = identBarn.map { Barn(it, barnetrygdTom = "000000") },
+            delytelse = listOf(
+                Delytelse(
+                    fom = LocalDate.now(),
+                    tom = null,
+                    beløp = beløp,
+                    typeDelytelse = "MS",
+                    typeUtbetaling = "M",
+                ),
+                Delytelse(
+                    fom = LocalDate.now(),
+                    tom = null,
+                    beløp = 660.0,
+                    typeDelytelse = "SM",
+                    typeUtbetaling = "M",
+                )
+            ),
+            opphørsgrunn = "0"
+        ),
+        status = "FB",
+        valg = "UT",
+        undervalg = "EF"
+    )
+}
