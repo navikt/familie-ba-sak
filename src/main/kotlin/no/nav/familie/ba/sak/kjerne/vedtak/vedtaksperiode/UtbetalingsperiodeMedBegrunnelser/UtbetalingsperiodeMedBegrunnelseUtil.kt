@@ -20,15 +20,14 @@ fun slåSammenUtbetalingsperioderMedKompetanse(
     val utbetalingsTidslinje = VedtaksperiodeMedBegrunnelserTidslinjeMåned(utbetalingsperioder)
 
     val kombinertTidslinje =
-        utbetalingsTidslinje
-            .snittKombinerMed(kompetanseTidslinje) { vedtaksperiodeMedBegrunnelser, kompetanse ->
-                vedtaksperiodeMedBegrunnelser?.let {
-                    UtbetalingsperiodeMedOverlappendeKompetanse(
-                        it,
-                        kompetanse
-                    )
-                }
+        utbetalingsTidslinje.snittKombinerMed(kompetanseTidslinje) { vedtaksperiodeMedBegrunnelser, kompetanse ->
+            vedtaksperiodeMedBegrunnelser?.let {
+                UtbetalingsperiodeMedOverlappendeKompetanse(
+                    it,
+                    kompetanse
+                )
             }
+        }
 
     return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
 }
