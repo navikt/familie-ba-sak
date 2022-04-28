@@ -33,6 +33,9 @@ object YtelsePersonUtils {
 
             val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
+            val harSammeTidslinje = !andelerTidslinje.isEmpty &&
+                !forrigeAndelerTidslinje.isEmpty &&
+                andelerTidslinje == forrigeAndelerTidslinje
 
             val eksplisittAvslag = behandlingsresultatPerson.eksplisittAvslag
 
@@ -47,13 +50,11 @@ object YtelsePersonUtils {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
 
-            // segmenterLagtTil og segmenterFjernet 
-            // kan være tom når forrigeBehandling og nåværendeBehandling har samme tidslinje, 
+            // segmenterLagtTil og segmenterFjernet
+            // kan være tom når forrigeBehandling og nåværendeBehandling har samme tidslinje,
             // men ytelsen er opphørt ved dødsfall
-            if (erYtelsenOpphørt(
-                    andeler = behandlingsresultatPerson.andeler,
-                    inneværendeMåned = inneværendeMåned
-                )
+            if (erYtelsenOpphørt(andeler = behandlingsresultatPerson.andeler, inneværendeMåned = inneværendeMåned) &&
+                (harSammeTidslinje || (segmenterFjernet + segmenterLagtTil).isNotEmpty())
             ) {
                 resultater.add(YtelsePersonResultat.OPPHØRT)
             }
