@@ -16,7 +16,7 @@ open class VedtaksperiodeMedBegrunnelserTidslinje(
         it.fom.tilTidspunktEllerUendeligLengeSiden()
     }
 
-    override fun tilOgMed(): Tidspunkt<Dag> = vedtaksperioderMedBegrunnelser.minOf {
+    override fun tilOgMed(): Tidspunkt<Dag> = vedtaksperioderMedBegrunnelser.maxOf {
         it.tom.tilTidspunktEllerUendeligLengeTil()
     }
 
