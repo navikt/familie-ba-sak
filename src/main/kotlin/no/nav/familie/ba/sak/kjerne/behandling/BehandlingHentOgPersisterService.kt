@@ -91,7 +91,10 @@ class BehandlingHentOgPersisterService(
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
-    private fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
+    fun hentAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): Map<Long, String> =
+        behandlingRepository.finnAktivtFødselsnummerForBehandlinger(behandlingIder).associate { it.first to it.second }
+
+    fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
     }
 }

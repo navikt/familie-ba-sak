@@ -144,4 +144,12 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query("SELECT b.id from Behandling b where b.opprettetÅrsak in (:opprettetÅrsak)")
     fun finnBehandlingIdMedOpprettetÅrsak(opprettetÅrsak: List<BehandlingÅrsak>): List<Long>
+
+    @Query(
+        "SELECT new kotlin.Pair(b.id, p.fødselsnummer) from Behandling b " +
+            "INNER JOIN Fagsak f ON f.id = b.fagsak.id INNER JOIN Aktør a on f.aktør.aktørId = a.aktørId " +
+            "INNER JOIN Personident p on p.aktør.aktørId = a.aktørId " +
+            "where b.id in (:behandlingIder) AND b.aktiv = true AND p.aktiv=true AND f.status = 'LØPENDE' "
+    )
+    fun finnAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
 }
