@@ -585,17 +585,6 @@ class VedtaksperiodeService(
         }.toList()
     }
 
-    private fun hentForrigeIverksatteBehandling(behandling: Behandling): Behandling? {
-        val iverksatteBehandlinger =
-            behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
-
-        val forrigeIverksatteBehandling: Behandling? = Behandlingutils.hentForrigeIverksatteBehandling(
-            iverksatteBehandlinger = iverksatteBehandlinger,
-            behandlingFørFølgende = behandling
-        )
-        return forrigeIverksatteBehandling
-    }
-
     companion object {
 
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
