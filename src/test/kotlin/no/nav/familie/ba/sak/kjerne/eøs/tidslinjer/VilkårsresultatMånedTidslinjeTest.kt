@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.oppfyltVilkår
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.eøs.util.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatenerTidslinjer
@@ -38,6 +39,7 @@ class VilkårsresultatMånedTidslinjeTest {
     fun `Back to back perioder i månedsskiftet gir sammenhengende perioder`() {
         val periodeFom = LocalDate.of(2022, 4, 15)
         val periodeFom2 = LocalDate.of(2022, 7, 1)
+        val senesteDato = periodeFom.til18ÅrsVilkårsdato() // 2040-04-14
         val vilkårsresultatMånedTidslinje = VilkårsresultatDagTidslinje(
             vilkårsresultater = listOf(
                 lagVilkårResultat(

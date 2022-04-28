@@ -127,6 +127,18 @@ data class DagTidspunkt internal constructor(
                 uendelighet
             )
 
+        internal fun LocalDate?.tilTidspunktEllerUendeligLengeSiden() =
+            this.tilTidspunktEllerUendelig(PRAKTISK_TIDLIGSTE_DAG, Uendelighet.FORTID)
+
+        internal fun LocalDate?.tilTidspunktEllerUendeligLengeTil() =
+            this.tilTidspunktEllerUendelig(PRAKTISK_SENESTE_DAG, Uendelighet.FREMTID)
+
+        private fun LocalDate?.tilTidspunktEllerUendelig(default: LocalDate?, uendelighet: Uendelighet) =
+            this?.let { DagTidspunkt(it, Uendelighet.INGEN) } ?: DagTidspunkt(
+                default ?: LocalDate.now(),
+                uendelighet
+            )
+
         fun dagForUendeligLengeSiden(dato: LocalDate = LocalDate.now()) =
             DagTidspunkt(dato, uendelighet = Uendelighet.FORTID)
 

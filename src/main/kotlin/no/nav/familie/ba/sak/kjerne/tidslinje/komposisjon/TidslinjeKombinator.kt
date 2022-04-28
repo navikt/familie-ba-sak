@@ -60,10 +60,10 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerForAlleNøklerMe
 /**
  * Extension-metode for å kombinere to tidslinjer
  * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
- * fra minste fraOgMed til største fraOgMed() fra begge tidslinjene
+ * fra minste fraOgMed til største tilOgMed fra begge tidslinjene
  * Tidsenhet (T) må være av samme type
  * Hver av tidslinjene kan ha ulik innholdstype, hhv V og H
- * Kombintor-funksjonen tar inn (nullable) av V og H og returner (nullable) R
+ * Kombintor-funksjonen tar inn (nullable) av V og H og returnerer (nullable) R
  * Resultatet er en tidslinje med tidsenhet T og innhold R
  */
 fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(

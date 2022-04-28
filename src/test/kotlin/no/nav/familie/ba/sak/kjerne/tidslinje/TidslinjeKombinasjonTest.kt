@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed

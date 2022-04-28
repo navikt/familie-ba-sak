@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.PRAKTISK_SENESTE_DAG
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Uendelighet
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBolskTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -45,18 +45,18 @@ internal class TomTidslinjeTest {
     @Test
     fun `test kombinering fra tom tidslinje til tidslinje med innhold`() {
 
-        val bolskTidslinje = "tftftftftftft".somBolskTidslinje(jan(2020))
-        val resultat = TomTidslinje<Boolean, Måned>().kombinerMed(bolskTidslinje) { v, h -> v ?: h }
+        val boolskTidslinje = "tftftftftftft".somBoolskTidslinje(jan(2020))
+        val resultat = TomTidslinje<Boolean, Måned>().kombinerMed(boolskTidslinje) { v, h -> v ?: h }
 
-        assertEquals(bolskTidslinje, resultat)
+        assertEquals(boolskTidslinje, resultat)
     }
 
     @Test
     fun `test kombinering fra tidslinje med innhold til tom tidslinje`() {
 
-        val bolskTidslinje = "tftft    ftft".somBolskTidslinje(jan(2020))
-        val resultat = bolskTidslinje.kombinerMed(TomTidslinje<Boolean, Måned>()) { v, h -> v ?: h }
+        val boolskTidslinje = "tftft    ftft".somBoolskTidslinje(jan(2020))
+        val resultat = boolskTidslinje.kombinerMed(TomTidslinje<Boolean, Måned>()) { v, h -> v ?: h }
 
-        assertEquals(bolskTidslinje, resultat)
+        assertEquals(boolskTidslinje, resultat)
     }
 }

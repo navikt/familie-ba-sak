@@ -18,6 +18,8 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrer(filter: (I?) -> Boolean): Tidslin
     val fraOgMed = tidslinje.perioder().firstOrNull { filter(it.innhold) }?.fraOgMed
     val tilOgMed = tidslinje.perioder().lastOrNull { filter(it.innhold) }?.tilOgMed
 
+    // fraOgMed og tilOgMed vil enten begge ha verdi eller begge være null
+    // Sjekker begge for å få smart cast for begge i metodekallene under
     return if (fraOgMed == null || tilOgMed == null)
         TomTidslinje()
     else object : Tidslinje<I, T>() {
@@ -37,13 +39,13 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrer(filter: (I?) -> Boolean): Tidslin
 fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerIkkeNull(): Tidslinje<I, T> = filtrer { it != null }
 
 /**
- * Extension-metode for å filtrere tidslinjen mot en bolsk tidslinje
+ * Extension-metode for å filtrere tidslinjen mot en boolsk tidslinje
  * Resultatet får samme lengde som tidslinjen det opereres på
  * Det vil finnes perioder som tilsvarer periodene fra kilde-tidslinjen,
- * men innholdet blir null hvis den bolske tidslinjen er false
+ * men innholdet blir null hvis den boolske tidslinjen er false
  */
-fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerMed(bolskTidslinje: Tidslinje<Boolean, T>): Tidslinje<I, T> {
-    return this.kombinerMed(bolskTidslinje) { innhold, erSann ->
+fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerMed(boolskTidslinje: Tidslinje<Boolean, T>): Tidslinje<I, T> {
+    return this.kombinerMed(boolskTidslinje) { innhold, erSann ->
         when (erSann) {
             true -> innhold
             else -> null
