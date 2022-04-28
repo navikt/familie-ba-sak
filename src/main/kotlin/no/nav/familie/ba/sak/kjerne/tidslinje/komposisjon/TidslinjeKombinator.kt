@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
 /**
  * Extension-metode for å kombinere en map av tidslinjer med en annen map av tidslinjer
@@ -54,4 +55,15 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerForAlleNøklerMe
             val resultat: Tidslinje<R, T> = venstre.kombinerMed(høyre, kombinator)
             it to resultat
         }.toMap()
+}
+
+fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
+    høyre: Tidslinje<H, T>,
+    kombinator: (V?, H?) -> R?
+): Tidslinje<R, T> {
+    val venstre = this
+    return object : TidslinjeSomStykkerOppTiden<R, T>(venstre, høyre) {
+        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
+            kombinator(venstre.innholdForTidspunkt(tidspunkt), høyre.innholdForTidspunkt(tidspunkt))
+    }
 }
