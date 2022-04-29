@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 
 /**
  * Extension-metode for å konvertere fra Dag-tidslinje til Måned-tidslinje
@@ -17,11 +19,11 @@ fun <I, R> Tidslinje<I, Dag>.tilMåned(mapper: (List<I?>) -> R?): Tidslinje<R, M
     val dagTidslinje = this
 
     return object : Tidslinje<R, Måned>() {
-        override fun fraOgMed() = dagTidslinje.fraOgMed().tilInneværendeMåned()
-        override fun tilOgMed() = dagTidslinje.tilOgMed().tilInneværendeMåned()
+        val fraOgMed = dagTidslinje.fraOgMed().tilInneværendeMåned()
+        val tilOgMed = dagTidslinje.tilOgMed().tilInneværendeMåned()
 
         override fun lagPerioder(): Collection<Periode<R, Måned>> {
-            val månedTidsrom = fraOgMed()..tilOgMed()
+            val månedTidsrom = fraOgMed..tilOgMed
             return månedTidsrom.map { måned ->
                 val dagerIMåned = måned.tilFørsteDagIMåneden()..måned.tilSisteDagIMåneden()
                 val innholdAlleDager = dagerIMåned.map { dag -> dagTidslinje.innholdForTidspunkt(dag) }
