@@ -1,13 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.NullTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
 abstract class Tidslinje<I, T : Tidsenhet> {
     private var periodeCache: List<Periode<I, T>>? = null
-
-    internal abstract fun fraOgMed(): Tidspunkt<T>
-    internal abstract fun tilOgMed(): Tidspunkt<T>
 
     fun perioder(): Collection<Periode<I, T>> {
         return periodeCache ?: lagPerioder().sortedBy { it.fraOgMed }.toList()
@@ -51,16 +48,13 @@ abstract class Tidslinje<I, T : Tidsenhet> {
 
     override fun equals(other: Any?): Boolean {
         return if (other is Tidslinje<*, *>) {
-            fraOgMed() == other.fraOgMed() &&
-                tilOgMed() == other.tilOgMed() &&
-                perioder() == other.perioder()
+            perioder() == other.perioder()
         } else
             false
     }
 
     override fun toString(): String =
-        "[${fraOgMed()} - ${tilOgMed()}] " +
-            lagPerioder().joinToString(" | ") { it.toString() }
+        lagPerioder().joinToString(" | ") { it.toString() }
 
     companion object {
         data class TidslinjeFeil(
@@ -80,3 +74,9 @@ abstract class Tidslinje<I, T : Tidsenhet> {
             IllegalStateException(tidslinjeFeil.toString())
     }
 }
+
+fun <I, T : Tidsenhet> Tidslinje<I, T>.fraOgMed() =
+    this.perioder().firstOrNull()?.fraOgMed ?: NullTidspunkt.fraOgMed()
+
+fun <I, T : Tidsenhet> Tidslinje<I, T>.tilOgMed() =
+    this.perioder().lastOrNull()?.tilOgMed ?: NullTidspunkt.tilOgMed()

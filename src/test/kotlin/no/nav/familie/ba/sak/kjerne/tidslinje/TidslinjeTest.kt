@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje.Companion.TidslinjeFeilException
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteEllerNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
@@ -84,8 +82,5 @@ internal class TidslinjeTest {
 }
 
 internal class TestTidslinje(vararg val perioder: Periode<Char, Dag>) : Tidslinje<Char, Dag>() {
-    override fun fraOgMed() = perioder.map { it.fraOgMed }.minsteEllerNull()!!
-    override fun tilOgMed() = perioder.map { it.tilOgMed }.størsteEllerNull()!!
-
     override fun lagPerioder() = perioder.toList()
 }

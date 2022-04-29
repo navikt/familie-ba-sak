@@ -99,11 +99,11 @@ class Tidslinjer(
 fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> {
 
     return object : Tidslinje<Boolean, Måned>() {
-        override fun fraOgMed() = Tidspunkt.med(fødselsdato.toYearMonth()).neste()
-        override fun tilOgMed() = Tidspunkt.med(fødselsdato.til18ÅrsVilkårsdato().toYearMonth()).forrige()
+        private val fraOgMed = Tidspunkt.med(fødselsdato.toYearMonth()).neste()
+        private val tilOgMed = Tidspunkt.med(fødselsdato.til18ÅrsVilkårsdato().toYearMonth()).forrige()
 
         override fun lagPerioder(): Collection<Periode<Boolean, Måned>> = listOf(
-            Periode(fraOgMed(), tilOgMed(), true)
+            Periode(fraOgMed, tilOgMed, true)
         )
     }
 }

@@ -11,8 +11,6 @@ fun <T : Tidsenhet, I> TidspunktClosedRange<T>.tilTidslinje(innhold: () -> I): T
     val fom = this.start
     val tom = this.endInclusive
     return object : Tidslinje<I, T>() {
-        override fun fraOgMed() = fom
-        override fun tilOgMed() = tom
         override fun lagPerioder(): Collection<Periode<I, T>> {
             return listOf(Periode(fom, tom, innhold()))
         }

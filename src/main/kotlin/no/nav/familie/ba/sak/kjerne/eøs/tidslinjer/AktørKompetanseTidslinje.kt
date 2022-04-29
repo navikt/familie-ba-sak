@@ -13,15 +13,6 @@ class AktørKompetanseTidslinje(
     private val aktør: Aktør,
     private val kompetanser: List<Kompetanse>,
 ) : Tidslinje<Kompetanse, Måned>() {
-
-    override fun fraOgMed() = kompetanser
-        .map { it.fom.tilTidspunktEllerUendeligLengeSiden { it.tom ?: YearMonth.now() } }
-        .minOrNull() ?: throw IllegalStateException("Listen av kompetanser er tom")
-
-    override fun tilOgMed() = kompetanser
-        .map { it.tom.tilTidspunktEllerUendeligLengeTil { it.fom ?: YearMonth.now() } }
-        .maxOrNull() ?: throw IllegalStateException("Listen av kompetanser er tom")
-
     override fun lagPerioder(): Collection<Periode<Kompetanse, Måned>> {
         return kompetanser.map { it.tilPeriode() }
     }

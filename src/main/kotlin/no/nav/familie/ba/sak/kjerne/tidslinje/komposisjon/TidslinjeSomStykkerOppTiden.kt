@@ -12,8 +12,11 @@ abstract class TidslinjeSomStykkerOppTiden<I, T : Tidsenhet>(
     constructor(vararg avhengighet: Tidslinje<*, T>) :
         this(avhengighet.asList())
 
+    val fraOgMed = avhengigheter.fraOgMed()
+    val tilOgMed = avhengigheter.tilOgMed()
+
     override fun lagPerioder(): Collection<Periode<I, T>> {
-        val tidspunkter = fraOgMed()..tilOgMed()
+        val tidspunkter = fraOgMed..tilOgMed
         return tidspunkter.map { tidspunkt -> TidspunktMedInnhold(tidspunkt, finnInnholdForTidspunkt(tidspunkt)) }
             .fold(emptyList()) { perioder, tidspunktMedInnhold ->
                 val sistePeriode = perioder.lastOrNull()
