@@ -44,9 +44,7 @@ abstract class Tidspunkt<T : Tidsenhet> internal constructor(
     abstract fun somUendeligLengeSiden(): Tidspunkt<T>
     abstract fun somUendeligLengeTil(): Tidspunkt<T>
     abstract fun somFraOgMed(): Tidspunkt<T>
-    abstract fun somFraOgMed(dato: LocalDate): Tidspunkt<T>
     abstract fun somTilOgMed(): Tidspunkt<T>
-    abstract fun somTilOgMed(dato: LocalDate): Tidspunkt<T>
 
     companion object {
         fun uendeligLengeSiden(dato: LocalDate) = DagTidspunkt(dato, uendelighet = Uendelighet.FORTID)
