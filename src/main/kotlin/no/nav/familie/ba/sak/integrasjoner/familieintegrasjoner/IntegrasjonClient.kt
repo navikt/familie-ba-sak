@@ -15,6 +15,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.http.client.RessursException
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
@@ -24,6 +26,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
+import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -38,6 +41,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -385,30 +389,60 @@ class IntegrasjonClient(
         if (journalførendeEnhet == DEFAULT_JOURNALFØRENDE_ENHET) {
             logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
         }
-        val journalpost = kallEksternTjenesteRessurs(
-            tjeneste = "dokarkiv",
-            uri = uri,
-            formål = "Journalfør dokument på fagsak $fagsakId",
-        ) {
-            val arkiverDokumentRequest = ArkiverDokumentRequest(
-                fnr = fnr,
-                forsøkFerdigstill = true,
-                hoveddokumentvarianter = brev,
-                vedleggsdokumenter = vedlegg,
-                fagsakId = fagsakId,
-                journalførendeEnhet = journalførendeEnhet,
-                førsteside = førsteside,
-                eksternReferanseId = "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
-            )
 
-            postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
+        val eksternReferanseId = "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
+
+        val journalpostId = try {
+            val journalpost = kallEksternTjenesteRessurs(
+                tjeneste = "dokarkiv",
+                uri = uri,
+                formål = "Journalfør dokument på fagsak $fagsakId",
+            ) {
+                val arkiverDokumentRequest = ArkiverDokumentRequest(
+                    fnr = fnr,
+                    forsøkFerdigstill = true,
+                    hoveddokumentvarianter = brev,
+                    vedleggsdokumenter = vedlegg,
+                    fagsakId = fagsakId,
+                    journalførendeEnhet = journalførendeEnhet,
+                    førsteside = førsteside,
+                    eksternReferanseId = eksternReferanseId
+                )
+
+                postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
+            }
+
+            if (!journalpost.ferdigstilt) {
+                error("Klarte ikke ferdigstille journalpost med id ${journalpost.journalpostId}")
+            }
+
+            journalpost.journalpostId
+        } catch (ressursException: RessursException) {
+            when (ressursException.httpStatus) {
+                HttpStatus.CONFLICT -> {
+                    logger.warn(
+                        "Klarte ikke journalføre dokument på fagsak=$fagsakId fordi det allerede finnes en journalpost " +
+                            "med eksternReferanseId=$eksternReferanseId."
+                    )
+
+                    hentEksisterendeJournalpost(eksternReferanseId, fnr)
+                }
+                else -> throw ressursException
+            }
         }
 
-        if (!journalpost.ferdigstilt) {
-            error("Klarte ikke ferdigstille journalpost med id ${journalpost.journalpostId}")
-        }
-        return journalpost.journalpostId
+        return journalpostId
     }
+
+    private fun hentEksisterendeJournalpost(
+        eksternReferanseId: String,
+        fnr: String
+    ): String = hentJournalposterForBruker(
+        JournalposterForBrukerRequest(
+            brukerId = Bruker(id = fnr, type = BrukerIdType.FNR),
+            antall = 50,
+        )
+    ).single { it.eksternReferanseId == eksternReferanseId }.journalpostId
 
     fun opprettSkyggesak(aktør: Aktør, fagsakId: Long) {
         val uri = URI.create("$integrasjonUri/skyggesak/v1")
