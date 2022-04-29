@@ -15,13 +15,6 @@ internal class KompetanseTidslinje(
 
     constructor(vararg kompetanser: Kompetanse) : this(kompetanser.toList())
 
-    /*
-        override fun fraOgMed() =
-            kompetanser.map { it.fraOgMedTidspunkt() }.minsteEllerNull() ?: månedForUendeligLengeSiden()
-
-        override fun tilOgMed() =
-            kompetanser.map { it.tilOgMedTidspunkt() }.størsteEllerNull() ?: månedOmUendeligLenge()
-    */
     override fun lagPerioder(): Collection<Periode<Kompetanse, Måned>> =
         kompetanser.sortedBy { it.fraOgMedTidspunkt() }
             .map { Periode(it.fraOgMedTidspunkt(), it.tilOgMedTidspunkt(), it.utenPeriode()) }
