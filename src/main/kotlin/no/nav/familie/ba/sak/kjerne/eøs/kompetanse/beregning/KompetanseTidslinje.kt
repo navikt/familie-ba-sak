@@ -36,4 +36,3 @@ private fun Kompetanse.fraOgMedTidspunkt(): Tidspunkt<Måned> =
 
 private fun Kompetanse.tilOgMedTidspunkt(): Tidspunkt<Måned> =
     this.tom.tilTidspunktEllerUendeligLengeTil { this.fom }
-
