@@ -33,7 +33,7 @@ fun List<Tidslinje<VilkårRegelverkResultat, Dag>>.tilRestVilkårTidslinjer(): L
         vilkårsresultatTidslinje.perioder().map { periode ->
             RestTidslinjePeriode(
                 fraOgMed = periode.fraOgMed.tilLocalDate(),
-                tilOgMed = periode.tilOgMed.tilLocalDate(),
+                tilOgMed = periode.tilOgMed.tilLocalDateEllerNull(),
                 innhold = periode.innhold!!
             )
         }
@@ -52,7 +52,7 @@ fun Tidslinje<Resultat, Måned>.tilRestOppfyllerVilkårTidslinje(): List<RestTid
     this.perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
-            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDate(),
+            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
             innhold = periode.innhold!!
         )
     }

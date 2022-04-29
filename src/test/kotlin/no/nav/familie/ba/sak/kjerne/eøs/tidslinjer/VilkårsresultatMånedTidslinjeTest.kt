@@ -10,10 +10,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.aug
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.print
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
@@ -52,13 +52,11 @@ class VilkårsresultatMånedTidslinjeTest {
                     periodeFom = periodeFom2,
                     periodeTom = null
                 )
-            ),
-            praktiskTidligsteDato = periodeFom,
-            praktiskSenesteDato = senesteDato
-        ).tilMånedsbasertTidslinjeForVilkårRegelverkResultat().also { it.print() }
+            )
+        ).tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
 
         val forventetMånedstidslinje: Tidslinje<VilkårRegelverkResultat, Måned> =
-            (mai(2022)..apr(2040)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
+            (mai(2022)..aug(2022).somUendeligLengeTil()).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
 
         assertEquals(forventetMånedstidslinje, vilkårsresultatMånedTidslinje)
     }
@@ -80,15 +78,15 @@ class VilkårsresultatMånedTidslinjeTest {
         val dagvilkårtidslinje = konkatenerTidslinjer(
             (26.feb(2020)..7.mar(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
             (21.mar(2020)..13.mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
-        ).also { it.print() }
+        )
 
         val forventetMånedstidslinje = konkatenerTidslinjer(
             mar(2020).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
             (apr(2020)..mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
-        ).also { it.print() }
+        )
 
         val faktiskMånedstidslinje =
-            dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat().also { it.print() }
+            dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
         assertEquals(forventetMånedstidslinje, faktiskMånedstidslinje)
     }
 }

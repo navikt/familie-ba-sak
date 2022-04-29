@@ -1,8 +1,7 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
+package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -118,6 +117,25 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("S        ", barn1, barn2)
             .medKompetanse("     SS--", barn1, barn3)
             .medKompetanse("-  SS    ", barn3)
+            .byggKompetanser().sortedBy { it.fom }
+
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder).sortedBy { it.fom }
+        Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `tilpass kompetanser til barn med åpne regelverkstidslinjer`() {
+
+        val kompetanser: List<Kompetanse> = emptyList()
+
+        val eøsPerioder = mapOf(
+            barn1.aktør to "EEEEEEEEE>".tilRegelverkTidslinje(jan2020),
+            barn2.aktør to "  EEEEEEEEE>".tilRegelverkTidslinje(jan2020),
+        )
+
+        val forventedeKompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("--", barn1)
+            .medKompetanse("  ->", barn1, barn2)
             .byggKompetanser().sortedBy { it.fom }
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder).sortedBy { it.fom }
