@@ -27,6 +27,8 @@ object YtelsePersonUtils {
         uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
         inneværendeMåned: YearMonth = YearMonth.now(),
     ): List<YtelsePerson> {
+        val altOpphørt = behandlingsresultatPersoner.all { erYtelsenOpphørt(it.andeler, inneværendeMåned) }
+
         return behandlingsresultatPersoner.map { behandlingsresultatPerson ->
             val forrigeAndelerTidslinje = behandlingsresultatPerson.forrigeAndeler.tilTidslinje()
             val andelerTidslinje = behandlingsresultatPerson.andeler.tilTidslinje()
@@ -50,13 +52,12 @@ object YtelsePersonUtils {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
 
-            // segmenterLagtTil og segmenterFjernet
-            // kan være tom når forrigeBehandling og nåværendeBehandling har samme tidslinje,
-            // men ytelsen er opphørt ved dødsfall
-            if (erYtelsenOpphørt(andeler = behandlingsresultatPerson.andeler, inneværendeMåned = inneværendeMåned) &&
-                (harSammeTidslinje || (segmenterFjernet + segmenterLagtTil).isNotEmpty())
-            ) {
-                resultater.add(YtelsePersonResultat.OPPHØRT)
+            if (erYtelsenOpphørt(andeler = behandlingsresultatPerson.andeler, inneværendeMåned = inneværendeMåned)) {
+                when {
+                    // ytelsen er opphørt ved dødsfall. Da kan RV har samme tidstilnje men alle ytelesene er opphørt
+                    harSammeTidslinje && altOpphørt -> resultater.add(YtelsePersonResultat.OPPHØRT)
+                    (segmenterFjernet + segmenterLagtTil).isNotEmpty() -> resultater.add(YtelsePersonResultat.OPPHØRT)
+                }
             }
 
             if (finnesInnvilget(
