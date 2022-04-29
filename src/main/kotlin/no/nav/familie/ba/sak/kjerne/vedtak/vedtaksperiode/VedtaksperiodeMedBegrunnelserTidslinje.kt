@@ -5,20 +5,11 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 
 open class VedtaksperiodeMedBegrunnelserTidslinje(
     private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
 ) : Tidslinje<VedtaksperiodeMedBegrunnelser, Dag>() {
-
-    override fun fraOgMed(): Tidspunkt<Dag> = vedtaksperioderMedBegrunnelser.minOf {
-        it.fom.tilTidspunktEllerUendeligLengeSiden()
-    }
-
-    override fun tilOgMed(): Tidspunkt<Dag> = vedtaksperioderMedBegrunnelser.maxOf {
-        it.tom.tilTidspunktEllerUendeligLengeTil()
-    }
 
     override fun lagPerioder(): List<Periode<VedtaksperiodeMedBegrunnelser, Dag>> =
         vedtaksperioderMedBegrunnelser.map {
@@ -31,4 +22,9 @@ open class VedtaksperiodeMedBegrunnelserTidslinje(
 }
 
 fun Tidslinje<VedtaksperiodeMedBegrunnelser, Dag>.lagVedtaksperioderMedBegrunnelser(): List<VedtaksperiodeMedBegrunnelser> =
-    this.perioder().mapNotNull { it.innhold?.copy(fom = it.fraOgMed.tilLocalDateEllerNull(), tom = it.tilOgMed.tilLocalDateEllerNull()) }
+    this.perioder().mapNotNull {
+        it.innhold?.copy(
+            fom = it.fraOgMed.tilLocalDateEllerNull(),
+            tom = it.tilOgMed.tilLocalDateEllerNull()
+        )
+    }

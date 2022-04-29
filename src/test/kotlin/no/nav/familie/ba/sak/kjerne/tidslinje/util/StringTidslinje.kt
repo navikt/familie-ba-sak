@@ -11,15 +11,16 @@ class StringTidslinje(
     val s: List<String>
 ) : Tidslinje<String, Måned>() {
 
-    override fun fraOgMed() = if (s.firstOrNull() == "<") start.somUendeligLengeSiden() else start
+    val fraOgMed = if (s.firstOrNull() == "<") start.somUendeligLengeSiden() else start
 
-    override fun tilOgMed(): Tidspunkt<Måned> {
-        val slutt = start.flytt(s.size.toLong() - 1)
-        return if (s.lastOrNull() == ">") slutt.somUendeligLengeTil() else slutt
-    }
+    val tilOgMed: Tidspunkt<Måned>
+        get() {
+            val slutt = start.flytt(s.size.toLong() - 1)
+            return if (s.lastOrNull() == ">") slutt.somUendeligLengeTil() else slutt
+        }
 
     override fun lagPerioder(): Collection<Periode<String, Måned>> {
-        val tidspunkter = fraOgMed()..tilOgMed()
+        val tidspunkter = fraOgMed..tilOgMed
         return tidspunkter.mapIndexed { index, tidspunkt ->
             val c = when (index) {
                 0 -> if (s[index] == "<") s[index + 1] else s[index]
