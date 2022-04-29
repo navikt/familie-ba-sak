@@ -76,16 +76,8 @@ class TomTidslinje<I, T : Tidsenhet> : Tidslinje<I, T>() {
             return fraOgMed()
         }
 
-        override fun somFraOgMed(dato: LocalDate): Tidspunkt<T> {
-            throw nullTidspunktException
-        }
-
         override fun somTilOgMed(): Tidspunkt<T> {
             return tilOgMed()
-        }
-
-        override fun somTilOgMed(dato: LocalDate): Tidspunkt<T> {
-            throw nullTidspunktException
         }
 
         override fun sammenliknMed(tidspunkt: Tidspunkt<T>): Int {
