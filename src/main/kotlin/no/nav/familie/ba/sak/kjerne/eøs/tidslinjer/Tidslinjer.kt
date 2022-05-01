@@ -75,10 +75,12 @@ class Tidslinjer(
         private val vilkårsresultatMånedTidslinjer: List<Tidslinje<VilkårRegelverkResultat, Måned>> =
             vilkårsresultatTidslinjer.map { it.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() }
 
+        val erUnder18ÅrVilkårTidslinje = erUnder18ÅrVilkårTidslinje(tidslinjer.barnOgFødselsdatoer.getValue(aktør))
+
         val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             vilkårsresultatMånedTidslinjer
                 .snittKombinerUtenNull(BarnOppfyllerVilkårKombinator()::kombiner)
-                .filtrerMed(erUnder18ÅrVilkårTidslinje(tidslinjer.barnOgFødselsdatoer.getValue(aktør)))
+                .filtrerMed(erUnder18ÅrVilkårTidslinje)
 
         val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             oppfyllerVilkårTidslinje.snittKombinerMed(
