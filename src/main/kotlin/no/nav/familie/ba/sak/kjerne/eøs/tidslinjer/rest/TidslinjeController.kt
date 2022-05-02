@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje.rest
+package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.rest
 
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
 import no.nav.familie.kontrakter.felles.Ressurs
