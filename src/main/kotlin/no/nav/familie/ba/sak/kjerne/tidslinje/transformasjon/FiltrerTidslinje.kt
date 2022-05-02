@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 
 /**
@@ -23,14 +22,6 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrer(filter: (I?) -> Boolean): Tidslin
     return if (fraOgMed == null || tilOgMed == null)
         TomTidslinje()
     else object : Tidslinje<I, T>() {
-        override fun fraOgMed(): Tidspunkt<T> {
-            return fraOgMed
-        }
-
-        override fun tilOgMed(): Tidspunkt<T> {
-            return tilOgMed
-        }
-
         override fun lagPerioder(): Collection<Periode<I, T>> =
             tidslinje.perioder().filter { filter(it.innhold) }
     }
