@@ -22,7 +22,7 @@ class VedtaksperiodeMedBegrunnelserTidslinjeTest {
             VedtaksperiodeMedBegrunnelser(
                 vedtak = lagVedtak(),
                 type = Vedtaksperiodetype.UTBETALING,
-                fom = LocalDate.now(),
+                fom = LocalDate.now().plusDays(1),
                 tom = null
             )
         )
