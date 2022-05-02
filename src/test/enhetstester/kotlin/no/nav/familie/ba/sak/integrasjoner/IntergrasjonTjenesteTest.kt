@@ -34,7 +34,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgi
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidstaker
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Skyggesak
-import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
+import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
@@ -187,7 +187,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
                             tittel = VEDTAK_VEDLEGG_TITTEL
                         )
                     ),
-                    eksternReferanseId = JournalføringService.genererEksternReferanseIdForJournalpost(
+                    eksternReferanseId = UtgåendeJournalføringService.genererEksternReferanseIdForJournalpost(
                         fagsakId,
                         vedtak.behandling.id
                     ),

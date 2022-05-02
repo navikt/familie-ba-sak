@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
+import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
@@ -55,7 +55,7 @@ class DokumentService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val rolleConfig: RolleConfig,
     private val settPåVentService: SettPåVentService,
-    private val journalføringService: JournalføringService,
+    private val utgåendeJournalføringService: UtgåendeJournalføringService,
 ) {
 
     private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
@@ -151,7 +151,7 @@ class DokumentService(
             )
         } else null
 
-        val journalpostId = journalføringService.journalførManueltBrev(
+        val journalpostId = utgåendeJournalføringService.journalførManueltBrev(
             fnr = manueltBrevRequest.mottakerIdent,
             fagsakId = fagsakId.toString(),
             journalførendeEnhet = manueltBrevRequest.enhet?.enhetId
