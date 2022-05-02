@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 
-open class VedtaksperiodeMedBegrunnelserTidslinjeMåned(
+class VedtaksperiodeMedBegrunnelserTidslinjeMåned(
     private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
 ) : Tidslinje<VedtaksperiodeMedBegrunnelser, Måned>() {
 
