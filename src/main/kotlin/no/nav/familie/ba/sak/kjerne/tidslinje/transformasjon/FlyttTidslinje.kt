@@ -13,9 +13,6 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.forskyv(tidsenheter: Long): Tidslinje<I, 
     val tidslinje = this
 
     return object : Tidslinje<I, T>() {
-        override fun fraOgMed() = tidslinje.fraOgMed().flytt(tidsenheter)
-        override fun tilOgMed() = tidslinje.tilOgMed().flytt(tidsenheter)
-
         override fun lagPerioder(): Collection<Periode<I, T>> =
             tidslinje.perioder().map {
                 Periode(it.fraOgMed.flytt(tidsenheter), it.tilOgMed.flytt(tidsenheter), it.innhold)
