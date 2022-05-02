@@ -44,7 +44,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingspreiodeMedBegrunnelserService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -69,7 +69,7 @@ class VedtaksperiodeService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val endringstidspunktService: EndringstidspunktService,
     private val featureToggleService: FeatureToggleService,
-    private val utbetalingspreiodeMedBegrunnelserService: UtbetalingspreiodeMedBegrunnelserService,
+    private val utbetalingsperiodeMedBegrunnelserService: UtbetalingsperiodeMedBegrunnelserService,
 ) {
 
     fun oppdaterVedtaksperiodeMedFritekster(
@@ -268,7 +268,7 @@ class VedtaksperiodeService(
             hentOpphørsperioder(vedtak.behandling).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
 
         val utbetalingsperioder =
-            utbetalingspreiodeMedBegrunnelserService.hentUtbealtingsperioder(vedtak, opphørsperioder)
+            utbetalingsperiodeMedBegrunnelserService.hentUtbealtingsperioder(vedtak, opphørsperioder)
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 

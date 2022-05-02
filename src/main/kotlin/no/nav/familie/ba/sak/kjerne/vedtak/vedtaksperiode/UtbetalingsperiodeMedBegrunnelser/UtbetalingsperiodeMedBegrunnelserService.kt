@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.oppdaterUtbetalingsper
 import org.springframework.stereotype.Service
 
 @Service
-class UtbetalingspreiodeMedBegrunnelserService(
+class UtbetalingsperiodeMedBegrunnelserService(
     private val featureToggleService: FeatureToggleService,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
