@@ -313,6 +313,7 @@ enum class Behandlingsresultat(val displayName: String) {
     ENDRET(displayName = "Endret"),
     ENDRET_OG_OPPHØRT(displayName = "Endret og opphørt"),
     OPPHØRT(displayName = "Opphørt"),
+    FORTSATT_OPPHØRT(displayName = "Fortsatt opphørt"),
     FORTSATT_INNVILGET(displayName = "Fortsatt innvilget"),
 
     // Henlagt

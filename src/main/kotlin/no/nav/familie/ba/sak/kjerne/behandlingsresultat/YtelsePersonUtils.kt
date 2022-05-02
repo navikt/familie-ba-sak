@@ -55,7 +55,7 @@ object YtelsePersonUtils {
             if (erYtelsenOpphørt(andeler = behandlingsresultatPerson.andeler, inneværendeMåned = inneværendeMåned)) {
                 when {
                     // ytelsen er opphørt ved dødsfall. Da kan RV har samme tidstilnje men alle ytelesene er opphørt
-                    harSammeTidslinje && altOpphørt -> resultater.add(YtelsePersonResultat.OPPHØRT)
+                    harSammeTidslinje && altOpphørt -> resultater.add(YtelsePersonResultat.FORTSATT_OPPHØRT)
                     (segmenterFjernet + segmenterLagtTil).isNotEmpty() -> resultater.add(YtelsePersonResultat.OPPHØRT)
                 }
             }

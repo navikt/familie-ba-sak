@@ -257,7 +257,7 @@ class YtelsePersonUtilsTest {
         )
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner)
 
-        assertTrue { ytelsePersonerMedResultat.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } }
+        assertTrue { ytelsePersonerMedResultat.any { it.resultater.contains(YtelsePersonResultat.FORTSATT_OPPHØRT) } }
     }
 
     @Test

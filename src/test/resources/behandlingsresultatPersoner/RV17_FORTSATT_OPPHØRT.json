@@ -1,5 +1,5 @@
 {
-  "beskrivelse": "Førstegangsbehandling var innvilget og opphørt. RV: Hele ytelsen er opphørt ved brukers dødsfall",
+  "beskrivelse": "Førstegangsbehandling var innvilget og opphørt. RV: Ytelsen er fortsatt opphørt",
   "inneværendeMåned": "2022-04",
   "personer": [
     {
@@ -26,5 +26,5 @@
       ]
     }
   ],
-  "forventetResultat": "OPPHØRT"
+  "forventetResultat": "FORTSATT_OPPHØRT"
 }

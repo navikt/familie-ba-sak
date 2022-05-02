@@ -11,7 +11,7 @@ fun Utbetalingsoppdrag.valider(
 ) {
     if (this.utbetalingsperiode.isNotEmpty() && behandlingsresultat == Behandlingsresultat.FORTSATT_INNVILGET && !erEndreMigreringsdatoBehandling) {
         throw FunksjonellFeil("Behandling har resultat fortsatt innvilget, men det finnes utbetalingsperioder som ifølge systemet skal endres. $KONTAKT_TEAMET_SUFFIX")
-    } else if (this.utbetalingsperiode.isEmpty()) {
+    } else if (this.utbetalingsperiode.isEmpty() && behandlingsresultat != Behandlingsresultat.FORTSATT_OPPHØRT) {
         throw FunksjonellFeil(
             "Utbetalingsoppdraget inneholder ingen utbetalingsperioder " +
                 "og det er grunn til å tro at denne ikke bør simuleres eller iverksettes. $KONTAKT_TEAMET_SUFFIX"
