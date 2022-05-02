@@ -31,4 +31,9 @@ open class VedtaksperiodeMedBegrunnelserTidslinje(
 }
 
 fun Tidslinje<VedtaksperiodeMedBegrunnelser, Dag>.lagVedtaksperioderMedBegrunnelser(): List<VedtaksperiodeMedBegrunnelser> =
-    this.perioder().mapNotNull { it.innhold?.copy(fom = it.fraOgMed.tilLocalDateEllerNull(), tom = it.tilOgMed.tilLocalDateEllerNull()) }
+    this.perioder().mapNotNull {
+        it.innhold?.copy(
+            fom = it.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
+            tom = it.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull()
+        )
+    }
