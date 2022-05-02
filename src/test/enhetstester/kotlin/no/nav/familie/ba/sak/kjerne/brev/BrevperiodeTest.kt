@@ -24,6 +24,10 @@ class BrevperiodeTest {
         val sanityBegrunnelser = hentSanityBegrunnelser()
 
         val antallFeil = testmappe.list()?.fold(0) { acc, it ->
+            if (it != "REDUKSJON_FRA_FORRIGE_IVERKSATTE_BEHANDLING.json") {
+                return@fold acc
+            }
+
             val fil = File("$testmappe/$it")
 
             val behandlingsresultatPersonTestConfig =
@@ -60,6 +64,8 @@ class BrevperiodeTest {
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
+                    barnMedReduksjonFraForrigeBehandlingFnr = behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
+                        .map { it.personIdent },
                 )
             } catch (e: Exception) {
                 testReporter.publishEntry(

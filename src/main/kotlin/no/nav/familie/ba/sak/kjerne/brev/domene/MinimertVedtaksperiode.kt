@@ -66,7 +66,8 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean = false,
-    brevMålform: Målform
+    brevMålform: Målform,
+    barnMedReduksjonFraForrigeBehandlingFnr: List<String> = emptyList(),
 ): BrevPeriodeForLogging {
 
     return BrevPeriodeForLogging(
@@ -78,7 +79,8 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
         personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling.map {
             it.tilBrevPeriodeTestPerson(
                 brevPeriodeGrunnlag = this,
-                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev
+                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+                barnMedReduksjonFraForrigeBehandlingFnr = barnMedReduksjonFraForrigeBehandlingFnr
             )
         },
         uregistrerteBarn = uregistrerteBarn.map { it.copy(personIdent = "", navn = "") },

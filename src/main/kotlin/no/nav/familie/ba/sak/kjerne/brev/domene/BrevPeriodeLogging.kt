@@ -33,7 +33,8 @@ data class BrevPeriodePersonForLogging(
     val overstyrteVilkårresultater: List<MinimertVilkårResultat>,
     val andreVurderinger: List<MinimertAnnenVurdering>,
     val endredeUtbetalinger: List<EndretUtbetalingAndelPåPersonForLogging>,
-    val utbetalinger: List<UtbetalingPåPersonForLogging>
+    val utbetalinger: List<UtbetalingPåPersonForLogging>,
+    val harReduksjonFraForrigeBehandling: Boolean,
 )
 
 data class UtbetalingPåPersonForLogging(

@@ -33,6 +33,7 @@ data class BrevperiodeData(
             restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
             uregistrerteBarn = this.uregistrerteBarn,
             brevMålform = this.brevMålform,
+            barnMedReduksjonFraForrigeBehandlingFnr = this.barnPersonIdentMedReduksjon
         )
 
     override fun compareTo(other: BrevperiodeData): Int {

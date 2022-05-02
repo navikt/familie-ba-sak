@@ -59,14 +59,14 @@ fun hentBrevPerioder(
             uregistrerteBarn = it.uregistrerteBarn,
             erFørsteVedtaksperiodePåFagsak = it.erFørsteVedtaksperiodePåFagsak,
             brevMålform = it.brevMålform,
-            barnPersonIdentMedReduksjon = it.barnPersonIdentMedReduksjon,
+            barnMedReduksjonFraForrigeBehandlingFnr = it.barnPersonIdentMedReduksjon,
         )
     }
 
 fun MinimertVedtaksperiode.tilBrevPeriode(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
-    barnPersonIdentMedReduksjon: List<String> = emptyList(),
+    barnMedReduksjonFraForrigeBehandlingFnr: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     brevMålform: Målform,
 ): BrevPeriode? {
@@ -75,7 +75,7 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
             erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
-            barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
+            barnPersonIdentMedReduksjon = barnMedReduksjonFraForrigeBehandlingFnr,
         )
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
@@ -113,10 +113,8 @@ private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
     val barnMedNullutbetaling = nullutbetalingerBarn.map { it.person }
 
     val barnIPeriode: List<MinimertRestPerson> = when (this.type) {
-        UTBETALING -> this.finnBarnIInnvilgelsePeriode(restBehandlingsgrunnlagForBrev.personerPåBehandling)
-        UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> this.finnBarnIUtbetalingMedReduksjonFraForrigeBehandlignPeriode(
-            restBehandlingsgrunnlagForBrev.personerPåBehandling
-        )
+        UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+        UTBETALING -> this.finnBarnIUtbetalingPeriode(restBehandlingsgrunnlagForBrev.personerPåBehandling)
         OPPHØR -> emptyList()
         AVSLAG -> emptyList()
         FORTSATT_INNVILGET -> barnMedUtbetaling + barnMedNullutbetaling
@@ -179,7 +177,7 @@ private fun hentPeriodetype(
     UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.INNVILGELSE
 }
 
-fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
+fun BrevPeriodeGrunnlagMedPersoner.finnBarnIUtbetalingPeriode(
     personerPåBehandling: List<MinimertRestPerson>,
 ): List<MinimertRestPerson> {
     val identerIBegrunnelene = this.begrunnelser
@@ -189,25 +187,6 @@ fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
     val identerMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer.map { it.person.personIdent }
 
     val barnIPeriode = (identerIBegrunnelene + identerMedUtbetaling)
-        .toSet()
-        .mapNotNull { personIdent ->
-            personerPåBehandling.find { it.personIdent == personIdent }
-        }
-        .filter { it.type == PersonType.BARN }
-
-    return barnIPeriode
-}
-
-fun BrevPeriodeGrunnlagMedPersoner.finnBarnIUtbetalingMedReduksjonFraForrigeBehandlignPeriode(
-    personerPåBehandling: List<MinimertRestPerson>,
-): List<MinimertRestPerson> {
-    val identerIBegrunnelsene = this.begrunnelser
-        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON }
-        .flatMap { it.personIdenter }
-
-    val identerMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer.map { it.person.personIdent }
-
-    val barnIPeriode = (identerIBegrunnelsene + identerMedUtbetaling)
         .toSet()
         .mapNotNull { personIdent ->
             personerPåBehandling.find { it.personIdent == personIdent }
