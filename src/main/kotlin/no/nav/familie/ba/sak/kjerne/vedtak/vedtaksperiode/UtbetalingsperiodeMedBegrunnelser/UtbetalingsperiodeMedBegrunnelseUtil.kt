@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.KompetanseTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.snittKombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeMedBegrunnelserTidslinjeMåned
@@ -40,7 +40,7 @@ data class UtbetalingsperiodeMedOverlappendeKompetanse(
 fun Tidslinje<UtbetalingsperiodeMedOverlappendeKompetanse, Måned>.lagVedtaksperioderMedBegrunnelser(): List<VedtaksperiodeMedBegrunnelser> =
     this.perioder().mapNotNull {
         it.innhold?.vedtaksperiodeMedBegrunnelser?.copy(
-            fom = it.fraOgMed.tilLocalDate().førsteDagIInneværendeMåned(),
-            tom = it.tilOgMed.tilLocalDate().sisteDagIMåned()
+            fom = it.fraOgMed.tilLocalDateEllerNull()?.førsteDagIInneværendeMåned(),
+            tom = it.tilOgMed.tilLocalDateEllerNull()?.sisteDagIMåned()
         )
     }
