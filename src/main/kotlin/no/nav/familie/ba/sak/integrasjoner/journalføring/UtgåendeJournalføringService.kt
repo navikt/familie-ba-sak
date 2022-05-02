@@ -106,9 +106,10 @@ class UtgåendeJournalføringService(
         )
     ).single { it.eksternReferanseId == eksternReferanseId }.journalpostId
 
+    fun genererEksternReferanseIdForJournalpost(fagsakId: String, behandlingId: Long?) =
+        "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
+
     companion object {
-        fun genererEksternReferanseIdForJournalpost(fagsakId: String, behandlingId: Long?) =
-            "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
 
         private val logger = LoggerFactory.getLogger(this::class.java)
     }

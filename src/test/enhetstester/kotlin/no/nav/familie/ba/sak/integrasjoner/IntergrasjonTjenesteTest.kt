@@ -76,12 +76,16 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
     lateinit var restOperations: RestOperations
 
     lateinit var integrasjonClient: IntegrasjonClient
+    lateinit var utgåendeJournalføringService: UtgåendeJournalføringService
 
     @BeforeEach
     fun setUp() {
         integrasjonClient = IntegrasjonClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
             restOperations
+        )
+        utgåendeJournalføringService = UtgåendeJournalføringService(
+            integrasjonClient = integrasjonClient
         )
     }
 
@@ -165,34 +169,27 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         val vedtak = lagVedtak(lagBehandling())
         vedtak.stønadBrevPdF = mockPdf
 
-        val fagsakId = vedtak.behandling.fagsak.id.toString()
         val journalPostId =
-            integrasjonClient.journalførDokument(
-                ArkiverDokumentRequest(
-                    fnr = MOCK_FNR,
-                    fagsakId = fagsakId,
-                    hoveddokumentvarianter = listOf(
-                        Dokument(
-                            dokument = mockPdf,
-                            filtype = Filtype.PDFA,
-                            dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
-                        )
-                    ),
-                    journalførendeEnhet = "1",
-                    vedleggsdokumenter = listOf(
-                        Dokument(
-                            dokument = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)!!,
-                            filtype = Filtype.PDFA,
-                            dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
-                            tittel = VEDTAK_VEDLEGG_TITTEL
-                        )
-                    ),
-                    eksternReferanseId = UtgåendeJournalføringService.genererEksternReferanseIdForJournalpost(
-                        fagsakId,
-                        vedtak.behandling.id
-                    ),
-                    forsøkFerdigstill = true,
-                )
+            utgåendeJournalføringService.journalførDokument(
+                fnr = MOCK_FNR,
+                fagsakId = vedtak.behandling.fagsak.id.toString(),
+                brev = listOf(
+                    Dokument(
+                        dokument = mockPdf,
+                        filtype = Filtype.PDFA,
+                        dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
+                    )
+                ),
+                journalførendeEnhet = "1",
+                vedlegg = listOf(
+                    Dokument(
+                        dokument = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)!!,
+                        filtype = Filtype.PDFA,
+                        dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
+                        tittel = VEDTAK_VEDLEGG_TITTEL
+                    )
+                ),
+                behandlingId = vedtak.behandling.id
             )
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)
