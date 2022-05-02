@@ -169,6 +169,7 @@ internal class BrevUtilsTest {
     }
 
     private val behandlingsersultaterForOpphørt = listOf(Behandlingsresultat.OPPHØRT)
+    private val behandlingsersultaterForFortsattOpphørt = listOf(Behandlingsresultat.FORTSATT_OPPHØRT)
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt'`() {
@@ -242,6 +243,7 @@ internal class BrevUtilsTest {
             Behandlingsresultat.values()
                 .subtract(behandlingsersultaterForVedtakEndring)
                 .subtract(behandlingsersultaterForOpphørt)
+                .subtract(behandlingsersultaterForFortsattOpphørt)
                 .subtract(behandlingsersultaterForOpphørMedEndring)
                 .subtract(behandlingsersultaterForOpphørMedEndring)
                 .subtract(behandlingsersultaterForAvslag)
