@@ -87,20 +87,6 @@ data class DagTidspunkt internal constructor(
         }
     }
 
-    override fun somFraOgMed(dato: LocalDate): DagTidspunkt {
-        return if (dato < PRAKTISK_TIDLIGSTE_DAG)
-            DagTidspunkt(PRAKTISK_TIDLIGSTE_DAG, Uendelighet.FORTID)
-        else
-            DagTidspunkt(dato, Uendelighet.INGEN)
-    }
-
-    override fun somTilOgMed(dato: LocalDate): DagTidspunkt {
-        return if (dato > PRAKTISK_SENESTE_DAG)
-            DagTidspunkt(PRAKTISK_SENESTE_DAG, Uendelighet.FREMTID)
-        else
-            DagTidspunkt(dato, Uendelighet.INGEN).somTilOgMed()
-    }
-
     override fun sammenliknMed(tidspunkt: Tidspunkt<Dag>): Int {
         return dato.compareTo(tidspunkt.tilLocalDate())
     }
@@ -114,6 +100,18 @@ data class DagTidspunkt internal constructor(
 
     companion object {
         fun nå() = DagTidspunkt(LocalDate.now(), Uendelighet.INGEN)
+
+        internal fun LocalDate?.tilTidspunktEllerUendeligLengeSiden(default: () -> LocalDate?) =
+            this.tilTidspunktEllerUendelig(default, Uendelighet.FORTID)
+
+        internal fun LocalDate?.tilTidspunktEllerUendeligLengeTil(default: () -> LocalDate?) =
+            this.tilTidspunktEllerUendelig(default, Uendelighet.FREMTID)
+
+        private fun LocalDate?.tilTidspunktEllerUendelig(default: () -> LocalDate?, uendelighet: Uendelighet) =
+            this?.let { DagTidspunkt(it, Uendelighet.INGEN) } ?: DagTidspunkt(
+                default() ?: LocalDate.now(),
+                uendelighet
+            )
 
         internal fun LocalDate?.tilTidspunktEllerUendeligLengeSiden() =
             this.tilTidspunktEllerUendelig(PRAKTISK_TIDLIGSTE_DAG, Uendelighet.FORTID)

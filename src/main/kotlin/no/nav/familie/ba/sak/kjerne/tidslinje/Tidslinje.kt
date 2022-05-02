@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeMedAvhengigheter
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TidslinjeSomStykkerOppTiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
@@ -23,22 +20,32 @@ abstract class Tidslinje<I, T : Tidsenhet> {
     protected abstract fun lagPerioder(): Collection<Periode<I, T>>
 
     protected open fun valider(perioder: List<Periode<I, T>>) {
-        val perioderMedFeil = perioder.mapIndexed { index, periode ->
+
+        val feilInnenforPerioder = perioder.map {
             when {
-                index > 0 && periode.fraOgMed.erUendeligLengeSiden() ->
-                    TidslinjeFeil(periode, this, TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE)
-                index < perioder.size - 1 && periode.tilOgMed.erUendeligLengeTil() ->
-                    TidslinjeFeil(periode, this, TidslinjeFeilType.UENDELIG_FREMTID_FØR_SISTE_PERIODE)
-                periode.fraOgMed > periode.tilOgMed ->
-                    TidslinjeFeil(periode, this, TidslinjeFeilType.TOM_ER_FØR_FOM)
-                index < index - 1 && perioder[index].tilOgMed > perioder[index + 1].fraOgMed ->
-                    TidslinjeFeil(periode, this, TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE)
+                it.fraOgMed > it.tilOgMed ->
+                    TidslinjeFeil(it, this, TidslinjeFeilType.TOM_ER_FØR_FOM)
                 else -> null
             }
-        }.filterNotNull()
+        }
 
-        perioderMedFeil.takeIf { it.isNotEmpty() }?.also {
-            throw TidslinjeFeilException(it)
+        val feilMellomPåfølgendePerioder = perioder.windowed(2) { (periode1, periode2) ->
+            when {
+                periode2.fraOgMed.erUendeligLengeSiden() ->
+                    TidslinjeFeil(periode2, this, TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE)
+                periode1.tilOgMed.erUendeligLengeTil() ->
+                    TidslinjeFeil(periode1, this, TidslinjeFeilType.UENDELIG_FREMTID_FØR_SISTE_PERIODE)
+                periode1.tilOgMed >= periode2.fraOgMed ->
+                    TidslinjeFeil(periode1, this, TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE)
+                else -> null
+            }
+        }
+
+        val tidslinjeFeil = (feilInnenforPerioder + feilMellomPåfølgendePerioder)
+            .filterNotNull()
+
+        if (tidslinjeFeil.isNotEmpty()) {
+            throw TidslinjeFeilException(tidslinjeFeil)
         }
     }
 
@@ -71,25 +78,5 @@ abstract class Tidslinje<I, T : Tidsenhet> {
 
         class TidslinjeFeilException(tidslinjeFeil: Collection<TidslinjeFeil>) :
             IllegalStateException(tidslinjeFeil.toString())
-    }
-}
-
-fun <I, T : Tidsenhet, R> Tidslinje<I, T>.map(mapper: (I?) -> R?): Tidslinje<R, T> {
-    val avhengighet = this
-    return object : TidslinjeMedAvhengigheter<R, T>(listOf(avhengighet)) {
-        override fun lagPerioder() = avhengighet.perioder().map {
-            Periode(it.fraOgMed, it.tilOgMed, mapper(it.innhold))
-        }
-    }
-}
-
-fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
-    høyre: Tidslinje<H, T>,
-    kombinator: (V?, H?) -> R?
-): Tidslinje<R, T> {
-    val venstre = this
-    return object : TidslinjeSomStykkerOppTiden<R, T>(venstre, høyre) {
-        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
-            kombinator(venstre.innholdForTidspunkt(tidspunkt), høyre.innholdForTidspunkt(tidspunkt))
     }
 }

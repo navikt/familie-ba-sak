@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.rest
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårsresultatDagTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import java.time.LocalDate
@@ -28,12 +28,12 @@ fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
     )
 }
 
-fun List<VilkårsresultatDagTidslinje>.tilRestVilkårTidslinjer(): List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>> =
+fun List<Tidslinje<VilkårRegelverkResultat, Dag>>.tilRestVilkårTidslinjer(): List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>> =
     this.map { vilkårsresultatTidslinje ->
         vilkårsresultatTidslinje.perioder().map { periode ->
             RestTidslinjePeriode(
                 fraOgMed = periode.fraOgMed.tilLocalDate(),
-                tilOgMed = periode.tilOgMed.tilLocalDate(),
+                tilOgMed = periode.tilOgMed.tilLocalDateEllerNull(),
                 innhold = periode.innhold!!
             )
         }
@@ -52,7 +52,7 @@ fun Tidslinje<Resultat, Måned>.tilRestOppfyllerVilkårTidslinje(): List<RestTid
     this.perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
-            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDate(),
+            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
             innhold = periode.innhold!!
         )
     }
