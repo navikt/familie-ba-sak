@@ -144,14 +144,10 @@ object ØkonomiUtils {
         forrigeKjeder
             .mapValues { (person, forrigeAndeler) ->
                 forrigeAndeler.filter {
-                    altIKjedeOpphøres(
-                        person,
-                        sisteBeståendeAndelIHverKjede
-                    ) || andelOpphøres(
-                        person,
-                        it,
-                        sisteBeståendeAndelIHverKjede
-                    )
+                    altIKjedeOpphøres(person, sisteBeståendeAndelIHverKjede) ||
+                        andelOpphøres(person, it, sisteBeståendeAndelIHverKjede) ||
+                        // når tilhørende opphørsdato er samme fra forrige behandling
+                        sammeAndelOpphøres(person, it, sisteBeståendeAndelIHverKjede)
                 }
             }
             .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
@@ -182,6 +178,17 @@ object ØkonomiUtils {
         andel: AndelTilkjentYtelse,
         sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>
     ): Boolean = andel.stønadFom > sisteBeståendeAndelIHverKjede[kjedeidentifikator]!!.stønadTom
+
+    private fun sammeAndelOpphøres(
+        kjedeidentifikator: String,
+        andel: AndelTilkjentYtelse,
+        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>
+    ): Boolean {
+        val beståendeAndel = sisteBeståendeAndelIHverKjede[kjedeidentifikator]
+        return beståendeAndel != null &&
+            andel.stønadFom == beståendeAndel.stønadFom &&
+            andel.stønadTom == beståendeAndel.stønadTom
+    }
 
     const val SMÅBARNSTILLEGG_SUFFIX = "_SMÅBARNSTILLEGG"
 }
