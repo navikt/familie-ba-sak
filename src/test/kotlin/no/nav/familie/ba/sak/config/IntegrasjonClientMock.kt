@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
+import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -104,12 +105,8 @@ class IntegrasjonClientMock {
                 OppdaterJournalpostResponse("1234567")
 
             every {
-                mockIntegrasjonClient.journalførManueltBrev(any(), any(), any(), any(), any(), any())
-            } returns "journalpostId"
-
-            every {
-                mockIntegrasjonClient.journalførDokument(any(), any(), any(), any(), any(), any(), any())
-            } returns "journalpostId"
+                mockIntegrasjonClient.journalførDokument(any())
+            } returns ArkiverDokumentResponse(ferdigstilt = true, journalpostId = "journalpostId")
 
             every {
                 mockIntegrasjonClient.leggTilLogiskVedlegg(any(), any())

@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgi
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidstaker
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Skyggesak
+import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
@@ -164,27 +165,34 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         val vedtak = lagVedtak(lagBehandling())
         vedtak.stønadBrevPdF = mockPdf
 
+        val fagsakId = vedtak.behandling.fagsak.id.toString()
         val journalPostId =
             integrasjonClient.journalførDokument(
-                fnr = MOCK_FNR,
-                fagsakId = vedtak.behandling.fagsak.id.toString(),
-                brev = listOf(
-                    Dokument(
-                        dokument = mockPdf,
-                        filtype = Filtype.PDFA,
-                        dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
-                    )
-                ),
-                journalførendeEnhet = "1",
-                vedlegg = listOf(
-                    Dokument(
-                        dokument = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)!!,
-                        filtype = Filtype.PDFA,
-                        dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
-                        tittel = VEDTAK_VEDLEGG_TITTEL
-                    )
-                ),
-                behandlingId = vedtak.behandling.id
+                ArkiverDokumentRequest(
+                    fnr = MOCK_FNR,
+                    fagsakId = fagsakId,
+                    hoveddokumentvarianter = listOf(
+                        Dokument(
+                            dokument = mockPdf,
+                            filtype = Filtype.PDFA,
+                            dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
+                        )
+                    ),
+                    journalførendeEnhet = "1",
+                    vedleggsdokumenter = listOf(
+                        Dokument(
+                            dokument = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)!!,
+                            filtype = Filtype.PDFA,
+                            dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
+                            tittel = VEDTAK_VEDLEGG_TITTEL
+                        )
+                    ),
+                    eksternReferanseId = JournalføringService.genererEksternReferanseIdForJournalpost(
+                        fagsakId,
+                        vedtak.behandling.id
+                    ),
+                    forsøkFerdigstill = true,
+                )
             )
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)
