@@ -27,7 +27,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
     private val kompetanseRepository: KompetanseRepository,
 ) {
 
-    fun hentUtbealtingsperioder(
+    fun hentUtbetalingsperioder(
         vedtak: Vedtak,
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
