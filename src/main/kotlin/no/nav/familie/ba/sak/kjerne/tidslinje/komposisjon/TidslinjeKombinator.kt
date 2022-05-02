@@ -25,7 +25,7 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerForFellesNøkler
         .mapValues { (key, venstre) ->
             val høyre: Tidslinje<H, T> = tidslinjeMap.getValue(key)
             val kombinator: (V?, H?) -> R? = mapKombinator(key)
-            val resultat: Tidslinje<R, T> = venstre.kombinerMed(høyre, kombinator)
+            val resultat: Tidslinje<R, T> = venstre.snittKombinerMed(høyre, kombinator)
             resultat
         }
 }
@@ -52,7 +52,7 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerForAlleNøklerMe
             val høyre: Tidslinje<H, T> = tidslinjeMap[it] ?: TomTidslinje()
             val venstre: Tidslinje<V, T> = this[it] ?: TomTidslinje()
             val kombinator: (V?, H?) -> R? = mapKombinator(it)
-            val resultat: Tidslinje<R, T> = venstre.kombinerMed(høyre, kombinator)
+            val resultat: Tidslinje<R, T> = venstre.snittKombinerMed(høyre, kombinator)
             it to resultat
         }.toMap()
 }

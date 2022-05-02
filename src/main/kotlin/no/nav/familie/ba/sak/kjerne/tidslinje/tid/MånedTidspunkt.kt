@@ -70,20 +70,6 @@ data class MånedTidspunkt internal constructor(
             this
     }
 
-    override fun somFraOgMed(dato: LocalDate): MånedTidspunkt {
-        return if (dato < PRAKTISK_TIDLIGSTE_DAG)
-            MånedTidspunkt(PRAKTISK_TIDLIGSTE_DAG.toYearMonth(), Uendelighet.FORTID)
-        else
-            MånedTidspunkt(dato.toYearMonth(), Uendelighet.INGEN)
-    }
-
-    override fun somTilOgMed(dato: LocalDate): MånedTidspunkt {
-        return if (dato > PRAKTISK_SENESTE_DAG)
-            MånedTidspunkt(PRAKTISK_SENESTE_DAG.toYearMonth(), Uendelighet.FREMTID)
-        else
-            MånedTidspunkt(dato.toYearMonth(), Uendelighet.INGEN).somTilOgMed()
-    }
-
     override fun sammenliknMed(tidspunkt: Tidspunkt<Måned>): Int {
         return måned.compareTo(tidspunkt.tilYearMonth())
     }
