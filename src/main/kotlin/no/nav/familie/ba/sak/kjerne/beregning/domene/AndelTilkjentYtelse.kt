@@ -284,14 +284,6 @@ fun List<AndelTilkjentYtelse>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>
         }
 }
 
-fun List<AndelTilkjentYtelse>.finnesUtvidetEndringsutbetalingIPerioden(
-    fom: YearMonth?,
-    tom: YearMonth?
-) = this.any { andelTilkjentYtelse ->
-    andelTilkjentYtelse.erUtvidet() &&
-        andelTilkjentYtelse.harEndringsutbetalingIPerioden(fom, tom)
-}
-
 fun List<AndelTilkjentYtelse>.erUlike(andreAndeler: List<AndelTilkjentYtelse>): Boolean {
     if (this.size != andreAndeler.size) return true
 

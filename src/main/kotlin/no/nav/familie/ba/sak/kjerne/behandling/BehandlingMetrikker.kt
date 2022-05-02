@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -24,7 +24,7 @@ import java.time.temporal.ChronoUnit
 class BehandlingMetrikker(
     private val behandlingRepository: BehandlingRepository,
     private val vedtakRepository: VedtakRepository,
-    private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val sanityService: SanityService
 ) {
     private var sanityBegrunnelser: List<SanityBegrunnelse> = emptyList()
@@ -105,7 +105,7 @@ class BehandlingMetrikker(
                 ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
 
             val vedtaksperiodeMedBegrunnelser =
-                vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
+                vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
             vedtaksperiodeMedBegrunnelser.forEach {
                 it.begrunnelser.forEach { vedtaksbegrunnelse: Vedtaksbegrunnelse ->
