@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
-import org.slf4j.MDC
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
@@ -30,7 +29,6 @@ abstract class AbstractSpringIntegrationTestDev : AbstractMockkSpringRunner() {
 
     init {
         wireMockServer.start()
-        MDC.put("callId", "callId")
     }
 
     @AfterAll
