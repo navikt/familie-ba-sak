@@ -13,11 +13,13 @@ import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -117,8 +119,6 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.flyttTilOgMed(tilTidspunkt: Tidspunkt<T>)
         TomTidslinje()
     else
         object : Tidslinje<I, T>() {
-            override fun fraOgMed() = tidslinje.fraOgMed()
-            override fun tilOgMed() = tilTidspunkt
             override fun lagPerioder(): Collection<Periode<I, T>> = tidslinje.perioder()
                 .filter { it.fraOgMed <= tilTidspunkt }
                 .replaceLast { Periode(it.fraOgMed, tilTidspunkt, it.innhold) }

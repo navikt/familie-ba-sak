@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 
 /**
  * Extension-metode for å kombinere et "vindu" med størrelse size i hver periode
@@ -20,13 +22,13 @@ fun <I, T : Tidsenhet, R> Tidslinje<I, T>.windowed(
     val tidslinje = this
 
     return object : Tidslinje<R, T>() {
-        override fun fraOgMed() = tidslinje.fraOgMed()
-        override fun tilOgMed() = tidslinje.tilOgMed()
+        val fraOgMed = tidslinje.fraOgMed()
+        val tilOgMed = tidslinje.tilOgMed()
 
         override fun lagPerioder(): Collection<Periode<R, T>> =
             tidslinje.perioder().windowed(size, step, partialWindows) { perioder ->
                 val periode = mapper(perioder)
-                if (periode.fraOgMed < fraOgMed() || periode.tilOgMed > tilOgMed())
+                if (periode.fraOgMed < fraOgMed || periode.tilOgMed > tilOgMed)
                     throw IllegalArgumentException("Forsøk på å flytte perioden utenfor grensene for tidslinjen")
                 periode
             }
