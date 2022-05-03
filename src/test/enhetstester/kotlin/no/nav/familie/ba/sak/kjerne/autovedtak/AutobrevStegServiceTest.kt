@@ -57,6 +57,28 @@ class AutobrevStegServiceTest {
     }
 
     @Test
+    fun `Skal stoppe autovedtak og opprette oppgave ved åpen behandling med status Fatter vedtak`() {
+        val aktør = randomAktørId()
+        val fagsak = defaultFagsak(aktør)
+        val behandling = lagBehandling(fagsak).also {
+            it.status = BehandlingStatus.FATTER_VEDTAK
+        }
+
+        every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
+        every { fagsakService.hent(aktør) } returns fagsak
+        every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
+        every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
+
+        autovedtakStegService.kjørBehandling(
+            mottakersAktør = aktør,
+            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
+            behandlingsdata = aktør
+        )
+
+        verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) }
+    }
+
+    @Test
     fun `Skal stoppe autovedtak ved å kaste feil ved åpen behandling som iverksettes`() {
         val aktør = randomAktørId()
         val fagsak = defaultFagsak(aktør)
