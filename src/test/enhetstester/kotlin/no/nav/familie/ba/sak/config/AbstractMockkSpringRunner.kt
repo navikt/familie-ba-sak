@@ -123,7 +123,7 @@ abstract class AbstractMockkSpringRunner {
         if (isMockKMock(mockOpprettTaskService)) {
             TaskRepositoryTestConfig.clearMockTaskService(mockOpprettTaskService)
         }
-        
+
         MDC.put("callId", "callId")
     }
 
