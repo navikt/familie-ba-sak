@@ -351,6 +351,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetBarn16AarUtvidetFraFlytting"
     },
+    INNVILGET_TILLEGGSTEKST_OPPHØR_UTVIDET_NYFØDT_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstOpphorUtvidetNyfoedtBarn"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -590,6 +594,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_BARN_DØDE_SAMME_MÅNED_SOM_FØDT {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBarnDodeSammeMaanedSomFoedt"
+    },
+    REDUKSJON_MANGLER_MEKLINGSATTEST {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonManglerMeklingsattest"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
@@ -831,6 +839,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagVurderingIkkeFlyttetFraTidligereEktefelle"
     },
+    AVSLAG_AVTALE_OM_DELT_BOSTED_FØLGES_FORTSATT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagAvtaleOmDeltBostedFolgesFortsatt"
+    },
     OPPHØR_BARN_FLYTTET_FRA_SØKER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnBorIkkeMedSoker"
@@ -994,6 +1006,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_BARN_DØD_SAMME_MÅNED_SOM_FØDT {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnDodSammeMaanedSomFoedt"
+    },
+    OPPHØR_UGYLDIG_KONTONUMMER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorUgyldigKontonummer"
     },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
