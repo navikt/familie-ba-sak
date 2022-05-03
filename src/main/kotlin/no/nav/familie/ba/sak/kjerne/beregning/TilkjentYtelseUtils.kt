@@ -40,7 +40,6 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
-        skalBrukeNyMåteÅLageUtvidetAndeler: Boolean = true,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
@@ -92,8 +91,7 @@ object TilkjentYtelseUtils {
 
         val andelerTilkjentYtelseSøker = UtvidetBarnetrygdGenerator(
             behandlingId = vilkårsvurdering.behandling.id,
-            tilkjentYtelse = tilkjentYtelse,
-            skalBrukeNyMåteÅLageUtvidetAndeler = skalBrukeNyMåteÅLageUtvidetAndeler
+            tilkjentYtelse = tilkjentYtelse
         )
             .lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = vilkårsvurdering.personResultater
