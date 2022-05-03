@@ -106,7 +106,7 @@ class IntegrasjonClientMock {
 
             every {
                 mockIntegrasjonClient.journalførDokument(any())
-            } returns ArkiverDokumentResponse(ferdigstilt = false, journalpostId = "journalpostId")
+            } returns ArkiverDokumentResponse(ferdigstilt = true, journalpostId = "journalpostId")
 
             every {
                 mockIntegrasjonClient.leggTilLogiskVedlegg(any(), any())
