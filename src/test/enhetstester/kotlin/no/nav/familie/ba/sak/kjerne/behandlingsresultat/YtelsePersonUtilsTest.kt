@@ -261,7 +261,7 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
-    fun `skal gi opphør når forrigebehandling,nybehandling har opphørt med brukerens dødsfall`() {
+    fun `skal gi OPPHØRT når alle andeler er avsluttet`() {
         val ytelsePersoner = listOf(
             BehandlingsresultatPerson(
                 aktør = barn1.aktør,
