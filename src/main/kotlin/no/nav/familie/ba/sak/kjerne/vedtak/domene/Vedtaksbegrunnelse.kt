@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
@@ -91,6 +92,7 @@ data class BegrunnelseData(
     val belop: String,
     val soknadstidspunkt: String,
     val avtaletidspunktDeltBosted: String,
+    val sokerFaarUtbetaltUtvidetIPerioden: Boolean
 ) : Begrunnelse
 
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
@@ -148,6 +150,9 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     val søknadstidspunkt = endringsperioder.sortedBy { it.søknadstidspunkt }
         .firstOrNull { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
 
+    val søkerFårUtbetaltUtvidetIPerioden =
+        minimerteUtbetalingsperiodeDetaljer.any { it.person.type == PersonType.SØKER && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.utbetaltPerMnd > 0 }
+
     this.validerBrevbegrunnelse(
         gjelderSøker = gjelderSøker,
         barnasFødselsdatoer = barnasFødselsdatoer,
@@ -168,7 +173,8 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         apiNavn = this.standardbegrunnelse.sanityApiNavn,
         belop = Utils.formaterBeløp(beløp),
         soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: "",
-        avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted?.tilKortString() ?: ""
+        avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted?.tilKortString() ?: "",
+        sokerFaarUtbetaltUtvidetIPerioden = søkerFårUtbetaltUtvidetIPerioden
     )
 }
 

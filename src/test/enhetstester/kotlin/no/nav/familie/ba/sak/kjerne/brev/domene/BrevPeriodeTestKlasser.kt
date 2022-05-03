@@ -141,7 +141,8 @@ data class BegrunnelseDataTestConfig(
     val apiNavn: String,
     val belop: Int,
     val soknadstidspunkt: String?,
-    val avtaletidspunktDeltBosted: String?
+    val avtaletidspunktDeltBosted: String?,
+    val sokerFaarUtbetaltUtvidetIPerioden: Boolean
 ) : TestBegrunnelse {
 
     fun tilBegrunnelseData() = BegrunnelseData(
@@ -157,7 +158,8 @@ data class BegrunnelseDataTestConfig(
         maalform = this.maalform,
         apiNavn = this.apiNavn,
         soknadstidspunkt = this.soknadstidspunkt ?: "",
-        avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: ""
+        avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: "",
+        sokerFaarUtbetaltUtvidetIPerioden = this.sokerFaarUtbetaltUtvidetIPerioden
     )
 }
 
