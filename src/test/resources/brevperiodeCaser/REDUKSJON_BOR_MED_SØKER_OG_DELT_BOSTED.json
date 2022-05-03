@@ -125,7 +125,8 @@
         "maanedOgAarBegrunnelsenGjelderFor": "oktober 2021",
         "maalform": "bokmaal",
         "apiNavn": "reduksjonFlyttetBarn",
-        "belop": 0
+        "belop": 0,
+        "sokerFaarUtbetaltUtvidetIPerioden": true
       },
       {
         "gjelderSoker": false,
@@ -138,7 +139,8 @@
         "maanedOgAarBegrunnelsenGjelderFor": "oktober 2021",
         "maalform": "bokmaal",
         "apiNavn": "reduksjonDeltBarnetrygdAnnenForelderSokt",
-        "belop": 827
+        "belop": 827,
+        "sokerFaarUtbetaltUtvidetIPerioden": true
       }
     ],
     "type": "innvilgelse"

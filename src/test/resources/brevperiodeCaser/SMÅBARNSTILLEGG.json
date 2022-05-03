@@ -100,7 +100,8 @@
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",
         "apiNavn": "reduksjonSmaabarnstilleggIkkeLengerFullOvergangsstonad",
-        "belop": 2708
+        "belop": 2708,
+        "sokerFaarUtbetaltUtvidetIPerioden": true
       }
     ],
     "type": "innvilgelse"
