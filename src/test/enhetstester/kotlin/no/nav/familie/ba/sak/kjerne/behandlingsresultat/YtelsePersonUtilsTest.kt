@@ -233,7 +233,7 @@ class YtelsePersonUtilsTest {
     }
 
     @Test
-    fun `skal gi opphør når forrigebehandling,nybehandling har samme tidslinje og er opphørt med brukerens dødsfall`() {
+    fun `skal gi FORTSATT_OPPHØRT når forrige behandling og ny behandling er opphørt og har lik tilkjent ytelse`() {
         val ytelsePersoner = listOf(
             BehandlingsresultatPerson(
                 aktør = barn1.aktør,
