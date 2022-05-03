@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.rest
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMedEtter
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilDag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import java.time.LocalDate
@@ -43,6 +45,7 @@ fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
                     .beskjærEtter(erUnder18årTidslinje)
                     .tilRestTidslinje(),
                 regelverkTidslinje = it.value.regelverkTidslinje
+                    .map { it?.regelverk }
                     .beskjærEtter(erUnder18årTidslinje)
                     .tilRestTidslinje(),
                 oppsummeringTidslinje = tilfeldigOppsummering(
@@ -108,7 +111,7 @@ enum class BeregningOppsummeringStatus {
     IKKE_VURDERT
 }
 
-fun tilfeldigOppsummering(regelverkTidslinje: Tidslinje<Regelverk, Måned>):
+fun tilfeldigOppsummering(regelverkTidslinje: Tidslinje<RegelverkResultat, Måned>):
     List<RestTidslinjePeriode<BeregningOppsummering>> {
 
     val tilfeldigTidslinje = tilfeldigIntTidslinje(
@@ -117,9 +120,9 @@ fun tilfeldigOppsummering(regelverkTidslinje: Tidslinje<Regelverk, Måned>):
     )
 
     return regelverkTidslinje
-        .snittKombinerMed(tilfeldigTidslinje) { regelverk, rnd ->
-            when (regelverk) {
-                Regelverk.EØS_FORORDNINGEN ->
+        .snittKombinerMed(tilfeldigTidslinje) { regelverkResultat, rnd ->
+            when (regelverkResultat) {
+                RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN ->
                     BeregningOppsummering(
                         Regelverk.EØS_FORORDNINGEN,
                         status = finnSikkert<BeregningOppsummeringStatus>(rnd!!),
@@ -127,7 +130,7 @@ fun tilfeldigOppsummering(regelverkTidslinje: Tidslinje<Regelverk, Måned>):
                     )
                 else ->
                     BeregningOppsummering(
-                        regelverk = regelverk,
+                        regelverk = regelverkResultat?.regelverk,
                         status = null,
                         kompetentLand = null
                     )
