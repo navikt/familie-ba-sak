@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
@@ -18,13 +19,23 @@ fun <T : Tidsenhet> String.tilRegelverkTidslinje(start: Tidspunkt<T>) =
         }
     }
 
+fun <T : Tidsenhet> String.tilRegelverkResultatTidslinje(start: Tidspunkt<T>) =
+    this.tilCharTidslinje(start).map {
+        when (it?.lowercaseChar()) {
+            'e' -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
+            'n' -> RegelverkResultat.OPPFYLT_NASJONALE_REGLER
+            '?' -> RegelverkResultat.OPPFYLT_TO_REGELVERK
+            else -> null
+        }
+    }
+
 fun <T : Tidsenhet> String.tilVilkårRegelverkResultatTidslinje(vilkår: Vilkår, start: Tidspunkt<T>) =
     this.tilCharTidslinje(start).map {
         when (it?.lowercaseChar()) {
-            'e' -> VilkårRegelverkResultat(vilkår, Regelverk.EØS_FORORDNINGEN, Resultat.OPPFYLT)
-            'n' -> VilkårRegelverkResultat(vilkår, Regelverk.NASJONALE_REGLER, Resultat.OPPFYLT)
-            '+' -> VilkårRegelverkResultat(vilkår, null, Resultat.OPPFYLT)
-            '-' -> VilkårRegelverkResultat(vilkår, null, Resultat.IKKE_OPPFYLT)
+            'e' -> VilkårRegelverkResultat(vilkår, RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN)
+            'n' -> VilkårRegelverkResultat(vilkår, RegelverkResultat.OPPFYLT_NASJONALE_REGLER)
+            '+' -> VilkårRegelverkResultat(vilkår, RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT)
+            '-' -> VilkårRegelverkResultat(vilkår, RegelverkResultat.IKKE_OPPFYLT)
             else -> null
         }
     }
