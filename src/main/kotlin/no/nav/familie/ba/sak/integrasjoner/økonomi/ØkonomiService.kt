@@ -41,11 +41,7 @@ class ØkonomiService(
         val oppdatertBehandling = vedtak.behandling
         val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
-        // Behandlingsresultat er opphørt når det ikke finnes endring fra forrige behandling og alt er opphørt
-        // På denne tilfellen avslutter fagsystem saken uten å sende noe til økonomi
-        if (oppdatertBehandling.resultat != Behandlingsresultat.FORTSATT_OPPHØRT) {
-            iverksettOppdrag(utbetalingsoppdrag)
-        }
+        iverksettOppdrag(utbetalingsoppdrag)
     }
 
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
