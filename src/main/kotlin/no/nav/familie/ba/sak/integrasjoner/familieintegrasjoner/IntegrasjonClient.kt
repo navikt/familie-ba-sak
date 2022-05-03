@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
-import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.ba.sak.common.kallEksternTjenesteUtenRespons
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -20,9 +19,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -347,67 +343,18 @@ class IntegrasjonClient(
         }
     }
 
-    fun journalførManueltBrev(
-        fnr: String,
-        fagsakId: String,
-        journalførendeEnhet: String,
-        brev: ByteArray,
-        dokumenttype: Dokumenttype,
-        førsteside: Førsteside?
-    ): String {
-        return journalførDokument(
-            fnr = fnr,
-            fagsakId = fagsakId,
-            journalførendeEnhet = journalførendeEnhet,
-            brev = listOf(
-                Dokument(
-                    dokument = brev,
-                    filtype = Filtype.PDFA,
-                    dokumenttype = dokumenttype
-                )
-            ),
-            førsteside = førsteside,
-        )
-    }
-
     fun journalførDokument(
-        fnr: String,
-        fagsakId: String,
-        journalførendeEnhet: String? = null,
-        brev: List<Dokument>,
-        vedlegg: List<Dokument> = emptyList(),
-        førsteside: Førsteside? = null,
-        behandlingId: Long? = null
-    ): String {
+        arkiverDokumentRequest: ArkiverDokumentRequest
+    ): ArkiverDokumentResponse {
         val uri = URI.create("$integrasjonUri/arkiv/v4")
-        logger.info("Sender pdf til DokArkiv: $uri")
 
-        if (journalførendeEnhet == DEFAULT_JOURNALFØRENDE_ENHET) {
-            logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
-        }
-        val journalpost = kallEksternTjenesteRessurs(
+        return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
-            formål = "Journalfør dokument på fagsak $fagsakId",
+            formål = "Journalfør dokument på fagsak ${arkiverDokumentRequest.fagsakId}"
         ) {
-            val arkiverDokumentRequest = ArkiverDokumentRequest(
-                fnr = fnr,
-                forsøkFerdigstill = true,
-                hoveddokumentvarianter = brev,
-                vedleggsdokumenter = vedlegg,
-                fagsakId = fagsakId,
-                journalførendeEnhet = journalførendeEnhet,
-                førsteside = førsteside,
-                eksternReferanseId = "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
-            )
-
-            postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest)
+            postForEntity(uri, arkiverDokumentRequest)
         }
-
-        if (!journalpost.ferdigstilt) {
-            error("Klarte ikke ferdigstille journalpost med id ${journalpost.journalpostId}")
-        }
-        return journalpost.journalpostId
     }
 
     fun opprettSkyggesak(aktør: Aktør, fagsakId: Long) {

@@ -24,18 +24,18 @@ import javax.validation.Valid
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class JournalføringController(
-    private val journalføringService: JournalføringService,
+    private val innkomendeJournalføringService: InnkomendeJournalføringService,
     private val tilgangService: TilgangService
 ) {
 
     @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentJournalpost(@PathVariable journalpostId: String): ResponseEntity<Ressurs<Journalpost>> {
-        return ResponseEntity.ok(Ressurs.success(journalføringService.hentJournalpost(journalpostId)))
+        return ResponseEntity.ok(Ressurs.success(innkomendeJournalføringService.hentJournalpost(journalpostId)))
     }
 
     @GetMapping(path = ["/for-bruker/{brukerId}"])
     fun hentJournalposterForBruker(@PathVariable brukerId: String): ResponseEntity<Ressurs<List<Journalpost>>> {
-        return ResponseEntity.ok(Ressurs.success(journalføringService.hentJournalposterForBruker(brukerId)))
+        return ResponseEntity.ok(Ressurs.success(innkomendeJournalføringService.hentJournalposterForBruker(brukerId)))
     }
 
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
@@ -43,7 +43,14 @@ class JournalføringController(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String
     ): ResponseEntity<Ressurs<ByteArray>> {
-        return ResponseEntity.ok(Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                innkomendeJournalføringService.hentDokument(
+                    journalpostId,
+                    dokumentInfoId
+                )
+            )
+        )
     }
 
     @GetMapping(
@@ -54,7 +61,7 @@ class JournalføringController(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String
     ): ResponseEntity<ByteArray> {
-        return ResponseEntity.ok(journalføringService.hentDokument(journalpostId, dokumentInfoId))
+        return ResponseEntity.ok(innkomendeJournalføringService.hentDokument(journalpostId, dokumentInfoId))
     }
 
     @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -73,7 +80,7 @@ class JournalføringController(
             throw FunksjonellFeil("Minst ett av dokumentene mangler dokumenttittel.")
         }
 
-        val fagsakId = journalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
+        val fagsakId = innkomendeJournalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Journalført"))
     }
 }

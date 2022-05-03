@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaskRepositoryTestConfig
 import org.junit.jupiter.api.BeforeEach
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
@@ -122,6 +123,8 @@ abstract class AbstractMockkSpringRunner {
         if (isMockKMock(mockOpprettTaskService)) {
             TaskRepositoryTestConfig.clearMockTaskService(mockOpprettTaskService)
         }
+
+        MDC.put("callId", "callId")
     }
 
     private fun clearCaches() {
