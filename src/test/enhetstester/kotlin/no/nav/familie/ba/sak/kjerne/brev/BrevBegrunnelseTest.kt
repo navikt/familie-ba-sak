@@ -41,7 +41,6 @@ class BrevBegrunnelseTest {
                     minimerteEndredeUtbetalingAndeler = brevBegrunnelserTestConfig.hentEndretUtbetalingAndeler(),
                     erFørsteVedtaksperiodePåFagsak = brevBegrunnelserTestConfig.erFørsteVedtaksperiodePåFagsak,
                     ytelserForSøkerForrigeMåned = brevBegrunnelserTestConfig.ytelserForSøkerForrigeMåned,
-                    erNyDeltBostedTogglePå = false
                 )
             } catch (e: Exception) {
                 testReporter.publishEntry(
