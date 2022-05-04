@@ -20,7 +20,7 @@ data class BrevBegrunnelseGrunnlag(
         identerMedUtbetalingPåPeriode: List<String>,
         erFørsteVedtaksperiodePåFagsak: Boolean,
         erUregistrerteBarnPåbehandling: Boolean,
-        barnPersonIdentMedReduksjon: List<String>,
+        barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
         minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
 
@@ -39,7 +39,7 @@ data class BrevBegrunnelseGrunnlag(
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 identerMedUtbetalingPåPeriode = identerMedUtbetalingPåPeriode,
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                identerMedReduksjonPåPeriode = barnPersonIdentMedReduksjon.map { it },
+                identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent.map { it },
                 minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
             )
 
