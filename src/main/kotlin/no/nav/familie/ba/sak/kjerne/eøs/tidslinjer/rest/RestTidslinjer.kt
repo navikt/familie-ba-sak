@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.PRAKTISK_SENESTE_DAG
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import java.time.LocalDate
@@ -52,7 +53,7 @@ fun Tidslinje<Regelverk, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinje
     this.perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
-            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDate(),
+            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull() ?: PRAKTISK_SENESTE_DAG,
             innhold = periode.innhold
         )
     }
@@ -61,7 +62,7 @@ fun Tidslinje<Resultat, Måned>.tilRestOppfyllerVilkårTidslinje(): List<RestTid
     this.perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
-            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDate(),
+            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull() ?: PRAKTISK_SENESTE_DAG,
             innhold = periode.innhold!!
         )
     }
