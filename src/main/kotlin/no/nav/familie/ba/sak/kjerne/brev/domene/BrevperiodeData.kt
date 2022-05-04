@@ -12,7 +12,7 @@ data class BrevperiodeData(
     val uregistrerteBarn: List<MinimertUregistrertBarn>,
     val brevMålform: Målform,
     val minimertVedtaksperiode: MinimertVedtaksperiode,
-    val barnPersonIdentMedReduksjon: List<String> = emptyList()
+    val barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList()
 ) : Comparable<BrevperiodeData> {
     fun hentBegrunnelserOgFritekster(): List<Begrunnelse> =
         minimertVedtaksperiode
@@ -20,7 +20,7 @@ data class BrevperiodeData(
                 restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
                 erFørsteVedtaksperiodePåFagsak = this.erFørsteVedtaksperiodePåFagsak,
                 erUregistrerteBarnPåbehandling = this.uregistrerteBarn.isNotEmpty(),
-                barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
+                barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
             )
             .byggBegrunnelserOgFritekster(
                 restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
@@ -33,6 +33,7 @@ data class BrevperiodeData(
             restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
             uregistrerteBarn = this.uregistrerteBarn,
             brevMålform = this.brevMålform,
+            barnMedReduksjonFraForrigeBehandlingIdent = this.barnMedReduksjonFraForrigeBehandlingIdent
         )
 
     override fun compareTo(other: BrevperiodeData): Int {

@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.IKKE_VURDERT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT
@@ -110,6 +111,7 @@ fun hentManuellVedtaksbrevtype(
                 ENDRET -> Brevmal.VEDTAK_ENDRING
 
                 OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
+                FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
 
                 INNVILGET_OG_OPPHØRT,
                 INNVILGET_ENDRET_OG_OPPHØRT,

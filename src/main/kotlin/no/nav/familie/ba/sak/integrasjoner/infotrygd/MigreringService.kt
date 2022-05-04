@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_UTVIDET_DELT_BOSTED
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -43,7 +42,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
-import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -125,11 +123,6 @@ class MigreringService(
 
             validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
-            if (!featureToggleService.isEnabled(FeatureToggleConfig.SKAL_MIGRERE_FOSTERBARN, false)) {
-                secureLog.info("Migrering: Validerer at barna er i relasjon med $personIdent")
-                validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
-            }
-
             try {
                 fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
                     .also { kastFeilDersomAlleredeMigrert(it) }
@@ -170,7 +163,7 @@ class MigreringService(
 
             val førsteUtbetalingsperiode = finnFørsteUtbetalingsperiode(behandling.id)
 
-            sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(behandling.id, løpendeInfotrygdsak)
+            sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(behandling.id, løpendeInfotrygdsak, personIdent)
 
             iverksett(behandlingEtterVilkårsvurdering)
 
@@ -231,21 +224,6 @@ class MigreringService(
         if (søkerIdenter.single { it.ident == personIdent }.historisk) {
             secureLog.warn("Personident $personIdent er historisk, og kan ikke brukes til å migrere$søkerIdenter")
             kastOgTellMigreringsFeil(MigreringsfeilType.IDENT_IKKE_LENGER_AKTIV)
-        }
-    }
-
-    private fun validerAtBarnErIRelasjonMedPersonident(personAktør: Aktør, barnasAktør: List<Aktør>) {
-        val barnasIdenter = barnasAktør.map { it.aktivFødselsnummer() }
-
-        val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjoner(personAktør)
-            .filter { it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN }
-            .map { it.relatertPersonsIdent }
-        if (!listeBarnFraPdl.containsAll(barnasIdenter)) {
-            secureLog.info(
-                "Kan ikke migrere person ${personAktør.aktivFødselsnummer()} fordi barn fra PDL IKKE inneholder alle løpende barnetrygdbarn fra Infotrygd.\n" +
-                    "Barn fra PDL: ${listeBarnFraPdl}\n Barn fra Infotrygd: $barnasIdenter"
-            )
-            kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)
         }
     }
 
@@ -421,6 +399,7 @@ class MigreringService(
     private fun sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(
         behandlingId: Long,
         infotrygdSak: Sak,
+        fnr: String,
     ) {
         val førsteutbetalingsperiode = finnFørsteUtbetalingsperiode(behandlingId)
         val førsteUtbetalingsbeløp = førsteutbetalingsperiode.value
@@ -438,7 +417,7 @@ class MigreringService(
                 )?.andelerTilkjentYtelse
                 }"
             )
-
+            secureLog.info("Beløp fra infotrygd sammsvarer ikke med beløp fra ba-sak for ${infotrygdSak.valg} ${infotrygdSak.undervalg} fnr=$fnr baSak=$førsteUtbetalingsbeløp infotrygd=$beløpFraInfotrygd")
             kastOgTellMigreringsFeil(
                 beløpfeilType,
                 beløpfeilType.beskrivelse +

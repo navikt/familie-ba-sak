@@ -42,7 +42,13 @@ data class BrevPeriodeTestConfig(
     val brevMålform: Målform,
 
     val forventetOutput: BrevPeriodeOutput?
-)
+) {
+    fun hentPersonerMedReduksjonFraForrigeBehandling(): List<BrevPeriodeTestPerson> =
+        this.personerPåBehandling.filter { it.harReduksjonFraForrigeBehandling }
+
+    fun hentBarnMedReduksjonFraForrigeBehandling() =
+        hentPersonerMedReduksjonFraForrigeBehandling().filter { it.type == PersonType.BARN }
+}
 
 data class BrevPeriodeTestPerson(
     val personIdent: String = randomFnr(),
@@ -51,7 +57,8 @@ data class BrevPeriodeTestPerson(
     val overstyrteVilkårresultater: List<MinimertVilkårResultat>,
     val andreVurderinger: List<MinimertAnnenVurdering>,
     val endredeUtbetalinger: List<EndretRestUtbetalingAndelPåPerson>,
-    val utbetalinger: List<UtbetalingPåPerson>
+    val utbetalinger: List<UtbetalingPåPerson>,
+    val harReduksjonFraForrigeBehandling: Boolean = false,
 ) {
     fun tilMinimertPerson() = MinimertRestPerson(personIdent = personIdent, fødselsdato = fødselsdato, type = type)
     fun tilUtbetalingsperiodeDetaljer() = utbetalinger.map {

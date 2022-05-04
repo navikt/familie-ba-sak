@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -69,6 +70,9 @@ class DokumentServiceTest(
 
     @Autowired
     private val integrasjonClient: IntegrasjonClient,
+
+    @Autowired
+    private val utgåendeJournalføringService: UtgåendeJournalføringService,
 
     @Autowired
     private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -267,14 +271,7 @@ class DokumentServiceTest(
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         io.mockk.verify(exactly = 1) {
-            integrasjonClient.journalførManueltBrev(
-                fnr = manueltBrevRequest.mottakerIdent,
-                fagsakId = behandling.fagsak.id.toString(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                førsteside = null,
-                dokumenttype = manueltBrevRequest.brevmal.dokumenttype
-            )
+            integrasjonClient.journalførDokument(any())
         }
     }
 }

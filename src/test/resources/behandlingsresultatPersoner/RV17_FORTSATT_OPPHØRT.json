@@ -1,0 +1,30 @@
+{
+  "beskrivelse": "Førstegangsbehandling var innvilget og opphørt. RV: Ytelsen er fortsatt opphørt",
+  "inneværendeMåned": "2022-04",
+  "personer": [
+    {
+      "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678911",
+        "aktørId": "1234567891100"
+      },
+      "søktForPerson": false,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2021-01",
+          "stønadTom": "2022-04",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2021-01",
+          "stønadTom": "2022-04",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    }
+  ],
+  "forventetResultat": "FORTSATT_OPPHØRT"
+}

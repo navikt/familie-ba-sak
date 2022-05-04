@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.fødselsnummerGenerator
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
@@ -375,32 +374,6 @@ class MigreringServiceTest(
         assertThat(vilkårResultater.filter { it.vilkårType.gjelderAlltidFraBarnetsFødselsdato() })
             .extracting("periodeFom")
             .hasSameElementsAs(barnasFødselsdatoer)
-    }
-
-    @Test
-    fun `migrering skal feile dersom PDL returnerer mangelfull liste over barn fra Infotrygd på person`() {
-        val barnUnder18 = fødselsnummerGenerator.foedselsnummer(LocalDate.now()).asString
-        val barnOver18 = fødselsnummerGenerator.foedselsnummer(LocalDate.now().minusYears(19)).asString
-        every {
-            infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
-        every { pdlRestClient.hentForelderBarnRelasjoner(any()) } returns
-            listOf(
-                ForelderBarnRelasjon(
-                    relatertPersonsIdent = barnUnder18,
-                    relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN
-                ),
-                ForelderBarnRelasjon(
-                    relatertPersonsIdent = barnOver18,
-                    relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN
-                )
-            )
-
-        assertThatThrownBy {
-            migreringService.migrer(ClientMocks.søkerFnr[0])
-        }.isInstanceOf(KanIkkeMigrereException::class.java)
-            .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)
     }
 
     @Test

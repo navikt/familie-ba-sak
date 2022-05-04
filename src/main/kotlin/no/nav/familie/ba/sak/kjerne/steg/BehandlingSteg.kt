@@ -315,7 +315,9 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
 
 fun hentNesteStegTypeBasertPåBehandlingsresultat(resultat: Behandlingsresultat): StegType {
     return when (resultat) {
-        Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.AVSLÅTT -> JOURNALFØR_VEDTAKSBREV
+        Behandlingsresultat.FORTSATT_INNVILGET,
+        Behandlingsresultat.AVSLÅTT,
+        Behandlingsresultat.FORTSATT_OPPHØRT -> JOURNALFØR_VEDTAKSBREV
         else -> IVERKSETT_MOT_OPPDRAG
     }
 }
