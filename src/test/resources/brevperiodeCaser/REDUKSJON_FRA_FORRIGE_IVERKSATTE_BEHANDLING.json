@@ -1,5 +1,5 @@
 {
-  "beskrivelse": "Utbetalingsperiode.Redkusjon fra forrige iverksatte behandling. Ett barn bor ikke med søker og skal ikke med i periodeteksten.",
+  "beskrivelse": "Utbetalingsperiode.Reduksjon fra forrige iverksatte behandling. Ett barn bor ikke med søker og skal ikke med i periodeteksten.",
   "fom": "2021-03-01",
   "tom": "2021-08-31",
   "vedtaksperiodetype": "UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING",
