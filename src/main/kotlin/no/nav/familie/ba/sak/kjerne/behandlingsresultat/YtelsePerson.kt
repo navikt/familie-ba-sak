@@ -46,6 +46,7 @@ enum class YtelsePersonResultat(val displayName: String) {
     INNVILGET(displayName = "Innvilget"),
     AVSLÅTT(displayName = "Avslått"),
     OPPHØRT(displayName = "Reduksjon som har ført til opphør"),
+    FORTSATT_OPPHØRT(displayName = "Fortsatt Opphørt"),
     IKKE_VURDERT(displayName = "Ikke vurdert"),
     ENDRET(displayName = "Endret"),
 }

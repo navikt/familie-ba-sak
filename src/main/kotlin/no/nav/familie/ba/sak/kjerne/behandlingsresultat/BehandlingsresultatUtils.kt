@@ -105,6 +105,7 @@ object BehandlingsresultatUtils {
 
         return when {
             samledeResultater.isEmpty() -> Behandlingsresultat.FORTSATT_INNVILGET
+            samledeResultater == setOf(YtelsePersonResultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.FORTSATT_OPPHØRT
             samledeResultater == setOf(YtelsePersonResultat.ENDRET) -> Behandlingsresultat.ENDRET
             samledeResultater == setOf(
                 YtelsePersonResultat.ENDRET,

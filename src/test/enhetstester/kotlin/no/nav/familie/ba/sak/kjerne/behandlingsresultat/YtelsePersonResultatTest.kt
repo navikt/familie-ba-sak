@@ -1,20 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.personident.dummyAktør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class YtelsePersonResultatTest {
-    private val personidentService = mockk<PersonidentService>()
-
     val søker = tilfeldigPerson()
     val barn1 = tilfeldigPerson()
     val barn2 = tilfeldigPerson()
