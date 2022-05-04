@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.YtelsePersonUtils.erAndelMedEndretBeløp
@@ -229,5 +230,61 @@ class YtelsePersonUtilsTest {
                 listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned4, beløp2))
             )
         )
+    }
+
+    @Test
+    fun `skal gi FORTSATT_OPPHØRT når forrige behandling og ny behandling er opphørt og har lik tilkjent ytelse`() {
+        val ytelsePersoner = listOf(
+            BehandlingsresultatPerson(
+                aktør = barn1.aktør,
+                søktForPerson = false,
+                personType = barn1.type,
+                forrigeAndeler = listOf(
+                    lagBehandlingsresultatAndelTilkjentYtelse(
+                        inneværendeMåned().minusYears(3).toString(),
+                        inneværendeMåned().forrigeMåned().toString(),
+                        1054
+                    )
+                ),
+                andeler = listOf(
+                    lagBehandlingsresultatAndelTilkjentYtelse(
+                        inneværendeMåned().minusYears(3).toString(),
+                        inneværendeMåned().forrigeMåned().toString(),
+                        1054
+                    )
+                )
+            )
+        )
+        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner)
+
+        assertTrue { ytelsePersonerMedResultat.any { it.resultater.contains(YtelsePersonResultat.FORTSATT_OPPHØRT) } }
+    }
+
+    @Test
+    fun `skal gi OPPHØRT når alle andeler er avsluttet`() {
+        val ytelsePersoner = listOf(
+            BehandlingsresultatPerson(
+                aktør = barn1.aktør,
+                søktForPerson = false,
+                personType = barn1.type,
+                forrigeAndeler = listOf(
+                    lagBehandlingsresultatAndelTilkjentYtelse(
+                        inneværendeMåned().minusYears(3).toString(),
+                        inneværendeMåned().plusYears(15).toString(),
+                        1054
+                    )
+                ),
+                andeler = listOf(
+                    lagBehandlingsresultatAndelTilkjentYtelse(
+                        inneværendeMåned().minusYears(3).toString(),
+                        inneværendeMåned().forrigeMåned().toString(),
+                        1054
+                    )
+                )
+            )
+        )
+        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(ytelsePersoner)
+
+        assertTrue { ytelsePersonerMedResultat.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } }
     }
 }

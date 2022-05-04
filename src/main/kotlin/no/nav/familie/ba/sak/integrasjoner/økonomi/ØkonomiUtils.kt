@@ -144,14 +144,8 @@ object ØkonomiUtils {
         forrigeKjeder
             .mapValues { (person, forrigeAndeler) ->
                 forrigeAndeler.filter {
-                    altIKjedeOpphøres(
-                        person,
-                        sisteBeståendeAndelIHverKjede
-                    ) || andelOpphøres(
-                        person,
-                        it,
-                        sisteBeståendeAndelIHverKjede
-                    )
+                    altIKjedeOpphøres(person, sisteBeståendeAndelIHverKjede) ||
+                        andelOpphøres(person, it, sisteBeståendeAndelIHverKjede)
                 }
             }
             .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
