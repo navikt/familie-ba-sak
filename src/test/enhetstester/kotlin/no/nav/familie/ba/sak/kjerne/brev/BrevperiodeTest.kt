@@ -61,7 +61,7 @@ class BrevperiodeTest {
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
-                    barnMedReduksjonFraForrigeBehandlingFnr = behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
+                    barnMedReduksjonFraForrigeBehandlingIdent = behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
                         .map { it.personIdent },
                 )
             } catch (e: Exception) {

@@ -59,14 +59,14 @@ fun hentBrevPerioder(
             uregistrerteBarn = it.uregistrerteBarn,
             erFørsteVedtaksperiodePåFagsak = it.erFørsteVedtaksperiodePåFagsak,
             brevMålform = it.brevMålform,
-            barnMedReduksjonFraForrigeBehandlingFnr = it.barnPersonIdentMedReduksjon,
+            barnMedReduksjonFraForrigeBehandlingIdent = it.barnMedReduksjonFraForrigeBehandlingIdent,
         )
     }
 
 fun MinimertVedtaksperiode.tilBrevPeriode(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
-    barnMedReduksjonFraForrigeBehandlingFnr: List<String>,
+    barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     brevMålform: Målform,
 ): BrevPeriode? {
@@ -75,7 +75,7 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
             erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
-            barnPersonIdentMedReduksjon = barnMedReduksjonFraForrigeBehandlingFnr,
+            barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
         )
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
