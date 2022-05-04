@@ -85,7 +85,7 @@ class BrevPeriodeService(
                 andelerTilkjentYtelse,
                 utvidetVedtaksperiodeMedBegrunnelse.fom
             ),
-            barnPersonIdentMedReduksjon = hentBarnsPersonIdentMedRedusertPeriode(
+            barnMedReduksjonFraForrigeBehandlingIdent = hentBarnsPersonIdentMedRedusertPeriode(
                 vedtaksperiodeMedBegrunnelser,
                 andelerTilkjentYtelse
             )
