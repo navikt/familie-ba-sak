@@ -4,12 +4,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.dagForUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.dagMedUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteEllerNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteEllerNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -23,14 +19,6 @@ data class VilkårRegelverkResultat(
 class VilkårsresultatDagTidslinje(
     private val vilkårsresultater: List<VilkårResultat>
 ) : Tidslinje<VilkårRegelverkResultat, Dag>() {
-
-    override fun fraOgMed() = vilkårsresultater.map {
-        it.periodeFom.tilTidspunktEllerUendeligLengeSiden { it.periodeTom }
-    }.minsteEllerNull() ?: dagForUendeligLengeSiden()
-
-    override fun tilOgMed() = vilkårsresultater.map {
-        it.periodeTom.tilTidspunktEllerUendeligLengeTil { it.periodeFom }
-    }.størsteEllerNull() ?: dagMedUendeligLengeTil()
 
     override fun lagPerioder(): Collection<Periode<VilkårRegelverkResultat, Dag>> {
         return vilkårsresultater.map { it.tilPeriode() }

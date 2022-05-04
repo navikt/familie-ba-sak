@@ -39,14 +39,14 @@ import java.time.LocalDate
 import javax.transaction.Transactional
 
 @Service
-class JournalføringService(
+class InnkomendeJournalføringService(
     private val integrasjonClient: IntegrasjonClient,
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val journalføringRepository: JournalføringRepository,
     private val loggService: LoggService,
     private val stegService: StegService,
-    private val journalføringMetrikk: JournalføringMetrikk
+    private val journalføringMetrikk: JournalføringMetrikk,
 ) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
@@ -333,6 +333,6 @@ class JournalføringService(
 
     companion object {
 
-        private val logger = LoggerFactory.getLogger(JournalføringService::class.java)
+        private val logger = LoggerFactory.getLogger(InnkomendeJournalføringService::class.java)
     }
 }

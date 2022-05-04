@@ -77,7 +77,6 @@ class BeregningServiceTest {
             personopplysningGrunnlagRepository,
             endretUtbetalingAndelRepository,
             småbarnstilleggService,
-            featureToggleService
         )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs

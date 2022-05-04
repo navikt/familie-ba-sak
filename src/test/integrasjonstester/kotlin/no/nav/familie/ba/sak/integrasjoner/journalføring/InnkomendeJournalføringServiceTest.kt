@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 
-class JournalføringServiceTest(
+class InnkomendeJournalføringServiceTest(
 
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -34,7 +34,7 @@ class JournalføringServiceTest(
     private val personidentService: PersonidentService,
 
     @Autowired
-    private val journalføringService: JournalføringService,
+    private val innkomendeJournalføringService: InnkomendeJournalføringService,
 
     @Autowired
     private val journalføringRepository: JournalføringRepository,
@@ -49,7 +49,7 @@ class JournalføringServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
 
-        val (sak, behandlinger) = journalføringService
+        val (sak, behandlinger) = innkomendeJournalføringService
             .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
 
         val journalposter = journalføringRepository.findByBehandlingId(behandlingId = behandling.id)
@@ -68,7 +68,7 @@ class JournalføringServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
 
-        val (sak, behandlinger) = journalføringService
+        val (sak, behandlinger) = innkomendeJournalføringService
             .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")
 
         assertNull(sak.fagsakId)
@@ -80,7 +80,7 @@ class JournalføringServiceTest(
     fun `journalfør skal opprette en førstegangsbehandling fra journalføring`() {
         val søkerFnr = randomFnr()
         val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr))
-        val fagsakId = journalføringService.journalfør(request, "123", "mockEnhet", "1")
+        val fagsakId = innkomendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
 
         val behandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId.toLong())
         assertNotNull(behandling)
@@ -98,7 +98,7 @@ class JournalføringServiceTest(
         val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr)).copy(datoMottatt = null)
 
         val exception = assertThrows<RuntimeException> {
-            journalføringService.journalfør(
+            innkomendeJournalføringService.journalfør(
                 request,
                 "123",
                 "mockEnhet",

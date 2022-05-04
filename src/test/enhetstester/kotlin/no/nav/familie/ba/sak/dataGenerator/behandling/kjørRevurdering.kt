@@ -378,8 +378,7 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
         ytelserForSøkerForrigeMåned = hentYtelserForSøkerForrigeMåned(
             andelerTilkjentYtelse,
             utvidetVedtaksperiodeMedBegrunnelser
-        ),
-        erNyDeltBostedTogglePå = false
+        )
     )
 
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(

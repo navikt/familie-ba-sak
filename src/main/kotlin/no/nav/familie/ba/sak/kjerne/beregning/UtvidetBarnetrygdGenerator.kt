@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erBack2BackIMånedsskifte
-import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
@@ -13,7 +12,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.slåSammenPerioderSomIkkeSkulleHaVærtSplittet
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -29,8 +27,7 @@ import java.time.LocalDate
 
 data class UtvidetBarnetrygdGenerator(
     val behandlingId: Long,
-    val tilkjentYtelse: TilkjentYtelse,
-    val skalBrukeNyMåteÅLageUtvidetAndeler: Boolean = true
+    val tilkjentYtelse: TilkjentYtelse
 ) {
 
     fun lagUtvidetBarnetrygdAndeler(
@@ -49,53 +46,16 @@ data class UtvidetBarnetrygdGenerator(
 
         val utvidaTidslinje = LocalDateTimeline(datoSegmenter)
 
-        val utvidetAndeler: List<AndelTilkjentYtelse> = if (skalBrukeNyMåteÅLageUtvidetAndeler) {
-            val barnasTidslinje =
-                utledTidslinjeForBarna(andelerBarna)
+        val barnasTidslinje =
+            utledTidslinjeForBarna(andelerBarna)
 
-            val sammenslåttTidslinje = kombinerTidslinjer(utvidaTidslinje, barnasTidslinje)
+        val sammenslåttTidslinje = kombinerTidslinjer(utvidaTidslinje, barnasTidslinje)
 
-            sammenslåttTidslinje.toSegments()
-                .filter { segment -> segment.value.any { it.rolle == PersonType.BARN } && segment.value.any { it.rolle == PersonType.SØKER } }
-                .flatMap { segment ->
-                    lagAndelerForSegmentBasertPåSatsperioder(segment, søkerAktør)
-                }
-        } else {
-            val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
-                .groupBy { it.aktør }
-                .map { identMedAndeler ->
-                    lagTidslinjeForBarn(identMedAndeler)
-                }
-
-            val sammenslåttTidslinje = barnasTidslinjer.fold(utvidaTidslinje) { sammenlagt, neste ->
-                (kombinerTidslinjer(sammenlagt, neste))
+        val utvidetAndeler: List<AndelTilkjentYtelse> = sammenslåttTidslinje.toSegments()
+            .filter { segment -> segment.value.any { it.rolle == PersonType.BARN } && segment.value.any { it.rolle == PersonType.SØKER } }
+            .flatMap { segment ->
+                lagAndelerForSegmentBasertPåSatsperioder(segment, søkerAktør)
             }
-
-            sammenslåttTidslinje.toSegments()
-                .filter { segment -> segment.value.any { it.rolle == PersonType.BARN } && segment.value.any { it.rolle == PersonType.SØKER } }
-                .map {
-                    val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(
-                        satstype = SatsType.ORBA,
-                        stønadFraOgMed = it.fom.toYearMonth(),
-                        stønadTilOgMed = it.tom.toYearMonth()
-                    )
-                        .singleOrNull()?.sats
-                        ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
-                    val prosentForPeriode =
-                        it.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
-                    AndelTilkjentYtelse(
-                        behandlingId = behandlingId,
-                        tilkjentYtelse = tilkjentYtelse,
-                        aktør = søkerAktør,
-                        stønadFom = it.fom.toYearMonth(),
-                        stønadTom = it.tom.toYearMonth(),
-                        kalkulertUtbetalingsbeløp = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosentForPeriode),
-                        type = YtelseType.UTVIDET_BARNETRYGD,
-                        sats = ordinærSatsForPeriode,
-                        prosent = prosentForPeriode
-                    )
-                }
-        }
 
         if (utvidetAndeler.isEmpty()) {
             throw FunksjonellFeil(
@@ -104,10 +64,7 @@ data class UtvidetBarnetrygdGenerator(
             )
         }
 
-        return if (skalBrukeNyMåteÅLageUtvidetAndeler) utvidetAndeler else return slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
-            andelerTilkjentYtelse = utvidetAndeler.toMutableList(),
-            skalAndelerSlåsSammen = ::skalUtvidetAndelerSlåsSammen
-        )
+        return utvidetAndeler
     }
 
     private fun lagAndelerForSegmentBasertPåSatsperioder(
@@ -125,7 +82,8 @@ data class UtvidetBarnetrygdGenerator(
         }
 
         val prosentForPeriode =
-            segment.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent for periode fom=${segment.fom}, tom=${segment.tom}")
+            segment.value.maxByOrNull { data -> data.prosent }?.prosent
+                ?: error("Finner ikke prosent for periode fom=${segment.fom}, tom=${segment.tom}")
 
         return ordinæreSatserForPeriode.map { satsperiode ->
             AndelTilkjentYtelse(
@@ -143,14 +101,6 @@ data class UtvidetBarnetrygdGenerator(
     }
 
     data class PeriodeData(val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
-
-    private fun skalUtvidetAndelerSlåsSammen(
-        førsteAndel: AndelTilkjentYtelse,
-        nesteAndel: AndelTilkjentYtelse
-    ): Boolean =
-        førsteAndel.stønadTom.sisteDagIInneværendeMåned()
-            .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) &&
-            førsteAndel.kalkulertUtbetalingsbeløp == nesteAndel.kalkulertUtbetalingsbeløp
 
     private fun utledTidslinjeForBarna(andelerBarna: List<AndelTilkjentYtelse>): LocalDateTimeline<List<PeriodeData>> {
         val barnasTidslinjer = andelerBarna
