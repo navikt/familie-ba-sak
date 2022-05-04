@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.tilDokumenttype
+import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevtype
@@ -29,7 +29,7 @@ data class JournalførVedtaksbrevDTO(
 class JournalførVedtaksbrev(
     private val vedtakService: VedtakService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val utgåendeJournalføringService: UtgåendeJournalføringService,
     private val taskRepository: TaskRepositoryWrapper
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
@@ -91,7 +91,7 @@ class JournalførVedtaksbrev(
                 tittel = VEDTAK_VEDLEGG_TITTEL
             )
         )
-        return integrasjonClient.journalførDokument(
+        return utgåendeJournalføringService.journalførDokument(
             fnr = fnr,
             fagsakId = fagsakId,
             journalførendeEnhet = journalførendeEnhet,

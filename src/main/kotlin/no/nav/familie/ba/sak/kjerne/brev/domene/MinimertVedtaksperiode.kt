@@ -20,7 +20,7 @@ data class MinimertVedtaksperiode(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         erFørsteVedtaksperiodePåFagsak: Boolean,
         erUregistrerteBarnPåbehandling: Boolean,
-        barnPersonIdentMedReduksjon: List<String> = emptyList(),
+        barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
     ): BrevPeriodeGrunnlagMedPersoner {
         return BrevPeriodeGrunnlagMedPersoner(
             fom = this.fom,
@@ -39,7 +39,7 @@ data class MinimertVedtaksperiode(
                     minimerteUtbetalingsperiodeDetaljer = this.minimerteUtbetalingsperiodeDetaljer,
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                     erUregistrerteBarnPåbehandling = erUregistrerteBarnPåbehandling,
-                    barnPersonIdentMedReduksjon = barnPersonIdentMedReduksjon,
+                    barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
                 )
             },
             fritekster = this.fritekster,
@@ -66,7 +66,8 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean = false,
-    brevMålform: Målform
+    brevMålform: Målform,
+    barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
 ): BrevPeriodeForLogging {
 
     return BrevPeriodeForLogging(
@@ -78,7 +79,8 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
         personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling.map {
             it.tilBrevPeriodeTestPerson(
                 brevPeriodeGrunnlag = this,
-                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev
+                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+                barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent
             )
         },
         uregistrerteBarn = uregistrerteBarn.map { it.copy(personIdent = "", navn = "") },

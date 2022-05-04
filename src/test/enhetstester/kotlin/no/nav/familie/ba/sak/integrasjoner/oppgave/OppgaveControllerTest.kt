@@ -8,7 +8,7 @@ import io.mockk.just
 import io.mockk.runs
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
-import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
+import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkomendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -45,7 +45,7 @@ class OppgaveControllerTest {
     lateinit var fagsakService: FagsakService
 
     @MockK
-    lateinit var journalføringService: JournalføringService
+    lateinit var innkomendeJournalføringService: InnkomendeJournalføringService
 
     @MockK
     lateinit var tilgangService: TilgangService

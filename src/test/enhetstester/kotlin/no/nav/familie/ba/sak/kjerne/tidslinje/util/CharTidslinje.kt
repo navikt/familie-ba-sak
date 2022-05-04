@@ -12,21 +12,22 @@ import java.time.YearMonth
 class CharTidslinje<T : Tidsenhet>(private val tegn: String, private val startTidspunkt: Tidspunkt<T>) :
     Tidslinje<Char, T>() {
 
-    override fun fraOgMed() = when (tegn.first()) {
+    val fraOgMed = when (tegn.first()) {
         '<' -> startTidspunkt.somUendeligLengeSiden()
         else -> startTidspunkt
     }
 
-    override fun tilOgMed(): Tidspunkt<T> {
-        val sluttMåned = startTidspunkt.flytt(tegn.length.toLong() - 1)
-        return when (tegn.last()) {
-            '>' -> sluttMåned.somUendeligLengeTil()
-            else -> sluttMåned
+    val tilOgMed: Tidspunkt<T>
+        get() {
+            val sluttMåned = startTidspunkt.flytt(tegn.length.toLong() - 1)
+            return when (tegn.last()) {
+                '>' -> sluttMåned.somUendeligLengeTil()
+                else -> sluttMåned
+            }
         }
-    }
 
     override fun lagPerioder(): Collection<Periode<Char, T>> {
-        val tidspunkter = fraOgMed()..tilOgMed()
+        val tidspunkter = fraOgMed..tilOgMed
 
         return tidspunkter.mapIndexed { index, tidspunkt ->
             val c = when (index) {

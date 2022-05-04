@@ -38,7 +38,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
-fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
+fun hentPerioderMedUtbetaling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak
 ) = andelerTilkjentYtelse.lagVertikaleSegmenter()
@@ -123,7 +123,7 @@ fun erFørsteVedtaksperiodePåFagsak(
     )
 }
 
-fun identifiserReduksjonsperioderFraInnvilgelsesTidspunkt(
+fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak,
@@ -206,11 +206,11 @@ private fun utledTom(
 
 fun finnOgOppdaterOverlappendeUtbetalingsperiode(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
-    reduksjonsperioder: List<VedtaksperiodeMedBegrunnelser>
+    perioderMedReduksjonFraSistIverksatteBehandling: List<VedtaksperiodeMedBegrunnelser>
 ): List<VedtaksperiodeMedBegrunnelser> {
     val overlappendePerioder =
         utbetalingsperioder.filter {
-            reduksjonsperioder.any { reduksjonsperiode ->
+            perioderMedReduksjonFraSistIverksatteBehandling.any { reduksjonsperiode ->
                 reduksjonsperiode.fom!!.isSameOrAfter(it.fom!!) && reduksjonsperiode.tom!!.isSameOrBefore(
                     it.tom!!
                 )
@@ -222,7 +222,7 @@ fun finnOgOppdaterOverlappendeUtbetalingsperiode(
             overlappendePerioder.firstOrNull { periode -> it.fom == periode.fom && it.tom == periode.tom }
         if (overlappendePeriode != null) {
             oppdatertUtbetalingsperioder.addAll(
-                reduksjonsperioder.filter { reduksjonsperiode ->
+                perioderMedReduksjonFraSistIverksatteBehandling.filter { reduksjonsperiode ->
                     reduksjonsperiode.fom!! >= overlappendePeriode.fom &&
                         reduksjonsperiode.tom!! <= overlappendePeriode.tom
                 }
@@ -242,7 +242,6 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    erNyDeltBostedTogglePå: Boolean
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
     sanityBegrunnelser = sanityBegrunnelser,
@@ -259,8 +258,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     ytelserForSøkerForrigeMåned = hentYtelserForSøkerForrigeMåned(
         andelerTilkjentYtelse,
         utvidetVedtaksperiodeMedBegrunnelser
-    ),
-    erNyDeltBostedTogglePå = erNyDeltBostedTogglePå
+    )
 )
 
 fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
@@ -271,8 +269,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     aktørIderMedUtbetaling: List<String>,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    ytelserForSøkerForrigeMåned: List<YtelseType>,
-    erNyDeltBostedTogglePå: Boolean
+    ytelserForSøkerForrigeMåned: List<YtelseType>
 ): List<Standardbegrunnelse> {
     val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.values()
         .filter {
@@ -282,9 +279,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
                 .contains(it.vedtakBegrunnelseType)
         }.filter {
             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
-                endretUtbetalingsperiodeBegrunnelser.filter { standardbegrunnelse ->
-                    erNyDeltBostedTogglePå || standardbegrunnelse != Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING
-                }.contains(it)
+                endretUtbetalingsperiodeBegrunnelser.contains(it)
             } else true
         }
 

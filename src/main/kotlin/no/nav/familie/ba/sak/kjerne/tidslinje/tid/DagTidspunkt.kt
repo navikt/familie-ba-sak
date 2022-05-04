@@ -6,7 +6,7 @@ import java.time.YearMonth
 
 data class DagTidspunkt internal constructor(
     private val dato: LocalDate,
-    private val uendelighet: Uendelighet
+    val uendelighet: Uendelighet
 ) : Tidspunkt<Dag>(uendelighet) {
 
     init {

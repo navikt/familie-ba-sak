@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jul
 import org.junit.jupiter.api.Assertions.assertEquals

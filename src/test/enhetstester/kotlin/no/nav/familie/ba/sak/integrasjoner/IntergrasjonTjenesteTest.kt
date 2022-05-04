@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgi
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidstaker
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Skyggesak
+import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
@@ -75,12 +76,16 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
     lateinit var restOperations: RestOperations
 
     lateinit var integrasjonClient: IntegrasjonClient
+    lateinit var utgåendeJournalføringService: UtgåendeJournalføringService
 
     @BeforeEach
     fun setUp() {
         integrasjonClient = IntegrasjonClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
             restOperations
+        )
+        utgåendeJournalføringService = UtgåendeJournalføringService(
+            integrasjonClient = integrasjonClient
         )
     }
 
@@ -165,7 +170,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         vedtak.stønadBrevPdF = mockPdf
 
         val journalPostId =
-            integrasjonClient.journalførDokument(
+            utgåendeJournalføringService.journalførDokument(
                 fnr = MOCK_FNR,
                 fagsakId = vedtak.behandling.fagsak.id.toString(),
                 brev = listOf(

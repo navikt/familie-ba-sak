@@ -75,10 +75,12 @@ class Tidslinjer(
         private val vilkårsresultatMånedTidslinjer: List<Tidslinje<VilkårRegelverkResultat, Måned>> =
             vilkårsresultatTidslinjer.map { it.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() }
 
+        val erUnder18ÅrVilkårTidslinje = erUnder18ÅrVilkårTidslinje(tidslinjer.barnOgFødselsdatoer.getValue(aktør))
+
         val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             vilkårsresultatMånedTidslinjer
                 .snittKombinerUtenNull(BarnOppfyllerVilkårKombinator()::kombiner)
-                .filtrerMed(erUnder18ÅrVilkårTidslinje(tidslinjer.barnOgFødselsdatoer.getValue(aktør)))
+                .filtrerMed(erUnder18ÅrVilkårTidslinje)
 
         val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             oppfyllerVilkårTidslinje.snittKombinerMed(
@@ -99,11 +101,11 @@ class Tidslinjer(
 fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> {
 
     return object : Tidslinje<Boolean, Måned>() {
-        override fun fraOgMed() = Tidspunkt.med(fødselsdato.toYearMonth()).neste()
-        override fun tilOgMed() = Tidspunkt.med(fødselsdato.til18ÅrsVilkårsdato().toYearMonth()).forrige()
+        private val fraOgMed = Tidspunkt.med(fødselsdato.toYearMonth()).neste()
+        private val tilOgMed = Tidspunkt.med(fødselsdato.til18ÅrsVilkårsdato().toYearMonth()).forrige()
 
         override fun lagPerioder(): Collection<Periode<Boolean, Måned>> = listOf(
-            Periode(fraOgMed(), tilOgMed(), true)
+            Periode(fraOgMed, tilOgMed, true)
         )
     }
 }
