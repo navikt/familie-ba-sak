@@ -66,7 +66,7 @@
     {
       "fødselsdato": "2021-02-28",
       "type": "BARN",
-      "harReduksjonFraForrigeBehanlding": true,
+      "harReduksjonFraForrigeBehandling": true,
       "overstyrteVilkårresultater": [
         {
           "vilkårType": "BOR_MED_SØKER",
