@@ -9,14 +9,15 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.PRAKTISK_SENESTE_DAG
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMedEtter
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilDag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import java.time.LocalDate
 import java.util.Random
@@ -25,54 +26,49 @@ fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
     val barnasTidslinjer = this.barnasTidslinjer()
     val søkersTidslinjer = this.søkersTidslinjer()
 
+    val erYtelseForBarnaMånedTidslinje: Tidslinje<Boolean, Måned> = barnasTidslinjer.values
+        .map { it.erUnder18ÅrVilkårTidslinje }
+        .snittKombinerUtenNull { it.any { it } }
+
     return RestTidslinjer(
         barnasTidslinjer = barnasTidslinjer.entries.associate {
+            val erUnder18årTidslinje = it.value.erUnder18ÅrVilkårTidslinje
             it.key.aktivFødselsnummer() to RestTidslinjerForBarn(
-                vilkårTidslinjer = it.value.vilkårsresultatTidslinjer.tilRestVilkårTidslinjer(),
+                vilkårTidslinjer = it.value.vilkårsresultatTidslinjer.map {
+                    it.beskjærEtter(erUnder18årTidslinje.tilDag())
+                        .tilRestTidslinje()
+                },
                 oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje = it.value
                     .barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje
-                    .filtrerIkkeNull()
-                    .beskjærEtter(it.value.erUnder18ÅrVilkårTidslinje)
-                    .tilRestOppfyllerVilkårTidslinje(),
+                    .beskjærEtter(erUnder18årTidslinje)
+                    .tilRestTidslinje(),
                 regelverkTidslinje = it.value.regelverkTidslinje
-                    .filtrerIkkeNull()
-                    .beskjærEtter(it.value.erUnder18ÅrVilkårTidslinje)
-                    .tilRestRegelverkTidslinje(),
-                oppsummeringTidslinje = tilfeldigOppsummering(it.value.regelverkTidslinje)
+                    .beskjærEtter(erUnder18årTidslinje)
+                    .tilRestTidslinje(),
+                oppsummeringTidslinje = tilfeldigOppsummering(
+                    it.value.regelverkTidslinje
+                        .beskjærEtter(erUnder18årTidslinje)
+                )
             )
         },
         søkersTidslinjer = RestTidslinjerForSøker(
-            vilkårTidslinjer = søkersTidslinjer.vilkårsresultatTidslinjer.tilRestVilkårTidslinjer(),
-            oppfyllerEgneVilkårTidslinje = søkersTidslinjer.oppfyllerVilkårTidslinje.tilRestOppfyllerVilkårTidslinje(),
+            vilkårTidslinjer = søkersTidslinjer.vilkårsresultatTidslinjer.map {
+                it.beskjærTilOgMedEtter(erYtelseForBarnaMånedTidslinje.tilDag())
+                    .tilRestTidslinje()
+            },
+            oppfyllerEgneVilkårTidslinje = søkersTidslinjer
+                .oppfyllerVilkårTidslinje
+                .beskjærTilOgMedEtter(erYtelseForBarnaMånedTidslinje)
+                .tilRestTidslinje()
         )
     )
 }
 
-fun List<Tidslinje<VilkårRegelverkResultat, Dag>>.tilRestVilkårTidslinjer(): List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>> =
-    this.map { vilkårsresultatTidslinje ->
-        vilkårsresultatTidslinje.perioder().map { periode ->
-            RestTidslinjePeriode(
-                fraOgMed = periode.fraOgMed.tilLocalDate(),
-                tilOgMed = periode.tilOgMed.tilLocalDateEllerNull(),
-                innhold = periode.innhold!!
-            )
-        }
-    }
-
-fun Tidslinje<Regelverk, Måned>.tilRestRegelverkTidslinje(): List<RestTidslinjePeriode<Regelverk?>> =
-    this.perioder().map { periode ->
+fun <I, T : Tidsenhet> Tidslinje<I, T>.tilRestTidslinje(): List<RestTidslinjePeriode<I>> =
+    this.filtrerIkkeNull().perioder().map { periode ->
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
-            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull() ?: PRAKTISK_SENESTE_DAG,
-            innhold = periode.innhold
-        )
-    }
-
-fun Tidslinje<Resultat, Måned>.tilRestOppfyllerVilkårTidslinje(): List<RestTidslinjePeriode<Resultat>> =
-    this.perioder().map { periode ->
-        RestTidslinjePeriode(
-            fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
-            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull() ?: PRAKTISK_SENESTE_DAG,
+            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDate(),
             innhold = periode.innhold!!
         )
     }
@@ -85,7 +81,7 @@ data class RestTidslinjer(
 data class RestTidslinjerForBarn(
     val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>>,
     val oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje: List<RestTidslinjePeriode<Resultat>>,
-    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk?>>,
+    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk>>,
     // / TODO: Er kun for å teste ut visualisering.
     val oppsummeringTidslinje: List<RestTidslinjePeriode<BeregningOppsummering>>
 )
@@ -120,7 +116,7 @@ fun tilfeldigOppsummering(regelverkTidslinje: Tidslinje<Regelverk, Måned>):
         regelverkTidslinje.tilOgMed()
     )
 
-    val tilfeldigOppsummeringTidslinje = regelverkTidslinje
+    return regelverkTidslinje
         .snittKombinerMed(tilfeldigTidslinje) { regelverk, rnd ->
             when (regelverk) {
                 Regelverk.EØS_FORORDNINGEN ->
@@ -136,15 +132,7 @@ fun tilfeldigOppsummering(regelverkTidslinje: Tidslinje<Regelverk, Måned>):
                         kompetentLand = null
                     )
             }
-        }
-
-    return tilfeldigOppsummeringTidslinje.perioder().map {
-        RestTidslinjePeriode(
-            fraOgMed = it.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
-            tilOgMed = it.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull() ?: PRAKTISK_SENESTE_DAG,
-            innhold = it.innhold!!
-        )
-    }
+        }.tilRestTidslinje()
 }
 
 fun <T : Tidsenhet> tilfeldigIntTidslinje(

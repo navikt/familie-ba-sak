@@ -21,6 +21,16 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærEtter(tidslinje: Tidslinje<*, T>)
     beskjær(tidslinje.fraOgMed(), tidslinje.tilOgMed())
 
 /**
+ * Extension-metode for å beskjære (forkorte) en tidslinje etter til-og-med fra en annen tidslinje
+ * Etter beskjæringen vil tidslinjen maksimalt strekke seg fra [this]s fraOgMed() og til [tidslinje]s tilOgMed()
+ * Perioder som ligger helt utenfor grensene vil forsvinne.
+ * Perioden i hver ende som ligger delvis innenfor, vil forkortes.
+ * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den nye benyttes
+ */
+fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMedEtter(tidslinje: Tidslinje<*, T>): Tidslinje<I, T> =
+    beskjær(this.fraOgMed(), tidslinje.tilOgMed())
+
+/**
  * Extension-metode for å beskjære (forkorte) en tidslinje
  * Etter beskjæringen vil tidslinjen maksimalt strekke seg fra innsendt [fraOgMed] og til [tilOgMed]
  * Perioder som ligger helt utenfor grensene vil forsvinne.
