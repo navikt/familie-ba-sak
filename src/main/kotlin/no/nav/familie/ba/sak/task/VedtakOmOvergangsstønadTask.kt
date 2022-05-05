@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
-import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -28,12 +27,11 @@ class VedtakOmOvergangsstønadTask(
 
         val aktør = personidentService.hentAktør(personIdent)
 
-        val responeFraService = autovedtakStegService.kjørBehandling(
+        val responseFraService = autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
-            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
             behandlingsdata = aktør
         )
-        secureLogger.info("Håndterte vedtak om overgangsstønad for person $personIdent:\n$responeFraService")
+        secureLogger.info("Håndterte vedtak om overgangsstønad for person $personIdent:\n$responseFraService")
     }
 
     companion object {
