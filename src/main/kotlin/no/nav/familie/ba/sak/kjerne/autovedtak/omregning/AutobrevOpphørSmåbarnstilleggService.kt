@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
-import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -64,9 +63,8 @@ class AutobrevOpphørSmåbarnstilleggService(
             return
         }
 
-        autovedtakStegService.kjørBehandling(
+        autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = behandling.fagsak.aktør,
-            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
             behandlingsdata = behandling.fagsak.aktør
         )
     }

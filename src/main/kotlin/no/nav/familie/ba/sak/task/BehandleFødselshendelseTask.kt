@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
-import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -56,11 +55,10 @@ class BehandleFødselshendelseTask(
         }
 
         when (velgFagsystemService.velgFagsystem(nyBehandling).first) {
-            FagsystemRegelVurdering.SEND_TIL_BA -> autovedtakStegService.kjørBehandling(
+            FagsystemRegelVurdering.SEND_TIL_BA -> autovedtakStegService.kjørBehandlingFødselshendelse(
                 mottakersAktør = personidentService.hentAktør(
                     nyBehandling.morsIdent
                 ),
-                autovedtaktype = Autovedtaktype.FØDSELSHENDELSE,
                 behandlingsdata = nyBehandling
             )
             FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> {
