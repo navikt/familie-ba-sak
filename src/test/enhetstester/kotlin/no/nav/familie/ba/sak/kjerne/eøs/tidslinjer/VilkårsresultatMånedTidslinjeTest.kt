@@ -40,8 +40,8 @@ class VilkårsresultatMånedTidslinjeTest {
         val periodeFom = LocalDate.of(2022, 4, 15)
         val periodeFom2 = LocalDate.of(2022, 7, 1)
         val senesteDato = periodeFom.til18ÅrsVilkårsdato() // 2040-04-14
-        val vilkårsresultatMånedTidslinje = VilkårsresultatDagTidslinje(
-            vilkårsresultater = listOf(
+        val vilkårsresultatMånedTidslinje =
+            listOf(
                 lagVilkårResultat(
                     vilkårType = BOSATT_I_RIKET,
                     periodeFom = periodeFom,
@@ -53,7 +53,8 @@ class VilkårsresultatMånedTidslinjeTest {
                     periodeTom = null
                 )
             )
-        ).tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
+                .tilVilkårRegelverkResultatTidslinje()
+                .tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
 
         val forventetMånedstidslinje: Tidslinje<VilkårRegelverkResultat, Måned> =
             (mai(2022)..aug(2022).somUendeligLengeTil()).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }

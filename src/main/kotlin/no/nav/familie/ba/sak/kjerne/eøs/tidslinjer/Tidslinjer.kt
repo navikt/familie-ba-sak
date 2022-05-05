@@ -35,9 +35,7 @@ class Tidslinjer(
     private val vilkårsresultaterTidslinjeMap = aktørTilPersonResultater
         .entries.associate { (aktør, personResultat) ->
             aktør to personResultat.vilkårResultater.groupBy { it.vilkårType }
-                .map {
-                    VilkårsresultatDagTidslinje(vilkårsresultater = it.value)
-                }
+                .map { it.value.tilVilkårRegelverkResultatTidslinje() }
         }
 
     private val søkersTidslinje: SøkersTidslinjer =
@@ -75,6 +73,8 @@ class Tidslinjer(
         tidslinjer: Tidslinjer,
         aktør: Aktør,
     ) {
+        val søkersTidslinje = tidslinjer.søkersTidslinje
+
         val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat, Dag>> =
             tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
 
@@ -90,7 +90,7 @@ class Tidslinjer(
 
         val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             oppfyllerVilkårTidslinje.snittKombinerMed(
-                tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje,
+                søkersTidslinje.oppfyllerVilkårTidslinje,
                 BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()::kombiner
             )
 
@@ -99,12 +99,12 @@ class Tidslinjer(
                 .snittKombinerUtenNull {
                     kombinerVilkårResultaterTilRegelverkResultat(PersonType.BARN, it)
                 }
-                .snittKombinerMed(tidslinjer.søkersTidslinje.regelverkResultatTidslinje) { barnetsResultat, søkersResultat ->
+                .snittKombinerMed(søkersTidslinje.regelverkResultatTidslinje) { barnetsResultat, søkersResultat ->
                     barnetsResultat.kombinerMed(søkersResultat)
                 }
                 // Hvis barnet har uendelige vilkårsvurderinger, vil også tidslinjen hertil være uendelig,
                 // selv om søker har endelige vilkårsvurderinger. Berskjærer mot søker for å forhindre det
-                .beskjærEtter(tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje)
+                .beskjærEtter(søkersTidslinje.oppfyllerVilkårTidslinje)
     }
 }
 
