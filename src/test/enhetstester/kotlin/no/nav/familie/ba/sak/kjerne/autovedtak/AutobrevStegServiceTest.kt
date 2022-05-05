@@ -8,13 +8,17 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
+import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevBehandlingsdata
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 class AutobrevStegServiceTest {
@@ -54,6 +58,39 @@ class AutobrevStegServiceTest {
         )
 
         verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) }
+    }
+
+    @Test
+    fun `Skal kun ta inn aktør som behandlingsdata for opphør av småbarnstillegg`() {
+        val aktør = randomAktørId()
+        val fagsak = defaultFagsak(aktør)
+        val behandling = lagBehandling(fagsak).also {
+            it.status = BehandlingStatus.AVSLUTTET
+        }
+
+        every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
+        every { autovedtakSmåbarnstilleggService.kjørBehandling(aktør) } returns ""
+        every { fagsakService.hent(aktør) } returns fagsak
+        every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns null
+
+        assertThrows<ClassCastException> {
+            autovedtakStegService.kjørBehandling(
+                mottakersAktør = aktør,
+                autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
+                behandlingsdata = AutovedtakBrevBehandlingsdata(
+                    aktør = behandling.fagsak.aktør,
+                    behandlingsårsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
+                    standardbegrunnelse = Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
+                )
+            )
+        }
+        assertDoesNotThrow {
+            autovedtakStegService.kjørBehandling(
+                mottakersAktør = aktør,
+                autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
+                behandlingsdata = aktør
+            )
+        }
     }
 
     @Test
