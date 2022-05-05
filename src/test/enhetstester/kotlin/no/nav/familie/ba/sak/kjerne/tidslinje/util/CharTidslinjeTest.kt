@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -12,7 +12,7 @@ class CharTidslinjeTest {
         val charTidslinje = CharTidslinje(tegn, jan(2020))
         Assertions.assertEquals(tegn.length, charTidslinje.perioder().size)
 
-        val perioder = charTidslinje.komprimer().perioder()
+        val perioder = charTidslinje.slåSammenLike().perioder()
         Assertions.assertEquals(1, perioder.size)
 
         val periode = perioder.first()
@@ -28,7 +28,7 @@ class CharTidslinjeTest {
 
         Assertions.assertEquals(tegn.length, charTidslinje.perioder().size)
 
-        val perioder = charTidslinje.komprimer().perioder()
+        val perioder = charTidslinje.slåSammenLike().perioder()
 
         Assertions.assertEquals(1, perioder.size)
         val periode = perioder.first()
@@ -44,7 +44,7 @@ class CharTidslinjeTest {
         val tegn = "aabbbbcdddddda"
         val charTidslinje = CharTidslinje(tegn, jan(2020))
         Assertions.assertEquals(tegn.length, charTidslinje.perioder().size)
-        val perioder = charTidslinje.komprimer().perioder().toList()
+        val perioder = charTidslinje.slåSammenLike().perioder().toList()
         Assertions.assertEquals(5, perioder.size)
         Assertions.assertEquals((jan(2020)..feb(2020)).med('a'), perioder[0])
         Assertions.assertEquals((mar(2020)..jun(2020)).med('b'), perioder[1])
