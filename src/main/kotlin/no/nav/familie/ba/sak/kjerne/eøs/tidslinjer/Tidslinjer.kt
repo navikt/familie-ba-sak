@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
@@ -63,6 +64,11 @@ class Tidslinjer(
 
         val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
             vilkårsresultatMånedTidslinjer.snittKombinerUtenNull(SøkerOppfyllerVilkårKombinator()::kombiner)
+
+        val regelverkResultatTidslinje = vilkårsresultatMånedTidslinjer
+            .snittKombinerUtenNull {
+                kombinerVilkårResultaterTilRegelverkResultat(PersonType.SØKER, it)
+            }
     }
 
     class BarnetsTidslinjer(
@@ -91,9 +97,10 @@ class Tidslinjer(
         val regelverkResultatTidslinje =
             vilkårsresultatMånedTidslinjer
                 .snittKombinerUtenNull {
-                    kombinerVilkårResultaterTilRegelverkResultat(it)
-                }.snittKombinerMed(barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje) { regelverkResultat, oppfylt ->
-                    kombinerVilkårResultatMedRegelverkResultat(oppfylt, regelverkResultat)
+                    kombinerVilkårResultaterTilRegelverkResultat(PersonType.BARN, it)
+                }
+                .snittKombinerMed(tidslinjer.søkersTidslinje.regelverkResultatTidslinje) { barnetsResultat, søkersResultat ->
+                    barnetsResultat.kombinerMed(søkersResultat)
                 }
                 // Hvis barnet har uendelige vilkårsvurderinger, vil også tidslinjen hertil være uendelig,
                 // selv om søker har endelige vilkårsvurderinger. Berskjærer mot søker for å forhindre det

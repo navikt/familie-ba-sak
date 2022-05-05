@@ -191,8 +191,8 @@ internal class KompetanseServiceTest {
 
         val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>()
             .forPerson(søker, treMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
-            .medVilkår("+++++++++++", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("+++++++++++", Vilkår.LOVLIG_OPPHOLD)
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("EEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
             .forPerson(barn1, treMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
             .medVilkår("+++++++++++", Vilkår.UNDER_18_ÅR)
             .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
@@ -235,8 +235,8 @@ internal class KompetanseServiceTest {
 
         val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>()
             .forPerson(søker, seksMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
-            .medVilkår("+++++++++++", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("+++++++++++", Vilkår.LOVLIG_OPPHOLD)
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("EEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
             .forPerson(barn1, seksMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
             .medVilkår("+++++++++++", Vilkår.UNDER_18_ÅR)
             .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)

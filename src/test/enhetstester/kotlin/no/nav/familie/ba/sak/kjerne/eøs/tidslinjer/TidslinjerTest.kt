@@ -32,8 +32,8 @@ internal class TidslinjerTest {
 
         val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>(behandling)
             .forPerson(søker, startMåned)
-            .medVilkår("EEEEEEEEEEEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("EEEEEEEEEEEEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
+            .medVilkår("EEEEEEEENNEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("EEEEEEEENNEEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
             .byggPerson()
         val søkerResult = "+++++++++++++++++++++".tilVilkårResultatTidslinje(startMåned).forskyv(1)
 
@@ -53,7 +53,7 @@ internal class TidslinjerTest {
             .medVilkår("EEEENNEEE>", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++>", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn2Result = "-EEE???EEEEEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val barn2Result = "-EEE???E??EEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
@@ -88,7 +88,7 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = "-----???NN?EEEEE-----".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val barn1Result = "-----??????EE???-----".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
