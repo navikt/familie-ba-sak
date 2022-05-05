@@ -101,7 +101,7 @@
         "maalform": "bokmaal",
         "apiNavn": "reduksjonSmaabarnstilleggIkkeLengerFullOvergangsstonad",
         "belop": 2708,
-        "sokerFaarUtbetaltUtvidetIPerioden": true
+        "sokerFaarUtbetaltUtvidetIPerioden": "sokerFaarUtvidet"
       }
     ],
     "type": "innvilgelse"

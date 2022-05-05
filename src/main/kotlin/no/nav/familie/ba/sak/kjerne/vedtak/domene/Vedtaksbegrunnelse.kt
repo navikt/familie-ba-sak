@@ -92,7 +92,7 @@ data class BegrunnelseData(
     val belop: String,
     val soknadstidspunkt: String,
     val avtaletidspunktDeltBosted: String,
-    val sokerFaarUtbetaltUtvidetIPerioden: Boolean
+    val sokerFaarUtbetaltUtvidetIPerioden: String
 ) : Begrunnelse
 
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
@@ -150,8 +150,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     val søknadstidspunkt = endringsperioder.sortedBy { it.søknadstidspunkt }
         .firstOrNull { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
 
-    val søkerFårUtbetaltUtvidetIPerioden =
-        minimerteUtbetalingsperiodeDetaljer.any { it.person.type == PersonType.SØKER && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.utbetaltPerMnd > 0 }
+    val utvidetPåSøkerIPerioden = finnUtOmSøkerFårUtbetaltEllerHarRettPåUtvidet(minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer)
 
     this.validerBrevbegrunnelse(
         gjelderSøker = gjelderSøker,
@@ -174,8 +173,32 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         belop = Utils.formaterBeløp(beløp),
         soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: "",
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted?.tilKortString() ?: "",
-        sokerFaarUtbetaltUtvidetIPerioden = søkerFårUtbetaltUtvidetIPerioden
+        sokerFaarUtbetaltUtvidetIPerioden = utvidetPåSøkerIPerioden.tilSanityFormat()
     )
+}
+
+private fun finnUtOmSøkerFårUtbetaltEllerHarRettPåUtvidet(minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>): UtvidetPåSøker {
+    val utvidetUtbetalingsdetaljerPåSøker =
+        minimerteUtbetalingsperiodeDetaljer.filter { it.person.type == PersonType.SØKER && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD }
+
+    return when {
+        utvidetUtbetalingsdetaljerPåSøker.any { it.utbetaltPerMnd > 0 } -> UtvidetPåSøker.SØKER_FÅR_UTVIDET
+        utvidetUtbetalingsdetaljerPåSøker.isNotEmpty() &&
+            utvidetUtbetalingsdetaljerPåSøker.all { it.utbetaltPerMnd == 0 } -> UtvidetPåSøker.SØKER_HAR_RETT_MEN_FÅR_IKKE
+        else -> UtvidetPåSøker.SØKER_HAR_IKKE_RETT
+    }
+}
+
+enum class UtvidetPåSøker {
+    SØKER_FÅR_UTVIDET,
+    SØKER_HAR_RETT_MEN_FÅR_IKKE,
+    SØKER_HAR_IKKE_RETT;
+
+    fun tilSanityFormat() = when (this) {
+        SØKER_FÅR_UTVIDET -> "sokerFaarUtvidet"
+        SØKER_HAR_RETT_MEN_FÅR_IKKE -> "sokerHarRettMenFaarIkke"
+        SØKER_HAR_IKKE_RETT -> "sokerHarIkkeRett"
+    }
 }
 
 fun Standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(

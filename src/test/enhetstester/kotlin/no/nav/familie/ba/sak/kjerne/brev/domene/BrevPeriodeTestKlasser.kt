@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.UtvidetPåSøker
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
@@ -142,7 +143,7 @@ data class BegrunnelseDataTestConfig(
     val belop: Int,
     val soknadstidspunkt: String?,
     val avtaletidspunktDeltBosted: String?,
-    val sokerFaarUtbetaltUtvidetIPerioden: Boolean
+    val sokerFaarUtbetaltUtvidetIPerioden: String?
 ) : TestBegrunnelse {
 
     fun tilBegrunnelseData() = BegrunnelseData(
@@ -160,6 +161,7 @@ data class BegrunnelseDataTestConfig(
         soknadstidspunkt = this.soknadstidspunkt ?: "",
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: "",
         sokerFaarUtbetaltUtvidetIPerioden = this.sokerFaarUtbetaltUtvidetIPerioden
+            ?: UtvidetPåSøker.SØKER_HAR_IKKE_RETT.tilSanityFormat()
     )
 }
 
