@@ -99,7 +99,7 @@ class KompetanseService(
     private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<Regelverk, Måned>> =
         this.hentTidslinjerThrows(behandlingId).barnasTidslinjer()
             .mapValues { (_, tidslinjer) ->
-                tidslinjer.regelverkTidslinje
+                tidslinjer.regelverkResultatTidslinje
                     .map { it?.regelverk }
                     .filtrerIkkeNull()
                     .forlengFremtidTilUendelig(MånedTidspunkt.nå())

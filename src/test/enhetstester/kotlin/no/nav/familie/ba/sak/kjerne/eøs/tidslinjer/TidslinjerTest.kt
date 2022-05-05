@@ -61,8 +61,8 @@ internal class TidslinjerTest {
         )
 
         assertEquals(søkerResult, tidslinjer.søkersTidslinjer().oppfyllerVilkårTidslinje)
-        assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkTidslinje)
-        assertEquals(barn2Result, tidslinjer.forBarn(barn2).regelverkTidslinje)
+        assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkResultatTidslinje)
+        assertEquals(barn2Result, tidslinjer.forBarn(barn2).regelverkResultatTidslinje)
     }
 
     @Test
@@ -96,7 +96,7 @@ internal class TidslinjerTest {
         )
 
         assertEquals(søkerResult, tidslinjer.søkersTidslinjer().oppfyllerVilkårTidslinje)
-        assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkTidslinje)
+        assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkResultatTidslinje)
     }
 
     @Test
