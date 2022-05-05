@@ -16,7 +16,7 @@ enum class RegelverkResultat(val regelverk: Regelverk?, val resultat: Resultat?)
     OPPFYLT_REGELVERK_IKKE_SATT(null, Resultat.OPPFYLT),
     OPPFYLT_BLANDET_REGELVERK(null, Resultat.OPPFYLT),
     IKKE_OPPFYLT(null, Resultat.IKKE_OPPFYLT),
-    IKKE_VURDERT(null, Resultat.IKKE_VURDERT),
+    IKKE_FULLT_VURDERT(null, Resultat.IKKE_VURDERT),
 }
 
 data class VilkårRegelverkResultat(
@@ -34,7 +34,7 @@ fun VilkårResultat.tilRegelverkResultat() = when (this.resultat) {
         else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
     }
     Resultat.IKKE_OPPFYLT -> RegelverkResultat.IKKE_OPPFYLT
-    Resultat.IKKE_VURDERT -> RegelverkResultat.IKKE_VURDERT
+    Resultat.IKKE_VURDERT -> RegelverkResultat.IKKE_FULLT_VURDERT
 }
 
 class VilkårsresultatDagTidslinje(
