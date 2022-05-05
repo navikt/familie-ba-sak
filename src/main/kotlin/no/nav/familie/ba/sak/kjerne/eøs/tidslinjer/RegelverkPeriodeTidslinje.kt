@@ -32,7 +32,7 @@ class RegelverkPeriodeKombinator {
         return when {
             eøsVilkår.containsAll(regelverkVilkår) -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
             nasjonaleVilkår.containsAll(regelverkVilkår) -> RegelverkResultat.OPPFYLT_NASJONALE_REGLER
-            eøsVilkår.size > 0 && nasjonaleVilkår.size > 0 -> RegelverkResultat.OPPFYLT_TO_REGELVERK
+            eøsVilkår.size > 0 || nasjonaleVilkår.size > 0 -> RegelverkResultat.OPPFYLT_BLANDET_REGELVERK
             else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
         }
     }

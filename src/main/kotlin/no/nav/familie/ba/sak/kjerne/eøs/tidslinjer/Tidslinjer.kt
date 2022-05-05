@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
@@ -87,13 +88,15 @@ class Tidslinjer(
                 BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()::kombiner
             )
 
-        val regelverkMidlertidigTidslinje: Tidslinje<RegelverkResultat, Måned> =
+        private val regelverkMidlertidigTidslinje: Tidslinje<RegelverkResultat, Måned> =
             vilkårsresultatMånedTidslinjer.snittKombinerUtenNull(RegelverkPeriodeKombinator()::kombiner)
 
-        val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje.snittKombinerMed(
-            regelverkMidlertidigTidslinje,
-            RegelverkOgOppfyltePerioderKombinator()::kombiner
-        )
+        val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje
+            .snittKombinerMed(
+                regelverkMidlertidigTidslinje,
+                RegelverkOgOppfyltePerioderKombinator()::kombiner
+            )
+            .beskjærEtter(tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje)
     }
 }
 

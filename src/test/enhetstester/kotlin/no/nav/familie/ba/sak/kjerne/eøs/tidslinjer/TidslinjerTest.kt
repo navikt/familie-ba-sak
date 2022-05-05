@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.print
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilVilkårResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -45,7 +44,7 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = "     N NNNN  EEE     ".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val barn1Result = "-----?-?NN?--EEE-----".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         vilkårsvurderingBygger.forPerson(barn2, startMåned)
             .medVilkår("+++++++++>", Vilkår.UNDER_18_ÅR)
@@ -54,14 +53,12 @@ internal class TidslinjerTest {
             .medVilkår("EEEENNEEE>", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++>", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn2Result = " EEENNNEEEEEEEEEEEEEE >".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val barn2Result = "-EEE???EEEEEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
         )
-
-        tidslinjer.forBarn(barn1).regelverkMidlertidigTidslinje.print()
 
         assertEquals(søkerResult, tidslinjer.søkersTidslinjer().oppfyllerVilkårTidslinje)
         assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkTidslinje)
@@ -91,7 +88,7 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = "     NNNNNNEEEEE     ".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val barn1Result = "-----???NN?EEEEE-----".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),

@@ -14,7 +14,7 @@ enum class RegelverkResultat(val regelverk: Regelverk?, val resultat: Resultat?)
     OPPFYLT_EØS_FORORDNINGEN(Regelverk.EØS_FORORDNINGEN, Resultat.OPPFYLT),
     OPPFYLT_NASJONALE_REGLER(Regelverk.NASJONALE_REGLER, Resultat.OPPFYLT),
     OPPFYLT_REGELVERK_IKKE_SATT(null, Resultat.OPPFYLT),
-    OPPFYLT_TO_REGELVERK(null, Resultat.OPPFYLT),
+    OPPFYLT_BLANDET_REGELVERK(null, Resultat.OPPFYLT),
     IKKE_OPPFYLT(null, Resultat.IKKE_OPPFYLT),
     IKKE_VURDERT(null, Resultat.IKKE_VURDERT),
 }
