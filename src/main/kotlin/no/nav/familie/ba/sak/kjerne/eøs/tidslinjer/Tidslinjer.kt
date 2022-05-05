@@ -88,15 +88,16 @@ class Tidslinjer(
                 BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()::kombiner
             )
 
-        private val regelverkMidlertidigTidslinje: Tidslinje<RegelverkResultat, Måned> =
-            vilkårsresultatMånedTidslinjer.snittKombinerUtenNull(RegelverkPeriodeKombinator()::kombiner)
-
-        val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje
-            .snittKombinerMed(
-                regelverkMidlertidigTidslinje,
-                RegelverkOgOppfyltePerioderKombinator()::kombiner
-            )
-            .beskjærEtter(tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje)
+        val regelverkResultatTidslinje =
+            vilkårsresultatMånedTidslinjer
+                .snittKombinerUtenNull {
+                    kombinerVilkårResultaterTilRegelverkResultat(it)
+                }.snittKombinerMed(barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje) { regelverkResultat, oppfylt ->
+                    kombinerVilkårResultatMedRegelverkResultat(oppfylt, regelverkResultat)
+                }
+                // Hvis barnet har uendelige vilkårsvurderinger, vil også tidslinjen hertil være uendelig,
+                // selv om søker har endelige vilkårsvurderinger. Berskjærer mot søker for å forhindre det
+                .beskjærEtter(tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje)
     }
 }
 

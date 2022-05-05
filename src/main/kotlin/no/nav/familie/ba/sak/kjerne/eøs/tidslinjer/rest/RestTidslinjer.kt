@@ -44,12 +44,12 @@ fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
                     .barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje
                     .beskjærEtter(erUnder18årTidslinje)
                     .tilRestTidslinje(),
-                regelverkTidslinje = it.value.regelverkTidslinje
+                regelverkTidslinje = it.value.regelverkResultatTidslinje
                     .map { it?.regelverk }
                     .beskjærEtter(erUnder18årTidslinje)
                     .tilRestTidslinje(),
                 oppsummeringTidslinje = tilfeldigOppsummering(
-                    it.value.regelverkTidslinje
+                    it.value.regelverkResultatTidslinje
                         .beskjærEtter(erUnder18årTidslinje)
                 )
             )
@@ -111,15 +111,15 @@ enum class BeregningOppsummeringStatus {
     IKKE_VURDERT
 }
 
-fun tilfeldigOppsummering(regelverkTidslinje: Tidslinje<RegelverkResultat, Måned>):
+fun tilfeldigOppsummering(regelverkResultatTidslinje: Tidslinje<RegelverkResultat, Måned>):
     List<RestTidslinjePeriode<BeregningOppsummering>> {
 
     val tilfeldigTidslinje = tilfeldigIntTidslinje(
-        regelverkTidslinje.fraOgMed(),
-        regelverkTidslinje.tilOgMed()
+        regelverkResultatTidslinje.fraOgMed(),
+        regelverkResultatTidslinje.tilOgMed()
     )
 
-    return regelverkTidslinje
+    return regelverkResultatTidslinje
         .snittKombinerMed(tilfeldigTidslinje) { regelverkResultat, rnd ->
             when (regelverkResultat) {
                 RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN ->
