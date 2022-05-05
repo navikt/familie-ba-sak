@@ -27,12 +27,17 @@ object YtelsePersonUtils {
         uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
         inneværendeMåned: YearMonth = YearMonth.now(),
     ): List<YtelsePerson> {
+        val altOpphørt = behandlingsresultatPersoner.all { erYtelsenOpphørt(it.andeler, inneværendeMåned) }
+
         return behandlingsresultatPersoner.map { behandlingsresultatPerson ->
             val forrigeAndelerTidslinje = behandlingsresultatPerson.forrigeAndeler.tilTidslinje()
             val andelerTidslinje = behandlingsresultatPerson.andeler.tilTidslinje()
 
             val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
+            val harSammeTidslinje = !andelerTidslinje.isEmpty &&
+                !forrigeAndelerTidslinje.isEmpty &&
+                andelerTidslinje == forrigeAndelerTidslinje
 
             val eksplisittAvslag = behandlingsresultatPerson.eksplisittAvslag
 
@@ -47,12 +52,12 @@ object YtelsePersonUtils {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
 
-            if (erYtelsenOpphørt(
-                    andeler = behandlingsresultatPerson.andeler,
-                    inneværendeMåned = inneværendeMåned
-                ) && (segmenterFjernet + segmenterLagtTil).isNotEmpty()
-            ) {
-                resultater.add(YtelsePersonResultat.OPPHØRT)
+            if (erYtelsenOpphørt(andeler = behandlingsresultatPerson.andeler, inneværendeMåned = inneværendeMåned)) {
+                when {
+                    // ytelsen er opphørt ved dødsfall. Da kan RV har samme tidstilnje men alle ytelesene er opphørt
+                    harSammeTidslinje && altOpphørt -> resultater.add(YtelsePersonResultat.FORTSATT_OPPHØRT)
+                    (segmenterFjernet + segmenterLagtTil).isNotEmpty() -> resultater.add(YtelsePersonResultat.OPPHØRT)
+                }
             }
 
             if (finnesInnvilget(

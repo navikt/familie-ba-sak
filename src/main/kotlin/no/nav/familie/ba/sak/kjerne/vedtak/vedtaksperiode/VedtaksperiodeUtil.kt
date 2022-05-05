@@ -242,7 +242,6 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    erNyDeltBostedTogglePå: Boolean
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
     sanityBegrunnelser = sanityBegrunnelser,
@@ -259,8 +258,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     ytelserForSøkerForrigeMåned = hentYtelserForSøkerForrigeMåned(
         andelerTilkjentYtelse,
         utvidetVedtaksperiodeMedBegrunnelser
-    ),
-    erNyDeltBostedTogglePå = erNyDeltBostedTogglePå
+    )
 )
 
 fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
@@ -271,8 +269,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     aktørIderMedUtbetaling: List<String>,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    ytelserForSøkerForrigeMåned: List<YtelseType>,
-    erNyDeltBostedTogglePå: Boolean
+    ytelserForSøkerForrigeMåned: List<YtelseType>
 ): List<Standardbegrunnelse> {
     val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.values()
         .filter {
@@ -282,9 +279,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
                 .contains(it.vedtakBegrunnelseType)
         }.filter {
             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
-                endretUtbetalingsperiodeBegrunnelser.filter { standardbegrunnelse ->
-                    erNyDeltBostedTogglePå || standardbegrunnelse != Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING
-                }.contains(it)
+                endretUtbetalingsperiodeBegrunnelser.contains(it)
             } else true
         }
 

@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
+import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkomendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -40,7 +40,7 @@ class OppgaveController(
     private val integrasjonClient: IntegrasjonClient,
     private val personopplysningerService: PersonopplysningerService,
     private val tilgangService: TilgangService,
-    private val journalføringService: JournalføringService,
+    private val innkomendeJournalføringService: InnkomendeJournalføringService,
 ) {
 
     @PostMapping(
@@ -149,7 +149,7 @@ class OppgaveController(
         // Validerer at oppgave med gitt oppgaveId eksisterer
         oppgaveService.hentOppgave(oppgaveId)
 
-        val fagsakId = journalføringService.knyttJournalpostTilFagsakOgFerdigstillOppgave(request, oppgaveId)
+        val fagsakId = innkomendeJournalføringService.knyttJournalpostTilFagsakOgFerdigstillOppgave(request, oppgaveId)
 
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Oppgaven $oppgaveId er lukket"))
     }
