@@ -24,7 +24,8 @@ fun <T : Tidsenhet> String.tilRegelverkResultatTidslinje(start: Tidspunkt<T>) =
         when (it?.lowercaseChar()) {
             'e' -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
             'n' -> RegelverkResultat.OPPFYLT_NASJONALE_REGLER
-            '?' -> RegelverkResultat.OPPFYLT_TO_REGELVERK
+            '?' -> RegelverkResultat.OPPFYLT_BLANDET_REGELVERK
+            '-' -> RegelverkResultat.IKKE_VURDERT
             else -> null
         }
     }
