@@ -28,9 +28,9 @@ fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
     val barnasTidslinjer = this.barnasTidslinjer()
     val søkersTidslinjer = this.søkersTidslinjer()
 
-    val erYtelseForBarnaMånedTidslinje: Tidslinje<Boolean, Måned> = barnasTidslinjer.values
+    val erNoenAvBarnaMellom0Og18ÅrTidslinje: Tidslinje<Boolean, Måned> = barnasTidslinjer.values
         .map { it.erUnder18ÅrVilkårTidslinje }
-        .snittKombinerUtenNull { it.any { it } }
+        .snittKombinerUtenNull { barnaEr0Til18ÅrListe -> barnaEr0Til18ÅrListe.any { it } }
 
     return RestTidslinjer(
         barnasTidslinjer = barnasTidslinjer.entries.associate {
@@ -56,12 +56,12 @@ fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
         },
         søkersTidslinjer = RestTidslinjerForSøker(
             vilkårTidslinjer = søkersTidslinjer.vilkårsresultatTidslinjer.map {
-                it.beskjærTilOgMedEtter(erYtelseForBarnaMånedTidslinje.tilDag())
+                it.beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje.tilDag())
                     .tilRestTidslinje()
             },
             oppfyllerEgneVilkårTidslinje = søkersTidslinjer
                 .oppfyllerVilkårTidslinje
-                .beskjærTilOgMedEtter(erYtelseForBarnaMånedTidslinje)
+                .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje)
                 .tilRestTidslinje()
         )
     )
