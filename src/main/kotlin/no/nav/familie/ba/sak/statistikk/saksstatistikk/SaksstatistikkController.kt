@@ -49,7 +49,6 @@ class SaksstatistikkController(
 
     @Operation(
         description = "Oppdaterer saksstatistikk mellomlagring om at en melding har blitt sendt. Setter sendtTidspunkt slik at melding ikke blir sendt på nytt."
-
     )
     @PostMapping(path = ["/registrer-sendt-fra-statistikk"])
     fun registrerSendtFraStatistikk(@RequestBody(required = true) input: SaksstatistikkSendtRequest): ResponseEntity<SaksstatistikkMellomlagring> {

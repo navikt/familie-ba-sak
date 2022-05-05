@@ -35,7 +35,7 @@ class SaksstatistikkControllerTest {
         )
 
         val slot = slot<SaksstatistikkMellomlagring>()
-        every { saksstatistikkMellomlagringRepository.save(capture(slot)) } returns mockk()
+        every { saksstatistikkMellomlagringRepository.saveAndFlush(capture(slot)) } returns mockk()
         controller.registrerSendtFraStatistikk(request)
 
         assertThat(slot.captured.offsetVerdi).isEqualTo(request.offset)
@@ -59,7 +59,8 @@ class SaksstatistikkControllerTest {
         )
 
         val slot = slot<SaksstatistikkMellomlagring>()
-        every { saksstatistikkMellomlagringRepository.save(capture(slot)) } returns mockk()
+        every { saksstatistikkMellomlagringRepository.saveAndFlush(capture(slot)) } returns mockk()
+
         controller.registrerSendtFraStatistikk(request)
 
         assertThat(slot.captured.offsetVerdi).isEqualTo(request.offset)
