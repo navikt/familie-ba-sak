@@ -126,7 +126,7 @@
         "maalform": "bokmaal",
         "apiNavn": "reduksjonFlyttetBarn",
         "belop": 0,
-        "sokerFaarUtbetaltUtvidetIPerioden": "sokerFaarUtvidet"
+        "sokersRettTilUtvidet": "sokerFaarUtvidet"
       },
       {
         "gjelderSoker": false,
@@ -140,7 +140,7 @@
         "maalform": "bokmaal",
         "apiNavn": "reduksjonDeltBarnetrygdAnnenForelderSokt",
         "belop": 827,
-        "sokerFaarUtbetaltUtvidetIPerioden": "sokerFaarUtvidet"
+        "sokersRettTilUtvidet": "sokerFaarUtvidet"
       }
     ],
     "type": "innvilgelse"

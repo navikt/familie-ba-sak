@@ -92,7 +92,7 @@ data class BegrunnelseData(
     val belop: String,
     val soknadstidspunkt: String,
     val avtaletidspunktDeltBosted: String,
-    val sokerFaarUtbetaltUtvidetIPerioden: String
+    val sokersRettTilUtvidet: String
 ) : Begrunnelse
 
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
@@ -150,7 +150,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     val søknadstidspunkt = endringsperioder.sortedBy { it.søknadstidspunkt }
         .firstOrNull { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
 
-    val utvidetPåSøkerIPerioden = finnUtOmSøkerFårUtbetaltEllerHarRettPåUtvidet(minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer)
+    val søkersRettTilUtvidet = finnUtOmSøkerFårUtbetaltEllerHarRettPåUtvidet(minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer)
 
     this.validerBrevbegrunnelse(
         gjelderSøker = gjelderSøker,
@@ -173,23 +173,23 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         belop = Utils.formaterBeløp(beløp),
         soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: "",
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted?.tilKortString() ?: "",
-        sokerFaarUtbetaltUtvidetIPerioden = utvidetPåSøkerIPerioden.tilSanityFormat()
+        sokersRettTilUtvidet = søkersRettTilUtvidet.tilSanityFormat()
     )
 }
 
-private fun finnUtOmSøkerFårUtbetaltEllerHarRettPåUtvidet(minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>): UtvidetPåSøker {
+private fun finnUtOmSøkerFårUtbetaltEllerHarRettPåUtvidet(minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>): SøkersRettTilUtvidet {
     val utvidetUtbetalingsdetaljerPåSøker =
         minimerteUtbetalingsperiodeDetaljer.filter { it.person.type == PersonType.SØKER && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD }
 
     return when {
-        utvidetUtbetalingsdetaljerPåSøker.any { it.utbetaltPerMnd > 0 } -> UtvidetPåSøker.SØKER_FÅR_UTVIDET
+        utvidetUtbetalingsdetaljerPåSøker.any { it.utbetaltPerMnd > 0 } -> SøkersRettTilUtvidet.SØKER_FÅR_UTVIDET
         utvidetUtbetalingsdetaljerPåSøker.isNotEmpty() &&
-            utvidetUtbetalingsdetaljerPåSøker.all { it.utbetaltPerMnd == 0 } -> UtvidetPåSøker.SØKER_HAR_RETT_MEN_FÅR_IKKE
-        else -> UtvidetPåSøker.SØKER_HAR_IKKE_RETT
+            utvidetUtbetalingsdetaljerPåSøker.all { it.utbetaltPerMnd == 0 } -> SøkersRettTilUtvidet.SØKER_HAR_RETT_MEN_FÅR_IKKE
+        else -> SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT
     }
 }
 
-enum class UtvidetPåSøker {
+enum class SøkersRettTilUtvidet {
     SØKER_FÅR_UTVIDET,
     SØKER_HAR_RETT_MEN_FÅR_IKKE,
     SØKER_HAR_IKKE_RETT;
