@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.internal
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
-import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -72,9 +71,8 @@ class TestVerktøyController(
     fun mottaHendelseOmVedtakOmOvergangsstønad(@RequestBody personIdent: PersonIdent): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
             val aktør = personidentService.hentAktør(personIdent.ident)
-            val melding = autovedtakStegService.kjørBehandling(
+            val melding = autovedtakStegService.kjørBehandlingSmåbarnstillegg(
                 mottakersAktør = aktør,
-                autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
                 behandlingsdata = aktør
             )
             ResponseEntity.ok(Ressurs.success(melding))

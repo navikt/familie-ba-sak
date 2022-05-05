@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
-import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -63,9 +62,8 @@ class Autobrev6og18ÅrService(
             return
         }
 
-        autovedtakStegService.kjørBehandling(
+        autovedtakStegService.kjørBehandlingOmregning(
             mottakersAktør = behandling.fagsak.aktør,
-            autovedtaktype = Autovedtaktype.OMREGNING_BREV,
             behandlingsdata = AutovedtakBrevBehandlingsdata(
                 aktør = behandling.fagsak.aktør,
                 behandlingsårsak = behandlingsårsak,
