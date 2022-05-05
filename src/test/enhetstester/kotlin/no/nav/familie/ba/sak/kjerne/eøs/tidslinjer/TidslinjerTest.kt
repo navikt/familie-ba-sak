@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkResultatTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilVilkårResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -35,7 +34,7 @@ internal class TidslinjerTest {
             .medVilkår("EEEEEEEENNEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
             .medVilkår("EEEEEEEENNEEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
             .byggPerson()
-        val søkerResult = "+++++++++++++++++++++".tilVilkårResultatTidslinje(startMåned).forskyv(1)
+        val søkerResult = "EEEEEEEENNEEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         vilkårsvurderingBygger.forPerson(barn1, startMåned)
             .medVilkår("++++++++++++++++     ", Vilkår.UNDER_18_ÅR)
@@ -44,7 +43,7 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = "-----?-?NN?--EEE-----".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val barn1Result = "?????!?!NN!??EEE?????".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         vilkårsvurderingBygger.forPerson(barn2, startMåned)
             .medVilkår("+++++++++>", Vilkår.UNDER_18_ÅR)
@@ -53,14 +52,14 @@ internal class TidslinjerTest {
             .medVilkår("EEEENNEEE>", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++>", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn2Result = "-EEE???E??EEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val barn2Result = "?EEE!!!E!!EEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
         )
 
-        assertEquals(søkerResult, tidslinjer.søkersTidslinjer().oppfyllerVilkårTidslinje)
+        assertEquals(søkerResult, tidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
         assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkResultatTidslinje)
         assertEquals(barn2Result, tidslinjer.forBarn(barn2).regelverkResultatTidslinje)
     }
@@ -79,7 +78,7 @@ internal class TidslinjerTest {
             .medVilkår("EEEEEEEEEEEEENNNNNNNN", Vilkår.BOSATT_I_RIKET)
             .medVilkår("EEEEEEEEEEEEENNNNNNNN", Vilkår.LOVLIG_OPPHOLD)
             .byggPerson()
-        val søkerResult = "+++++++++++++++++++++".tilVilkårResultatTidslinje(startMåned).forskyv(1)
+        val søkerResult = "EEEEEEEEEEEEENNNNNNNN".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         vilkårsvurderingBygger.forPerson(barn1, startMåned)
             .medVilkår("++++++++++++++++     ", Vilkår.UNDER_18_ÅR)
@@ -88,14 +87,14 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = "-----??????EE???-----".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val barn1Result = "?????!!!!!!EE!!!?????".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
         )
 
-        assertEquals(søkerResult, tidslinjer.søkersTidslinjer().oppfyllerVilkårTidslinje)
+        assertEquals(søkerResult, tidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
         assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkResultatTidslinje)
     }
 
@@ -126,7 +125,7 @@ internal class TidslinjerTest {
 
         assertEquals(
             barn1.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(),
-            tidslinjer.forBarn(barn1).oppfyllerVilkårTidslinje.filtrerIkkeNull()
+            tidslinjer.forBarn(barn1).egetRegelverkResultatTidslinje.filtrerIkkeNull()
                 .perioder().maxOf { it.tilOgMed.tilYearMonth() }
         )
     }

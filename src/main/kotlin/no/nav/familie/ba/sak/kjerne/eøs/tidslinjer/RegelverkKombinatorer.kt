@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.IKKE_FULLT_VURDERT
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.OPPFYLT_BLANDET_REGELVERK
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.OPPFYLT_NASJONALE_REGLER
@@ -15,26 +16,36 @@ fun kombinerVilkårResultaterTilRegelverkResultat(
 ): RegelverkResultat? {
 
     val nødvendigeVilkår = Vilkår.hentVilkårFor(personType)
-    val regelverkVilkår = nødvendigeVilkår.filter { it.harRegelverk }
+        .filter { it != Vilkår.UTVIDET_BARNETRYGD }
 
-    val oppfyllerNødvendigVilkår = alleVilkårResultater
-        .filter { it.resultat == Resultat.OPPFYLT }
-        .map { it.vilkår }
-        .containsAll(nødvendigeVilkår)
+    val regelverkVilkår = nødvendigeVilkår
+        .filter { it.harRegelverk }
 
-    if (!oppfyllerNødvendigVilkår)
-        return null
-
-    val eøsVilkår = alleVilkårResultater
+    val alleVilkårResultaterMedEøs = alleVilkårResultater
         .filter { it.regelverk == Regelverk.EØS_FORORDNINGEN }.map { it.vilkår }
 
-    val nasjonaleVilkår = alleVilkårResultater
+    val alleVilkårResultaterMedNasjonalt = alleVilkårResultater
         .filter { it.regelverk == Regelverk.NASJONALE_REGLER }.map { it.vilkår }
 
+    val erAlleVilkårUtenResultat = alleVilkårResultater.all { it.resultat == null }
+
+    val erAlleNødvendigeVilkårOppfylt = alleVilkårResultater.all { it.resultat == Resultat.OPPFYLT } &&
+        alleVilkårResultater.map { it.vilkår }.distinct().containsAll(nødvendigeVilkår)
+
+    val erEttEllerFlereVilkårIkkeOppfylt = alleVilkårResultater.any { it.resultat == Resultat.IKKE_OPPFYLT }
+
     return when {
-        eøsVilkår.containsAll(regelverkVilkår) -> OPPFYLT_EØS_FORORDNINGEN
-        nasjonaleVilkår.containsAll(regelverkVilkår) -> OPPFYLT_NASJONALE_REGLER
-        eøsVilkår.isNotEmpty() || nasjonaleVilkår.isNotEmpty() -> OPPFYLT_BLANDET_REGELVERK
-        else -> OPPFYLT_REGELVERK_IKKE_SATT
+        erAlleVilkårUtenResultat -> null
+        erEttEllerFlereVilkårIkkeOppfylt -> RegelverkResultat.IKKE_OPPFYLT
+        erAlleNødvendigeVilkårOppfylt -> when {
+            alleVilkårResultaterMedEøs.containsAll(regelverkVilkår) ->
+                OPPFYLT_EØS_FORORDNINGEN
+            alleVilkårResultaterMedNasjonalt.containsAll(regelverkVilkår) ->
+                OPPFYLT_NASJONALE_REGLER
+            (alleVilkårResultaterMedEøs + alleVilkårResultaterMedNasjonalt).isNotEmpty() ->
+                OPPFYLT_BLANDET_REGELVERK
+            else -> OPPFYLT_REGELVERK_IKKE_SATT
+        }
+        else -> IKKE_FULLT_VURDERT
     }
 }
