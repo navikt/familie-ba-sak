@@ -33,9 +33,9 @@ class VilkårsvurderingSteg(
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
-        val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
+            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
             validerIngenVilkårSattEtterSøkersDød(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 vilkårsvurdering = vilkårsvurdering
@@ -43,6 +43,7 @@ class VilkårsvurderingSteg(
         }
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
+            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
             validerIkkeBlandetRegelverk(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 vilkårsvurdering = vilkårsvurdering
