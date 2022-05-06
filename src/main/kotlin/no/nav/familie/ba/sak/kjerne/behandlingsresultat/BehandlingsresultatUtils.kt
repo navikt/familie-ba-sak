@@ -250,7 +250,7 @@ fun hentUtbetalingstidslinjeForSøker(andeler: List<AndelTilkjentYtelse>): Local
 }
 
 fun Set<YtelsePersonResultat>.matcherAltOgHarEndretResultat(andreElementer: Set<YtelsePersonResultat>): Boolean {
-    val endretResultat = this.firstOrNull {
+    val endretResultat = this.singleOrNull {
         it == YtelsePersonResultat.ENDRET_UTBETALING ||
             it == YtelsePersonResultat.ENDRET_UTEN_UTBETALING
     } ?: return false
