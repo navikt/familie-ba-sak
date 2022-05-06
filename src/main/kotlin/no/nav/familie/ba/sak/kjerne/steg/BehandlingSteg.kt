@@ -314,20 +314,15 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
 }
 
 fun hentNesteStegTypeBasertPåBehandlingsresultat(resultat: Behandlingsresultat): StegType {
-    return when (resultat) {
-        Behandlingsresultat.FORTSATT_INNVILGET,
-        Behandlingsresultat.AVSLÅTT,
-        Behandlingsresultat.FORTSATT_OPPHØRT,
-        Behandlingsresultat.ENDRET_UTEN_UTBETALING -> JOURNALFØR_VEDTAKSBREV
+    return when {
+        resultat.kanIkkeSendesTilOppdrag() -> JOURNALFØR_VEDTAKSBREV
         else -> IVERKSETT_MOT_OPPDRAG
     }
 }
 
 fun hentStegEtterBeslutteVedtakForTekniskEndring(resultat: Behandlingsresultat): StegType {
-    return when (resultat) {
-        Behandlingsresultat.FORTSATT_INNVILGET,
-        Behandlingsresultat.AVSLÅTT,
-        Behandlingsresultat.FORTSATT_OPPHØRT -> FERDIGSTILLE_BEHANDLING
+    return when {
+        resultat.kanIkkeSendesTilOppdrag() -> FERDIGSTILLE_BEHANDLING
         else -> IVERKSETT_MOT_OPPDRAG
     }
 }

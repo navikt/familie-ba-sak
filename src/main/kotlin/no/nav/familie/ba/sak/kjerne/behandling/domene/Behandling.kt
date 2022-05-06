@@ -323,7 +323,10 @@ enum class Behandlingsresultat(val displayName: String) {
     HENLAGT_AUTOMATISK_FØDSELSHENDELSE(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
     HENLAGT_TEKNISK_VEDLIKEHOLD(displayName = "Henlagt teknisk vedlikehold"),
 
-    IKKE_VURDERT(displayName = "Ikke vurdert")
+    IKKE_VURDERT(displayName = "Ikke vurdert");
+
+    fun kanIkkeSendesTilOppdrag(): Boolean =
+        this in listOf(FORTSATT_INNVILGET, AVSLÅTT, FORTSATT_OPPHØRT, ENDRET_UTEN_UTBETALING)
 }
 
 /**
