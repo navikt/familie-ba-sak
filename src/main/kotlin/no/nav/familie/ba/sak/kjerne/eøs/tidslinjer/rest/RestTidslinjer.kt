@@ -98,9 +98,9 @@ data class RestTidslinjePeriode<T>(
 )
 
 data class BeregningOppsummering(
-    val regelverk: Regelverk?,
-    val status: BeregningOppsummeringStatus?,
-    val kompetentLand: KompetanseResultat?
+    val regelverk: Regelverk? = null,
+    val status: BeregningOppsummeringStatus? = null,
+    val kompetentLand: KompetanseResultat? = null
 )
 
 enum class BeregningOppsummeringStatus {

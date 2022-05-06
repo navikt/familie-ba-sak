@@ -8,24 +8,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenBack2BackAndelsperioderMedSammeBeløp
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.KompetanseTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.rest.BeregningOppsummering
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import java.time.LocalDate
 import java.time.YearMonth
-
-data class BeregningOppsummering(
-    val regelverk: Regelverk? = null,
-    val status: BeregningOppsummeringStatus? = null,
-    val kompetentLand: KompetanseResultat? = null,
-)
-
-enum class BeregningOppsummeringStatus {
-    VURDERT,
-    IKKE_VURDERT
-}
 
 data class RestPersonMedAndeler(
     val personIdent: String?,
@@ -85,7 +73,7 @@ fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(
     if (barnetsTidslinjer == null) throw Feil("Tidslinjer mangler for barn")
 
     val restYtelseTidslinjeMedRegelverk = RestYtelsePeriodeTidslinje(initielleRestYtelsePerioder)
-        .snittKombinerMed(barnetsTidslinjer.regelverkTidslinje) { restYtelsePeriode, regelverk, ->
+        .snittKombinerMed(barnetsTidslinjer.regelverkTidslinje) { restYtelsePeriode, regelverk ->
             when {
                 regelverk == null -> restYtelsePeriode
                 restYtelsePeriode == null -> null
@@ -96,7 +84,7 @@ fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(
         }
 
     val restYtelseTidslinjeMedRegelverkOgKompetentLand =
-        restYtelseTidslinjeMedRegelverk.snittKombinerMed(KompetanseTidslinje(kompetanser)) { restYtelsePeriode, kompetanse, ->
+        restYtelseTidslinjeMedRegelverk.snittKombinerMed(KompetanseTidslinje(kompetanser)) { restYtelsePeriode, kompetanse ->
             when {
                 kompetanse == null -> restYtelsePeriode
                 restYtelsePeriode == null -> null
