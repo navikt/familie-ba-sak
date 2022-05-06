@@ -48,7 +48,31 @@ class AutovedtakStegService(
         Metrics.counter("behandling.saksbehandling.autovedtak.aapen_behandling", "type", it.name)
     }
 
-    fun <Behandlingsdata> kjørBehandling(
+    fun kjørBehandlingFødselshendelse(mottakersAktør: Aktør, behandlingsdata: NyBehandlingHendelse): String {
+        return kjørBehandling(
+            mottakersAktør = mottakersAktør,
+            autovedtaktype = Autovedtaktype.FØDSELSHENDELSE,
+            behandlingsdata = behandlingsdata
+        )
+    }
+
+    fun kjørBehandlingOmregning(mottakersAktør: Aktør, behandlingsdata: AutovedtakBrevBehandlingsdata): String {
+        return kjørBehandling(
+            mottakersAktør = mottakersAktør,
+            autovedtaktype = Autovedtaktype.OMREGNING_BREV,
+            behandlingsdata = behandlingsdata
+        )
+    }
+
+    fun kjørBehandlingSmåbarnstillegg(mottakersAktør: Aktør, behandlingsdata: Aktør): String {
+        return kjørBehandling(
+            mottakersAktør = mottakersAktør,
+            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
+            behandlingsdata = behandlingsdata
+        )
+    }
+
+    private fun <Behandlingsdata> kjørBehandling(
         mottakersAktør: Aktør,
         autovedtaktype: Autovedtaktype,
         behandlingsdata: Behandlingsdata
@@ -111,7 +135,7 @@ class AutovedtakStegService(
         return resultatAvKjøring
     }
 
-    fun håndterÅpenBehandlingOgAvbrytAutovedtak(aktør: Aktør, autovedtaktype: Autovedtaktype): Boolean {
+    private fun håndterÅpenBehandlingOgAvbrytAutovedtak(aktør: Aktør, autovedtaktype: Autovedtaktype): Boolean {
         val åpenBehandling = fagsakService.hent(aktør)?.let {
             behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(it.id)
         }
