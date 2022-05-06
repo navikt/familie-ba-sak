@@ -325,8 +325,8 @@ enum class Behandlingsresultat(val displayName: String) {
 
     IKKE_VURDERT(displayName = "Ikke vurdert");
 
-    fun kanIkkeSendesTilOppdrag(): Boolean =
-        this in listOf(FORTSATT_INNVILGET, AVSLÅTT, FORTSATT_OPPHØRT, ENDRET_UTEN_UTBETALING)
+    fun kanSendesTilOppdrag(): Boolean =
+        this !in listOf(FORTSATT_INNVILGET, AVSLÅTT, FORTSATT_OPPHØRT, ENDRET_UTEN_UTBETALING)
 }
 
 /**
