@@ -24,3 +24,13 @@ fun RestValutakurs.tilValutakurs(barnAktører: List<Aktør>) = Valutakurs(
     valutakode = this.valutakode,
     kurs = this.kurs
 )
+
+fun Valutakurs.tilRestValutakurs() = RestValutakurs(
+    id = this.id,
+    fom = this.fom,
+    tom = this.tom,
+    barnIdenter = this.barnAktører.map { it.aktivFødselsnummer() },
+    valutakursdato = this.valutakursdato,
+    valutakode = this.valutakode,
+    kurs = this.kurs
+)

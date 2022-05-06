@@ -31,7 +31,7 @@ class UtenlandskPeriodebeløpController(
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
     @PutMapping(path = ["{behandlingId}/{utenlandskPeriodebeløpId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun oppdaterValutakurs(
+    fun oppdaterUtenlandskPeriodebeløp(
         @PathVariable behandlingId: Long,
         @PathVariable utenlandskPeriodebeløpId: Long,
         @RequestBody restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp
@@ -48,7 +48,7 @@ class UtenlandskPeriodebeløpController(
     }
 
     @DeleteMapping(path = ["{behandlingId}/{utenlandskPeriodebeløpId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun slettValutakurs(
+    fun slettUtenlandskPeriodebeløp(
         @PathVariable behandlingId: Long,
         @PathVariable utenlandskPeriodebeløpId: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {

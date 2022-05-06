@@ -23,3 +23,13 @@ fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører: List<Ak
     valutakode = this.valutakode,
     intervall = this.intervall
 )
+
+fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() = RestUtenlandskPeriodebeløp(
+    id = this.id,
+    fom = this.fom,
+    tom = this.tom,
+    barnIdenter = this.barnAktører.map { it.aktivFødselsnummer() },
+    beløp = this.beløp,
+    valutakode = this.valutakode,
+    intervall = this.intervall
+)

@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestSettPåVent
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestUtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
@@ -23,6 +25,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandsperiodebeløp.UtenlandskPeriodebeløpRepository
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
@@ -50,7 +54,9 @@ class UtvidetBehandlingService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val settPåVentService: SettPåVentService,
     private val kompetanseRepository: KompetanseRepository,
-    private val endringstidspunktService: EndringstidspunktService
+    private val endringstidspunktService: EndringstidspunktService,
+    private val valutakursRepository: ValutakursRepository,
+    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository
 ) {
 
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
@@ -115,7 +121,11 @@ class UtvidetBehandlingService(
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
             aktivSettPåVent = settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
                 ?.tilRestSettPåVent(),
-            migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId)
+            migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
+            valutakurser = valutakursRepository.findByBehandlingId(behandlingId = behandlingId)
+                .map { it.tilRestValutakurs() },
+            utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.findByBehandlingId(behandlingId = behandlingId)
+                .map { it.tilRestUtenlandskPeriodebeløp() }
         )
     }
 
