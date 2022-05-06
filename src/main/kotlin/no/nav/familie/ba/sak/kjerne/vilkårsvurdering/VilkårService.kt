@@ -235,7 +235,7 @@ class VilkårService(
                 behandling,
                 personopplysningGrunnlag
             )
-            return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+            vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         } else if (aktivVilkårsvurdering != null) {
             val (initieltSomErOppdatert, aktivtSomErRedusert) = flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initiellVilkårsvurdering,
@@ -252,7 +252,7 @@ class VilkårService(
                     frontendFeilmelding = lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
                 )
             }
-            return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
+            vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
         } else {
             vilkårsvurderingService.lagreInitielt(initiellVilkårsvurdering)
         }
