@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -21,7 +22,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -139,5 +144,63 @@ class VilkårsvurderingStegTest {
         every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
 
         assertDoesNotThrow { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, "") }
+    }
+
+    @Test
+    fun `skal validere når regelverk er konsistent`() {
+
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+
+        val behandling = lagBehandling()
+
+        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>(behandling)
+            .forPerson(søker, MånedTidspunkt.nå())
+            .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)
+            .forPerson(barn1, MånedTidspunkt.nå())
+            .medVilkår("+>", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+            .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
+            .byggPerson()
+
+        val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+
+        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vilkårsvurdering
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
+        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) } returns true
+
+        assertDoesNotThrow { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
+    }
+
+    @Test
+    fun `validering skal feile når det er blanding av regelverk på vilkårene for barnet`() {
+
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+
+        val behandling = lagBehandling()
+
+        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>(behandling)
+            .forPerson(søker, MånedTidspunkt.nå())
+            .medVilkår("EEEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)
+            .forPerson(barn1, MånedTidspunkt.nå())
+            .medVilkår("+++++++++++++", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+            .medVilkår("   EEEENNNNEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("     EEENNEEE", Vilkår.LOVLIG_OPPHOLD)
+            .medVilkår("NNNNNNNNNNEEE", Vilkår.BOR_MED_SØKER)
+            .byggPerson()
+
+        val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+
+        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vilkårsvurdering
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
+        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) } returns true
+
+        val exception = assertThrows<RuntimeException> { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
+        assertEquals(
+            "Det er forskjellig regelverk for en eller flere perioder for søker eller barna",
+            exception.message
+        )
     }
 }
