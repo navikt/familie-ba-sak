@@ -43,7 +43,7 @@ class BehandlingsresultatUtilsTest {
 
         setOf(
             Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-            Behandlingsresultat.ENDRET,
+            Behandlingsresultat.ENDRET_UTEN_UTBETALING,
             Behandlingsresultat.ENDRET_OG_OPPHØRT,
             Behandlingsresultat.OPPHØRT,
             Behandlingsresultat.FORTSATT_INNVILGET,

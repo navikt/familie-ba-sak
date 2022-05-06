@@ -226,7 +226,6 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal beholde vilkår om utvidet barnetrygd når forrige behandling inneholdt utvidet-vilkåret, men inneværende behandling er ordinær`() {
-        val søkerFnr = randomFnr()
         val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
 
@@ -255,7 +254,6 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal beholde vilkår om utvidet barnetrygd når det eksisterer løpende sak med utvidet, men inneværende behandling er ordinær`() {
-        val søkerFnr = randomFnr()
         val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
 
@@ -283,7 +281,6 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal fjerne vilkår om utvidet barnetrygd når den inneværende behandlingen gjelder ordinær, og det ikke eksisterer løpende sak med utvidet, eller utvidet-vilkåret var på forrige behandling`() {
-        val søkerFnr = randomFnr()
         val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
 
@@ -364,7 +361,6 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal kopiere over alle utvidet-vilkår fra aktiv vilkårsvurdering hvis den aktive vilkårsvurderingen er fra den inneværende behandlingen`() {
-        val søkerFnr = randomFnr()
         val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
 
@@ -413,7 +409,6 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal ikke legge til utvidet vilkåret hvis det kun eksisterer ikke-oppfylte perioder, men fortsatt slette fra aktiv`() {
-        val søkerFnr = randomFnr()
         val søkerAktørId = randomAktørId()
         val nyBehandling = lagBehandling()
         val forrigeBehandling = lagBehandling()

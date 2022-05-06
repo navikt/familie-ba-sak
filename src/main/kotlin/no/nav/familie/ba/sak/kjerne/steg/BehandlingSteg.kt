@@ -282,7 +282,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.ENDRET)
+                BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING)
                     IVERKSETT_MOT_OPPDRAG
                 else throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
@@ -317,7 +317,8 @@ fun hentNesteStegTypeBasertPåBehandlingsresultat(resultat: Behandlingsresultat)
     return when (resultat) {
         Behandlingsresultat.FORTSATT_INNVILGET,
         Behandlingsresultat.AVSLÅTT,
-        Behandlingsresultat.FORTSATT_OPPHØRT -> JOURNALFØR_VEDTAKSBREV
+        Behandlingsresultat.FORTSATT_OPPHØRT,
+        Behandlingsresultat.ENDRET_UTEN_UTBETALING -> JOURNALFØR_VEDTAKSBREV
         else -> IVERKSETT_MOT_OPPDRAG
     }
 }
