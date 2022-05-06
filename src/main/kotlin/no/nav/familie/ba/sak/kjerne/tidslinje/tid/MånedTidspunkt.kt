@@ -95,6 +95,12 @@ data class MånedTidspunkt internal constructor(
                 uendelighet
             )
 
+        internal fun YearMonth?.tilTidspunktEllerUendeligLengeSiden() =
+            this.tilTidspunktEllerUendelig({ PRAKTISK_TIDLIGSTE_DAG.toYearMonth() }, Uendelighet.FORTID)
+
+        internal fun YearMonth?.tilTidspunktEllerUendeligLengeTil() =
+            this.tilTidspunktEllerUendelig({ PRAKTISK_SENESTE_DAG.toYearMonth() }, Uendelighet.FREMTID)
+
         fun månedForUendeligLengeSiden(måned: YearMonth = YearMonth.now()) =
             MånedTidspunkt(måned, uendelighet = Uendelighet.FORTID)
 

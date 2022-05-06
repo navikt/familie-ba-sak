@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
@@ -50,7 +51,8 @@ class UtvidetBehandlingService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val settPåVentService: SettPåVentService,
     private val kompetanseRepository: KompetanseRepository,
-    private val endringstidspunktService: EndringstidspunktService
+    private val endringstidspunktService: EndringstidspunktService,
+    private val tidslinjeService: TidslinjeService,
 ) {
 
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
@@ -76,6 +78,10 @@ class UtvidetBehandlingService(
 
         val endringstidspunkt = endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId)
 
+        val kompetanser = kompetanseRepository.findByBehandlingId(behandlingId = behandlingId)
+
+        val tidslinjer = tidslinjeService.hentTidslinjer(behandlingId)
+
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
             steg = behandling.steg,
@@ -98,7 +104,11 @@ class UtvidetBehandlingService(
                 behandlingId = behandling.id
             ).map { it.tilRestFødselshendelsefiltreringResultat() },
             utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
-            personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
+            personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(
+                andelerKnyttetTilPersoner = andelerTilkjentYtelse,
+                tidslinjer = tidslinjeService.hentTidslinjer(behandlingId),
+                kompetanser = kompetanser,
+            )
                 ?: emptyList(),
             endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
                 .map { it.tilRestEndretUtbetalingAndel() },
@@ -110,8 +120,7 @@ class UtvidetBehandlingService(
                 } else emptyList(),
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),
-            kompetanser = kompetanseRepository.findByBehandlingId(behandlingId = behandlingId)
-                .map { it.tilRestKompetanse() },
+            kompetanser = kompetanser.map { it.tilRestKompetanse() },
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
             aktivSettPåVent = settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
                 ?.tilRestSettPåVent(),
