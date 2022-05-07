@@ -17,8 +17,8 @@ fun oppdaterKompetanserRekursivt(kompetanser: Collection<Kompetanse>, oppdaterin
         .firstOrNull() ?: return kompetanser
 
     val endretKompetanse = oppdatering.medBarnOgPeriodeSomOverlapperMed(kompetanseSomOppdateres)!!
-
     val kompetanseFratrukketOppdatering = kompetanseSomOppdateres.trekkFra(endretKompetanse)
+
     val oppdaterteKompetanser = kompetanser
         .minus(kompetanseSomOppdateres)
         .plus(endretKompetanse)

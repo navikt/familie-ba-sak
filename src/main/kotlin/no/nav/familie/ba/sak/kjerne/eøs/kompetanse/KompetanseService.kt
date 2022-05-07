@@ -63,13 +63,13 @@ class KompetanseService(
     }
 
     @Transactional
-    fun endreKompetanse(behandlingId: Long, endretKompetanse: Kompetanse) {
+    fun endreKompetanse(behandlingId: Long, oppdatering: Kompetanse) {
         val gjeldendeKompetanser = hentKompetanser(behandlingId)
 
-        val oppdaterteKompetanser = if (gjeldendeKompetanser.erLukkingAvÅpenPeriode(endretKompetanse))
-            oppdaterKompetanserRekursivt(gjeldendeKompetanser, endretKompetanse.utenSkjemaHeretter())
+        val oppdaterteKompetanser = if (gjeldendeKompetanser.erLukkingAvEnÅpenPeriode(oppdatering))
+            oppdaterKompetanserRekursivt(gjeldendeKompetanser, oppdatering.utenSkjemaHeretter())
         else
-            oppdaterKompetanserRekursivt(gjeldendeKompetanser, endretKompetanse)
+            oppdaterKompetanserRekursivt(gjeldendeKompetanser, oppdatering)
 
         lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser.medBehandlingId(behandlingId))
         tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
@@ -143,6 +143,6 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.flyttTilOgMed(tilTidspunkt: Tidspunkt<T>)
 fun <T> Collection<T>.replaceLast(replacer: (T) -> T) =
     this.take(this.size - 1) + replacer(this.last())
 
-fun Iterable<Kompetanse>.erLukkingAvÅpenPeriode(kompetanse: Kompetanse) =
+fun Iterable<Kompetanse>.erLukkingAvEnÅpenPeriode(kompetanse: Kompetanse) =
     this.filter { it.tom == null && kompetanse.tom != null && it.copy(tom = kompetanse.tom) == kompetanse }
         .singleOrNull() != null
