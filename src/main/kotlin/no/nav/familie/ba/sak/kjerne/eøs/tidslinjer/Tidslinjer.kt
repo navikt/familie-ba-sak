@@ -54,7 +54,7 @@ class Tidslinjer(
         tidslinjer: Tidslinjer,
         aktør: Aktør,
     ) {
-        val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør]!!
+        val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
 
         private val vilkårsresultatMånedTidslinjer =
             vilkårsresultatTidslinjer.map { it.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() }

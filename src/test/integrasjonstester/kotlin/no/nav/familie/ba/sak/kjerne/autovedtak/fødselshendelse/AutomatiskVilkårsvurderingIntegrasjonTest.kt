@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -33,6 +35,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val mockPersonopplysningerService: PersonopplysningerService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
 
@@ -52,6 +55,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        vilkårsvurderingService.lagreInitielt(Vilkårsvurdering(behandling = behandlingFørVilkår))
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
@@ -68,6 +72,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        vilkårsvurderingService.lagreInitielt(Vilkårsvurdering(behandling = behandlingFørVilkår))
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
@@ -93,6 +98,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        vilkårsvurderingService.lagreInitielt(Vilkårsvurdering(behandling = behandlingFørVilkår))
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
@@ -137,6 +143,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        vilkårsvurderingService.lagreInitielt(Vilkårsvurdering(behandling = behandlingFørVilkår))
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
