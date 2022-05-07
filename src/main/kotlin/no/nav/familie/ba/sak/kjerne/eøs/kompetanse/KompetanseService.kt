@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.inneholder
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenSkjema
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenSkjemaHeretter
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -39,20 +40,6 @@ class KompetanseService(
     fun hentKompetanse(kompetanseId: Long): Kompetanse {
         return kompetanseRepository.getById(kompetanseId)
     }
-/*
-    fun oppdaterKompetanse(kompetanseId: Long, oppdatertKompetanse: Kompetanse) {
-        val gjeldendeKompetanser = hentKompetanser(oppdatertKompetanse.behandlingId)
-
-        val kompetanserMedOverlapp = gjeldendeKompetanser.overlapperBarnOgPeriodeMed(oppdatertKompetanse)
-
-        when {
-            kompetanserMedOverlapp.size > 1 -> overskrivFlereKompetanser(gjeldendeKompetanser, oppdatertKompetanse)
-            kompetanserMedOverlapp.size == 1 && erLukking(kompetanserMedOverlapp.first(), oppdatertKompetanse) ->
-                lukkKompetanse(kompetanserMedOverlapp.first(), oppdatertKompetanse)
-            else -> endreKompetanse(kompetanseId, oppdatertKompetanse)
-        }
-    }
- */
 
     @Transactional
     @Deprecated("Bruk ny versjon av endreKompetanse")
@@ -79,10 +66,12 @@ class KompetanseService(
     fun endreKompetanse(behandlingId: Long, endretKompetanse: Kompetanse) {
         val gjeldendeKompetanser = hentKompetanser(behandlingId)
 
-        val oppdaterteKompetanser = oppdaterKompetanserRekursivt(gjeldendeKompetanser, endretKompetanse)
-            .medBehandlingId(behandlingId)
+        val oppdaterteKompetanser = if (gjeldendeKompetanser.erLukkingAvÅpenPeriode(endretKompetanse))
+            oppdaterKompetanserRekursivt(gjeldendeKompetanser, endretKompetanse.utenSkjemaHeretter())
+        else
+            oppdaterKompetanserRekursivt(gjeldendeKompetanser, endretKompetanse)
 
-        lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
+        lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser.medBehandlingId(behandlingId))
         tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
     }
 
@@ -153,3 +142,7 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.flyttTilOgMed(tilTidspunkt: Tidspunkt<T>)
 
 fun <T> Collection<T>.replaceLast(replacer: (T) -> T) =
     this.take(this.size - 1) + replacer(this.last())
+
+fun Iterable<Kompetanse>.erLukkingAvÅpenPeriode(kompetanse: Kompetanse) =
+    this.filter { it.tom == null && kompetanse.tom != null && it.copy(tom = kompetanse.tom) == kompetanse }
+        .singleOrNull() != null

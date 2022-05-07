@@ -131,7 +131,7 @@ internal class KompetanseServiceTest {
     }
 
     @Test
-    fun `oppdatering som endrer flere kompetanser`() {
+    fun `skal kunne sende inn oppdatering som overlapper flere kompetanser`() {
         val behandlingId = 10L
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
@@ -152,8 +152,33 @@ internal class KompetanseServiceTest {
             .medKompetanse("--   ----", barn2, barn3)
             .byggKompetanser()
 
-        val actual = kompetanseService.hentKompetanser(behandlingId)
-        assertEqualsUnordered(forventedeKompetanser, actual)
+        val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `skal kunne lukke åpen kompetanse ved å sende inn identisk skjema med til-og-med-dato`() {
+        val behandlingId = 10L
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        // Åpen (til-og-med er null) kompetanse med sekundærland for tre barn
+        KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("S>", barn1, barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        // Endrer kun til-og-med dato fra uendelig (null) til en gitt dato
+        val oppdatertKompetanse = kompetanse(jan(2020), "SSS", barn1, barn2, barn3)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+
+        // Forventer tomt skjema fra oppdatert dato og fremover
+        val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("SSS->", barn1, barn2, barn3)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test

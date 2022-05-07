@@ -98,14 +98,24 @@ fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
 }
 
 fun Kompetanse.medBarnOgPeriodeSomOverlapperMed(kompetanse: Kompetanse): Kompetanse? {
+
+    val fom = maxOf(this.fom ?: MIN_MÅNED, kompetanse.fom ?: MIN_MÅNED)
+    val tom = minOf(this.tom ?: MAX_MÅNED, kompetanse.tom ?: MAX_MÅNED)
+
     val snitt = this.copy(
-        fom = maxOf(this.fom ?: MIN_MÅNED, kompetanse.fom ?: MIN_MÅNED),
-        tom = minOf(this.tom ?: MAX_MÅNED, kompetanse.tom ?: MAX_MÅNED),
+        fom = if (fom == MIN_MÅNED) null else fom,
+        tom = if (tom == MAX_MÅNED) null else tom,
         barnAktører = this.barnAktører.intersect(kompetanse.barnAktører)
     )
 
     return if (snitt.harBarnOgPeriode()) snitt else null
 }
+
+fun Kompetanse.utenSkjemaHeretter() =
+    this.copy(
+        fom = tom?.plusMonths(1),
+        tom = null,
+    ).utenSkjema()
 
 fun Kompetanse.harBarnOgPeriode(): Boolean {
     val harGyldigPeriode = fom == null || tom == null || fom <= tom
