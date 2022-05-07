@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.oppdaterKompetanserRekursivt
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.trekkFra
@@ -38,22 +39,48 @@ class KompetanseService(
     fun hentKompetanse(kompetanseId: Long): Kompetanse {
         return kompetanseRepository.getById(kompetanseId)
     }
+/*
+    fun oppdaterKompetanse(kompetanseId: Long, oppdatertKompetanse: Kompetanse) {
+        val gjeldendeKompetanser = hentKompetanser(oppdatertKompetanse.behandlingId)
+
+        val kompetanserMedOverlapp = gjeldendeKompetanser.overlapperBarnOgPeriodeMed(oppdatertKompetanse)
+
+        when {
+            kompetanserMedOverlapp.size > 1 -> overskrivFlereKompetanser(gjeldendeKompetanser, oppdatertKompetanse)
+            kompetanserMedOverlapp.size == 1 && erLukking(kompetanserMedOverlapp.first(), oppdatertKompetanse) ->
+                lukkKompetanse(kompetanserMedOverlapp.first(), oppdatertKompetanse)
+            else -> endreKompetanse(kompetanseId, oppdatertKompetanse)
+        }
+    }
+ */
 
     @Transactional
-    fun oppdaterKompetanse(kompetanseId: Long, oppdatertKompetanse: Kompetanse) {
+    @Deprecated("Bruk ny versjon av endreKompetanse")
+    fun endreKompetanseOld(kompetanseId: Long, endretKompetanse: Kompetanse) {
         val kompetanseSomOppdateres = kompetanseRepository.getById(kompetanseId)
 
-        if (!kompetanseSomOppdateres.utenSkjema().inneholder(oppdatertKompetanse.utenSkjema()))
+        if (!kompetanseSomOppdateres.utenSkjema().inneholder(endretKompetanse.utenSkjema()))
             throw IllegalArgumentException("Endringen er ikke innenfor kompetansen som endres")
 
         val behandlingId = kompetanseSomOppdateres.behandlingId
         val gjeldendeKompetanser = hentKompetanser(behandlingId)
 
-        val kompetanseFratrukketOppdatering = kompetanseSomOppdateres.trekkFra(oppdatertKompetanse)
+        val kompetanseFratrukketOppdatering = kompetanseSomOppdateres.trekkFra(endretKompetanse)
         val oppdaterteKompetanser =
             gjeldendeKompetanser.plus(kompetanseFratrukketOppdatering)
-                .plus(oppdatertKompetanse).minus(kompetanseSomOppdateres)
+                .plus(endretKompetanse).minus(kompetanseSomOppdateres)
                 .slåSammen().medBehandlingId(behandlingId)
+
+        lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
+    }
+
+    @Transactional
+    fun endreKompetanse(behandlingId: Long, endretKompetanse: Kompetanse) {
+        val gjeldendeKompetanser = hentKompetanser(behandlingId)
+
+        val oppdaterteKompetanser = oppdaterKompetanserRekursivt(gjeldendeKompetanser, endretKompetanse)
+            .medBehandlingId(behandlingId)
 
         lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
         tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)

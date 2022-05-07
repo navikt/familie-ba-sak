@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -68,7 +69,7 @@ internal class KompetanseServiceTest {
             .lagreTil(mockKompetanseRepository)
 
         val oppdatertKompetanse = kompetanse(jan(2020), "  SSSSS  ", barn1)
-        kompetanseService.oppdaterKompetanse(lagretKompetanse.id, oppdatertKompetanse)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
 
         val forventedeKompetanser = listOf(lagretKompetanse)
 
@@ -87,7 +88,7 @@ internal class KompetanseServiceTest {
 
         val oppdatertKompetanse = kompetanse(jan(2020), "  PP", barn2, barn3)
 
-        kompetanseService.oppdaterKompetanse(lagretKompetanse.id, oppdatertKompetanse)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
 
         val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
             .medKompetanse("--", barn1, barn2, barn3)
@@ -117,12 +118,8 @@ internal class KompetanseServiceTest {
             .medKompetanse("   SSSS", barn1)
             .lagreTil(mockKompetanseRepository)
 
-        val lagretKompetanse = kompetanseService.finnKompetanse(
-            behandlingId, kompetanse(jan(2020), "SSS", barn1)
-        )
-
         val oppdatertKompetanse = kompetanse(jan(2020), "PP", barn1)
-        kompetanseService.oppdaterKompetanse(lagretKompetanse.id, oppdatertKompetanse)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
 
         val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
             .medKompetanse("PP", barn1)
@@ -131,6 +128,32 @@ internal class KompetanseServiceTest {
             .byggKompetanser()
 
         assertEqualsUnordered(forventedeKompetanser, kompetanseService.hentKompetanser(behandlingId))
+    }
+
+    @Test
+    fun `oppdatering som endrer flere kompetanser`() {
+        val behandlingId = 10L
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("SSS", barn1)
+            .medKompetanse("---------", barn2, barn3)
+            .medKompetanse("   SSSS", barn1)
+            .lagreTil(mockKompetanseRepository)
+
+        val oppdatertKompetanse = kompetanse(mar(2020), "PPP", barn1, barn2, barn3)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+
+        val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("SS   SS", barn1)
+            .medKompetanse("  PPP", barn1, barn2, barn3)
+            .medKompetanse("--   ----", barn2, barn3)
+            .byggKompetanser()
+
+        val actual = kompetanseService.hentKompetanser(behandlingId)
+        assertEqualsUnordered(forventedeKompetanser, actual)
     }
 
     @Test

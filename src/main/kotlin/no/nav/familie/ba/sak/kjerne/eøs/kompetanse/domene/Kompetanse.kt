@@ -97,6 +97,21 @@ fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
         this.barnAktører.containsAll(kompetanse.barnAktører)
 }
 
+fun Kompetanse.medBarnOgPeriodeSomOverlapperMed(kompetanse: Kompetanse): Kompetanse? {
+    val snitt = this.copy(
+        fom = maxOf(this.fom ?: MIN_MÅNED, kompetanse.fom ?: MIN_MÅNED),
+        tom = minOf(this.tom ?: MAX_MÅNED, kompetanse.tom ?: MAX_MÅNED),
+        barnAktører = this.barnAktører.intersect(kompetanse.barnAktører)
+    )
+
+    return if (snitt.harBarnOgPeriode()) snitt else null
+}
+
+fun Kompetanse.harBarnOgPeriode(): Boolean {
+    val harGyldigPeriode = fom == null || tom == null || fom <= tom
+    return harGyldigPeriode && barnAktører.isNotEmpty()
+}
+
 enum class SøkersAktivitet {
     ARBEIDER_I_NORGE,
     SELVSTENDIG_NÆRINGSDRIVENDE,
