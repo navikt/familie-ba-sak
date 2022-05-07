@@ -220,11 +220,8 @@ class VilkårService(
         val initiellVilkårsvurdering = InitiellVilkårsvurderingGenerator(behandling, personopplysningGrunnlag)
             .genererInitiellVilkårsvurdering(barnaSomAlleredeErVurdert)
 
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE &&
-            førstegangskjøringAvVilkårsvurdering(initiellVilkårsvurdering)
-        ) {
-            vilkårsvurderingMetrics.tellMetrikker(initiellVilkårsvurdering)
-        }
+        if (aktivVilkårsvurdering == null) // Bare tell hvis det er første gang
+            tellMetrikkerForFødselshendelse(initiellVilkårsvurdering)
 
         return if (forrigeBehandlingSomErVedtatt != null && aktivVilkårsvurdering == null) {
             val forrigeBehandlingsVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
@@ -241,15 +238,18 @@ class VilkårService(
                 behandling,
                 forrigeBehandlingSomErVedtatt
             )
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+            return vilkårsvurderingService.lagreInitielt(vilkårsvurdering)
         } else if (aktivVilkårsvurdering != null) {
+            val løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(behandling.fagsak.id)
+            val forrigeBehandlingVilkårsvurdering = forrigeBehandlingSomErVedtatt?.let {
+                hentVilkårsvurdering(it.id)
+            }
+
             val (initieltSomErOppdatert, aktivtSomErRedusert) = flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initiellVilkårsvurdering,
                 aktivVilkårsvurdering = aktivVilkårsvurdering,
-                løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
-                forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) hentVilkårsvurdering(
-                    forrigeBehandlingSomErVedtatt.id
-                ) else null
+                løpendeUnderkategori = løpendeUnderkategori,
+                forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
             )
 
             if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
@@ -261,6 +261,14 @@ class VilkårService(
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
         } else {
             vilkårsvurderingService.lagreInitielt(initiellVilkårsvurdering)
+        }
+    }
+
+    private fun tellMetrikkerForFødselshendelse(
+        initiellVilkårsvurdering: Vilkårsvurdering
+    ) {
+        if (initiellVilkårsvurdering.behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+            vilkårsvurderingMetrics.tellMetrikker(initiellVilkårsvurdering)
         }
     }
 
@@ -382,10 +390,6 @@ class VilkårService(
 
             personResultat
         }.toSet()
-    }
-
-    private fun førstegangskjøringAvVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Boolean {
-        return hentVilkårsvurdering(vilkårsvurdering.behandling.id) == null
     }
 
     private fun finnesUtvidetBarnetrydIForrigeBehandling(behandling: Behandling, personIdent: String): Boolean {
