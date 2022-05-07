@@ -12,10 +12,13 @@ import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
@@ -457,4 +460,13 @@ fun validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(
                 "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling."
         )
     }
+}
+
+fun Vilkårsvurdering.justerForBrukersDødsfall(personopplysningGrunnlag: PersonopplysningGrunnlag): Vilkårsvurdering {
+    if (behandling.type == BehandlingType.REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
+        this.personResultater.single { it.erSøkersResultater() }.vilkårResultater.forEach { vilkårResultat ->
+            vilkårResultat.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
+        }
+    }
+    return this
 }

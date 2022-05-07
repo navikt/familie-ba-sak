@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.REVURDERING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
@@ -228,11 +227,19 @@ class VilkårService(
         }
 
         return if (forrigeBehandlingSomErVedtatt != null && aktivVilkårsvurdering == null) {
-            val vilkårsvurdering = genererVilkårsvurderingFraForrigeVedtattBehandling(
-                initiellVilkårsvurdering,
-                forrigeBehandlingSomErVedtatt,
+            val forrigeBehandlingsVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
+            val løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(behandling.fagsak.id)
+
+            val vilkårsvurdering = flyttResultaterTilInitielt(
+                aktivVilkårsvurdering = forrigeBehandlingsVilkårsvurdering,
+                initiellVilkårsvurdering = initiellVilkårsvurdering,
+                løpendeUnderkategori = løpendeUnderkategori,
+                forrigeBehandlingVilkårsvurdering = forrigeBehandlingsVilkårsvurdering
+            ).first.justerForBrukersDødsfall(personopplysningGrunnlag)
+
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
                 behandling,
-                personopplysningGrunnlag
+                forrigeBehandlingSomErVedtatt
             )
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         } else if (aktivVilkårsvurdering != null) {
@@ -255,32 +262,6 @@ class VilkårService(
         } else {
             vilkårsvurderingService.lagreInitielt(initiellVilkårsvurdering)
         }
-    }
-
-    private fun genererVilkårsvurderingFraForrigeVedtattBehandling(
-        initiellVilkårsvurdering: Vilkårsvurdering,
-        forrigeBehandlingSomErVedtatt: Behandling,
-        behandling: Behandling,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
-    ): Vilkårsvurdering {
-        val forrigeBehandlingsVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
-        val (vilkårsvurdering) = flyttResultaterTilInitielt(
-            aktivVilkårsvurdering = forrigeBehandlingsVilkårsvurdering,
-            initiellVilkårsvurdering = initiellVilkårsvurdering,
-            løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
-            forrigeBehandlingVilkårsvurdering = forrigeBehandlingsVilkårsvurdering
-        )
-
-        if (behandling.type == REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
-            vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater.forEach { vilkårResultat ->
-                vilkårResultat.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
-            }
-        }
-        endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
-            behandling,
-            forrigeBehandlingSomErVedtatt
-        )
-        return vilkårsvurdering
     }
 
     fun genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
