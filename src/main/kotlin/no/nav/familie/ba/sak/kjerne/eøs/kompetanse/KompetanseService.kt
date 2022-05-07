@@ -129,7 +129,6 @@ class KompetanseService(
                     .filtrerIkkeNull()
                     .forlengFremtidTilUendelig(MånedTidspunkt.nå())
             }
-            .mapKeys { (aktør, _) -> aktør }
 }
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.forlengFremtidTilUendelig(nå: Tidspunkt<T>): Tidslinje<I, T> {
