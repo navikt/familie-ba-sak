@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandsperiodebeløp
 
-import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.YearMonth
 import javax.persistence.Column
 import javax.persistence.Convert
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -15,15 +18,19 @@ import javax.persistence.JoinColumn
 import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
 import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
+@EntityListeners(RollestyringMotDatabase::class)
+@Entity(name = "UtenlandskPeriodebeløp")
+@Table(name = "UTENLANDSK_PERIODEBELØP")
 data class UtenlandskPeriodebeløp(
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val fom: YearMonth?,
+    override val fom: YearMonth?,
 
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val tom: YearMonth?,
+    override val tom: YearMonth?,
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -31,17 +38,17 @@ data class UtenlandskPeriodebeløp(
         joinColumns = [JoinColumn(name = "fk_kompetanse_id")],
         inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")]
     )
-    val barnAktører: Set<Aktør> = emptySet(),
+    override val barnAktører: Set<Aktør> = emptySet(),
 
     @Column(name = "belop")
-    val beløp: BigDecimal,
+    val beløp: BigDecimal?,
 
     @Column(name = "valutakode")
-    val valutakode: String,
+    val valutakode: String?,
 
     @Column(name = "intervall")
-    val intervall: String,
-) : BaseEntitet() {
+    val intervall: String?,
+) : PeriodeOgBarnSkjemaEntitet<UtenlandskPeriodebeløp>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "utenlandskperiodebelop_seq_generator")
     @SequenceGenerator(
@@ -49,8 +56,20 @@ data class UtenlandskPeriodebeløp(
         sequenceName = "utenlandskperiodebelop_seq",
         allocationSize = 50
     )
-    var id: Long = 0
+    override var id: Long = 0
 
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
-    var behandlingId: Long = 0
+    override var behandlingId: Long = 0
+
+    override fun utenSkjema(): UtenlandskPeriodebeløp = copy(
+        beløp = null,
+        valutakode = null,
+        intervall = null
+    )
+
+    override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) = copy(
+        fom = fom,
+        tom = tom,
+        barnAktører = barnAktører
+    )
 }

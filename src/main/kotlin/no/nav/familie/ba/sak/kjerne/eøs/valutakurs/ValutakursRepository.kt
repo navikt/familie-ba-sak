@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
-import org.springframework.data.jpa.repository.JpaRepository
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 
-interface ValutakursRepository : JpaRepository<Valutakurs, Long> {
+interface ValutakursRepository : PeriodeOgBarnSkjemaRepository<Valutakurs> {
 
     // / TODO: Koble til databasen
     // @Query("")
-    fun findByBehandlingId(behandlingId: Long): List<Valutakurs>
+    override fun findByBehandlingId(behandlingId: Long): List<Valutakurs>
 }

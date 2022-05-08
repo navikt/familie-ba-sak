@@ -10,9 +10,9 @@ data class RestUtenlandskPeriodebeløp(
     val fom: YearMonth?,
     val tom: YearMonth?,
     val barnIdenter: List<String>,
-    val beløp: BigDecimal,
-    val valutakode: String,
-    val intervall: String
+    val beløp: BigDecimal?,
+    val valutakode: String?,
+    val intervall: String?
 )
 
 fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører: List<Aktør>) = UtenlandskPeriodebeløp(

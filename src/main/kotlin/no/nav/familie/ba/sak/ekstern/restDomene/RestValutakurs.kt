@@ -11,9 +11,9 @@ data class RestValutakurs(
     val fom: YearMonth?,
     val tom: YearMonth?,
     val barnIdenter: List<String>,
-    val valutakursdato: LocalDate,
-    val valutakode: String,
-    val kurs: BigDecimal
+    val valutakursdato: LocalDate?,
+    val valutakode: String?,
+    val kurs: BigDecimal?
 )
 
 fun RestValutakurs.tilValutakurs(barnAktører: List<Aktør>) = Valutakurs(

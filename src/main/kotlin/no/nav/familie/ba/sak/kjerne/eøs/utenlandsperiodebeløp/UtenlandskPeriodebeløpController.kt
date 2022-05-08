@@ -30,10 +30,9 @@ class UtenlandskPeriodebeløpController(
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
-    @PutMapping(path = ["{behandlingId}/{utenlandskPeriodebeløpId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterUtenlandskPeriodebeløp(
         @PathVariable behandlingId: Long,
-        @PathVariable utenlandskPeriodebeløpId: Long,
         @RequestBody restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
@@ -42,7 +41,7 @@ class UtenlandskPeriodebeløpController(
         val barnAktører = restUtenlandskPeriodebeløp.barnIdenter.map { personidentService.hentAktør(it) }
         val utenlandskPeriodebeløp = restUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører = barnAktører)
 
-        utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(utenlandskPeriodebeløpId, utenlandskPeriodebeløp)
+        utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(behandlingId, utenlandskPeriodebeløp)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

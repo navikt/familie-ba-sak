@@ -30,10 +30,9 @@ class ValutakursController(
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
-    @PutMapping(path = ["{behandlingId}/{valutakursId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterValutakurs(
         @PathVariable behandlingId: Long,
-        @PathVariable valutakursId: Long,
         @RequestBody restValutakurs: RestValutakurs
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
@@ -42,7 +41,7 @@ class ValutakursController(
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
         val valutakurs = restValutakurs.tilValutakurs(barnAktører = barnAktører)
 
-        valutakursService.oppdaterValutakurs(valutakursId, valutakurs)
+        valutakursService.oppdaterValutakurs(behandlingId, valutakurs)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
