@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
-import no.nav.familie.ba.sak.kjerne.autovedtak.Autovedtaktype
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -280,9 +279,8 @@ class BehandleSmåbarnstilleggTest(
         settOppefSakMockForDeFørste2Testene(søkersIdent)
 
         val søkersAktør = personidentService.hentAktør(søkersIdent)
-        autovedtakStegService.kjørBehandling(
+        autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
             behandlingsdata = søkersAktør
         )
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
@@ -310,9 +308,8 @@ class BehandleSmåbarnstilleggTest(
                 ),
             )
         )
-        autovedtakStegService.kjørBehandling(
+        autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
             behandlingsdata = søkersAktør
         )
 
@@ -367,9 +364,8 @@ class BehandleSmåbarnstilleggTest(
                 ),
             )
         )
-        autovedtakStegService.kjørBehandling(
+        autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = søkersAktør,
-            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
             behandlingsdata = søkersAktør
         )
 
