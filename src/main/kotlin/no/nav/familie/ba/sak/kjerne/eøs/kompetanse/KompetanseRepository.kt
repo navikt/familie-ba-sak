@@ -1,6 +1,7 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
+package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import org.springframework.data.jpa.repository.Query
 
 interface KompetanseRepository : PeriodeOgBarnSkjemaRepository<Kompetanse> {

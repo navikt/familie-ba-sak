@@ -98,46 +98,6 @@ enum class KompetanseStatus {
     OK
 }
 
-fun Kompetanse.utenSkjema() = this.copy(
-    søkersAktivitet = null,
-    annenForeldersAktivitet = null,
-    annenForeldersAktivitetsland = null,
-    barnetsBostedsland = null,
-    resultat = null
-)
-
-fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
-    return this.bareSkjema() == kompetanse.bareSkjema() &&
-        (this.fom == null || this.fom <= kompetanse.fom) &&
-        (this.tom == null || this.tom >= kompetanse.tom) &&
-        this.barnAktører.containsAll(kompetanse.barnAktører)
-}
-
-fun Kompetanse.medBarnOgPeriodeSomOverlapperMed(kompetanse: Kompetanse): Kompetanse? {
-
-    val fom = maxOf(this.fom ?: MIN_MÅNED, kompetanse.fom ?: MIN_MÅNED)
-    val tom = minOf(this.tom ?: MAX_MÅNED, kompetanse.tom ?: MAX_MÅNED)
-
-    val snitt = this.copy(
-        fom = if (fom == MIN_MÅNED) null else fom,
-        tom = if (tom == MAX_MÅNED) null else tom,
-        barnAktører = this.barnAktører.intersect(kompetanse.barnAktører)
-    )
-
-    return if (snitt.harBarnOgPeriode()) snitt else null
-}
-
-fun Kompetanse.utenSkjemaHeretter() =
-    this.copy(
-        fom = tom?.plusMonths(1),
-        tom = null,
-    ).utenSkjema()
-
-fun Kompetanse.harBarnOgPeriode(): Boolean {
-    val harGyldigPeriode = fom == null || tom == null || fom <= tom
-    return harGyldigPeriode && barnAktører.isNotEmpty()
-}
-
 enum class SøkersAktivitet {
     ARBEIDER_I_NORGE,
     SELVSTENDIG_NÆRINGSDRIVENDE,
@@ -162,12 +122,3 @@ enum class KompetanseResultat {
     NORGE_ER_SEKUNDÆRLAND,
     TO_PRIMÆRLAND
 }
-
-fun Kompetanse.bareSkjema() =
-    this.copy(fom = null, tom = null, barnAktører = emptySet())
-
-fun Kompetanse.utenBarn() =
-    this.copy(barnAktører = emptySet())
-
-fun Kompetanse.utenPeriode() =
-    this.copy(fom = null, tom = null)

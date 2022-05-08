@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.settFomOgTom
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.trekkFra
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.AktørKompetanseTidslinje
 import no.nav.familie.ba.sak.kjerne.personident.Aktør

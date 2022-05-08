@@ -3,10 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.felles
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.oppdaterSkjemaerRekursivt
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
-@Service
 class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
     val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<T>,
     val tilbakestillBehandlingService: TilbakestillBehandlingService,
@@ -20,7 +17,6 @@ class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
         return periodeOgBarnSkjemaRepository.getById(id)
     }
 
-    @Transactional
     fun endreSkjemaer(behandlingId: Long, oppdatering: T) {
         val gjeldendeSkjema = hentMedBehandlingId(behandlingId)
 
@@ -33,7 +29,6 @@ class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
         tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
     }
 
-    @Transactional
     fun slettSkjema(skjemaId: Long) {
         val kompetanseTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
         val behandlingId = kompetanseTilSletting.behandlingId
@@ -48,14 +43,9 @@ class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
         tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
     }
 
-    protected fun lagreSkjemaDifferanse(gjeldende: Collection<T>, oppdaterte: Collection<T>) {
+    fun lagreSkjemaDifferanse(gjeldende: Collection<T>, oppdaterte: Collection<T>) {
         periodeOgBarnSkjemaRepository.deleteAll(gjeldende - oppdaterte)
         periodeOgBarnSkjemaRepository.saveAll(oppdaterte - gjeldende)
-    }
-
-    private fun Collection<T>.medBehandlingId(behandlingId: Long): Collection<T> {
-        this.forEach { it.behandlingId = behandlingId }
-        return this
     }
 
     private fun <T : PeriodeOgBarnSkjema<T>> Iterable<T>.erLukkingAvEnÅpenPeriode(skjema: T) =
@@ -63,4 +53,9 @@ class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
             it.tom == null && skjema.tom != null && it.kopier(tom = skjema.tom) == skjema
         }
             .singleOrNull() != null
+}
+
+fun <T : PeriodeOgBarnSkjemaEntitet<T>> Collection<T>.medBehandlingId(behandlingId: Long): Collection<T> {
+    this.forEach { it.behandlingId = behandlingId }
+    return this
 }
