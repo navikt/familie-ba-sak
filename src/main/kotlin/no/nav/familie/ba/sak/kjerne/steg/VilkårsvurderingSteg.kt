@@ -43,11 +43,12 @@ class VilkårsvurderingSteg(
         }
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
-            validerIkkeBlandetRegelverk(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                vilkårsvurdering = vilkårsvurdering
-            )
+            vilkårService.hentVilkårsvurdering(behandling.id)?.apply {
+                validerIkkeBlandetRegelverk(
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    vilkårsvurdering = this
+                )
+            }
         }
     }
 

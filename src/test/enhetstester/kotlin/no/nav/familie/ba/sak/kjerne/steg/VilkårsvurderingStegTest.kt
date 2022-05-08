@@ -165,7 +165,7 @@ class VilkårsvurderingStegTest {
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
 
-        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vilkårsvurdering
+        every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
         every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) } returns true
 
@@ -193,7 +193,7 @@ class VilkårsvurderingStegTest {
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
 
-        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vilkårsvurdering
+        every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
         every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) } returns true
 
