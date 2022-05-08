@@ -35,8 +35,8 @@ data class Valutakurs(
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "AKTOER_TIL_KOMPETANSE",
-        joinColumns = [JoinColumn(name = "fk_kompetanse_id")],
+        name = "AKTOER_TIL_VALUTAKURS",
+        joinColumns = [JoinColumn(name = "fk_valutakurs_id")],
         inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")]
     )
     override val barnAktører: Set<Aktør> = emptySet(),

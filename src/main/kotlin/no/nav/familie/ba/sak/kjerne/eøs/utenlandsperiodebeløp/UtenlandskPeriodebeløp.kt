@@ -22,7 +22,7 @@ import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "UtenlandskPeriodebeløp")
-@Table(name = "UTENLANDSK_PERIODEBELØP")
+@Table(name = "UTENLANDSK_PERIODEBELOEP")
 data class UtenlandskPeriodebeløp(
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
@@ -34,13 +34,13 @@ data class UtenlandskPeriodebeløp(
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "AKTOER_TIL_KOMPETANSE",
-        joinColumns = [JoinColumn(name = "fk_kompetanse_id")],
+        name = "AKTOER_TIL_UTENLANDSK_PERIODEBELOEP",
+        joinColumns = [JoinColumn(name = "fk_utenlandsk_periodebeloep_id")],
         inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")]
     )
     override val barnAktører: Set<Aktør> = emptySet(),
 
-    @Column(name = "belop")
+    @Column(name = "beloep")
     val beløp: BigDecimal?,
 
     @Column(name = "valutakode")
@@ -50,10 +50,10 @@ data class UtenlandskPeriodebeløp(
     val intervall: String?,
 ) : PeriodeOgBarnSkjemaEntitet<UtenlandskPeriodebeløp>() {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "utenlandskperiodebelop_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "utenlandsk_periodebeloep_seq_generator")
     @SequenceGenerator(
-        name = "utenlandskperiodebelop_seq_generator",
-        sequenceName = "utenlandskperiodebelop_seq",
+        name = "utenlandsk_periodebeloep_seq_generator",
+        sequenceName = "utenlandsk_periodebeloep_seq",
         allocationSize = 50
     )
     override var id: Long = 0

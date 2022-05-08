@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandsperiodebeløp
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
+import org.springframework.data.jpa.repository.Query
 
 interface UtenlandskPeriodebeløpRepository : PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> {
-    // / TODO: Koble til databasen
-    // @Query("")
+
+    @Query("SELECT upb FROM UtenlandskPeriodebeløp upb WHERE upb.behandlingId = :behandlingId")
     override fun findByBehandlingId(behandlingId: Long): List<UtenlandskPeriodebeløp>
 }
