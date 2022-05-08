@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
-import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.YearMonthConverter
-import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjema
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.YearMonth
@@ -60,7 +59,8 @@ data class Kompetanse(
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat")
     val resultat: KompetanseResultat? = null
-) : PeriodeOgBarnSkjema<Kompetanse>, BaseEntitet() {
+) : PeriodeOgBarnSkjemaEntitet<Kompetanse>() {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "kompetanse_seq_generator")
     @SequenceGenerator(
@@ -68,10 +68,10 @@ data class Kompetanse(
         sequenceName = "kompetanse_seq",
         allocationSize = 50
     )
-    var id: Long = 0
+    override var id: Long = 0
 
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
-    var behandlingId: Long = 0
+    override var behandlingId: Long = 0
 
     @Transient
     var status: KompetanseStatus? = KompetanseStatus.IKKE_UTFYLT
