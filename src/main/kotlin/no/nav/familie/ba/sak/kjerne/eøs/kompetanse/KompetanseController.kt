@@ -69,7 +69,7 @@ class KompetanseController(
         val gjeldendeKompetanse = kompetanseService.hentKompetanse(kompetanseId)
         validerOppdatering(gjeldendeKompetanse, kompetanse)
 
-        kompetanseService.endreKompetanseOld(kompetanseId, kompetanse)
+        kompetanseService.endreKompetanse(gjeldendeKompetanse.behandlingId, kompetanse)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

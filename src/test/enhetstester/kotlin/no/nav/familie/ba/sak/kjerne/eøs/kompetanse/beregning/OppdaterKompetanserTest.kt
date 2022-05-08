@@ -60,4 +60,18 @@ internal class OppdaterKompetanserTest {
         val faktiskeKompetanser = oppdaterKompetanserRekursivt(kompetanser, kompetanse)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
+
+    @Test
+    fun `oppdatere kompetanser som begynner uendret, skal likevel bli endret`() {
+        val kompetanse = kompetanse(jan(2020), "    SSSSSSSSS", barn1)
+
+        val forventedeKompetanser = KompetanseBuilder(jan(2020), 1L)
+            .medKompetanse("    SSSSSSSSS", barn1)
+            .medKompetanse("  ---------PP", barn2, barn3)
+            .medKompetanse("             PP", barn1, barn2, barn3)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = oppdaterKompetanserRekursivt(kompetanser, kompetanse)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
 }

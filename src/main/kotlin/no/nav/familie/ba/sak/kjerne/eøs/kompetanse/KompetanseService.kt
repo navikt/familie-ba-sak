@@ -3,10 +3,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.oppdaterKompetanserRekursivt
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.tilpassKompetanserTilRegelverk
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.trekkFra
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.inneholder
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenSkjema
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenSkjemaHeretter
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
@@ -39,27 +37,6 @@ class KompetanseService(
 
     fun hentKompetanse(kompetanseId: Long): Kompetanse {
         return kompetanseRepository.getById(kompetanseId)
-    }
-
-    @Transactional
-    @Deprecated("Bruk ny versjon av endreKompetanse")
-    fun endreKompetanseOld(kompetanseId: Long, endretKompetanse: Kompetanse) {
-        val kompetanseSomOppdateres = kompetanseRepository.getById(kompetanseId)
-
-        if (!kompetanseSomOppdateres.utenSkjema().inneholder(endretKompetanse.utenSkjema()))
-            throw IllegalArgumentException("Endringen er ikke innenfor kompetansen som endres")
-
-        val behandlingId = kompetanseSomOppdateres.behandlingId
-        val gjeldendeKompetanser = hentKompetanser(behandlingId)
-
-        val kompetanseFratrukketOppdatering = kompetanseSomOppdateres.trekkFra(endretKompetanse)
-        val oppdaterteKompetanser =
-            gjeldendeKompetanser.plus(kompetanseFratrukketOppdatering)
-                .plus(endretKompetanse).minus(kompetanseSomOppdateres)
-                .slåSammen().medBehandlingId(behandlingId)
-
-        lagreKompetanseDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
-        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
     }
 
     @Transactional
