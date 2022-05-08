@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjema
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.YearMonth
@@ -28,11 +29,11 @@ import javax.persistence.Transient
 data class Kompetanse(
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val fom: YearMonth?,
+    override val fom: YearMonth?,
 
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val tom: YearMonth?,
+    override val tom: YearMonth?,
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -40,7 +41,7 @@ data class Kompetanse(
         joinColumns = [JoinColumn(name = "fk_kompetanse_id")],
         inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")]
     )
-    val barnAktører: Set<Aktør> = emptySet(),
+    override val barnAktører: Set<Aktør> = emptySet(),
 
     @Enumerated(EnumType.STRING)
     @Column(name = "soekers_aktivitet")
@@ -59,7 +60,7 @@ data class Kompetanse(
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat")
     val resultat: KompetanseResultat? = null
-) : BaseEntitet() {
+) : PeriodeOgBarnSkjema<Kompetanse>, BaseEntitet() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "kompetanse_seq_generator")
     @SequenceGenerator(
@@ -74,6 +75,21 @@ data class Kompetanse(
 
     @Transient
     var status: KompetanseStatus? = KompetanseStatus.IKKE_UTFYLT
+
+    override fun utenSkjema() = this.copy(
+        søkersAktivitet = null,
+        annenForeldersAktivitet = null,
+        annenForeldersAktivitetsland = null,
+        barnetsBostedsland = null,
+        resultat = null
+    )
+
+    override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) =
+        copy(
+            fom = fom,
+            tom = tom,
+            barnAktører = barnAktører
+        )
 }
 
 enum class KompetanseStatus {
