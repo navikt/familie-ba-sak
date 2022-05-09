@@ -26,6 +26,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "Varsel om revurdering samboer"
     ),
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
+    FORLENGET_SVARTIDSBREV(false, "forlengetSvartidsbrev", "Forlenget svartidsbrev"),
     INFORMASJONSBREV_FØDSEL_MINDREÅRIG(
         false,
         "informasjonsbrevFodselMindreaarig",
