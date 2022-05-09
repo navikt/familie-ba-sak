@@ -311,7 +311,7 @@ enum class Behandlingsresultat(val displayName: String) {
 
     // Revurdering uten søknad
     ENDRET_UTBETALING(displayName = "Endret utbetaling"),
-    ENDRET_UTEN_UTBETALING(displayName = "Endret, uten utbetaling"),
+    ENDRET_UTEN_UTBETALING(displayName = "Endret, uten endret utbetaling"),
     ENDRET_OG_OPPHØRT(displayName = "Endret og opphørt"),
     OPPHØRT(displayName = "Opphørt"),
     FORTSATT_OPPHØRT(displayName = "Fortsatt opphørt"),
