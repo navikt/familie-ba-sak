@@ -5,9 +5,8 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
-import java.time.YearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 
 class AktørKompetanseTidslinje(
     private val aktør: Aktør,
@@ -18,8 +17,8 @@ class AktørKompetanseTidslinje(
     }
 
     private fun Kompetanse.tilPeriode() = Periode(
-        fraOgMed = this.fom.tilTidspunktEllerUendeligLengeSiden { tom ?: YearMonth.now() },
-        tilOgMed = this.tom.tilTidspunktEllerUendeligLengeTil { fom ?: YearMonth.now() },
+        fraOgMed = this.fom.tilTidspunktEllerTidligereEnn(tom),
+        tilOgMed = this.tom.tilTidspunktEllerSenereEnn(fom),
         innhold = this.copy(fom = null, tom = null, barnAktører = setOf(aktør))
     )
 }

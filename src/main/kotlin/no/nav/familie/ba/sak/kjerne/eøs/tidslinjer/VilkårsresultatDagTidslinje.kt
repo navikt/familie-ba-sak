@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -47,8 +47,8 @@ class VilkårsresultatDagTidslinje(
 }
 
 fun VilkårResultat.tilPeriode(): Periode<VilkårRegelverkResultat, Dag> {
-    val fom = periodeFom.tilTidspunktEllerUendeligLengeSiden { periodeTom }
-    val tom = periodeTom.tilTidspunktEllerUendeligLengeTil { periodeFom }
+    val fom = periodeFom.tilTidspunktEllerTidligereEnn(periodeTom)
+    val tom = periodeTom.tilTidspunktEllerSenereEnn(periodeFom)
     return Periode(
         fom, tom,
         VilkårRegelverkResultat(

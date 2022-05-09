@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenPeriode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
 internal class KompetanseTidslinje(
@@ -21,7 +21,7 @@ internal class KompetanseTidslinje(
 }
 
 private fun Kompetanse.fraOgMedTidspunkt(): Tidspunkt<Måned> =
-    this.fom.tilTidspunktEllerUendeligLengeSiden { this.tom }
+    this.fom.tilTidspunktEllerTidligereEnn(this.tom)
 
 private fun Kompetanse.tilOgMedTidspunkt(): Tidspunkt<Måned> =
-    this.tom.tilTidspunktEllerUendeligLengeTil { this.fom }
+    this.tom.tilTidspunktEllerSenereEnn(this.fom)
