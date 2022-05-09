@@ -217,8 +217,8 @@ object VilkårsvurderingUtils {
                 oppdaterEksisterendePerson(
                     personenSomFinnes = personenSomFinnes,
                     personFraInit = personFraInit,
-                    initiellVilkårsvurderingBehandlingId = initiellVilkårsvurderingKopi.behandling.id,
-                    aktivVilkårsvurderingBehandlingId = aktivVilkårsvurderingKopi.behandling.id,
+                    initiellBehandlingId = initiellVilkårsvurderingKopi.behandling.id,
+                    aktivBehandlingId = aktivVilkårsvurderingKopi.behandling.id,
                     personTilOppdatert = personTilOppdatert,
                     forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
                     løpendeUnderkategori = løpendeUnderkategori,
@@ -237,8 +237,8 @@ object VilkårsvurderingUtils {
     private fun oppdaterEksisterendePerson(
         personenSomFinnes: PersonResultat,
         personFraInit: PersonResultat,
-        initiellVilkårsvurderingBehandlingId: Long,
-        aktivVilkårsvurderingBehandlingId: Long,
+        initiellBehandlingId: Long,
+        aktivBehandlingId: Long,
         personTilOppdatert: PersonResultat,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering?,
         løpendeUnderkategori: BehandlingUnderkategori?,
@@ -252,7 +252,7 @@ object VilkårsvurderingUtils {
                 personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
 
             val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
-                kopieringSkjerFraForrigeBehandling = initiellVilkårsvurderingBehandlingId != aktivVilkårsvurderingBehandlingId
+                kopieringSkjerFraForrigeBehandling = initiellBehandlingId != aktivBehandlingId
             )
             val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
             personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
@@ -291,7 +291,7 @@ object VilkårsvurderingUtils {
                 personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
             if (utvidetVilkår.isNotEmpty()) {
                 personsVilkårOppdatert.addAll(
-                    utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = initiellVilkårsvurderingBehandlingId != aktivVilkårsvurderingBehandlingId)
+                    utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = initiellBehandlingId != aktivBehandlingId)
                         .map { it.kopierMedParent(personTilOppdatert) }
                 )
                 personsVilkårAktivt.removeAll(utvidetVilkår)
