@@ -15,8 +15,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTBETALING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTEN_UTBETALING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.IKKE_VURDERT
@@ -108,7 +109,7 @@ fun hentManuellVedtaksbrevtype(
                 DELVIS_INNVILGET,
                 DELVIS_INNVILGET_OG_ENDRET,
                 AVSLÅTT_OG_ENDRET,
-                ENDRET -> Brevmal.VEDTAK_ENDRING
+                ENDRET_UTBETALING, ENDRET_UTEN_UTBETALING -> Brevmal.VEDTAK_ENDRING
 
                 OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
                 FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
