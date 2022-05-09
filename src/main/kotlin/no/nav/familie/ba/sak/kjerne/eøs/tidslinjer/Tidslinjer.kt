@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
@@ -88,13 +88,16 @@ class Tidslinjer(
                 BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()::kombiner
             )
 
-        val regelverkMidlertidigTidslinje: Tidslinje<Regelverk, Måned> =
-            vilkårsresultatMånedTidslinjer.snittKombinerUtenNull(RegelverkPeriodeKombinator()::kombiner)
-
-        val regelverkTidslinje = barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje.snittKombinerMed(
-            regelverkMidlertidigTidslinje,
-            RegelverkOgOppfyltePerioderKombinator()::kombiner
-        )
+        val regelverkResultatTidslinje =
+            vilkårsresultatMånedTidslinjer
+                .snittKombinerUtenNull {
+                    kombinerVilkårResultaterTilRegelverkResultat(it)
+                }.snittKombinerMed(barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje) { regelverkResultat, oppfylt ->
+                    kombinerVilkårResultatMedRegelverkResultat(oppfylt, regelverkResultat)
+                }
+                // Hvis barnet har uendelige vilkårsvurderinger, vil også tidslinjen hertil være uendelig,
+                // selv om søker har endelige vilkårsvurderinger. Berskjærer mot søker for å forhindre det
+                .beskjærEtter(tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje)
     }
 }
 

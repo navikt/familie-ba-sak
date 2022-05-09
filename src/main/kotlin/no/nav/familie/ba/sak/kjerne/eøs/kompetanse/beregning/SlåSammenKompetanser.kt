@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenBarn
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utenPeriode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 
@@ -26,7 +26,7 @@ fun Collection<Kompetanse>.slåSammen(): Collection<Kompetanse> {
 
     val kompetanseSlåttSammenHorisontalt = kompetanserSlåttSammenVertikalt
         .groupBy { it.utenPeriode() }
-        .mapValues { (_, kompetanser) -> KompetanseTidslinje(kompetanser).komprimer() }
+        .mapValues { (_, kompetanser) -> KompetanseTidslinje(kompetanser).slåSammenLike() }
         .mapValues { (_, tidslinje) -> tidslinje.perioder() }
         .values.flatten().mapNotNull { periode -> periode.innhold?.settFomOgTom(periode) }
 
