@@ -41,7 +41,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
-import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -120,8 +119,7 @@ class MigreringService(
             // Vi ønsker at steg'ene selv lagrer aktører. De blir cachet i appen så det blir ikke gjort nytt kall mot PDL
             val personAktør = personidentService.hentOgLagreAktør(personIdent, false)
             val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, false)
-
-            validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
+            kastFeilVedDobbeltforekomstViaHistoriskIdent(barnasAktør, barnasIdenter)
 
             try {
                 fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
@@ -202,18 +200,24 @@ class MigreringService(
         }
     }
 
+    private fun kastFeilVedDobbeltforekomstViaHistoriskIdent(barnasAktør: List<Aktør>, barnasIdenter: List<String>) {
+        val dobbeltforekomster =
+            barnasAktør.filter { barnasAktør.count { barn -> barn.aktørId == it.aktørId } > 1 }.toSet()
+
+        if (dobbeltforekomster.isNotEmpty()) {
+            secureLog.warn(
+                "Kan ikke migrere fordi barnasIdenter $barnasIdenter inneholder en eller flere historiske identer tilhørende samme barn" +
+                    " som en annen ident. Fant følgende dobbeltforekomster: $dobbeltforekomster"
+            )
+            kastOgTellMigreringsFeil(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
+        }
+    }
+
     private fun erToggleForDeltBostedAvskrudd(infotrygdsak: Sak): Boolean {
         return when (infotrygdsak.valg) {
             "OR" -> !featureToggleService.isEnabled(SKAL_MIGRERE_ORDINÆR_DELT_BOSTED, false)
             "UT" -> !featureToggleService.isEnabled(SKAL_MIGRERE_UTVIDET_DELT_BOSTED, false)
             else -> true
-        }
-    }
-
-    private fun validerStøttetGradering(personAktør: Aktør) {
-        val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personAktør)
-        if (adressebeskyttelse == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG) {
-            kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_GRADERING)
         }
     }
 
@@ -451,14 +455,17 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     FAGSAK_AVSLUTTET_UTEN_MIGRERING("Personen er allerede migrert"),
     FLERE_DELYTELSER_I_INFOTRYGD("Finnes flere delytelser på sak"),
     FLERE_LØPENDE_SAKER_INFOTRYGD("Fant mer enn én aktiv sak på bruker i infotrygd"),
+    HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD("Listen med barn fra Infotrygd har identer tilhørende samme barn"),
     IDENT_IKKE_LENGER_AKTIV("Ident ikke lenger aktiv"),
     IKKE_GYLDIG_KJØREDATO("Ikke gyldig kjøredato"),
     IKKE_STØTTET_GRADERING("Personen har ikke støttet gradering"),
     IKKE_STØTTET_SAKSTYPE("Kan kun migrere ordinære(OR OS) og utvidet(UT EF) saker"),
     INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD("Fant ingen barn med løpende stønad på sak"),
     INGEN_LØPENDE_SAK_INFOTRYGD("Personen har ikke løpende sak i infotrygd"),
+    INSTITUSJON("Midlertidig ignoerert fordi det er en institusjon"),
     IVERKSETT_BEHANDLING_UTEN_VEDTAK("Fant ikke aktivt vedtak på behandling"),
     KAN_IKKE_OPPRETTE_BEHANDLING("Kan ikke opprette behandling"),
+    KUN_ETT_MIGRERINGFORSØK_PER_DAG("Migrering allerede påbegynt i dag. Vent minst en dag før man prøver igjen"),
     MANGLER_ANDEL_TILKJENT_YTELSE("Fant ingen andeler tilkjent ytelse på behandlingen"),
     MANGLER_FØRSTE_UTBETALINGSPERIODE("Tilkjent ytelse er null"),
     MANGLER_VILKÅRSVURDERING("Fant ikke vilkårsvurdering."),
@@ -467,8 +474,6 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
     UKJENT("Ukjent migreringsfeil"),
     ÅPEN_SAK_INFOTRYGD("Bruker har åpen behandling i Infotrygd"),
-    INSTITUSJON("Midlertidig ignoerert fordi det er en institusjon"),
-    KUN_ETT_MIGRERINGFORSØK_PER_DAG("Migrering allerede påbegynt i dag. Vent minst en dag før man prøver igjen"),
 }
 
 open class KanIkkeMigrereException(

@@ -61,6 +61,8 @@ spec:
           cluster: prod-gcp
         - application: familie-ba-migrering
           cluster: prod-gcp
+        - application: familie-ba-statistikk
+          cluster: prod-fss
         - application: bidrag-grunnlag-feature
           namespace: bidrag
           cluster: prod-gcp

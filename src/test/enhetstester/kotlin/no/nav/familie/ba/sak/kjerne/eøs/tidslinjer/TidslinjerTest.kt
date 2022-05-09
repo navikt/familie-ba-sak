@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilVilkårResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -44,7 +44,7 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = "     N NNNN  EEE     ".tilRegelverkTidslinje(startMåned).forskyv(1)
+        val barn1Result = "-----?-?NN?--EEE-----".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         vilkårsvurderingBygger.forPerson(barn2, startMåned)
             .medVilkår("+++++++++>", Vilkår.UNDER_18_ÅR)
@@ -53,7 +53,7 @@ internal class TidslinjerTest {
             .medVilkår("EEEENNEEE>", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++>", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn2Result = " EEENNNEEEEEEEEEEEEEE >".tilRegelverkTidslinje(startMåned).forskyv(1)
+        val barn2Result = "-EEE???EEEEEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
@@ -61,8 +61,8 @@ internal class TidslinjerTest {
         )
 
         assertEquals(søkerResult, tidslinjer.søkersTidslinjer().oppfyllerVilkårTidslinje)
-        assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkTidslinje)
-        assertEquals(barn2Result, tidslinjer.forBarn(barn2).regelverkTidslinje)
+        assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkResultatTidslinje)
+        assertEquals(barn2Result, tidslinjer.forBarn(barn2).regelverkResultatTidslinje)
     }
 
     @Test
@@ -88,7 +88,7 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = "     NNNNNNEEEEE     ".tilRegelverkTidslinje(startMåned).forskyv(1)
+        val barn1Result = "-----???NN?EEEEE-----".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
         val tidslinjer = Tidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
@@ -96,7 +96,7 @@ internal class TidslinjerTest {
         )
 
         assertEquals(søkerResult, tidslinjer.søkersTidslinjer().oppfyllerVilkårTidslinje)
-        assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkTidslinje)
+        assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkResultatTidslinje)
     }
 
     @Test

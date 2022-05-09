@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.komprimer
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.StringTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
@@ -57,7 +57,7 @@ class TidslinjeKombinasjonTest {
         val char2 = linje2.tilCharTidslinje(fom)
 
         val k1 = char1.snittKombinerMed(char2, kombinator)
-        val f = StringTidslinje(fom, forventet.toList()).komprimer()
+        val f = StringTidslinje(fom, forventet.toList()).slåSammenLike()
 
         Assertions.assertEquals(f, k1)
     }
