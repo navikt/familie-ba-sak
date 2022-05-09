@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -53,7 +54,7 @@ class Tidslinjer(
         tidslinjer: Tidslinjer,
         aktør: Aktør,
     ) {
-        val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør]!!
+        val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
 
         private val vilkårsresultatMånedTidslinjer =
             vilkårsresultatTidslinjer.map { it.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() }
@@ -68,7 +69,7 @@ class Tidslinjer(
         tidslinjer: Tidslinjer,
         aktør: Aktør,
     ) {
-        val søkersTidslinje = tidslinjer.søkersTidslinje
+        private val søkersTidslinje = tidslinjer.søkersTidslinje
 
         val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat, Dag>> =
             tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
@@ -104,3 +105,11 @@ fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, M�
         )
     }
 }
+
+fun Tidslinjer.harBlandetRegelverk(): Boolean {
+    return søkersTidslinjer().regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) ||
+        barnasTidslinjer().values.any { it.regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) }
+}
+
+fun <I, T : Tidsenhet> Tidslinje<I, T>.inneholder(innhold: I): Boolean =
+    this.perioder().any { it.innhold == innhold }
