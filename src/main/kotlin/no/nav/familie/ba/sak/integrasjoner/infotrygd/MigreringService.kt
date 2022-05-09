@@ -41,7 +41,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
-import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -121,8 +120,6 @@ class MigreringService(
             val personAktør = personidentService.hentOgLagreAktør(personIdent, false)
             val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, false)
             kastFeilVedDobbeltforekomstViaHistoriskIdent(barnasAktør, barnasIdenter)
-
-            validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
             try {
                 fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
@@ -204,7 +201,8 @@ class MigreringService(
     }
 
     private fun kastFeilVedDobbeltforekomstViaHistoriskIdent(barnasAktør: List<Aktør>, barnasIdenter: List<String>) {
-        val dobbeltforekomster = barnasAktør.filter { barnasAktør.count { barn -> barn.aktørId == it.aktørId } > 1 }.toSet()
+        val dobbeltforekomster =
+            barnasAktør.filter { barnasAktør.count { barn -> barn.aktørId == it.aktørId } > 1 }.toSet()
 
         if (dobbeltforekomster.isNotEmpty()) {
             secureLog.warn(
@@ -220,13 +218,6 @@ class MigreringService(
             "OR" -> !featureToggleService.isEnabled(SKAL_MIGRERE_ORDINÆR_DELT_BOSTED, false)
             "UT" -> !featureToggleService.isEnabled(SKAL_MIGRERE_UTVIDET_DELT_BOSTED, false)
             else -> true
-        }
-    }
-
-    private fun validerStøttetGradering(personAktør: Aktør) {
-        val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personAktør)
-        if (adressebeskyttelse == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG) {
-            kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_GRADERING)
         }
     }
 
