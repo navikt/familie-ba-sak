@@ -98,6 +98,9 @@ class Tidslinjer(
     }
 }
 
+fun Tidslinjer.hentRegelverkTidslinjer(): Map<Aktør, Tidslinje<Regelverk, Måned>> = this.barnasTidslinjer()
+    .mapValues { (_, tidslinjer): Map.Entry<Aktør, Tidslinjer.BarnetsTidslinjer> -> tidslinjer.regelverkTidslinje }
+
 fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> {
 
     return object : Tidslinje<Boolean, Måned>() {

@@ -49,6 +49,7 @@ internal class KompetanseTidslinje(
             '-' -> kompetanseMal
             'S' -> kompetanseMal.copy(resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND)
             'P' -> kompetanseMal.copy(resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND)
+            'T' -> kompetanseMal.copy(resultat = KompetanseResultat.TO_PRIMÆRLAND)
             else -> null
         }
     }

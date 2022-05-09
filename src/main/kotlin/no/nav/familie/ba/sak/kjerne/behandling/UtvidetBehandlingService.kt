@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.hentRegelverkTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
@@ -80,8 +81,6 @@ class UtvidetBehandlingService(
 
         val kompetanser = kompetanseRepository.findByBehandlingId(behandlingId = behandlingId)
 
-        val tidslinjer = tidslinjeService.hentTidslinjer(behandlingId)
-
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
             steg = behandling.steg,
@@ -106,10 +105,9 @@ class UtvidetBehandlingService(
             utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(
                 andelerKnyttetTilPersoner = andelerTilkjentYtelse,
-                tidslinjer = tidslinjeService.hentTidslinjer(behandlingId),
+                regelverkTidslinjer = tidslinjeService.hentTidslinjer(behandlingId)?.hentRegelverkTidslinjer(),
                 kompetanser = kompetanser,
-            )
-                ?: emptyList(),
+            ) ?: emptyList(),
             endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
                 .map { it.tilRestEndretUtbetalingAndel() },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),

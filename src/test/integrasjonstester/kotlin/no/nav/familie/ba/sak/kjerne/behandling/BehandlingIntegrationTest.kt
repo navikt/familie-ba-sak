@@ -364,11 +364,14 @@ class BehandlingIntegrationTest(
 
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         val restVedtakBarnMap =
-            personopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
-                .associateBy(
-                    { it.personIdent },
-                    { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } }
-                )
+            personopplysningGrunnlag.tilRestPersonerMedAndeler(
+                andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+                regelverkTidslinjer = null,
+                kompetanser = emptyList(),
+            ).associateBy(
+                { it.personIdent },
+                { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } }
+            )
 
         val satsEndringDatoSeptember2020 =
             SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1354)!!.toYearMonth()
@@ -478,11 +481,14 @@ class BehandlingIntegrationTest(
 
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         val restVedtakBarnMap =
-            personopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
-                .associateBy(
-                    { it.personIdent },
-                    { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } }
-                )
+            personopplysningGrunnlag.tilRestPersonerMedAndeler(
+                andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+                regelverkTidslinjer = null,
+                kompetanser = emptyList(),
+            ).associateBy(
+                { it.personIdent },
+                { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } }
+            )
 
         assertEquals(2, restVedtakBarnMap.size)
 

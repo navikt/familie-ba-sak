@@ -8,10 +8,13 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenBack2BackAndelsperioderMedSammeBeløp
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.KompetanseTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.rest.BeregningOppsummering
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -33,18 +36,17 @@ data class RestYtelsePeriode(
 
 fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(
     andelerKnyttetTilPersoner: List<AndelTilkjentYtelse>,
-    tidslinjer: Tidslinjer?,
+    regelverkTidslinjer: Map<Aktør, Tidslinje<Regelverk, Måned>>?,
     kompetanser: List<Kompetanse>
 ): List<RestPersonMedAndeler> =
-    andelerKnyttetTilPersoner
-        .groupBy { it.aktør }
+    andelerKnyttetTilPersoner.groupBy { it.aktør }
         .map { (aktør, andeler) ->
 
             val sammenslåtteAndeler =
                 andeler.groupBy { it.type }.flatMap { it.value.slåSammenBack2BackAndelsperioderMedSammeBeløp() }
 
             // Støtter kun for barn enn så lenge
-            val barnetsTidslinjer = tidslinjer?.barnasTidslinjer()?.get(aktør)
+            val barnetsTidslinjer = regelverkTidslinjer?.get(aktør)
             val kompetanserPåBarn = kompetanser.filter { it.barnAktører.contains(aktør) }
 
             RestPersonMedAndeler(
@@ -57,7 +59,7 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(
         }
 
 fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(
-    barnetsTidslinjer: Tidslinjer.BarnetsTidslinjer?,
+    regelverkTidslinje: Tidslinje<Regelverk, Måned>?,
     kompetanser: List<Kompetanse>
 ): List<RestYtelsePeriode> {
     val initielleRestYtelsePerioder = this.map {
@@ -70,10 +72,10 @@ fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(
         )
     }
 
-    if (barnetsTidslinjer == null) throw Feil("Tidslinjer mangler for barn")
+    if (regelverkTidslinje == null) throw Feil("RegelverkTidslinje mangler for barn")
 
     val restYtelseTidslinjeMedRegelverk = RestYtelsePeriodeTidslinje(initielleRestYtelsePerioder)
-        .snittKombinerMed(barnetsTidslinjer.regelverkTidslinje) { restYtelsePeriode, regelverk ->
+        .snittKombinerMed(regelverkTidslinje) { restYtelsePeriode, regelverk ->
             when {
                 regelverk == null -> restYtelsePeriode
                 restYtelsePeriode == null -> null
@@ -96,5 +98,5 @@ fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(
 
     return restYtelseTidslinjeMedRegelverkOgKompetentLand
         .perioder()
-        .mapNotNull { it.innhold }
+        .mapNotNull { it.innhold?.copy(stønadFom = it.fraOgMed.tilYearMonth(), stønadTom = it.tilOgMed.tilYearMonth()) }
 }
