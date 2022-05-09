@@ -125,7 +125,7 @@ class DokumentService(
                 if (it is Feil) {
                     throw it
                 } else throw Feil(
-                    message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal.visningsTekst}. ${it.message}",
+                    message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal}. ${it.message}",
                     frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                     httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                     throwable = it

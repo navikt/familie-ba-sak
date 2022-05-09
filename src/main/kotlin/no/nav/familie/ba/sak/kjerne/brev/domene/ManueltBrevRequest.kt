@@ -83,8 +83,8 @@ fun ManueltBrevRequest.leggTilEnhet(arbeidsfordelingService: ArbeidsfordelingSer
     )
 }
 
-fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
-    INFORMASJONSBREV_DELT_BOSTED.malId ->
+fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal) {
+    INFORMASJONSBREV_DELT_BOSTED ->
         InformasjonsbrevDeltBostedBrev(
             data = InformasjonsbrevDeltBostedData(
                 delmalData = InformasjonsbrevDeltBostedData.DelmalData(
@@ -101,7 +101,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    INNHENTE_OPPLYSNINGER.malId ->
+    INNHENTE_OPPLYSNINGER ->
         InnhenteOpplysningerBrev(
             data = InnhenteOpplysningerData(
                 delmalData = InnhenteOpplysningerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
@@ -112,7 +112,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    HENLEGGE_TRUKKET_SØKNAD.malId ->
+    HENLEGGE_TRUKKET_SØKNAD ->
         HenleggeTrukketSøknadBrev(
             data = HenleggeTrukketSøknadData(
                 delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
@@ -122,7 +122,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    VARSEL_OM_REVURDERING.malId ->
+    VARSEL_OM_REVURDERING ->
         VarselOmRevurderingBrev(
             data = VarselOmRevurderingData(
                 delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
@@ -133,7 +133,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    BrevType.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14.malId ->
+    BrevType.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 ->
         VarselOmRevurderingDeltBostedParagraf14Brev(
             data = VarselOmRevurderingDeltBostedParagraf14Data(
                 delmalData = VarselOmRevurderingDeltBostedParagraf14Data.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
@@ -144,7 +144,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    BrevType.VARSEL_OM_REVURDERING_SAMBOER.malId ->
+    BrevType.VARSEL_OM_REVURDERING_SAMBOER ->
         if (this.datoAvtale == null) throw FunksjonellFeil(
             frontendFeilmelding = "Du må sette dato for samboerskap for å sende dette brevet.",
             melding = "Dato er ikke satt for brevtype 'varsel om revurdering samboer'"
@@ -159,35 +159,35 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    BrevType.SVARTIDSBREV.malId ->
+    BrevType.SVARTIDSBREV ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             mal = Brevmal.SVARTIDSBREV
         )
-    BrevType.INFORMASJONSBREV_FØDSEL_MINDREÅRIG.malId ->
+    BrevType.INFORMASJONSBREV_FØDSEL_MINDREÅRIG ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG
         )
-    BrevType.INFORMASJONSBREV_FØDSEL_UMYNDIG.malId ->
+    BrevType.INFORMASJONSBREV_FØDSEL_UMYNDIG ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG
         )
-    BrevType.INFORMASJONSBREV_FØDSEL_GENERELL.malId ->
+    BrevType.INFORMASJONSBREV_FØDSEL_GENERELL ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL
         )
-    BrevType.INFORMASJONSBREV_KAN_SØKE.malId ->
+    BrevType.INFORMASJONSBREV_KAN_SØKE ->
         InformasjonsbrevKanSøke(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
@@ -196,7 +196,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
         )
     else -> error(
         "Kan ikke mappe brevmal for ${
-        this.brevmal.visningsTekst
+        this.brevmal
         } til ny brevtype da denne ikke er støttet i ny løsning enda."
     )
 }
