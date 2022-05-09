@@ -217,8 +217,7 @@ object VilkårsvurderingUtils {
                 oppdaterEksisterendePerson(
                     personenSomFinnes = personenSomFinnes,
                     personFraInit = personFraInit,
-                    initiellBehandlingId = initiellVilkårsvurderingKopi.behandling.id,
-                    aktivBehandlingId = aktivVilkårsvurderingKopi.behandling.id,
+                    kopieringSkjerFraForrigeBehandling = initiellVilkårsvurderingKopi.behandling.id != aktivVilkårsvurderingKopi.behandling.id,
                     personTilOppdatert = personTilOppdatert,
                     forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
                     løpendeUnderkategori = løpendeUnderkategori,
@@ -237,8 +236,7 @@ object VilkårsvurderingUtils {
     private fun oppdaterEksisterendePerson(
         personenSomFinnes: PersonResultat,
         personFraInit: PersonResultat,
-        initiellBehandlingId: Long,
-        aktivBehandlingId: Long,
+        kopieringSkjerFraForrigeBehandling: Boolean,
         personTilOppdatert: PersonResultat,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering?,
         løpendeUnderkategori: BehandlingUnderkategori?,
@@ -252,7 +250,7 @@ object VilkårsvurderingUtils {
                 personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
 
             val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
-                kopieringSkjerFraForrigeBehandling = initiellBehandlingId != aktivBehandlingId
+                kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling
             )
             val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
             personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
@@ -291,7 +289,7 @@ object VilkårsvurderingUtils {
                 personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
             if (utvidetVilkår.isNotEmpty()) {
                 personsVilkårOppdatert.addAll(
-                    utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = initiellBehandlingId != aktivBehandlingId)
+                    utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling)
                         .map { it.kopierMedParent(personTilOppdatert) }
                 )
                 personsVilkårAktivt.removeAll(utvidetVilkår)
