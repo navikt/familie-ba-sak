@@ -112,7 +112,7 @@ class BehandlingSatsendringTest(
         autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = behandling.id)
 
         val satsendingBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
-        assertEquals(Behandlingsresultat.ENDRET, satsendingBehandling?.resultat)
+        assertEquals(Behandlingsresultat.ENDRET_UTBETALING, satsendingBehandling?.resultat)
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, satsendingBehandling?.steg)
 
         val satsendingsvedtak = vedtakService.hentAktivForBehandling(behandlingId = satsendingBehandling!!.id)
@@ -275,7 +275,7 @@ class BehandlingSatsendringTest(
             .forEach { autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = it) }
 
         val satsendingBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
-        assertEquals(Behandlingsresultat.ENDRET, satsendingBehandling?.resultat)
+        assertEquals(Behandlingsresultat.ENDRET_UTBETALING, satsendingBehandling?.resultat)
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, satsendingBehandling?.steg)
 
         val satsendingsvedtak = vedtakService.hentAktivForBehandling(behandlingId = satsendingBehandling!!.id)

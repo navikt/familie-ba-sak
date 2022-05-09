@@ -2,18 +2,18 @@ package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -34,9 +34,7 @@ class Tidslinjer(
     private val vilkårsresultaterTidslinjeMap = aktørTilPersonResultater
         .entries.associate { (aktør, personResultat) ->
             aktør to personResultat.vilkårResultater.groupBy { it.vilkårType }
-                .map {
-                    VilkårsresultatDagTidslinje(vilkårsresultater = it.value)
-                }
+                .map { it.value.tilVilkårRegelverkResultatTidslinje() }
         }
 
     private val søkersTidslinje: SøkersTidslinjer =
@@ -56,19 +54,23 @@ class Tidslinjer(
         tidslinjer: Tidslinjer,
         aktør: Aktør,
     ) {
-        val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør]!!
+        val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
 
         private val vilkårsresultatMånedTidslinjer =
             vilkårsresultatTidslinjer.map { it.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() }
 
-        val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-            vilkårsresultatMånedTidslinjer.snittKombinerUtenNull(SøkerOppfyllerVilkårKombinator()::kombiner)
+        val regelverkResultatTidslinje = vilkårsresultatMånedTidslinjer
+            .snittKombinerUtenNull {
+                kombinerVilkårResultaterTilRegelverkResultat(PersonType.SØKER, it)
+            }
     }
 
     class BarnetsTidslinjer(
         tidslinjer: Tidslinjer,
         aktør: Aktør,
     ) {
+        private val søkersTidslinje = tidslinjer.søkersTidslinje
+
         val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat, Dag>> =
             tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
 
@@ -77,27 +79,18 @@ class Tidslinjer(
 
         val erUnder18ÅrVilkårTidslinje = erUnder18ÅrVilkårTidslinje(tidslinjer.barnOgFødselsdatoer.getValue(aktør))
 
-        val oppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
+        val egetRegelverkResultatTidslinje: Tidslinje<RegelverkResultat, Måned> =
             vilkårsresultatMånedTidslinjer
-                .snittKombinerUtenNull(BarnOppfyllerVilkårKombinator()::kombiner)
-                .filtrerMed(erUnder18ÅrVilkårTidslinje)
+                .snittKombinerUtenNull { kombinerVilkårResultaterTilRegelverkResultat(PersonType.BARN, it) }
+                .beskjærEtter(erUnder18ÅrVilkårTidslinje)
 
-        val barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje: Tidslinje<Resultat, Måned> =
-            oppfyllerVilkårTidslinje.snittKombinerMed(
-                tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje,
-                BarnIKombinasjonMedSøkerOppfyllerVilkårKombinator()::kombiner
-            )
-
-        val regelverkResultatTidslinje =
-            vilkårsresultatMånedTidslinjer
-                .snittKombinerUtenNull {
-                    kombinerVilkårResultaterTilRegelverkResultat(it)
-                }.snittKombinerMed(barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje) { regelverkResultat, oppfylt ->
-                    kombinerVilkårResultatMedRegelverkResultat(oppfylt, regelverkResultat)
-                }
-                // Hvis barnet har uendelige vilkårsvurderinger, vil også tidslinjen hertil være uendelig,
-                // selv om søker har endelige vilkårsvurderinger. Berskjærer mot søker for å forhindre det
-                .beskjærEtter(tidslinjer.søkersTidslinje.oppfyllerVilkårTidslinje)
+        val regelverkResultatTidslinje = egetRegelverkResultatTidslinje
+            .snittKombinerMed(søkersTidslinje.regelverkResultatTidslinje) { barnetsResultat, søkersResultat ->
+                barnetsResultat.kombinerMed(søkersResultat)
+            }
+            // Barnets egne tidslinjer kan på dette tidspunktet strekke seg 18 år frem i tid,
+            // og mye lenger enn søkers regelverk-tidslinje, som skal være begrensningen. Derfor besjærer vi mot den
+            .beskjærEtter(søkersTidslinje.regelverkResultatTidslinje)
     }
 }
 
@@ -112,3 +105,11 @@ fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, M�
         )
     }
 }
+
+fun Tidslinjer.harBlandetRegelverk(): Boolean {
+    return søkersTidslinjer().regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) ||
+        barnasTidslinjer().values.any { it.regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) }
+}
+
+fun <I, T : Tidsenhet> Tidslinje<I, T>.inneholder(innhold: I): Boolean =
+    this.perioder().any { it.innhold == innhold }

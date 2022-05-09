@@ -48,7 +48,8 @@ enum class YtelsePersonResultat(val displayName: String) {
     OPPHØRT(displayName = "Reduksjon som har ført til opphør"),
     FORTSATT_OPPHØRT(displayName = "Fortsatt Opphørt"),
     IKKE_VURDERT(displayName = "Ikke vurdert"),
-    ENDRET(displayName = "Endret"),
+    ENDRET_UTBETALING(displayName = "Endret utbetaling"),
+    ENDRET_UTEN_UTBETALING(displayName = "Endret, uten utbetaling"),
 }
 
 enum class KravOpprinnelse(val displayName: String) {
