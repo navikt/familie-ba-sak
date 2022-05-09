@@ -174,7 +174,7 @@ class BehandlingsresultatMedKravTest {
                     aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
             )
@@ -323,7 +323,7 @@ class BehandlingsresultatMedKravTest {
                     aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
             )
@@ -430,7 +430,7 @@ class BehandlingsresultatMedKravTest {
                     aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING),
                     ytelseSlutt = defaultYtelseSluttForLøpende,
                 ),
                 YtelsePerson(
@@ -453,7 +453,7 @@ class BehandlingsresultatMedKravTest {
                     aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
