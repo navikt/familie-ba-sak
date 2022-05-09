@@ -96,7 +96,7 @@ class VilkårsvurderingFlyttResultaterTest(
             )
         )
 
-        val forrigeBehandlingPersonResultater = setOf(
+        val førstegangsbehandlingPersonResultater = setOf(
             søkerPersonResultat,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
@@ -118,9 +118,9 @@ class VilkårsvurderingFlyttResultaterTest(
             )
         )
 
-        vilkårsvurderingMedUtvidetAvslått.personResultater = forrigeBehandlingPersonResultater
+        vilkårsvurderingMedUtvidetAvslått.personResultater = førstegangsbehandlingPersonResultater
 
-        val b = kjørStegprosessForBehandling(
+        val førstegangsbehandling = kjørStegprosessForBehandling(
             søkerFnr = søker,
             barnasIdenter = listOf(barn1, barn2),
             underkategori = BehandlingUnderkategori.UTVIDET,
@@ -138,10 +138,10 @@ class VilkårsvurderingFlyttResultaterTest(
         )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
-            vilkårsvurderingService.hentAktivForBehandling(behandlingId = b.id)
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = førstegangsbehandling.id)
 
         // Lager revurdering når utvidet ikke løper, så underkategorien er ordinær
-        val siste = kjørStegprosessForBehandling(
+        kjørStegprosessForBehandling(
             tilSteg = StegType.REGISTRERE_PERSONGRUNNLAG,
             søkerFnr = søker,
             barnasIdenter = listOf(barn1, barn2),
@@ -161,7 +161,7 @@ class VilkårsvurderingFlyttResultaterTest(
 
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret
         val vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering =
-            vilkårsvurderingService.hentAktivForBehandling(behandlingId = b.id)
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = førstegangsbehandling.id)
 
         val søkersVilkår =
             vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.erSøkersResultater() }?.vilkårResultater
