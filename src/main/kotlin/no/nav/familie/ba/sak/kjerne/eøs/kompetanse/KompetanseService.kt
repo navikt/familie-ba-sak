@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -91,7 +92,8 @@ class KompetanseService(
     private fun TidslinjeService.hentBarnasRegelverkTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<Regelverk, Måned>> =
         this.hentTidslinjerThrows(behandlingId).barnasTidslinjer()
             .mapValues { (_, tidslinjer) ->
-                tidslinjer.regelverkTidslinje
+                tidslinjer.regelverkResultatTidslinje
+                    .map { it?.regelverk }
                     .filtrerIkkeNull()
                     .forlengFremtidTilUendelig(MånedTidspunkt.nå())
             }

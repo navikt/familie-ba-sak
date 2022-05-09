@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -1087,6 +1088,9 @@ fun lagTriggesAv(
 fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
     VilkårRegelverkResultat(
         vilkår = vilkår,
-        resultat = Resultat.OPPFYLT,
-        regelverk = regelverk
+        regelverkResultat = when (regelverk) {
+            Regelverk.NASJONALE_REGLER -> RegelverkResultat.OPPFYLT_NASJONALE_REGLER
+            Regelverk.EØS_FORORDNINGEN -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
+            else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
+        }
     )
