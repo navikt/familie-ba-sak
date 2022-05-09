@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED
@@ -676,19 +675,6 @@ class MigreringServiceTest(
         }
         assertThatThrownBy { s.migrer(ident) }
             .extracting("feiltype").isNotEqualTo(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
-    }
-
-    @Test
-    fun `migrering skal feile med kode 6 person`() {
-        every {
-            infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
-
-        assertThatThrownBy {
-            migreringService.migrer(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)
-        }.isInstanceOf(KanIkkeMigrereException::class.java)
-            .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.IKKE_STØTTET_GRADERING)
     }
 
     private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(
