@@ -45,16 +45,17 @@ class AutobrevTask(
     }
 
     private fun opprettTaskerForReduksjonSmåbarnstillegg() {
-        behandlingHentOgPersisterService.partitionByIverksatteBehandlinger {
+        val berørteFagsaker = behandlingHentOgPersisterService.partitionByIverksatteBehandlinger {
             fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
                 iverksatteLøpendeBehandlinger = it,
             )
         }
-            .forEach { fagsakId ->
-                opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(
-                    fagsakId = fagsakId
-                )
-            }
+        logger.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med opphør av småbarnstillegg.")
+        berørteFagsaker.forEach { fagsakId ->
+            opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(
+                fagsakId = fagsakId
+            )
+        }
     }
 
     private fun finnAlleBarnMedFødselsdagInneværendeMåned(alder: Long): Set<Fagsak> =

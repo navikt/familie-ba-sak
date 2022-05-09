@@ -259,6 +259,33 @@ class BehandlingStegTest {
     }
 
     @Test
+    fun `teknisk endring skal ha riktig seg ved behandlingsresultat fortsatt innvilget`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.VURDER_TILBAKEKREVING,
+            StegType.SEND_TIL_BESLUTTER,
+            StegType.BESLUTTE_VEDTAK,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(steg, it)
+            assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
+            steg = hentNesteSteg(
+                behandling = lagBehandling(
+                    behandlingType = BehandlingType.TEKNISK_ENDRING,
+                    årsak = BehandlingÅrsak.TEKNISK_ENDRING,
+                    resultat = Behandlingsresultat.FORTSATT_INNVILGET,
+                ),
+                utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
     fun `Tester rekkefølgen på behandling av omregn 18 år`() {
         var steg = FØRSTE_STEG
 

@@ -215,7 +215,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
+                BESLUTTE_VEDTAK -> hentStegEtterBeslutteVedtakForTekniskEndring(behandling.resultat)
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
@@ -318,6 +318,15 @@ fun hentNesteStegTypeBasertPåBehandlingsresultat(resultat: Behandlingsresultat)
         Behandlingsresultat.FORTSATT_INNVILGET,
         Behandlingsresultat.AVSLÅTT,
         Behandlingsresultat.FORTSATT_OPPHØRT -> JOURNALFØR_VEDTAKSBREV
+        else -> IVERKSETT_MOT_OPPDRAG
+    }
+}
+
+fun hentStegEtterBeslutteVedtakForTekniskEndring(resultat: Behandlingsresultat): StegType {
+    return when (resultat) {
+        Behandlingsresultat.FORTSATT_INNVILGET,
+        Behandlingsresultat.AVSLÅTT,
+        Behandlingsresultat.FORTSATT_OPPHØRT -> FERDIGSTILLE_BEHANDLING
         else -> IVERKSETT_MOT_OPPDRAG
     }
 }
