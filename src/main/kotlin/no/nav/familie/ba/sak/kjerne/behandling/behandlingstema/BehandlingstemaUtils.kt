@@ -47,8 +47,8 @@ fun utledLøpendeKategori(
 
     val etBarnHarMinstEnLøpendeEØSPeriode = barnasTidslinjer
         .values
-        .map { it.regelverkTidslinje.innholdForTidspunkt(nå) }
-        .any { it == Regelverk.EØS_FORORDNINGEN }
+        .map { it.regelverkResultatTidslinje.innholdForTidspunkt(nå) }
+        .any { it?.regelverk == Regelverk.EØS_FORORDNINGEN }
 
     return if (etBarnHarMinstEnLøpendeEØSPeriode) {
         BehandlingKategori.EØS
