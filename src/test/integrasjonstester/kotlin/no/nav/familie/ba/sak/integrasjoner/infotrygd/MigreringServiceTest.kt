@@ -7,11 +7,11 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED
@@ -629,16 +629,52 @@ class MigreringServiceTest(
     }
 
     @Test
-    fun `migrering skal feile med kode 6 person`() {
+    fun `migrering skal feile med HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD hvis PersonidentService returnerer samme aktørId `() {
+        val mockkPersonidentService = mockk<PersonidentService>()
+        val s = MigreringService(
+            behandlingRepository = mockk(),
+            behandlingService = mockk(),
+            env = mockk(),
+            fagsakService = mockk(),
+            infotrygdBarnetrygdClient = infotrygdBarnetrygdClient,
+            pdlRestClient = mockk(),
+            personidentService = mockkPersonidentService,
+            personopplysningerService = mockk(),
+            stegService = mockk(),
+            taskRepository = mockk(),
+            tilkjentYtelseRepository = mockk(),
+            totrinnskontrollService = mockk(),
+            vedtakService = mockk(),
+            vilkårService = mockk(),
+            vilkårsvurderingService = mockk(),
+            migreringRestClient = mockk(relaxed = true),
+            featureToggleService = mockk(relaxed = true),
+        )
+
+        val ident = randomFnr()
+        every { mockkPersonidentService.hentIdenter(any(), true) } returns listOf(
+            IdentInformasjon(ident, false, "FOLKEREGISTERIDENT"),
+        )
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
 
+        every { mockkPersonidentService.hentOgLagreAktørIder(any(), false) } answers { callOriginal() }
+
+        every { mockkPersonidentService.hentOgLagreAktør(any(), false) } returns
+            Aktør(randomAktørId().aktørId, personidenter = mutableSetOf())
+
         assertThatThrownBy {
-            migreringService.migrer(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)
+            s.migrer(ident)
         }.isInstanceOf(KanIkkeMigrereException::class.java)
-            .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.IKKE_STØTTET_GRADERING)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
+
+        // Verifiserer at feiltypen ikke er den samme når vi endrer til unike aktørId'er for barna
+        every { mockkPersonidentService.hentOgLagreAktør(any(), false) } answers {
+            Aktør(randomAktørId().aktørId, personidenter = mutableSetOf())
+        }
+        assertThatThrownBy { s.migrer(ident) }
+            .extracting("feiltype").isNotEqualTo(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
     }
 
     private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(

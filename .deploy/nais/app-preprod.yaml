@@ -60,6 +60,8 @@ spec:
           cluster: dev-gcp
         - application: familie-ba-migrering
           cluster: dev-gcp
+        - application: familie-ba-statistikk
+          cluster: dev-fss
         - application: bidrag-grunnlag-feature
           namespace: bidrag
           cluster: dev-gcp

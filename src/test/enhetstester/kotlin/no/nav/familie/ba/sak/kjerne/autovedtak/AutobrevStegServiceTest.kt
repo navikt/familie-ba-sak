@@ -47,9 +47,8 @@ class AutobrevStegServiceTest {
         every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
 
-        autovedtakStegService.kjørBehandling(
+        autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
-            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
             behandlingsdata = aktør
         )
 
@@ -69,9 +68,8 @@ class AutobrevStegServiceTest {
         every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
 
-        autovedtakStegService.kjørBehandling(
+        autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
-            autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
             behandlingsdata = aktør
         )
 
@@ -92,9 +90,8 @@ class AutobrevStegServiceTest {
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
 
         assertThrows<RekjørSenereException> {
-            autovedtakStegService.kjørBehandling(
+            autovedtakStegService.kjørBehandlingSmåbarnstillegg(
                 mottakersAktør = aktør,
-                autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
                 behandlingsdata = aktør
             )
         }
