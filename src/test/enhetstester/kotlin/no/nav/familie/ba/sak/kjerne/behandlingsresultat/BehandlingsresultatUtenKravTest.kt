@@ -50,12 +50,12 @@ class BehandlingsresultatUtenKravTest {
                     aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING),
                     ytelseSlutt = inneværendeMåned().plusMonths(1),
                 ),
             )
         )
-        assertEquals(Behandlingsresultat.ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET_UTBETALING, behandlingsresultat)
     }
 
     @Test
@@ -74,7 +74,7 @@ class BehandlingsresultatUtenKravTest {
                     aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = likOpphørsdato
                 )
             )
@@ -114,7 +114,7 @@ class BehandlingsresultatUtenKravTest {
                     aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned().minusMonths(1)
                 ),
                 YtelsePerson(
@@ -126,7 +126,7 @@ class BehandlingsresultatUtenKravTest {
                 )
             )
         )
-        assertEquals(Behandlingsresultat.ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET_UTBETALING, behandlingsresultat)
     }
 
     @Test
@@ -137,19 +137,19 @@ class BehandlingsresultatUtenKravTest {
                     aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING),
                     ytelseSlutt = inneværendeMåned().plusMonths(1),
                 ),
                 YtelsePerson(
                     aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING),
                     ytelseSlutt = inneværendeMåned().plusMonths(1),
                 )
             )
         )
-        assertEquals(Behandlingsresultat.ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET_UTEN_UTBETALING, behandlingsresultat)
     }
 
     @Test
@@ -172,7 +172,7 @@ class BehandlingsresultatUtenKravTest {
                 )
             )
         )
-        assertEquals(Behandlingsresultat.ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET_UTBETALING, behandlingsresultat)
     }
 
     @Test
@@ -183,14 +183,14 @@ class BehandlingsresultatUtenKravTest {
                     aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
                     aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
             )
@@ -229,7 +229,7 @@ class BehandlingsresultatUtenKravTest {
                     aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                    resultater = setOf(YtelsePersonResultat.ENDRET),
+                    resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING),
                     ytelseSlutt = inneværendeMåned().plusMonths(1),
                 ),
                 YtelsePerson(
@@ -241,7 +241,7 @@ class BehandlingsresultatUtenKravTest {
                 )
             )
         )
-        assertEquals(Behandlingsresultat.ENDRET, behandlingsresultat)
+        assertEquals(Behandlingsresultat.ENDRET_UTBETALING, behandlingsresultat)
     }
 
     @Test
