@@ -1,49 +1,51 @@
 package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.IKKE_FULLT_VURDERT
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.OPPFYLT_BLANDET_REGELVERK
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.OPPFYLT_NASJONALE_REGLER
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-private val nødvendigeVilkår = Vilkår.hentVilkårFor(PersonType.BARN)
+fun kombinerVilkårResultaterTilRegelverkResultat(
+    personType: PersonType,
+    alleVilkårResultater: Iterable<VilkårRegelverkResultat>
+): RegelverkResultat? {
 
-private val regelverkVilkår = listOf(
-    Vilkår.BOR_MED_SØKER,
-    Vilkår.LOVLIG_OPPHOLD,
-    Vilkår.BOSATT_I_RIKET
-)
+    val nødvendigeVilkår = Vilkår.hentVilkårFor(personType)
+        .filter { it != Vilkår.UTVIDET_BARNETRYGD }
 
-fun kombinerVilkårResultaterTilRegelverkResultat(alleVilkårResultater: Iterable<VilkårRegelverkResultat>): RegelverkResultat? {
-    val oppfyllerNødvendigVilkår = alleVilkårResultater
-        .filter { it.resultat == Resultat.OPPFYLT }
-        .map { it.vilkår }
-        .containsAll(nødvendigeVilkår)
+    val regelverkVilkår = nødvendigeVilkår
+        .filter { it.harRegelverk }
 
-    if (!oppfyllerNødvendigVilkår)
-        return null
-
-    val eøsVilkår = alleVilkårResultater
+    val alleVilkårResultaterMedEøs = alleVilkårResultater
         .filter { it.regelverk == Regelverk.EØS_FORORDNINGEN }.map { it.vilkår }
 
-    val nasjonaleVilkår = alleVilkårResultater
+    val alleVilkårResultaterMedNasjonalt = alleVilkårResultater
         .filter { it.regelverk == Regelverk.NASJONALE_REGLER }.map { it.vilkår }
 
-    return when {
-        eøsVilkår.containsAll(regelverkVilkår) -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
-        nasjonaleVilkår.containsAll(regelverkVilkår) -> RegelverkResultat.OPPFYLT_NASJONALE_REGLER
-        eøsVilkår.size > 0 || nasjonaleVilkår.size > 0 -> RegelverkResultat.OPPFYLT_BLANDET_REGELVERK
-        else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
-    }
-}
+    val erAlleVilkårUtenResultat = alleVilkårResultater.all { it.resultat == null }
 
-fun kombinerVilkårResultatMedRegelverkResultat(
-    resultat: Resultat?,
-    regelverkResultat: RegelverkResultat?
-): RegelverkResultat? {
-    return when (resultat) {
-        null -> null
-        Resultat.OPPFYLT -> regelverkResultat
-        Resultat.IKKE_OPPFYLT -> RegelverkResultat.IKKE_OPPFYLT
-        Resultat.IKKE_VURDERT -> RegelverkResultat.IKKE_VURDERT
+    val erAlleNødvendigeVilkårOppfylt = alleVilkårResultater.all { it.resultat == Resultat.OPPFYLT } &&
+        alleVilkårResultater.map { it.vilkår }.distinct().containsAll(nødvendigeVilkår)
+
+    val erEttEllerFlereVilkårIkkeOppfylt = alleVilkårResultater.any { it.resultat == Resultat.IKKE_OPPFYLT }
+
+    return when {
+        erAlleVilkårUtenResultat -> null
+        erEttEllerFlereVilkårIkkeOppfylt -> RegelverkResultat.IKKE_OPPFYLT
+        erAlleNødvendigeVilkårOppfylt -> when {
+            alleVilkårResultaterMedEøs.containsAll(regelverkVilkår) ->
+                OPPFYLT_EØS_FORORDNINGEN
+            alleVilkårResultaterMedNasjonalt.containsAll(regelverkVilkår) ->
+                OPPFYLT_NASJONALE_REGLER
+            (alleVilkårResultaterMedEøs + alleVilkårResultaterMedNasjonalt).isNotEmpty() ->
+                OPPFYLT_BLANDET_REGELVERK
+            else -> OPPFYLT_REGELVERK_IKKE_SATT
+        }
+        else -> IKKE_FULLT_VURDERT
     }
 }

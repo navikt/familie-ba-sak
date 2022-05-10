@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIkkeBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIngenVilkårSattEtterSøkersDød
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -40,6 +41,15 @@ class VilkårsvurderingSteg(
                 vilkårsvurdering = vilkårsvurdering
             )
         }
+
+        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
+            vilkårService.hentVilkårsvurdering(behandling.id)?.apply {
+                validerIkkeBlandetRegelverk(
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    vilkårsvurdering = this
+                )
+            }
+        }
     }
 
     @Transactional
@@ -60,7 +70,10 @@ class VilkårsvurderingSteg(
         }
 
         // midlertidig validering for helmanuell migrering
-        if (behandling.erHelmanuellMigrering() && !featureToggleService.isEnabled(KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED)) {
+        if (behandling.erHelmanuellMigrering() && !featureToggleService.isEnabled(
+                KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED
+            )
+        ) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
             val finnesDeltBosted = vilkårsvurdering.personResultater.any {
                 it.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER }
