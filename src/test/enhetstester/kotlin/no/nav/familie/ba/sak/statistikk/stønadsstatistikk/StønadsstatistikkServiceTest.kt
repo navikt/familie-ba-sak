@@ -22,9 +22,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.eksterne.kontrakter.Kompetanse
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,6 +38,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
+import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockKExtension::class)
@@ -53,6 +59,9 @@ internal class StønadsstatistikkServiceTest(
     private val personopplysningerService: PersonopplysningerService,
 
     @MockK
+    private val kompetanseService: KompetanseService,
+
+    @MockK
     private val vedtakRepository: VedtakRepository,
 ) {
 
@@ -63,7 +72,8 @@ internal class StønadsstatistikkServiceTest(
             beregningService,
             vedtakService,
             personopplysningerService,
-            vedtakRepository
+            vedtakRepository,
+            kompetanseService
         )
     private val behandling = lagBehandling()
     private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
@@ -99,6 +109,17 @@ internal class StønadsstatistikkServiceTest(
             periodeIdOffset = null
         )
 
+        val kompetanseperioder = setOf<no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse>(
+            no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
+                fom = YearMonth.now(),
+                tom = null,
+                barnAktører = setOf(barn1.aktør),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
+                annenForeldersAktivitetsland = "PL", barnetsBostedsland = "PL", resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND
+            )
+        )
+
         val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(
             barn2.fødselsdato.nesteMåned().toString(),
             barn2.fødselsdato.plusYears(2).toYearMonth().toString(),
@@ -109,6 +130,7 @@ internal class StønadsstatistikkServiceTest(
         )
 
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
+        every { kompetanseService.hentKompetanser(any()) } returns kompetanseperioder
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
             tilkjentYtelse.copy(
                 andelerTilkjentYtelse = mutableSetOf(
@@ -134,6 +156,25 @@ internal class StønadsstatistikkServiceTest(
         )
 
         vedtak.utbetalingsperioder
+            .flatMap { it.utbetalingsDetaljer.map { ud -> ud.person } }
+            .filter { it.personIdent != søkerFnr[0] }
+            .forEach {
+                assertEquals(0, it.delingsprosentYtelse)
+            }
+    }
+
+    @Test
+    fun hentVedtakV2() {
+        val vedtak = stønadsstatistikkService.hentVedtakV2(1L)
+        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
+
+        assertEquals(2, vedtak.utbetalingsperioderV2[0].utbetalingsDetaljer.size)
+        assertEquals(
+            1 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD),
+            vedtak.utbetalingsperioderV2[0].utbetaltPerMnd
+        )
+
+        vedtak.utbetalingsperioderV2
             .flatMap { it.utbetalingsDetaljer.map { ud -> ud.person } }
             .filter { it.personIdent != søkerFnr[0] }
             .forEach {
@@ -176,6 +217,63 @@ internal class StønadsstatistikkServiceTest(
 
         assertThat(behandlingsÅrsakIBASak).hasSize(behandlingsÅrsakFraEksternKontrakt.size)
             .containsAll(behandlingsÅrsakFraEksternKontrakt)
+    }
+
+    /**
+     * Nye AnnenForeldersAktivitet må legges til VedtakDVHV2 når det legges til i Behandling
+     *
+     * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en AnnenForeldersAktivitet, så må man være sikker på at det ikke er sendt
+     * et slik vedtak til stønaddstatistikk.
+     *
+     * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVHV2 og ikke slette gamle
+     *
+     */
+    @Test
+    fun `Skal gi feil hvis det kommer en ny AnnenForeldersAktivitet som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
+        val annenForeldersAktivitet = enumValues<AnnenForeldersAktivitet>().map { it.name }
+        val annenForeldersAktivitetFraEksternKontrakt =
+            enumValues<no.nav.familie.eksterne.kontrakter.AnnenForeldersAktivitet>().map { it.name }
+
+        assertThat(annenForeldersAktivitet).hasSize(annenForeldersAktivitetFraEksternKontrakt.size)
+            .containsAll(annenForeldersAktivitetFraEksternKontrakt)
+    }
+
+    /**
+     * Nye søkersAktivitet må legges til VedtakDVHV2 når det legges til i Behandling
+     *
+     * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en SøkersAktivitet, så må man være sikker på at det ikke er sendt
+     * et slik vedtak til stønaddstatistikk.
+     *
+     * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVHV2 og ikke slette gamle
+     *
+     */
+    @Test
+    fun `Skal gi feil hvis det kommer en ny søkersAktivitet som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
+        val søkersAktivitet = enumValues<SøkersAktivitet>().map { it.name }
+        val søkersAktivitetFraEksternKontrakt =
+            enumValues<no.nav.familie.eksterne.kontrakter.SøkersAktivitet>().map { it.name }
+
+        assertThat(søkersAktivitet).hasSize(søkersAktivitetFraEksternKontrakt.size)
+            .containsAll(søkersAktivitetFraEksternKontrakt)
+    }
+
+    /**
+     * Nye KompetanseResultat må legges til VedtakDVHV2 når det legges til i Behandling
+     *
+     * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en KompetanseResultat, så må man være sikker på at det ikke er sendt
+     * et slik vedtak til stønaddstatistikk.
+     *
+     * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVHV2 og ikke slette gamle
+     *
+     */
+    @Test
+    fun `Skal gi feil hvis det kommer en ny KompetanseResultat som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
+        val kompetanseResultat = enumValues<KompetanseResultat>().map { it.name }
+        val oompetanseResultatFraEksternKontrakt =
+            enumValues<no.nav.familie.eksterne.kontrakter.KompetanseResultat>().map { it.name }
+
+        assertThat(kompetanseResultat).hasSize(oompetanseResultatFraEksternKontrakt.size)
+            .containsAll(oompetanseResultatFraEksternKontrakt)
     }
 
     /**
