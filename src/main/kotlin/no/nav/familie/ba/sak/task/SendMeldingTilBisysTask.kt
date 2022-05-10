@@ -38,7 +38,8 @@ class SendMeldingTilBisysTask(
         val behandling = behandlingRepository.finnBehandling(task.payload.toLong())
 
         // Bisys vil kun ha rene manuelle opphør eller reduksjon
-        if (behandling.resultat == Behandlingsresultat.OPPHØRT || behandling.resultat == Behandlingsresultat.ENDRET ||
+        if (behandling.resultat == Behandlingsresultat.OPPHØRT ||
+            behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING ||
             behandling.resultat == Behandlingsresultat.ENDRET_OG_OPPHØRT
         ) {
             val barnEndretOpplysning = finnBarnEndretOpplysning(behandling)
