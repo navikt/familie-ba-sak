@@ -40,7 +40,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     INFORMASJONSBREV_FØDSEL_UMYNDIG(false, "informasjonsbrevFodselUmyndig", "Informasjonsbrev fødsel umyndig"),
     INFORMASJONSBREV_KAN_SØKE(false, "informasjonsbrevKanSoke", "Informasjonsbrev kan søke"),
     INFORMASJONSBREV_FØDSEL_GENERELL(false, "informasjonsbrevFodselGenerell", "Informasjonsbrev fødsel generell"),
-    INFORMASJONSBREV_KAN_SØKE_EØS(false, "informasjonsbrevKanSokeEOS", "Informasjonsbrev kan søke EØS"),
 
     VEDTAK_FØRSTEGANGSVEDTAK(true, "forstegangsvedtak", "Førstegangsvedtak"),
     VEDTAK_ENDRING(true, "vedtakEndring", "Vedtak endring"),
