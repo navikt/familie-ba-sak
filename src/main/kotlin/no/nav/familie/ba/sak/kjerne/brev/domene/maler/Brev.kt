@@ -16,11 +16,6 @@ interface Brev {
 enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visningsTekst: String) {
     INFORMASJONSBREV_DELT_BOSTED(false, "informasjonsbrevDeltBosted", "Informasjonsbrev delt bosted"),
     INNHENTE_OPPLYSNINGER(false, "innhenteOpplysninger", "Innhente opplysninger"),
-    INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED(
-        false,
-        "innhenteOpplysningerEtterSoknadISED",
-        "Innhente opplysninger etter søknad i SED"
-    ),
 
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "Henlegge trukket søknad"),
     VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "Varsel om revurdering"),
@@ -33,16 +28,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         false,
         "varselOmRevurderingSamboer",
         "Varsel om revurdering samboer"
-    ),
-    VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED(
-        false,
-        "varselOmVedtakEtterSoknadISED",
-        "Varsel om vedtak etter søknad i SED"
-    ),
-    VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS(
-        false,
-        "varselOmRevurderingFraNasjonalTilEOS",
-        "Varsel om revurdering fra nasjonal til EØS"
     ),
 
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
