@@ -35,10 +35,10 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
         private val person: Person = tilfeldigPerson(),
         private val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat, T>> = emptyList(),
     ) {
-        fun medVilkår(v: String, vilkår: Vilkår): PersonResultatBuilder<T> {
+        fun medVilkår(v: String, vararg vilkår: Vilkår): PersonResultatBuilder<T> {
             return copy(
                 vilkårsresultatTidslinjer = this.vilkårsresultatTidslinjer +
-                    v.tilVilkårRegelverkResultatTidslinje(vilkår, startTidspunkt)
+                    vilkår.map { v.tilVilkårRegelverkResultatTidslinje(it, startTidspunkt) }
             )
         }
 

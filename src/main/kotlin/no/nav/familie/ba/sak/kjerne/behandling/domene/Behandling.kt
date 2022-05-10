@@ -193,7 +193,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erOmregning() && resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
             skalBehandlesAutomatisk && erMigrering() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
-            skalBehandlesAutomatisk && erSatsendring() && resultat == Behandlingsresultat.ENDRET -> true
+            skalBehandlesAutomatisk && erSatsendring() && resultat == Behandlingsresultat.ENDRET_UTBETALING -> true
             else -> false
         }
     }
@@ -310,7 +310,8 @@ enum class Behandlingsresultat(val displayName: String) {
     AVSLÅTT_ENDRET_OG_OPPHØRT(displayName = "Avslått, endret og opphørt"),
 
     // Revurdering uten søknad
-    ENDRET(displayName = "Endret"),
+    ENDRET_UTBETALING(displayName = "Endret utbetaling"),
+    ENDRET_UTEN_UTBETALING(displayName = "Endret, uten endret utbetaling"),
     ENDRET_OG_OPPHØRT(displayName = "Endret og opphørt"),
     OPPHØRT(displayName = "Opphørt"),
     FORTSATT_OPPHØRT(displayName = "Fortsatt opphørt"),
@@ -322,7 +323,10 @@ enum class Behandlingsresultat(val displayName: String) {
     HENLAGT_AUTOMATISK_FØDSELSHENDELSE(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
     HENLAGT_TEKNISK_VEDLIKEHOLD(displayName = "Henlagt teknisk vedlikehold"),
 
-    IKKE_VURDERT(displayName = "Ikke vurdert")
+    IKKE_VURDERT(displayName = "Ikke vurdert");
+
+    fun kanIkkeSendesTilOppdrag(): Boolean =
+        this in listOf(FORTSATT_INNVILGET, AVSLÅTT, FORTSATT_OPPHØRT, ENDRET_UTEN_UTBETALING)
 }
 
 /**

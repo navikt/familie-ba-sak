@@ -22,38 +22,45 @@ import java.time.LocalDate
 enum class Vilkår(
     val parterDetteGjelderFor: List<PersonType>,
     val ytelseType: YtelseType,
-    val beskrivelse: String
+    val beskrivelse: String,
+    val harRegelverk: Boolean
 ) {
 
     UNDER_18_ÅR(
         parterDetteGjelderFor = listOf(BARN),
         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-        beskrivelse = "Er under 18 år"
+        beskrivelse = "Er under 18 år",
+        false
     ),
     BOR_MED_SØKER(
         parterDetteGjelderFor = listOf(BARN),
         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-        beskrivelse = "Bor med søker"
+        beskrivelse = "Bor med søker",
+        true
     ),
     GIFT_PARTNERSKAP(
         parterDetteGjelderFor = listOf(BARN),
         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-        beskrivelse = "Gift/partnerskap"
+        beskrivelse = "Gift/partnerskap",
+        false
     ),
     BOSATT_I_RIKET(
         parterDetteGjelderFor = listOf(SØKER, BARN),
         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-        beskrivelse = "Bosatt i riket"
+        beskrivelse = "Bosatt i riket",
+        true
     ),
     LOVLIG_OPPHOLD(
         parterDetteGjelderFor = listOf(SØKER, BARN),
         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-        beskrivelse = "Lovlig opphold"
+        beskrivelse = "Lovlig opphold",
+        true
     ),
     UTVIDET_BARNETRYGD(
         parterDetteGjelderFor = listOf(SØKER),
         ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-        beskrivelse = "Utvidet barnetrygd"
+        beskrivelse = "Utvidet barnetrygd",
+        false
     );
 
     override fun toString(): String {

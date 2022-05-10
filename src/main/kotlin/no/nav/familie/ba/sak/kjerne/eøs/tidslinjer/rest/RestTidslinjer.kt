@@ -41,7 +41,8 @@ fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
                         .tilRestTidslinje()
                 },
                 oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje = it.value
-                    .barnetIKombinasjonMedSøkerOppfyllerVilkårTidslinje
+                    .regelverkResultatTidslinje
+                    .map { it?.resultat }
                     .beskjærEtter(erUnder18årTidslinje)
                     .tilRestTidslinje(),
                 regelverkTidslinje = it.value.regelverkResultatTidslinje
@@ -60,7 +61,7 @@ fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
                     .tilRestTidslinje()
             },
             oppfyllerEgneVilkårTidslinje = søkersTidslinjer
-                .oppfyllerVilkårTidslinje
+                .regelverkResultatTidslinje.map { it?.resultat }
                 .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje)
                 .tilRestTidslinje()
         )
