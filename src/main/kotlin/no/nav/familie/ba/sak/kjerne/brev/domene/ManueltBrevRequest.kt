@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EnkeltInformasjonsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FlettefelterForDokumentImpl
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForlengetSvartidsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.HenleggeTrukketSøknadBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.HenleggeTrukketSøknadData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevDeltBostedBrev
@@ -37,7 +38,8 @@ data class ManueltBrevRequest(
     // Settes av backend ved utsending fra behandling
     val mottakerMålform: Målform = Målform.NB,
     val mottakerNavn: String = "",
-    val enhet: Enhet? = null
+    val enhet: Enhet? = null,
+    val antallUkerSvarfrist: Int? = null,
 ) {
 
     override fun toString(): String {
@@ -162,6 +164,14 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             mal = Brevmal.SVARTIDSBREV
+        )
+    Brevmal.FORLENGET_SVARTIDSBREV ->
+        ForlengetSvartidsbrev(
+            navn = this.mottakerNavn,
+            fodselsnummer = this.mottakerIdent,
+            enhetNavn = this.enhetNavn(),
+            årsaker = this.multiselectVerdier,
+            antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw Feil("Antall uker svarfrist er ikke satt")
         )
     Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG ->
         EnkeltInformasjonsbrev(

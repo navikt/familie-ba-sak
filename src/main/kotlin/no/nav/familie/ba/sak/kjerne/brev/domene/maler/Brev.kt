@@ -46,6 +46,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     ),
 
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
+    FORLENGET_SVARTIDSBREV(false, "forlengetSvartidsbrev", "Forlenget svartidsbrev"),
     INFORMASJONSBREV_FØDSEL_MINDREÅRIG(
         false,
         "informasjonsbrevFodselMindreaarig",
