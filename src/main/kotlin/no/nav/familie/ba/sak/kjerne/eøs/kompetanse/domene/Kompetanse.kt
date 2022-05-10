@@ -97,7 +97,11 @@ fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
         this.barnAktører.containsAll(kompetanse.barnAktører)
 }
 
-fun Kompetanse.medBarnOgPeriodeSomOverlapperMed(kompetanse: Kompetanse): Kompetanse? {
+/**
+ * Returnerer en kompetanse med samme skjema som [this],
+ * men der periode og barn er det som er felles i (snittet av) [this] og [kompetanse]
+ */
+fun Kompetanse.medBarnOgPeriodeSomErFellesMed(kompetanse: Kompetanse): Kompetanse? {
 
     val fom = maxOf(this.fom ?: MIN_MÅNED, kompetanse.fom ?: MIN_MÅNED)
     val tom = minOf(this.tom ?: MAX_MÅNED, kompetanse.tom ?: MAX_MÅNED)
