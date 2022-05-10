@@ -15,12 +15,10 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringR
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.INNHENTE_OPPLYSNINGER
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.VARSEL_OM_REVURDERING
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevmal
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrev
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -114,7 +112,7 @@ class DokumentService(
         erForhåndsvisning: Boolean = false
     ): ByteArray {
         Result.runCatching {
-            val brev: Brev = manueltBrevRequest.tilBrevmal()
+            val brev: Brev = manueltBrevRequest.tilBrev()
             return brevKlient.genererBrev(
                 målform = manueltBrevRequest.mottakerMålform.tilSanityFormat(),
                 brev = brev
@@ -143,7 +141,7 @@ class DokumentService(
 
         val generertBrev = genererManueltBrev(manueltBrevRequest)
 
-        val førsteside = if (manueltBrevRequest.brevmal.genererForside) {
+        val førsteside = if (manueltBrevRequest.brevmal.skalGenerereForside()) {
             Førsteside(
                 språkkode = manueltBrevRequest.mottakerMålform.tilSpråkkode(),
                 navSkjemaId = "NAV 33.00-07",
@@ -158,7 +156,7 @@ class DokumentService(
                 ?: DEFAULT_JOURNALFØRENDE_ENHET,
             brev = generertBrev,
             førsteside = førsteside,
-            dokumenttype = manueltBrevRequest.brevmal.dokumenttype
+            dokumenttype = manueltBrevRequest.brevmal.tilDokumentType(),
         )
 
         if (behandling != null) {
@@ -172,8 +170,8 @@ class DokumentService(
         }
 
         if ((
-            manueltBrevRequest.brevmal == INNHENTE_OPPLYSNINGER ||
-                manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING
+            manueltBrevRequest.brevmal == Brevmal.INNHENTE_OPPLYSNINGER ||
+                manueltBrevRequest.brevmal == Brevmal.VARSEL_OM_REVURDERING
             ) && behandling != null
         ) {
             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(
@@ -187,7 +185,7 @@ class DokumentService(
                 personIdent = manueltBrevRequest.mottakerIdent,
                 behandlingId = behandling?.id,
                 journalpostId = journalpostId,
-                brevmal = manueltBrevRequest.brevmal.tilSanityBrevtype(),
+                brevmal = manueltBrevRequest.brevmal,
                 erManueltSendt = true
             ),
             properties = Properties().apply {
