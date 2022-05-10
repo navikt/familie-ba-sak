@@ -97,6 +97,35 @@ fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
         this.barnAktører.containsAll(kompetanse.barnAktører)
 }
 
+/**
+ * Returnerer en kompetanse med samme skjema som [this],
+ * men der periode og barn er det som er felles i (snittet av) [this] og [kompetanse]
+ */
+fun Kompetanse.medBarnOgPeriodeSomErFellesMed(kompetanse: Kompetanse): Kompetanse? {
+
+    val fom = maxOf(this.fom ?: MIN_MÅNED, kompetanse.fom ?: MIN_MÅNED)
+    val tom = minOf(this.tom ?: MAX_MÅNED, kompetanse.tom ?: MAX_MÅNED)
+
+    val snitt = this.copy(
+        fom = if (fom == MIN_MÅNED) null else fom,
+        tom = if (tom == MAX_MÅNED) null else tom,
+        barnAktører = this.barnAktører.intersect(kompetanse.barnAktører)
+    )
+
+    return if (snitt.harBarnOgPeriode()) snitt else null
+}
+
+fun Kompetanse.utenSkjemaHeretter() =
+    this.copy(
+        fom = tom?.plusMonths(1),
+        tom = null,
+    ).utenSkjema()
+
+fun Kompetanse.harBarnOgPeriode(): Boolean {
+    val harGyldigPeriode = fom == null || tom == null || fom <= tom
+    return harGyldigPeriode && barnAktører.isNotEmpty()
+}
+
 enum class SøkersAktivitet {
     ARBEIDER_I_NORGE,
     SELVSTENDIG_NÆRINGSDRIVENDE,
