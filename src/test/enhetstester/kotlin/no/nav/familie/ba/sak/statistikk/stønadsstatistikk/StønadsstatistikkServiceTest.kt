@@ -269,11 +269,11 @@ internal class StønadsstatistikkServiceTest(
     @Test
     fun `Skal gi feil hvis det kommer en ny KompetanseResultat som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val kompetanseResultat = enumValues<KompetanseResultat>().map { it.name }
-        val oompetanseResultatFraEksternKontrakt =
+        val kompetanseResultatFraEksternKontrakt =
             enumValues<no.nav.familie.eksterne.kontrakter.KompetanseResultat>().map { it.name }
 
-        assertThat(kompetanseResultat).hasSize(oompetanseResultatFraEksternKontrakt.size)
-            .containsAll(oompetanseResultatFraEksternKontrakt)
+        assertThat(kompetanseResultat).hasSize(kompetanseResultatFraEksternKontrakt.size)
+            .containsAll(kompetanseResultatFraEksternKontrakt)
     }
 
     /**

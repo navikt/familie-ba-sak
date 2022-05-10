@@ -90,16 +90,16 @@ class StønadsstatistikkService(
     private fun hentKompetanse(behandlingId: Long): List<Kompetanse> {
         val kompetanser = kompetanseService.hentKompetanser(behandlingId)
 
-        return kompetanser.map {
+        return kompetanser.map { kompetanse ->
             Kompetanse(
-                barnsIdenter = it.barnAktører.map { it.aktivFødselsnummer() },
-                annenForeldersAktivitet = AnnenForeldersAktivitet.valueOf(it.annenForeldersAktivitet!!.name),
-                annenForeldersAktivitetsland = it.annenForeldersAktivitetsland,
-                barnetsBostedsland = it.barnetsBostedsland,
-                fom = it.fom!!,
-                tom = it.tom,
-                resultat = KompetanseResultat.valueOf(it.resultat!!.name),
-                sokersaktivitet = SøkersAktivitet.valueOf(it.søkersAktivitet!!.name)
+                barnsIdenter = kompetanse.barnAktører.map { aktør -> aktør.aktivFødselsnummer() },
+                annenForeldersAktivitet = AnnenForeldersAktivitet.valueOf(kompetanse.annenForeldersAktivitet!!.name),
+                annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
+                barnetsBostedsland = kompetanse.barnetsBostedsland,
+                fom = kompetanse.fom!!,
+                tom = kompetanse.tom,
+                resultat = KompetanseResultat.valueOf(kompetanse.resultat!!.name),
+                sokersaktivitet = SøkersAktivitet.valueOf(kompetanse.søkersAktivitet!!.name)
             )
         }
     }
