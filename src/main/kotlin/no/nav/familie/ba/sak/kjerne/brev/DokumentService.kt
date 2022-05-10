@@ -156,7 +156,7 @@ class DokumentService(
                 ?: DEFAULT_JOURNALFØRENDE_ENHET,
             brev = generertBrev,
             førsteside = førsteside,
-            dokumenttype = manueltBrevRequest.brevmal.tilDokumentType(),
+            dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
         )
 
         if (behandling != null) {

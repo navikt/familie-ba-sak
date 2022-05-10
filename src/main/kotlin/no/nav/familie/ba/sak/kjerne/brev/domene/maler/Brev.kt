@@ -97,7 +97,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             else -> throw Feil("Ikke avgjort om $this skal generere forside")
         }
 
-    fun tilDokumentType(): Dokumenttype =
+    fun tilFamilieKontrakterDokumentType(): Dokumenttype =
         when (this) {
             INNHENTE_OPPLYSNINGER -> Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER
             VARSEL_OM_REVURDERING -> Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING
