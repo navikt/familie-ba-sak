@@ -50,10 +50,8 @@ internal class RestTidslinjerTest {
             28.feb(2022).tilLocalDate(),
             barnetsTidslinjer.regelverkTidslinje.last().tilOgMed
         )
-        // Stopper først ved barnets 18-års-grense fordi vilkårsvurderinen er IKKE_VURDERT løpende (mot uendelig)
-        // Hadde den vært <null> ville den bli stoppet før
         assertEquals(
-            31.des(2037).tilLocalDate(),
+            28.feb(2022).tilLocalDate(),
             barnetsTidslinjer.oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje.last().tilOgMed
         )
 

@@ -69,14 +69,15 @@ class PdlRestClient(
             val forelderBarnRelasjon: Set<ForelderBarnRelasjon> =
                 when (personInfoQuery) {
                     PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON -> {
-                        pdlPerson.person.forelderBarnRelasjon.map { relasjon ->
-                            val relatertAktør =
-                                personidentService.hentAktør(relasjon.relatertPersonsIdent)
-                            ForelderBarnRelasjon(
-                                aktør = relatertAktør,
-                                relasjonsrolle = relasjon.relatertPersonsRolle
-                            )
-                        }.toSet()
+                        pdlPerson.person.forelderBarnRelasjon
+                            .mapNotNull { relasjon ->
+                                relasjon.relatertPersonsIdent?.let { ident ->
+                                    ForelderBarnRelasjon(
+                                        aktør = personidentService.hentAktør(ident),
+                                        relasjonsrolle = relasjon.relatertPersonsRolle
+                                    )
+                                }
+                            }.toSet()
                     }
                     else -> emptySet()
                 }
