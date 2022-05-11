@@ -111,7 +111,7 @@ fun hentManuellVedtaksbrevtype(
                 AVSLÅTT_OG_ENDRET,
                 ENDRET_UTBETALING, ENDRET_UTEN_UTBETALING -> Brevmal.VEDTAK_ENDRING
 
-                OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
+                OPPHØRT,
                 FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
 
                 INNVILGET_OG_OPPHØRT,

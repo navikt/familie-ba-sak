@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.stereotype.Service
@@ -33,7 +33,7 @@ class HenleggBehandling(
                 fagsakId = behandling.fagsak.id,
                 manueltBrevRequest = ManueltBrevRequest(
                     mottakerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-                    brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
+                    brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
                 ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService)
             )
         }
