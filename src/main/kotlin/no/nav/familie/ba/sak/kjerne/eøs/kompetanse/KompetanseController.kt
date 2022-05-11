@@ -35,8 +35,27 @@ class KompetanseController(
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
 
-    @PutMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterKompetanse(
+        @PathVariable behandlingId: Long,
+        @RequestBody restKompetanse: RestKompetanse
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
+
+        val barnAktører = restKompetanse.barnIdenter.map { personidentService.hentAktør(it) }
+        val kompetanse = restKompetanse.tilKompetanse(barnAktører = barnAktører)
+
+        validerOppdatering(kompetanse)
+
+        kompetanseService.endreKompetanse(behandlingId, kompetanse)
+
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+    }
+
+    @Deprecated("Bruk endepunkt som bare krever behandlingId")
+    @PutMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun oppdaterKompetanseOld(
         @PathVariable behandlingId: Long,
         @PathVariable kompetanseId: Long,
         @RequestBody restKompetanse: RestKompetanse
@@ -50,7 +69,7 @@ class KompetanseController(
         val gjeldendeKompetanse = kompetanseService.hentKompetanse(kompetanseId)
         validerOppdatering(gjeldendeKompetanse, kompetanse)
 
-        kompetanseService.oppdaterKompetanse(kompetanseId, kompetanse)
+        kompetanseService.endreKompetanse(gjeldendeKompetanse.behandlingId, kompetanse)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -68,17 +87,23 @@ class KompetanseController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    private fun validerOppdatering(gjeldendeKompetanse: Kompetanse, oppdatertKompetanse: Kompetanse) {
+    private fun validerOppdatering(oppdatertKompetanse: Kompetanse) {
         if (oppdatertKompetanse.fom == null)
             throw FunksjonellFeil("Manglende fra-og-med", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.tom != null && oppdatertKompetanse.fom > oppdatertKompetanse.tom)
             throw FunksjonellFeil("Fra-og-med er etter til-og-med", httpStatus = HttpStatus.BAD_REQUEST)
-        if (oppdatertKompetanse.fom < (gjeldendeKompetanse.fom ?: MIN_MÅNED))
+        if (oppdatertKompetanse.barnAktører.isEmpty())
+            throw FunksjonellFeil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
+    }
+
+    @Deprecated("Unødvendig med validering av gjeldende kompetanse")
+    private fun validerOppdatering(gjeldendeKompetanse: Kompetanse, oppdatertKompetanse: Kompetanse) {
+        validerOppdatering(oppdatertKompetanse)
+
+        if (oppdatertKompetanse.fom!! < (gjeldendeKompetanse.fom ?: MIN_MÅNED))
             throw FunksjonellFeil("Setter fra-og-med tidligere", httpStatus = HttpStatus.BAD_REQUEST)
         if ((oppdatertKompetanse.tom ?: MAX_MÅNED) > (gjeldendeKompetanse.tom ?: MAX_MÅNED))
             throw FunksjonellFeil("Setter til-og-med senere ", httpStatus = HttpStatus.BAD_REQUEST)
-        if (oppdatertKompetanse.barnAktører.isEmpty())
-            throw FunksjonellFeil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
         if (!gjeldendeKompetanse.barnAktører.containsAll(oppdatertKompetanse.barnAktører))
             throw FunksjonellFeil(
                 "Oppdaterer barn som ikke er knyttet til kompetansen",
