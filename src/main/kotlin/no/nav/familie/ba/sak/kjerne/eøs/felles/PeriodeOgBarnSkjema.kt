@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.felles
 
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MAX_MÅNED
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MIN_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.YearMonth
 
