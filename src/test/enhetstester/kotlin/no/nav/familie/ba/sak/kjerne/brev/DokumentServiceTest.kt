@@ -10,13 +10,12 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -70,9 +69,6 @@ class DokumentServiceTest(
 
     @Autowired
     private val integrasjonClient: IntegrasjonClient,
-
-    @Autowired
-    private val utgåendeJournalføringService: UtgåendeJournalføringService,
 
     @Autowired
     private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -261,7 +257,7 @@ class DokumentServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val manueltBrevRequest = ManueltBrevRequest(
-            brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
+            brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
             mottakerIdent = fnr
         ).byggMottakerdata(
             behandling,
