@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class manuelBrevRequestTest {
     private val årsaker = listOf("1", "2", "3")
     private val forlengetSvartidsbrevRequest = ManueltBrevRequest(
-        brevmal = BrevType.FORLENGET_SVARTIDSBREV,
+        brevmal = Brevmal.FORLENGET_SVARTIDSBREV,
         multiselectVerdier = årsaker,
         mottakerIdent = "testident",
         mottakerNavn = "testnavn",
@@ -19,14 +19,14 @@ class manuelBrevRequestTest {
 
     @Test
     fun `Forlenget svartidsbrev request skal gi forlenget svartid brevmal med riktig data`() {
-        val brevmal = forlengetSvartidsbrevRequest.tilBrevmal()
+        val brev = forlengetSvartidsbrevRequest.tilBrev()
 
-        Assertions.assertEquals(brevmal::class, ForlengetSvartidsbrev::class)
-        brevmal as ForlengetSvartidsbrev
+        Assertions.assertEquals(brev::class, ForlengetSvartidsbrev::class)
+        brev as ForlengetSvartidsbrev
 
-        Assertions.assertEquals(brevmal.mal, Brevmal.FORLENGET_SVARTIDSBREV)
+        Assertions.assertEquals(brev.mal, Brevmal.FORLENGET_SVARTIDSBREV)
 
-        Assertions.assertEquals(brevmal.data.flettefelter.antallUkerSvarfrist!!.single(), "3")
-        Assertions.assertEquals(brevmal.data.flettefelter.aarsakerSvartidsbrev!!, årsaker)
+        Assertions.assertEquals(brev.data.flettefelter.antallUkerSvarfrist!!.single(), "3")
+        Assertions.assertEquals(brev.data.flettefelter.aarsakerSvartidsbrev!!, årsaker)
     }
 }
