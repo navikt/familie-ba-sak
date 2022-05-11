@@ -74,12 +74,24 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INFORMASJONSBREV_DELT_BOSTED,
             HENLEGGE_TRUKKET_SØKNAD,
             SVARTIDSBREV,
+            FORLENGET_SVARTIDSBREV,
             INFORMASJONSBREV_FØDSEL_UMYNDIG,
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
             INFORMASJONSBREV_KAN_SØKE,
             INFORMASJONSBREV_FØDSEL_GENERELL -> false
 
-            else -> throw Feil("Ikke avgjort om $this skal generere forside")
+            VEDTAK_FØRSTEGANGSVEDTAK,
+            VEDTAK_ENDRING,
+            VEDTAK_OPPHØRT,
+            VEDTAK_OPPHØR_MED_ENDRING,
+            VEDTAK_AVSLAG,
+            VEDTAK_FORTSATT_INNVILGET,
+            VEDTAK_KORREKSJON_VEDTAKSBREV,
+            VEDTAK_OPPHØR_DØDSFALL,
+            DØDSFALL,
+            AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
+            AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+            AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Ikke avgjort om $this skal generere forside")
         }
 
     fun tilFamilieKontrakterDokumentType(): Dokumenttype =
@@ -91,11 +103,24 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INFORMASJONSBREV_DELT_BOSTED -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_DELT_BOSTED
             HENLEGGE_TRUKKET_SØKNAD -> Dokumenttype.BARNETRYGD_HENLEGGE_TRUKKET_SØKNAD
             SVARTIDSBREV -> Dokumenttype.BARNETRYGD_SVARTIDSBREV
+            FORLENGET_SVARTIDSBREV -> Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV
             INFORMASJONSBREV_FØDSEL_UMYNDIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_UMYNDIG
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_MINDREÅRIG
             INFORMASJONSBREV_KAN_SØKE -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE
             INFORMASJONSBREV_FØDSEL_GENERELL -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_GENERELL
-            else -> throw Feil("Ingen dokumenttype for $this")
+
+            VEDTAK_ENDRING,
+            VEDTAK_OPPHØRT,
+            VEDTAK_OPPHØR_MED_ENDRING,
+            VEDTAK_FORTSATT_INNVILGET,
+            VEDTAK_AVSLAG,
+            VEDTAK_FØRSTEGANGSVEDTAK,
+            VEDTAK_KORREKSJON_VEDTAKSBREV,
+            VEDTAK_OPPHØR_DØDSFALL,
+            DØDSFALL,
+            AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
+            AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+            AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Ingen dokumenttype for $this")
         }
 
     fun setterBehandlingPåVent(): Boolean =
