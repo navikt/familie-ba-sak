@@ -55,6 +55,12 @@ enum class BrevType(
         "svartidsbrev",
         false
     ),
+    FORLENGET_SVARTIDSBREV(
+        "forlenget-svartidsbrev",
+        Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV,
+        "forlenget-svartidsbrev",
+        false
+    ),
     INFORMASJONSBREV_FØDSEL_UMYNDIG(
         "informasjonsbrev-fodsel-umyndig",
         Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_UMYNDIG,
@@ -93,6 +99,7 @@ enum class BrevType(
             VARSEL_OM_REVURDERING_SAMBOER -> Brevmal.VARSEL_OM_REVURDERING_SAMBOER
             HENLEGGE_TRUKKET_SØKNAD -> Brevmal.HENLEGGE_TRUKKET_SØKNAD
             SVARTIDSBREV -> Brevmal.SVARTIDSBREV
+            FORLENGET_SVARTIDSBREV -> Brevmal.FORLENGET_SVARTIDSBREV
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG
             INFORMASJONSBREV_FØDSEL_UMYNDIG -> Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG
             INFORMASJONSBREV_KAN_SØKE -> Brevmal.INFORMASJONSBREV_KAN_SØKE
