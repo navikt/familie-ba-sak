@@ -122,6 +122,11 @@ object BehandlingsresultatUtils {
                 YtelsePersonResultat.INNVILGET,
                 YtelsePersonResultat.OPPHØRT
             ) -> Behandlingsresultat.INNVILGET_OG_OPPHØRT
+            samledeResultater == setOf(
+                YtelsePersonResultat.INNVILGET,
+                YtelsePersonResultat.OPPHØRT,
+                YtelsePersonResultat.FORTSATT_OPPHØRT
+            ) -> Behandlingsresultat.INNVILGET_OG_OPPHØRT
             samledeResultater.matcherAltOgHarEndretResultat(setOf(YtelsePersonResultat.INNVILGET)) -> Behandlingsresultat.INNVILGET_OG_ENDRET
             samledeResultater.matcherAltOgHarEndretResultat(
                 setOf(
