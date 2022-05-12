@@ -96,7 +96,7 @@ object BehandlingsresultatUtils {
 
         val opphørSomFørerTilEndring = altOpphører && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling
         if (opphørSomFørerTilEndring) {
-            samledeResultater.add(YtelsePersonResultat.ENDRET_UTEN_UTBETALING)
+            samledeResultater.add(YtelsePersonResultat.ENDRET_UTBETALING)
         }
 
         if (!altOpphører) {
@@ -109,6 +109,13 @@ object BehandlingsresultatUtils {
             samledeResultater == setOf(YtelsePersonResultat.ENDRET_UTBETALING) -> Behandlingsresultat.ENDRET_UTBETALING
             samledeResultater == setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING) -> Behandlingsresultat.ENDRET_UTEN_UTBETALING
             samledeResultater.matcherAltOgHarEndretResultat(setOf(YtelsePersonResultat.OPPHØRT)) -> Behandlingsresultat.ENDRET_OG_OPPHØRT
+            samledeResultater.matcherAltOgHarEndretResultat(setOf(YtelsePersonResultat.FORTSATT_OPPHØRT)) -> Behandlingsresultat.ENDRET_OG_OPPHØRT
+            samledeResultater.matcherAltOgHarEndretResultat(
+                setOf(
+                    YtelsePersonResultat.OPPHØRT,
+                    YtelsePersonResultat.FORTSATT_OPPHØRT
+                )
+            ) -> Behandlingsresultat.ENDRET_OG_OPPHØRT
             samledeResultater == setOf(YtelsePersonResultat.OPPHØRT) -> Behandlingsresultat.OPPHØRT
             samledeResultater == setOf(YtelsePersonResultat.INNVILGET) -> Behandlingsresultat.INNVILGET
             samledeResultater == setOf(
