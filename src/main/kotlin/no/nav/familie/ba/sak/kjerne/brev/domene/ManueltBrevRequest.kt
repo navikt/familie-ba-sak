@@ -201,5 +201,20 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             enhet = this.enhetNavn(),
             dokumentliste = this.multiselectVerdier
         )
-    else -> throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")
+    Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
+    Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
+    Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
+    Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS,
+    Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
+    Brevmal.VEDTAK_ENDRING,
+    Brevmal.VEDTAK_OPPHØRT,
+    Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
+    Brevmal.VEDTAK_AVSLAG,
+    Brevmal.VEDTAK_FORTSATT_INNVILGET,
+    Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV,
+    Brevmal.VEDTAK_OPPHØR_DØDSFALL,
+    Brevmal.DØDSFALL,
+    Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
+    Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+    Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")
 }
