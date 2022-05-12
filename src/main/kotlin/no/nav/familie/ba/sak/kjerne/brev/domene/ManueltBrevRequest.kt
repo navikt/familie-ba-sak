@@ -5,10 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.HENLEGGE_TRUKKET_SØKNAD
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.INFORMASJONSBREV_DELT_BOSTED
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.INNHENTE_OPPLYSNINGER
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.VARSEL_OM_REVURDERING
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EnkeltInformasjonsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FlettefelterForDokumentImpl
@@ -34,7 +30,7 @@ import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import java.time.LocalDate
 
 data class ManueltBrevRequest(
-    val brevmal: BrevType,
+    val brevmal: Brevmal,
     val multiselectVerdier: List<String> = emptyList(),
     val mottakerIdent: String,
     val barnIBrev: List<String> = emptyList(),
@@ -86,8 +82,8 @@ fun ManueltBrevRequest.leggTilEnhet(arbeidsfordelingService: ArbeidsfordelingSer
     )
 }
 
-fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
-    INFORMASJONSBREV_DELT_BOSTED.malId ->
+fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
+    Brevmal.INFORMASJONSBREV_DELT_BOSTED ->
         InformasjonsbrevDeltBostedBrev(
             data = InformasjonsbrevDeltBostedData(
                 delmalData = InformasjonsbrevDeltBostedData.DelmalData(
@@ -104,7 +100,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    INNHENTE_OPPLYSNINGER.malId ->
+    Brevmal.INNHENTE_OPPLYSNINGER ->
         InnhenteOpplysningerBrev(
             data = InnhenteOpplysningerData(
                 delmalData = InnhenteOpplysningerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
@@ -115,7 +111,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    HENLEGGE_TRUKKET_SØKNAD.malId ->
+    Brevmal.HENLEGGE_TRUKKET_SØKNAD ->
         HenleggeTrukketSøknadBrev(
             data = HenleggeTrukketSøknadData(
                 delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
@@ -125,7 +121,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    VARSEL_OM_REVURDERING.malId ->
+    Brevmal.VARSEL_OM_REVURDERING ->
         VarselOmRevurderingBrev(
             data = VarselOmRevurderingData(
                 delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
@@ -136,7 +132,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    BrevType.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14.malId ->
+    Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 ->
         VarselOmRevurderingDeltBostedParagraf14Brev(
             data = VarselOmRevurderingDeltBostedParagraf14Data(
                 delmalData = VarselOmRevurderingDeltBostedParagraf14Data.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
@@ -147,7 +143,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    BrevType.VARSEL_OM_REVURDERING_SAMBOER.malId ->
+    Brevmal.VARSEL_OM_REVURDERING_SAMBOER ->
         if (this.datoAvtale == null) throw FunksjonellFeil(
             frontendFeilmelding = "Du må sette dato for samboerskap for å sende dette brevet.",
             melding = "Dato er ikke satt for brevtype 'varsel om revurdering samboer'"
@@ -162,14 +158,14 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                 )
             )
         )
-    BrevType.SVARTIDSBREV.malId ->
+    Brevmal.SVARTIDSBREV ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             mal = Brevmal.SVARTIDSBREV
         )
-    BrevType.FORLENGET_SVARTIDSBREV.malId ->
+    Brevmal.FORLENGET_SVARTIDSBREV ->
         ForlengetSvartidsbrev(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
@@ -177,37 +173,33 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
             årsaker = this.multiselectVerdier,
             antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw Feil("Antall uker svarfrist er ikke satt")
         )
-    BrevType.INFORMASJONSBREV_FØDSEL_MINDREÅRIG.malId ->
+    Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG
         )
-    BrevType.INFORMASJONSBREV_FØDSEL_UMYNDIG.malId ->
+    Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG
         )
-    BrevType.INFORMASJONSBREV_FØDSEL_GENERELL.malId ->
+    Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL
         )
-    BrevType.INFORMASJONSBREV_KAN_SØKE.malId ->
+    Brevmal.INFORMASJONSBREV_KAN_SØKE ->
         InformasjonsbrevKanSøke(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             dokumentliste = this.multiselectVerdier
         )
-    else -> error(
-        "Kan ikke mappe brevmal for ${
-        this.brevmal.visningsTekst
-        } til ny brevtype da denne ikke er støttet i ny løsning enda."
-    )
+    else -> throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")
 }

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.FerdigstillOppgaver
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -79,11 +81,19 @@ class BeslutteVedtak(
                 }
                 StegType.JOURNALFØR_VEDTAKSBREV -> {
                     if (!behandling.erBehandlingMedVedtaksbrevutsending())
-                        throw Feil("Prøvte å opprette vedtaksbrev for behandling som ikke skal sende ut vedtaksbrev.")
+                        throw Feil("Prøvde å opprette vedtaksbrev for behandling som ikke skal sende ut vedtaksbrev.")
 
                     opprettJournalførVedtaksbrevTask(behandling, vedtak)
                 }
-                else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på beslutte vedtak steg")
+                StegType.FERDIGSTILLE_BEHANDLING -> {
+                    if (behandling.type == BehandlingType.TEKNISK_ENDRING) {
+                        FerdigstillBehandlingTask.opprettTask(
+                            søkerPersonIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                            behandlingsId = behandling.id
+                        )
+                    } else throw Feil("Neste steg 'ferdigstille behandling' er ikke implementert på 'beslutte vedtak'-steg")
+                }
+                else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på 'beslutte vedtak'-steg")
             }
             nesteSteg
         } else {

@@ -108,7 +108,7 @@ fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, M�
 
 fun Tidslinjer.harBlandetRegelverk(): Boolean {
     return søkersTidslinjer().regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) ||
-        barnasTidslinjer().values.any { it.regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) }
+        barnasTidslinjer().values.any { it.egetRegelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) }
 }
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.inneholder(innhold: I): Boolean =
