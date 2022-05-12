@@ -60,7 +60,7 @@ class SaksstatistikkController(
             } else {
                 jsnoNode.get("behandlingId").asLong()
             }
-            val kontraktversjon = jsnoNode.get("kontraktversjon").asText()
+            val kontraktversjon = jsnoNode.get("versjon").asText()
 
             val sm = SaksstatistikkMellomlagring(
                 offsetVerdi = input.offset,
