@@ -4,11 +4,22 @@ import no.nav.familie.ba.sak.common.Utils
 import javax.persistence.AttributeConverter
 import javax.persistence.Converter
 
-enum class UtdypendeVilkårsvurdering(val tekst: String) {
-    VURDERING_ANNET_GRUNNLAG(tekst = "Vurdering annet grunnlag"),
-    VURDERT_MEDLEMSKAP(tekst = "Vurdert medlemskap"),
-    DELT_BOSTED(tekst = "Delt bosted: skal deles"),
-    DELT_BOSTED_SKAL_IKKE_DELES(tekst = "Delt bosted: skal ikke deles")
+enum class UtdypendeVilkårsvurdering {
+    VURDERING_ANNET_GRUNNLAG,
+    VURDERT_MEDLEMSKAP,
+    DELT_BOSTED,
+    DELT_BOSTED_SKAL_IKKE_DELES,
+    OMFATTET_AV_NORSK_LOVGIVNING,
+    OMFATTET_AV_NORSK_LOVGIVNING_UTLAND,
+    BARN_BOR_I_NORGE,
+    BARN_BOR_I_EØS,
+    BARN_BOR_I_STORBRITANNIA,
+    BARN_BOR_I_NORGE_MED_SØKER,
+    BARN_BOR_I_EØS_MED_SØKER,
+    BARN_BOR_I_EØS_MED_ANNEN_FORELDER,
+    BARN_BOR_I_STORBRITANNIA_MED_SØKER,
+    BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER,
+    BARN_BOR_ALENE_I_ANNET_EØS_LAND
 }
 
 @Converter
