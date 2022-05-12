@@ -64,14 +64,14 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
         val response = kafkaTemplate.send(VEDTAK_TOPIC, vedtak.funksjonellId!!, vedtak).get()
         logger.info("$VEDTAK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
-        vedtakV2Counter.increment()
+        vedtakCounter.increment()
         return response.recordMetadata.offset()
     }
 
     override fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long {
         val response = kafkaTemplate.send(VEDTAKV2_TOPIC, vedtakV2.funksjonellId!!, vedtakV2).get()
         logger.info("$VEDTAKV2_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
-        vedtakCounter.increment()
+        vedtakV2Counter.increment()
         return response.recordMetadata.offset()
     }
 
