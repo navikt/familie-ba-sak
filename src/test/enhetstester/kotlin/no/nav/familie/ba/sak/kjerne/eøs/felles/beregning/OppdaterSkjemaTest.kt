@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
+package no.nav.familie.ba.sak.kjerne.eøs.felles.beregning
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Test
 
-internal class OppdaterKompetanserTest {
+internal class OppdaterSkjemaTest {
     val barn1 = tilfeldigPerson(personType = PersonType.BARN)
     val barn2 = tilfeldigPerson(personType = PersonType.BARN)
     val barn3 = tilfeldigPerson(personType = PersonType.BARN)
@@ -24,7 +24,7 @@ internal class OppdaterKompetanserTest {
     fun `oppdatere med tom kompetanse skal ikke har noen effekt`() {
         val tomKompetanse = Kompetanse(null, null)
 
-        val faktiskeKompetanser = oppdaterKompetanserRekursivt(kompetanser, tomKompetanse)
+        val faktiskeKompetanser = oppdaterSkjemaerRekursivt(kompetanser, tomKompetanse)
         assertEqualsUnordered(kompetanser, faktiskeKompetanser)
     }
 
@@ -32,7 +32,7 @@ internal class OppdaterKompetanserTest {
     fun `oppdatere tom liste av kompetansr med en gyldig kompetanse skal gi tom liste`() {
         val kompetanse = kompetanse(jan(2020), "------", barn1, barn2, barn3)
 
-        val faktiskeKompetanser = oppdaterKompetanserRekursivt(emptyList(), kompetanse)
+        val faktiskeKompetanser = oppdaterSkjemaerRekursivt(emptyList(), kompetanse)
         assertEqualsUnordered(emptyList(), faktiskeKompetanser)
     }
 
@@ -44,7 +44,7 @@ internal class OppdaterKompetanserTest {
             barn1, barn2, barn3
         )
 
-        val faktiskeKompetanser = oppdaterKompetanserRekursivt(kompetanser, kompetanse)
+        val faktiskeKompetanser = oppdaterSkjemaerRekursivt(kompetanser, kompetanse)
         assertEqualsUnordered(kompetanser, faktiskeKompetanser)
     }
 
@@ -57,7 +57,7 @@ internal class OppdaterKompetanserTest {
             .medKompetanse("  PP", barn2, barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = oppdaterKompetanserRekursivt(kompetanser, kompetanse)
+        val faktiskeKompetanser = oppdaterSkjemaerRekursivt(kompetanser, kompetanse)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -71,7 +71,7 @@ internal class OppdaterKompetanserTest {
             .medKompetanse("             PP", barn1, barn2, barn3)
             .byggKompetanser()
 
-        val faktiskeKompetanser = oppdaterKompetanserRekursivt(kompetanser, kompetanse)
+        val faktiskeKompetanser = oppdaterSkjemaerRekursivt(kompetanser, kompetanse)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 }

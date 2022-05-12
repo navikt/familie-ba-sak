@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
+package no.nav.familie.ba.sak.kjerne.eøs.felles.util
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import java.time.LocalDate

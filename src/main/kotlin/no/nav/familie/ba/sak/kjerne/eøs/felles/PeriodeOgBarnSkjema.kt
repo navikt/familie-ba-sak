@@ -1,0 +1,59 @@
+package no.nav.familie.ba.sak.kjerne.eøs.felles
+
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import java.time.YearMonth
+
+interface PeriodeOgBarnSkjema<out T> where T : PeriodeOgBarnSkjema<T> {
+    val fom: YearMonth?
+    val tom: YearMonth?
+    val barnAktører: Set<Aktør>
+    fun utenSkjema(): T
+    fun kopier(
+        fom: YearMonth? = this.fom,
+        tom: YearMonth? = this.tom,
+        barnAktører: Set<Aktør> = this.barnAktører
+    ): T
+}
+
+fun <T : PeriodeOgBarnSkjema<T>> T.medBarnOgPeriodeSomErFellesMed(skjema: T): T? {
+
+    val fom = maxOf(this.fom ?: MIN_MÅNED, skjema.fom ?: MIN_MÅNED)
+    val tom = minOf(this.tom ?: MAX_MÅNED, skjema.tom ?: MAX_MÅNED)
+
+    val snitt = this.kopier(
+        fom = if (fom == MIN_MÅNED) null else fom,
+        tom = if (tom == MAX_MÅNED) null else tom,
+        barnAktører = this.barnAktører.intersect(skjema.barnAktører)
+    )
+
+    return if (snitt.harBarnOgPeriode()) snitt else null
+}
+
+fun <T : PeriodeOgBarnSkjema<T>> T.harBarnOgPeriode(): Boolean {
+    val harGyldigPeriode = fom == null || tom == null || fom!! <= tom
+    return harGyldigPeriode && barnAktører.isNotEmpty()
+}
+
+fun <T : PeriodeOgBarnSkjema<T>> T.inneholder(skjema: T): Boolean {
+    return this.bareSkjema() == skjema.bareSkjema() &&
+        (this.fom == null || this.fom!! <= skjema.fom) &&
+        (this.tom == null || this.tom!! >= skjema.tom) &&
+        this.barnAktører.containsAll(skjema.barnAktører)
+}
+
+fun <T : PeriodeOgBarnSkjema<T>> T.bareSkjema(): T =
+    this.kopier(fom = null, tom = null, barnAktører = emptySet())
+
+fun <T : PeriodeOgBarnSkjema<T>> T.utenBarn(): T =
+    this.kopier(fom = this.fom, tom = this.tom, barnAktører = emptySet())
+
+fun <T : PeriodeOgBarnSkjema<T>> T.utenPeriode(): T =
+    this.kopier(fom = null, tom = null, barnAktører = this.barnAktører)
+
+fun <T : PeriodeOgBarnSkjema<T>> T.utenSkjemaHeretter() =
+    this.kopier(
+        fom = tom?.plusMonths(1),
+        tom = null,
+    ).utenSkjema()
