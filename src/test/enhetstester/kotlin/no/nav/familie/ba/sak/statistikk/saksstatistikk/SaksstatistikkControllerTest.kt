@@ -31,7 +31,7 @@ class SaksstatistikkControllerTest {
             offset = 45635,
             type = SaksstatistikkMellomlagringType.SAK,
             sendtTidspunkt = LocalDateTime.now(),
-            json = """{"sakId": 123456789, "kontraktversjon": "1.0", "funksjonellId": "aaa-bbb-ccc"}"""
+            json = """{"sakId": 123456789, "versjon": "1.0", "funksjonellId": "aaa-bbb-ccc"}"""
         )
 
         val slot = slot<SaksstatistikkMellomlagring>()
@@ -55,7 +55,7 @@ class SaksstatistikkControllerTest {
             offset = 45635,
             type = SaksstatistikkMellomlagringType.BEHANDLING,
             sendtTidspunkt = LocalDateTime.now(),
-            json = """{"behandlingId": 123456789, "kontraktversjon": "1.0", "funksjonellId": "aaa-bbb-ccc"}"""
+            json = """{"behandlingId": 123456789, "versjon": "1.0", "funksjonellId": "aaa-bbb-ccc"}"""
         )
 
         val slot = slot<SaksstatistikkMellomlagring>()
