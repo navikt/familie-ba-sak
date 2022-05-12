@@ -31,7 +31,7 @@
         <familie.kontrakter.stønadsstatistikk>2.0_20220506145321_fda933e</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.12.3</mockk.version>
-        <token-validation-spring.version>2.0.16</token-validation-spring.version>
+        <token-validation-spring.version>2.0.17</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>1.6.8</springdoc.version>
 
