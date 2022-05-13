@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.task.PubliserVedtakTask
 import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
+import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.PathVariable
@@ -36,6 +37,16 @@ class StønadsstatistikkController(
             return behandlinger.map { stønadsstatistikkService.hentVedtak(it) }
         } catch (e: Exception) {
             logger.warn("Feil ved henting av stønadsstatistikk for $behandlinger", e)
+            throw e
+        }
+    }
+
+    @PostMapping(path = ["/vedtakV2"])
+    fun hentBehandlingDvhV2(@RequestBody(required = true) behandlinger: List<Long>): List<VedtakDVHV2> {
+        try {
+            return behandlinger.map { stønadsstatistikkService.hentVedtakV2(it) }
+        } catch (e: Exception) {
+            logger.warn("Feil ved henting av stønadsstatistikk V2 for $behandlinger", e)
             throw e
         }
     }

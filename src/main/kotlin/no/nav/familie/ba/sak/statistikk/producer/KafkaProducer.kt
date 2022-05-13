@@ -69,7 +69,9 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     }
 
     override fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long {
-        val response = kafkaTemplate.send(VEDTAKV2_TOPIC, vedtakV2.funksjonellId!!, vedtakV2).get()
+        val vedtakForDVHV2Melding =
+            objectMapper.writeValueAsString(vedtakV2)
+        val response = kafkaAivenTemplate.send(VEDTAKV2_TOPIC, vedtakV2.funksjonellId!!, vedtakForDVHV2Melding).get()
         logger.info("$VEDTAKV2_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         vedtakV2Counter.increment()
         return response.recordMetadata.offset()
@@ -158,7 +160,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private const val VEDTAK_TOPIC = "aapen-barnetrygd-vedtak-v1"
-        private const val VEDTAKV2_TOPIC = "aapen-barnetrygd-vedtak-v2"
+        private const val VEDTAKV2_TOPIC = "teamfamilie.aapen-barnetrygd-vedtak-v2"
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "aapen-barnetrygd-saksstatistikk-behandling-v1"
         private const val SAKSSTATISTIKK_SAK_TOPIC = "aapen-barnetrygd-saksstatistikk-sak-v1"
         private const val COUNTER_NAME = "familie.ba.sak.kafka.produsert"

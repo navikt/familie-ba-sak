@@ -20,12 +20,8 @@ class PubliserVedtakV2Task(
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        if (env.erProd()) {
-            LOG.info("Send VedtakV2 to Kafka Aiven for DVH skipped in prod")
-        } else {
-            val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(task.payload.toLong())
-            task.metadata["offset"] = kafkaProducer.sendMessageForTopicVedtakV2(vedtakV2DVH).toString()
-        }
+        val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(task.payload.toLong())
+        task.metadata["offset"] = kafkaProducer.sendMessageForTopicVedtakV2(vedtakV2DVH).toString()
     }
 
     companion object {
