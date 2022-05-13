@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -16,12 +18,14 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevDeltBosted
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevKanSøke
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerData
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerOmBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Data
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboerBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboerData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevMedÅrsaker
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.VarselbrevMedÅrsakerOgBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -197,10 +201,39 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             enhet = this.enhetNavn(),
             dokumentliste = this.multiselectVerdier
         )
-    Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
-    Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
-    Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
-    Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS,
+    Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED ->
+        VarselbrevMedÅrsakerOgBarn(
+            mal = Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
+            navn = this.mottakerNavn,
+            fødselsnummer = this.mottakerIdent,
+            enhet = this.enhetNavn(),
+            varselÅrsaker = this.multiselectVerdier,
+            barnasFødselsdager = this.barnIBrev.tilFormaterteFødselsdager()
+        )
+    Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS ->
+        VarselbrevMedÅrsaker(
+            mal = Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
+            navn = this.mottakerNavn,
+            fødselsnummer = this.mottakerIdent,
+            varselÅrsaker = this.multiselectVerdier,
+            enhet = this.enhetNavn(),
+        )
+    Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED ->
+        InnhenteOpplysningerOmBarn(
+            mal = Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
+            navn = this.mottakerNavn,
+            fødselsnummer = this.mottakerIdent,
+            enhet = this.enhetNavn(),
+            barnasFødselsdager = this.barnIBrev.tilFormaterteFødselsdager()
+        )
+    Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS ->
+        EnkeltInformasjonsbrev(
+            navn = this.mottakerNavn,
+            fodselsnummer = this.mottakerIdent,
+            enhet = this.enhetNavn(),
+            mal = Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS
+        )
+
     Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
     Brevmal.VEDTAK_ENDRING,
     Brevmal.VEDTAK_OPPHØRT,
@@ -214,3 +247,9 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
     Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
     Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")
 }
+
+private fun List<String>.tilFormaterteFødselsdager() = Utils.slåSammen(
+    map {
+        LocalDate.parse(it).tilKortString()
+    }
+)
