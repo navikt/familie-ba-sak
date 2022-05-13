@@ -17,12 +17,11 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevKanSøke
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingBrev
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Data
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboerBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboerData
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevMedÅrsaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -122,15 +121,12 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             )
         )
     Brevmal.VARSEL_OM_REVURDERING ->
-        VarselOmRevurderingBrev(
-            data = VarselOmRevurderingData(
-                delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
-                flettefelter = VarselOmRevurderingData.Flettefelter(
-                    navn = this.mottakerNavn,
-                    fodselsnummer = this.mottakerIdent,
-                    varselÅrsaker = this.multiselectVerdier,
-                )
-            )
+        VarselbrevMedÅrsaker(
+            mal = Brevmal.VARSEL_OM_REVURDERING,
+            navn = this.mottakerNavn,
+            fødselsnummer = this.mottakerIdent,
+            varselÅrsaker = this.multiselectVerdier,
+            enhet = this.enhetNavn(),
         )
     Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 ->
         VarselOmRevurderingDeltBostedParagraf14Brev(
