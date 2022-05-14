@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
@@ -25,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandsperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -56,7 +59,8 @@ class UtvidetBehandlingService(
     private val kompetanseRepository: KompetanseRepository,
     private val endringstidspunktService: EndringstidspunktService,
     private val valutakursRepository: ValutakursRepository,
-    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository
+    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
@@ -81,6 +85,17 @@ class UtvidetBehandlingService(
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
         val endringstidspunkt = endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId)
+
+        val kanBehandleEøs = featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)
+
+        val kompetanser: List<Kompetanse> =
+            if (kanBehandleEøs) kompetanseRepository.findByBehandlingId(behandlingId) else emptyList()
+
+        val valutakurser =
+            if (kanBehandleEøs) valutakursRepository.findByBehandlingId(behandlingId) else emptyList()
+
+        val utenlandskePeriodebeløp =
+            if (kanBehandleEøs) utenlandskPeriodebeløpRepository.findByBehandlingId(behandlingId) else emptyList()
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
@@ -116,16 +131,13 @@ class UtvidetBehandlingService(
                 } else emptyList(),
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),
-            kompetanser = kompetanseRepository.findByBehandlingId(behandlingId = behandlingId)
-                .map { it.tilRestKompetanse() },
+            kompetanser = kompetanser.map { it.tilRestKompetanse() },
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
             aktivSettPåVent = settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
                 ?.tilRestSettPåVent(),
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
-            valutakurser = valutakursRepository.findByBehandlingId(behandlingId = behandlingId)
-                .map { it.tilRestValutakurs() },
-            utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.findByBehandlingId(behandlingId = behandlingId)
-                .map { it.tilRestUtenlandskPeriodebeløp() }
+            valutakurser = valutakurser.map { it.tilRestValutakurs() },
+            utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() }
         )
     }
 
