@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.felles
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.oppdaterSkjemaerRekursivt
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.somInversOppdateringEllersNull
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 
 class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
@@ -20,9 +21,8 @@ class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
     fun endreSkjemaer(behandlingId: Long, oppdatering: T) {
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
 
-        val oppdaterteKompetanser = oppdaterSkjemaerRekursivt(
-            gjeldendeSkjemaer, oppdatering.eventueltInverterOppdateringVedInnsnevringAvEttSkjema(gjeldendeSkjemaer)
-        )
+        val justertOppdatering = oppdatering.somInversOppdateringEllersNull(gjeldendeSkjemaer) ?: oppdatering
+        val oppdaterteKompetanser = oppdaterSkjemaerRekursivt(gjeldendeSkjemaer, justertOppdatering)
 
         lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteKompetanser.medBehandlingId(behandlingId))
         tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
@@ -58,47 +58,3 @@ fun <T : PeriodeOgBarnSkjemaEntitet<T>> Collection<T>.medBehandlingId(behandling
     this.forEach { it.behandlingId = behandlingId }
     return this
 }
-
-fun <T : PeriodeOgBarnSkjemaEntitet<T>> T.eventueltInverterOppdateringVedInnsnevringAvEttSkjema(
-    gjeldendeSkjemaer: Collection<T>
-): T {
-    val endring = this
-
-    val erInnsnevringAvPeriode = gjeldendeSkjemaer.filter { gjeldende ->
-        gjeldende.tom == null &&
-            endring.tom != null &&
-            gjeldende.kopier(tom = endring.tom) == endring
-    }
-        .singleOrNull() != null
-
-    val eventueltSkjemaSomInnsnevresPåBarn = gjeldendeSkjemaer.filter { gjeldende ->
-        endring.barnAktører.size < gjeldende.barnAktører.size &&
-            gjeldende.barnAktører.containsAll(endring.barnAktører) &&
-            gjeldende.kopier(barnAktører = endring.barnAktører) == endring
-    }.singleOrNull()
-
-    val erInnsnevringAvBarn = eventueltSkjemaSomInnsnevresPåBarn != null
-
-    val eventueltSkjemaSomInnsnevresPåBarnOgPerriode = gjeldendeSkjemaer.filter { gjeldende ->
-        gjeldende.tom == null &&
-            endring.tom != null &&
-            endring.barnAktører.size < gjeldende.barnAktører.size &&
-            gjeldende.barnAktører.containsAll(endring.barnAktører) &&
-            gjeldende.kopier(tom = endring.tom, barnAktører = endring.barnAktører) == endring
-    }.singleOrNull()
-
-    val erInnsnevringAvBarnOgPeriode = eventueltSkjemaSomInnsnevresPåBarnOgPerriode != null
-
-    return when {
-        erInnsnevringAvPeriode ->
-            endring.utenSkjemaHeretter()
-        erInnsnevringAvBarn ->
-            endring.medBarnSomForsvinnerFra(eventueltSkjemaSomInnsnevresPåBarn!!).utenSkjema()
-        eventueltSkjemaSomInnsnevresPåBarnOgPerriode != null ->
-            endring.medBarnSomForsvinnerFra(eventueltSkjemaSomInnsnevresPåBarnOgPerriode).utenSkjemaHeretter()
-        else -> endring
-    }
-}
-
-fun <T : PeriodeOgBarnSkjemaEntitet<T>> T.medBarnSomForsvinnerFra(skjema: T) =
-    this.kopier(barnAktører = skjema.barnAktører.minus(this.barnAktører))
