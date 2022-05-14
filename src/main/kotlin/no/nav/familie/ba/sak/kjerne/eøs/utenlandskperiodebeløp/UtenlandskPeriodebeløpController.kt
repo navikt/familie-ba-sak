@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.utenlandsperiodebeløp
+package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService

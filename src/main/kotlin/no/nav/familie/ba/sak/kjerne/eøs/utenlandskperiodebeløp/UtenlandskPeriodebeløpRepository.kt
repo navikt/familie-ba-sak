@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.utenlandsperiodebeløp
+package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import org.springframework.data.jpa.repository.Query

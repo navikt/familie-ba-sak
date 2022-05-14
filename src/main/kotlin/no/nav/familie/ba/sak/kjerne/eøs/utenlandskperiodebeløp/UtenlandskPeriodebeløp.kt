@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.utenlandsperiodebeløp
+package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
