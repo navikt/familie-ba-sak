@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.felles.beregning
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjema
 import no.nav.familie.ba.sak.kjerne.eøs.felles.inneholder
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MAX_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 
 /**
  * Reduser innholdet i this-kompetansen med innholdet i oppdaterKompetanse

@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.utenPeriode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
 internal class SkjemaTidslinje<T : PeriodeOgBarnSkjema<T>>(
@@ -21,7 +21,7 @@ internal class SkjemaTidslinje<T : PeriodeOgBarnSkjema<T>>(
 }
 
 private fun <T : PeriodeOgBarnSkjema<T>> PeriodeOgBarnSkjema<T>.fraOgMedTidspunkt(): Tidspunkt<Måned> =
-    this.fom.tilTidspunktEllerUendeligLengeSiden { this.tom }
+    this.fom.tilTidspunktEllerTidligereEnn(this.tom)
 
 private fun <T : PeriodeOgBarnSkjema<T>> PeriodeOgBarnSkjema<T>.tilOgMedTidspunkt(): Tidspunkt<Måned> =
-    this.tom.tilTidspunktEllerUendeligLengeTil { this.fom }
+    this.tom.tilTidspunktEllerSenereEnn(this.fom)

@@ -383,7 +383,7 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.SATSENDRING,
-                ).copy(resultat = Behandlingsresultat.ENDRET),
+                ).copy(resultat = Behandlingsresultat.ENDRET_UTBETALING),
                 utførendeStegType = it
             )
         }

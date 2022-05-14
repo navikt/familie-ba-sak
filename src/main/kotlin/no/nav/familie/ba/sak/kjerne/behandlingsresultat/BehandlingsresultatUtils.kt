@@ -91,12 +91,12 @@ object BehandlingsresultatUtils {
         }
 
         if (noeOpphørerPåTidligereBarn && !altOpphører) {
-            samledeResultater.add(YtelsePersonResultat.ENDRET)
+            samledeResultater.add(YtelsePersonResultat.ENDRET_UTBETALING)
         }
 
         val opphørSomFørerTilEndring = altOpphører && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling
         if (opphørSomFørerTilEndring) {
-            samledeResultater.add(YtelsePersonResultat.ENDRET)
+            samledeResultater.add(YtelsePersonResultat.ENDRET_UTBETALING)
         }
 
         if (!altOpphører) {
@@ -106,10 +106,15 @@ object BehandlingsresultatUtils {
         return when {
             samledeResultater.isEmpty() -> Behandlingsresultat.FORTSATT_INNVILGET
             samledeResultater == setOf(YtelsePersonResultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.FORTSATT_OPPHØRT
-            samledeResultater == setOf(YtelsePersonResultat.ENDRET) -> Behandlingsresultat.ENDRET
-            samledeResultater == setOf(
-                YtelsePersonResultat.ENDRET,
-                YtelsePersonResultat.OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.ENDRET_UTBETALING) -> Behandlingsresultat.ENDRET_UTBETALING
+            samledeResultater == setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING) -> Behandlingsresultat.ENDRET_UTEN_UTBETALING
+            samledeResultater.matcherAltOgHarEndretResultat(setOf(YtelsePersonResultat.OPPHØRT)) -> Behandlingsresultat.ENDRET_OG_OPPHØRT
+            samledeResultater.matcherAltOgHarEndretResultat(setOf(YtelsePersonResultat.FORTSATT_OPPHØRT)) -> Behandlingsresultat.ENDRET_OG_OPPHØRT
+            samledeResultater.matcherAltOgHarEndretResultat(
+                setOf(
+                    YtelsePersonResultat.OPPHØRT,
+                    YtelsePersonResultat.FORTSATT_OPPHØRT
+                )
             ) -> Behandlingsresultat.ENDRET_OG_OPPHØRT
             samledeResultater == setOf(YtelsePersonResultat.OPPHØRT) -> Behandlingsresultat.OPPHØRT
             samledeResultater == setOf(YtelsePersonResultat.INNVILGET) -> Behandlingsresultat.INNVILGET
@@ -119,12 +124,15 @@ object BehandlingsresultatUtils {
             ) -> Behandlingsresultat.INNVILGET_OG_OPPHØRT
             samledeResultater == setOf(
                 YtelsePersonResultat.INNVILGET,
-                YtelsePersonResultat.ENDRET
-            ) -> Behandlingsresultat.INNVILGET_OG_ENDRET
-            samledeResultater == setOf(
-                YtelsePersonResultat.INNVILGET,
-                YtelsePersonResultat.ENDRET,
-                YtelsePersonResultat.OPPHØRT
+                YtelsePersonResultat.OPPHØRT,
+                YtelsePersonResultat.FORTSATT_OPPHØRT
+            ) -> Behandlingsresultat.INNVILGET_OG_OPPHØRT
+            samledeResultater.matcherAltOgHarEndretResultat(setOf(YtelsePersonResultat.INNVILGET)) -> Behandlingsresultat.INNVILGET_OG_ENDRET
+            samledeResultater.matcherAltOgHarEndretResultat(
+                setOf(
+                    YtelsePersonResultat.INNVILGET,
+                    YtelsePersonResultat.OPPHØRT
+                )
             ) -> Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT
             samledeResultater == setOf(
                 YtelsePersonResultat.INNVILGET,
@@ -135,30 +143,30 @@ object BehandlingsresultatUtils {
                 YtelsePersonResultat.AVSLÅTT,
                 YtelsePersonResultat.OPPHØRT
             ) -> Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT
-            samledeResultater == setOf(
-                YtelsePersonResultat.INNVILGET,
-                YtelsePersonResultat.AVSLÅTT,
-                YtelsePersonResultat.ENDRET
+            samledeResultater.matcherAltOgHarEndretResultat(
+                setOf(
+                    YtelsePersonResultat.INNVILGET,
+                    YtelsePersonResultat.AVSLÅTT
+                )
             ) -> Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET
-            samledeResultater == setOf(
-                YtelsePersonResultat.INNVILGET,
-                YtelsePersonResultat.AVSLÅTT,
-                YtelsePersonResultat.ENDRET,
-                YtelsePersonResultat.OPPHØRT
+            samledeResultater.matcherAltOgHarEndretResultat(
+                setOf(
+                    YtelsePersonResultat.INNVILGET,
+                    YtelsePersonResultat.AVSLÅTT,
+                    YtelsePersonResultat.OPPHØRT
+                )
             ) -> Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
             samledeResultater == setOf(YtelsePersonResultat.AVSLÅTT) -> Behandlingsresultat.AVSLÅTT
             samledeResultater == setOf(
                 YtelsePersonResultat.AVSLÅTT,
                 YtelsePersonResultat.OPPHØRT
             ) -> Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
-            samledeResultater == setOf(
-                YtelsePersonResultat.AVSLÅTT,
-                YtelsePersonResultat.ENDRET
-            ) -> Behandlingsresultat.AVSLÅTT_OG_ENDRET
-            samledeResultater == setOf(
-                YtelsePersonResultat.AVSLÅTT,
-                YtelsePersonResultat.ENDRET,
-                YtelsePersonResultat.OPPHØRT
+            samledeResultater.matcherAltOgHarEndretResultat(setOf(YtelsePersonResultat.AVSLÅTT)) -> Behandlingsresultat.AVSLÅTT_OG_ENDRET
+            samledeResultater.matcherAltOgHarEndretResultat(
+                setOf(
+                    YtelsePersonResultat.AVSLÅTT,
+                    YtelsePersonResultat.OPPHØRT,
+                )
             ) -> Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
             else -> throw ikkeStøttetFeil
         }
@@ -168,7 +176,8 @@ object BehandlingsresultatUtils {
         if ((
             behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
                     Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-                    Behandlingsresultat.ENDRET,
+                    Behandlingsresultat.ENDRET_UTBETALING,
+                    Behandlingsresultat.ENDRET_UTEN_UTBETALING,
                     Behandlingsresultat.ENDRET_OG_OPPHØRT,
                     Behandlingsresultat.OPPHØRT,
                     Behandlingsresultat.FORTSATT_INNVILGET,
@@ -250,4 +259,12 @@ fun hentUtbetalingstidslinjeForSøker(andeler: List<AndelTilkjentYtelse>): Local
         StandardCombinators::sum,
         LocalDateTimeline.JoinStyle.CROSS_JOIN
     )
+}
+
+fun Set<YtelsePersonResultat>.matcherAltOgHarEndretResultat(andreElementer: Set<YtelsePersonResultat>): Boolean {
+    val endretResultat = this.singleOrNull {
+        it == YtelsePersonResultat.ENDRET_UTBETALING ||
+            it == YtelsePersonResultat.ENDRET_UTEN_UTBETALING
+    } ?: return false
+    return this == setOf(endretResultat) + andreElementer
 }

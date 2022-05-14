@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 data class VarselOmRevurderingSamboerBrev(
     override val mal: Brevmal = Brevmal.VARSEL_OM_REVURDERING_SAMBOER,
-    override val data: BrevData
+    override val data: VarselOmRevurderingSamboerData
 ) : Brev
 
 data class VarselOmRevurderingSamboerData(

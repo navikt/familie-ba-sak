@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.felles
 
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MAX_MÅNED
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MIN_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.YearMonth
 
@@ -18,7 +18,6 @@ interface PeriodeOgBarnSkjema<out T> where T : PeriodeOgBarnSkjema<T> {
 }
 
 fun <T : PeriodeOgBarnSkjema<T>> T.medBarnOgPeriodeSomOverlapperMed(skjema: T): T? {
-
     val fom = maxOf(this.fom ?: MIN_MÅNED, skjema.fom ?: MIN_MÅNED)
     val tom = minOf(this.tom ?: MAX_MÅNED, skjema.tom ?: MAX_MÅNED)
 

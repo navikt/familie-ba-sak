@@ -29,8 +29,10 @@ class TeamStatistikkService(
     val tidSidenOpprettelseåpneBehandlingerPerMånedGauge =
         MultiGauge.builder("TidSidenOpprettelseAapneBehandlingerPerMaanedGauge").register(Metrics.globalRegistry)
 
-    @Scheduled(cron = OPPDATERING_HVER_HALVTIME)
+    @Scheduled(initialDelay = FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG, fixedRate = OPPDATERING_HVER_DAG)
     fun utbetalinger() {
+        if (!erLeader()) return
+
         val månederMedTotalUtbetaling =
             listOf<LocalDateTime>(
                 LocalDateTime.now(),
@@ -38,12 +40,6 @@ class TeamStatistikkService(
             ).associateWith {
                 behandlingRepository.hentTotalUtbetalingForMåned(it)
             }
-
-        if (!erLeaderOgLoggResultat(
-                beskrivelse = "Total utbetalinger",
-                resultat = månederMedTotalUtbetaling.toString()
-            )
-        ) return
 
         val rows = månederMedTotalUtbetaling.map {
             MultiGauge.Row.of(
@@ -57,15 +53,11 @@ class TeamStatistikkService(
         utbetalingerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(cron = OPPDATERING_HVER_HALVTIME)
+    @Scheduled(initialDelay = FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG, fixedRate = OPPDATERING_HVER_DAG)
     fun antallFagsaker() {
-        val antallFagsaker = fagsakRepository.finnAntallFagsakerTotalt()
+        if (!erLeader()) return
 
-        if (!erLeaderOgLoggResultat(
-                beskrivelse = "Antall fagsaker",
-                resultat = antallFagsaker.toString()
-            )
-        ) return
+        val antallFagsaker = fagsakRepository.finnAntallFagsakerTotalt()
 
         val rows = listOf(
             MultiGauge.Row.of(
@@ -79,15 +71,11 @@ class TeamStatistikkService(
         antallFagsakerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(cron = OPPDATERING_HVER_HALVTIME)
+    @Scheduled(initialDelay = FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG, fixedRate = OPPDATERING_HVER_DAG)
     fun løpendeFagsaker() {
-        val løpendeFagsaker = fagsakRepository.finnAntallFagsakerLøpende()
+        if (!erLeader()) return
 
-        if (!erLeaderOgLoggResultat(
-                beskrivelse = "Løpende fagsaker",
-                resultat = løpendeFagsaker.toString()
-            )
-        ) return
+        val løpendeFagsaker = fagsakRepository.finnAntallFagsakerLøpende()
 
         val rows = listOf(
             MultiGauge.Row.of(
@@ -101,15 +89,11 @@ class TeamStatistikkService(
         løpendeFagsakerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(cron = OPPDATERING_HVER_HALVTIME)
+    @Scheduled(initialDelay = FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG, fixedRate = OPPDATERING_HVER_DAG)
     fun åpneBehandlinger() {
-        val åpneBehandlinger = behandlingRepository.finnAntallBehandlingerIkkeAvsluttet()
+        if (!erLeader()) return
 
-        if (!erLeaderOgLoggResultat(
-                beskrivelse = "Åpne behandlinger",
-                resultat = åpneBehandlinger.toString()
-            )
-        ) return
+        val åpneBehandlinger = behandlingRepository.finnAntallBehandlingerIkkeAvsluttet()
 
         val rows = listOf(
             MultiGauge.Row.of(
@@ -123,8 +107,10 @@ class TeamStatistikkService(
         åpneBehandlingerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(cron = OPPDATERING_HVER_HALVTIME)
+    @Scheduled(initialDelay = FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG, fixedRate = OPPDATERING_HVER_DAG)
     fun tidFraOpprettelsePåÅpneBehandlinger() {
+        if (!erLeader()) return
+
         val opprettelsestidspunktPååpneBehandlinger = behandlingRepository.finnOpprettelsestidspunktPåÅpneBehandlinger()
         val diffPåÅpneBehandlinger =
             opprettelsestidspunktPååpneBehandlinger.map { Duration.between(it, LocalDateTime.now()).seconds }
@@ -132,12 +118,6 @@ class TeamStatistikkService(
         val snitt = diffPåÅpneBehandlinger.average()
         val max = diffPåÅpneBehandlinger.maxOf { it }
         val min = diffPåÅpneBehandlinger.minOf { it }
-
-        if (!erLeaderOgLoggResultat(
-                beskrivelse = "Gjennomsnitt siden åpne behandlinger ble opprettet",
-                resultat = "snitt: $snitt, max: $max, min, $min"
-            )
-        ) return
 
         val rows = listOf(
             MultiGauge.Row.of(
@@ -165,6 +145,8 @@ class TeamStatistikkService(
 
     @Scheduled(cron = "0 0 14 * * *")
     fun loggÅpneBehandlingerSomHarLiggetLenge() {
+        if (!erLeader()) return
+
         listOf(180, 150, 120, 90, 60).fold(mutableSetOf<Long>()) { acc, dagerSiden ->
             val åpneBehandlinger = behandlingRepository.finnÅpneBehandlinger(
                 opprettetFør = LocalDateTime.now().minusDays(dagerSiden.toLong())
@@ -182,18 +164,13 @@ class TeamStatistikkService(
         }
     }
 
-    private fun erLeaderOgLoggResultat(beskrivelse: String, resultat: String): Boolean {
-        return if (LeaderClient.isLeader() != true) {
-            logger.info("Node er ikke leader, teller ikke metrikk. $beskrivelse: $resultat")
-            false
-        } else {
-            logger.info("Node er leader, teller metrikk. $beskrivelse: $resultat")
-            true
-        }
+    private fun erLeader(): Boolean {
+        return LeaderClient.isLeader() == true
     }
 
     companion object {
-        const val OPPDATERING_HVER_HALVTIME: String = "0 0/30 * * * *"
+        const val OPPDATERING_HVER_DAG: Long = 1000 * 60 * 60 * 24
+        const val FEM_MINUTTER_VENTETID_FØR_OPPDATERING_FØRSTE_GANG: Long = 1000 * 60 * 5
         const val ÅR_MÅNED_TAG = "aar-maaned"
         val logger = LoggerFactory.getLogger(TeamStatistikkService::class.java)
     }

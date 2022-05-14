@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
+import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
 
@@ -13,6 +16,7 @@ interface Brev {
 enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visningsTekst: String) {
     INFORMASJONSBREV_DELT_BOSTED(false, "informasjonsbrevDeltBosted", "Informasjonsbrev delt bosted"),
     INNHENTE_OPPLYSNINGER(false, "innhenteOpplysninger", "Innhente opplysninger"),
+
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "Henlegge trukket søknad"),
     VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "Varsel om revurdering"),
     VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14(
@@ -25,7 +29,9 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "varselOmRevurderingSamboer",
         "Varsel om revurdering samboer"
     ),
+
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
+    FORLENGET_SVARTIDSBREV(false, "forlengetSvartidsbrev", "Forlenget svartidsbrev"),
     INFORMASJONSBREV_FØDSEL_MINDREÅRIG(
         false,
         "informasjonsbrevFodselMindreaarig",
@@ -57,6 +63,89 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     ),
     AUTOVEDTAK_NYFØDT_FØRSTE_BARN(true, "autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),
     AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(true, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før");
+
+    fun skalGenerereForside(): Boolean =
+        when (this) {
+            INNHENTE_OPPLYSNINGER,
+            VARSEL_OM_REVURDERING,
+            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
+            VARSEL_OM_REVURDERING_SAMBOER -> true
+
+            INFORMASJONSBREV_DELT_BOSTED,
+            HENLEGGE_TRUKKET_SØKNAD,
+            SVARTIDSBREV,
+            FORLENGET_SVARTIDSBREV,
+            INFORMASJONSBREV_FØDSEL_UMYNDIG,
+            INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
+            INFORMASJONSBREV_KAN_SØKE,
+            INFORMASJONSBREV_FØDSEL_GENERELL -> false
+
+            VEDTAK_FØRSTEGANGSVEDTAK,
+            VEDTAK_ENDRING,
+            VEDTAK_OPPHØRT,
+            VEDTAK_OPPHØR_MED_ENDRING,
+            VEDTAK_AVSLAG,
+            VEDTAK_FORTSATT_INNVILGET,
+            VEDTAK_KORREKSJON_VEDTAKSBREV,
+            VEDTAK_OPPHØR_DØDSFALL,
+            DØDSFALL,
+            AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
+            AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+            AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Ikke avgjort om $this skal generere forside")
+        }
+
+    fun tilFamilieKontrakterDokumentType(): Dokumenttype =
+        when (this) {
+            INNHENTE_OPPLYSNINGER -> Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER
+            VARSEL_OM_REVURDERING -> Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING
+            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14
+            VARSEL_OM_REVURDERING_SAMBOER -> Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING_SAMBOER
+            INFORMASJONSBREV_DELT_BOSTED -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_DELT_BOSTED
+            HENLEGGE_TRUKKET_SØKNAD -> Dokumenttype.BARNETRYGD_HENLEGGE_TRUKKET_SØKNAD
+            SVARTIDSBREV -> Dokumenttype.BARNETRYGD_SVARTIDSBREV
+            FORLENGET_SVARTIDSBREV -> Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV
+            INFORMASJONSBREV_FØDSEL_UMYNDIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_UMYNDIG
+            INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_MINDREÅRIG
+            INFORMASJONSBREV_KAN_SØKE -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE
+            INFORMASJONSBREV_FØDSEL_GENERELL -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_GENERELL
+
+            VEDTAK_ENDRING,
+            VEDTAK_OPPHØRT,
+            VEDTAK_OPPHØR_MED_ENDRING,
+            VEDTAK_FORTSATT_INNVILGET,
+            VEDTAK_AVSLAG,
+            VEDTAK_FØRSTEGANGSVEDTAK,
+            VEDTAK_KORREKSJON_VEDTAKSBREV,
+            VEDTAK_OPPHØR_DØDSFALL,
+            DØDSFALL,
+            AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
+            AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+            AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Ingen dokumenttype for $this")
+        }
+
+    fun setterBehandlingPåVent(): Boolean =
+        when (this) {
+            INNHENTE_OPPLYSNINGER,
+            VARSEL_OM_REVURDERING,
+            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> true
+            else -> false
+        }
+
+    fun ventefristDager(): Long =
+        when (this) {
+            INNHENTE_OPPLYSNINGER,
+            VARSEL_OM_REVURDERING,
+            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> 3 * 7
+            else -> throw Feil("Ventefrist ikke definert for brevtype $this")
+        }
+
+    fun venteårsak() =
+        when (this) {
+            INNHENTE_OPPLYSNINGER,
+            VARSEL_OM_REVURDERING,
+            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            else -> throw Feil("Venteårsak ikke definert for brevtype $this")
+        }
 }
 
 interface BrevData {

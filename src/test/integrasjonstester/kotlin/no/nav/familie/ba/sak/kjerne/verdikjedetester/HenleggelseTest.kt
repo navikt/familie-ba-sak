@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
@@ -84,7 +84,7 @@ class HenleggelseTest(
             behandlingId = førsteBehandling.behandlingId,
             manueltBrevRequest = ManueltBrevRequest(
                 mottakerIdent = scenario.søker.ident!!,
-                brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD
+                brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD
             )
         )
         assertThat(responseForhandsvis.status == Ressurs.Status.SUKSESS)

@@ -72,12 +72,13 @@ object YtelsePersonUtils {
                 behandlingsresultatPerson.andeler.maxByOrNull { it.stønadTom }?.stønadTom
                     ?: throw Feil("Finnes andel uten tom-dato") else TIDENES_MORGEN.toYearMonth()
 
-            val erEndring =
-                erEndring(behandlingsresultatPerson, segmenterLagtTil, segmenterFjernet, ytelsePerson, inneværendeMåned)
-
-            if (erEndring) {
-                resultater.add(YtelsePersonResultat.ENDRET)
-            }
+            utledYtelsePersonResultatVedEndring(
+                behandlingsresultatPerson,
+                segmenterLagtTil,
+                segmenterFjernet,
+                ytelsePerson,
+                inneværendeMåned
+            )?.let { resultater.add(it) }
 
             ytelsePerson.copy(
                 resultater = resultater.toSet(),
@@ -106,56 +107,71 @@ object YtelsePersonUtils {
             }
         )
 
-    private fun erEndring(
+    // metoden utleder YtelsesPersonResultat om det finnes en endring ellers sender null
+    private fun utledYtelsePersonResultatVedEndring(
         behandlingsresultatPerson: BehandlingsresultatPerson,
         segmenterLagtTil: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,
         segmenterFjernet: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,
         ytelsePerson: YtelsePerson,
         inneværendeMåned: YearMonth
-    ): Boolean {
+    ): YtelsePersonResultat? {
         val nesteMåned = inneværendeMåned.nesteMåned()
-        val stønadSlutt =
-            behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom }?.stønadTom
-                ?: TIDENES_MORGEN.toYearMonth()
+        val stønadSlutt = behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom }?.stønadTom
+            ?: TIDENES_MORGEN.toYearMonth()
 
-        val forrigeStønadSlutt =
-            behandlingsresultatPerson
-                .forrigeAndeler
-                .maxByOrNull { it.stønadFom }
-                ?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
+        val forrigeStønadSlutt = behandlingsresultatPerson.forrigeAndeler
+            .maxByOrNull { it.stønadFom }?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
 
         val opphører = stønadSlutt.isBefore(nesteMåned)
 
-        if (behandlingsresultatPerson.søktForPerson) {
+        return if (behandlingsresultatPerson.søktForPerson) {
             val beløpRedusert = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
-                (behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } - behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }) > 0
+                (
+                behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } -
+                    behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }
+                ) > 0
 
             val finnesReduksjonerTilbakeITid = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
                 segmenterFjernet.harSegmentFør(inneværendeMåned)
 
-            return !opphører && finnesReduksjonerTilbakeITid || beløpRedusert
-        } else {
-            // Hvis det ikke finnes noen forrige andeler kan det aldri bety endring
-            if (behandlingsresultatPerson.forrigeAndeler.isEmpty()) return false
+            val finnesReduksjonerTilbakeITidMedBeløp = finnesReduksjonerTilbakeITid &&
+                segmenterFjernet.any { it.value.kalkulertUtbetalingsbeløp > 0 }
 
+            when {
+                opphører -> null
+                beløpRedusert || finnesReduksjonerTilbakeITidMedBeløp -> YtelsePersonResultat.ENDRET_UTBETALING
+                finnesReduksjonerTilbakeITid -> YtelsePersonResultat.ENDRET_UTEN_UTBETALING
+                else -> null
+            }
+            // Hvis det ikke finnes noen forrige andeler kan det aldri bety endring
+        } else if (behandlingsresultatPerson.forrigeAndeler.isNotEmpty()) {
             val erAndelMedEndretBeløp = erAndelMedEndretBeløp(
                 forrigeAndeler = behandlingsresultatPerson.forrigeAndeler,
                 andeler = behandlingsresultatPerson.andeler
             )
 
-            val erLagtTilSegmenter =
-                ytelsePerson.erFramstiltKravForITidligereBehandling() && segmenterLagtTil.harSegmentFør(if (opphører) stønadSlutt else nesteMåned)
+            val erLagtTilSegmenter = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
+                segmenterLagtTil.harSegmentFør(if (opphører) stønadSlutt else nesteMåned)
 
-            val erFjernetSegmenter =
-                segmenterFjernet.harSegmentFør(if (opphører) stønadSlutt else nesteMåned)
+            val erLagtTilSegmenterMedEndringIUtbetaling = erLagtTilSegmenter &&
+                segmenterLagtTil.any { it.value.kalkulertUtbetalingsbeløp > 0 }
+
+            val erFjernetSegmenter = segmenterFjernet.harSegmentFør(if (opphører) stønadSlutt else nesteMåned)
+
+            val erFjernetSegmenterMedEndringIUtbetaling = erFjernetSegmenter &&
+                segmenterFjernet.any { it.value.kalkulertUtbetalingsbeløp > 0 }
 
             val opphørsdatoErSattSenere = stønadSlutt.isAfter(forrigeStønadSlutt)
 
-            return erAndelMedEndretBeløp ||
-                erLagtTilSegmenter ||
-                erFjernetSegmenter ||
-                opphørsdatoErSattSenere
-        }
+            when {
+                erAndelMedEndretBeløp ||
+                    erLagtTilSegmenterMedEndringIUtbetaling ||
+                    erFjernetSegmenterMedEndringIUtbetaling ||
+                    opphørsdatoErSattSenere -> YtelsePersonResultat.ENDRET_UTBETALING
+                erLagtTilSegmenter || erFjernetSegmenter -> YtelsePersonResultat.ENDRET_UTEN_UTBETALING
+                else -> null
+            }
+        } else null
     }
 
     fun erAndelMedEndretBeløp(
@@ -204,10 +220,8 @@ object YtelsePersonUtils {
 
     private fun LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>.harSegmentFør(
         måned: YearMonth
-    ) =
-        !this.isEmpty && (
-            this.any {
-                it.tom < måned.sisteDagIInneværendeMåned()
-            } || this.any { it.fom < måned.sisteDagIInneværendeMåned() }
-            )
+    ) = !this.isEmpty && (
+        this.any { it.tom < måned.sisteDagIInneværendeMåned() } ||
+            this.any { it.fom < måned.sisteDagIInneværendeMåned() }
+        )
 }

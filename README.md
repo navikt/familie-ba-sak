@@ -159,4 +159,7 @@ Kjør så:
 
 For NAV-interne kan henvendelser om applikasjonen rettes til #team-familie på slack. Ellers kan man opprette et issue
 her på github.
+  
+## Tilgang til databasene i prod og preprod
+Se https://github.com/navikt/familie/blob/master/doc/utvikling/gcp/gcp_kikke_i_databasen.md
 

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -9,16 +10,16 @@ import org.junit.jupiter.api.assertThrows
 class BrevTypeTest {
 
     private val førerTilAvventerDokumentasjon = listOf(
-        BrevType.INNHENTE_OPPLYSNINGER,
-        BrevType.VARSEL_OM_REVURDERING,
-        BrevType.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14
+        Brevmal.INNHENTE_OPPLYSNINGER,
+        Brevmal.VARSEL_OM_REVURDERING,
+        Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14
     )
 
-    private val førerIkkeTilAvventingAvDokumentasjon = BrevType.values().filter { it !in førerTilAvventerDokumentasjon }
+    private val førerIkkeTilAvventingAvDokumentasjon = Brevmal.values().filter { it !in førerTilAvventerDokumentasjon }
 
     @Test
     fun `Skal si om behandling settes på vent`() {
-        val setterIkkeBehandlingPåVent = BrevType.values().filter { !førerTilAvventerDokumentasjon.contains(it) }
+        val setterIkkeBehandlingPåVent = Brevmal.values().filter { !førerTilAvventerDokumentasjon.contains(it) }
 
         setterIkkeBehandlingPåVent.forEach {
             Assertions.assertFalse(it.setterBehandlingPåVent())
