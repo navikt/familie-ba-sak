@@ -149,7 +149,7 @@ class RegistrerGrunnlagForNyBehandlingSteg(
         forrigeBehandlingId: Long?
     ) {
         if (forrigeBehandlingId != null)
-            kompetanseService.kopierKompetanse(
+            kompetanseService.kopierOgErstattKompetanser(
                 fraBehandlingId = forrigeBehandlingId,
                 tilBehandlingId = behandlingId
             )
@@ -160,7 +160,7 @@ class RegistrerGrunnlagForNyBehandlingSteg(
         forrigeBehandlingId: Long?
     ) {
         if (forrigeBehandlingId != null)
-            valutakursService.kopierValutakurser(
+            valutakursService.kopierOgErstattValutakurser(
                 fraBehandlingId = forrigeBehandlingId,
                 tilBehandlingId = behandlingId
             )
@@ -171,7 +171,7 @@ class RegistrerGrunnlagForNyBehandlingSteg(
         forrigeBehandlingId: Long?
     ) {
         if (forrigeBehandlingId != null)
-            utenlandskPeriodebeløpService.kopierUtenlandskePeriodebeløp(
+            utenlandskPeriodebeløpService.kopierOgErstattUtenlandskePeriodebeløp(
                 fraBehandlingId = forrigeBehandlingId,
                 tilBehandlingId = behandlingId
             )

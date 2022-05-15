@@ -22,6 +22,6 @@ class UtenlandskPeriodebeløpService(
         serviceDelegate.slettSkjema(utenlandskPeriodebeløpId)
 
     @Transactional
-    fun kopierUtenlandskePeriodebeløp(fraBehandlingId: Long, tilBehandlingId: Long) =
-        serviceDelegate.kopierSkjemaer(fraBehandlingId, tilBehandlingId)
+    fun kopierOgErstattUtenlandskePeriodebeløp(fraBehandlingId: Long, tilBehandlingId: Long) =
+        serviceDelegate.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }

@@ -22,6 +22,6 @@ class ValutakursService(
         serviceDelegate.slettSkjema(valutakursId)
 
     @Transactional
-    fun kopierValutakurser(fraBehandlingId: Long, tilBehandlingId: Long) =
-        serviceDelegate.kopierSkjemaer(fraBehandlingId, tilBehandlingId)
+    fun kopierOgErstattValutakurser(fraBehandlingId: Long, tilBehandlingId: Long) =
+        serviceDelegate.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }

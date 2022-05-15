@@ -47,6 +47,6 @@ class KompetanseService(
     }
 
     @Transactional
-    fun kopierKompetanse(fraBehandlingId: Long, tilBehandlingId: Long) =
-        serviceDelegate.kopierSkjemaer(fraBehandlingId, tilBehandlingId)
+    fun kopierOgErstattKompetanser(fraBehandlingId: Long, tilBehandlingId: Long) =
+        serviceDelegate.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }
