@@ -52,7 +52,7 @@ class RegistrerGrunnlagForNyBehandlingSteg(
         opprettVilkårsvurdering(
             behandling,
             forrigeBehandlingSomErVedtatt,
-            data.nyMigreringsdato!!
+            data.nyMigreringsdato
         )
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
@@ -110,14 +110,14 @@ class RegistrerGrunnlagForNyBehandlingSteg(
     private fun opprettVilkårsvurdering(
         behandling: Behandling,
         forrigeBehandlingSomErVedtatt: Behandling?,
-        nyMigreringsdato: LocalDate
+        nyMigreringsdato: LocalDate?
     ) {
         when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
                 vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                     behandling = behandling,
                     forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
-                    nyMigreringsdato = nyMigreringsdato
+                    nyMigreringsdato = nyMigreringsdato!!
                 )
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
@@ -125,7 +125,7 @@ class RegistrerGrunnlagForNyBehandlingSteg(
             BehandlingÅrsak.HELMANUELL_MIGRERING -> {
                 vilkårService.genererVilkårsvurderingForHelmanuellMigrering(
                     behandling = behandling,
-                    nyMigreringsdato = nyMigreringsdato
+                    nyMigreringsdato = nyMigreringsdato!!
                 )
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
