@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ValutakursService(
@@ -19,4 +20,8 @@ class ValutakursService(
 
     fun slettValutakurs(valutakursId: Long) =
         serviceDelegate.slettSkjema(valutakursId)
+
+    @Transactional
+    fun kopierValutakurser(fraBehandlingId: Long, tilBehandlingId: Long) =
+        serviceDelegate.kopierSkjemaer(fraBehandlingId, tilBehandlingId)
 }

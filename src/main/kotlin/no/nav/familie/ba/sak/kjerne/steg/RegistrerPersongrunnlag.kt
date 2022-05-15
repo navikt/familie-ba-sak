@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -7,6 +9,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -24,7 +28,10 @@ class RegistrerPersongrunnlag(
     private val persongrunnlagService: PersongrunnlagService,
     private val personidentService: PersonidentService,
     private val vilkårService: VilkårService,
-    private val kompetanseService: KompetanseService
+    private val kompetanseService: KompetanseService,
+    private val featureToggleService: FeatureToggleService,
+    private val valutakursService: ValutakursService,
+    private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService
 ) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
 
     @Transactional
@@ -48,10 +55,22 @@ class RegistrerPersongrunnlag(
             data.nyMigreringsdato!!
         )
 
-        kopierKompetanse(
-            behandling.id,
-            forrigeBehandlingSomErVedtatt?.id
-        )
+        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
+            kopierKompetanse(
+                behandling.id,
+                forrigeBehandlingSomErVedtatt?.id
+            )
+
+            kopierValutakurs(
+                behandling.id,
+                forrigeBehandlingSomErVedtatt?.id
+            )
+
+            kopierUtenlandskPeriodebeløp(
+                behandling.id,
+                forrigeBehandlingSomErVedtatt?.id
+            )
+        }
 
         return hentNesteStegForNormalFlyt(behandling)
     }
@@ -131,6 +150,28 @@ class RegistrerPersongrunnlag(
     ) {
         if (forrigeBehandlingId != null)
             kompetanseService.kopierKompetanse(
+                fraBehandlingId = forrigeBehandlingId,
+                tilBehandlingId = behandlingId
+            )
+    }
+
+    fun kopierValutakurs(
+        behandlingId: Long,
+        forrigeBehandlingId: Long?
+    ) {
+        if (forrigeBehandlingId != null)
+            valutakursService.kopierValutakurser(
+                fraBehandlingId = forrigeBehandlingId,
+                tilBehandlingId = behandlingId
+            )
+    }
+
+    fun kopierUtenlandskPeriodebeløp(
+        behandlingId: Long,
+        forrigeBehandlingId: Long?
+    ) {
+        if (forrigeBehandlingId != null)
+            utenlandskPeriodebeløpService.kopierUtenlandskePeriodebeløp(
                 fraBehandlingId = forrigeBehandlingId,
                 tilBehandlingId = behandlingId
             )
