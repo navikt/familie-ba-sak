@@ -93,9 +93,9 @@ class StegService(
             }
         }
 
-        return håndterPersongrunnlag(
+        return håndterGrunnlagTilknyttetNyBehandling(
             behandling,
-            RegistrerPersongrunnlagDTO(
+            RegistrerGrunnlagForNyBehandlingDTO(
                 ident = nyBehandling.søkersIdent,
                 barnasIdenter = barnasIdenter,
                 nyMigreringsdato = nyBehandling.nyMigreringsdato
@@ -183,15 +183,15 @@ class StegService(
     }
 
     @Transactional
-    fun håndterPersongrunnlag(
+    fun håndterGrunnlagTilknyttetNyBehandling(
         behandling: Behandling,
-        registrerPersongrunnlagDTO: RegistrerPersongrunnlagDTO
+        registrerGrunnlagForNyBehandlingDTO: RegistrerGrunnlagForNyBehandlingDTO
     ): Behandling {
-        val behandlingSteg: RegistrerPersongrunnlag =
-            hentBehandlingSteg(StegType.REGISTRERE_PERSONGRUNNLAG) as RegistrerPersongrunnlag
+        val behandlingSteg: RegistrerGrunnlagForNyBehandlingSteg =
+            hentBehandlingSteg(StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING) as RegistrerGrunnlagForNyBehandlingSteg
 
         return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO)
+            behandlingSteg.utførStegOgAngiNeste(behandling, registrerGrunnlagForNyBehandlingDTO)
         }
     }
 

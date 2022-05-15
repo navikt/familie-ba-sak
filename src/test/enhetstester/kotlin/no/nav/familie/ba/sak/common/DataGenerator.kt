@@ -605,7 +605,7 @@ fun kjørStegprosessForFGB(
             )
         )
 
-    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD)
+    if (tilSteg == StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING || tilSteg == StegType.REGISTRERE_SØKNAD)
         return behandlingEtterPersongrunnlagSteg
 
     val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!

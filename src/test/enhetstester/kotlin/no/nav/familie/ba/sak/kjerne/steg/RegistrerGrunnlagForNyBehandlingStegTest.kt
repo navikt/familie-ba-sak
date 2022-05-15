@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class RegistrerPersongrunnlagTest(
+class RegistrerGrunnlagForNyBehandlingStegTest(
     @Autowired
     private val stegService: StegService,
 
@@ -50,9 +50,9 @@ class RegistrerPersongrunnlagTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        stegService.håndterPersongrunnlag(
+        stegService.håndterGrunnlagTilknyttetNyBehandling(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
                 ident = morId,
                 barnasIdenter = listOf(barn1Id, barn2Id)
             )
@@ -79,9 +79,9 @@ class RegistrerPersongrunnlagTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        stegService.håndterPersongrunnlag(
+        stegService.håndterGrunnlagTilknyttetNyBehandling(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
                 ident = morId,
                 barnasIdenter = listOf(barn1Id)
             )
@@ -93,9 +93,9 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == barn1Id })
 
-        stegService.håndterPersongrunnlag(
+        stegService.håndterGrunnlagTilknyttetNyBehandling(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
                 ident = morId,
                 barnasIdenter = listOf(
                     barn1Id,
@@ -111,9 +111,9 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag2.personer.any { it.aktør.aktivFødselsnummer() == barn2Id })
 
         // Skal ikke føre til flere personer på persongrunnlaget
-        stegService.håndterPersongrunnlag(
+        stegService.håndterGrunnlagTilknyttetNyBehandling(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
                 ident = morId,
                 barnasIdenter = listOf(
                     barn1Id,

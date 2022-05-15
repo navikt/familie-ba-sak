@@ -335,7 +335,7 @@ class StegServiceTest(
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
-                it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG &&
+                it.behandlingSteg == StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING &&
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
         }
@@ -406,7 +406,7 @@ class StegServiceTest(
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
             behandling.behandlingStegTilstand.any {
-                it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG &&
+                it.behandlingSteg == StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING &&
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
         }

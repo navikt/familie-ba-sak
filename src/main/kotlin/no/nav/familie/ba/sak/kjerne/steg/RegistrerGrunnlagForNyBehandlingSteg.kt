@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
-class RegistrerPersongrunnlag(
+class RegistrerGrunnlagForNyBehandlingSteg(
     private val behandlingService: BehandlingService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val beregningService: BeregningService,
@@ -32,12 +32,12 @@ class RegistrerPersongrunnlag(
     private val featureToggleService: FeatureToggleService,
     private val valutakursService: ValutakursService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService
-) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
+) : BehandlingSteg<RegistrerGrunnlagForNyBehandlingDTO> {
 
     @Transactional
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: RegistrerPersongrunnlagDTO
+        data: RegistrerGrunnlagForNyBehandlingDTO
     ): StegType {
         val forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService
             .hentForrigeBehandlingSomErVedtatt(behandling)
@@ -178,7 +178,7 @@ class RegistrerPersongrunnlag(
     }
 
     override fun stegType(): StegType {
-        return StegType.REGISTRERE_PERSONGRUNNLAG
+        return StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING
     }
 
     companion object {
@@ -186,7 +186,7 @@ class RegistrerPersongrunnlag(
     }
 }
 
-data class RegistrerPersongrunnlagDTO(
+data class RegistrerGrunnlagForNyBehandlingDTO(
     val ident: String,
     val barnasIdenter: List<String>,
     val nyMigreringsdato: LocalDate? = null
