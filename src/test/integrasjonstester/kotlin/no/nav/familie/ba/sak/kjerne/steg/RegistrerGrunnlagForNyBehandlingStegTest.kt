@@ -4,8 +4,10 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -32,7 +34,14 @@ class RegistrerGrunnlagForNyBehandlingStegTest(
     private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val kompetanseService: KompetanseService,
+
+    @Autowired
+    private val featureToggleService: FeatureToggleService,
+
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
