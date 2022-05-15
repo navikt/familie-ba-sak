@@ -30,11 +30,33 @@ class RegistrerPersongrunnlag(
         behandling: Behandling,
         data: RegistrerPersongrunnlagDTO
     ): StegType {
-        val forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-            behandling
+        val forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService
+            .hentForrigeBehandlingSomErVedtatt(behandling)
+
+        opprettPersonopplysningGrunnlag(
+            behandling,
+            forrigeBehandlingSomErVedtatt,
+            data.ident,
+            data.barnasIdenter
         )
-        val aktør = personidentService.hentOgLagreAktør(data.ident, true)
-        val barnaAktør = personidentService.hentOgLagreAktørIder(data.barnasIdenter, true)
+        
+        opprettVilkårsvurdering(
+            behandling,
+            forrigeBehandlingSomErVedtatt,
+            data.nyMigreringsdato!!
+        )
+
+        return hentNesteStegForNormalFlyt(behandling)
+    }
+
+    private fun opprettPersonopplysningGrunnlag(
+        behandling: Behandling,
+        forrigeBehandlingSomErVedtatt: Behandling?,
+        søkerIdent: String,
+        barnasIdenter: List<String>
+    ) {
+        val søker = personidentService.hentOgLagreAktør(søkerIdent, true)
+        val barna = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
 
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
             val forrigePersongrunnlagBarna =
@@ -43,47 +65,50 @@ class RegistrerPersongrunnlag(
                 persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErVedtatt.id)
 
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = aktør,
-                barnFraInneværendeBehandling = barnaAktør,
+                aktør = søker,
+                barnFraInneværendeBehandling = barna,
                 barnFraForrigeBehandling = forrigePersongrunnlagBarna,
                 behandling = behandling,
                 målform = forrigeMålform
             )
         } else {
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = aktør,
-                barnFraInneværendeBehandling = barnaAktør,
+                aktør = søker,
+                barnFraInneværendeBehandling = barna,
                 behandling = behandling,
                 målform = Målform.NB
             )
         }
+    }
+
+    private fun opprettVilkårsvurdering(
+        behandling: Behandling,
+        forrigeBehandlingSomErVedtatt: Behandling?,
+        nyMigreringsdato: LocalDate
+    ) {
         when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
                 vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                     behandling = behandling,
-                    forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-                        behandling
-                    ),
-                    nyMigreringsdato = data.nyMigreringsdato!!
+                    forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
+                    nyMigreringsdato = nyMigreringsdato
                 )
                 // Lagre ned migreringsdato
-                behandlingService.lagreNedMigreringsdato(data.nyMigreringsdato, behandling)
+                behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
             BehandlingÅrsak.HELMANUELL_MIGRERING -> {
                 vilkårService.genererVilkårsvurderingForHelmanuellMigrering(
                     behandling = behandling,
-                    nyMigreringsdato = data.nyMigreringsdato!!
+                    nyMigreringsdato = nyMigreringsdato
                 )
                 // Lagre ned migreringsdato
-                behandlingService.lagreNedMigreringsdato(data.nyMigreringsdato, behandling)
+                behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
             !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
                 vilkårService.initierVilkårsvurderingForBehandling(
                     behandling = behandling,
                     bekreftEndringerViaFrontend = true,
-                    forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-                        behandling
-                    )
+                    forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt
                 )
             }
             else -> logger.info(
@@ -91,8 +116,6 @@ class RegistrerPersongrunnlag(
                     behandling.opprettetÅrsak.visningsnavn
             )
         }
-
-        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {
