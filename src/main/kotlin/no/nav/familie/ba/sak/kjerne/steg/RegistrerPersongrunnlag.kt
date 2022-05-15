@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -22,7 +23,8 @@ class RegistrerPersongrunnlag(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val personidentService: PersonidentService,
-    private val vilkårService: VilkårService
+    private val vilkårService: VilkårService,
+    private val kompetanseService: KompetanseService
 ) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
 
     @Transactional
@@ -39,11 +41,16 @@ class RegistrerPersongrunnlag(
             data.ident,
             data.barnasIdenter
         )
-        
+
         opprettVilkårsvurdering(
             behandling,
             forrigeBehandlingSomErVedtatt,
             data.nyMigreringsdato!!
+        )
+
+        kopierKompetanse(
+            behandling.id,
+            forrigeBehandlingSomErVedtatt?.id
         )
 
         return hentNesteStegForNormalFlyt(behandling)
@@ -116,6 +123,17 @@ class RegistrerPersongrunnlag(
                     behandling.opprettetÅrsak.visningsnavn
             )
         }
+    }
+
+    fun kopierKompetanse(
+        behandlingId: Long,
+        forrigeBehandlingId: Long?
+    ) {
+        if (forrigeBehandlingId != null)
+            kompetanseService.kopierKompetanse(
+                fraBehandlingId = forrigeBehandlingId,
+                tilBehandlingId = behandlingId
+            )
     }
 
     override fun stegType(): StegType {

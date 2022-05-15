@@ -45,4 +45,8 @@ class KompetanseService(
 
         serviceDelegate.lagreSkjemaDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
     }
+
+    @Transactional
+    fun kopierKompetanse(fraBehandlingId: Long, tilBehandlingId: Long) =
+        serviceDelegate.kopierSkjemaer(fraBehandlingId, tilBehandlingId)
 }
