@@ -7,43 +7,36 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.EøsSkjemaerForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.PersonopplysningGrunnlagForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import org.junit.jupiter.api.Test
 
 class RegistrerGrunnlagForNyBehandlingStegEnhetTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
-    private val behandlingService: BehandlingService = mockk()
-    private val beregningService: BeregningService = mockk()
-    private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val personidentService: PersonidentService = mockk()
-    private val vilkårService: VilkårService = mockk()
+    private val personopplysningGrunnlagForNyBehandlingService: PersonopplysningGrunnlagForNyBehandlingService = mockk()
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService = mockk()
     private val kompetanseService: KompetanseService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val valutakursService: ValutakursService = mockk()
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService = mockk()
 
     private val registrerGrunnlagForNyBehandlingSteg = RegistrerGrunnlagForNyBehandlingSteg(
-        behandlingService,
         behandlingHentOgPersisterService,
-        beregningService,
-        persongrunnlagService,
-        personidentService,
-        vilkårService,
-        kompetanseService,
-        featureToggleService,
-        valutakursService,
-        utenlandskPeriodebeløpService,
+        personopplysningGrunnlagForNyBehandlingService,
+        vilkårsvurderingForNyBehandlingService,
+        EøsSkjemaerForNyBehandlingService(
+            featureToggleService,
+            kompetanseService,
+            valutakursService,
+            utenlandskPeriodebeløpService
+        )
     )
 
     @Test
@@ -56,10 +49,22 @@ class RegistrerGrunnlagForNyBehandlingStegEnhetTest {
         val behandling2 = lagBehandling()
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling2) } returns behandling1
-        every { personidentService.hentOgLagreAktør(any(), any()) } returns mor.aktør
-        every { personidentService.hentOgLagreAktørIder(any(), any()) } returns listOf(barn1.aktør, barn2.aktør)
-        every { persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(any(), any(), behandling2, any()) } returns
-            lagTestPersonopplysningGrunnlag(behandling2.id, mor, barn1, barn2)
+        every {
+            personopplysningGrunnlagForNyBehandlingService.opprettPersonopplysningGrunnlag(
+                behandling = behandling2,
+                forrigeBehandlingSomErVedtatt = behandling1,
+                søkerIdent = mor.aktør.aktivFødselsnummer(),
+                barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer())
+            )
+        } just runs
+
+        every {
+            vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
+                behandling = behandling2,
+                forrigeBehandlingSomErVedtatt = behandling1
+            )
+        } just runs
+
         every { featureToggleService.isEnabled(any()) } returns true
         every { kompetanseService.kopierOgErstattKompetanser(behandling1.id, behandling2.id) } just runs
         every { valutakursService.kopierOgErstattValutakurser(behandling1.id, behandling2.id) } just runs
@@ -72,7 +77,7 @@ class RegistrerGrunnlagForNyBehandlingStegEnhetTest {
 
         registrerGrunnlagForNyBehandlingSteg.utførStegOgAngiNeste(
             behandling = behandling2,
-            data = RegistrerGrunnlagForNyBehandlingDTO(
+            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
                 ident = mor.aktør.aktivFødselsnummer(),
                 barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer())
             )
