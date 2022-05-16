@@ -12,6 +12,7 @@ import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderRespo
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerson
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -25,7 +26,7 @@ class SkatteetatenService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingRepository: BehandlingRepository
 ) {
-
+    @Cacheable("skatt_personer", cacheManager = "skattPersonerCache", unless = "#result == null")
     fun finnPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
         LOG.debug("enter finnPersonerMedUtvidetBarnetrygd(), år {}", år)
         val personerFraInfotrygd = infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(år)
