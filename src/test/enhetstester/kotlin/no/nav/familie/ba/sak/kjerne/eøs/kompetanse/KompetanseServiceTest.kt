@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -293,6 +294,61 @@ internal class KompetanseServiceTest {
 
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `skal kopiere kompetanser fra en behandling til til en behandling som mangler kompetanser`() {
+        val behandlingId1 = 10L
+        val behandlingId2 = 22L
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        val kompetanser = KompetanseBuilder(jan(2020), behandlingId1)
+            .medKompetanse("SS   SS", barn1)
+            .medKompetanse("  PPP", barn1, barn2, barn3)
+            .medKompetanse("--   ----", barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        kompetanseService.kopierOgErstattKompetanser(behandlingId1, behandlingId2)
+
+        val faktiskeKompetanserBehandling2 = kompetanseService.hentKompetanser(behandlingId2)
+
+        assertEqualsUnordered(kompetanser, faktiskeKompetanserBehandling2)
+        faktiskeKompetanserBehandling2.forEach {
+            assertEquals(it.behandlingId, behandlingId2)
+        }
+
+        val faktiskeKompetanserBehandling1 = kompetanseService.hentKompetanser(behandlingId1)
+        assertEqualsUnordered(kompetanser, faktiskeKompetanserBehandling1)
+        faktiskeKompetanserBehandling1.forEach {
+            assertEquals(it.behandlingId, behandlingId1)
+        }
+    }
+
+    @Test
+    fun `skal kopiere kompetanser fra en behandling til en annen behandling, og overskrive eksisterende`() {
+        val behandlingId1 = 10L
+        val behandlingId2 = 22L
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        val kompetanser1 = KompetanseBuilder(jan(2020), behandlingId1)
+            .medKompetanse("SS   SS", barn1)
+            .medKompetanse("  PPP", barn1, barn2, barn3)
+            .medKompetanse("--   ----", barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        KompetanseBuilder(jan(2020), behandlingId2)
+            .medKompetanse("PPPSSSPPPPPPP", barn1, barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        kompetanseService.kopierOgErstattKompetanser(behandlingId1, behandlingId2)
+
+        val faktiskeKompetanserBehandling2 = kompetanseService.hentKompetanser(behandlingId2)
+
+        assertEqualsUnordered(kompetanser1, faktiskeKompetanserBehandling2)
     }
 }
 
