@@ -1,29 +1,39 @@
-# Beregning på kompetanseskjemaer
+# Beregning på skjemaer for Kompetanse, Valutakurs og Utenlandsk periodebeløp
 
-## Hva er Kompetanse
+## Hva er de ulike skjemaene
 
-Under vilkårsvurdering avgjør saksbehandler om et vilkår skal vurderes etter _EØS-forordningen_ eller _nasjonale regler.
-Hvis vilkårene er oppfylt og et gitt sett av vilkår er vurdert etter EØS-forordning for søker og ett eller flere barn,
+Under vilkårsvurdering avgjør saksbehandler om et vilkår skal vurderes etter _EØS-forordningen_ eller _nasjonale regler_
+. Hvis vilkårene er oppfylt og et gitt sett av vilkår er vurdert etter EØS-forordning for søker og ett eller flere barn,
 oppstår det _EØS-perioder_ på barnet
 
-Kompetanse er et skjema som saksbehandler fyller ut for å avgjøre om Norge er _primærland_ eller _sekundærland_ i barnas
-EØS-perioder.
+**Kompetanse** er et skjema som saksbehandler fyller ut for å avgjøre om Norge er _primærland_ eller _sekundærland_ i
+barnas EØS-perioder.
 
 * Norge som primærland betyr at utbetaling av barnetrygd skal skje som vanlig etter nasjonale regler
 * Norge som sekundærland betyr at utbetalingen mot differanseberegnes mot tilsvarende ytelse i EØS
 
+Hvis Norge er sekundærland, må to andre skjeamer fylles ut:
+
+* **Utenlandsk periodebeløp** inneholder hva brukeren har fått utbetalt i ytelse tilsvarende barnetygd fra annet
+  EØS-land. Skjemaet inneholder beløpet, valutaen og intervallet beløpet utbetales med (ukentlig, månedlig, kvartalsvis,
+  årlig etc)
+* **Valutakurs** inneholder informasjon om hvilken valutkurs som skal benyttes for å omregne utenlandsk periodebeløp til
+  norske kroner. Det inneholder også hvilken dato valuktakursen er hentet fra.
+
 ## Konsept
 
-*Kompetanse* består av to hoveddeler
+Et skjema består av to hoveddeler
 
-* Barn og periode
-* Skjema
+* Barn og periode, som er likt for alle
+* Skjemafelter, som varier fra skjema til skjema
 
-_Barn_ er ett eller flere barn, representert ved aktør-id'er
+_Barn_ er ett eller flere barn, representert ved aktør-id'er.
 
-_Periode_ er gitt ved 'fom' og 'tom' og representerer tiden mellom fra-og-med-måned og til-og-med-måned
+_Periode_ er gitt ved 'fom' og 'tom' og representerer tiden mellom fra-og-med-måned og til-og-med-måned.
 
-_Skjema_ er ett eller flere flere felter med verdier. For _Kompetanse_ er det blant annet:
+Alle skjemaer implementerer `PeriodeOgBarnSkjema`, som ivaretar de grunnleggende konseptene.
+
+For å vise konseptene tar vi utgangspunkt i _Kompetanse_, som blant annet har følgende felter:
 
 * Barnets bostedsland, representert som en String med ISO-kode
 * Annen forelders bostedsland (String)
@@ -37,7 +47,7 @@ _Kompetent land_ er en av:
 * NORGE_ER_SEKUNDÆRLAND
 * BEGGE_ER_PRIMÆRLAND
 
-Heretter benyttes følgende struktur for å beskrive kompetanse-skjemaer
+Heretter benyttes følgende syntaks for å beskrive kompetanse-skjemaer
 
 ```
 2020-03
@@ -57,7 +67,7 @@ som leses som:
 
 ## Beregningsregler
 
-### Like, etterfølgende kompetanser for ett barn slås sammen
+### Like, etterfølgende skjemaer for ett barn slås sammen
 
 Altså:
 
@@ -75,7 +85,7 @@ blir til
 "PPP", B1
 ```
 
-### Like kompetanser i samme periode for flere barn slås sammen
+### Like skjemaer i samme periode for flere barn slås sammen
 
 Altså:
 
@@ -115,7 +125,7 @@ blir til
 "    P",    B3
 ```
 
-### Oppdatering vil kunne føre til flere kompetanse-skjemaer for å oppfylle reglene ovenfor
+### Oppdatering vil kunne føre til flere skjemaer for å oppfylle reglene ovenfor
 
 Eksisterende kompetanser som ser slik ut:
 
@@ -127,7 +137,7 @@ Eksisterende kompetanser som ser slik ut:
 og oppdateres med
 
 ```
-2020-03
+2020-06
 "   SSS", B2
 ```
 
@@ -142,7 +152,7 @@ vil resultere i:
 
 ```
 
-### Oppdatering vil respektere eksisterende kompetansegrenser
+### Oppdatering vil respektere eksisterende skjema-grenser
 
 Eksisterende kompetanser som ser slik ut:
 
@@ -151,7 +161,7 @@ Eksisterende kompetanser som ser slik ut:
 "----   SSSS ---", B1, B2, B3
 ```
 
-som oppdateres med
+som oppdateres med (primærlanf fra start-dato og uendelig fremover)
 
 ```
 2020-03
@@ -165,7 +175,36 @@ vil resultere i:
 "PPPP   PPPP PPP", B1, B2, B3
 ```
 
-### Kompetanser matcher alltid EØS-periodene.
+### Innsnevring av ett skjema fører til at opprettes tomme skjemaer "rundt"
+
+Eksisterende skjema (som altså løper fra 2020-03, men ikke har avslutning)
+
+```
+2020-03
+"S>", B1, B2, B3
+```
+
+som oppdateres med (altså at perioden blir avsluttet, og ett barn fjernes)
+
+```
+2020-03
+"SSS", B1, B2
+```
+
+vil resultere i:
+
+```
+2020-03
+"SSS->", B1, B2
+"->", B3
+```
+
+Her blir det altså opprettet et tomt skjema for barn B1 og B2 fra og med juni, mens barn B3 får et tomt skjema for hele
+perioden, altså fra og med mars.
+
+### Spesielt for Kompetanse
+
+#### Kompetanser matcher alltid EØS-periodene.
 
 Hvis vilkårsvurderingen fører til at barnets EØS-perioder endrer seg, så vil kompetanse endre seg. Det er et par
 tilfeller:

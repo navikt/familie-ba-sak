@@ -142,7 +142,7 @@ class VilkårsvurderingFlyttResultaterTest(
 
         // Lager revurdering når utvidet ikke løper, så underkategorien er ordinær
         kjørStegprosessForBehandling(
-            tilSteg = StegType.REGISTRERE_PERSONGRUNNLAG,
+            tilSteg = StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
             søkerFnr = søker,
             barnasIdenter = listOf(barn1, barn2),
             underkategori = BehandlingUnderkategori.ORDINÆR,

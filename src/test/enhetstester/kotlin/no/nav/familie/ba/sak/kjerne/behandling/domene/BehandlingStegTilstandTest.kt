@@ -13,7 +13,7 @@ class BehandlingStegTilstandTest {
     @Test
     fun `Verifiser at siste steg får status IKKE_UTFØRT`() {
         val behandling = opprettBehandling()
-        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
+        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
         assertEquals(
@@ -22,7 +22,7 @@ class BehandlingStegTilstandTest {
         )
         assertEquals(
             BehandlingStegStatus.UTFØRT,
-            behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus
+            behandling.behandlingStegTilstand.first { it.behandlingSteg == StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING }.behandlingStegStatus
         )
         assertEquals(
             BehandlingStegStatus.IKKE_UTFØRT,
@@ -34,7 +34,7 @@ class BehandlingStegTilstandTest {
     fun `Verifiser maks et steg av hver type`() {
         val behandling = opprettBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
-        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
+        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
         assertEquals(
@@ -46,14 +46,14 @@ class BehandlingStegTilstandTest {
     @Test
     fun `Verifiser at alle steg med høyere rekkefølge enn siste fjernes`() {
         val behandling = opprettBehandling()
-        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
+        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
 
         assertEquals(
             BehandlingStegStatus.UTFØRT,
-            behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus
+            behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING }.behandlingStegStatus
         )
         assertEquals(
             BehandlingStegStatus.UTFØRT,
@@ -69,7 +69,7 @@ class BehandlingStegTilstandTest {
     @Test
     fun `Verifiser henlegg søknad ikke endrer stegstatus`() {
         val behandling = opprettBehandling()
-        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
+        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
         behandling.leggTilHenleggStegOmDetIkkeFinnesFraFør()
@@ -80,7 +80,7 @@ class BehandlingStegTilstandTest {
         )
         assertEquals(
             BehandlingStegStatus.UTFØRT,
-            behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG }.behandlingStegStatus
+            behandling.behandlingStegTilstand.single { it.behandlingSteg == StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING }.behandlingStegStatus
         )
         assertEquals(
             BehandlingStegStatus.UTFØRT,
