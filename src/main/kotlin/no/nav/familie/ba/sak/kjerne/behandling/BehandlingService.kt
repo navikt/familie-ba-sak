@@ -85,7 +85,6 @@ class BehandlingService(
 
             val kategori = bestemKategori(
                 overstyrtKategori = nyBehandling.kategori,
-                kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id),
                 kategoriFraInneværendeBehandling = behandlingstemaService.hentKategoriFraInneværendeBehandling(
                     fagsak.id
                 ),

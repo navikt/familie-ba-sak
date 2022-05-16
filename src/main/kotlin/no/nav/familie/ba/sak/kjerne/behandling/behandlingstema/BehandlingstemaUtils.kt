@@ -12,11 +12,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
 fun bestemKategori(
     overstyrtKategori: BehandlingKategori?,
-    kategoriFraLøpendeBehandling: BehandlingKategori?,
     kategoriFraInneværendeBehandling: BehandlingKategori? = null,
 ): BehandlingKategori {
-    if (kategoriFraLøpendeBehandling == BehandlingKategori.EØS) return BehandlingKategori.EØS
-
     val oppdatertKategori = listOf(overstyrtKategori, kategoriFraInneværendeBehandling).finnHøyesteKategori()
 
     return oppdatertKategori ?: BehandlingKategori.NASJONAL
