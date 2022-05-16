@@ -155,7 +155,10 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         when (this) {
             INNHENTE_OPPLYSNINGER,
             VARSEL_OM_REVURDERING,
-            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> true
+            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
+            INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
+            VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
+            VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> true
             else -> false
         }
 
@@ -163,7 +166,10 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         when (this) {
             INNHENTE_OPPLYSNINGER,
             VARSEL_OM_REVURDERING,
-            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> 3 * 7
+            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
+            INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
+            VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
+            VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> 3 * 7
             else -> throw Feil("Ventefrist ikke definert for brevtype $this")
         }
 
@@ -171,7 +177,10 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         when (this) {
             INNHENTE_OPPLYSNINGER,
             VARSEL_OM_REVURDERING,
-            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
+            INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
+            VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
+            VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
             else -> throw Feil("Venteårsak ikke definert for brevtype $this")
         }
 }
