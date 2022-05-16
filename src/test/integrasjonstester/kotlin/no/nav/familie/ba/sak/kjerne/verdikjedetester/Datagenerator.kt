@@ -59,7 +59,8 @@ fun lagInfotrygdSak(beløp: Double, identBarn: List<String>, valg: String? = "OR
                     typeUtbetaling = "J",
                 )
             ),
-            opphørsgrunn = "0"
+            opphørsgrunn = "0",
+            antallBarn = identBarn.size
         ),
         status = "FB",
         valg = valg,
@@ -90,7 +91,8 @@ fun lagInfotrygdSakMedSmåbarnstillegg(
                     typeUtbetaling = "M",
                 )
             ),
-            opphørsgrunn = "0"
+            opphørsgrunn = "0",
+            antallBarn = identBarn.size,
         ),
         status = "FB",
         valg = "UT",

@@ -387,6 +387,7 @@ class MigreringServiceTest(
                         barn = listOf(
                             Barn(ClientMocks.søkerFnr[0], barnetrygdTom = "000000")
                         ),
+                        antallBarn = 1,
                         delytelse = listOf(
                             Delytelse(
                                 fom = LocalDate.now(),
@@ -683,6 +684,7 @@ class MigreringServiceTest(
                 Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
                 Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000")
             ),
+            antallBarn = 2,
             delytelse = beløp.map {
                 Delytelse(
                     fom = LocalDate.now(),
@@ -705,6 +707,7 @@ class MigreringServiceTest(
                 Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
                 Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000")
             ),
+            antallBarn = 2,
             delytelse = beløp.map {
                 Delytelse(
                     fom = LocalDate.now(),
