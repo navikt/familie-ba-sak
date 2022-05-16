@@ -402,12 +402,14 @@ class MigreringService(
         val (søkersAndeler, barnasAndeler) = førsteAndelerTilkjentYtelse.partition { it.erSøkersAndel() }
 
         if (barnasIdenter.size != barnasAndeler.groupBy { it.aktør.aktørId }.size) {
-            secureLog.info("Migrering ble stoppet fordi det var barn på stønaden i Infotrygd det ikke ble tilkjent ytelse for:\n" +
-                                   "${barnasIdenter.filterNot { barnasAndeler.personidenter.contains(it) }}")
+            secureLog.info(
+                "Migrering ble stoppet fordi det var barn på stønaden i Infotrygd det ikke ble tilkjent ytelse for:\n" +
+                    "${barnasIdenter.filterNot { barnasAndeler.personidenter.contains(it) }}"
+            )
             kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_BA_SAK)
         }
         if (søkersAndeler.any { it.erSmåbarnstillegg() }) {
-            delytelserInfotrygd.find { it.typeDelytelse == "SM"}
+            delytelserInfotrygd.find { it.typeDelytelse == "SM" }
                 ?: kastOgTellMigreringsFeil(MigreringsfeilType.SMÅBARNSTILLEGG_BA_SAK_IKKE_INFOTRYGD)
         }
         if (delytelserInfotrygd.any { it.typeDelytelse == "SM" }) {
@@ -421,7 +423,7 @@ class MigreringService(
                 MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD
             secureLog.info(
                 "Ulikt beløp ba-sak og infotrygd migrering. Andeler fra og med ${førsteAndelerTilkjentYtelse.first().stønadFom}: " +
-                        "$førsteAndelerTilkjentYtelse"
+                    "$førsteAndelerTilkjentYtelse"
             )
             secureLog.info("Beløp fra infotrygd sammsvarer ikke med beløp fra ba-sak for ${infotrygdSak.valg} ${infotrygdSak.undervalg} fnr=$fnr baSak=$førsteUtbetalingsbeløp infotrygd=$beløpFraInfotrygd")
             kastOgTellMigreringsFeil(
