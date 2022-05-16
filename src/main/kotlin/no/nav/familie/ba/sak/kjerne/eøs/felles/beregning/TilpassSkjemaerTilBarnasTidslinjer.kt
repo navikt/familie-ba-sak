@@ -49,7 +49,7 @@ private fun <S : PeriodeOgBarnSkjema<S>, I> fjernOverflødigeSkjemaerRekursivt(
     }
 }
 
-private fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilTidslinjerForBarna(): Map<Aktør, Tidslinje<S, Måned>> {
+fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilTidslinjerForBarna(): Map<Aktør, Tidslinje<S, Måned>> {
     if (this.toList().isEmpty()) return emptyMap()
 
     val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
