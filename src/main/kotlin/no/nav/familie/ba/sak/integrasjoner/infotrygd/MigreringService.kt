@@ -319,7 +319,7 @@ class MigreringService(
         } else if (barnasIdenter.size != løpendeSak.stønad!!.antallBarn) {
             secureLog.info(
                 "${MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER.beskrivelse}: " +
-                        "barnasIdenter.size=${barnasIdenter.size} stønad.antallBarn=${løpendeSak.stønad!!.antallBarn}"
+                    "barnasIdenter.size=${barnasIdenter.size} stønad.antallBarn=${løpendeSak.stønad!!.antallBarn}"
             )
             kastOgTellMigreringsFeil(MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER)
         }
