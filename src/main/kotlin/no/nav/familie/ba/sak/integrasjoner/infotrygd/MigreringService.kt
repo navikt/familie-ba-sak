@@ -316,6 +316,12 @@ class MigreringService(
                 MigreringsfeilType.INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD,
                 "Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk}${løpendeSak.saksnr} på bruker i Infotrygd."
             )
+        } else if (barnasIdenter.size != løpendeSak.stønad!!.antallBarn) {
+            secureLog.info(
+                "${MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER.beskrivelse}: " +
+                        "barnasIdenter.size=${barnasIdenter.size} stønad.antallBarn=${løpendeSak.stønad!!.antallBarn}"
+            )
+            kastOgTellMigreringsFeil(MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER)
         }
         return barnasIdenter
     }
@@ -481,6 +487,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     MANGLER_VILKÅRSVURDERING("Fant ikke vilkårsvurdering."),
     MER_ENN_ETT_BARN_PÅ_SAK_AV_TYPE_UT_MD("Migrering av sakstype UT-MD er begrenset til saker med ett barn"),
     MIGRERING_ALLEREDE_PÅBEGYNT("Migrering allerede påbegynt"),
+    OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER("Antall barnidenter samsvarer ikke med stønad.antallBarn"),
     SMÅBARNSTILLEGG_BA_SAK_IKKE_INFOTRYGD("Uoverensstemmelse angående småbarnstillegg"),
     SMÅBARNSTILLEGG_INFOTRYGD_IKKE_BA_SAK("Uoverensstemmelse angående småbarnstillegg"),
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
