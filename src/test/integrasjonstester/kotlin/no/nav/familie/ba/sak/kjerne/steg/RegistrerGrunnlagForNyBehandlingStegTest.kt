@@ -4,8 +4,10 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -15,7 +17,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class RegistrerPersongrunnlagTest(
+class RegistrerGrunnlagForNyBehandlingStegTest(
     @Autowired
     private val stegService: StegService,
 
@@ -32,7 +34,14 @@ class RegistrerPersongrunnlagTest(
     private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val kompetanseService: KompetanseService,
+
+    @Autowired
+    private val featureToggleService: FeatureToggleService,
+
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -50,9 +59,9 @@ class RegistrerPersongrunnlagTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        stegService.håndterPersongrunnlag(
+        stegService.håndterGrunnlagTilknyttetNyBehandling(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
                 ident = morId,
                 barnasIdenter = listOf(barn1Id, barn2Id)
             )
@@ -79,9 +88,9 @@ class RegistrerPersongrunnlagTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        stegService.håndterPersongrunnlag(
+        stegService.håndterGrunnlagTilknyttetNyBehandling(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
                 ident = morId,
                 barnasIdenter = listOf(barn1Id)
             )
@@ -93,9 +102,9 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == barn1Id })
 
-        stegService.håndterPersongrunnlag(
+        stegService.håndterGrunnlagTilknyttetNyBehandling(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
                 ident = morId,
                 barnasIdenter = listOf(
                     barn1Id,
@@ -111,9 +120,9 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag2.personer.any { it.aktør.aktivFødselsnummer() == barn2Id })
 
         // Skal ikke føre til flere personer på persongrunnlaget
-        stegService.håndterPersongrunnlag(
+        stegService.håndterGrunnlagTilknyttetNyBehandling(
             behandling = behandling1,
-            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
                 ident = morId,
                 barnasIdenter = listOf(
                     barn1Id,
