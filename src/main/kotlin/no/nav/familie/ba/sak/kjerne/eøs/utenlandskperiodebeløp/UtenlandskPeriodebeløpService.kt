@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UtenlandskPeriodebeløpService(
@@ -20,8 +19,4 @@ class UtenlandskPeriodebeløpService(
 
     fun slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId: Long) =
         serviceDelegate.slettSkjema(utenlandskPeriodebeløpId)
-
-    @Transactional
-    fun kopierOgErstattUtenlandskePeriodebeløp(fraBehandlingId: Long, tilBehandlingId: Long) =
-        serviceDelegate.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }

@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.steg.RegistrerGrunnlagForNyBehandlingDTO
+import no.nav.familie.ba.sak.kjerne.steg.RegistrerPersongrunnlagDTO
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.SAK
@@ -179,9 +179,9 @@ class FagsakServiceTest(
                 søknadMottattDato = LocalDate.now()
             )
         )
-        stegService.håndterGrunnlagTilknyttetNyBehandling(
+        stegService.håndterPersongrunnlag(
             førsteBehandling,
-            RegistrerGrunnlagForNyBehandlingDTO(ident = søker1Fnr, barnasIdenter = listOf(barn1Fnr))
+            RegistrerPersongrunnlagDTO(ident = søker1Fnr, barnasIdenter = listOf(barn1Fnr))
         )
 
         behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.AVSLUTTET)
@@ -195,9 +195,9 @@ class FagsakServiceTest(
                 søknadMottattDato = LocalDate.now()
             )
         )
-        stegService.håndterGrunnlagTilknyttetNyBehandling(
+        stegService.håndterPersongrunnlag(
             andreBehandling,
-            RegistrerGrunnlagForNyBehandlingDTO(
+            RegistrerPersongrunnlagDTO(
                 ident = søker1Fnr,
                 barnasIdenter = listOf(barn1Fnr, barn2Fnr)
             )
@@ -212,9 +212,9 @@ class FagsakServiceTest(
                 søknadMottattDato = LocalDate.now()
             )
         )
-        stegService.håndterGrunnlagTilknyttetNyBehandling(
+        stegService.håndterPersongrunnlag(
             tredjeBehandling,
-            RegistrerGrunnlagForNyBehandlingDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr))
+            RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr))
         )
 
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)

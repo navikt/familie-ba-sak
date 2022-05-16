@@ -20,7 +20,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
             StegType.IVERKSETT_MOT_OPPDRAG,
@@ -45,7 +45,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
             StegType.VURDER_TILBAKEKREVING,
@@ -73,7 +73,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.REGISTRERE_SØKNAD,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
@@ -106,7 +106,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.REGISTRERE_SØKNAD,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
@@ -136,7 +136,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.FILTRERING_FØDSELSHENDELSER,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
@@ -163,7 +163,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.FILTRERING_FØDSELSHENDELSER,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
@@ -185,7 +185,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
             StegType.IVERKSETT_MOT_OPPDRAG,
@@ -210,7 +210,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
             StegType.IVERKSETT_MOT_OPPDRAG,
@@ -235,7 +235,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
             StegType.VURDER_TILBAKEKREVING,
@@ -263,7 +263,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
             StegType.VURDER_TILBAKEKREVING,
@@ -290,7 +290,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
             StegType.JOURNALFØR_VEDTAKSBREV,
@@ -313,7 +313,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
             StegType.VURDER_TILBAKEKREVING,
@@ -342,7 +342,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
             StegType.VURDER_TILBAKEKREVING,
@@ -371,7 +371,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
             StegType.IVERKSETT_MOT_OPPDRAG,
@@ -394,7 +394,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
         ).forEach {
@@ -424,7 +424,7 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-            StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
             StegType.VURDER_TILBAKEKREVING,
