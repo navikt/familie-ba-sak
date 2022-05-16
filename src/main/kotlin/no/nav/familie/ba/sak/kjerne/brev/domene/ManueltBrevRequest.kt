@@ -43,6 +43,7 @@ data class ManueltBrevRequest(
     val mottakerNavn: String = "",
     val enhet: Enhet? = null,
     val antallUkerSvarfrist: Int? = null,
+    val barnasFødselsdager: List<LocalDate>? = null,
 ) {
 
     override fun toString(): String {
@@ -208,7 +209,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             fødselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             varselÅrsaker = this.multiselectVerdier,
-            barnasFødselsdager = this.barnIBrev.tilFormaterteFødselsdager()
+            barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager()
         )
     Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS ->
         VarselbrevMedÅrsaker(
@@ -224,8 +225,9 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             navn = this.mottakerNavn,
             fødselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
-            barnasFødselsdager = this.barnIBrev.tilFormaterteFødselsdager()
+            barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager()
         )
+
     Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
@@ -248,8 +250,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
     Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")
 }
 
-private fun List<String>.tilFormaterteFødselsdager() = Utils.slåSammen(
-    map {
-        LocalDate.parse(it).tilKortString()
-    }
+private fun List<LocalDate>?.tilFormaterteFødselsdager() = Utils.slåSammen(
+    this?.map { it.tilKortString() }
+        ?: throw Feil("Fikk ikke med barna sine fødselsdager")
 )
