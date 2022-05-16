@@ -41,13 +41,13 @@ data class UtenlandskPeriodebeløp(
     override val barnAktører: Set<Aktør> = emptySet(),
 
     @Column(name = "beloep")
-    val beløp: BigDecimal?,
+    val beløp: BigDecimal? = null,
 
     @Column(name = "valutakode")
-    val valutakode: String?,
+    val valutakode: String? = null,
 
     @Column(name = "intervall")
-    val intervall: String?,
+    val intervall: String? = null,
 ) : PeriodeOgBarnSkjemaEntitet<UtenlandskPeriodebeløp>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "utenlandsk_periodebeloep_seq_generator")
