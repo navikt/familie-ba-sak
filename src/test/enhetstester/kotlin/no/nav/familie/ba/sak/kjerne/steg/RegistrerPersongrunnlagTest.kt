@@ -4,10 +4,8 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -17,7 +15,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class RegistrerGrunnlagForNyBehandlingStegTest(
+class RegistrerPersongrunnlagTest(
     @Autowired
     private val stegService: StegService,
 
@@ -34,14 +32,7 @@ class RegistrerGrunnlagForNyBehandlingStegTest(
     private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-
-    @Autowired
-    private val kompetanseService: KompetanseService,
-
-    @Autowired
-    private val featureToggleService: FeatureToggleService,
-
+    private val databaseCleanupService: DatabaseCleanupService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -59,9 +50,9 @@ class RegistrerGrunnlagForNyBehandlingStegTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        stegService.håndterGrunnlagTilknyttetNyBehandling(
+        stegService.håndterPersongrunnlag(
             behandling = behandling1,
-            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
+            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
                 ident = morId,
                 barnasIdenter = listOf(barn1Id, barn2Id)
             )
@@ -88,9 +79,9 @@ class RegistrerGrunnlagForNyBehandlingStegTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        stegService.håndterGrunnlagTilknyttetNyBehandling(
+        stegService.håndterPersongrunnlag(
             behandling = behandling1,
-            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
+            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
                 ident = morId,
                 barnasIdenter = listOf(barn1Id)
             )
@@ -102,9 +93,9 @@ class RegistrerGrunnlagForNyBehandlingStegTest(
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == barn1Id })
 
-        stegService.håndterGrunnlagTilknyttetNyBehandling(
+        stegService.håndterPersongrunnlag(
             behandling = behandling1,
-            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
+            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
                 ident = morId,
                 barnasIdenter = listOf(
                     barn1Id,
@@ -120,9 +111,9 @@ class RegistrerGrunnlagForNyBehandlingStegTest(
         Assertions.assertTrue(grunnlag2.personer.any { it.aktør.aktivFødselsnummer() == barn2Id })
 
         // Skal ikke føre til flere personer på persongrunnlaget
-        stegService.håndterGrunnlagTilknyttetNyBehandling(
+        stegService.håndterPersongrunnlag(
             behandling = behandling1,
-            registrerGrunnlagForNyBehandlingDTO = RegistrerGrunnlagForNyBehandlingDTO(
+            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
                 ident = morId,
                 barnasIdenter = listOf(
                     barn1Id,

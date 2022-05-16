@@ -213,7 +213,7 @@ class SøknadGrunnlagTest(
         assertEquals(
             setOf(
                 StegType.REGISTRERE_SØKNAD,
-                StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
+                StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
                 StegType.BEHANDLINGSRESULTAT
             ),
@@ -252,11 +252,7 @@ class SøknadGrunnlagTest(
             behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
         assertEquals("Result must not be null!", error.message)
         assertEquals(
-            setOf(
-                StegType.REGISTRERE_SØKNAD,
-                StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING,
-                StegType.VILKÅRSVURDERING
-            ),
+            setOf(StegType.REGISTRERE_SØKNAD, StegType.REGISTRERE_PERSONGRUNNLAG, StegType.VILKÅRSVURDERING),
             stegEtterNyRegistrering
         )
     }

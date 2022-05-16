@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType.HENLEGG_BEHANDLING
 import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_FAMILIE_TILBAKE
 import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_OPPDRAG
 import no.nav.familie.ba.sak.kjerne.steg.StegType.JOURNALFØR_VEDTAKSBREV
-import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING
+import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_PERSONGRUNNLAG
 import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_SØKNAD
 import no.nav.familie.ba.sak.kjerne.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ba.sak.kjerne.steg.StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
@@ -43,7 +43,7 @@ interface BehandlingSteg<T> {
     fun postValiderSteg(behandling: Behandling) {}
 }
 
-val FØRSTE_STEG = REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING
+val FØRSTE_STEG = REGISTRERE_PERSONGRUNNLAG
 val SISTE_STEG = BEHANDLING_AVSLUTTET
 
 enum class StegType(
@@ -62,7 +62,7 @@ enum class StegType(
             BehandlingStatus.IVERKSETTER_VEDTAK
         )
     ),
-    REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING(
+    REGISTRERE_PERSONGRUNNLAG(
         rekkefølge = 1,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
@@ -165,7 +165,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
 
     if (behandlingÅrsak.erOmregningsårsak()) {
         return when (utførendeStegType) {
-            REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING -> VILKÅRSVURDERING
+            REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
             VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
             BEHANDLINGSRESULTAT -> JOURNALFØR_VEDTAKSBREV
             JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
@@ -180,7 +180,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         BehandlingÅrsak.TEKNISK_OPPHØR -> throw Feil("Teknisk opphør er ikke mulig å behandle lenger")
         BehandlingÅrsak.MIGRERING -> {
             when (utførendeStegType) {
-                REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
@@ -192,7 +192,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.ENDRE_MIGRERINGSDATO, BehandlingÅrsak.HELMANUELL_MIGRERING -> {
             when (utførendeStegType) {
-                REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
@@ -210,7 +210,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.TEKNISK_ENDRING -> {
             when (utførendeStegType) {
-                REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
@@ -225,7 +225,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.FØDSELSHENDELSE -> {
             when (utførendeStegType) {
-                REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING -> FILTRERING_FØDSELSHENDELSER
+                REGISTRERE_PERSONGRUNNLAG -> FILTRERING_FØDSELSHENDELSER
                 FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
@@ -240,7 +240,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.SØKNAD -> {
             when (utførendeStegType) {
-                REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING -> REGISTRERE_SØKNAD
+                REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
                 REGISTRERE_SØKNAD -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
@@ -259,7 +259,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.SMÅBARNSTILLEGG -> {
             when (utførendeStegType) {
-                REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> {
                     if (!behandling.skalBehandlesAutomatisk) VURDER_TILBAKEKREVING
@@ -280,7 +280,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.SATSENDRING -> {
             when (utførendeStegType) {
-                REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING)
                     IVERKSETT_MOT_OPPDRAG
@@ -294,7 +294,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         else -> {
             when (utførendeStegType) {
-                REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER

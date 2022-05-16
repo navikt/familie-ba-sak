@@ -34,7 +34,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
@@ -92,11 +91,7 @@ class VilkårServiceTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
-    private val stegService: StegService,
-
-    @Autowired
-    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
-
+    private val stegService: StegService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -625,12 +620,11 @@ class VilkårServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.now().minusMonths(5)
-        val vilkårsvurdering =
-            vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
-                behandling = behandling,
-                forrigeBehandlingSomErVedtatt = forrigeBehandling,
-                nyMigreringsdato = nyMigreringsdato
-            )
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = forrigeBehandling,
+            nyMigreringsdato = nyMigreringsdato
+        )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         val søkerVilkårResultat =
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater
@@ -677,12 +671,11 @@ class VilkårServiceTest(
         val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
         val behandling = behandlinger.second
 
-        val vilkårsvurdering =
-            vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
-                behandling = behandling,
-                forrigeBehandlingSomErVedtatt = behandlinger.first,
-                nyMigreringsdato = nyMigreringsdato
-            )
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = behandlinger.first,
+            nyMigreringsdato = nyMigreringsdato
+        )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         val søkerVilkårResultat =
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater
@@ -834,12 +827,11 @@ class VilkårServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        val vilkårsvurdering =
-            vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
-                behandling = behandling,
-                forrigeBehandlingSomErVedtatt = forrigeBehandling,
-                nyMigreringsdato = nyMigreringsdato
-            )
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = forrigeBehandling,
+            nyMigreringsdato = nyMigreringsdato
+        )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         val søkerVilkårResultat =
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater
@@ -891,12 +883,11 @@ class VilkårServiceTest(
         val nåVærendeBehandling = behandlinger.second
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        var vilkårsvurdering =
-            vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
-                behandling = nåVærendeBehandling,
-                forrigeBehandlingSomErVedtatt = behandlinger.first,
-                nyMigreringsdato = nyMigreringsdato
-            )
+        var vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = nåVærendeBehandling,
+            forrigeBehandlingSomErVedtatt = behandlinger.first,
+            nyMigreringsdato = nyMigreringsdato
+        )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         assertTrue { vilkårsvurdering.personResultater.any { it.aktør.aktivFødselsnummer() == fnr } }
         assertTrue { vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == fnr }!!.vilkårResultater.size == 2 }
@@ -1028,12 +1019,11 @@ class VilkårServiceTest(
         val nåVærendeBehandling = behandlinger.second
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        val vilkårsvurdering =
-            vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
-                behandling = nåVærendeBehandling,
-                forrigeBehandlingSomErVedtatt = behandlinger.first,
-                nyMigreringsdato = nyMigreringsdato
-            )
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = nåVærendeBehandling,
+            forrigeBehandlingSomErVedtatt = behandlinger.first,
+            nyMigreringsdato = nyMigreringsdato
+        )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         assertTrue { vilkårsvurdering.personResultater.any { it.aktør.aktivFødselsnummer() == fnr } }
         assertTrue { vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == fnr }!!.vilkårResultater.size == 2 }
@@ -1058,7 +1048,7 @@ class VilkårServiceTest(
 
         val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
         val behandling = behandlinger.second
-        vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+        vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
             behandling = behandling,
             forrigeBehandlingSomErVedtatt = behandlinger.first,
             nyMigreringsdato = LocalDate.of(2021, 1, 1)
@@ -1162,12 +1152,11 @@ class VilkårServiceTest(
         )
         behandlingHentOgPersisterService.lagreEllerOppdater(forrigeBehandling)
 
-        val vilkårsvurdering =
-            vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
-                behandling = behandling,
-                forrigeBehandlingSomErVedtatt = forrigeBehandling,
-                nyMigreringsdato = LocalDate.of(2021, 1, 1)
-            )
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = forrigeBehandling,
+            nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        )
         assertTrue { vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater.size == 3 }
         val exception = assertThrows<RuntimeException> {
             vilkårService.deleteVilkår(
@@ -1194,7 +1183,7 @@ class VilkårServiceTest(
 
         val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
         val behandling = behandlinger.second
-        vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+        vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
             behandling = behandling,
             forrigeBehandlingSomErVedtatt = behandlinger.first,
             nyMigreringsdato = LocalDate.of(2021, 1, 1)
@@ -1265,10 +1254,7 @@ class VilkårServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForHelmanuellMigrering(
-            behandling,
-            nyMigreringsdato
-        )
+        vilkårService.genererVilkårsvurderingForHelmanuellMigrering(behandling, nyMigreringsdato)
 
         vilkårService.postVilkår(
             behandling.id,
@@ -1335,10 +1321,7 @@ class VilkårServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForHelmanuellMigrering(
-            behandling,
-            nyMigreringsdato
-        )
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForHelmanuellMigrering(behandling, nyMigreringsdato)
 
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         assertTrue { vilkårsvurdering.personResultater.size == 2 }
@@ -1401,10 +1384,7 @@ class VilkårServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForHelmanuellMigrering(
-            behandling,
-            nyMigreringsdato
-        )
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForHelmanuellMigrering(behandling, nyMigreringsdato)
 
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         assertTrue { vilkårsvurdering.personResultater.size == 2 }
@@ -1468,10 +1448,7 @@ class VilkårServiceTest(
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
         behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
-        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForHelmanuellMigrering(
-            behandling,
-            nyMigreringsdato
-        )
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForHelmanuellMigrering(behandling, nyMigreringsdato)
 
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         assertTrue { vilkårsvurdering.personResultater.size == 2 }

@@ -87,7 +87,7 @@ fun kjørStegprosessForBehandling(
             håndterSøknadSteg(stegService, behandling, søkerFnr, barnasIdenter, underkategori)
         } else behandling
 
-    if (tilSteg == StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING || tilSteg == StegType.REGISTRERE_SØKNAD)
+    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD)
         return behandlingEtterPersongrunnlagSteg
 
     val behandlingEtterVilkårsvurderingSteg =
