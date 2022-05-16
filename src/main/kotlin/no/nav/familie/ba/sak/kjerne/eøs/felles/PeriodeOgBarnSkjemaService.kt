@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.felles
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.oppdaterSkjemaerRekursivt
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.somInversOppdateringEllersNull
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 
 class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
@@ -18,14 +19,12 @@ class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
     }
 
     fun endreSkjemaer(behandlingId: Long, oppdatering: T) {
-        val gjeldendeSkjema = hentMedBehandlingId(behandlingId)
+        val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
 
-        val oppdaterteKompetanser = if (gjeldendeSkjema.erLukkingAvEnÅpenPeriode(oppdatering))
-            oppdaterSkjemaerRekursivt(gjeldendeSkjema, oppdatering.utenSkjemaHeretter())
-        else
-            oppdaterSkjemaerRekursivt(gjeldendeSkjema, oppdatering)
+        val justertOppdatering = oppdatering.somInversOppdateringEllersNull(gjeldendeSkjemaer) ?: oppdatering
+        val oppdaterteKompetanser = oppdaterSkjemaerRekursivt(gjeldendeSkjemaer, justertOppdatering)
 
-        lagreSkjemaDifferanse(gjeldendeSkjema, oppdaterteKompetanser.medBehandlingId(behandlingId))
+        lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteKompetanser.medBehandlingId(behandlingId))
         tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
     }
 
