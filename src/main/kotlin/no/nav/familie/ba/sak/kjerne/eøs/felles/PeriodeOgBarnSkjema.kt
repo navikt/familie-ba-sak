@@ -17,8 +17,7 @@ interface PeriodeOgBarnSkjema<out T> where T : PeriodeOgBarnSkjema<T> {
     ): T
 }
 
-fun <T : PeriodeOgBarnSkjema<T>> T.medBarnOgPeriodeSomErFellesMed(skjema: T): T? {
-
+fun <T : PeriodeOgBarnSkjema<T>> T.medBarnOgPeriodeSomOverlapperMed(skjema: T): T? {
     val fom = maxOf(this.fom ?: MIN_MÅNED, skjema.fom ?: MIN_MÅNED)
     val tom = minOf(this.tom ?: MAX_MÅNED, skjema.tom ?: MAX_MÅNED)
 
