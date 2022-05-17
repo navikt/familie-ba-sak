@@ -42,13 +42,13 @@ data class Valutakurs(
     override val barnAktører: Set<Aktør> = emptySet(),
 
     @Column(name = "valutakursdato", columnDefinition = "DATE")
-    val valutakursdato: LocalDate?,
+    val valutakursdato: LocalDate? = null,
 
     @Column(name = "valutakode")
-    val valutakode: String?,
+    val valutakode: String? = null,
 
     @Column(name = "kurs", nullable = false)
-    val kurs: BigDecimal?,
+    val kurs: BigDecimal? = null,
 ) : PeriodeOgBarnSkjemaEntitet<Valutakurs>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "valutakurs_seq_generator")
