@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
+package no.nav.familie.ba.sak.kjerne.eøs.felles.beregning
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
@@ -8,30 +8,33 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilEøsRegelverkTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class TilpassKompetanserTilRegelverkTest {
+class TilpassBarnasSkjemaerTilTidslinjerTest {
     val jan2020 = jan(2020)
     val barn1 = tilfeldigPerson()
     val barn2 = tilfeldigPerson()
     val barn3 = tilfeldigPerson()
+
+    val tomKompetanseForBarn: (Aktør) -> Kompetanse =
+        { aktør -> Kompetanse(null, null, barnAktører = setOf(aktør)) }
 
     @Test
     fun testTilpassKompetanserUtenKompetanser() {
         val kompetanser: List<Kompetanse> = emptyList()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEENNEEEE".tilRegelverkTidslinje(jan2020)
+            barn1.aktør to "EEENNEEEE".tilEøsRegelverkTidslinje(jan2020)
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
             .medKompetanse("---  ----", barn1)
             .byggKompetanser()
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder)
+        val faktiskeKompetanser = tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -45,7 +48,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val forventedeKompetanser = emptyList<Kompetanse>()
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder)
+        val faktiskeKompetanser = tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -56,14 +59,14 @@ class TilpassKompetanserTilRegelverkTest {
             .byggKompetanser()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEENNEEEE".tilRegelverkTidslinje(jan2020)
+            barn1.aktør to "EEENNEEEE".tilEøsRegelverkTidslinje(jan2020)
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
             .medKompetanse("SSS  SS--", barn1)
             .byggKompetanser()
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder)
+        val faktiskeKompetanser = tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -74,8 +77,8 @@ class TilpassKompetanserTilRegelverkTest {
             .byggKompetanser()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEENNEEEE".tilRegelverkTidslinje(jan2020),
-            barn2.aktør to "EEEENNEEE".tilRegelverkTidslinje(jan2020)
+            barn1.aktør to "EEENNEEEE".tilEøsRegelverkTidslinje(jan2020),
+            barn2.aktør to "EEEENNEEE".tilEøsRegelverkTidslinje(jan2020)
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
@@ -84,7 +87,7 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("   - ", barn2)
             .byggKompetanser().sortedBy { it.fom }
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder)
+        val faktiskeKompetanser = tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -103,9 +106,9 @@ class TilpassKompetanserTilRegelverkTest {
             .byggKompetanser()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEENNEEEE".tilRegelverkTidslinje(jan2020),
-            barn2.aktør to "EEE--NNNN".tilRegelverkTidslinje(jan2020),
-            barn3.aktør to "EEEEEEEEE".tilRegelverkTidslinje(jan2020)
+            barn1.aktør to "EEENNEEEE".tilEøsRegelverkTidslinje(jan2020),
+            barn2.aktør to "EEE--NNNN".tilEøsRegelverkTidslinje(jan2020),
+            barn3.aktør to "EEEEEEEEE".tilEøsRegelverkTidslinje(jan2020)
         )
 
         // SSS  SS--, barn1
@@ -119,7 +122,8 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("-  SS    ", barn3)
             .byggKompetanser().sortedBy { it.fom }
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder).sortedBy { it.fom }
+        val faktiskeKompetanser =
+            tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn).sortedBy { it.fom }
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -129,8 +133,8 @@ class TilpassKompetanserTilRegelverkTest {
         val kompetanser: List<Kompetanse> = emptyList()
 
         val eøsPerioder = mapOf(
-            barn1.aktør to "EEEEEEEEE>".tilRegelverkTidslinje(jan2020),
-            barn2.aktør to "  EEEEEEEEE>".tilRegelverkTidslinje(jan2020),
+            barn1.aktør to "EEEEEEEEE>".tilEøsRegelverkTidslinje(jan2020),
+            barn2.aktør to "  EEEEEEEEE>".tilEøsRegelverkTidslinje(jan2020),
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
@@ -138,7 +142,8 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("  ->", barn1, barn2)
             .byggKompetanser().sortedBy { it.fom }
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder).sortedBy { it.fom }
+        val faktiskeKompetanser =
+            tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn).sortedBy { it.fom }
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 }

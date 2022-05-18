@@ -2,9 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinjerForBarna
-import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.beregning.tilpassValutakurserTilUtenlandskePeriodebeløp
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -35,16 +33,14 @@ class ValutakursService(
 
     @Transactional
     fun tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId: Long) {
-        val gjeldendeValutakurser = hentValutakurser(behandlingId)
+
         val barnasUtenlandskePeriodebeløpTidslinjer = utenlandskPeriodebeløpService
             .hentUtenlandskePeriodebeløp(behandlingId)
             .tilTidslinjerForBarna()
 
-        val oppdaterteValutakurser = tilpassValutakurserTilUtenlandskePeriodebeløp(
-            gjeldendeValutakurser,
+        serviceDelegate.tilpassBarnasSkjemaerTilTidslinjer(
+            behandlingId,
             barnasUtenlandskePeriodebeløpTidslinjer
-        ).medBehandlingId(behandlingId)
-
-        serviceDelegate.lagreSkjemaDifferanse(gjeldendeValutakurser, oppdaterteValutakurser)
+        ) { aktør -> Valutakurs(null, null, setOf(aktør)) }
     }
 }
