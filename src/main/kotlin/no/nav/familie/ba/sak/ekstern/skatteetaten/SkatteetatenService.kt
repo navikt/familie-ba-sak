@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -83,8 +84,8 @@ class SkatteetatenService(
 
     private fun hentPersonerMedUtvidetBarnetrygd(år: String): List<SkatteetatenPerson> {
         return fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(
-            fom = YearMonth.of(år.toInt(), 1),
-            tom = YearMonth.of(år.toInt(), 12)
+            fom = LocalDate.of(år.toInt(), 1, 1).atStartOfDay(),
+            tom = LocalDate.of(år.toInt() + 1, 1, 1).atStartOfDay()
         )
             .map { SkatteetatenPerson(it.first, it.second.atStartOfDay()) }
     }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.Optional
 import javax.persistence.LockModeType
@@ -105,7 +106,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         nativeQuery = true
     )
     @Timed
-    fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<String, LocalDate>>
+    fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: LocalDateTime, tom: LocalDateTime): List<Pair<String, LocalDate>>
 
     @Query(
         """
