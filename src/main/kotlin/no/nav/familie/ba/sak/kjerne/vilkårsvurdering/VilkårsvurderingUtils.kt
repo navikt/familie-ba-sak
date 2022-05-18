@@ -277,7 +277,7 @@ object VilkårsvurderingUtils {
                     it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
                         it.resultat == Resultat.OPPFYLT &&
                         // forrige behandling har minst et måned ubetalt utvidet barnetrygd
-                        it.differanseIPeriode().toTotalMonths() > Period.ofMonths(1).months
+                        it.differanseIPeriode().toTotalMonths() >= Period.ofMonths(1).months
                 } ?: false
 
         // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
