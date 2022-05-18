@@ -7,42 +7,43 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerForAlleNøklerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 
-fun <S : PeriodeOgBarnSkjema<S>, I> tilpassSkjemaerTilBarnasTidslinjer(
-    skjemaer: Collection<S>,
+fun <S : PeriodeOgBarnSkjema<S>, I> tilpassSkjemaerTilTidslinjer(
+    gjeldendeSkjemaer: Collection<S>,
     barnasTidslinjer: Map<Aktør, Tidslinje<I, Måned>>,
-    manglendeSkjemaMapKombinator: (Aktør) -> (S?, I?) -> S?,
-    overflødigSkjemaMapKombinator: (Aktør) -> (S?, I?) -> S?
+    tomtSkjemForBarnFactory: (Aktør) -> S
 ): Collection<S> {
-    val skjemaerUtenOverflødige = fjernOverflødigeSkjemaerRekursivt(
-        skjemaer, barnasTidslinjer, overflødigSkjemaMapKombinator
-    )
+    val skjemaerUtenOverflødige = fjernOverflødigeSkjemaerRekursivt(gjeldendeSkjemaer, barnasTidslinjer)
 
     val barnTilSkjemaTidslinje = skjemaerUtenOverflødige.tilTidslinjerForBarna()
 
     val manglendeSkjemaer = barnTilSkjemaTidslinje
-        .kombinerForAlleNøklerMed(barnasTidslinjer, manglendeSkjemaMapKombinator)
+        .kombinerForAlleNøklerMed(barnasTidslinjer) { barn: Aktør ->
+            { skjema: S?, innhold: I? ->
+                if (innhold != null && skjema == null) tomtSkjemForBarnFactory(barn) else null
+            }
+        }
         .slåSammen()
 
     return (skjemaerUtenOverflødige + manglendeSkjemaer).slåSammen()
 }
 
-private fun <S : PeriodeOgBarnSkjema<S>, I> fjernOverflødigeSkjemaerRekursivt(
+fun <S : PeriodeOgBarnSkjema<S>, I> fjernOverflødigeSkjemaerRekursivt(
     skjemaer: Collection<S>,
     barnasTidslinjer: Map<Aktør, Tidslinje<I, Måned>>,
-    overflødigSkjemaMapKombinator: (Aktør) -> (S?, I?) -> S?
 ): Collection<S> {
     val barnTilSkjemaTidslinje = skjemaer.tilTidslinjerForBarna()
 
     val overflødigeSkjemaer = barnTilSkjemaTidslinje
-        .kombinerForAlleNøklerMed(barnasTidslinjer, overflødigSkjemaMapKombinator)
+        .kombinerForAlleNøklerMed(barnasTidslinjer) {
+            { skjema: S?, innhold: I? -> if (innhold == null && skjema != null) skjema else null }
+        }
         .slåSammen()
 
     return if (overflødigeSkjemaer.isNotEmpty()) {
         val skjemaerFratrukketOverflødige = skjemaer.trekkFra(overflødigeSkjemaer.first())
         fjernOverflødigeSkjemaerRekursivt(
             skjemaerFratrukketOverflødige,
-            barnasTidslinjer,
-            overflødigSkjemaMapKombinator
+            barnasTidslinjer
         )
     } else {
         skjemaer

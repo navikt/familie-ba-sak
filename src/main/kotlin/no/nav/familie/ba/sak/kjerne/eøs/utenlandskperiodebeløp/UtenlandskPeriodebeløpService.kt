@@ -2,9 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinjerForBarna
-import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
-import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.beregning.tilpassUtenlandskePeriodebeløpTilKompetanser
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,14 +29,11 @@ class UtenlandskPeriodebeløpService(
 
     @Transactional
     fun tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId: Long) {
-        val gjeldendeUtenlandskePeriodebeløp = hentUtenlandskePeriodebeløp(behandlingId)
         val barnasKompetanseTidslinjer = kompetanseService.hentKompetanser(behandlingId).tilTidslinjerForBarna()
 
-        val oppdaterteUtenlandskePeriodebeløp = tilpassUtenlandskePeriodebeløpTilKompetanser(
-            gjeldendeUtenlandskePeriodebeløp,
+        serviceDelegate.tilpassBarnasSkjemaerTilTidslinjer(
+            behandlingId,
             barnasKompetanseTidslinjer
-        ).medBehandlingId(behandlingId)
-
-        serviceDelegate.lagreSkjemaDifferanse(gjeldendeUtenlandskePeriodebeløp, oppdaterteUtenlandskePeriodebeløp)
+        ) { aktør -> UtenlandskPeriodebeløp(null, null, setOf(aktør)) }
     }
 }

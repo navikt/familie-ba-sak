@@ -3,22 +3,26 @@ package no.nav.familie.ba.sak.kjerne.eøs.felles
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.oppdaterSkjemaerRekursivt
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.somInversOppdateringEllersNull
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassSkjemaerTilTidslinjer
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 
-class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
-    val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<T>,
+class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
+    val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>,
     val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
 
-    fun hentMedBehandlingId(behandlingId: Long): Collection<T> {
+    fun hentMedBehandlingId(behandlingId: Long): Collection<S> {
         return periodeOgBarnSkjemaRepository.findByBehandlingId(behandlingId)
     }
 
-    fun hentMedId(id: Long): T {
+    fun hentMedId(id: Long): S {
         return periodeOgBarnSkjemaRepository.getById(id)
     }
 
-    fun endreSkjemaer(behandlingId: Long, oppdatering: T) {
+    fun endreSkjemaer(behandlingId: Long, oppdatering: S) {
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
 
         val justertOppdatering = oppdatering.somInversOppdateringEllersNull(gjeldendeSkjemaer) ?: oppdatering
@@ -42,16 +46,31 @@ class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
         tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
     }
 
-    fun lagreSkjemaDifferanse(gjeldende: Collection<T>, oppdaterte: Collection<T>) {
+    fun kopierOgErstattSkjemaer(fraBehandlingId: Long, tilBehandlingId: Long) {
+        val gjeldendeTilSkjemaer = hentMedBehandlingId(tilBehandlingId)
+        val kopiAvFraSkjemaer = hentMedBehandlingId(fraBehandlingId)
+            .map { it.kopier() }
+            .medBehandlingId(tilBehandlingId)
+
+        lagreSkjemaDifferanse(gjeldendeTilSkjemaer, kopiAvFraSkjemaer)
+    }
+
+    fun <I> tilpassBarnasSkjemaerTilTidslinjer(
+        behandlingId: Long,
+        barnasTidslinjer: Map<Aktør, Tidslinje<I, Måned>>,
+        tomtSkjemaForBarnFactory: (Aktør) -> S
+    ) {
+        val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
+        val oppdaterteSkjemaer =
+            tilpassSkjemaerTilTidslinjer(gjeldendeSkjemaer, barnasTidslinjer, tomtSkjemaForBarnFactory)
+
+        lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteSkjemaer.medBehandlingId(behandlingId))
+    }
+
+    fun lagreSkjemaDifferanse(gjeldende: Collection<S>, oppdaterte: Collection<S>) {
         periodeOgBarnSkjemaRepository.deleteAll(gjeldende - oppdaterte)
         periodeOgBarnSkjemaRepository.saveAll(oppdaterte - gjeldende)
     }
-
-    private fun <T : PeriodeOgBarnSkjema<T>> Iterable<T>.erLukkingAvEnÅpenPeriode(skjema: T) =
-        this.filter {
-            it.tom == null && skjema.tom != null && it.kopier(tom = skjema.tom) == skjema
-        }
-            .singleOrNull() != null
 }
 
 fun <T : PeriodeOgBarnSkjemaEntitet<T>> Collection<T>.medBehandlingId(behandlingId: Long): Collection<T> {
