@@ -87,7 +87,7 @@ class SkatteetatenService(
             fom = LocalDate.of(år.toInt(), 1, 1).atStartOfDay(),
             tom = LocalDate.of(år.toInt() + 1, 1, 1).atStartOfDay()
         )
-            .map { SkatteetatenPerson(it.first, it.second.atStartOfDay()) }
+            .map { SkatteetatenPerson(it.fnr, it.sisteVedtaksdato.atStartOfDay()) }
     }
 
     private fun hentPerioderMedUtvidetBarnetrygdFraBaSak(
@@ -178,4 +178,9 @@ fun SkatteetatenPeriode.Delingsprosent.tilBigDecimal(): BigDecimal = when (this)
     SkatteetatenPeriode.Delingsprosent._0 -> BigDecimal.valueOf(100)
     SkatteetatenPeriode.Delingsprosent._50 -> BigDecimal.valueOf(50)
     else -> BigDecimal.valueOf(0)
+}
+
+interface UtvidetSkatt {
+    val fnr: String
+    val sisteVedtaksdato: LocalDate
 }

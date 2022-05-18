@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.micrometer.core.annotation.Timed
+import no.nav.familie.ba.sak.ekstern.skatteetaten.UtvidetSkatt
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
@@ -91,8 +92,8 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Query(
         value = """
-        SELECT p.foedselsnummer,
-               MAX(ty.opprettet_dato)
+        SELECT p.foedselsnummer as fnr,
+               MAX(ty.opprettet_dato) as sisteVedtaksdato
         FROM andel_tilkjent_ytelse aty
                  INNER JOIN
              tilkjent_ytelse ty ON aty.tilkjent_ytelse_id = ty.id
@@ -106,7 +107,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         nativeQuery = true
     )
     @Timed
-    fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: LocalDateTime, tom: LocalDateTime): List<Pair<String, LocalDate>>
+    fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: LocalDateTime, tom: LocalDateTime): List<UtvidetSkatt>
 
     @Query(
         """
