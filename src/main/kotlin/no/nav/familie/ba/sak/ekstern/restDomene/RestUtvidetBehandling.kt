@@ -38,5 +38,7 @@ data class RestUtvidetBehandling(
     val totrinnskontroll: RestTotrinnskontroll?,
     val aktivSettPåVent: RestSettPåVent?,
     val migreringsdato: LocalDate?,
-    val endringstidspunkt: LocalDate?
+    val endringstidspunkt: LocalDate?,
+    val valutakurser: List<RestValutakurs>,
+    val utenlandskePeriodebeløp: List<RestUtenlandskPeriodebeløp>
 )

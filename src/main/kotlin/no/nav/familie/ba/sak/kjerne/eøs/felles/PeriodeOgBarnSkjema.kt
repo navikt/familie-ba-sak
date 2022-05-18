@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.felles
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.erEkteDelmengdeAv
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.YearMonth
 
@@ -17,8 +18,7 @@ interface PeriodeOgBarnSkjema<out T> where T : PeriodeOgBarnSkjema<T> {
     ): T
 }
 
-fun <T : PeriodeOgBarnSkjema<T>> T.medBarnOgPeriodeSomErFellesMed(skjema: T): T? {
-
+fun <T : PeriodeOgBarnSkjema<T>> T.medBarnOgPeriodeSomOverlapperMed(skjema: T): T? {
     val fom = maxOf(this.fom ?: MIN_MÅNED, skjema.fom ?: MIN_MÅNED)
     val tom = minOf(this.tom ?: MAX_MÅNED, skjema.tom ?: MAX_MÅNED)
 
@@ -57,3 +57,21 @@ fun <T : PeriodeOgBarnSkjema<T>> T.utenSkjemaHeretter() =
         fom = tom?.plusMonths(1),
         tom = null,
     ).utenSkjema()
+
+fun <T : PeriodeOgBarnSkjema<T>> T.medBarnaSomForsvinnerFra(skjema: T): T =
+    this.kopier(barnAktører = skjema.barnAktører.minus(this.barnAktører))
+
+fun <T : PeriodeOgBarnSkjema<T>> T.periodeBlirLukketAv(skjema: T): Boolean =
+    this.tom == null && skjema.tom != null
+
+fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraTilOgMed(skjema: T): Boolean =
+    this.kopier(tom = skjema.tom) == skjema
+
+fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraBarn(skjema: T): Boolean =
+    this.kopier(barnAktører = skjema.barnAktører) == skjema
+
+fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraBarnOgTilOgMed(skjema: T): Boolean =
+    this.kopier(barnAktører = skjema.barnAktører, tom = skjema.tom) == skjema
+
+fun <T : PeriodeOgBarnSkjema<T>> T.harEkteDelmengdeAvBarna(skjema: T): Boolean =
+    this.barnAktører.erEkteDelmengdeAv(skjema.barnAktører)

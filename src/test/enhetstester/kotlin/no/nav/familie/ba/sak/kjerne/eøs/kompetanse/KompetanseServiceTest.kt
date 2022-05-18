@@ -181,6 +181,32 @@ internal class KompetanseServiceTest {
     }
 
     @Test
+    fun `skal opprette tomt skjema for barn som fjernes fra ellers uendret skjema`() {
+        val behandlingId = 10L
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        // Åpen (til-og-med er null) kompetanse med sekundærland for tre barn
+        KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("S>", barn1, barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        // Fjerner ett barn fra gjeldende skjema, ellers likt
+        val oppdatertKompetanse = kompetanse(jan(2020), "S>", barn1, barn2)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+
+        // Forventer tomt skjema for samme periode for barnet som ble fjernet
+        val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("S>", barn1, barn2)
+            .medKompetanse("->", barn3)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
     fun `kompetanse skal vare uendelig når til regelverk-tidslinjer fortsetter etter nåtidspunktet`() {
         val behandlingId = 10L
 
