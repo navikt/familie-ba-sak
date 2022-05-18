@@ -7,9 +7,9 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MinnebasertKompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
+import no.nav.familie.ba.sak.kjerne.eøs.util.MinnebasertSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test
 
 internal class KompetanseServiceTest {
 
-    val minnebasertKompetanseRepository = MinnebasertKompetanseRepository()
+    val minnebasertKompetanseRepository = MinnebasertSkjemaRepository<Kompetanse>()
     val mockKompetanseRepository = mockk<KompetanseRepository>()
     val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk(relaxed = true)
     val tidslinjeService: TidslinjeService = mockk()
@@ -43,11 +43,11 @@ internal class KompetanseServiceTest {
         val kompetanseListeSlot = slot<Iterable<Kompetanse>>()
 
         every { mockKompetanseRepository.findByBehandlingId(capture(idSlot)) } answers {
-            minnebasertKompetanseRepository.hentKompetanser(idSlot.captured)
+            minnebasertKompetanseRepository.hentSkjemaer(idSlot.captured)
         }
 
         every { mockKompetanseRepository.getById(capture(idSlot)) } answers {
-            minnebasertKompetanseRepository.hentKompetanse(idSlot.captured)
+            minnebasertKompetanseRepository.hentSkjema(idSlot.captured)
         }
 
         every { mockKompetanseRepository.saveAll(capture(kompetanseListeSlot)) } answers {
