@@ -74,7 +74,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 
     override fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long {
         val vedtakForDVHV2Melding =
-            objectMapper.writeValueAsString(vedtakV2)
+            kafkaObjectMapper.writeValueAsString(vedtakV2)
         val response = kafkaAivenTemplate.send(VEDTAKV2_TOPIC, vedtakV2.funksjonellId!!, vedtakForDVHV2Melding).get()
         logger.info("$VEDTAKV2_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         vedtakV2Counter.increment()
@@ -137,7 +137,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         barnetrygdBisysMelding: BarnetrygdBisysMelding
     ) {
         val opphørBarnetrygdBisysMelding =
-            kafkaObjectMapper.writeValueAsString(barnetrygdBisysMelding)
+            objectMapper.writeValueAsString(barnetrygdBisysMelding)
 
         kafkaAivenTemplate.send(OPPHOER_BARNETRYGD_BISYS_TOPIC, behandlingId, opphørBarnetrygdBisysMelding)
             .addCallback(
