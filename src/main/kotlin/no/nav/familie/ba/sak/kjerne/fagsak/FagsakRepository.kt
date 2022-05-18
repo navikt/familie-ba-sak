@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.micrometer.core.annotation.Timed
+import no.nav.familie.ba.sak.ekstern.skatteetaten.UtvidetSkatt
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.Optional
 import javax.persistence.LockModeType
@@ -88,26 +90,24 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Query(value = "SELECT count(*) from Fagsak f where f.status='LØPENDE' and f.arkivert = false")
     fun finnAntallFagsakerLøpende(): Long
 
-    @Lock(LockModeType.NONE)
     @Query(
         value = """
-        SELECT new kotlin.Pair(f , MAX(ty.opprettetDato))
-        FROM Behandling b
-               INNER JOIN Fagsak f ON f.id = b.fagsak.id
-               INNER JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
-        WHERE ty.utbetalingsoppdrag IS NOT NULL
-        AND EXISTS(
-            SELECT aty.type FROM AndelTilkjentYtelse aty
-            WHERE aty.tilkjentYtelse.id = ty.id
-            AND aty.type = 'UTVIDET_BARNETRYGD'
-            AND aty.stønadFom <= :tom
-            AND aty.stønadTom >= :fom
-        )
-        GROUP BY f.id
-    """
+        SELECT p.foedselsnummer as fnr,
+               MAX(ty.opprettet_dato) as sisteVedtaksdato
+        FROM andel_tilkjent_ytelse aty
+                 INNER JOIN
+             tilkjent_ytelse ty ON aty.tilkjent_ytelse_id = ty.id
+                 INNER JOIN personident p on aty.fk_aktoer_id = p.fk_aktoer_id
+        WHERE ty.utbetalingsoppdrag is not null
+          AND aty.type = 'UTVIDET_BARNETRYGD'
+          AND aty.stonad_fom <= :tom
+          AND aty.stonad_tom >= :fom
+        group by p.foedselsnummer
+    """,
+        nativeQuery = true
     )
     @Timed
-    fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<Fagsak, LocalDate>>
+    fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: LocalDateTime, tom: LocalDateTime): List<UtvidetSkatt>
 
     @Query(
         """

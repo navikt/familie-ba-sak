@@ -599,6 +599,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonManglerMeklingsattest"
     },
+    REDUKSJON_FORELDRENE_BOR_SAMMEN_ANNEN_FORELDER_SØKT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonForeldreneBorSammenAnnenForelderSokt"
+    },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagBosattIRiket"
@@ -1010,6 +1014,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_UGYLDIG_KONTONUMMER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorUgyldigKontonummer"
+    },
+    OPPHØR_FORELDRENE_BOR_SAMMEN_ENDRE_MOTTAKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorForeldreneBorSammenEndretMottaker"
     },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
