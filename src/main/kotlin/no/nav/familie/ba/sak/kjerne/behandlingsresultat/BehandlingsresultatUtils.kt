@@ -245,7 +245,7 @@ fun Set<YtelsePersonResultat>.matcherAltOgHarEndretResultat(andreElementer: Set<
 
 fun Set<YtelsePersonResultat>.matcherAltOgHarOpphørtResultat(andreElementer: Set<YtelsePersonResultat>): Boolean {
     val opphørtResultat = this.intersect(setOf(YtelsePersonResultat.OPPHØRT, YtelsePersonResultat.FORTSATT_OPPHØRT))
-    return this == andreElementer + opphørtResultat
+    return if (opphørtResultat.isEmpty()) false else this == andreElementer + opphørtResultat
 }
 
 fun Set<YtelsePersonResultat>.matcherAltOgHarBådeEndretOgOpphørtResultat(andreElementer: Set<YtelsePersonResultat>): Boolean {
@@ -256,5 +256,5 @@ fun Set<YtelsePersonResultat>.matcherAltOgHarBådeEndretOgOpphørtResultat(andre
 
     val opphørtResultat = this.intersect(setOf(YtelsePersonResultat.OPPHØRT, YtelsePersonResultat.FORTSATT_OPPHØRT))
 
-    return this == setOf(endretResultat) + opphørtResultat + andreElementer
+    return if (opphørtResultat.isEmpty()) false else this == setOf(endretResultat) + opphørtResultat + andreElementer
 }
