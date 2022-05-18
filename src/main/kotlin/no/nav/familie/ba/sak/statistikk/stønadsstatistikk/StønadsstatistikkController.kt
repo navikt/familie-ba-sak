@@ -32,7 +32,7 @@ class StønadsstatistikkController(
     private val logger = LoggerFactory.getLogger(StønadsstatistikkController::class.java)
 
     @PostMapping(path = ["/vedtak"])
-    fun hentBehandlingDvh(@RequestBody(required = true) behandlinger: List<Long>): List<VedtakDVH> {
+    fun hentVedtakDvh(@RequestBody(required = true) behandlinger: List<Long>): List<VedtakDVH> {
         try {
             return behandlinger.map { stønadsstatistikkService.hentVedtak(it) }
         } catch (e: Exception) {
@@ -42,7 +42,7 @@ class StønadsstatistikkController(
     }
 
     @PostMapping(path = ["/vedtakV2"])
-    fun hentBehandlingDvhV2(@RequestBody(required = true) behandlinger: List<Long>): List<VedtakDVHV2> {
+    fun hentVedtakDvhV2(@RequestBody(required = true) behandlinger: List<Long>): List<VedtakDVHV2> {
         try {
             return behandlinger.map { stønadsstatistikkService.hentVedtakV2(it) }
         } catch (e: Exception) {

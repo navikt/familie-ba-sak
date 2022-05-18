@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.statistikk.producer
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
@@ -11,6 +12,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -54,7 +56,9 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     private val vedtakV2Counter = Metrics.counter(COUNTER_NAME, "type", "vedtakV2")
     private val saksstatistikkSakDvhCounter = Metrics.counter(COUNTER_NAME, "type", "sak")
     private val saksstatistikkBehandlingDvhCounter = Metrics.counter(COUNTER_NAME, "type", "behandling")
-
+    @Autowired
+    @Qualifier("kafkaObjectMapper")
+    lateinit var kafkaObjectMapper: ObjectMapper
     @Autowired
     lateinit var kafkaTemplate: KafkaTemplate<String, Any>
 
@@ -133,7 +137,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         barnetrygdBisysMelding: BarnetrygdBisysMelding
     ) {
         val opphørBarnetrygdBisysMelding =
-            objectMapper.writeValueAsString(barnetrygdBisysMelding)
+            kafkaObjectMapper.writeValueAsString(barnetrygdBisysMelding)
 
         kafkaAivenTemplate.send(OPPHOER_BARNETRYGD_BISYS_TOPIC, behandlingId, opphørBarnetrygdBisysMelding)
             .addCallback(
