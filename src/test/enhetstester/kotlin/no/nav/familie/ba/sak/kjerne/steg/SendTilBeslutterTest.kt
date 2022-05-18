@@ -16,7 +16,7 @@ class SendTilBeslutterTest {
     @Test
     fun `Sjekk at validering er bakoverkompatibel med endring i stegrekkefølge`() {
         val behandling = lagBehandling(førsteSteg = StegType.REGISTRERE_SØKNAD)
-        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_GRUNNLAG_FOR_NY_BEHANDLING)
+        behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
 

@@ -42,15 +42,6 @@ class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
         tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
     }
 
-    fun kopierOgErstattSkjemaer(fraBehandlingId: Long, tilBehandlingId: Long) {
-        val gjeldendeTilSkjemaer = hentMedBehandlingId(tilBehandlingId)
-        val kopiAvFraSkjemaer = hentMedBehandlingId(fraBehandlingId)
-            .map { it.kopier() }
-            .medBehandlingId(tilBehandlingId)
-
-        lagreSkjemaDifferanse(gjeldendeTilSkjemaer, kopiAvFraSkjemaer)
-    }
-
     fun lagreSkjemaDifferanse(gjeldende: Collection<T>, oppdaterte: Collection<T>) {
         periodeOgBarnSkjemaRepository.deleteAll(gjeldende - oppdaterte)
         periodeOgBarnSkjemaRepository.saveAll(oppdaterte - gjeldende)
