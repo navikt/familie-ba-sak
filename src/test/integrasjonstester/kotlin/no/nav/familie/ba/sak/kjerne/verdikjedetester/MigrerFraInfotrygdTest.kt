@@ -520,7 +520,7 @@ class MigrerFraInfotrygdTest(
     }
 
     @Test
-    fun `skal feile migrering av utvidet barnetrygd med delt bosted fordi det er mer enn ett barn`() {
+    fun `skal feile migrering av utvidet barnetrygd med delt bosted pga ulikt antall barn når et av barna er over 18`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.SKAL_MIGRERE_FOSTERBARN, any()) } returns true
         every {
             featureToggleService.isEnabled(
@@ -539,13 +539,13 @@ class MigrerFraInfotrygdTest(
                 ),
                 barna = listOf(
                     RestScenarioPerson(
-                        fødselsdato = LocalDate.now().minusYears(8).toString(),
-                        fornavn = "Tvilling1",
+                        fødselsdato = LocalDate.now().minusYears(19).toString(),
+                        fornavn = "Barn1",
                         etternavn = "Barnesen1"
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
-                        fornavn = "Tvilling2",
+                        fornavn = "Barn2",
                         etternavn = "Barnesen2"
                     )
                 )
@@ -576,7 +576,75 @@ class MigrerFraInfotrygdTest(
 
         val exception =
             assertThrows<KanIkkeMigrereException> { migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!) }
-        assertThat(exception.feiltype).isEqualTo(MigreringsfeilType.MER_ENN_ETT_BARN_PÅ_SAK_AV_TYPE_UT_MD)
+        assertThat(exception.feiltype).isEqualTo(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_BA_SAK)
+    }
+
+    @Test
+    fun `skal feile migrering dersom ikke småbarnstillegg stemmer overens`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SKAL_MIGRERE_FOSTERBARN, any()) } returns true
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.SKAL_MIGRERE_UTVIDET_DELT_BOSTED,
+                any()
+            )
+        } returns true
+        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
+
+        val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(
+                    fødselsdato = "1996-01-12",
+                    fornavn = "Mor",
+                    etternavn = "Søker"
+                ),
+                barna = listOf(
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusYears(11).toString(),
+                        fornavn = "Barn1",
+                        etternavn = "Barnesen1"
+                    ),
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusYears(8).toString(),
+                        fornavn = "Barn2",
+                        etternavn = "Barnesen2"
+                    )
+                )
+            )
+        )
+
+        val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(
+                    fødselsdato = "1996-01-12",
+                    fornavn = "Mor",
+                    etternavn = "Søker",
+                    infotrygdSaker = InfotrygdSøkResponse(
+                        bruker = listOf(
+                            lagInfotrygdSak(
+                                HALV_UTVIDET_BARNETRYGD_SATS + HALV_BARNETRYGD_SATS_OVER_6_ÅR * 2,
+                                barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
+                                "UT",
+                                "MD"
+                            ).let {
+                                it.copy(
+                                    stønad = it.stønad!!.copy(
+                                        delytelse = listOf(
+                                            it.stønad!!.delytelse.first().copy(typeDelytelse = SMÅBARNSTILLEGG_KODE)
+                                        )
+                                    )
+                                )
+                            }
+                        ),
+                        barn = emptyList()
+                    )
+                ),
+                barna = emptyList()
+            )
+        )
+
+        val exception =
+            assertThrows<KanIkkeMigrereException> { migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!) }
+        assertThat(exception.feiltype).isEqualTo(MigreringsfeilType.SMÅBARNSTILLEGG_INFOTRYGD_IKKE_BA_SAK)
     }
 
     companion object {
@@ -584,5 +652,6 @@ class MigrerFraInfotrygdTest(
         const val HALV_BARNETRYGD_SATS_OVER_6_ÅR = 527.0
         const val HALV_UTVIDET_BARNETRYGD_SATS = 527.0
         const val SMÅBARNSTILLEGG = 660.0
+        const val SMÅBARNSTILLEGG_KODE = "SM"
     }
 }
