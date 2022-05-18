@@ -131,7 +131,6 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
     aktørerIForrigePersonopplysningGrunnlag: List<Aktør>,
-    skalBrukeNyMåteÅGenerereVedtaksperioder: Boolean
 ): List<VedtaksperiodeMedBegrunnelser> {
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
 
@@ -168,7 +167,6 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
                                         utbetalingsperiode.hentUtbetalingsperiodeDetaljer(
                                             andelerTilkjentYtelse = andelerTilkjentYtelse,
                                             personopplysningGrunnlag = personopplysningGrunnlag,
-                                            skalBrukeNyMåteÅGenerereVedtaksperioder = skalBrukeNyMåteÅGenerereVedtaksperioder
                                         )
                                             .any {
                                                 it.person.personIdent ==
