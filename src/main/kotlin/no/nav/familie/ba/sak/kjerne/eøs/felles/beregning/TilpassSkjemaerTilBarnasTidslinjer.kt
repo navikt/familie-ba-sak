@@ -22,7 +22,7 @@ fun <S : PeriodeOgBarnSkjema<S>, I> tilpassSkjemaerTilTidslinjer(
                 if (innhold != null && skjema == null) tomtSkjemForBarnFactory(barn) else null
             }
         }
-        .slåSammen()
+        .tilSkjemaer().slåSammen()
 
     return (skjemaerUtenOverflødige + manglendeSkjemaer).slåSammen()
 }
@@ -37,10 +37,10 @@ fun <S : PeriodeOgBarnSkjema<S>, I> fjernOverflødigeSkjemaerRekursivt(
         .kombinerForAlleNøklerMed(barnasTidslinjer) {
             { skjema: S?, innhold: I? -> if (innhold == null && skjema != null) skjema else null }
         }
-        .slåSammen()
+        .tilSkjemaer().slåSammen()
 
     return if (overflødigeSkjemaer.isNotEmpty()) {
-        val skjemaerFratrukketOverflødige = skjemaer.trekkFra(overflødigeSkjemaer.first())
+        val skjemaerFratrukketOverflødige = skjemaer.trekkFra(overflødigeSkjemaer.first()).slåSammen()
         fjernOverflødigeSkjemaerRekursivt(
             skjemaerFratrukketOverflødige,
             barnasTidslinjer
@@ -60,9 +60,8 @@ fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilTidslinjerForBarna(): Map<Aktør
     }
 }
 
-private fun <S : PeriodeOgBarnSkjema<S>> Map<Aktør, Tidslinje<S, Måned>>.slåSammen() =
+private fun <S : PeriodeOgBarnSkjema<S>> Map<Aktør, Tidslinje<S, Måned>>.tilSkjemaer() =
     this.flatMap { (_, tidslinjer) -> tidslinjer.tilSkjemaer() }
-        .slåSammen()
 
 private fun <S : PeriodeOgBarnSkjema<S>> Tidslinje<S, Måned>.tilSkjemaer() =
     this.perioder().mapNotNull { periode ->

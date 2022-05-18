@@ -294,6 +294,55 @@ internal class KompetanseServiceTest {
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
+
+    @Test
+    fun `skal tilpasse kompetanser til endrede regelverk-tidslinjer`() {
+        val behandlingId = 10L
+
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
+
+        KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("SS   SS", barn1)
+            .medKompetanse("  PPP", barn1, barn2, barn3)
+            .medKompetanse("--   ----", barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>()
+            .forPerson(søker, jan(2020))
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)
+            .forPerson(barn1, jan(2020))
+            .medVilkår("+++++++++++", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
+            .forPerson(barn2, jan(2020))
+            .medVilkår("  +++", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+            .medVilkår("  EEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
+            .forPerson(barn3, jan(2020))
+            .medVilkår("+>", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+            .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
+
+        val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
+        val tidslinjer = Tidslinjer(
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2, barn3)
+        )
+
+        every { tidslinjeService.hentTidslinjerThrows(behandlingId) } returns tidslinjer
+
+        kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
+
+        val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+
+        val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse(" SP  SS-----", barn1)
+            .medKompetanse("     -", barn2)
+            .medKompetanse("   PP ", barn1, barn2)
+            .byggKompetanser()
+
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
 }
 
 fun kompetanse(tidspunkt: Tidspunkt<Måned>, behandlingId: Long, s: String, vararg barn: Person) =

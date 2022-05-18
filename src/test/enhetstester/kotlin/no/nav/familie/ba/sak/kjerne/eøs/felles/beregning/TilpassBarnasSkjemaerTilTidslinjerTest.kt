@@ -146,4 +146,37 @@ class TilpassBarnasSkjemaerTilTidslinjerTest {
             tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn).sortedBy { it.fom }
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
+
+    @Test
+    fun `tilpass kompetanser til barn som ikke lenger har EØS-perioder`() {
+        // "SSSSSSS", barn1
+        // "SSSPPSS", barn2
+        // "-SSSSSS", barn3
+
+        val kompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse(" SS  SS", barn1, barn2, barn3)
+            .medKompetanse("S      ", barn1, barn2)
+            .medKompetanse("   SS  ", barn1, barn3)
+            .medKompetanse("   PP  ", barn2)
+            .medKompetanse("-      ", barn3)
+            .byggKompetanser()
+
+        val eøsPerioder = mapOf(
+            barn1.aktør to "EEENNEEEE".tilEøsRegelverkTidslinje(jan2020),
+            barn2.aktør to "EEE--NNNN".tilEøsRegelverkTidslinje(jan2020),
+            barn3.aktør to "NNNN-----".tilEøsRegelverkTidslinje(jan2020)
+        )
+
+        // SSS  SS--, barn1
+        // SSS      , barn2
+
+        val forventedeKompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("SSS      ", barn1, barn2)
+            .medKompetanse("     SS--", barn1)
+            .byggKompetanser().sortedBy { it.fom }
+
+        val faktiskeKompetanser =
+            tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn).sortedBy { it.fom }
+        Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
+    }
 }
