@@ -27,9 +27,10 @@ internal class SkatteetatenServiceTest {
 
         val nyesteVedtaksdato = LocalDate.now()
         every { fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(any(), any()) } returns listOf(
-            fagsak to nyesteVedtaksdato,
-            fagsak2 to nyesteVedtaksdato.plusDays(2)
+            TestUtvidetSkatt(fagsak.aktør.aktivFødselsnummer(), nyesteVedtaksdato),
+            TestUtvidetSkatt(fagsak2.aktør.aktivFødselsnummer(), nyesteVedtaksdato.plusDays(2))
         )
+
         every { infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(any()) } returns SkatteetatenPersonerResponse(
             listOf(
                 SkatteetatenPerson(fagsak.aktør.aktivFødselsnummer(), nyesteVedtaksdato.atStartOfDay().minusYears(1))
@@ -70,9 +71,10 @@ internal class SkatteetatenServiceTest {
         val fagsak2 = defaultFagsak()
 
         val vedtaksdato = LocalDate.now()
+
         every { fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(any(), any()) } returns listOf(
-            fagsak to vedtaksdato,
-            fagsak2 to vedtaksdato.plusDays(2)
+            TestUtvidetSkatt(fagsak.aktør.aktivFødselsnummer(), vedtaksdato),
+            TestUtvidetSkatt(fagsak2.aktør.aktivFødselsnummer(), vedtaksdato.plusDays(2))
         )
 
         val skatteetatenService =
@@ -135,4 +137,6 @@ internal class SkatteetatenServiceTest {
         )
             .isEqualTo(vedtaksdato.atStartOfDay())
     }
+
+    class TestUtvidetSkatt(override val fnr: String, override val sisteVedtaksdato: LocalDate) : UtvidetSkatt
 }
