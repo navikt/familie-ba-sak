@@ -87,10 +87,7 @@ class BeslutteVedtak(
                 }
                 StegType.FERDIGSTILLE_BEHANDLING -> {
                     if (behandling.type == BehandlingType.TEKNISK_ENDRING) {
-                        FerdigstillBehandlingTask.opprettTask(
-                            søkerPersonIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-                            behandlingsId = behandling.id
-                        )
+                        opprettFerdigstillBehandlingTask(behandling)
                     } else throw Feil("Neste steg 'ferdigstille behandling' er ikke implementert på 'beslutte vedtak'-steg")
                 }
                 else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på 'beslutte vedtak'-steg")
@@ -145,6 +142,14 @@ class BeslutteVedtak(
             }
         }
         return nesteSteg
+    }
+
+    private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {
+        val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
+            søkerPersonIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+            behandlingsId = behandling.id
+        )
+        taskRepository.save(ferdigstillBehandlingTask)
     }
 
     private fun opprettTaskFerdigstillGodkjenneVedtak(behandling: Behandling, beslutning: RestBeslutningPåVedtak) {
