@@ -3,10 +3,26 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
-data class VarselOmRevurderingBrev(
-    override val mal: Brevmal = Brevmal.VARSEL_OM_REVURDERING,
+data class VarselbrevMedÅrsaker(
+    override val mal: Brevmal,
     override val data: VarselOmRevurderingData
-) : Brev
+) : Brev {
+    constructor(
+        mal: Brevmal,
+        navn: String,
+        fødselsnummer: String,
+        varselÅrsaker: List<String>,
+        enhet: String,
+    ) : this(
+        mal = mal,
+        data = VarselOmRevurderingData(
+            delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = enhet)),
+            flettefelter = VarselOmRevurderingData.Flettefelter(
+                navn = navn, fodselsnummer = fødselsnummer, varselÅrsaker = varselÅrsaker
+            ),
+        )
+    )
+}
 
 data class VarselOmRevurderingData(
     override val delmalData: DelmalData,
