@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -35,9 +35,9 @@ class ValutakursService(
 
         val barnasUtenlandskePeriodebeløpTidslinjer = utenlandskPeriodebeløpService
             .hentUtenlandskePeriodebeløp(behandlingId)
-            .tilTidslinjerForBarna()
+            .tilSeparateTidslinjerForBarna()
 
-        val oppdaterteValutakurser = gjeldendeValutakurser.tilTidslinjerForBarna()
+        val oppdaterteValutakurser = gjeldendeValutakurser.tilSeparateTidslinjerForBarna()
             .tilpassTil(barnasUtenlandskePeriodebeløpTidslinjer) { Valutakurs.NULL }
             .tilSkjemaer(behandlingId)
 

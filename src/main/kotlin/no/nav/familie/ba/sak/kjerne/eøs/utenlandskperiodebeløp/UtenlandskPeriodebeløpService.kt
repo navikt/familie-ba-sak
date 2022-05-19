@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -40,10 +40,10 @@ class UtenlandskPeriodebeløpService(
         val gjeldendeUtenlandskePeridebeløp = hentUtenlandskePeriodebeløp(behandlingId)
 
         val barnasKompetanseTidslinjer = kompetanseService.hentKompetanser(behandlingId)
-            .tilTidslinjerForBarna()
+            .tilSeparateTidslinjerForBarna()
             .filtrerSekundærland()
 
-        val oppdaterteUtenlandskPeriodebeløp = gjeldendeUtenlandskePeridebeløp.tilTidslinjerForBarna()
+        val oppdaterteUtenlandskPeriodebeløp = gjeldendeUtenlandskePeridebeløp.tilSeparateTidslinjerForBarna()
             .tilpassTil(barnasKompetanseTidslinjer) { UtenlandskPeriodebeløp.NULL }
             .tilSkjemaer(behandlingId)
 
