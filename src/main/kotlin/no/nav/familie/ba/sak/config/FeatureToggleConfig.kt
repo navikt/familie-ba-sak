@@ -115,8 +115,6 @@ class FeatureToggleConfig(
         const val LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT =
             "familie-ba-sak.lag.reduksjonsperioder.fra.innvilgelsestidspunkt"
 
-        const val SKAL_MIGRERE_FOSTERBARN = "familie-ba-sak.migrer-fosterbarn"
-
         const val SKAL_MIGRERE_ORDINÆR_DELT_BOSTED = "familie-ba-sak.migrer-delt-bosted"
 
         const val SKAL_MIGRERE_UTVIDET_DELT_BOSTED = "familie-ba-sak.migrer-utvidet-delt-bosted"
