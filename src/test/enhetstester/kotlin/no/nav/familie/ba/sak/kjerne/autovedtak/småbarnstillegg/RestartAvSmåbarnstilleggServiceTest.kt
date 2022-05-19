@@ -42,8 +42,6 @@ class RestartAvSmåbarnstilleggServiceTest {
             restartAvSmåbarnstilleggService.periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(any(), any())
         } returns false
 
-        every { restartAvSmåbarnstilleggService.finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(any()) } answers { callOriginal() }
-
         Assertions.assertEquals(
             listOf(0L, 2L),
             restartAvSmåbarnstilleggService.finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned()
