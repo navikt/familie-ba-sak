@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -21,11 +23,13 @@ class RestartAvSmåbarnstilleggService(
     private val opprettTaskService: OpprettTaskService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
+    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
 ) {
 
     /**
      * Første dag hver måned sjekkes det om noen fagsaker har oppstart av småbarnstillegg inneværende måned, etter å ha
      * hatt et opphold. Hvis perioden ikke allerede er begrunnet, skal det opprettes en "vurder livshendelse"-oppgave
+     * med mindre forrige behandling var en migrering fra Infotrygd.
      */
     @Scheduled(cron = "0 0 7 1 * *")
     @Transactional
@@ -53,11 +57,14 @@ class RestartAvSmåbarnstilleggService(
                 stønadFom = måned
             )
         }.filter { fagsakId ->
+            val migreringsdato = behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
+            migreringsdato?.month != LocalDate.now().minusMonths(1).month
+        }.filter { fagsakId ->
             !periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId = fagsakId, måned = måned)
         }
     }
 
-    private fun periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId: Long, måned: YearMonth): Boolean {
+    internal fun periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId: Long, måned: YearMonth): Boolean {
         val vedtaksperioderForVedtatteBehandlinger =
             behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
                 .filter { behandling ->
