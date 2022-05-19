@@ -27,7 +27,7 @@ class RestartAvSmåbarnstilleggServiceTest {
     )
 
     @Test
-    fun `Skal ikke finne saker migrert forrige måned`() {
+    fun `Skal ikke inkludere saker som er migrert forrige måned ved opprettelse av restartet småbarnstillegg oppgave`() {
         every { behandlingHentOgPersisterService.partitionByIverksatteBehandlinger<Long>(any()) } returns
             listOf(0L, 1L, 2L)
 
