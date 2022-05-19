@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.tilDokumenttype
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevtype
+import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -57,7 +57,7 @@ class JournalførVedtaksbrev(
                 personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
                 behandlingId = vedtak.behandling.id,
                 journalpostId = journalpostId,
-                brevmal = hentBrevtype(behandling),
+                brevmal = hentBrevmal(behandling),
                 erManueltSendt = false
             ),
             properties = data.task.metadata
