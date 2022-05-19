@@ -36,7 +36,6 @@ internal class UtenlandskPeriodebeløpServiceTest {
     fun `skal tilpasse utenlandsk periodebeløp til endrede kompetanser`() {
         val behandlingId = 10L
 
-        val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
         val barn3 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
