@@ -7,11 +7,12 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.utenPeriode
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerForAlleNøklerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilpassTil
 
 fun <S : PeriodeOgBarnSkjema<S>> S.tilTidslinje() = listOf(this).tilTidslinje()
 
@@ -61,15 +62,15 @@ private fun <S : PeriodeOgBarnSkjema<S>> Tidslinje<S, Måned>.tilSkjemaer(aktør
     }
 
 fun <S : PeriodeOgBarnSkjema<S>, I> Map<Aktør, Tidslinje<S, Måned>>.tilpassTil(
-    aktørTilTidslinjeMap: Map<Aktør, Tidslinje<I, Måned>>,
+    aktørTilMønsterTidslinje: Map<Aktør, Tidslinje<I, Måned>>,
     nyttSkjemaFactory: () -> S
 ): Map<Aktør, Tidslinje<S, Måned>> {
-    return this.kombinerForAlleNøklerMed(aktørTilTidslinjeMap) {
-        { skjema: S?, innhold: I? ->
-            when {
-                innhold == null -> null
-                else -> skjema ?: nyttSkjemaFactory()
-            }
-        }
+    val alleBarnAktørIder = this.keys + aktørTilMønsterTidslinje.keys
+
+    return alleBarnAktørIder.associateWith { aktør ->
+        val skjemaTidslinje = this.getOrDefault(aktør, TomTidslinje())
+        val mønsterTidslinje = aktørTilMønsterTidslinje.getOrDefault(aktør, TomTidslinje())
+
+        skjemaTidslinje.tilpassTil(mønsterTidslinje) { nyttSkjemaFactory() }
     }
 }
