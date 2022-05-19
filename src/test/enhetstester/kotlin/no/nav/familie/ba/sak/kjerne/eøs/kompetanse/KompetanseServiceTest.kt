@@ -6,6 +6,7 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
@@ -356,11 +357,11 @@ private fun KompetanseService.finnKompetanse(behandlingId: Long, kompetanse: Kom
         .first { it == kompetanse }
 }
 
-private fun KompetanseBuilder.lagreTil(kompetanseRepository: KompetanseRepository): List<Kompetanse> {
+fun KompetanseBuilder.lagreTil(kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>): List<Kompetanse> {
     val byggKompetanser = this.byggKompetanser()
     return kompetanseRepository.saveAll(byggKompetanser)
 }
 
-private fun Kompetanse.lagreTil(kompetanseRepository: KompetanseRepository): Kompetanse {
+fun Kompetanse.lagreTil(kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>): Kompetanse {
     return kompetanseRepository.saveAll(listOf(this)).first()
 }

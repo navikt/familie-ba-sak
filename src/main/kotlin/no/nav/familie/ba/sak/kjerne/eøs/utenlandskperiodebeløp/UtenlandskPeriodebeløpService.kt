@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
@@ -17,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UtenlandskPeriodebeløpService(
-    repository: UtenlandskPeriodebeløpRepository,
+    repository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val kompetanseService: KompetanseService
 ) {

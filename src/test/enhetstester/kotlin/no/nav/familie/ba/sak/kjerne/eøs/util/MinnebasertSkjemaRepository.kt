@@ -1,6 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import java.util.concurrent.atomic.AtomicLong
 
 class MinnebasertSkjemaRepository<S> where S : PeriodeOgBarnSkjemaEntitet<S> {
@@ -36,4 +40,39 @@ class MinnebasertSkjemaRepository<S> where S : PeriodeOgBarnSkjemaEntitet<S> {
     fun delete(tilSletting: Iterable<S>) {
         tilSletting.forEach { skjemaer.remove(it.id) }
     }
+
+    fun deleteAll() {
+        skjemaer.clear()
+    }
+}
+
+fun <S : PeriodeOgBarnSkjemaEntitet<S>> mockRepo(): PeriodeOgBarnSkjemaRepository<S> {
+
+    val minnebasertSkjemaRepository = MinnebasertSkjemaRepository<S>()
+    val mockSkjemaRepository = mockk<PeriodeOgBarnSkjemaRepository<S>>()
+
+    val idSlot = slot<Long>()
+    val skjemaListeSlot = slot<Iterable<S>>()
+
+    every { mockSkjemaRepository.findByBehandlingId(capture(idSlot)) } answers {
+        minnebasertSkjemaRepository.hentSkjemaer(idSlot.captured)
+    }
+
+    every { mockSkjemaRepository.getById(capture(idSlot)) } answers {
+        minnebasertSkjemaRepository.hentSkjema(idSlot.captured)
+    }
+
+    every { mockSkjemaRepository.saveAll(capture(skjemaListeSlot)) } answers {
+        minnebasertSkjemaRepository.save(skjemaListeSlot.captured)
+    }
+
+    every { mockSkjemaRepository.deleteAll(capture(skjemaListeSlot)) } answers {
+        minnebasertSkjemaRepository.delete(skjemaListeSlot.captured)
+    }
+
+    every { mockSkjemaRepository.deleteAll() } answers {
+        minnebasertSkjemaRepository.deleteAll()
+    }
+
+    return mockSkjemaRepository
 }

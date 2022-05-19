@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
@@ -11,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ValutakursService(
-    repository: ValutakursRepository,
+    repository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
     tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService
 ) {
@@ -30,7 +31,7 @@ class ValutakursService(
         serviceDelegate.slettSkjema(valutakursId)
 
     @Transactional
-    fun tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId: Long) {
+    fun tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId: Long) {
         val gjeldendeValutakurser = hentValutakurser(behandlingId)
 
         val barnasUtenlandskePeriodebeløpTidslinjer = utenlandskPeriodebeløpService
