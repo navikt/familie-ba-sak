@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevtype
+import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -25,7 +25,7 @@ class DistribuerVedtaksbrevTask(
             behandlingId = distribuerVedtaksbrevDTO.behandlingId,
             journalpostId = distribuerVedtaksbrevDTO.journalpostId,
             personIdent = distribuerVedtaksbrevDTO.personIdent,
-            brevmal = hentBrevtype(behandling),
+            brevmal = hentBrevmal(behandling),
             erManueltSendt = false
         )
         stegService.håndterDistribuerVedtaksbrev(
