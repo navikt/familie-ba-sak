@@ -3,11 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.felles
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.oppdaterSkjemaerRekursivt
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.somInversOppdateringEllersNull
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassSkjemaerTilTidslinjer
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 
 class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
     val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>,
@@ -53,18 +49,6 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
             .medBehandlingId(tilBehandlingId)
 
         lagreSkjemaDifferanse(gjeldendeTilSkjemaer, kopiAvFraSkjemaer)
-    }
-
-    fun <I> tilpassBarnasSkjemaerTilTidslinjer(
-        behandlingId: Long,
-        barnasTidslinjer: Map<Aktør, Tidslinje<I, Måned>>,
-        tomtSkjemaForBarnFactory: (Aktør) -> S
-    ) {
-        val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
-        val oppdaterteSkjemaer =
-            tilpassSkjemaerTilTidslinjer(gjeldendeSkjemaer, barnasTidslinjer, tomtSkjemaForBarnFactory)
-
-        lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteSkjemaer.medBehandlingId(behandlingId))
     }
 
     fun lagreSkjemaDifferanse(gjeldende: Collection<S>, oppdaterte: Collection<S>) {

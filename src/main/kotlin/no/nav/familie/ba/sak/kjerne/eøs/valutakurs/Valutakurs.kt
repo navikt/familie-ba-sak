@@ -74,4 +74,8 @@ data class Valutakurs(
             tom = tom,
             barnAktører = barnAktører
         )
+
+    companion object {
+        val NULL = Valutakurs(null, null, emptySet())
+    }
 }

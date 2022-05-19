@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.tilpassTil
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.hentBarnasEøsRegelverkTidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
@@ -35,12 +38,14 @@ class KompetanseService(
 
     @Transactional
     fun tilpassKompetanserTilRegelverk(behandlingId: Long) {
-        val barnasEøsRegelverkTidslinjer = tidslinjeService
-            .hentBarnasEøsRegelverkTidslinjer(behandlingId)
+        val gjeldendeKompetanser = hentKompetanser(behandlingId)
 
-        serviceDelegate.tilpassBarnasSkjemaerTilTidslinjer(
-            behandlingId,
-            barnasEøsRegelverkTidslinjer
-        ) { aktør -> Kompetanse(null, null, setOf(aktør)) }
+        val barnasEøsRegelverkTidslinjer = tidslinjeService.hentBarnasEøsRegelverkTidslinjer(behandlingId)
+
+        val oppdaterteSkjemaer = gjeldendeKompetanser.tilTidslinjerForBarna()
+            .tilpassTil(barnasEøsRegelverkTidslinjer) { Kompetanse.NULL }
+            .tilSkjemaer(behandlingId)
+
+        serviceDelegate.lagreSkjemaDifferanse(gjeldendeKompetanser, oppdaterteSkjemaer)
     }
 }

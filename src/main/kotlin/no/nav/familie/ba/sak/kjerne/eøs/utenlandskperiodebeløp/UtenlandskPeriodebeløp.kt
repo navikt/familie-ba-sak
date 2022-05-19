@@ -72,4 +72,8 @@ data class UtenlandskPeriodebeløp(
         tom = tom,
         barnAktører = barnAktører
     )
+
+    companion object {
+        val NULL = UtenlandskPeriodebeløp(null, null, emptySet())
+    }
 }

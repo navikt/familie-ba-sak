@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.springframework.stereotype.Service
@@ -29,14 +31,16 @@ class ValutakursService(
 
     @Transactional
     fun tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId: Long) {
+        val gjeldendeValutakurser = hentValutakurser(behandlingId)
 
         val barnasUtenlandskePeriodebeløpTidslinjer = utenlandskPeriodebeløpService
             .hentUtenlandskePeriodebeløp(behandlingId)
             .tilTidslinjerForBarna()
 
-        serviceDelegate.tilpassBarnasSkjemaerTilTidslinjer(
-            behandlingId,
-            barnasUtenlandskePeriodebeløpTidslinjer
-        ) { aktør -> Valutakurs(null, null, setOf(aktør)) }
+        val oppdaterteValutakurser = gjeldendeValutakurser.tilTidslinjerForBarna()
+            .tilpassTil(barnasUtenlandskePeriodebeløpTidslinjer) { Valutakurs.NULL }
+            .tilSkjemaer(behandlingId)
+
+        serviceDelegate.lagreSkjemaDifferanse(gjeldendeValutakurser, oppdaterteValutakurser)
     }
 }

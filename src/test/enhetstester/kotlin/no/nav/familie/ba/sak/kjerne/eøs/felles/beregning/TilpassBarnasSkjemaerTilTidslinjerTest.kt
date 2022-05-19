@@ -34,7 +34,10 @@ class TilpassBarnasSkjemaerTilTidslinjerTest {
             .medKompetanse("---  ----", barn1)
             .byggKompetanser()
 
-        val faktiskeKompetanser = tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn)
+        val faktiskeKompetanser = kompetanser.tilTidslinjerForBarna()
+            .tilpassTil(eøsPerioder) { Kompetanse.NULL }
+            .tilSkjemaer(0L)
+
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -48,7 +51,10 @@ class TilpassBarnasSkjemaerTilTidslinjerTest {
 
         val forventedeKompetanser = emptyList<Kompetanse>()
 
-        val faktiskeKompetanser = tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn)
+        val faktiskeKompetanser = kompetanser.tilTidslinjerForBarna()
+            .tilpassTil(eøsPerioder) { Kompetanse.NULL }
+            .tilSkjemaer(0L)
+
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -66,7 +72,10 @@ class TilpassBarnasSkjemaerTilTidslinjerTest {
             .medKompetanse("SSS  SS--", barn1)
             .byggKompetanser()
 
-        val faktiskeKompetanser = tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn)
+        val faktiskeKompetanser = kompetanser.tilTidslinjerForBarna()
+            .tilpassTil(eøsPerioder) { Kompetanse.NULL }
+            .tilSkjemaer(0L)
+
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -87,7 +96,10 @@ class TilpassBarnasSkjemaerTilTidslinjerTest {
             .medKompetanse("   - ", barn2)
             .byggKompetanser().sortedBy { it.fom }
 
-        val faktiskeKompetanser = tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn)
+        val faktiskeKompetanser = kompetanser.tilTidslinjerForBarna()
+            .tilpassTil(eøsPerioder) { Kompetanse.NULL }
+            .tilSkjemaer(0L)
+
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -122,8 +134,11 @@ class TilpassBarnasSkjemaerTilTidslinjerTest {
             .medKompetanse("-  SS    ", barn3)
             .byggKompetanser().sortedBy { it.fom }
 
-        val faktiskeKompetanser =
-            tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn).sortedBy { it.fom }
+        val faktiskeKompetanser = kompetanser.tilTidslinjerForBarna()
+            .tilpassTil(eøsPerioder) { Kompetanse.NULL }
+            .tilSkjemaer(0L)
+            .sortedBy { it.fom }
+
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -142,8 +157,11 @@ class TilpassBarnasSkjemaerTilTidslinjerTest {
             .medKompetanse("  ->", barn1, barn2)
             .byggKompetanser().sortedBy { it.fom }
 
-        val faktiskeKompetanser =
-            tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn).sortedBy { it.fom }
+        val faktiskeKompetanser = kompetanser.tilTidslinjerForBarna()
+            .tilpassTil(eøsPerioder) { Kompetanse.NULL }
+            .tilSkjemaer(0L)
+            .sortedBy { it.fom }
+
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 
@@ -175,8 +193,11 @@ class TilpassBarnasSkjemaerTilTidslinjerTest {
             .medKompetanse("     SS--", barn1)
             .byggKompetanser().sortedBy { it.fom }
 
-        val faktiskeKompetanser =
-            tilpassSkjemaerTilTidslinjer(kompetanser, eøsPerioder, tomKompetanseForBarn).sortedBy { it.fom }
+        val faktiskeKompetanser = kompetanser.tilTidslinjerForBarna()
+            .tilpassTil(eøsPerioder) { Kompetanse.NULL }
+            .tilSkjemaer(0L)
+            .sortedBy { it.fom }
+
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
 }
