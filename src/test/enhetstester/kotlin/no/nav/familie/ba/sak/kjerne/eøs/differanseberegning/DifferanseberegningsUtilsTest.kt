@@ -10,15 +10,15 @@ class DifferanseberegningsUtilsTest {
 
         val utenlandskSatsÅrlig = 1200
 
-        val utbetalingsbeløpUtlandINok =
+        Assertions.assertEquals(
+            1000,
             beregnUtbetalingsbeløpUtlandINok(
                 satsUtland = utenlandskSatsÅrlig,
                 kurs = 10.0,
                 intervall = Intervall.ÅRLIG,
                 erSkuddår = false
             )
-
-        Assertions.assertEquals(1000, utbetalingsbeløpUtlandINok)
+        )
     }
 
     @Test
@@ -26,15 +26,15 @@ class DifferanseberegningsUtilsTest {
 
         val utenlandskSatsKvartalsvis = 400
 
-        val utbetalingsbeløpUtlandINok =
+        Assertions.assertEquals(
+            1000,
             beregnUtbetalingsbeløpUtlandINok(
                 satsUtland = utenlandskSatsKvartalsvis,
                 kurs = 10.0,
                 intervall = Intervall.KVARTALSVIS,
                 erSkuddår = false
             )
-
-        Assertions.assertEquals(1000, utbetalingsbeløpUtlandINok)
+        )
     }
 
     @Test
@@ -42,15 +42,15 @@ class DifferanseberegningsUtilsTest {
 
         val utenlandskSatsMåendlig = 100
 
-        val utbetalingsbeløpUtlandINok =
+        Assertions.assertEquals(
+            1000,
             beregnUtbetalingsbeløpUtlandINok(
                 satsUtland = utenlandskSatsMåendlig,
                 kurs = 10.0,
                 intervall = Intervall.MÅNEDLIG,
                 erSkuddår = false
             )
-
-        Assertions.assertEquals(1000, utbetalingsbeløpUtlandINok)
+        )
     }
 
     @Test
@@ -58,15 +58,15 @@ class DifferanseberegningsUtilsTest {
 
         val utenlandskSatsUkentlig = 25
 
-        val utbetalingsbeløpUtlandINok =
+        Assertions.assertEquals(
+            1086,
             beregnUtbetalingsbeløpUtlandINok(
                 satsUtland = utenlandskSatsUkentlig,
                 kurs = 10.0,
                 intervall = Intervall.UKENTLIG,
                 erSkuddår = false
             )
-
-        Assertions.assertEquals(1086, utbetalingsbeløpUtlandINok)
+        )
     }
 
     @Test
@@ -74,15 +74,15 @@ class DifferanseberegningsUtilsTest {
 
         val utenlandskSatsUkentlig = 25
 
-        val utbetalingsbeløpUtlandINok =
+        Assertions.assertEquals(
+            1089,
             beregnUtbetalingsbeløpUtlandINok(
                 satsUtland = utenlandskSatsUkentlig,
                 kurs = 10.0,
                 intervall = Intervall.UKENTLIG,
                 erSkuddår = true
             )
-
-        Assertions.assertEquals(1089, utbetalingsbeløpUtlandINok)
+        )
     }
 
     @Test
