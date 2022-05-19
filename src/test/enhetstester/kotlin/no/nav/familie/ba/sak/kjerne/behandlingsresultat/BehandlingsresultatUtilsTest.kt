@@ -92,7 +92,7 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(
-            Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
+            Behandlingsresultat.AVSLÅTT,
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }

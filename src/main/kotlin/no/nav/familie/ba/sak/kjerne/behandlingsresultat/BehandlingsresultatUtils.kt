@@ -137,7 +137,19 @@ object BehandlingsresultatUtils {
                 )
             ) -> Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
             samledeResultater == setOf(YtelsePersonResultat.AVSLÅTT) -> Behandlingsresultat.AVSLÅTT
-            samledeResultater.matcherAltOgHarOpphørtResultat(setOf(YtelsePersonResultat.AVSLÅTT)) -> Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
+            samledeResultater == setOf(
+                YtelsePersonResultat.AVSLÅTT,
+                YtelsePersonResultat.FORTSATT_OPPHØRT
+            ) -> Behandlingsresultat.AVSLÅTT // for å få riktig brevmål AVSLÅTT siden det var ingen endring fra forrige
+            samledeResultater == setOf(
+                YtelsePersonResultat.AVSLÅTT,
+                YtelsePersonResultat.OPPHØRT
+            ) -> Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
+            samledeResultater == setOf(
+                YtelsePersonResultat.AVSLÅTT,
+                YtelsePersonResultat.OPPHØRT,
+                YtelsePersonResultat.FORTSATT_OPPHØRT
+            ) -> Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
             samledeResultater.matcherAltOgHarEndretResultat(setOf(YtelsePersonResultat.AVSLÅTT)) -> Behandlingsresultat.AVSLÅTT_OG_ENDRET
             samledeResultater.matcherAltOgHarBådeEndretOgOpphørtResultat(
                 setOf(YtelsePersonResultat.AVSLÅTT)
