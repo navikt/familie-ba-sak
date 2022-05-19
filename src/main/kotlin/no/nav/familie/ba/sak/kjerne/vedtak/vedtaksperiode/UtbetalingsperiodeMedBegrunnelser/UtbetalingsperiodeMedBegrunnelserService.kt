@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_BEHANDLE_EØS
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -12,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.finnOgOppdaterOverlappendeUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentPerioderMedUtbetaling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.identifiserReduksjonsperioderFraSistIverksatteBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling
@@ -47,17 +45,10 @@ class UtbetalingsperiodeMedBegrunnelserService(
             )
 
         val utbetalingsperioderMedReduksjon =
-            if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER)) {
-                oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
-                    utbetalingsperioder = utbetalingsperioder,
-                    reduksjonsperioder = perioderMedReduksjonFraSistIverksatteBehandling
-                )
-            } else {
-                finnOgOppdaterOverlappendeUtbetalingsperiode(
-                    utbetalingsperioder,
-                    perioderMedReduksjonFraSistIverksatteBehandling
-                )
-            }
+            oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
+                utbetalingsperioder = utbetalingsperioder,
+                reduksjonsperioder = perioderMedReduksjonFraSistIverksatteBehandling
+            )
 
         return if (featureToggleService.isEnabled(KAN_BEHANDLE_EØS)) {
             val kompetanser = kompetanseRepository.findByBehandlingId(vedtak.behandling.id)
@@ -101,7 +92,6 @@ class UtbetalingsperiodeMedBegrunnelserService(
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = opphørsperioder,
             aktørerIForrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag.søkerOgBarn.map { it.aktør },
-            skalBrukeNyMåteÅGenerereVedtaksperioder = featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER)
         )
     }
 }
