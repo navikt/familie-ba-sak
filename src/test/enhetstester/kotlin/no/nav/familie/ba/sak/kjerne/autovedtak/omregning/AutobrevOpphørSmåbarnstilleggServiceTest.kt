@@ -86,13 +86,13 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
-        every { autovedtakStegService.kjørBehandlingSmåbarnstillegg(any(), any()) } returns ""
+        every { autovedtakStegService.kjørBehandlingOmregning(any(), any()) } returns ""
 
         autobrevOpphørSmåbarnstilleggService
             .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId = behandling.fagsak.id)
 
         verify(exactly = 1) {
-            autovedtakStegService.kjørBehandlingSmåbarnstillegg(
+            autovedtakStegService.kjørBehandlingOmregning(
                 any(),
                 any()
             )

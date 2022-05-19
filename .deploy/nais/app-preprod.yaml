@@ -52,6 +52,8 @@ spec:
       rules:
         - application: familie-ba-sak-frontend
           cluster: dev-gcp
+        - application: familie-ba-sak-frontend-lokal
+          cluster: dev-gcp
         - application: familie-ba-mottak
           cluster: dev-fss
         - application: familie-prosessering
