@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.LocalDateService
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.KanIkkeMigrereException
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.MigreringService
@@ -81,12 +80,7 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere delt bosted med 1 barn under 6 år`() {
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED,
-                any()
-            )
-        } returns true
+
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
@@ -141,12 +135,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere delt bosted med 1 barn over 6 år`() {
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED,
-                any()
-            )
-        } returns true
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
@@ -201,12 +189,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere delt bosted med 3 barn over 6 år`() {
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED,
-                any()
-            )
-        } returns true
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
@@ -271,12 +253,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere delt bosted med 2 barn over 6 år og 1 under`() {
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED,
-                any()
-            )
-        } returns true
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
@@ -341,12 +317,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal feile migrere fordi beregnet beløp er ulikt beregnet beløp i ba-sak `() {
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED,
-                any()
-            )
-        } returns true
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
@@ -395,12 +365,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere utvidet barnetrygd med delt bosted for ett barn over 6 år`() {
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.SKAL_MIGRERE_UTVIDET_DELT_BOSTED,
-                any()
-            )
-        } returns true
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
@@ -455,12 +419,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere utvidet barnetrygd for ett barn under 3 år`() {
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.SKAL_MIGRERE_UTVIDET_DELT_BOSTED,
-                any()
-            )
-        } returns true
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
@@ -513,12 +471,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal feile migrering av utvidet barnetrygd med delt bosted pga ulikt antall barn når et av barna er over 18`() {
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.SKAL_MIGRERE_UTVIDET_DELT_BOSTED,
-                any()
-            )
-        } returns true
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
@@ -567,17 +519,11 @@ class MigrerFraInfotrygdTest(
 
         val exception =
             assertThrows<KanIkkeMigrereException> { migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!) }
-        assertThat(exception.feiltype).isEqualTo(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_BA_SAK)
+        assertThat(exception.feiltype).isEqualTo(MigreringsfeilType.HAR_BARN_OVER_18_PÅ_INFOTRYGDSAK)
     }
 
     @Test
     fun `skal feile migrering dersom ikke småbarnstillegg stemmer overens`() {
-        every {
-            featureToggleService.isEnabled(
-                FeatureToggleConfig.SKAL_MIGRERE_UTVIDET_DELT_BOSTED,
-                any()
-            )
-        } returns true
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(

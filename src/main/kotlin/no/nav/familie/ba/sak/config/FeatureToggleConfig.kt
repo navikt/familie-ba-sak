@@ -115,10 +115,6 @@ class FeatureToggleConfig(
         const val LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT =
             "familie-ba-sak.lag.reduksjonsperioder.fra.innvilgelsestidspunkt"
 
-        const val SKAL_MIGRERE_ORDINÆR_DELT_BOSTED = "familie-ba-sak.migrer-delt-bosted"
-
-        const val SKAL_MIGRERE_UTVIDET_DELT_BOSTED = "familie-ba-sak.migrer-utvidet-delt-bosted"
-
         const val KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED = "familie-ba-sak.manuell-migrering-ikke-delt-bosted"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
