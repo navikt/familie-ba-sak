@@ -16,12 +16,9 @@ import org.springframework.transaction.annotation.Transactional
 class KompetanseService(
     private val tidslinjeService: TidslinjeService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
-    tilbakestillBehandlingService: TilbakestillBehandlingService,
+    val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
-    val serviceDelegate = PeriodeOgBarnSkjemaService(
-        kompetanseRepository,
-        tilbakestillBehandlingService
-    )
+    val serviceDelegate = PeriodeOgBarnSkjemaService(kompetanseRepository)
 
     fun hentKompetanser(behandlingId: Long) =
         serviceDelegate.hentMedBehandlingId(behandlingId)
@@ -31,11 +28,15 @@ class KompetanseService(
 
     @Transactional
     fun endreKompetanse(behandlingId: Long, oppdatering: Kompetanse) =
-        serviceDelegate.endreSkjemaer(behandlingId, oppdatering)
+        serviceDelegate.endreSkjemaer(behandlingId, oppdatering) {
+            tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
+        }
 
     @Transactional
     fun slettKompetanse(kompetanseId: Long) =
-        serviceDelegate.slettSkjema(kompetanseId)
+        serviceDelegate.slettSkjema(kompetanseId) {
+            tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(it)
+        }
 
     @Transactional
     fun tilpassKompetanserTilRegelverk(behandlingId: Long) {

@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
@@ -19,13 +18,9 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class UtenlandskPeriodebeløpService(
     repository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val kompetanseService: KompetanseService
 ) {
-    val serviceDelegate = PeriodeOgBarnSkjemaService(
-        repository,
-        tilbakestillBehandlingService
-    )
+    val serviceDelegate = PeriodeOgBarnSkjemaService(repository)
 
     fun hentUtenlandskePeriodebeløp(behandlingId: Long) =
         serviceDelegate.hentMedBehandlingId(behandlingId)

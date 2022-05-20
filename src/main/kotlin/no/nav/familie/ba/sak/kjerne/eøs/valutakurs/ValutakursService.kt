@@ -6,20 +6,15 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerF
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ValutakursService(
     repository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
-    tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService
 ) {
-    val serviceDelegate = PeriodeOgBarnSkjemaService(
-        repository,
-        tilbakestillBehandlingService
-    )
+    val serviceDelegate = PeriodeOgBarnSkjemaService(repository)
 
     fun hentValutakurser(behandlingId: Long) =
         serviceDelegate.hentMedBehandlingId(behandlingId)

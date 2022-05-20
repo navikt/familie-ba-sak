@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.BeforeEach
@@ -19,12 +18,10 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> =
         mockPeriodeBarnRepository()
-    val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk(relaxed = true)
     val kompetanseService: KompetanseService = mockk()
 
     val utenlandskPeriodebeløpService = UtenlandskPeriodebeløpService(
         utenlandskPeriodebeløpRepository,
-        tilbakestillBehandlingService,
         kompetanseService
     )
 
