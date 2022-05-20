@@ -72,6 +72,18 @@ class DifferanseberegningsUtilsTest {
     }
 
     @Test
+    fun `Skal ha presisjon i kronekonverteringen til norske kroner`() {
+
+        val utenlandskSatsÅrlig = 12000000
+
+        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
+            satsUtland = utenlandskSatsÅrlig, kurs = 12.3456775, intervall = Intervall.ÅRLIG, erSkuddår = false
+        )
+
+        Assertions.assertEquals(12345678, utbetalingsbeløpUtlandINok)
+    }
+
+    @Test
     fun `Skal gi null dersom utenlandsk beløp er større en det norske når det ikke er småbarnstilleg eller utvidet`() {
 
         Assertions.assertEquals(
