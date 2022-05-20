@@ -185,11 +185,11 @@ data class Behandling(
 
     fun leggTilHenleggStegOmDetIkkeFinnesFraFør(): Behandling {
         leggTilStegOmDetIkkeFinnesFraFør(StegType.HENLEGG_BEHANDLING)
-        fjernStegSomSkjerEtterHenleggSteg()
+        fjernStegFraBehandlingStegTilstandSomSkalSkjeEtterHenleggSteg()
         return this
     }
 
-    fun fjernStegSomSkjerEtterHenleggSteg(): Behandling {
+    fun fjernStegFraBehandlingStegTilstandSomSkalSkjeEtterHenleggSteg(): Behandling {
         val ferdigstillBehandlingSteg =
             this.behandlingStegTilstand.find { it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }
         if (ferdigstillBehandlingSteg != null) this.behandlingStegTilstand.remove(ferdigstillBehandlingSteg)
