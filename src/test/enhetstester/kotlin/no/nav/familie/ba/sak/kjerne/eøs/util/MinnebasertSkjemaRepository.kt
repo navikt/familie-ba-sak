@@ -46,7 +46,7 @@ class MinnebasertSkjemaRepository<S> where S : PeriodeOgBarnSkjemaEntitet<S> {
     }
 }
 
-fun <S : PeriodeOgBarnSkjemaEntitet<S>> mockRepo(): PeriodeOgBarnSkjemaRepository<S> {
+fun <S : PeriodeOgBarnSkjemaEntitet<S>> mockPeriodeBarnRepository(): PeriodeOgBarnSkjemaRepository<S> {
 
     val minnebasertSkjemaRepository = MinnebasertSkjemaRepository<S>()
     val mockSkjemaRepository = mockk<PeriodeOgBarnSkjemaRepository<S>>()

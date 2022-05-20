@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
@@ -10,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
-import no.nav.familie.ba.sak.kjerne.eøs.util.MinnebasertSkjemaRepository
+import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -27,8 +26,7 @@ import org.junit.jupiter.api.Test
 
 internal class KompetanseServiceTest {
 
-    val minnebasertKompetanseRepository = MinnebasertSkjemaRepository<Kompetanse>()
-    val mockKompetanseRepository = mockk<KompetanseRepository>()
+    val mockKompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse> = mockPeriodeBarnRepository()
     val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk(relaxed = true)
     val tidslinjeService: TidslinjeService = mockk()
 
@@ -40,24 +38,7 @@ internal class KompetanseServiceTest {
 
     @BeforeEach
     fun init() {
-        val idSlot = slot<Long>()
-        val kompetanseListeSlot = slot<Iterable<Kompetanse>>()
-
-        every { mockKompetanseRepository.findByBehandlingId(capture(idSlot)) } answers {
-            minnebasertKompetanseRepository.hentSkjemaer(idSlot.captured)
-        }
-
-        every { mockKompetanseRepository.getById(capture(idSlot)) } answers {
-            minnebasertKompetanseRepository.hentSkjema(idSlot.captured)
-        }
-
-        every { mockKompetanseRepository.saveAll(capture(kompetanseListeSlot)) } answers {
-            minnebasertKompetanseRepository.save(kompetanseListeSlot.captured)
-        }
-
-        every { mockKompetanseRepository.deleteAll(capture(kompetanseListeSlot)) } answers {
-            minnebasertKompetanseRepository.delete(kompetanseListeSlot.captured)
-        }
+        mockKompetanseRepository.deleteAll()
     }
 
     @Test

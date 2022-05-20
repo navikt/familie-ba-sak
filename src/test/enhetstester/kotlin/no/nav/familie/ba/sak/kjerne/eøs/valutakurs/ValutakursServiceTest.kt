@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
-import no.nav.familie.ba.sak.kjerne.eøs.util.mockRepo
+import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class ValutakursServiceTest {
-    val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs> = mockRepo()
+    val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs> = mockPeriodeBarnRepository()
     val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk(relaxed = true)
     val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService = mockk()
 

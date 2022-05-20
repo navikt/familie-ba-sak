@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
@@ -14,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class KompetanseService(
     private val tidslinjeService: TidslinjeService,
-    kompetanseRepository: KompetanseRepository,
+    kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
     val serviceDelegate = PeriodeOgBarnSkjemaService(
