@@ -150,11 +150,13 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     val søknadstidspunkt = endringsperioder.sortedBy { it.søknadstidspunkt }
         .firstOrNull { this.triggesAv.endringsaarsaker.contains(it.årsak) }?.søknadstidspunkt
 
-    val søkersRettTilUtvidet = finnUtOmSøkerFårUtbetaltEllerHarRettPåUtvidet(minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer)
+    val søkersRettTilUtvidet =
+        finnUtOmSøkerFårUtbetaltEllerHarRettPåUtvidet(minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer)
 
     this.validerBrevbegrunnelse(
         gjelderSøker = gjelderSøker,
         barnasFødselsdatoer = barnasFødselsdatoer,
+        standardbegrunnelse = this.standardbegrunnelse
     )
 
     return BegrunnelseData(
@@ -220,8 +222,12 @@ fun Standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
 private fun BrevBegrunnelseGrunnlagMedPersoner.validerBrevbegrunnelse(
     gjelderSøker: Boolean,
     barnasFødselsdatoer: List<LocalDate>,
+    standardbegrunnelse: Standardbegrunnelse
 ) {
-    if (!gjelderSøker && barnasFødselsdatoer.isEmpty() && !this.triggesAv.satsendring) {
+    val standardbegrunnelseKreverBarnasFødselsdato =
+        standardbegrunnelse != Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN &&
+            barnasFødselsdatoer.isEmpty()
+    if (!gjelderSøker && standardbegrunnelseKreverBarnasFødselsdato && !this.triggesAv.satsendring) {
         throw IllegalStateException("Ingen personer på brevbegrunnelse")
     }
 }
