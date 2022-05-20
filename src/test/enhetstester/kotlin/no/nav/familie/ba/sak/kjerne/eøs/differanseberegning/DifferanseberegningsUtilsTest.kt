@@ -11,7 +11,7 @@ class DifferanseberegningsUtilsTest {
 
         val utenlandskSatsÅrlig = 1200
 
-        val utbetalingsbeløpUtlandINok = beregnUtbetalingsbeløpUtlandINok(
+        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
             satsUtland = utenlandskSatsÅrlig, kurs = 10.0, intervall = Intervall.ÅRLIG, erSkuddår = false
         )
 
@@ -24,7 +24,7 @@ class DifferanseberegningsUtilsTest {
 
         val utenlandskSatsKvartalsvis = 400
 
-        val utbetalingsbeløpUtlandINok = beregnUtbetalingsbeløpUtlandINok(
+        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
             satsUtland = utenlandskSatsKvartalsvis, kurs = 10.0, intervall = Intervall.KVARTALSVIS, erSkuddår = false
         )
 
@@ -37,7 +37,7 @@ class DifferanseberegningsUtilsTest {
 
         val utenlandskSatsMåendlig = 100
 
-        val utbetalingsbeløpUtlandINok = beregnUtbetalingsbeløpUtlandINok(
+        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
             satsUtland = utenlandskSatsMåendlig, kurs = 10.0, intervall = Intervall.MÅNEDLIG, erSkuddår = false
         )
 
@@ -50,7 +50,7 @@ class DifferanseberegningsUtilsTest {
 
         val utenlandskSatsUkentlig = 25
 
-        val utbetalingsbeløpUtlandINok = beregnUtbetalingsbeløpUtlandINok(
+        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
             satsUtland = utenlandskSatsUkentlig, kurs = 10.0, intervall = Intervall.UKENTLIG, erSkuddår = false
         )
 
@@ -63,7 +63,7 @@ class DifferanseberegningsUtilsTest {
 
         val utenlandskSatsUkentlig = 25
 
-        val utbetalingsbeløpUtlandINok = beregnUtbetalingsbeløpUtlandINok(
+        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
             satsUtland = utenlandskSatsUkentlig, kurs = 10.0, intervall = Intervall.UKENTLIG, erSkuddår = true
         )
 
@@ -72,7 +72,7 @@ class DifferanseberegningsUtilsTest {
     }
 
     @Test
-    fun `Skal gi null dersom utenandsk beløp er større en det norske når det ikke er småbarnstilleg eller utvidet`() {
+    fun `Skal gi null dersom utenlandsk beløp er større en det norske når det ikke er småbarnstilleg eller utvidet`() {
 
         Assertions.assertEquals(
             0,

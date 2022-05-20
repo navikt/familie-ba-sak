@@ -12,7 +12,7 @@ enum class Intervall {
         ÅRLIG -> beløp / 12
         KVARTALSVIS -> beløp / 4
         MÅNEDLIG -> beløp
-        UKENTLIG -> konverterFraUkentligTilMåentligBeløp(beløp, erSkuddår)
+        UKENTLIG -> konverterFraUkentligTilMånedligBeløp(beløp, erSkuddår)
     }
 
     /***
@@ -22,7 +22,7 @@ enum class Intervall {
      * ta utgangspunkt i antall dager i et år. Siden valutajusteringen kun skjer en gang i året bruker
      * vi et gjennomsnitt for hver måned, slik at vi konverterer likt for måneder med forskjellig lengde.
      ***/
-    private fun konverterFraUkentligTilMåentligBeløp(beløp: Double, erSkuddår: Boolean): Double {
+    private fun konverterFraUkentligTilMånedligBeløp(beløp: Double, erSkuddår: Boolean): Double {
         val dagerIÅret: Double = if (erSkuddår) 366.0 else 365.0
         val ukerIÅret: Double = dagerIÅret / 7.0
         val ukerIEnMåned: Double = ukerIÅret / 12.0
@@ -38,7 +38,12 @@ fun beregnDifferanseOrdinær(utbetalingsbeløpNorge: Int, utbetalingsbeløpUtlan
     else differanse
 }
 
-fun beregnUtbetalingsbeløpUtlandINok(satsUtland: Int, kurs: Double, intervall: Intervall, erSkuddår: Boolean): Int {
+fun beregnMånedligUtbetalingsbeløpUtlandINok(
+    satsUtland: Int,
+    kurs: Double,
+    intervall: Intervall,
+    erSkuddår: Boolean
+): Int {
     val beløpINorskeKroner = satsUtland * kurs
     val utbetalingsbeløpUtlandINok = intervall.konverterBeløpTilMånedlig(
         beløp = beløpINorskeKroner,
