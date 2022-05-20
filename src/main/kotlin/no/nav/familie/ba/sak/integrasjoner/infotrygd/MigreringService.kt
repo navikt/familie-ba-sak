@@ -2,17 +2,14 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_UTVIDET_DELT_BOSTED
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -67,9 +64,7 @@ class MigreringService(
     private val env: EnvService,
     private val fagsakService: FagsakService,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    private val pdlRestClient: PdlRestClient,
     private val personidentService: PersonidentService,
-    private val personopplysningerService: PersonopplysningerService,
     private val stegService: StegService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
@@ -77,8 +72,7 @@ class MigreringService(
     private val vedtakService: VedtakService,
     private val vilkårService: VilkårService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val migreringRestClient: MigreringRestClient,
-    private val featureToggleService: FeatureToggleService
+    private val migreringRestClient: MigreringRestClient
 ) {
 
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
@@ -94,11 +88,6 @@ class MigreringService(
             validerAtIdentErAktiv(personIdent)
 
             val løpendeInfotrygdsak = hentLøpendeSakFraInfotrygd(personIdent)
-
-            if (løpendeInfotrygdsak.undervalg == "MD" && erToggleForDeltBostedAvskrudd(løpendeInfotrygdsak)) {
-                secureLog.warn("Migrering: Kan ikke migrere ${løpendeInfotrygdsak.valg}-saker med delt bosted")
-                kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
-            }
             val underkategori = kastFeilEllerHentUnderkategori(løpendeInfotrygdsak)
             kastfeilHvisIkkeEnDelytelseIInfotrygd(løpendeInfotrygdsak)
 
@@ -155,7 +144,12 @@ class MigreringService(
 
             val førsteAndelerTilkjentYtelse = finnFørsteAndelerTilkjentYtelse(behandling.id)
 
-            sammenlignBeregnetYtelseMedNåværendeFraInfotrygd(førsteAndelerTilkjentYtelse, løpendeInfotrygdsak, personIdent, barnasIdenter)
+            sammenlignBeregnetYtelseMedNåværendeFraInfotrygd(
+                førsteAndelerTilkjentYtelse,
+                løpendeInfotrygdsak,
+                personIdent,
+                barnasIdenter
+            )
 
             iverksett(behandlingEtterVilkårsvurdering)
 
@@ -204,14 +198,6 @@ class MigreringService(
                     " som en annen ident. Fant følgende dobbeltforekomster: $dobbeltforekomster"
             )
             kastOgTellMigreringsFeil(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
-        }
-    }
-
-    private fun erToggleForDeltBostedAvskrudd(infotrygdsak: Sak): Boolean {
-        return when (infotrygdsak.valg) {
-            "OR" -> !featureToggleService.isEnabled(SKAL_MIGRERE_ORDINÆR_DELT_BOSTED, false)
-            "UT" -> !featureToggleService.isEnabled(SKAL_MIGRERE_UTVIDET_DELT_BOSTED, false)
-            else -> true
         }
     }
 
@@ -301,7 +287,10 @@ class MigreringService(
                 return
             }
             else -> {
-                kastOgTellMigreringsFeil(MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD)
+                kastOgTellMigreringsFeil(
+                    MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD,
+                    "Fant ugylding antall delytelser ${sak.stønad!!.delytelse.filter { it.tom == null }.size}"
+                )
             }
         }
     }
@@ -323,6 +312,15 @@ class MigreringService(
             )
             kastOgTellMigreringsFeil(MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER)
         }
+
+        barnasIdenter.forEach { ident ->
+            if (FoedselsNr(ident).foedselsdato.isSameOrBefore(LocalDate.now().minusYears(18L))) {
+                kastOgTellMigreringsFeil(
+                    MigreringsfeilType.HAR_BARN_OVER_18_PÅ_INFOTRYGDSAK
+                )
+            }
+        }
+
         return barnasIdenter
     }
 
@@ -387,8 +385,9 @@ class MigreringService(
     }
 
     private fun finnFørsteAndelerTilkjentYtelse(behandlingId: Long): List<AndelTilkjentYtelse> {
-        val andelerTilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse
-            ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_ANDEL_TILKJENT_YTELSE)
+        val andelerTilkjentYtelse =
+            tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse
+                ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_ANDEL_TILKJENT_YTELSE)
         val førsteUtbetalingsMåned = andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
             ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_ANDEL_TILKJENT_YTELSE)
 
@@ -493,6 +492,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
     UKJENT("Ukjent migreringsfeil"),
     ÅPEN_SAK_INFOTRYGD("Bruker har åpen behandling i Infotrygd"),
+    HAR_BARN_OVER_18_PÅ_INFOTRYGDSAK("Infotrygdsak har barn over 18"),
 }
 
 open class KanIkkeMigrereException(
