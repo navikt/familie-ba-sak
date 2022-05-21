@@ -14,10 +14,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
  */
 fun <I, M, T : Tidsenhet> Tidslinje<I, T>.tilpassTil(
     mønsterTidslinje: Tidslinje<M, T>,
-    nyttInnhold: (M) -> I
+    nyttInnhold: (I?, M) -> I
 ) = this.snittKombinerMed(mønsterTidslinje) { thisInnhold: I?, mønsterInnhold: M? ->
     when {
         mønsterInnhold == null -> null
-        else -> thisInnhold ?: nyttInnhold(mønsterInnhold)
+        else -> thisInnhold ?: nyttInnhold(thisInnhold, mønsterInnhold)
     }
 }

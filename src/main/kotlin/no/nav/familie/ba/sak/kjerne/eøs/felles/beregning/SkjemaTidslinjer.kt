@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.felles.beregning
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjema
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
-import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.utenPeriode
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
@@ -48,9 +47,9 @@ fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilSeparateTidslinjerForBarna(): Ma
     }
 }
 
-fun <S : PeriodeOgBarnSkjemaEntitet<S>> Map<Aktør, Tidslinje<S, Måned>>.tilSkjemaer(behandlingId: Long) =
+fun <S : PeriodeOgBarnSkjemaEntitet<S>> Map<Aktør, Tidslinje<S, Måned>>.tilSkjemaer() =
     this.flatMap { (aktør, tidslinjer) -> tidslinjer.tilSkjemaer(aktør) }
-        .slåSammen().medBehandlingId(behandlingId)
+        .slåSammen()
 
 private fun <S : PeriodeOgBarnSkjema<S>> Tidslinje<S, Måned>.tilSkjemaer(aktør: Aktør) =
     this.perioder().mapNotNull { periode ->
@@ -61,9 +60,9 @@ private fun <S : PeriodeOgBarnSkjema<S>> Tidslinje<S, Måned>.tilSkjemaer(aktør
         )
     }
 
-fun <S : PeriodeOgBarnSkjema<S>, I> Map<Aktør, Tidslinje<S, Måned>>.tilpassTil(
-    aktørTilMønsterTidslinje: Map<Aktør, Tidslinje<I, Måned>>,
-    nyttSkjemaFactory: () -> S
+fun <S : PeriodeOgBarnSkjema<S>, M> Map<Aktør, Tidslinje<S, Måned>>.tilpassTil(
+    aktørTilMønsterTidslinje: Map<Aktør, Tidslinje<M, Måned>>,
+    nyttSkjemaFactory: (S?, M) -> S
 ): Map<Aktør, Tidslinje<S, Måned>> {
     val alleBarnAktørIder = this.keys + aktørTilMønsterTidslinje.keys
 
@@ -71,6 +70,6 @@ fun <S : PeriodeOgBarnSkjema<S>, I> Map<Aktør, Tidslinje<S, Måned>>.tilpassTil
         val skjemaTidslinje = this.getOrDefault(aktør, TomTidslinje())
         val mønsterTidslinje = aktørTilMønsterTidslinje.getOrDefault(aktør, TomTidslinje())
 
-        skjemaTidslinje.tilpassTil(mønsterTidslinje) { nyttSkjemaFactory() }
+        skjemaTidslinje.tilpassTil(mønsterTidslinje, nyttSkjemaFactory)
     }
 }

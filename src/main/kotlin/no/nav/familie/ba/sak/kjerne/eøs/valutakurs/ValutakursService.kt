@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
+import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,15 +30,31 @@ class ValutakursService(
     @Transactional
     fun tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId: Long) {
         val gjeldendeValutakurser = hentValutakurser(behandlingId)
+        val utenlandskePeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
 
-        val barnasUtenlandskePeriodebeløpTidslinjer = utenlandskPeriodebeløpService
-            .hentUtenlandskePeriodebeløp(behandlingId)
-            .tilSeparateTidslinjerForBarna()
-
-        val oppdaterteValutakurser = gjeldendeValutakurser.tilSeparateTidslinjerForBarna()
-            .tilpassTil(barnasUtenlandskePeriodebeløpTidslinjer) { Valutakurs.NULL }
-            .tilSkjemaer(behandlingId)
+        val oppdaterteValutakurser = tilpassValutakurserTilUtenlandskePeriodebeløp(
+            gjeldendeValutakurser,
+            utenlandskePeriodebeløp
+        ).medBehandlingId(behandlingId)
 
         serviceDelegate.lagreSkjemaDifferanse(gjeldendeValutakurser, oppdaterteValutakurser)
     }
+}
+
+internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
+    valutakurser: Collection<Valutakurs>,
+    utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>
+): Collection<Valutakurs> {
+    val barnasUtenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp
+        .tilSeparateTidslinjerForBarna()
+
+    return valutakurser.tilSeparateTidslinjerForBarna()
+        .tilpassTil(barnasUtenlandskePeriodebeløpTidslinjer) { valutakurs, utenlandskPeridebeløp ->
+            when {
+                valutakurs == null -> Valutakurs.NULL
+                valutakurs.valutakode != utenlandskPeridebeløp.valutakode -> Valutakurs.NULL
+                else -> valutakurs
+            }
+        }
+        .tilSkjemaer()
 }

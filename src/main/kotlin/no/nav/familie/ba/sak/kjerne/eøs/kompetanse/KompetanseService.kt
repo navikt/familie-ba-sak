@@ -5,10 +5,16 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.hentBarnasEøsRegelverkTidslinjer
+import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.hentBarnasRegelverkResultatTidslinjer
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.tilBarnasEøsRegelverkTidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -42,12 +48,22 @@ class KompetanseService(
     fun tilpassKompetanserTilRegelverk(behandlingId: Long) {
         val gjeldendeKompetanser = hentKompetanser(behandlingId)
 
-        val barnasEøsRegelverkTidslinjer = tidslinjeService.hentBarnasEøsRegelverkTidslinjer(behandlingId)
+        val barnasRegelverkResultatTidslinjer = tidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId)
 
-        val oppdaterteSkjemaer = gjeldendeKompetanser.tilSeparateTidslinjerForBarna()
-            .tilpassTil(barnasEøsRegelverkTidslinjer) { Kompetanse.NULL }
-            .tilSkjemaer(behandlingId)
+        val oppdaterteKompetanser =
+            tilpassKompetanserTilRegelverk(gjeldendeKompetanser, barnasRegelverkResultatTidslinjer)
+                .medBehandlingId(behandlingId)
 
-        serviceDelegate.lagreSkjemaDifferanse(gjeldendeKompetanser, oppdaterteSkjemaer)
+        serviceDelegate.lagreSkjemaDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
     }
+}
+
+internal fun tilpassKompetanserTilRegelverk(
+    gjeldendeKompetanser: Collection<Kompetanse>,
+    barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>
+): Collection<Kompetanse> {
+    val barnasEøsRegelverkTidslinjer = barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer()
+    return gjeldendeKompetanser.tilSeparateTidslinjerForBarna()
+        .tilpassTil(barnasEøsRegelverkTidslinjer) { kompetanse, _ -> kompetanse ?: Kompetanse.NULL }
+        .tilSkjemaer()
 }

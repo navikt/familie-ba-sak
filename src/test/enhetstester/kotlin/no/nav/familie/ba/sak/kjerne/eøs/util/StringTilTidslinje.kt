@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.tilEøsRegelverkTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
@@ -25,7 +23,3 @@ fun <T : Tidsenhet> String.tilRegelverkResultatTidslinje(start: Tidspunkt<T>) =
 fun <T : Tidsenhet> String.tilVilkårRegelverkResultatTidslinje(vilkår: Vilkår, start: Tidspunkt<T>) =
     this.tilRegelverkResultatTidslinje(start)
         .map { it?.let { VilkårRegelverkResultat(vilkår, it) } }
-
-fun String.tilEøsRegelverkTidslinje(start: MånedTidspunkt) =
-    this.tilRegelverkResultatTidslinje(start)
-        .tilEøsRegelverkTidslinje()

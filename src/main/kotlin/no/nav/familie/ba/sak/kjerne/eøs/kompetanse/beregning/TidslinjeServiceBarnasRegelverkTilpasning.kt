@@ -17,18 +17,19 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
-fun TidslinjeService.hentBarnasEøsRegelverkTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<Regelverk, Måned>> =
+fun TidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<RegelverkResultat, Måned>> =
     this.hentTidslinjerThrows(behandlingId).barnasTidslinjer()
         .mapValues { (_, tidslinjer) ->
             tidslinjer.regelverkResultatTidslinje
-                .tilEøsRegelverkTidslinje()
         }
 
-fun Tidslinje<RegelverkResultat, Måned>.tilEøsRegelverkTidslinje() =
-    this.map { it?.regelverk }
-        .filtrer { it == Regelverk.EØS_FORORDNINGEN }
-        .filtrerIkkeNull()
-        .forlengFremtidTilUendelig(MånedTidspunkt.nå())
+fun Map<Aktør, Tidslinje<RegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer() =
+    this.mapValues { (_, tidslinjer) ->
+        tidslinjer.map { it?.regelverk }
+            .filtrer { it == Regelverk.EØS_FORORDNINGEN }
+            .filtrerIkkeNull()
+            .forlengFremtidTilUendelig(MånedTidspunkt.nå())
+    }
 
 private fun <I, T : Tidsenhet> Tidslinje<I, T>.forlengFremtidTilUendelig(nå: Tidspunkt<T>): Tidslinje<I, T> {
     return if (this.tilOgMed() > nå)
