@@ -51,9 +51,9 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
     return valutakurser.tilSeparateTidslinjerForBarna()
         .tilpassTil(barnasUtenlandskePeriodebeløpTidslinjer) { valutakurs, utenlandskPeridebeløp ->
             when {
-                valutakurs?.valutakode != utenlandskPeridebeløp.valutakode ->
+                valutakurs == null || valutakurs.valutakode != utenlandskPeridebeløp.valutakode ->
                     Valutakurs.NULL.copy(valutakode = utenlandskPeridebeløp.valutakode)
-                else -> valutakurs!! // Ok fordi det i praksis gjøres en nullsjekk over
+                else -> valutakurs
             }
         }
         .tilSkjemaer()

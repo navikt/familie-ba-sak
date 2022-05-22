@@ -12,7 +12,8 @@ class ValutakursBuilder(
 ) : SkjemaBuilder<Valutakurs, ValutakursBuilder>(startMåned, behandlingId) {
     fun medKurs(k: String, valutakode: String?, vararg barn: Person) = medSkjema(k, barn.toList()) {
         when {
-            it == '-' -> Valutakurs.NULL.copy(valutakode = valutakode)
+            it == '-' -> Valutakurs.NULL
+            it == '$' -> Valutakurs.NULL.copy(valutakode = valutakode)
             it?.isDigit() ?: false -> {
                 Valutakurs.NULL.copy(
                     kurs = it?.digitToInt()?.toBigDecimal(),

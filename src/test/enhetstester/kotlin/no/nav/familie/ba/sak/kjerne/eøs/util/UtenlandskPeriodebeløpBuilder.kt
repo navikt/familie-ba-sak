@@ -13,6 +13,7 @@ class UtenlandskPeriodebeløpBuilder(
     fun medBeløp(k: String, valutakode: String?, vararg barn: Person) = medSkjema(k, barn.toList()) {
         when {
             it == '-' -> UtenlandskPeriodebeløp.NULL
+            it == '$' -> UtenlandskPeriodebeløp.NULL.copy(valutakode = valutakode)
             it?.isDigit() ?: false -> {
                 UtenlandskPeriodebeløp.NULL.copy(
                     beløp = it?.digitToInt()?.toBigDecimal(),

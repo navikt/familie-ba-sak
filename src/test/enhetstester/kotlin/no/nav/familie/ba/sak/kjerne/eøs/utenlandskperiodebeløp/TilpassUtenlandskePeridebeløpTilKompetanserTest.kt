@@ -7,6 +7,13 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Test
 
+/**
+ * Syntaks:
+ * ' ' (blank): Skjema finnes ikke for perioden
+ * '-': Skjema finnes, men alle felter er null
+ * '$': Skjema finnes, valutakode er satt, men ellers null-felter
+ * '<siffer>': Skjema har oppgitt beløp og valutakode
+ */
 class TilpassUtenlandskePeridebeløpTilKompetanserTest {
     val jan2020 = jan(2020)
     val barn1 = tilfeldigPerson()
@@ -16,8 +23,7 @@ class TilpassUtenlandskePeridebeløpTilKompetanserTest {
     @Test
     fun `test tilpasning av utenlandske periodebeløp mot kompleks endring av kompetanse`() {
         val gjeldendeUtenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan2020)
-            .medBeløp("--3456789-----", "EUR", barn1)
-            .medBeløp("--3456789-----", "EUR", barn2)
+            .medBeløp("--3456789-----", "EUR", barn1, barn2)
             .bygg()
 
         val kompetanser = KompetanseBuilder(jan2020)
@@ -30,11 +36,10 @@ class TilpassUtenlandskePeridebeløpTilKompetanserTest {
             .medBeløp("- 34   89-", "EUR", barn1)
             .medBeløp("  --    - ", null, barn3)
             .medBeløp(" -        ", null, barn1, barn3)
-            .bygg().sortedBy { it.fom }
+            .bygg()
 
         val faktiskeKompetanser =
             tilpassUtenlandskePeriodebeløpTilKompetanser(gjeldendeUtenlandskePeriodebeløp, kompetanser)
-                .sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeUtenlandskePeriodebeløp, faktiskeKompetanser)
     }

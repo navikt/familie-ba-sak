@@ -51,7 +51,7 @@ internal class ValutakursServiceTest {
         val faktiskeValutakurser = valutakursService.hentValutakurser(behandlingId)
 
         val forventedeValutakurser = ValutakursBuilder(jan(2020), behandlingId)
-            .medKurs("  44---555-", "EUR", barn1)
+            .medKurs("  44$$$555$", "EUR", barn1)
             .bygg()
 
         assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
