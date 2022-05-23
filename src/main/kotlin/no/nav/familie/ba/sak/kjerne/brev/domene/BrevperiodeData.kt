@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
+import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeGenerator
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -14,19 +15,20 @@ data class BrevperiodeData(
     val minimertVedtaksperiode: MinimertVedtaksperiode,
     val barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList()
 ) : Comparable<BrevperiodeData> {
-    fun hentBegrunnelserOgFritekster(): List<Begrunnelse> =
-        minimertVedtaksperiode
-            .tilBrevPeriodeGrunnlagMedPersoner(
-                restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
-                erFørsteVedtaksperiodePåFagsak = this.erFørsteVedtaksperiodePåFagsak,
-                erUregistrerteBarnPåbehandling = this.uregistrerteBarn.isNotEmpty(),
-                barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
-            )
-            .byggBegrunnelserOgFritekster(
-                restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
-                uregistrerteBarn = this.uregistrerteBarn,
-                brevMålform = this.brevMålform,
-            )
+
+    fun tilBrevPeriodeGenereator() = BrevPeriodeGenerator(
+        restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        uregistrerteBarn = uregistrerteBarn,
+        brevMålform = brevMålform,
+        minimertVedtaksperiode = minimertVedtaksperiode,
+        barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
+    )
+
+    fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {
+        val brevPeriodeGenereator = this.tilBrevPeriodeGenereator()
+        return brevPeriodeGenereator.byggBegrunnelserOgFritekster(brevPeriodeGenereator.hentBegrunnelsegrunnlagMedPersoner())
+    }
 
     fun tilBrevperiodeForLogging() =
         minimertVedtaksperiode.tilBrevPeriodeForLogging(
