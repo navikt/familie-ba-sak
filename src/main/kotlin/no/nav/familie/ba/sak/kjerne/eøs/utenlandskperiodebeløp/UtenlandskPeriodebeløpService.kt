@@ -34,27 +34,27 @@ class UtenlandskPeriodebeløpService(
 
     @Transactional
     fun tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId: Long) {
-        val gjeldendeUtenlandskePeridebeløp = hentUtenlandskePeriodebeløp(behandlingId)
-        val kompetanser = kompetanseService.hentKompetanser(behandlingId)
+        val forrigeUtenlandskePeriodebeløp = hentUtenlandskePeriodebeløp(behandlingId)
+        val gjeldendeKompetanser = kompetanseService.hentKompetanser(behandlingId)
 
         val oppdaterteUtenlandskPeriodebeløp = tilpassUtenlandskePeriodebeløpTilKompetanser(
-            gjeldendeUtenlandskePeridebeløp,
-            kompetanser
+            forrigeUtenlandskePeriodebeløp,
+            gjeldendeKompetanser
         ).medBehandlingId(behandlingId)
 
-        serviceDelegate.lagreSkjemaDifferanse(gjeldendeUtenlandskePeridebeløp, oppdaterteUtenlandskPeriodebeløp)
+        serviceDelegate.lagreSkjemaDifferanse(forrigeUtenlandskePeriodebeløp, oppdaterteUtenlandskPeriodebeløp)
     }
 }
 
 internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
-    utenlandskePeridebeløp: Iterable<UtenlandskPeriodebeløp>,
-    kompetanser: Iterable<Kompetanse>
+    forrigeUtenlandskePeriodebeløp: Iterable<UtenlandskPeriodebeløp>,
+    gjeldendeKompetanser: Iterable<Kompetanse>
 ): Collection<UtenlandskPeriodebeløp> {
-    val barnasKompetanseTidslinjer = kompetanser
+    val barnasKompetanseTidslinjer = gjeldendeKompetanser
         .tilSeparateTidslinjerForBarna()
         .filtrerSekundærland()
 
-    return utenlandskePeridebeløp.tilSeparateTidslinjerForBarna()
+    return forrigeUtenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
         .tilpassTil(barnasKompetanseTidslinjer) { upb, _ -> upb ?: UtenlandskPeriodebeløp.NULL }
         .tilSkjemaer()
 }

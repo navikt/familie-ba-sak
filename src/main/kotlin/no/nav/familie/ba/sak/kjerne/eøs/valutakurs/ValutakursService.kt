@@ -29,30 +29,30 @@ class ValutakursService(
 
     @Transactional
     fun tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId: Long) {
-        val gjeldendeValutakurser = hentValutakurser(behandlingId)
-        val utenlandskePeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
+        val forrigeValutakurser = hentValutakurser(behandlingId)
+        val gjeldendeUtenlandskePeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
 
         val oppdaterteValutakurser = tilpassValutakurserTilUtenlandskePeriodebeløp(
-            gjeldendeValutakurser,
-            utenlandskePeriodebeløp
+            forrigeValutakurser,
+            gjeldendeUtenlandskePeriodebeløp
         ).medBehandlingId(behandlingId)
 
-        serviceDelegate.lagreSkjemaDifferanse(gjeldendeValutakurser, oppdaterteValutakurser)
+        serviceDelegate.lagreSkjemaDifferanse(forrigeValutakurser, oppdaterteValutakurser)
     }
 }
 
 internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
-    valutakurser: Collection<Valutakurs>,
-    utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>
+    forrigeValutakurser: Collection<Valutakurs>,
+    gjeldendeUtenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>
 ): Collection<Valutakurs> {
-    val barnasUtenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp
+    val barnasUtenlandskePeriodebeløpTidslinjer = gjeldendeUtenlandskePeriodebeløp
         .tilSeparateTidslinjerForBarna()
 
-    return valutakurser.tilSeparateTidslinjerForBarna()
-        .tilpassTil(barnasUtenlandskePeriodebeløpTidslinjer) { valutakurs, utenlandskPeridebeløp ->
+    return forrigeValutakurser.tilSeparateTidslinjerForBarna()
+        .tilpassTil(barnasUtenlandskePeriodebeløpTidslinjer) { valutakurs, utenlandskPeriodebeløp ->
             when {
-                valutakurs == null || valutakurs.valutakode != utenlandskPeridebeløp.valutakode ->
-                    Valutakurs.NULL.copy(valutakode = utenlandskPeridebeløp.valutakode)
+                valutakurs == null || valutakurs.valutakode != utenlandskPeriodebeløp.valutakode ->
+                    Valutakurs.NULL.copy(valutakode = utenlandskPeriodebeløp.valutakode)
                 else -> valutakurs
             }
         }

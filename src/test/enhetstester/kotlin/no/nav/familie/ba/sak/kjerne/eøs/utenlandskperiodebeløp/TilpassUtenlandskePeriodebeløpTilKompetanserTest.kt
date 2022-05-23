@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
  * '$': Skjema finnes, valutakode er satt, men ellers null-felter
  * '<siffer>': Skjema har oppgitt beløp og valutakode
  */
-class TilpassUtenlandskePeridebeløpTilKompetanserTest {
+class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
     val jan2020 = jan(2020)
     val barn1 = tilfeldigPerson()
     val barn2 = tilfeldigPerson()
@@ -22,11 +22,11 @@ class TilpassUtenlandskePeridebeløpTilKompetanserTest {
 
     @Test
     fun `test tilpasning av utenlandske periodebeløp mot kompleks endring av kompetanse`() {
-        val gjeldendeUtenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan2020)
+        val forrigeUtenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan2020)
             .medBeløp("--3456789-----", "EUR", barn1, barn2)
             .bygg()
 
-        val kompetanser = KompetanseBuilder(jan2020)
+        val gjeldendeKompetanser = KompetanseBuilder(jan2020)
             .medKompetanse("SSSSPPPSSS", barn1)
             .medKompetanse("PP--PP--PP", barn2)
             .medKompetanse("-SSS-PP-S-", barn3)
@@ -39,7 +39,7 @@ class TilpassUtenlandskePeridebeløpTilKompetanserTest {
             .bygg()
 
         val faktiskeKompetanser =
-            tilpassUtenlandskePeriodebeløpTilKompetanser(gjeldendeUtenlandskePeriodebeløp, kompetanser)
+            tilpassUtenlandskePeriodebeløpTilKompetanser(forrigeUtenlandskePeriodebeløp, gjeldendeKompetanser)
 
         assertEqualsUnordered(forventedeUtenlandskePeriodebeløp, faktiskeKompetanser)
     }
