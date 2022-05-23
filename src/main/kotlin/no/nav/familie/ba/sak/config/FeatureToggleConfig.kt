@@ -104,10 +104,7 @@ class FeatureToggleConfig(
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
         const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
-        const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER =
-            "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
         const val FØRSTE_ENDRINGSTIDSPUNKT = "familie-ba-sak.behandling.forste-endringstidspunkt.utgivelse"
-        const val NY_MÅTE_Å_GENERERE_VEDTAKSPERIODER = "familie-ba-sak.utgivelse.behandling.generer-vedtaksperioder"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 
@@ -117,12 +114,6 @@ class FeatureToggleConfig(
 
         const val LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT =
             "familie-ba-sak.lag.reduksjonsperioder.fra.innvilgelsestidspunkt"
-
-        const val SKAL_MIGRERE_FOSTERBARN = "familie-ba-sak.migrer-fosterbarn"
-
-        const val SKAL_MIGRERE_ORDINÆR_DELT_BOSTED = "familie-ba-sak.migrer-delt-bosted"
-
-        const val SKAL_MIGRERE_UTVIDET_DELT_BOSTED = "familie-ba-sak.migrer-utvidet-delt-bosted"
 
         const val KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED = "familie-ba-sak.manuell-migrering-ikke-delt-bosted"
 

@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
+package no.nav.familie.ba.sak.kjerne.eøs.felles.beregning
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class SlåSammenKompetanserTest {
+class SlåSammenSkjemaTest {
     val jan2020 = jan(2020)
     val barn1 = tilfeldigPerson()
     val barn2 = tilfeldigPerson()

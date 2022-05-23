@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -12,11 +13,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
@@ -38,9 +35,11 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.sakstatistikkObjectMapper
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.PubliserVedtakTask
+import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
+import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.kontrakter.ba.infotrygd.Barn
@@ -112,6 +111,9 @@ class MigreringServiceTest(
     private val publiserVedtakTask: PubliserVedtakTask,
 
     @Autowired
+    private val publiserVedtakV2Task: PubliserVedtakV2Task,
+
+    @Autowired
     private val ferdigstillBehandlingTask: FerdigstillBehandlingTask,
 
     @Autowired
@@ -128,9 +130,6 @@ class MigreringServiceTest(
 
     @Autowired
     private val envService: EnvService,
-
-    @Autowired
-    private val featureToggleService: FeatureToggleService,
 
 ) : AbstractMockkSpringRunner() {
 
@@ -172,9 +171,6 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
-            mockk(),
-            mockk(),
-            mockk(relaxed = true),
             mockk(relaxed = true),
         ) // => env.erDev() = env.erE2E() = false
     }
@@ -218,6 +214,13 @@ class MigreringServiceTest(
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+
+            task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
+            publiserVedtakV2Task.doTask(task)
+            publiserVedtakV2Task.onCompletion(task)
+
+            val vedtakDVHV2 = MockKafkaProducer.sendteMeldinger.values.last() as VedtakDVHV2
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
         }
     }
 
@@ -228,7 +231,6 @@ class MigreringServiceTest(
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
         val slotAktør = slot<Aktør>()
         every { pdlRestClient.hentForelderBarnRelasjoner(capture(slotAktør)) } returns emptyList()
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SKAL_MIGRERE_FOSTERBARN, any()) } returns true
 
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -263,6 +265,13 @@ class MigreringServiceTest(
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+
+            task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
+            publiserVedtakV2Task.doTask(task)
+            publiserVedtakV2Task.onCompletion(task)
+
+            val vedtakDVHV2 = MockKafkaProducer.sendteMeldinger.values.last() as VedtakDVHV2
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
         }
     }
 
@@ -274,7 +283,6 @@ class MigreringServiceTest(
             listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6 / 2).copy(undervalg = "MD")),
             emptyList()
         )
-        every { featureToggleService.isEnabled(SKAL_MIGRERE_ORDINÆR_DELT_BOSTED, any()) } returns true
 
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -312,6 +320,16 @@ class MigreringServiceTest(
                 SAK_BELØP_2_BARN_1_UNDER_6 / 2
             )
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+
+            task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
+            publiserVedtakV2Task.doTask(task)
+            publiserVedtakV2Task.onCompletion(task)
+
+            val vedtakDVHV2 = MockKafkaProducer.sendteMeldinger.values.last() as VedtakDVHV2
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().utbetaltPerMnd.toDouble()).isEqualTo(
+                SAK_BELØP_2_BARN_1_UNDER_6 / 2
+            )
         }
     }
 
@@ -357,6 +375,13 @@ class MigreringServiceTest(
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+
+            task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
+            publiserVedtakV2Task.doTask(task)
+            publiserVedtakV2Task.onCompletion(task)
+
+            val vedtakDVHV2 = MockKafkaProducer.sendteMeldinger.values.last() as VedtakDVHV2
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
         }
     }
 
@@ -379,6 +404,8 @@ class MigreringServiceTest(
 
     @Test
     fun `migrering skal feile dersom person registrert på stønad er også registrert som barn, Det er da mest sannsynlig institusjon`() {
+        val fødselsnrBarn = FoedselsnummerGenerator().foedselsnummer(LocalDate.now()).asString
+
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(
@@ -386,8 +413,57 @@ class MigreringServiceTest(
                 Sak(
                     stønad = Stønad(
                         barn = listOf(
-                            Barn(ClientMocks.søkerFnr[0], barnetrygdTom = "000000")
+                            Barn(
+                                fødselsnrBarn,
+                                barnetrygdTom = "000000"
+                            )
                         ),
+                        antallBarn = 1,
+                        delytelse = listOf(
+                            Delytelse(
+                                fom = LocalDate.now(),
+                                tom = null,
+                                beløp = 2048.0,
+                                typeDelytelse = "MS",
+                                typeUtbetaling = "J",
+                            )
+                        ),
+                        opphørsgrunn = "0"
+                    ),
+                    status = "FB",
+                    valg = "OR",
+                    undervalg = "OS"
+                )
+
+            ),
+            emptyList()
+        )
+
+        assertThatThrownBy {
+            migreringService.migrer(fødselsnrBarn)
+        }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.INSTITUSJON)
+    }
+
+    @Test
+    fun `migrering skal feile dersom har barn er 18 år`() {
+        val fødselsnrBarn =
+            FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
+
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(
+            listOf(
+                Sak(
+                    stønad = Stønad(
+                        barn = listOf(
+                            Barn(
+                                fødselsnrBarn,
+                                barnetrygdTom = "000000"
+                            )
+                        ),
+                        antallBarn = 1,
                         delytelse = listOf(
                             Delytelse(
                                 fom = LocalDate.now(),
@@ -412,7 +488,7 @@ class MigreringServiceTest(
             migreringService.migrer(ClientMocks.søkerFnr[0])
         }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.INSTITUSJON)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.HAR_BARN_OVER_18_PÅ_INFOTRYGDSAK)
     }
 
     @Test
@@ -475,7 +551,7 @@ class MigreringServiceTest(
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
             InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6, 660.0)), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(KanIkkeMigrereException::class.java)
-            .hasMessage(null)
+            .hasMessage("Fant ugylding antall delytelser 2")
             .extracting("feiltype").isEqualTo(MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD)
     }
 
@@ -599,7 +675,6 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
-            mockk(),
             mockkPersonidentService,
             mockk(),
             mockk(),
@@ -608,9 +683,7 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
-            mockk(),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
+            mockk(relaxed = true)
         )
 
         val aktivFnr = randomFnr()
@@ -638,9 +711,7 @@ class MigreringServiceTest(
             env = mockk(),
             fagsakService = mockk(),
             infotrygdBarnetrygdClient = infotrygdBarnetrygdClient,
-            pdlRestClient = mockk(),
             personidentService = mockkPersonidentService,
-            personopplysningerService = mockk(),
             stegService = mockk(),
             taskRepository = mockk(),
             tilkjentYtelseRepository = mockk(),
@@ -649,7 +720,6 @@ class MigreringServiceTest(
             vilkårService = mockk(),
             vilkårsvurderingService = mockk(),
             migreringRestClient = mockk(relaxed = true),
-            featureToggleService = mockk(relaxed = true),
         )
 
         val ident = randomFnr()
@@ -678,25 +748,13 @@ class MigreringServiceTest(
             .extracting("feiltype").isNotEqualTo(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
     }
 
-    @Test
-    fun `migrering skal feile med kode 6 person`() {
-        every {
-            infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
-
-        assertThatThrownBy {
-            migreringService.migrer(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)
-        }.isInstanceOf(KanIkkeMigrereException::class.java)
-            .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.IKKE_STØTTET_GRADERING)
-    }
-
     private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(
         stønad = Stønad(
             barn = listOf(
                 Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
                 Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000")
             ),
+            antallBarn = 2,
             delytelse = beløp.map {
                 Delytelse(
                     fom = LocalDate.now(),
@@ -719,6 +777,7 @@ class MigreringServiceTest(
                 Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
                 Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000")
             ),
+            antallBarn = 2,
             delytelse = beløp.map {
                 Delytelse(
                     fom = LocalDate.now(),

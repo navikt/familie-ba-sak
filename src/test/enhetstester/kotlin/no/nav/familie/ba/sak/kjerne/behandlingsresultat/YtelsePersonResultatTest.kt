@@ -224,10 +224,10 @@ class YtelsePersonResultatTest {
     }
 
     /**
-     * INNVILGET, AVSLÅTT, ENDRET
+     * INNVILGET, AVSLÅTT, ENDRET_UTBETALING
      */
     @Test
-    fun `Skal utelede INNVILGET, AVSLÅTT og ENDRET ved revurdering med utvidet innvilgelse, reduksjon tilbake i tid og eksplisitt avslag`() {
+    fun `Skal utelede INNVILGET, AVSLÅTT og ENDRET_UTBETALING ved revurdering med utvidet innvilgelse, reduksjon tilbake i tid og eksplisitt avslag`() {
         val forrigeAndelBarn1 = lagBehandlingsresultatAndelTilkjentYtelse(
             inneværendeMåned().minusYears(1).toString(),
             inneværendeMåned().plusMonths(12).toString(),
@@ -260,7 +260,7 @@ class YtelsePersonResultatTest {
         )
 
         assertEquals(
-            setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT, YtelsePersonResultat.ENDRET),
+            setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT, YtelsePersonResultat.ENDRET_UTBETALING),
             ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
@@ -609,7 +609,7 @@ class YtelsePersonResultatTest {
     }
 
     /**
-     * ENDRET
+     * ENDRET_UTBETALING
      */
     @Test
     fun `Skal utlede ENDRET på årlig kontroll med ny løpende periode tilbake i tid`() {
@@ -645,11 +645,14 @@ class YtelsePersonResultatTest {
         )
 
         assertEquals(
-            setOf(YtelsePersonResultat.ENDRET),
+            setOf(YtelsePersonResultat.ENDRET_UTBETALING),
             ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
 
+    /**
+     * ENDRET_UTBETALING
+     */
     @Test
     fun `Skal utlede ENDRET på barn som går fra opphørt inneværende måned til løpende`() {
         val forrigeAndelBarn1 = lagBehandlingsresultatAndelTilkjentYtelse(
@@ -678,7 +681,7 @@ class YtelsePersonResultatTest {
         )
 
         assertEquals(
-            setOf(YtelsePersonResultat.ENDRET),
+            setOf(YtelsePersonResultat.ENDRET_UTBETALING),
             ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
@@ -716,7 +719,7 @@ class YtelsePersonResultatTest {
         )
 
         assertEquals(
-            setOf(YtelsePersonResultat.ENDRET),
+            setOf(YtelsePersonResultat.ENDRET_UTBETALING),
             ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
@@ -753,7 +756,7 @@ class YtelsePersonResultatTest {
         )
 
         assertEquals(
-            setOf(YtelsePersonResultat.OPPHØRT, YtelsePersonResultat.ENDRET),
+            setOf(YtelsePersonResultat.OPPHØRT, YtelsePersonResultat.ENDRET_UTBETALING),
             ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
         assertEquals(
@@ -797,11 +800,97 @@ class YtelsePersonResultatTest {
         )
 
         assertEquals(
-            setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
+            setOf(YtelsePersonResultat.ENDRET_UTBETALING, YtelsePersonResultat.OPPHØRT),
             ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
         assertEquals(
             ytelseSlutt,
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.ytelseSlutt
+        )
+    }
+
+    @Test
+    fun `Skal utlede ENDRET_UTEN_UTBETALING og OPPHØRT når barn ikke har endring i utbetaling og får opphørs periode`() {
+        val forrigeAndelBarn1 = lagBehandlingsresultatAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(4).toString(),
+            inneværendeMåned().minusMonths(1).toString(),
+            1054
+        )
+
+        val andelBarn1 = lagBehandlingsresultatAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(5).toString(),
+            inneværendeMåned().minusYears(4).minusMonths(1).toString(),
+            0
+        )
+
+        val andel2Barn1 = lagBehandlingsresultatAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(4).toString(),
+            inneværendeMåned().minusMonths(1).toString(),
+            1054
+        )
+
+        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
+            behandlingsresultatPersoner = listOf(
+                BehandlingsresultatPerson(
+                    aktør = barn1.aktør,
+                    søktForPerson = false,
+                    personType = barn1.type,
+                    forrigeAndeler = listOf(forrigeAndelBarn1),
+                    andeler = listOf(andelBarn1, andel2Barn1),
+                    eksplisittAvslag = false
+                )
+            )
+        )
+
+        assertEquals(
+            setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING, YtelsePersonResultat.OPPHØRT),
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
+        )
+        assertEquals(
+            inneværendeMåned().minusMonths(1),
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.ytelseSlutt
+        )
+    }
+
+    @Test
+    fun `Skal utlede ENDRET_UTEN_UTBETALING når barn har endring uten å påvirke utbetaling`() {
+        val forrigeAndelBarn1 = lagBehandlingsresultatAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(4).toString(),
+            inneværendeMåned().plusMonths(12).toString(),
+            1054
+        )
+
+        val andelBarn1 = lagBehandlingsresultatAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(5).toString(),
+            inneværendeMåned().minusYears(4).minusMonths(1).toString(),
+            0
+        )
+
+        val andel2Barn1 = lagBehandlingsresultatAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(4).toString(),
+            inneværendeMåned().plusMonths(12).toString(),
+            1054
+        )
+
+        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
+            behandlingsresultatPersoner = listOf(
+                BehandlingsresultatPerson(
+                    aktør = barn1.aktør,
+                    søktForPerson = false,
+                    personType = barn1.type,
+                    forrigeAndeler = listOf(forrigeAndelBarn1),
+                    andeler = listOf(andelBarn1, andel2Barn1),
+                    eksplisittAvslag = false
+                )
+            )
+        )
+
+        assertEquals(
+            setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING),
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
+        )
+        assertEquals(
+            inneværendeMåned().plusMonths(12),
             ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.ytelseSlutt
         )
     }

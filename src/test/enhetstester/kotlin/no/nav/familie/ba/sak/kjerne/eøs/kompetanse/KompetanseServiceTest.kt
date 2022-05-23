@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MinnebasertKompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
@@ -20,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -68,7 +68,7 @@ internal class KompetanseServiceTest {
             .lagreTil(mockKompetanseRepository)
 
         val oppdatertKompetanse = kompetanse(jan(2020), "  SSSSS  ", barn1)
-        kompetanseService.oppdaterKompetanse(lagretKompetanse.id, oppdatertKompetanse)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
 
         val forventedeKompetanser = listOf(lagretKompetanse)
 
@@ -87,7 +87,7 @@ internal class KompetanseServiceTest {
 
         val oppdatertKompetanse = kompetanse(jan(2020), "  PP", barn2, barn3)
 
-        kompetanseService.oppdaterKompetanse(lagretKompetanse.id, oppdatertKompetanse)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
 
         val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
             .medKompetanse("--", barn1, barn2, barn3)
@@ -117,12 +117,8 @@ internal class KompetanseServiceTest {
             .medKompetanse("   SSSS", barn1)
             .lagreTil(mockKompetanseRepository)
 
-        val lagretKompetanse = kompetanseService.finnKompetanse(
-            behandlingId, kompetanse(jan(2020), "SSS", barn1)
-        )
-
         val oppdatertKompetanse = kompetanse(jan(2020), "PP", barn1)
-        kompetanseService.oppdaterKompetanse(lagretKompetanse.id, oppdatertKompetanse)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
 
         val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
             .medKompetanse("PP", barn1)
@@ -131,6 +127,83 @@ internal class KompetanseServiceTest {
             .byggKompetanser()
 
         assertEqualsUnordered(forventedeKompetanser, kompetanseService.hentKompetanser(behandlingId))
+    }
+
+    @Test
+    fun `skal kunne sende inn oppdatering som overlapper flere kompetanser`() {
+        val behandlingId = 10L
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("SSS", barn1)
+            .medKompetanse("---------", barn2, barn3)
+            .medKompetanse("   SSSS", barn1)
+            .lagreTil(mockKompetanseRepository)
+
+        val oppdatertKompetanse = kompetanse(mar(2020), "PPP", barn1, barn2, barn3)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+
+        val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("SS   SS", barn1)
+            .medKompetanse("  PPP", barn1, barn2, barn3)
+            .medKompetanse("--   ----", barn2, barn3)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `skal kunne lukke åpen kompetanse ved å sende inn identisk skjema med til-og-med-dato`() {
+        val behandlingId = 10L
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        // Åpen (til-og-med er null) kompetanse med sekundærland for tre barn
+        KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("S>", barn1, barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        // Endrer kun til-og-med dato fra uendelig (null) til en gitt dato
+        val oppdatertKompetanse = kompetanse(jan(2020), "SSS", barn1, barn2, barn3)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+
+        // Forventer tomt skjema fra oppdatert dato og fremover
+        val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("SSS->", barn1, barn2, barn3)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `skal opprette tomt skjema for barn som fjernes fra ellers uendret skjema`() {
+        val behandlingId = 10L
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        // Åpen (til-og-med er null) kompetanse med sekundærland for tre barn
+        KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("S>", barn1, barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        // Fjerner ett barn fra gjeldende skjema, ellers likt
+        val oppdatertKompetanse = kompetanse(jan(2020), "S>", barn1, barn2)
+        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+
+        // Forventer tomt skjema for samme periode for barnet som ble fjernet
+        val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("S>", barn1, barn2)
+            .medKompetanse("->", barn3)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 
     @Test
@@ -144,8 +217,8 @@ internal class KompetanseServiceTest {
 
         val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>()
             .forPerson(søker, treMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
-            .medVilkår("+++++++++++", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("+++++++++++", Vilkår.LOVLIG_OPPHOLD)
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("EEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
             .forPerson(barn1, treMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
             .medVilkår("+++++++++++", Vilkår.UNDER_18_ÅR)
             .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
@@ -188,8 +261,8 @@ internal class KompetanseServiceTest {
 
         val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>()
             .forPerson(søker, seksMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
-            .medVilkår("+++++++++++", Vilkår.BOSATT_I_RIKET)
-            .medVilkår("+++++++++++", Vilkår.LOVLIG_OPPHOLD)
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
+            .medVilkår("EEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
             .forPerson(barn1, seksMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
             .medVilkår("+++++++++++", Vilkår.UNDER_18_ÅR)
             .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)

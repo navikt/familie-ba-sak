@@ -152,7 +152,8 @@ internal class BrevUtilsTest {
         Behandlingsresultat.DELVIS_INNVILGET,
         Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET,
         Behandlingsresultat.AVSLÅTT_OG_ENDRET,
-        Behandlingsresultat.ENDRET
+        Behandlingsresultat.ENDRET_UTBETALING,
+        Behandlingsresultat.ENDRET_UTEN_UTBETALING
     )
 
     @Test
@@ -273,7 +274,7 @@ internal class BrevUtilsTest {
             )
         Assertions.assertEquals(
             Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
-            hentBrevtype(behandling)
+            hentBrevmal(behandling)
         )
     }
 
@@ -290,7 +291,7 @@ internal class BrevUtilsTest {
             )
         Assertions.assertEquals(
             Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
-            hentBrevtype(behandling)
+            hentBrevmal(behandling)
         )
     }
 

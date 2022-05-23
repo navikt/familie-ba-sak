@@ -108,7 +108,6 @@ data class VedtaksperiodeMedBegrunnelser(
     fun hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        skalBrukeNyMåteÅGenerereVedtaksperioder: Boolean
     ): List<UtbetalingsperiodeDetalj> =
         if (andelerTilkjentYtelse.isEmpty()) emptyList()
         else if (this.type == Vedtaksperiodetype.UTBETALING ||
@@ -120,7 +119,6 @@ data class VedtaksperiodeMedBegrunnelser(
                     hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse)
                 else hentVertikaltSegmentForVedtaksperiode(
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
-                    skalBrukeNyMåteÅGenerereVedtaksperioder = skalBrukeNyMåteÅGenerereVedtaksperioder
                 )
 
             val andelerForSegment =
@@ -133,15 +131,11 @@ data class VedtaksperiodeMedBegrunnelser(
 
     private fun hentVertikaltSegmentForVedtaksperiode(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        skalBrukeNyMåteÅGenerereVedtaksperioder: Boolean
     ) = andelerTilkjentYtelse
         .utledSegmenter()
         .find { localDateSegment ->
-            if (skalBrukeNyMåteÅGenerereVedtaksperioder) {
-                localDateSegment.fom.isSameOrBefore(this.fom ?: TIDENES_MORGEN) && localDateSegment.tom.isSameOrAfter(this.tom ?: TIDENES_ENDE)
-            } else {
-                localDateSegment.fom == this.fom || localDateSegment.tom == this.tom
-            }
+            localDateSegment.fom.isSameOrBefore(this.fom ?: TIDENES_MORGEN) &&
+                localDateSegment.tom.isSameOrAfter(this.tom ?: TIDENES_ENDE)
         } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
 
     companion object {

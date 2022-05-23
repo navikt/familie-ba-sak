@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
+package no.nav.familie.ba.sak.kjerne.eøs.felles.beregning
 
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-internal class KompetanseTidslinjeTest {
+internal class SkjemaTidslinjeTest {
 
     @Test
     fun `skal håndtere to påfølgende perioder i fremtiden, men de komprimeres ikke`() {
@@ -29,7 +29,7 @@ internal class KompetanseTidslinjeTest {
             barnAktører = setOf(barn.aktør)
         )
 
-        val kompetanseTidslinje = KompetanseTidslinje(kompetanse1, kompetanse2)
+        val kompetanseTidslinje = SkjemaTidslinje(kompetanse1, kompetanse2)
         assertEquals(2, kompetanseTidslinje.perioder().size)
         assertEquals(feb(2437), kompetanseTidslinje.fraOgMed())
         assertEquals(jul(2438).somUendeligLengeTil(), kompetanseTidslinje.tilOgMed())
@@ -45,7 +45,7 @@ internal class KompetanseTidslinjeTest {
             barnAktører = setOf(barn.aktør)
         )
 
-        val kompetanseTidslinje = KompetanseTidslinje(kompetanse)
+        val kompetanseTidslinje = SkjemaTidslinje(kompetanse)
         assertEquals(1, kompetanseTidslinje.perioder().size)
         assertEquals(MånedTidspunkt.nå().somUendeligLengeSiden(), kompetanseTidslinje.fraOgMed())
         assertEquals(MånedTidspunkt.nå().somUendeligLengeTil(), kompetanseTidslinje.tilOgMed())

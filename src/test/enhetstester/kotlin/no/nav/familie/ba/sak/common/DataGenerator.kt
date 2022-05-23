@@ -32,9 +32,10 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevtype
+import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -698,7 +699,7 @@ fun kjørStegprosessForFGB(
                 behandlingId = behandlingEtterJournalførtVedtak.id,
                 journalpostId = "1234",
                 personIdent = søkerFnr,
-                brevmal = hentBrevtype(
+                brevmal = hentBrevmal(
                     behandlingEtterJournalførtVedtak
                 ),
                 erManueltSendt = false
@@ -809,7 +810,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
                 personIdent = søkerFnr,
-                brevmal = hentBrevtype(behandling),
+                brevmal = hentBrevmal(behandling),
                 erManueltSendt = false
             )
         )
@@ -1087,6 +1088,9 @@ fun lagTriggesAv(
 fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
     VilkårRegelverkResultat(
         vilkår = vilkår,
-        resultat = Resultat.OPPFYLT,
-        regelverk = regelverk
+        regelverkResultat = when (regelverk) {
+            Regelverk.NASJONALE_REGLER -> RegelverkResultat.OPPFYLT_NASJONALE_REGLER
+            Regelverk.EØS_FORORDNINGEN -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
+            else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
+        }
     )

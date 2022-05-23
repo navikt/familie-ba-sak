@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.BrevService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -73,7 +73,7 @@ class OpplysningspliktTest(
         dokumentService.sendManueltBrev(
             fagsakId = behandling.fagsak.id,
             manueltBrevRequest = ManueltBrevRequest(
-                brevmal = BrevType.INNHENTE_OPPLYSNINGER,
+                brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
                 mottakerIdent = scenario.søker.ident,
                 enhet = Enhet(enhetId = "1234", enhetNavn = "Enhet Enhetesen")
             ),

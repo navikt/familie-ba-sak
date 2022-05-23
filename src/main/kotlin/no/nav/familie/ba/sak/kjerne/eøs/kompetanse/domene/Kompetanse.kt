@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
-import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.YearMonth
@@ -28,11 +28,11 @@ import javax.persistence.Transient
 data class Kompetanse(
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val fom: YearMonth?,
+    override val fom: YearMonth?,
 
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val tom: YearMonth?,
+    override val tom: YearMonth?,
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -40,7 +40,7 @@ data class Kompetanse(
         joinColumns = [JoinColumn(name = "fk_kompetanse_id")],
         inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")]
     )
-    val barnAktører: Set<Aktør> = emptySet(),
+    override val barnAktører: Set<Aktør> = emptySet(),
 
     @Enumerated(EnumType.STRING)
     @Column(name = "soekers_aktivitet")
@@ -59,7 +59,8 @@ data class Kompetanse(
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat")
     val resultat: KompetanseResultat? = null
-) : BaseEntitet() {
+) : PeriodeOgBarnSkjemaEntitet<Kompetanse>() {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "kompetanse_seq_generator")
     @SequenceGenerator(
@@ -67,34 +68,34 @@ data class Kompetanse(
         sequenceName = "kompetanse_seq",
         allocationSize = 50
     )
-    var id: Long = 0
+    override var id: Long = 0
 
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
-    var behandlingId: Long = 0
+    override var behandlingId: Long = 0
 
     @Transient
     var status: KompetanseStatus? = KompetanseStatus.IKKE_UTFYLT
+
+    override fun utenSkjema() = this.copy(
+        søkersAktivitet = null,
+        annenForeldersAktivitet = null,
+        annenForeldersAktivitetsland = null,
+        barnetsBostedsland = null,
+        resultat = null
+    )
+
+    override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) =
+        copy(
+            fom = fom,
+            tom = tom,
+            barnAktører = barnAktører
+        )
 }
 
 enum class KompetanseStatus {
     IKKE_UTFYLT,
     UFULLSTENDIG,
     OK
-}
-
-fun Kompetanse.utenSkjema() = this.copy(
-    søkersAktivitet = null,
-    annenForeldersAktivitet = null,
-    annenForeldersAktivitetsland = null,
-    barnetsBostedsland = null,
-    resultat = null
-)
-
-fun Kompetanse.inneholder(kompetanse: Kompetanse): Boolean {
-    return this.bareSkjema() == kompetanse.bareSkjema() &&
-        (this.fom == null || this.fom <= kompetanse.fom) &&
-        (this.tom == null || this.tom >= kompetanse.tom) &&
-        this.barnAktører.containsAll(kompetanse.barnAktører)
 }
 
 enum class SøkersAktivitet {
@@ -121,12 +122,3 @@ enum class KompetanseResultat {
     NORGE_ER_SEKUNDÆRLAND,
     TO_PRIMÆRLAND
 }
-
-fun Kompetanse.bareSkjema() =
-    this.copy(fom = null, tom = null, barnAktører = emptySet())
-
-fun Kompetanse.utenBarn() =
-    this.copy(barnAktører = emptySet())
-
-fun Kompetanse.utenPeriode() =
-    this.copy(fom = null, tom = null)

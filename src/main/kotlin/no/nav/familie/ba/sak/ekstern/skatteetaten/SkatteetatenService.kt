@@ -12,8 +12,10 @@ import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderRespo
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerson
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -25,20 +27,19 @@ class SkatteetatenService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingRepository: BehandlingRepository
 ) {
-
+    @Cacheable("skatt_personer", cacheManager = "skattPersonerCache", unless = "#result == null")
     fun finnPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
-        LOG.debug("enter finnPersonerMedUtvidetBarnetrygd(), år {}", år)
+        LOG.info("Kaller finnPersonerMedUtvidetBarnetrygd for år=$år")
         val personerFraInfotrygd = infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(år)
-        LOG.debug("hent personer fra Infotrygd return {} personer", personerFraInfotrygd.brukere.size)
+        LOG.info("Hentet ${personerFraInfotrygd.brukere.size} saker med utvidet fra infotrygd i $år")
         val personerFraBaSak = hentPersonerMedUtvidetBarnetrygd(år)
-        LOG.debug("hent personer fra ba-sak return {} personer", personerFraBaSak.size)
+        LOG.info("Hentet ${personerFraBaSak.size} saker med utvidet fra basak i $år")
 
         val personIdentSet = personerFraBaSak.map { it.ident }.toSet()
 
         // Assumes that vedtak in ba-sak is always newer than that in Infotrygd for the same person ident
         val kombinertListe =
             personerFraBaSak + personerFraInfotrygd.brukere.filter { !personIdentSet.contains(it.ident) }
-        LOG.debug("kombinert person fra Infotrygd og ba-sak: {} unik personer", kombinertListe.size)
 
         return SkatteetatenPersonerResponse(kombinertListe)
     }
@@ -83,10 +84,10 @@ class SkatteetatenService(
 
     private fun hentPersonerMedUtvidetBarnetrygd(år: String): List<SkatteetatenPerson> {
         return fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(
-            fom = YearMonth.of(år.toInt(), 1),
-            tom = YearMonth.of(år.toInt(), 12)
+            fom = LocalDate.of(år.toInt(), 1, 1).atStartOfDay(),
+            tom = LocalDate.of(år.toInt() + 1, 1, 1).atStartOfDay()
         )
-            .map { SkatteetatenPerson(it.first.aktør.aktivFødselsnummer(), it.second.atStartOfDay()) }
+            .map { SkatteetatenPerson(it.fnr, it.sisteVedtaksdato.atStartOfDay()) }
     }
 
     private fun hentPerioderMedUtvidetBarnetrygdFraBaSak(
@@ -177,4 +178,9 @@ fun SkatteetatenPeriode.Delingsprosent.tilBigDecimal(): BigDecimal = when (this)
     SkatteetatenPeriode.Delingsprosent._0 -> BigDecimal.valueOf(100)
     SkatteetatenPeriode.Delingsprosent._50 -> BigDecimal.valueOf(50)
     else -> BigDecimal.valueOf(0)
+}
+
+interface UtvidetSkatt {
+    val fnr: String
+    val sisteVedtaksdato: LocalDate
 }

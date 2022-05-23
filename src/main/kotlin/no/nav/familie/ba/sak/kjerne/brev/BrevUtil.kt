@@ -15,8 +15,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_OG_OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTBETALING
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTEN_UTBETALING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.IKKE_VURDERT
@@ -37,7 +38,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
-fun hentBrevtype(behandling: Behandling): Brevmal =
+fun hentBrevmal(behandling: Behandling): Brevmal =
     when (behandling.opprettetÅrsak) {
         BehandlingÅrsak.DØDSFALL_BRUKER -> Brevmal.VEDTAK_OPPHØR_DØDSFALL
         BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV
@@ -108,9 +109,9 @@ fun hentManuellVedtaksbrevtype(
                 DELVIS_INNVILGET,
                 DELVIS_INNVILGET_OG_ENDRET,
                 AVSLÅTT_OG_ENDRET,
-                ENDRET -> Brevmal.VEDTAK_ENDRING
+                ENDRET_UTBETALING, ENDRET_UTEN_UTBETALING -> Brevmal.VEDTAK_ENDRING
 
-                OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
+                OPPHØRT,
                 FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
 
                 INNVILGET_OG_OPPHØRT,

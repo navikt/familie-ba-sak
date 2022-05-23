@@ -190,12 +190,18 @@ object VilkårsvurderingUtils {
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
         løpendeUnderkategori: BehandlingUnderkategori? = null
     ): Pair<Vilkårsvurdering, Vilkårsvurdering> {
+
+        // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
+        // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
+        val initiellVilkårsvurderingKopi = initiellVilkårsvurdering.kopier()
+        val aktivVilkårsvurderingKopi = aktivVilkårsvurdering.kopier()
+
         // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
-        val personResultaterAktivt = aktivVilkårsvurdering.personResultater.toMutableSet()
+        val personResultaterAktivt = aktivVilkårsvurderingKopi.personResultater.toMutableSet()
         val personResultaterOppdatert = mutableSetOf<PersonResultat>()
-        initiellVilkårsvurdering.personResultater.forEach { personFraInit ->
+        initiellVilkårsvurderingKopi.personResultater.forEach { personFraInit ->
             val personTilOppdatert = PersonResultat(
-                vilkårsvurdering = initiellVilkårsvurdering,
+                vilkårsvurdering = initiellVilkårsvurderingKopi,
                 aktør = personFraInit.aktør
             )
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør }
@@ -209,34 +215,34 @@ object VilkårsvurderingUtils {
             } else {
                 // Fyll inn den initierte med person fra aktiv
                 oppdaterEksisterendePerson(
-                    personenSomFinnes,
-                    personFraInit,
-                    initiellVilkårsvurdering,
-                    aktivVilkårsvurdering,
-                    personTilOppdatert,
-                    forrigeBehandlingVilkårsvurdering,
-                    løpendeUnderkategori,
-                    personResultaterAktivt
+                    personenSomFinnes = personenSomFinnes,
+                    personFraInit = personFraInit,
+                    kopieringSkjerFraForrigeBehandling = initiellVilkårsvurderingKopi.behandling.id != aktivVilkårsvurderingKopi.behandling.id,
+                    personTilOppdatert = personTilOppdatert,
+                    forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
+                    løpendeUnderkategori = løpendeUnderkategori,
+                    personResultaterAktivt = personResultaterAktivt
                 )
             }
             personResultaterOppdatert.add(personTilOppdatert)
         }
-        aktivVilkårsvurdering.personResultater = personResultaterAktivt
-        initiellVilkårsvurdering.personResultater = personResultaterOppdatert
 
-        return Pair(initiellVilkårsvurdering, aktivVilkårsvurdering)
+        aktivVilkårsvurderingKopi.personResultater = personResultaterAktivt
+        initiellVilkårsvurderingKopi.personResultater = personResultaterOppdatert
+
+        return Pair(initiellVilkårsvurderingKopi, aktivVilkårsvurderingKopi)
     }
 
     private fun oppdaterEksisterendePerson(
         personenSomFinnes: PersonResultat,
         personFraInit: PersonResultat,
-        initiellVilkårsvurdering: Vilkårsvurdering,
-        aktivVilkårsvurdering: Vilkårsvurdering,
+        kopieringSkjerFraForrigeBehandling: Boolean,
         personTilOppdatert: PersonResultat,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering?,
         løpendeUnderkategori: BehandlingUnderkategori?,
         personResultaterAktivt: MutableSet<PersonResultat>
     ) {
+
         val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
         val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
         personFraInit.vilkårResultater.forEach { vilkårFraInit ->
@@ -244,7 +250,7 @@ object VilkårsvurderingUtils {
                 personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
 
             val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
-                kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
+                kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling
             )
             val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
             personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
@@ -271,7 +277,7 @@ object VilkårsvurderingUtils {
                     it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
                         it.resultat == Resultat.OPPFYLT &&
                         // forrige behandling har minst et måned ubetalt utvidet barnetrygd
-                        it.differanseIPeriode().toTotalMonths() > Period.ofMonths(1).months
+                        it.differanseIPeriode().toTotalMonths() >= Period.ofMonths(1).months
                 } ?: false
 
         // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
@@ -283,7 +289,7 @@ object VilkårsvurderingUtils {
                 personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
             if (utvidetVilkår.isNotEmpty()) {
                 personsVilkårOppdatert.addAll(
-                    utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id)
+                    utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling)
                         .map { it.kopierMedParent(personTilOppdatert) }
                 )
                 personsVilkårAktivt.removeAll(utvidetVilkår)
