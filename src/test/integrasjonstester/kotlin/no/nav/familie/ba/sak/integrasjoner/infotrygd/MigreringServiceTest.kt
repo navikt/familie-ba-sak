@@ -35,9 +35,11 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.sakstatistikkObjectMapper
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.PubliserVedtakTask
+import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
+import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.kontrakter.ba.infotrygd.Barn
@@ -107,6 +109,9 @@ class MigreringServiceTest(
 
     @Autowired
     private val publiserVedtakTask: PubliserVedtakTask,
+
+    @Autowired
+    private val publiserVedtakV2Task: PubliserVedtakV2Task,
 
     @Autowired
     private val ferdigstillBehandlingTask: FerdigstillBehandlingTask,
@@ -209,6 +214,13 @@ class MigreringServiceTest(
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+
+            task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
+            publiserVedtakV2Task.doTask(task)
+            publiserVedtakV2Task.onCompletion(task)
+
+            val vedtakDVHV2 = MockKafkaProducer.sendteMeldinger.values.last() as VedtakDVHV2
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
         }
     }
 
@@ -253,6 +265,13 @@ class MigreringServiceTest(
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+
+            task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
+            publiserVedtakV2Task.doTask(task)
+            publiserVedtakV2Task.onCompletion(task)
+
+            val vedtakDVHV2 = MockKafkaProducer.sendteMeldinger.values.last() as VedtakDVHV2
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
         }
     }
 
@@ -301,6 +320,16 @@ class MigreringServiceTest(
                 SAK_BELØP_2_BARN_1_UNDER_6 / 2
             )
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+
+            task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
+            publiserVedtakV2Task.doTask(task)
+            publiserVedtakV2Task.onCompletion(task)
+
+            val vedtakDVHV2 = MockKafkaProducer.sendteMeldinger.values.last() as VedtakDVHV2
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().utbetaltPerMnd.toDouble()).isEqualTo(
+                SAK_BELØP_2_BARN_1_UNDER_6 / 2
+            )
         }
     }
 
@@ -346,6 +375,13 @@ class MigreringServiceTest(
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+
+            task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
+            publiserVedtakV2Task.doTask(task)
+            publiserVedtakV2Task.onCompletion(task)
+
+            val vedtakDVHV2 = MockKafkaProducer.sendteMeldinger.values.last() as VedtakDVHV2
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
         }
     }
 
