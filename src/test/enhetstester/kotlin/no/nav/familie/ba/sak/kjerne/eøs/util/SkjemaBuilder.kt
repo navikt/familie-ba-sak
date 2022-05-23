@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
 
-@Suppress("UNCHECKED_CAST")
 abstract class SkjemaBuilder<S, B>(
     private val startMåned: Tidspunkt<Måned> = jan(2020),
     private val behandlingId: Long
@@ -33,6 +32,7 @@ abstract class SkjemaBuilder<S, B>(
             }
             .all { skjemaer.add(it) }
 
+        @Suppress("UNCHECKED_CAST")
         return this as B
     }
 

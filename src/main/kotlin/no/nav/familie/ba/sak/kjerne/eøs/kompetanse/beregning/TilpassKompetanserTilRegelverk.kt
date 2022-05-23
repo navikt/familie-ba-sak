@@ -1,5 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceLast
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -17,13 +22,23 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
+fun tilpassKompetanserTilRegelverk(
+    gjeldendeKompetanser: Collection<Kompetanse>,
+    barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>
+): Collection<Kompetanse> {
+    val barnasEøsRegelverkTidslinjer = barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer()
+    return gjeldendeKompetanser.tilSeparateTidslinjerForBarna()
+        .tilpassTil(barnasEøsRegelverkTidslinjer) { kompetanse, _ -> kompetanse ?: Kompetanse.NULL }
+        .tilSkjemaer()
+}
+
 fun TidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<RegelverkResultat, Måned>> =
     this.hentTidslinjerThrows(behandlingId).barnasTidslinjer()
         .mapValues { (_, tidslinjer) ->
             tidslinjer.regelverkResultatTidslinje
         }
 
-fun Map<Aktør, Tidslinje<RegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer() =
+private fun Map<Aktør, Tidslinje<RegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer() =
     this.mapValues { (_, tidslinjer) ->
         tidslinjer.map { it?.regelverk }
             .filtrer { it == Regelverk.EØS_FORORDNINGEN }
@@ -50,6 +65,3 @@ private fun <I, T : Tidsenhet> Tidslinje<I, T>.flyttTilOgMed(tilTidspunkt: Tidsp
                 .replaceLast { Periode(it.fraOgMed, tilTidspunkt, it.innhold) }
         }
 }
-
-private fun <T> Collection<T>.replaceLast(replacer: (T) -> T) =
-    this.take(this.size - 1) + replacer(this.last())

@@ -16,7 +16,7 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         return periodeOgBarnSkjemaRepository.getById(id)
     }
 
-    fun endreSkjemaer(behandlingId: Long, oppdatering: S, also: (behandlingId: Long) -> Unit = {}) {
+    fun endreSkjemaer(behandlingId: Long, oppdatering: S, kjørTilSlutt: (behandlingId: Long) -> Unit = {}) {
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
 
         val justertOppdatering = oppdatering.somInversOppdateringEllersNull(gjeldendeSkjemaer) ?: oppdatering
@@ -24,21 +24,21 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
 
         lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteKompetanser.medBehandlingId(behandlingId))
 
-        also(behandlingId)
+        kjørTilSlutt(behandlingId)
     }
 
-    fun slettSkjema(skjemaId: Long, also: (behandlingId: Long) -> Unit = {}) {
-        val kompetanseTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
-        val behandlingId = kompetanseTilSletting.behandlingId
-        val gjeldendeKompetanser = hentMedBehandlingId(behandlingId)
-        val blankKompetanse = kompetanseTilSletting.utenSkjema()
+    fun slettSkjema(skjemaId: Long, kjørTilSlutt: (behandlingId: Long) -> Unit = {}) {
+        val skjemaTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
+        val behandlingId = skjemaTilSletting.behandlingId
+        val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
+        val blanktSkjema = skjemaTilSletting.utenSkjema()
 
-        val oppdaterteKompetanser = gjeldendeKompetanser.minus(kompetanseTilSletting).plus(blankKompetanse)
+        val oppdaterteKompetanser = gjeldendeSkjemaer.minus(skjemaTilSletting).plus(blanktSkjema)
             .slåSammen().medBehandlingId(behandlingId)
 
-        lagreSkjemaDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
+        lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteKompetanser)
 
-        also(behandlingId)
+        kjørTilSlutt(behandlingId)
     }
 
     fun kopierOgErstattSkjemaer(fraBehandlingId: Long, tilBehandlingId: Long) {

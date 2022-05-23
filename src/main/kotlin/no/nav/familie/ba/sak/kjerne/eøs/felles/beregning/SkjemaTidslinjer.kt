@@ -60,6 +60,11 @@ private fun <S : PeriodeOgBarnSkjema<S>> Tidslinje<S, Måned>.tilSkjemaer(aktør
         )
     }
 
+/**
+ * En spesialisering av Tidslinje.tilpassTil, som i stedet for enkelttidslinjer opperer på en Map
+ * med aktør som key og tidslinje soom value. Tilsvarende er parameteren en Map av aktær-til-tidslinje-par
+ * Resultatet er en map med unionen av aktører som nøkler og tilpassede tidslinjer som verdier
+ */
 fun <S : PeriodeOgBarnSkjema<S>, M> Map<Aktør, Tidslinje<S, Måned>>.tilpassTil(
     aktørTilMønsterTidslinje: Map<Aktør, Tidslinje<M, Måned>>,
     nyttSkjemaFactory: (S?, M) -> S
