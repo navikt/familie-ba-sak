@@ -53,6 +53,8 @@ class StatusFraOppdragTask(
 
         val nyTask = PubliserVedtakTask.opprettTask(personIdent, statusFraOppdragDTO.behandlingsId)
         taskRepository.save(nyTask)
+        val nyTaskV2 = PubliserVedtakV2Task.opprettTask(personIdent, statusFraOppdragDTO.behandlingsId)
+        taskRepository.save(nyTaskV2)
     }
 
     companion object {
