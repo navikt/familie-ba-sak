@@ -104,16 +104,12 @@ class FeatureToggleConfig(
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
         const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
-        const val FØRSTE_ENDRINGSTIDSPUNKT = "familie-ba-sak.behandling.forste-endringstidspunkt.utgivelse"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 
         const val TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT =
             "familie-ba-sak.teknisk-iverksett-mot-oppdrag-allerede-sendt"
         const val KONSISTENSAVSTEMMING_SPLITT_BATCH = "familie-ba-sak.teknisk-konsistensavstemming-splitt-batch"
-
-        const val LAG_REDUKSJONSPERIODER_FRA_INNVILGELSESTIDSPUNKT =
-            "familie-ba-sak.lag.reduksjonsperioder.fra.innvilgelsestidspunkt"
 
         const val KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED = "familie-ba-sak.manuell-migrering-ikke-delt-bosted"
 
