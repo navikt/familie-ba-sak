@@ -32,7 +32,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevtype
+import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat
@@ -699,7 +699,7 @@ fun kjørStegprosessForFGB(
                 behandlingId = behandlingEtterJournalførtVedtak.id,
                 journalpostId = "1234",
                 personIdent = søkerFnr,
-                brevmal = hentBrevtype(
+                brevmal = hentBrevmal(
                     behandlingEtterJournalførtVedtak
                 ),
                 erManueltSendt = false
@@ -810,7 +810,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
                 personIdent = søkerFnr,
-                brevmal = hentBrevtype(behandling),
+                brevmal = hentBrevmal(behandling),
                 erManueltSendt = false
             )
         )

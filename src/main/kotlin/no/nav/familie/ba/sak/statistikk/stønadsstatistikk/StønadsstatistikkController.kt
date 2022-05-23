@@ -7,7 +7,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.task.PubliserVedtakTask
+import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
+import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.PathVariable
@@ -30,11 +32,21 @@ class StønadsstatistikkController(
     private val logger = LoggerFactory.getLogger(StønadsstatistikkController::class.java)
 
     @PostMapping(path = ["/vedtak"])
-    fun hentBehandlingDvh(@RequestBody(required = true) behandlinger: List<Long>): List<VedtakDVH> {
+    fun hentVedtakDvh(@RequestBody(required = true) behandlinger: List<Long>): List<VedtakDVH> {
         try {
             return behandlinger.map { stønadsstatistikkService.hentVedtak(it) }
         } catch (e: Exception) {
             logger.warn("Feil ved henting av stønadsstatistikk for $behandlinger", e)
+            throw e
+        }
+    }
+
+    @PostMapping(path = ["/vedtakV2"])
+    fun hentVedtakDvhV2(@RequestBody(required = true) behandlinger: List<Long>): List<VedtakDVHV2> {
+        try {
+            return behandlinger.map { stønadsstatistikkService.hentVedtakV2(it) }
+        } catch (e: Exception) {
+            logger.warn("Feil ved henting av stønadsstatistikk V2 for $behandlinger", e)
             throw e
         }
     }
@@ -44,8 +56,11 @@ class StønadsstatistikkController(
         behandlinger.forEach {
             if (!statistikkClient.harSendtVedtaksmeldingForBehandling(it)) {
                 val vedtakDVH = stønadsstatistikkService.hentVedtak(it)
+                val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(it)
                 val task = PubliserVedtakTask.opprettTask(vedtakDVH.person.personIdent, it)
                 taskRepository.save(task)
+                val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, it)
+                taskRepository.save(vedtakV2Task)
             }
         }
     }
@@ -63,10 +78,13 @@ class StønadsstatistikkController(
             if (!statistikkClient.harSendtVedtaksmeldingForBehandling(it) && erIverksattBehandling(it)) {
                 logger.info("Ettersender stønadstatistikk for behandlingId=$it dryRun=$dryRun")
                 val vedtakDVH = stønadsstatistikkService.hentVedtak(it)
+                val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(it)
                 if (!dryRun) {
                     secureLogger.info("Oppretter task for å ettersende vedtak $vedtakDVH.person.personIdent")
                     val task = PubliserVedtakTask.opprettTask(vedtakDVH.person.personIdent, it)
                     taskRepository.save(task)
+                    val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, it)
+                    taskRepository.save(vedtakV2Task)
                 }
             }
         }
