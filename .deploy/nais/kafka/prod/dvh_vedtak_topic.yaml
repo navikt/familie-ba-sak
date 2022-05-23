@@ -1,7 +1,7 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: aapen-familie-ba-sak-opphoer-barnetrygd
+  name: aapen-barnetrygd-vedtak-v2
   namespace: teamfamilie
   labels:
     team: teamfamilie
@@ -13,14 +13,17 @@ spec:
     partitions: 1
     replication: 3  # see min/max requirements
     retentionBytes: -1  # -1 means unlimited
-    retentionHours: 168  # -1 means unlimited
+    retentionHours: 1440 # -1 means unlimited
   acl:
     - team: teamfamilie
       application: familie-ba-sak #owner
       access: write   # readwrite
-    - team: bidrag
-      application: bidrag-grunnlag #consumer
+    - team: teamfamilie
+      application: familie-ba-statistikk
       access: read
     - team: teamfamilie
       application: familie-ba-kafka-manager
+      access: read
+    - team: dv-familie
+      application: dvh-fambt-konsumer
       access: read

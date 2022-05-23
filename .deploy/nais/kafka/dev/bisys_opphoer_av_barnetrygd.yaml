@@ -27,3 +27,6 @@ spec:
     - team: bidrag
       application: bidrag-grunnlag #consumer
       access: read
+    - team: teamfamilie
+      application: familie-ba-kafka-manager
+      access: read
