@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
@@ -16,7 +18,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import java.time.LocalDate
 
@@ -38,11 +42,7 @@ class BrevPeriodeGenerator(
                 barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
             )
 
-        val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
-            uregistrerteBarn = uregistrerteBarn,
-            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-            brevMålform = brevMålform,
-        )
+        val begrunnelserOgFritekster = byggBegrunnelserOgFritekster(brevPeriodeGrunnlagMedPersoner.begrunnelser)
 
         if (begrunnelserOgFritekster.isEmpty()) return null
 
@@ -55,6 +55,27 @@ class BrevPeriodeGenerator(
             tomDato = tomDato,
             begrunnelserOgFritekster = begrunnelserOgFritekster
         )
+    }
+
+    fun byggBegrunnelserOgFritekster(
+        begrunnelserGrunnlagMedPersoner: List<BrevBegrunnelseGrunnlagMedPersoner>,
+    ): List<Begrunnelse> {
+
+        val brevBegrunnelser = begrunnelserGrunnlagMedPersoner.sorted()
+            .map {
+                it.tilBrevBegrunnelse(
+                    vedtaksperiode = NullablePeriode(minimertVedtaksperiode.fom, minimertVedtaksperiode.tom),
+                    personerIPersongrunnlag = restBehandlingsgrunnlagForBrev.personerPåBehandling,
+                    brevMålform = brevMålform,
+                    uregistrerteBarn = uregistrerteBarn,
+                    minimerteUtbetalingsperiodeDetaljer = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer,
+                    minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler
+                )
+            }
+
+        val fritekster = minimertVedtaksperiode.fritekster.map { FritekstBegrunnelse(it) }
+
+        return brevBegrunnelser + fritekster
     }
 
     private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
