@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -13,9 +14,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_MIGRERE_ORDINÆR_DELT_BOSTED
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
@@ -133,9 +131,6 @@ class MigreringServiceTest(
     @Autowired
     private val envService: EnvService,
 
-    @Autowired
-    private val featureToggleService: FeatureToggleService,
-
 ) : AbstractMockkSpringRunner() {
 
     lateinit var migreringServiceMock: MigreringService
@@ -176,9 +171,6 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
-            mockk(),
-            mockk(),
-            mockk(relaxed = true),
             mockk(relaxed = true),
         ) // => env.erDev() = env.erE2E() = false
     }
@@ -239,7 +231,6 @@ class MigreringServiceTest(
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
         val slotAktør = slot<Aktør>()
         every { pdlRestClient.hentForelderBarnRelasjoner(capture(slotAktør)) } returns emptyList()
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SKAL_MIGRERE_FOSTERBARN, any()) } returns true
 
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -292,7 +283,6 @@ class MigreringServiceTest(
             listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6 / 2).copy(undervalg = "MD")),
             emptyList()
         )
-        every { featureToggleService.isEnabled(SKAL_MIGRERE_ORDINÆR_DELT_BOSTED, any()) } returns true
 
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -414,6 +404,8 @@ class MigreringServiceTest(
 
     @Test
     fun `migrering skal feile dersom person registrert på stønad er også registrert som barn, Det er da mest sannsynlig institusjon`() {
+        val fødselsnrBarn = FoedselsnummerGenerator().foedselsnummer(LocalDate.now()).asString
+
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(
@@ -421,7 +413,55 @@ class MigreringServiceTest(
                 Sak(
                     stønad = Stønad(
                         barn = listOf(
-                            Barn(ClientMocks.søkerFnr[0], barnetrygdTom = "000000")
+                            Barn(
+                                fødselsnrBarn,
+                                barnetrygdTom = "000000"
+                            )
+                        ),
+                        antallBarn = 1,
+                        delytelse = listOf(
+                            Delytelse(
+                                fom = LocalDate.now(),
+                                tom = null,
+                                beløp = 2048.0,
+                                typeDelytelse = "MS",
+                                typeUtbetaling = "J",
+                            )
+                        ),
+                        opphørsgrunn = "0"
+                    ),
+                    status = "FB",
+                    valg = "OR",
+                    undervalg = "OS"
+                )
+
+            ),
+            emptyList()
+        )
+
+        assertThatThrownBy {
+            migreringService.migrer(fødselsnrBarn)
+        }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.INSTITUSJON)
+    }
+
+    @Test
+    fun `migrering skal feile dersom har barn er 18 år`() {
+        val fødselsnrBarn =
+            FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
+
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(
+            listOf(
+                Sak(
+                    stønad = Stønad(
+                        barn = listOf(
+                            Barn(
+                                fødselsnrBarn,
+                                barnetrygdTom = "000000"
+                            )
                         ),
                         antallBarn = 1,
                         delytelse = listOf(
@@ -448,7 +488,7 @@ class MigreringServiceTest(
             migreringService.migrer(ClientMocks.søkerFnr[0])
         }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.INSTITUSJON)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.HAR_BARN_OVER_18_PÅ_INFOTRYGDSAK)
     }
 
     @Test
@@ -511,7 +551,7 @@ class MigreringServiceTest(
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
             InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6, 660.0)), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(KanIkkeMigrereException::class.java)
-            .hasMessage(null)
+            .hasMessage("Fant ugylding antall delytelser 2")
             .extracting("feiltype").isEqualTo(MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD)
     }
 
@@ -635,7 +675,6 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
-            mockk(),
             mockkPersonidentService,
             mockk(),
             mockk(),
@@ -644,9 +683,7 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
-            mockk(),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
+            mockk(relaxed = true)
         )
 
         val aktivFnr = randomFnr()
@@ -674,9 +711,7 @@ class MigreringServiceTest(
             env = mockk(),
             fagsakService = mockk(),
             infotrygdBarnetrygdClient = infotrygdBarnetrygdClient,
-            pdlRestClient = mockk(),
             personidentService = mockkPersonidentService,
-            personopplysningerService = mockk(),
             stegService = mockk(),
             taskRepository = mockk(),
             tilkjentYtelseRepository = mockk(),
@@ -685,7 +720,6 @@ class MigreringServiceTest(
             vilkårService = mockk(),
             vilkårsvurderingService = mockk(),
             migreringRestClient = mockk(relaxed = true),
-            featureToggleService = mockk(relaxed = true),
         )
 
         val ident = randomFnr()

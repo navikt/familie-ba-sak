@@ -38,7 +38,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
-fun hentBrevtype(behandling: Behandling): Brevmal =
+fun hentBrevmal(behandling: Behandling): Brevmal =
     when (behandling.opprettetÅrsak) {
         BehandlingÅrsak.DØDSFALL_BRUKER -> Brevmal.VEDTAK_OPPHØR_DØDSFALL
         BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV
