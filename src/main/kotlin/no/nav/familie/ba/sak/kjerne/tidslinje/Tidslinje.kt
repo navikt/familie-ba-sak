@@ -80,3 +80,8 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.fraOgMed() =
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.tilOgMed() =
     this.perioder().lastOrNull()?.tilOgMed ?: NullTidspunkt.tilOgMed()
+
+fun <I, T : Tidsenhet> tidslinje(lagPerioder: () -> Collection<Periode<I, T>>) =
+    object : Tidslinje<I, T>() {
+        override fun lagPerioder() = lagPerioder()
+    }
