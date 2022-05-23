@@ -15,7 +15,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer
 @Configuration
 class KafkaConfig {
 
-    @Bean
+    @Bean("kafkaObjectMapper")
     fun kafkaObjectMapper(): ObjectMapper {
         return objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
     }

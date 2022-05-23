@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FØRSTE_ENDRINGSTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
@@ -284,7 +283,7 @@ class VedtaksperiodeService(
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
     ): List<VedtaksperiodeMedBegrunnelser> {
         val endringstidspunkt = manueltOverstyrtEndringstidspunkt
-            ?: if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT) && !gjelderFortsattInnvilget)
+            ?: if (!gjelderFortsattInnvilget)
                 endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
             else TIDENES_MORGEN
 
