@@ -174,7 +174,16 @@ class BrevService(
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
         val brevPerioderData =
             utvidetVedtaksperioderMedBegrunnelser.map { brevPeriodeService.hentBrevperiodeData(it.id) }
-        val brevperioder = BrevPeriodeGenerator().hentBrevPerioder(brevPerioderData)
+        val brevperioder = brevPerioderData.sorted().mapNotNull {
+            BrevPeriodeGenerator(
+                restBehandlingsgrunnlagForBrev = it.restBehandlingsgrunnlagForBrev,
+                erFørsteVedtaksperiodePåFagsak = it.erFørsteVedtaksperiodePåFagsak,
+                uregistrerteBarn = it.uregistrerteBarn,
+                brevMålform = it.brevMålform,
+                minimertVedtaksperiode = it.minimertVedtaksperiode,
+                barnMedReduksjonFraForrigeBehandlingIdent = it.barnMedReduksjonFraForrigeBehandlingIdent,
+            ).genererBrevPeriode()
+        }
 
         val hjemler = hentHjemler(
             behandlingId = vedtak.behandling.id,

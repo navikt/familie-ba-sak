@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlagMedPersoner
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
@@ -21,32 +20,18 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import java.time.LocalDate
 
-class BrevPeriodeGenerator() {
+class BrevPeriodeGenerator(
+    private val restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
+    private val erFørsteVedtaksperiodePåFagsak: Boolean,
+    private val uregistrerteBarn: List<MinimertUregistrertBarn>,
+    private val brevMålform: Målform,
+    private val minimertVedtaksperiode: MinimertVedtaksperiode,
+    private val barnMedReduksjonFraForrigeBehandlingIdent: List<String>
+) {
 
-    fun hentBrevPerioder(
-        brevperioderData: List<BrevperiodeData>,
-    ) = brevperioderData
-        .sorted()
-        .mapNotNull {
-
-            it.minimertVedtaksperiode.tilBrevPeriode(
-                restBehandlingsgrunnlagForBrev = it.restBehandlingsgrunnlagForBrev,
-                uregistrerteBarn = it.uregistrerteBarn,
-                erFørsteVedtaksperiodePåFagsak = it.erFørsteVedtaksperiodePåFagsak,
-                brevMålform = it.brevMålform,
-                barnMedReduksjonFraForrigeBehandlingIdent = it.barnMedReduksjonFraForrigeBehandlingIdent,
-            )
-        }
-
-    fun MinimertVedtaksperiode.tilBrevPeriode(
-        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-        uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
-        barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
-        erFørsteVedtaksperiodePåFagsak: Boolean,
-        brevMålform: Målform,
-    ): BrevPeriode? {
+    internal fun genererBrevPeriode(): BrevPeriode? {
         val brevPeriodeGrunnlagMedPersoner =
-            this.tilBrevPeriodeGrunnlagMedPersoner(
+            minimertVedtaksperiode.tilBrevPeriodeGrunnlagMedPersoner(
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
@@ -67,16 +52,12 @@ class BrevPeriodeGenerator() {
             else null
 
         return brevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
-            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-            brevMålform = brevMålform,
             tomDato = tomDato,
             begrunnelserOgFritekster = begrunnelserOgFritekster
         )
     }
 
     private fun BrevPeriodeGrunnlagMedPersoner.byggBrevPeriode(
-        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-        brevMålform: Målform,
         tomDato: String?,
         begrunnelserOgFritekster: List<Begrunnelse>
     ): BrevPeriode {
@@ -89,7 +70,7 @@ class BrevPeriodeGenerator() {
 
         val barnIPeriode: List<MinimertRestPerson> = when (this.type) {
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            Vedtaksperiodetype.UTBETALING -> this.finnBarnIUtbetalingPeriode(restBehandlingsgrunnlagForBrev.personerPåBehandling)
+            Vedtaksperiodetype.UTBETALING -> this.finnBarnIUtbetalingPeriode()
             Vedtaksperiodetype.OPPHØR -> emptyList()
             Vedtaksperiodetype.AVSLAG -> emptyList()
             Vedtaksperiodetype.FORTSATT_INNVILGET -> barnMedUtbetaling + barnMedNullutbetaling
@@ -100,7 +81,7 @@ class BrevPeriodeGenerator() {
         val brevPeriodeType = hentPeriodetype(this.fom, this, barnMedUtbetaling, utbetalingsbeløp)
         return BrevPeriode(
 
-            fom = this.hentFomTekst(brevMålform),
+            fom = this.hentFomTekst(),
             tom = when {
                 this.type == Vedtaksperiodetype.FORTSATT_INNVILGET -> ""
                 tomDato.isNullOrBlank() -> ""
@@ -119,9 +100,7 @@ class BrevPeriodeGenerator() {
         )
     }
 
-    private fun BrevPeriodeGrunnlagMedPersoner.hentFomTekst(
-        brevMålform: Målform,
-    ): String = when (this.type) {
+    private fun BrevPeriodeGrunnlagMedPersoner.hentFomTekst(): String = when (this.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> hentFomtekstFortsattInnvilget(
             brevMålform,
             this.fom,
@@ -152,9 +131,7 @@ class BrevPeriodeGenerator() {
         Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.INNVILGELSE
     }
 
-    fun BrevPeriodeGrunnlagMedPersoner.finnBarnIUtbetalingPeriode(
-        personerPåBehandling: List<MinimertRestPerson>,
-    ): List<MinimertRestPerson> {
+    fun BrevPeriodeGrunnlagMedPersoner.finnBarnIUtbetalingPeriode(): List<MinimertRestPerson> {
         val identerIBegrunnelene = this.begrunnelser
             .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
             .flatMap { it.personIdenter }
@@ -164,7 +141,7 @@ class BrevPeriodeGenerator() {
         val barnIPeriode = (identerIBegrunnelene + identerMedUtbetaling)
             .toSet()
             .mapNotNull { personIdent ->
-                personerPåBehandling.find { it.personIdent == personIdent }
+                restBehandlingsgrunnlagForBrev.personerPåBehandling.find { it.personIdent == personIdent }
             }
             .filter { it.type == PersonType.BARN }
 
