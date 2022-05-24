@@ -40,7 +40,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
         this.standardbegrunnelse == Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN ->
             uregistrerteBarn.mapNotNull { it.fødselsdato }
 
-        gjelderSøker && this.vedtakBegrunnelseType != VedtakBegrunnelseType.ENDRET_UTBETALING -> {
+        gjelderSøker && this.vedtakBegrunnelseType != VedtakBegrunnelseType.ENDRET_UTBETALING && this.vedtakBegrunnelseType != VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> {
             if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG) {
                 personerIBehandling
                     .filter { it.type == PersonType.BARN }
