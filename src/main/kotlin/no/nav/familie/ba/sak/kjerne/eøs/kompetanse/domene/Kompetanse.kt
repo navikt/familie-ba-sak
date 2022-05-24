@@ -90,6 +90,10 @@ data class Kompetanse(
             tom = tom,
             barnAktører = barnAktører
         )
+
+    companion object {
+        val NULL = Kompetanse(null, null, emptySet())
+    }
 }
 
 enum class KompetanseStatus {
