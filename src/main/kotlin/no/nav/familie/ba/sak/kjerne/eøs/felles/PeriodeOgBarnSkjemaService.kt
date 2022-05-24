@@ -3,55 +3,57 @@ package no.nav.familie.ba.sak.kjerne.eøs.felles
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.oppdaterSkjemaerRekursivt
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.somInversOppdateringEllersNull
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 
-class PeriodeOgBarnSkjemaService<T : PeriodeOgBarnSkjemaEntitet<T>>(
-    val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<T>,
-    val tilbakestillBehandlingService: TilbakestillBehandlingService,
+class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
+    val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>
 ) {
 
-    fun hentMedBehandlingId(behandlingId: Long): Collection<T> {
+    fun hentMedBehandlingId(behandlingId: Long): Collection<S> {
         return periodeOgBarnSkjemaRepository.findByBehandlingId(behandlingId)
     }
 
-    fun hentMedId(id: Long): T {
+    fun hentMedId(id: Long): S {
         return periodeOgBarnSkjemaRepository.getById(id)
     }
 
-    fun endreSkjemaer(behandlingId: Long, oppdatering: T) {
+    fun endreSkjemaer(behandlingId: Long, oppdatering: S, kjørTilSlutt: (behandlingId: Long) -> Unit = {}) {
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
 
         val justertOppdatering = oppdatering.somInversOppdateringEllersNull(gjeldendeSkjemaer) ?: oppdatering
         val oppdaterteKompetanser = oppdaterSkjemaerRekursivt(gjeldendeSkjemaer, justertOppdatering)
 
         lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteKompetanser.medBehandlingId(behandlingId))
-        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
+
+        kjørTilSlutt(behandlingId)
     }
 
-    fun slettSkjema(skjemaId: Long) {
-        val kompetanseTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
-        val behandlingId = kompetanseTilSletting.behandlingId
-        val gjeldendeKompetanser = hentMedBehandlingId(behandlingId)
-        val blankKompetanse = kompetanseTilSletting.utenSkjema()
+    fun slettSkjema(skjemaId: Long, kjørTilSlutt: (behandlingId: Long) -> Unit = {}) {
+        val skjemaTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
+        val behandlingId = skjemaTilSletting.behandlingId
+        val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
+        val blanktSkjema = skjemaTilSletting.utenSkjema()
 
-        val oppdaterteKompetanser = gjeldendeKompetanser.minus(kompetanseTilSletting).plus(blankKompetanse)
+        val oppdaterteKompetanser = gjeldendeSkjemaer.minus(skjemaTilSletting).plus(blanktSkjema)
             .slåSammen().medBehandlingId(behandlingId)
 
-        lagreSkjemaDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
+        lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteKompetanser)
 
-        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
+        kjørTilSlutt(behandlingId)
     }
 
-    fun lagreSkjemaDifferanse(gjeldende: Collection<T>, oppdaterte: Collection<T>) {
+    fun kopierOgErstattSkjemaer(fraBehandlingId: Long, tilBehandlingId: Long) {
+        val gjeldendeTilSkjemaer = hentMedBehandlingId(tilBehandlingId)
+        val kopiAvFraSkjemaer = hentMedBehandlingId(fraBehandlingId)
+            .map { it.kopier() }
+            .medBehandlingId(tilBehandlingId)
+
+        lagreSkjemaDifferanse(gjeldendeTilSkjemaer, kopiAvFraSkjemaer)
+    }
+
+    fun lagreSkjemaDifferanse(gjeldende: Collection<S>, oppdaterte: Collection<S>) {
         periodeOgBarnSkjemaRepository.deleteAll(gjeldende - oppdaterte)
         periodeOgBarnSkjemaRepository.saveAll(oppdaterte - gjeldende)
     }
-
-    private fun <T : PeriodeOgBarnSkjema<T>> Iterable<T>.erLukkingAvEnÅpenPeriode(skjema: T) =
-        this.filter {
-            it.tom == null && skjema.tom != null && it.kopier(tom = skjema.tom) == skjema
-        }
-            .singleOrNull() != null
 }
 
 fun <T : PeriodeOgBarnSkjemaEntitet<T>> Collection<T>.medBehandlingId(behandlingId: Long): Collection<T> {
