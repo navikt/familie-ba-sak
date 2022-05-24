@@ -286,6 +286,13 @@ class MigreringService(
             sak.valg == "UT" && sak.stønad!!.delytelse.filter { it.tom == null }.size == 2 -> {
                 return
             }
+            sak.stønad!!.delytelse.filter { it.tom == null }.size == 0 -> {
+                if (sak.stønad!!.antallBarn == 0 && sak.stønad!!.barn.isEmpty()) {
+                    kastOgTellMigreringsFeil(MigreringsfeilType.DELYTELSE_OG_ANTALLBARN_NULL)
+                }
+                return
+            }
+
             else -> {
                 kastOgTellMigreringsFeil(
                     MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD,
@@ -296,32 +303,29 @@ class MigreringService(
     }
 
     private fun finnBarnMedLøpendeStønad(løpendeSak: Sak): List<String> {
-        val barnasIdenter = løpendeSak.stønad!!.barn
+        val (barnOver18, barnUnder18) = løpendeSak.stønad!!.barn
             .filter { it.barnetrygdTom == NULLDATO }
             .map { it.barnFnr!! }
+            .partition { ident -> FoedselsNr(ident).foedselsdato.isSameOrBefore(LocalDate.now().minusYears(18L)) }
 
-        if (barnasIdenter.isEmpty()) {
+        if (barnUnder18.size != barnOver18.size) {
+            secureLog.warn("Det er barn på stønaden i infotrygd som er over 18 år. Disse vil bli ignorert.  $barnOver18 sak=$løpendeSak")
+        }
+
+        if (barnUnder18.isEmpty()) {
             kastOgTellMigreringsFeil(
                 MigreringsfeilType.INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD,
-                "Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk}${løpendeSak.saksnr} på bruker i Infotrygd."
+                "Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk} ${løpendeSak.saksnr} på bruker i Infotrygd."
             )
-        } else if (barnasIdenter.size != løpendeSak.stønad!!.antallBarn) {
+        } else if (barnUnder18.size != løpendeSak.stønad!!.antallBarn) {
             secureLog.info(
                 "${MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER.beskrivelse}: " +
-                    "barnasIdenter.size=${barnasIdenter.size} stønad.antallBarn=${løpendeSak.stønad!!.antallBarn}"
+                    "barnasIdenter.size=${barnUnder18.size} stønad.antallBarn=${løpendeSak.stønad!!.antallBarn}"
             )
             kastOgTellMigreringsFeil(MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER)
         }
 
-        barnasIdenter.forEach { ident ->
-            if (FoedselsNr(ident).foedselsdato.isSameOrBefore(LocalDate.now().minusYears(18L))) {
-                kastOgTellMigreringsFeil(
-                    MigreringsfeilType.HAR_BARN_OVER_18_PÅ_INFOTRYGDSAK
-                )
-            }
-        }
-
-        return barnasIdenter
+        return barnUnder18
     }
 
     private fun forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(
@@ -466,14 +470,11 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD("Beregnet beløp var ulikt beløp fra Infotrygd"),
     BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD("Beløp beregnet for delt bosted var ulikt beløp fra Infotrygd"),
     DIFF_BARN_INFOTRYGD_OG_BA_SAK("Antall barn på tilkjent ytelse samsvarer ikke med antall barn på stønaden fra infotrygd"),
-    DIFF_BARN_INFOTRYGD_OG_PDL("Kan ikke migrere fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd"),
     FAGSAK_AVSLUTTET_UTEN_MIGRERING("Personen er allerede migrert"),
-    FLERE_DELYTELSER_I_INFOTRYGD("Finnes flere delytelser på sak"),
     FLERE_LØPENDE_SAKER_INFOTRYGD("Fant mer enn én aktiv sak på bruker i infotrygd"),
     HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD("Listen med barn fra Infotrygd har identer tilhørende samme barn"),
     IDENT_IKKE_LENGER_AKTIV("Ident ikke lenger aktiv"),
     IKKE_GYLDIG_KJØREDATO("Ikke gyldig kjøredato"),
-    IKKE_STØTTET_GRADERING("Personen har ikke støttet gradering"),
     IKKE_STØTTET_SAKSTYPE("Kan kun migrere ordinære(OR OS) og utvidet(UT EF) saker"),
     INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD("Fant ingen barn med løpende stønad på sak"),
     INGEN_LØPENDE_SAK_INFOTRYGD("Personen har ikke løpende sak i infotrygd"),
@@ -482,9 +483,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     KAN_IKKE_OPPRETTE_BEHANDLING("Kan ikke opprette behandling"),
     KUN_ETT_MIGRERINGFORSØK_PER_DAG("Migrering allerede påbegynt i dag. Vent minst en dag før man prøver igjen"),
     MANGLER_ANDEL_TILKJENT_YTELSE("Fant ingen andeler tilkjent ytelse på behandlingen"),
-    MANGLER_FØRSTE_UTBETALINGSPERIODE("Tilkjent ytelse er null"),
     MANGLER_VILKÅRSVURDERING("Fant ikke vilkårsvurdering."),
-    MER_ENN_ETT_BARN_PÅ_SAK_AV_TYPE_UT_MD("Migrering av sakstype UT-MD er begrenset til saker med ett barn"),
     MIGRERING_ALLEREDE_PÅBEGYNT("Migrering allerede påbegynt"),
     OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER("Antall barnidenter samsvarer ikke med stønad.antallBarn"),
     SMÅBARNSTILLEGG_BA_SAK_IKKE_INFOTRYGD("Uoverensstemmelse angående småbarnstillegg"),
@@ -492,7 +491,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
     UKJENT("Ukjent migreringsfeil"),
     ÅPEN_SAK_INFOTRYGD("Bruker har åpen behandling i Infotrygd"),
-    HAR_BARN_OVER_18_PÅ_INFOTRYGDSAK("Infotrygdsak har barn over 18"),
+    DELYTELSE_OG_ANTALLBARN_NULL("Infotrygdsak mangler delytelse og antall barn er 0"), // Disse kan man nok la være å migrere
 }
 
 open class KanIkkeMigrereException(
