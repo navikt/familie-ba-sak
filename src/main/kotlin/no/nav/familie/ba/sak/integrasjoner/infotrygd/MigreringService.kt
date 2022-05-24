@@ -308,7 +308,7 @@ class MigreringService(
             .map { it.barnFnr!! }
             .partition { ident -> FoedselsNr(ident).foedselsdato.isSameOrBefore(LocalDate.now().minusYears(18L)) }
 
-        if (barnUnder18.size != barnOver18.size) {
+        if (barnOver18.size > 0) {
             secureLog.warn("Det er barn på stønaden i infotrygd som er over 18 år. Disse vil bli ignorert.  $barnOver18 sak=$løpendeSak")
         }
 
