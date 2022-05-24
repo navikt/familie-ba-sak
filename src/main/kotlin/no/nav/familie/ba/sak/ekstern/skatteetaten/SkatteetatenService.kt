@@ -143,7 +143,7 @@ class SkatteetatenService(
     ): List<AndelTilkjentYtelsePeriode> {
         val yearStart = LocalDateTime.of(år.toInt(), 1, 1, 0, 0, 0)
         val yearEnd = LocalDateTime.of(år.toInt(), 12, 31, 23, 59, 59)
-        return andelTilkjentYtelseRepository.finnStonadPeriodMedUtvidetBarnetrygdForPersoner(
+        return andelTilkjentYtelseRepository.finnPerioderMedUtvidetBarnetrygdForPersoner(
             personIdenter,
             yearStart,
             yearEnd
