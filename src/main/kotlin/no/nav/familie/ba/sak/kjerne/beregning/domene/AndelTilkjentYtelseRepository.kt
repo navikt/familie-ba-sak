@@ -25,53 +25,39 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
         avstemmingstidspunkt: YearMonth
     ): List<AndelTilkjentYtelse>
 
-    // The query only returns the periods that overlap with the given year. Any periods that are
-    // totally out of the year scope will be ignored.
     @Query(
-        value = """WITH qualified AS (
-    SELECT *
-    FROM ((
-              SELECT personident.foedselsnummer       ident,
-                     aty.stonad_fom                     fom,
-                     aty.stonad_tom                     tom,
-                     aty.prosent                    prosent,
-                     aty.tilkjent_ytelse_id         aty_tyid,
-                     aty.id, 
-                     aty.fk_behandling_id           behandling_id   
-              FROM andel_tilkjent_ytelse aty
-              JOIN personident personident on personident.fk_aktoer_id = aty.fk_aktoer_id
-              WHERE aty.type = 'UTVIDET_BARNETRYGD'
-                AND personident.foedselsnummer IN :personIdenter
-                AND personident.aktiv = true
-                AND aty.stonad_fom <= :tom
-                AND aty.stonad_tom >= :fom
-          ) AS qualified_aty
-             INNER JOIN (
-        SELECT ty.id tyid, ty.endret_dato endret_dato
-        FROM tilkjent_ytelse ty
-        WHERE ty.utbetalingsoppdrag IS NOT NULL
-    ) AS qualified_ty
-                        ON qualified_aty.aty_tyid = qualified_ty.tyid)
-)
-
-SELECT qualified.id             AS id,
-       qualified.ident          AS ident,
-       qualified.prosent        AS prosent,
-       qualified.endret_dato AS endretDato,
-       qualified.fom            AS fom,
-       qualified.tom            AS tom,
-       qualified.behandling_id  AS behandlingId
-FROM (SELECT ident, MAX(endret_dato) dato
-      FROM qualified
-      GROUP BY ident
-     ) AS latest
-         INNER JOIN qualified
-                    ON qualified.ident = latest.ident AND qualified.endret_dato = latest.dato
-""",
+        """
+            SELECT aty.id               AS id,
+                   p.foedselsnummer     AS ident,
+                   aty.stonad_fom       AS fom,
+                   aty.stonad_tom       AS tom,
+                   aty.prosent          AS prosent,
+                   ty.endret_dato       AS endretdato,
+                   aty.fk_behandling_id AS behandlingid
+            FROM andel_tilkjent_ytelse aty
+                     INNER JOIN
+                 tilkjent_ytelse ty ON aty.tilkjent_ytelse_id = ty.id
+                     INNER JOIN
+                 personident p ON aty.fk_aktoer_id = p.fk_aktoer_id
+            WHERE aty.tilkjent_ytelse_id IN (
+                SELECT MAX(ty.id)
+                FROM andel_tilkjent_ytelse aty
+                         INNER JOIN
+                     tilkjent_ytelse ty ON aty.tilkjent_ytelse_id = ty.id
+                         INNER JOIN
+                     personident p ON aty.fk_aktoer_id = p.fk_aktoer_id
+                WHERE p.foedselsnummer IN :personIdenter
+                  AND ty.utbetalingsoppdrag IS NOT NULL
+                GROUP BY p.foedselsnummer
+            )
+              AND aty.type = 'UTVIDET_BARNETRYGD'
+              AND aty.stonad_fom <= :tom
+              AND aty.stonad_tom >= :fom
+        """,
         nativeQuery = true
     )
     @Timed
-    fun finnStonadPeriodMedUtvidetBarnetrygdForPersoner(
+    fun finnPerioderMedUtvidetBarnetrygdForPersoner(
         personIdenter: List<String>,
         fom: LocalDateTime,
         tom: LocalDateTime

@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.nesteBehandlingId
+import no.nav.familie.ba.sak.common.nesteVedtakId
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.tilAktør
@@ -9,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -20,9 +23,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.Personident
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
+import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -43,6 +49,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     lateinit var personidentService: PersonidentService
+
+    @Autowired
+    lateinit var personidentRepository: PersonidentRepository
 
     @Autowired
     lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
@@ -558,10 +567,96 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         )
     }
 
+    @Test
+    fun `finnPerioderMedUtvidetBarnetrygd() skal IKKE finne perioder for år 2021 etter en revurdering med ny stønadTom 2020`() {
+        val fnr = "00000000001"
+
+        // Result from ba-sak
+        val testDataBaSak =
+            PerioderTestData(
+                fnr = fnr,
+                aktør = tilAktør(fnr),
+                endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
+                perioder = listOf(
+                    Triple(
+                        LocalDateTime.of(2019, 9, 1, 12, 0),
+                        LocalDateTime.of(2029, 7, 31, 12, 0),
+                        SkatteetatenPeriode.Delingsprosent._0
+                    )
+                )
+            )
+
+        lagerTilkjentYtelse(testDataBaSak)
+
+        every {
+            infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygdForPersoner(
+                eq(listOf(fnr)),
+                any()
+            )
+        } returns emptyList()
+
+        var resultat =
+            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(
+                listOf(testDataBaSak.fnr),
+                "2021"
+            )
+
+        assertThat(resultat.brukere).hasSize(1)
+
+        lagRevurderingMedNyStonadTom(testDataBaSak, YearMonth.of(2020, 12))
+
+        resultat =
+            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(
+                listOf(testDataBaSak.fnr),
+                "2021"
+            )
+
+        assertThat(resultat.brukere).hasSize(0)
+    }
+
+    @Test
+    fun `finnPersonerMedUtvidetBarnetrygd() skal IKKE ta med historisk ident som en ekstra person`() {
+        val fnr = "00000000002"
+        val historiskIdent = "00000000001"
+
+        // Result from ba-sak
+        val testDataBaSak =
+            PerioderTestData(
+                fnr = fnr,
+                aktør = tilAktør(fnr).also { it.personidenter.add(Personident(historiskIdent, aktiv = false, aktør = it)) },
+                endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
+                perioder = listOf(
+                    Triple(
+                        LocalDateTime.of(2019, 9, 1, 12, 0),
+                        LocalDateTime.of(2029, 7, 31, 12, 0),
+                        SkatteetatenPeriode.Delingsprosent._0
+                    )
+                )
+            )
+
+        lagerTilkjentYtelse(testDataBaSak)
+
+        every {
+            infotrygdBarnetrygdClientMock.hentPersonerMedUtvidetBarnetrygd(
+                any()
+            )
+        } returns SkatteetatenPersonerResponse()
+
+        val resultat =
+            skatteetatenService.finnPersonerMedUtvidetBarnetrygd(
+                "2021"
+            )
+
+        assertThat(resultat.brukere).hasSize(1)
+        assertThat(resultat.brukere.first().ident == fnr)
+    }
+
     fun lagerTilkjentYtelse(perioderTestData: PerioderTestData) {
         val fødselsnummer = perioderTestData.aktør.aktivFødselsnummer()
         val aktør = perioderTestData.aktør
-        personidentService.hentOgLagreAktør(fødselsnummer, true)
+        personidentService.hentOgLagreAktør(fødselsnummer, true).also {
+            personidentRepository.saveAll(aktør.personidenter.filter { !it.aktiv })
+        }
 
         val fagsak = Fagsak(aktør = aktør)
         fagsakRepository.saveAndFlush(fagsak)
@@ -572,6 +667,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             opprettetÅrsak = BehandlingÅrsak.MIGRERING,
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.UTVIDET,
+            status = BehandlingStatus.AVSLUTTET,
+            aktiv = false
         )
         behandlingRepository.saveAndFlush(behandling)
 
@@ -590,6 +687,49 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         kalkulertUtbetalingsbeløp = 1000,
                         stønadFom = YearMonth.of(p.first.year, p.first.month),
                         stønadTom = YearMonth.of(p.second!!.year, p.second!!.month),
+                        type = YtelseType.UTVIDET_BARNETRYGD,
+                        sats = 1,
+                        prosent = p.third.tilBigDecimal()
+                    )
+                }.toMutableSet()
+            )
+        }
+        tilkjentYtelseRepository.saveAndFlush(ty)
+    }
+
+    fun lagRevurderingMedNyStonadTom(perioderTestData: PerioderTestData, stønadTom: YearMonth) {
+        val fødselsnummer = perioderTestData.aktør.aktivFødselsnummer()
+        val aktør = personidentService.hentOgLagreAktør(fødselsnummer, false)
+
+        val fagsak = fagsakRepository.finnFagsakForAktør(aktør)!!
+
+        val behandling = behandlingRepository.saveAndFlush(
+            Behandling(
+                id = nesteBehandlingId(),
+                fagsak = fagsak,
+                type = BehandlingType.REVURDERING,
+                opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.UTVIDET,
+            )
+        )
+
+        val ty = TilkjentYtelse(
+            id = nesteVedtakId(),
+            behandling = behandling,
+            opprettetDato = perioderTestData.endretDato.toLocalDate(),
+            endretDato = perioderTestData.endretDato.toLocalDate(),
+            utbetalingsoppdrag = "utbetalt",
+        ).also {
+            it.andelerTilkjentYtelse.addAll(
+                perioderTestData.perioder.map { p ->
+                    AndelTilkjentYtelse(
+                        behandlingId = it.behandling.id,
+                        tilkjentYtelse = it,
+                        aktør = perioderTestData.aktør,
+                        kalkulertUtbetalingsbeløp = 1000,
+                        stønadFom = YearMonth.of(p.first.year, p.first.month),
+                        stønadTom = stønadTom,
                         type = YtelseType.UTVIDET_BARNETRYGD,
                         sats = 1,
                         prosent = p.third.tilBigDecimal()
