@@ -21,8 +21,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakEier
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
@@ -123,9 +123,9 @@ class InnkomendeJournalføringService(
         kategori: BehandlingKategori? = null,
         underkategori: BehandlingUnderkategori? = null,
         søknadMottattDato: LocalDate? = null,
-        typeFagsak: FagsakType = FagsakType.STANDARD
+        eier: FagsakEier = FagsakEier.OMSORGSPERSON
     ): Behandling {
-        fagsakService.hentEllerOpprettFagsak(personIdent, type = typeFagsak)
+        fagsakService.hentEllerOpprettFagsak(personIdent, eier = eier)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 kategori = kategori,
@@ -135,7 +135,7 @@ class InnkomendeJournalføringService(
                 behandlingÅrsak = årsak,
                 navIdent = navIdent,
                 søknadMottattDato = søknadMottattDato,
-                fagsakType = typeFagsak
+                fagsakEier = eier
             )
         )
     }
@@ -160,7 +160,7 @@ class InnkomendeJournalføringService(
                     kategori = request.kategori,
                     underkategori = request.underkategori,
                     søknadMottattDato = request.datoMottatt?.toLocalDate(),
-                    typeFagsak = request.fagsakType
+                    eier = request.fagsakEier
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
@@ -341,5 +341,5 @@ class InnkomendeJournalføringService(
     }
 }
 
-private val RestJournalføring.fagsakType: FagsakType
-    get() = if (erEnsligMindreårig || erPåInstitusjon) FagsakType.INSTITUSJON_OG_ENSLIG_MINDREÅRIG else FagsakType.STANDARD
+private val RestJournalføring.fagsakEier: FagsakEier
+    get() = if (erEnsligMindreårig || erPåInstitusjon) FagsakEier.BARN else FagsakEier.OMSORGSPERSON

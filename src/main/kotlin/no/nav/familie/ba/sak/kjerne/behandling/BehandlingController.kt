@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakEier
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -148,7 +148,7 @@ data class NyBehandling(
     val barnasIdenter: List<String> = emptyList(),
     val nyMigreringsdato: LocalDate? = null,
     val søknadMottattDato: LocalDate? = null,
-    val fagsakType: FagsakType = FagsakType.STANDARD,
+    val fagsakEier: FagsakEier = FagsakEier.OMSORGSPERSON,
 ) {
     init { // Initiell validering på request
         when {

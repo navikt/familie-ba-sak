@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.STANDARD
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakEier.OMSORGSPERSON
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -94,12 +94,12 @@ class FagsakService(
     }
 
     @Transactional
-    fun hentEllerOpprettFagsak(personIdent: String, fraAutomatiskBehandling: Boolean = false, type: FagsakType = STANDARD): Fagsak {
+    fun hentEllerOpprettFagsak(personIdent: String, fraAutomatiskBehandling: Boolean = false, eier: FagsakEier = OMSORGSPERSON): Fagsak {
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
-        var fagsak = fagsakRepository.finnFagsakForAktør(aktør, type)
+        var fagsak = fagsakRepository.finnFagsakForAktør(aktør, eier)
         if (fagsak == null) {
 
-            fagsak = lagre(Fagsak(aktør = aktør, type = type))
+            fagsak = lagre(Fagsak(aktør = aktør, eier = eier))
             if (fraAutomatiskBehandling) {
                 antallFagsakerOpprettetFraAutomatisk.increment()
             } else {
