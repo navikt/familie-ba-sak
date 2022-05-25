@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
-import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriodeTestPerson
@@ -15,39 +14,7 @@ data class MinimertVedtaksperiode(
     val begrunnelser: List<BrevBegrunnelseGrunnlag>,
     val fritekster: List<String> = emptyList(),
     val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList(),
-) {
-    fun tilBrevPeriodeGrunnlagMedPersoner(
-        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-        erFørsteVedtaksperiodePåFagsak: Boolean,
-        erUregistrerteBarnPåbehandling: Boolean,
-        barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
-    ): BrevPeriodeGrunnlagMedPersoner {
-        return BrevPeriodeGrunnlagMedPersoner(
-            fom = this.fom,
-            tom = this.tom,
-            type = this.type,
-            begrunnelser = this.begrunnelser.flatMap {
-                it.tilBrevBegrunnelseGrunnlagMedPersoner(
-                    periode = NullablePeriode(
-                        fom = this.fom,
-                        tom = this.tom
-                    ),
-                    vedtaksperiodetype = type,
-                    restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                    identerMedUtbetalingPåPeriode = this.minimerteUtbetalingsperiodeDetaljer
-                        .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
-                    minimerteUtbetalingsperiodeDetaljer = this.minimerteUtbetalingsperiodeDetaljer,
-                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                    erUregistrerteBarnPåbehandling = erUregistrerteBarnPåbehandling,
-                    barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
-                )
-            },
-            fritekster = this.fritekster,
-            minimerteUtbetalingsperiodeDetaljer = this.minimerteUtbetalingsperiodeDetaljer,
-            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-        )
-    }
-}
+)
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
     sanityBegrunnelser: List<SanityBegrunnelse>
