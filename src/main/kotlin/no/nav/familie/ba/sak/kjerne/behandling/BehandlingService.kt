@@ -71,7 +71,7 @@ class BehandlingService(
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
         val søkersAktør = personidentService.hentAktør(nyBehandling.søkersIdent)
 
-        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør)
+        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør, nyBehandling.fagsakType)
             ?: throw FunksjonellFeil(
                 melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
                 frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak"

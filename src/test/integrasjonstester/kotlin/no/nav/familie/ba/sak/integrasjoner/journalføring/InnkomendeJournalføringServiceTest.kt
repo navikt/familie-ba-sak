@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.lagMockRestJournalføring
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -90,6 +91,25 @@ class InnkomendeJournalføringServiceTest(
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)
         assertNotNull(søknadMottattDato)
         assertEquals(request.datoMottatt!!.toLocalDate(), søknadMottattDato!!.toLocalDate())
+    }
+
+    @Test
+    fun `journalfør skal opprette førstegangsbehandling på fagsak av type INSTITUSJON_OG_ENSLIG_MINDREÅRIG`() {
+        val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
+            .copy(erEnsligMindreårig = true)
+        val fagsakId = innkomendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
+        val behandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId.toLong())
+
+        assertNotNull(behandling)
+        assertEquals(FagsakType.INSTITUSJON_OG_ENSLIG_MINDREÅRIG, behandling!!.fagsak.type)
+
+        val request2 = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
+            .copy(erPåInstitusjon = true)
+        val fagsakId2 = innkomendeJournalføringService.journalfør(request2, "1234", "mockEnhet", "2")
+        val behandling2 = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId2.toLong())
+
+        assertNotNull(behandling2)
+        assertEquals(FagsakType.INSTITUSJON_OG_ENSLIG_MINDREÅRIG, behandling2!!.fagsak.type)
     }
 
     @Test

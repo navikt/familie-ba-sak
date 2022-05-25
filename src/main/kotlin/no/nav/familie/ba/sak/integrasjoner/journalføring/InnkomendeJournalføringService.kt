@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
@@ -121,9 +122,10 @@ class InnkomendeJournalføringService(
         årsak: BehandlingÅrsak,
         kategori: BehandlingKategori? = null,
         underkategori: BehandlingUnderkategori? = null,
-        søknadMottattDato: LocalDate? = null
+        søknadMottattDato: LocalDate? = null,
+        typeFagsak: FagsakType = FagsakType.STANDARD
     ): Behandling {
-        fagsakService.hentEllerOpprettFagsak(personIdent)
+        fagsakService.hentEllerOpprettFagsak(personIdent, type = typeFagsak)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 kategori = kategori,
@@ -132,7 +134,8 @@ class InnkomendeJournalføringService(
                 behandlingType = type,
                 behandlingÅrsak = årsak,
                 navIdent = navIdent,
-                søknadMottattDato = søknadMottattDato
+                søknadMottattDato = søknadMottattDato,
+                fagsakType = typeFagsak
             )
         )
     }
@@ -156,7 +159,8 @@ class InnkomendeJournalføringService(
                     årsak = request.nyBehandlingsårsak,
                     kategori = request.kategori,
                     underkategori = request.underkategori,
-                    søknadMottattDato = request.datoMottatt?.toLocalDate()
+                    søknadMottattDato = request.datoMottatt?.toLocalDate(),
+                    typeFagsak = request.fagsakType
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
@@ -336,3 +340,6 @@ class InnkomendeJournalføringService(
         private val logger = LoggerFactory.getLogger(InnkomendeJournalføringService::class.java)
     }
 }
+
+private val RestJournalføring.fagsakType: FagsakType
+    get() = if (erEnsligMindreårig || erPåInstitusjon) FagsakType.INSTITUSJON_OG_ENSLIG_MINDREÅRIG else FagsakType.STANDARD

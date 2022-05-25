@@ -35,6 +35,10 @@ data class Fagsak(
     @Column(name = "status", nullable = false)
     var status: FagsakStatus = FagsakStatus.OPPRETTET,
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    val type: FagsakType = FagsakType.STANDARD,
+
     @Column(name = "arkivert", nullable = false)
     var arkivert: Boolean = false,
 ) : BaseEntitet() {
@@ -63,4 +67,9 @@ enum class FagsakStatus {
     OPPRETTET,
     LØPENDE, // Har minst én behandling gjeldende for fremtidig utbetaling
     AVSLUTTET
+}
+
+enum class FagsakType {
+    STANDARD,
+    INSTITUSJON_OG_ENSLIG_MINDREÅRIG
 }
