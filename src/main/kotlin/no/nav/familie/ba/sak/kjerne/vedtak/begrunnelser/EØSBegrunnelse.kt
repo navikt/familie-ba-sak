@@ -69,7 +69,7 @@ enum class EØSBegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetPrimarlandToArbeidslandAnnetLandUtbetaler"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
     },
-    INNVILGET_PRIMÆRLAND_SARKULLSBARN_ANDRE_BARN {
+    INNVILGET_PRIMÆRLAND_SÆRKULLSBARN_ANDRE_BARN {
         override val sanityApiNavn = "innvilgetPrimarlandSarkullsbarnAndreBarn"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
     },
