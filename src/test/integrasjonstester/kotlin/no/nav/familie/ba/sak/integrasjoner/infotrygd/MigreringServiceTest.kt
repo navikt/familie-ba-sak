@@ -447,7 +447,7 @@ class MigreringServiceTest(
     }
 
     @Test
-    fun `migrering skal feile dersom har barn er 18 år`() {
+    fun `happy case - personer over 18 skal ignoreres hvis antallBarn på stønaden stemmer overens med antall barn etter at de over at er filtrert vekk`() {
         val fødselsnrBarn =
             FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
 
@@ -456,19 +456,21 @@ class MigreringServiceTest(
         } returns InfotrygdSøkResponse(
             listOf(
                 Sak(
+                    // stønad med 2 barn, men kun 1 under 18
                     stønad = Stønad(
                         barn = listOf(
                             Barn(
                                 fødselsnrBarn,
                                 barnetrygdTom = "000000"
-                            )
+                            ),
+                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
                         ),
                         antallBarn = 1,
                         delytelse = listOf(
                             Delytelse(
                                 fom = LocalDate.now(),
                                 tom = null,
-                                beløp = 2048.0,
+                                beløp = 1054.0,
                                 typeDelytelse = "MS",
                                 typeUtbetaling = "J",
                             )
@@ -484,11 +486,85 @@ class MigreringServiceTest(
             emptyList()
         )
 
+        migreringService.migrer(ClientMocks.søkerFnr[0])
+    }
+
+    @Test
+    fun `Migrerin skal stoppes hvis antall barn på stønad ikke stemmer overens med antall barn under 18, når person har 1 barn over 18`() {
+        val fødselsnrBarn =
+            FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
+
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(
+            listOf(
+                Sak(
+                    // stønad med 2 barn, men kun 1 under 18
+                    stønad = Stønad(
+                        barn = listOf(
+                            Barn(
+                                fødselsnrBarn,
+                                barnetrygdTom = "000000"
+                            ),
+                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
+                        ),
+                        antallBarn = 2,
+                        delytelse = listOf(
+                            Delytelse(
+                                fom = LocalDate.now(),
+                                tom = null,
+                                beløp = 1054.0,
+                                typeDelytelse = "MS",
+                                typeUtbetaling = "J",
+                            )
+                        ),
+                        opphørsgrunn = "0"
+                    ),
+                    status = "FB",
+                    valg = "OR",
+                    undervalg = "OS"
+                )
+
+            ),
+            emptyList()
+        )
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])
         }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.HAR_BARN_OVER_18_PÅ_INFOTRYGDSAK)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER)
+    }
+
+    @Test
+    fun `Migrerin skal stoppes hvis antall delytelser er null og antall barn er 0`() {
+        val fødselsnrBarn =
+            FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
+
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(
+            listOf(
+                Sak(
+                    // stønad med 2 barn, men kun 1 under 18
+                    stønad = Stønad(
+                        barn = emptyList(),
+                        antallBarn = 0,
+                        delytelse = emptyList(),
+                        opphørsgrunn = "0"
+                    ),
+                    status = "FB",
+                    valg = "OR",
+                    undervalg = "OS"
+                )
+
+            ),
+            emptyList()
+        )
+        assertThatThrownBy {
+            migreringService.migrer(ClientMocks.søkerFnr[0])
+        }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.DELYTELSE_OG_ANTALLBARN_NULL)
     }
 
     @Test

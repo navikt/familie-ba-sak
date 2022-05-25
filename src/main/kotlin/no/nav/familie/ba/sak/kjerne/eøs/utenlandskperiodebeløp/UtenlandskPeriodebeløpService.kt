@@ -1,22 +1,38 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UtenlandskPeriodebeløpService(
-    repository: UtenlandskPeriodebeløpRepository,
-    tilbakestillBehandlingService: TilbakestillBehandlingService,
+    utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
+    private val kompetanseService: KompetanseService
 ) {
-    val serviceDelegate = PeriodeOgBarnSkjemaService(
-        repository,
-        tilbakestillBehandlingService
-    )
+    val skjemaService = PeriodeOgBarnSkjemaService(utenlandskPeriodebeløpRepository)
+
+    fun hentUtenlandskePeriodebeløp(behandlingId: Long) =
+        skjemaService.hentMedBehandlingId(behandlingId)
 
     fun oppdaterUtenlandskPeriodebeløp(behandlingId: Long, utenlandskPeriodebeløp: UtenlandskPeriodebeløp) =
-        serviceDelegate.endreSkjemaer(behandlingId, utenlandskPeriodebeløp)
+        skjemaService.endreSkjemaer(behandlingId, utenlandskPeriodebeløp)
 
     fun slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId: Long) =
-        serviceDelegate.slettSkjema(utenlandskPeriodebeløpId)
+        skjemaService.slettSkjema(utenlandskPeriodebeløpId)
+
+    @Transactional
+    fun tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId: Long) {
+        val forrigeUtenlandskePeriodebeløp = hentUtenlandskePeriodebeløp(behandlingId)
+        val gjeldendeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+
+        val oppdaterteUtenlandskPeriodebeløp = tilpassUtenlandskePeriodebeløpTilKompetanser(
+            forrigeUtenlandskePeriodebeløp,
+            gjeldendeKompetanser
+        ).medBehandlingId(behandlingId)
+
+        skjemaService.lagreSkjemaDifferanse(forrigeUtenlandskePeriodebeløp, oppdaterteUtenlandskPeriodebeløp)
+    }
 }
