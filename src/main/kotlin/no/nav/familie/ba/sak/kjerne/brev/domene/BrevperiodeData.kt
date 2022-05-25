@@ -16,7 +16,7 @@ data class BrevperiodeData(
     val barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList()
 ) : Comparable<BrevperiodeData> {
 
-    fun tilBrevPeriodeGenereator() = BrevPeriodeGenerator(
+    fun tilBrevPeriodeGenerator() = BrevPeriodeGenerator(
         restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         uregistrerteBarn = uregistrerteBarn,
@@ -26,7 +26,7 @@ data class BrevperiodeData(
     )
 
     fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {
-        val brevPeriodeGenereator = this.tilBrevPeriodeGenereator()
+        val brevPeriodeGenereator = this.tilBrevPeriodeGenerator()
         return brevPeriodeGenereator.byggBegrunnelserOgFritekster(brevPeriodeGenereator.hentBegrunnelsegrunnlagMedPersoner())
     }
 

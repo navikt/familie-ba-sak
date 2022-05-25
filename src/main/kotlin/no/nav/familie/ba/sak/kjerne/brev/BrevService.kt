@@ -175,7 +175,7 @@ class BrevService(
         val brevPerioderData =
             utvidetVedtaksperioderMedBegrunnelser.map { brevPeriodeService.hentBrevperiodeData(it.id) }
         val brevperioder = brevPerioderData.sorted().mapNotNull {
-            it.tilBrevPeriodeGenereator().genererBrevPeriode()
+            it.tilBrevPeriodeGenerator().genererBrevPeriode()
         }
 
         val hjemler = hentHjemler(
