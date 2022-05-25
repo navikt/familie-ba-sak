@@ -5,17 +5,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-
-fun <T : Tidsenhet> String.tilRegelverkTidslinje(start: Tidspunkt<T>) =
-    this.tilCharTidslinje(start).map {
-        when (it?.lowercaseChar()) {
-            'e' -> Regelverk.EØS_FORORDNINGEN
-            'n' -> Regelverk.NASJONALE_REGLER
-            else -> null
-        }
-    }
 
 fun <T : Tidsenhet> String.tilRegelverkResultatTidslinje(start: Tidspunkt<T>) =
     this.tilCharTidslinje(start).map {
