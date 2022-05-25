@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.SkjemaendringService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.hentBarnasRegelverkResultatTidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -15,9 +15,12 @@ import org.springframework.transaction.annotation.Transactional
 class KompetanseService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
-    val tilbakestillBehandlingService: TilbakestillBehandlingService,
+    val skjemaendringService: SkjemaendringService
 ) {
-    val skjemaService = PeriodeOgBarnSkjemaService(kompetanseRepository)
+    val skjemaService = PeriodeOgBarnSkjemaService(
+        kompetanseRepository,
+        skjemaendringService::kompetanserEndret
+    )
 
     fun hentKompetanser(behandlingId: Long) =
         skjemaService.hentMedBehandlingId(behandlingId)
@@ -27,15 +30,11 @@ class KompetanseService(
 
     @Transactional
     fun endreKompetanse(behandlingId: Long, oppdatering: Kompetanse) =
-        skjemaService.endreSkjemaer(behandlingId, oppdatering) {
-            tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
-        }
+        skjemaService.endreSkjemaer(behandlingId, oppdatering)
 
     @Transactional
     fun slettKompetanse(kompetanseId: Long) =
-        skjemaService.slettSkjema(kompetanseId) {
-            tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(it)
-        }
+        skjemaService.slettSkjema(kompetanseId)
 
     @Transactional
     fun tilpassKompetanserTilRegelverk(behandlingId: Long) {

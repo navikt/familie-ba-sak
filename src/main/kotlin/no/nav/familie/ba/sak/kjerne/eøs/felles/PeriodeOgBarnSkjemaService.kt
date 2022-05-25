@@ -5,7 +5,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.somInversOppdateringEllersNull
 
 class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
-    val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>
+    val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>,
+    val varsleEndring: (behandlingId: Long) -> Unit = {}
 ) {
 
     fun hentMedBehandlingId(behandlingId: Long): Collection<S> {
@@ -16,18 +17,16 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         return periodeOgBarnSkjemaRepository.getById(id)
     }
 
-    fun endreSkjemaer(behandlingId: Long, oppdatering: S, kjørTilSlutt: (behandlingId: Long) -> Unit = {}) {
+    fun endreSkjemaer(behandlingId: Long, oppdatering: S) {
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
 
         val justertOppdatering = oppdatering.somInversOppdateringEllersNull(gjeldendeSkjemaer) ?: oppdatering
         val oppdaterteKompetanser = oppdaterSkjemaerRekursivt(gjeldendeSkjemaer, justertOppdatering)
 
         lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteKompetanser.medBehandlingId(behandlingId))
-
-        kjørTilSlutt(behandlingId)
     }
 
-    fun slettSkjema(skjemaId: Long, kjørTilSlutt: (behandlingId: Long) -> Unit = {}) {
+    fun slettSkjema(skjemaId: Long) {
         val skjemaTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
         val behandlingId = skjemaTilSletting.behandlingId
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
@@ -37,8 +36,6 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
             .slåSammen().medBehandlingId(behandlingId)
 
         lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteKompetanser)
-
-        kjørTilSlutt(behandlingId)
     }
 
     fun kopierOgErstattSkjemaer(fraBehandlingId: Long, tilBehandlingId: Long) {
@@ -51,8 +48,17 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
     }
 
     fun lagreSkjemaDifferanse(gjeldende: Collection<S>, oppdaterte: Collection<S>) {
-        periodeOgBarnSkjemaRepository.deleteAll(gjeldende - oppdaterte)
-        periodeOgBarnSkjemaRepository.saveAll(oppdaterte - gjeldende)
+        val skalSlettes = gjeldende - oppdaterte
+        val skalOppdateres = oppdaterte - gjeldende
+
+        periodeOgBarnSkjemaRepository.deleteAll(skalSlettes)
+        periodeOgBarnSkjemaRepository.saveAll(skalOppdateres)
+
+        val endringer = skalSlettes + skalOppdateres
+        if (endringer.isNotEmpty()) {
+            val behandlingId = endringer.first().behandlingId
+            varsleEndring(behandlingId)
+        }
     }
 }
 

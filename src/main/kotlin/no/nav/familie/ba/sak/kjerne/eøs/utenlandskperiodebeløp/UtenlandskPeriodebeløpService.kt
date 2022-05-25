@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.SkjemaendringService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import org.springframework.stereotype.Service
@@ -10,9 +11,13 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class UtenlandskPeriodebeløpService(
     utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    private val kompetanseService: KompetanseService
+    private val kompetanseService: KompetanseService,
+    private val skjemaendringService: SkjemaendringService
 ) {
-    val skjemaService = PeriodeOgBarnSkjemaService(utenlandskPeriodebeløpRepository)
+    val skjemaService = PeriodeOgBarnSkjemaService(
+        utenlandskPeriodebeløpRepository,
+        skjemaendringService::utenlandskePeriodebeløpEndret
+    )
 
     fun hentUtenlandskePeriodebeløp(behandlingId: Long) =
         skjemaService.hentMedBehandlingId(behandlingId)

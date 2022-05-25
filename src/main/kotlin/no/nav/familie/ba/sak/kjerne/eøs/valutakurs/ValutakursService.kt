@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.SkjemaendringService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import org.springframework.stereotype.Service
@@ -10,9 +11,13 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ValutakursService(
     valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
-    private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService
+    private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
+    private val skjemaendringService: SkjemaendringService
 ) {
-    val skjemaService = PeriodeOgBarnSkjemaService(valutakursRepository)
+    val skjemaService = PeriodeOgBarnSkjemaService(
+        valutakursRepository,
+        skjemaendringService::valutakurserEndret
+    )
 
     fun hentValutakurser(behandlingId: Long) =
         skjemaService.hentMedBehandlingId(behandlingId)
