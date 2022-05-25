@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.config
 
-import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.familie.kontrakter.felles.Applikasjon
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -21,14 +19,13 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
-import org.springframework.kafka.support.serializer.JsonSerializer
 
 @Configuration
 class KafkaAivenConfig(val environment: Environment) {
 
     @Bean
     fun producerFactory(): ProducerFactory<String, String> {
-        return DefaultKafkaProducerFactory(producerConfigs(), StringSerializer(), JsonSerializer(objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)))
+        return DefaultKafkaProducerFactory(producerConfigs())
     }
 
     @Bean
@@ -60,6 +57,8 @@ class KafkaAivenConfig(val environment: Environment) {
         val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: "http://localhost:9092"
         val producerConfigs = mutableMapOf(
             ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
+            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
             ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true, // Den sikrer rekkefølge
             ProducerConfig.ACKS_CONFIG to "all", // Den sikrer at data ikke mistes
             ProducerConfig.CLIENT_ID_CONFIG to Applikasjon.FAMILIE_BA_SAK.name

@@ -93,7 +93,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Query(
         value = """
         SELECT p.foedselsnummer as fnr,
-               MAX(ty.opprettet_dato) as sisteVedtaksdato
+               MAX(ty.endret_dato) as sisteVedtaksdato
         FROM andel_tilkjent_ytelse aty
                  INNER JOIN
              tilkjent_ytelse ty ON aty.tilkjent_ytelse_id = ty.id
@@ -102,6 +102,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
           AND aty.type = 'UTVIDET_BARNETRYGD'
           AND aty.stonad_fom <= :tom
           AND aty.stonad_tom >= :fom
+          AND p.aktiv = true
         group by p.foedselsnummer
     """,
         nativeQuery = true
