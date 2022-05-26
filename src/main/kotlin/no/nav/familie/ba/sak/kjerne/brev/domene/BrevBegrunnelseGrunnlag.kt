@@ -5,11 +5,9 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.delOpp
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 data class BrevBegrunnelseGrunnlag(
     val standardbegrunnelse: Standardbegrunnelse,
@@ -36,16 +34,13 @@ data class BrevBegrunnelseGrunnlag(
             val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
                 triggesAv = this.triggesAv,
                 vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
+                vedtaksperiodetype = vedtaksperiodetype,
+                identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent,
                 periode = periode,
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 identerMedUtbetalingPåPeriode = identerMedUtbetalingPåPeriode,
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
-            ) + hentPersonidenterMedReduksjonFraForrigeBehandlingForBegrunnelse(
-                triggesAv = this.triggesAv,
-                vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
-                vedtaksperiodetype = vedtaksperiodetype,
-                identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent
             )
 
             if (
@@ -72,20 +67,6 @@ data class BrevBegrunnelseGrunnlag(
     fun tilBrevBegrunnelseGrunnlagForLogging() = BrevBegrunnelseGrunnlagForLogging(
         standardbegrunnelse = this.standardbegrunnelse,
     )
-}
-
-private fun hentPersonidenterMedReduksjonFraForrigeBehandlingForBegrunnelse(
-    identerMedReduksjonPåPeriode: List<String>,
-    vedtakBegrunnelseType: VedtakBegrunnelseType,
-    vedtaksperiodetype: Vedtaksperiodetype,
-    triggesAv: TriggesAv
-): List<String> {
-    return if (vedtaksperiodetype == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING && vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON && !triggesAv.vilkår.contains(
-            Vilkår.UNDER_18_ÅR
-        )
-    )
-        identerMedReduksjonPåPeriode
-    else emptyList()
 }
 
 fun RestVedtaksbegrunnelse.tilBrevBegrunnelseGrunnlag(

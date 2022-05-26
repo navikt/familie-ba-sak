@@ -16,20 +16,26 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun hentPersonidenterGjeldendeForBegrunnelse(
     triggesAv: TriggesAv,
     periode: NullablePeriode,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
+    vedtaksperiodetype: Vedtaksperiodetype,
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     identerMedUtbetalingPåPeriode: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
+    identerMedReduksjonPåPeriode: List<String>,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
 ): Set<String> {
 
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
+    val erUtbetalingMedReduksjonFraSistIverksatteBehandling =
+        vedtaksperiodetype == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING &&
+            vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON && !triggesAv.vilkår.contains(Vilkår.UNDER_18_ÅR)
 
     fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
         minimertePersonResultater = restBehandlingsgrunnlagForBrev.minimertePersonResultater,
@@ -78,6 +84,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             },
             minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
         )
+        erUtbetalingMedReduksjonFraSistIverksatteBehandling -> identerMedReduksjonPåPeriode
 
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(
