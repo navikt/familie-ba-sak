@@ -6,14 +6,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.hentBarnasRegelverkResultatTidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class KompetanseService(
-    private val tidslinjeService: TidslinjeService,
+    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
@@ -40,7 +40,8 @@ class KompetanseService(
     @Transactional
     fun tilpassKompetanserTilRegelverk(behandlingId: Long) {
         val gjeldendeKompetanser = hentKompetanser(behandlingId)
-        val barnasRegelverkResultatTidslinjer = tidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId)
+        val barnasRegelverkResultatTidslinjer =
+            vilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId)
 
         val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
             gjeldendeKompetanser,
