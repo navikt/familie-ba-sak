@@ -44,6 +44,7 @@ class VedtaksperiodeServiceUtilsTest {
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = triggesAv,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
+            vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
             periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
             restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -52,7 +53,6 @@ class VedtaksperiodeServiceUtilsTest {
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
-
             minimerteUtbetalingsperiodeDetaljer = listOf()
         )
 
@@ -96,6 +96,7 @@ class VedtaksperiodeServiceUtilsTest {
             triggesAv = triggesAv,
             periode = NullablePeriode(fom, tom),
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
+            vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
             restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
@@ -104,7 +105,6 @@ class VedtaksperiodeServiceUtilsTest {
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
-
             minimerteUtbetalingsperiodeDetaljer = listOf()
         )
 

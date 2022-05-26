@@ -27,7 +27,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     identerMedUtbetalingPåPeriode: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    identerMedReduksjonPåPeriode: List<String>,
+    identerMedReduksjonPåPeriode: List<String> = emptyList(),
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
 ): Set<String> {
 
