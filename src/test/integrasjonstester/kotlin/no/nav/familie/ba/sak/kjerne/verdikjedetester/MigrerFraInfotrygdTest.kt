@@ -519,7 +519,7 @@ class MigrerFraInfotrygdTest(
 
         val exception =
             assertThrows<KanIkkeMigrereException> { migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!) }
-        assertThat(exception.feiltype).isEqualTo(MigreringsfeilType.HAR_BARN_OVER_18_PÅ_INFOTRYGDSAK)
+        assertThat(exception.feiltype).isEqualTo(MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER)
     }
 
     @Test

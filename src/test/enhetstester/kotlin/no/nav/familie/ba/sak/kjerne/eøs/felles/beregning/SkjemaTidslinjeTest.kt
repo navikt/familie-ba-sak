@@ -29,7 +29,7 @@ internal class SkjemaTidslinjeTest {
             barnAktører = setOf(barn.aktør)
         )
 
-        val kompetanseTidslinje = SkjemaTidslinje(kompetanse1, kompetanse2)
+        val kompetanseTidslinje = listOf(kompetanse1, kompetanse2).tilTidslinje()
         assertEquals(2, kompetanseTidslinje.perioder().size)
         assertEquals(feb(2437), kompetanseTidslinje.fraOgMed())
         assertEquals(jul(2438).somUendeligLengeTil(), kompetanseTidslinje.tilOgMed())
@@ -45,7 +45,7 @@ internal class SkjemaTidslinjeTest {
             barnAktører = setOf(barn.aktør)
         )
 
-        val kompetanseTidslinje = SkjemaTidslinje(kompetanse)
+        val kompetanseTidslinje = kompetanse.tilTidslinje()
         assertEquals(1, kompetanseTidslinje.perioder().size)
         assertEquals(MånedTidspunkt.nå().somUendeligLengeSiden(), kompetanseTidslinje.fraOgMed())
         assertEquals(MånedTidspunkt.nå().somUendeligLengeTil(), kompetanseTidslinje.tilOgMed())
