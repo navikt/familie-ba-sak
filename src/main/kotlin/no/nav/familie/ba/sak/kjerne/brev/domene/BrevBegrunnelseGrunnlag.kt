@@ -34,12 +34,12 @@ data class BrevBegrunnelseGrunnlag(
             val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
                 triggesAv = this.triggesAv,
                 vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
-                vedtaksperiodetype = vedtaksperiodetype,
-                identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent,
                 periode = periode,
+                vedtaksperiodetype = vedtaksperiodetype,
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 identerMedUtbetalingPåPeriode = identerMedUtbetalingPåPeriode,
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent,
                 minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
             )
 
