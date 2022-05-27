@@ -15,5 +15,5 @@ data class SanityEØSBegrunnelse(
     val kompetanseResultat: List<KompetanseResultat> = emptyList(),
 )
 
-fun List<SanityEØSBegrunnelse>.finnBegrunnelse(eøsBegrunnelse: EØSBegrunnelse): SanityEØSBegrunnelse? =
-    this.first { it.apiNavn == eøsBegrunnelse.sanityApiNavn }
+fun List<SanityEØSBegrunnelse>.finnBegrunnelse(eøsBegrunnelse: EØSStandardbegrunnelse): SanityEØSBegrunnelse? =
+    this.find { it.apiNavn == eøsBegrunnelse.sanityApiNavn }
