@@ -36,4 +36,4 @@ class EØSPeriodebegrunnelse(
     @Enumerated(EnumType.STRING)
     @Column(name = "begrunnelse", updatable = false)
     val begrunnelse: Standardbegrunnelse,
-) 
+)
