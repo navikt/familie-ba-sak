@@ -20,15 +20,5 @@ class SanityService(
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
-    fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
-        val erIMiljø = environment.activeProfiles.any {
-            listOf("preprod", "prod").contains(it.trim(' '))
-        }
-
-        return if (erIMiljø) {
-            brevKlient.hentSanityBegrunnelser()
-        } else {
-            cachedSanityKlient.hentSanityBegrunnelserCached()
-        }
-    }
+    fun hentSanityBegrunnelser(): List<SanityBegrunnelse> = cachedSanityKlient.hentSanityBegrunnelserCached()
 }
