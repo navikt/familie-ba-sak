@@ -39,7 +39,7 @@ data class BrevBegrunnelseGrunnlag(
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 identerMedUtbetalingPåPeriode = identerMedUtbetalingPåPeriode,
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent.map { it },
+                identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent,
                 minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
             )
 
