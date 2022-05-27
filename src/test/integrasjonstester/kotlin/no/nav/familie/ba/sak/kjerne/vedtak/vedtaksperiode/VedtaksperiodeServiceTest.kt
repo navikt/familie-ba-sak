@@ -143,7 +143,7 @@ class VedtaksperiodeServiceTest(
         assertEquals(1, vedtaksperioder.flatMap { it.begrunnelser }.size)
         assertEquals(
             Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
-            vedtaksperioder.flatMap { it.begrunnelser }.first().standardbegrunnelse
+            vedtaksperioder.flatMap { it.begrunnelser }.first().begrunnelse
         )
     }
 
@@ -211,7 +211,7 @@ class VedtaksperiodeServiceTest(
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
         assertEquals(
             Standardbegrunnelse.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
-            vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().standardbegrunnelse
+            vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().begrunnelse
         )
 
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
@@ -224,7 +224,7 @@ class VedtaksperiodeServiceTest(
         assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.size)
         assertEquals(
             Standardbegrunnelse.FORTSATT_INNVILGET_FAST_OMSORG,
-            vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.first().standardbegrunnelse
+            vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.first().begrunnelse
         )
         assertEquals(0, vedtaksperioderMedOverskrevneBegrunnelser.first().fritekster.size)
     }

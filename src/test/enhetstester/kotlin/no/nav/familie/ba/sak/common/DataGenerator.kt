@@ -64,7 +64,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.NasjonalPeriodebegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
@@ -855,7 +855,7 @@ fun lagVedtaksperiodeMedBegrunnelser(
     fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
     tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
     type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
-    begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
+    begrunnelser: MutableSet<NasjonalPeriodebegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
     fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
 ) = VedtaksperiodeMedBegrunnelser(
     vedtak = vedtak,

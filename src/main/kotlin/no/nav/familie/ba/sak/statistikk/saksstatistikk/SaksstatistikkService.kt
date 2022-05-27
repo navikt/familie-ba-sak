@@ -186,8 +186,8 @@ class SaksstatistikkService(
                         ResultatBegrunnelseDVH(
                             fom = vedtaksperiode.fom,
                             tom = vedtaksperiode.tom,
-                            type = it.standardbegrunnelse.vedtakBegrunnelseType.name,
-                            vedtakBegrunnelse = it.standardbegrunnelse.name,
+                            type = it.begrunnelse.vedtakBegrunnelseType.name,
+                            vedtakBegrunnelse = it.begrunnelse.name,
                         )
                     }
             }

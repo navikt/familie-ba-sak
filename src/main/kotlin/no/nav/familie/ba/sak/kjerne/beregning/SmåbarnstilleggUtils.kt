@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.NasjonalPeriodebegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -144,9 +144,9 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
 
     vedtaksperiodeSomSkalOppdateres.settBegrunnelser(
         vedtaksperiodeSomSkalOppdateres.begrunnelser.toList() + listOf(
-            Vedtaksbegrunnelse(
+            NasjonalPeriodebegrunnelse(
                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeSomSkalOppdateres,
-                standardbegrunnelse = vedtaksperiodeSomSkalOppdateresOgBegrunnelse.second
+                begrunnelse = vedtaksperiodeSomSkalOppdateresOgBegrunnelse.second
             )
         )
     )

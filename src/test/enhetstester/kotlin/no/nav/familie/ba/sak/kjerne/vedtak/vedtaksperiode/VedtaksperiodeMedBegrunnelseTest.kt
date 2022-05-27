@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.NasjonalPeriodebegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunnelse
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -30,9 +30,9 @@ class VedtaksperiodeMedBegrunnelseTest {
                         Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
                         Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR
                     ).map { begrunnelse ->
-                        Vedtaksbegrunnelse(
+                        NasjonalPeriodebegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            begrunnelse = begrunnelse
                         )
                     }
                 )
@@ -66,9 +66,9 @@ class VedtaksperiodeMedBegrunnelseTest {
                         Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
                         Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
                     ).map { begrunnelse ->
-                        Vedtaksbegrunnelse(
+                        NasjonalPeriodebegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            begrunnelse = begrunnelse
                         )
                     }
                 )
@@ -98,9 +98,9 @@ class VedtaksperiodeMedBegrunnelseTest {
                     listOf(
                         Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
                     ).map { begrunnelse ->
-                        Vedtaksbegrunnelse(
+                        NasjonalPeriodebegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            begrunnelse = begrunnelse
                         )
                     }
                 )
@@ -129,9 +129,9 @@ class VedtaksperiodeMedBegrunnelseTest {
                     listOf(
                         Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
                     ).map { begrunnelse ->
-                        Vedtaksbegrunnelse(
+                        NasjonalPeriodebegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            begrunnelse = begrunnelse
                         )
                     }
                 )
@@ -160,9 +160,9 @@ class VedtaksperiodeMedBegrunnelseTest {
                     listOf(
                         Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
                     ).map { begrunnelse ->
-                        Vedtaksbegrunnelse(
+                        NasjonalPeriodebegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            begrunnelse = begrunnelse
                         )
                     }
                 )
@@ -191,9 +191,9 @@ class VedtaksperiodeMedBegrunnelseTest {
                     listOf(
                         Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD,
                     ).map { begrunnelse ->
-                        Vedtaksbegrunnelse(
+                        NasjonalPeriodebegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            begrunnelse = begrunnelse
                         )
                     }
                 )

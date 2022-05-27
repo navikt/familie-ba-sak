@@ -74,7 +74,7 @@ data class VedtaksperiodeMedBegrunnelser(
         orphanRemoval = true
     )
     @SortComparator(BegrunnelseComparator::class)
-    val begrunnelser: MutableSet<Vedtaksbegrunnelse> = sortedSetOf(comparator),
+    val begrunnelser: MutableSet<NasjonalPeriodebegrunnelse> = sortedSetOf(comparator),
 
     // Bruker list for å bevare rekkefølgen som settes frontend.
     @OneToMany(
@@ -87,7 +87,7 @@ data class VedtaksperiodeMedBegrunnelser(
 
 ) : BaseEntitet() {
 
-    fun settBegrunnelser(nyeBegrunnelser: List<Vedtaksbegrunnelse>) {
+    fun settBegrunnelser(nyeBegrunnelser: List<NasjonalPeriodebegrunnelse>) {
         begrunnelser.clear()
         begrunnelser.addAll(nyeBegrunnelser)
     }
@@ -148,7 +148,7 @@ fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
     måned: YearMonth
 ): Boolean {
     return this.any {
-        it.fom?.toYearMonth() == måned && it.begrunnelser.any { standardbegrunnelse -> standardbegrunnelse.standardbegrunnelse in standardbegrunnelser }
+        it.fom?.toYearMonth() == måned && it.begrunnelser.any { standardbegrunnelse -> standardbegrunnelse.begrunnelse in standardbegrunnelser }
     }
 }
 
@@ -159,10 +159,10 @@ private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<Andel
         ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
 }
 
-class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {
+class BegrunnelseComparator : Comparator<NasjonalPeriodebegrunnelse> {
 
-    override fun compare(o1: Vedtaksbegrunnelse, o2: Vedtaksbegrunnelse): Int {
-        return if (o1.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
+    override fun compare(o1: NasjonalPeriodebegrunnelse, o2: NasjonalPeriodebegrunnelse): Int {
+        return if (o1.begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
             -1
         } else 1
     }

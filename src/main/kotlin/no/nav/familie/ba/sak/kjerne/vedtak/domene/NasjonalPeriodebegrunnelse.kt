@@ -39,9 +39,9 @@ import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "Vedtaksbegrunnelse")
-@Table(name = "VEDTAKSBEGRUNNELSE")
-class Vedtaksbegrunnelse(
+@Entity(name = "NasjonalBegrunnelse")
+@Table(name = "NASJONAL_PERIODEBEGRUNNELSE")
+class NasjonalPeriodebegrunnelse(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtaksbegrunnelse_seq_generator")
     @SequenceGenerator(
@@ -56,24 +56,25 @@ class Vedtaksbegrunnelse(
     val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
-    val standardbegrunnelse: Standardbegrunnelse,
+    @Column(name = "begrunnelse", updatable = false)
+    val begrunnelse: Standardbegrunnelse,
 ) {
 
-    fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
-        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        standardbegrunnelse = this.standardbegrunnelse,
-    )
+    fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): NasjonalPeriodebegrunnelse =
+        NasjonalPeriodebegrunnelse(
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            begrunnelse = this.begrunnelse,
+        )
 
     override fun toString(): String {
-        return "Vedtaksbegrunnelse(id=$id, standardbegrunnelse=$standardbegrunnelse)"
+        return "Vedtaksbegrunnelse(id=$id, standardbegrunnelse=$begrunnelse)"
     }
 }
 
-fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
-    standardbegrunnelse = this.standardbegrunnelse,
-    vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
-    vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse,
+fun NasjonalPeriodebegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
+    standardbegrunnelse = this.begrunnelse,
+    vedtakBegrunnelseType = this.begrunnelse.vedtakBegrunnelseType,
+    vedtakBegrunnelseSpesifikasjon = this.begrunnelse,
 )
 
 interface Begrunnelse

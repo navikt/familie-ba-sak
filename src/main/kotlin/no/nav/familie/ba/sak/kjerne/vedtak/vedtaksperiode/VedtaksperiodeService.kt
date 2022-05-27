@@ -38,7 +38,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.NasjonalPeriodebegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingsperiodeMedBegrunnelserService
@@ -183,8 +183,8 @@ class VedtaksperiodeService(
 
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(
                 listOf(
-                    Vedtaksbegrunnelse(
-                        standardbegrunnelse = if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
+                    NasjonalPeriodebegrunnelse(
+                        begrunnelse = if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
                             Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
                         } else Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
                         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
@@ -206,8 +206,8 @@ class VedtaksperiodeService(
                     ?.also { satsendringsvedtaksperiode ->
                         satsendringsvedtaksperiode.settBegrunnelser(
                             listOf(
-                                Vedtaksbegrunnelse(
-                                    standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                                NasjonalPeriodebegrunnelse(
+                                    begrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
                                     vedtaksperiodeMedBegrunnelser = satsendringsvedtaksperiode,
                                 )
                             )
@@ -435,9 +435,9 @@ class VedtaksperiodeService(
 
         fortsattInnvilgetPeriode.settBegrunnelser(
             listOf(
-                Vedtaksbegrunnelse(
+                NasjonalPeriodebegrunnelse(
                     vedtaksperiodeMedBegrunnelser = fortsattInnvilgetPeriode,
-                    standardbegrunnelse = standardbegrunnelse,
+                    begrunnelse = standardbegrunnelse,
                 )
             )
         )
@@ -528,9 +528,9 @@ class VedtaksperiodeService(
                 .apply {
                     begrunnelser.addAll(
                         standardbegrunnelser.map { begrunnelse ->
-                            Vedtaksbegrunnelse(
+                            NasjonalPeriodebegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,
-                                standardbegrunnelse = begrunnelse
+                                begrunnelse = begrunnelse
                             )
                         }
                     )
@@ -569,9 +569,9 @@ class VedtaksperiodeService(
             if (it.fom == null && it.tom == null && uregistrerteBarn.isNotEmpty()) {
                 it.apply {
                     begrunnelser.add(
-                        Vedtaksbegrunnelse(
+                        NasjonalPeriodebegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
+                            begrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
                         )
                     )
                 }

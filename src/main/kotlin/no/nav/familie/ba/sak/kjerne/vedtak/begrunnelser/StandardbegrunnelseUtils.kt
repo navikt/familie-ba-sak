@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.harBarnMedSeksårsdagPåFom
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.NasjonalPeriodebegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.LoggerFactory
@@ -141,7 +141,7 @@ fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map 
 
 fun Standardbegrunnelse.tilVedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-): Vedtaksbegrunnelse {
+): NasjonalPeriodebegrunnelse {
     if (!vedtaksperiodeMedBegrunnelser
         .type
         .tillatteBegrunnelsestyper
@@ -153,9 +153,9 @@ fun Standardbegrunnelse.tilVedtaksbegrunnelse(
         )
     }
 
-    return Vedtaksbegrunnelse(
+    return NasjonalPeriodebegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        standardbegrunnelse = this,
+        begrunnelse = this,
     )
 }
 

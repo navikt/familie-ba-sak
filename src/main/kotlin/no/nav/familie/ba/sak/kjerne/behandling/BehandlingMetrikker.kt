@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.NasjonalPeriodebegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -108,8 +108,8 @@ class BehandlingMetrikker(
                 vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
             vedtaksperiodeMedBegrunnelser.forEach {
-                it.begrunnelser.forEach { vedtaksbegrunnelse: Vedtaksbegrunnelse ->
-                    antallBrevBegrunnelseSpesifikasjon[vedtaksbegrunnelse.standardbegrunnelse]?.increment()
+                it.begrunnelser.forEach { nasjonalPeriodebegrunnelse: NasjonalPeriodebegrunnelse ->
+                    antallBrevBegrunnelseSpesifikasjon[nasjonalPeriodebegrunnelse.begrunnelse]?.increment()
                 }
             }
         }

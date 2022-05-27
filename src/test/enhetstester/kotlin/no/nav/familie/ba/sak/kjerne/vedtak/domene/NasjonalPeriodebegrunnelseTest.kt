@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class VedtaksbegrunnelseTest {
+class NasjonalPeriodebegrunnelseTest {
     val søker = lagPerson(type = PersonType.SØKER)
     val barn1 = lagPerson(type = PersonType.BARN)
     val barn2 = lagPerson(type = PersonType.BARN)
