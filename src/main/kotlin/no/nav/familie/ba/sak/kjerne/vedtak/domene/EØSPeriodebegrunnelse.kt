@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -35,5 +35,5 @@ class EØSPeriodebegrunnelse(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "begrunnelse", updatable = false)
-    val begrunnelse: Standardbegrunnelse,
+    val begrunnelse: EØSBegrunnelse,
 )
