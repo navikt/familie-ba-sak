@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
-import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.http.client.AbstractRestClient
@@ -28,18 +26,6 @@ class BrevKlient(
         return kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Hente pdf for vedtaksbrev") {
             postForEntity(uri, brev.data)
         }
-    }
-
-    @Cacheable("begrunnelsestekster-for-nedtreksmeny", cacheManager = "shortCache")
-    fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
-        val uri = URI.create("$familieBrevUri/ba-sak/begrunnelser")
-
-        val restSanityBegrunnelser =
-            kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Henter begrunnelser fra sanity via familie brev") {
-                getForEntity<List<RestSanityBegrunnelse>>(uri)
-            }
-
-        return restSanityBegrunnelser.map { it.tilSanityBegrunnelse() }
     }
 
     @Cacheable("begrunnelsestekst", cacheManager = "shortCache")
