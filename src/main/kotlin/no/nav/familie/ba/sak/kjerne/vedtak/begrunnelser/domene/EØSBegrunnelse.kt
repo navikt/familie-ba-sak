@@ -22,10 +22,10 @@ import javax.persistence.Table
 @Table(name = "EOS_BEGRUNNELSE")
 class EØSBegrunnelse(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eos_periodebegrunnelse_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eos_begrunnelse_seq")
     @SequenceGenerator(
         name = "eos_periodebegrunnelse_seq_generator",
-        sequenceName = "eos_periodebegrunnelse_seq",
+        sequenceName = "eos_begrunnelse_seq",
         allocationSize = 50
     )
     val id: Long = 0,
