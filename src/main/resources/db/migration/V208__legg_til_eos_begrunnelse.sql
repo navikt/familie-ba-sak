@@ -8,8 +8,12 @@ CREATE TABLE eos_periodebegrunnelse
 CREATE INDEX eos_periodebegrunnelse_fk_vedtaksperiode_id_idx
     ON eos_periodebegrunnelse (fk_vedtaksperiode_id);
 
+CREATE SEQUENCE eos_periodebegrunnelse_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
+
 ALTER TABLE vedtaksbegrunnelse
     RENAME TO nasjonal_periodebegrunnelse;
 
 ALTER TABLE nasjonal_periodebegrunnelse
     RENAME COLUMN vedtak_begrunnelse_spesifikasjon TO begrunnelse;
+
+ALTER SEQUENCE vedtaksbegrunnelse_seq RENAME TO nasjonal_periodebegrunnelse_seq;

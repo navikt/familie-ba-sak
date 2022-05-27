@@ -39,14 +39,14 @@ import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "NasjonalBegrunnelse")
+@Entity(name = "NasjonalPeriodebegrunnelse")
 @Table(name = "NASJONAL_PERIODEBEGRUNNELSE")
 class NasjonalPeriodebegrunnelse(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtaksbegrunnelse_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "nasjonal_periodebegrunnelse_seq_generator")
     @SequenceGenerator(
-        name = "vedtaksbegrunnelse_seq_generator",
-        sequenceName = "vedtaksbegrunnelse_seq",
+        name = "nasjonal_periodebegrunnelse_seq_generator",
+        sequenceName = "nasjonal_periodebegrunnelse_seq",
         allocationSize = 50
     )
     val id: Long = 0,
