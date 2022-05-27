@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.sanity
 
-const val hentDokumenter =
+const val hentNasjonaleBegrunnelser =
     "*[_type == \"begrunnelse\"]{" +
         "apiNavn," +
         "navnISystem," +
@@ -17,4 +17,13 @@ const val hentDokumenter =
         "endretUtbetalingsperiodeDeltBostedUtbetalingTrigger," +
         "endringsaarsaker," +
         "utvidetBarnetrygdTriggere" +
+        "}"
+
+const val hentEØSBegrunnelser =
+    "*[_type == \"begrunnelse\" && behandlingstema == \"EØS\" && apiNavn != null && navnISystem != null]{" +
+        "apiNavn," +
+        "navnISystem," +
+        "annenForeldersAktivitet," +
+        "barnetsBostedsland," +
+        "kompetanseResultat" +
         "}"
