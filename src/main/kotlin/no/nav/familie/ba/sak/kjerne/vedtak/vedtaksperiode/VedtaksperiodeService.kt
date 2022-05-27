@@ -331,7 +331,7 @@ class VedtaksperiodeService(
             )
 
             nyVedtaksperiodeMedBegrunnelser.settBegrunnelser(
-                vedtaksperiodeMedBegrunnelser.begrunnelser.map {
+                vedtaksperiodeMedBegrunnelser.nasjonaleBegrunnelser.map {
                     it.kopier(nyVedtaksperiodeMedBegrunnelser)
                 }
             )
@@ -526,7 +526,7 @@ class VedtaksperiodeService(
                 type = Vedtaksperiodetype.AVSLAG
             )
                 .apply {
-                    begrunnelser.addAll(
+                    nasjonaleBegrunnelser.addAll(
                         standardbegrunnelser.map { begrunnelse ->
                             NasjonalPeriodebegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,
@@ -568,7 +568,7 @@ class VedtaksperiodeService(
         return avslagsperioderMedTomPeriode.map {
             if (it.fom == null && it.tom == null && uregistrerteBarn.isNotEmpty()) {
                 it.apply {
-                    begrunnelser.add(
+                    nasjonaleBegrunnelser.add(
                         NasjonalPeriodebegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
                             begrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,

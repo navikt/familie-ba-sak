@@ -108,7 +108,7 @@ class BehandlingMetrikker(
                 vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
             vedtaksperiodeMedBegrunnelser.forEach {
-                it.begrunnelser.forEach { nasjonalPeriodebegrunnelse: NasjonalPeriodebegrunnelse ->
+                it.nasjonaleBegrunnelser.forEach { nasjonalPeriodebegrunnelse: NasjonalPeriodebegrunnelse ->
                     antallBrevBegrunnelseSpesifikasjon[nasjonalPeriodebegrunnelse.begrunnelse]?.increment()
                 }
             }

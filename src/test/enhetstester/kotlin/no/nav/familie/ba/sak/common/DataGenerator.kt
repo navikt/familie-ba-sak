@@ -862,7 +862,7 @@ fun lagVedtaksperiodeMedBegrunnelser(
     fom = fom,
     tom = tom,
     type = type,
-    begrunnelser = begrunnelser,
+    nasjonaleBegrunnelser = begrunnelser,
     fritekster = fritekster,
 )
 

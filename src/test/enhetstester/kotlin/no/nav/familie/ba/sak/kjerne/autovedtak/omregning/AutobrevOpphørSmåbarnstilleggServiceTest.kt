@@ -116,7 +116,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
                 vedtak = vedtak,
                 type = Vedtaksperiodetype.UTBETALING
             ).apply {
-                begrunnelser.addAll(
+                nasjonaleBegrunnelser.addAll(
                     listOf(
                         Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
                     ).map { begrunnelse ->

@@ -143,7 +143,7 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
     }
 
     vedtaksperiodeSomSkalOppdateres.settBegrunnelser(
-        vedtaksperiodeSomSkalOppdateres.begrunnelser.toList() + listOf(
+        vedtaksperiodeSomSkalOppdateres.nasjonaleBegrunnelser.toList() + listOf(
             NasjonalPeriodebegrunnelse(
                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeSomSkalOppdateres,
                 begrunnelse = vedtaksperiodeSomSkalOppdateresOgBegrunnelse.second

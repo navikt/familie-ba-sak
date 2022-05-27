@@ -140,10 +140,10 @@ class VedtaksperiodeServiceTest(
         val vedtaksperioder = vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak)
 
         assertEquals(1, vedtaksperioder.size)
-        assertEquals(1, vedtaksperioder.flatMap { it.begrunnelser }.size)
+        assertEquals(1, vedtaksperioder.flatMap { it.nasjonaleBegrunnelser }.size)
         assertEquals(
             Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
-            vedtaksperioder.flatMap { it.begrunnelser }.first().begrunnelse
+            vedtaksperioder.flatMap { it.nasjonaleBegrunnelser }.first().begrunnelse
         )
     }
 
@@ -208,10 +208,10 @@ class VedtaksperiodeServiceTest(
 
         val vedtaksperioderMedUtfylteBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.size)
-        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
+        assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().nasjonaleBegrunnelser.size)
         assertEquals(
             Standardbegrunnelse.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
-            vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().begrunnelse
+            vedtaksperioderMedUtfylteBegrunnelser.first().nasjonaleBegrunnelser.first().begrunnelse
         )
 
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
@@ -221,10 +221,10 @@ class VedtaksperiodeServiceTest(
 
         val vedtaksperioderMedOverskrevneBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.size)
-        assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.size)
+        assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.first().nasjonaleBegrunnelser.size)
         assertEquals(
             Standardbegrunnelse.FORTSATT_INNVILGET_FAST_OMSORG,
-            vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.first().begrunnelse
+            vedtaksperioderMedOverskrevneBegrunnelser.first().nasjonaleBegrunnelser.first().begrunnelse
         )
         assertEquals(0, vedtaksperioderMedOverskrevneBegrunnelser.first().fritekster.size)
     }

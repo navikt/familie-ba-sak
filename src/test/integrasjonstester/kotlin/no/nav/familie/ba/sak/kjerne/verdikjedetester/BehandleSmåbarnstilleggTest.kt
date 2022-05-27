@@ -393,7 +393,7 @@ class BehandleSmåbarnstilleggTest(
         val aktuellVedtaksperiode =
             vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == YearMonth.now().nesteMåned() }
         assertNotNull(aktuellVedtaksperiode)
-        assertTrue(aktuellVedtaksperiode?.begrunnelser?.any { it.begrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD } == true)
+        assertTrue(aktuellVedtaksperiode?.nasjonaleBegrunnelser?.any { it.begrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD } == true)
 
         håndterIverksettingAvBehandling(
             behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)!!,

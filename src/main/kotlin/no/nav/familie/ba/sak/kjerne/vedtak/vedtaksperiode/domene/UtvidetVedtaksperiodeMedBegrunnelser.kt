@@ -49,7 +49,7 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         fom = this.fom,
         tom = this.tom,
         type = this.type,
-        begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
+        begrunnelser = this.nasjonaleBegrunnelser.map { it.tilRestVedtaksbegrunnelse() },
         fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
         utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
     )

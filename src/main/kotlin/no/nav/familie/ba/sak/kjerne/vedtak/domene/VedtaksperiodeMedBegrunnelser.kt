@@ -74,7 +74,7 @@ data class VedtaksperiodeMedBegrunnelser(
         orphanRemoval = true
     )
     @SortComparator(BegrunnelseComparator::class)
-    val begrunnelser: MutableSet<NasjonalPeriodebegrunnelse> = sortedSetOf(comparator),
+    val nasjonaleBegrunnelser: MutableSet<NasjonalPeriodebegrunnelse> = sortedSetOf(comparator),
 
     // Bruker list for å bevare rekkefølgen som settes frontend.
     @OneToMany(
@@ -88,8 +88,8 @@ data class VedtaksperiodeMedBegrunnelser(
 ) : BaseEntitet() {
 
     fun settBegrunnelser(nyeBegrunnelser: List<NasjonalPeriodebegrunnelse>) {
-        begrunnelser.clear()
-        begrunnelser.addAll(nyeBegrunnelser)
+        nasjonaleBegrunnelser.clear()
+        nasjonaleBegrunnelser.addAll(nyeBegrunnelser)
     }
 
     fun settFritekster(nyeFritekster: List<VedtaksbegrunnelseFritekst>) {
@@ -98,11 +98,11 @@ data class VedtaksperiodeMedBegrunnelser(
     }
 
     fun harFriteksterUtenStandardbegrunnelser(): Boolean {
-        return (type == Vedtaksperiodetype.OPPHØR || type == Vedtaksperiodetype.AVSLAG) && fritekster.isNotEmpty() && begrunnelser.isEmpty()
+        return (type == Vedtaksperiodetype.OPPHØR || type == Vedtaksperiodetype.AVSLAG) && fritekster.isNotEmpty() && nasjonaleBegrunnelser.isEmpty()
     }
 
     fun harFriteksterOgStandardbegrunnelser(): Boolean {
-        return fritekster.isNotEmpty() && begrunnelser.isNotEmpty()
+        return fritekster.isNotEmpty() && nasjonaleBegrunnelser.isNotEmpty()
     }
 
     fun hentUtbetalingsperiodeDetaljer(
@@ -148,7 +148,7 @@ fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
     måned: YearMonth
 ): Boolean {
     return this.any {
-        it.fom?.toYearMonth() == måned && it.begrunnelser.any { standardbegrunnelse -> standardbegrunnelse.begrunnelse in standardbegrunnelser }
+        it.fom?.toYearMonth() == måned && it.nasjonaleBegrunnelser.any { standardbegrunnelse -> standardbegrunnelse.begrunnelse in standardbegrunnelser }
     }
 }
 

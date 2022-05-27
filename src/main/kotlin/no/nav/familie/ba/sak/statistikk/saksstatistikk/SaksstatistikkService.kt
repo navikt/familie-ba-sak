@@ -181,7 +181,7 @@ class SaksstatistikkService(
     private fun Vedtak.hentResultatBegrunnelserFraVedtaksbegrunnelser(): List<ResultatBegrunnelseDVH> {
         return vedtaksperiodeService.hentPersisterteVedtaksperioder(this)
             .flatMap { vedtaksperiode ->
-                vedtaksperiode.begrunnelser
+                vedtaksperiode.nasjonaleBegrunnelser
                     .map {
                         ResultatBegrunnelseDVH(
                             fom = vedtaksperiode.fom,

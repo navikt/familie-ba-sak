@@ -307,8 +307,8 @@ class SmåbarnstilleggUtilsTest {
         )
 
         assertNotNull(oppdatertVedtaksperiodeMedBegrunnelser)
-        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.any { it.begrunnelse == Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG })
-        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.none { it.begrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.nasjonaleBegrunnelser.any { it.begrunnelse == Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG })
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.nasjonaleBegrunnelser.none { it.begrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
     }
 
     @Test
@@ -331,8 +331,8 @@ class SmåbarnstilleggUtilsTest {
         )
 
         assertNotNull(oppdatertVedtaksperiodeMedBegrunnelser)
-        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.none { it.begrunnelse == Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG })
-        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.any { it.begrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.nasjonaleBegrunnelser.none { it.begrunnelse == Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG })
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.nasjonaleBegrunnelser.any { it.begrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
     }
 
     @Test
@@ -355,8 +355,8 @@ class SmåbarnstilleggUtilsTest {
         )
 
         assertNotNull(oppdatertVedtaksperiodeMedBegrunnelser)
-        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.none { it.begrunnelse == Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG })
-        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.any { it.begrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.nasjonaleBegrunnelser.none { it.begrunnelse == Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG })
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.nasjonaleBegrunnelser.any { it.begrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
     }
 
     @Test

@@ -25,7 +25,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                 vedtak = vedtak,
                 type = Vedtaksperiodetype.UTBETALING
             ).apply {
-                begrunnelser.addAll(
+                nasjonaleBegrunnelser.addAll(
                     listOf(
                         Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
                         Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR
@@ -61,7 +61,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                 vedtak = vedtak,
                 type = Vedtaksperiodetype.UTBETALING
             ).apply {
-                begrunnelser.addAll(
+                nasjonaleBegrunnelser.addAll(
                     listOf(
                         Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
                         Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
@@ -94,7 +94,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                 vedtak = vedtak,
                 type = Vedtaksperiodetype.UTBETALING
             ).apply {
-                begrunnelser.addAll(
+                nasjonaleBegrunnelser.addAll(
                     listOf(
                         Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
                     ).map { begrunnelse ->
@@ -125,7 +125,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                 vedtak = vedtak,
                 type = Vedtaksperiodetype.UTBETALING
             ).apply {
-                begrunnelser.addAll(
+                nasjonaleBegrunnelser.addAll(
                     listOf(
                         Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
                     ).map { begrunnelse ->
@@ -156,7 +156,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                 vedtak = vedtak,
                 type = Vedtaksperiodetype.UTBETALING
             ).apply {
-                begrunnelser.addAll(
+                nasjonaleBegrunnelser.addAll(
                     listOf(
                         Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
                     ).map { begrunnelse ->
@@ -187,7 +187,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                 vedtak = vedtak,
                 type = Vedtaksperiodetype.UTBETALING
             ).apply {
-                begrunnelser.addAll(
+                nasjonaleBegrunnelser.addAll(
                     listOf(
                         Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD,
                     ).map { begrunnelse ->
