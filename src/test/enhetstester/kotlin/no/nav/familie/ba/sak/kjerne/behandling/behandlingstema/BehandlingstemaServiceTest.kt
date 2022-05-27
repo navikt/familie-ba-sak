@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -30,7 +30,7 @@ class BehandlingstemaServiceTest {
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val loggService = mockk<LoggService>()
     private val oppgaveService = mockk<OppgaveService>()
-    private val tidslinjeService = mockk<TidslinjeService>()
+    private val tidslinjeService = mockk<VilkårsvurderingTidslinjeService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val featureToggleService = mockk<FeatureToggleService>()
 
@@ -39,7 +39,7 @@ class BehandlingstemaServiceTest {
         andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         loggService = loggService,
         oppgaveService = oppgaveService,
-        tidslinjeService = tidslinjeService,
+        vilkårsvurderingTidslinjeService = tidslinjeService,
         vilkårsvurderingRepository = vilkårsvurderingRepository,
         featureToggleService = featureToggleService,
     )
