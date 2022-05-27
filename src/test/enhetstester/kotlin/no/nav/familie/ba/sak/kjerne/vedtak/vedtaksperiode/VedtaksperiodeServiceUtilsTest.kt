@@ -53,7 +53,6 @@ class VedtaksperiodeServiceUtilsTest {
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
-
             minimerteUtbetalingsperiodeDetaljer = listOf()
         )
 
@@ -106,7 +105,6 @@ class VedtaksperiodeServiceUtilsTest {
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
-
             minimerteUtbetalingsperiodeDetaljer = listOf()
         )
 
