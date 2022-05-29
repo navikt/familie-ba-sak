@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
-import no.nav.familie.ba.sak.kjerne.eøs.felles.SkjemaendringService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
@@ -18,12 +17,11 @@ import org.junit.jupiter.api.Test
 internal class ValutakursServiceTest {
     val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs> = mockPeriodeBarnSkjemaRepository()
     val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService = mockk()
-    val skjemaendringService: SkjemaendringService = mockk(relaxed = true)
 
     val valutakursService = ValutakursService(
         valutakursRepository,
         utenlandskPeriodebeløpService,
-        skjemaendringService
+        emptyList()
     )
 
     @BeforeEach

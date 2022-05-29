@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
-import no.nav.familie.ba.sak.kjerne.eøs.felles.SkjemaendringService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
@@ -28,12 +27,11 @@ internal class KompetanseServiceTest {
 
     val mockKompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse> = mockPeriodeBarnSkjemaRepository()
     val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService = mockk()
-    val skjemaendringService: SkjemaendringService = mockk(relaxed = true)
 
     val kompetanseService = KompetanseService(
         vilkårsvurderingTidslinjeService,
         mockKompetanseRepository,
-        skjemaendringService,
+        emptyList(),
     )
 
     @BeforeEach

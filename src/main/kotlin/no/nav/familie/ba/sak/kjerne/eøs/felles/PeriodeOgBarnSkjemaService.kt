@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.somInversOppdateringEl
 
 class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
     val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>,
-    val varsleEndring: (behandlingId: Long) -> Unit = {}
+    val endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<S>>
 ) {
 
     fun hentMedBehandlingId(behandlingId: Long): Collection<S> {
@@ -49,15 +49,15 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
 
     fun lagreSkjemaDifferanse(gjeldende: Collection<S>, oppdaterte: Collection<S>) {
         val skalSlettes = gjeldende - oppdaterte
-        val skalOppdateres = oppdaterte - gjeldende
+        val skalLagres = oppdaterte - gjeldende
 
         periodeOgBarnSkjemaRepository.deleteAll(skalSlettes)
-        periodeOgBarnSkjemaRepository.saveAll(skalOppdateres)
+        periodeOgBarnSkjemaRepository.saveAll(skalLagres)
 
-        val endringer = skalSlettes + skalOppdateres
+        val endringer = skalSlettes + skalLagres
         if (endringer.isNotEmpty()) {
             val behandlingId = endringer.first().behandlingId
-            varsleEndring(behandlingId)
+            endringsabonnenter.forEach { it.skjemaerEndret(behandlingId, oppdaterte) }
         }
     }
 }

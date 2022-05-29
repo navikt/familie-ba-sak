@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.SkjemaendringService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.hentBarnasRegelverkResultatTidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.tilpassKompetanserTilRegelverk
@@ -15,11 +15,11 @@ import org.springframework.transaction.annotation.Transactional
 class KompetanseService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
-    val skjemaendringService: SkjemaendringService
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>
 ) {
     val skjemaService = PeriodeOgBarnSkjemaService(
         kompetanseRepository,
-        skjemaendringService::kompetanserEndret
+        endringsabonnenter
     )
 
     fun hentKompetanser(behandlingId: Long) =

@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.SkjemaendringService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -12,11 +13,11 @@ import org.springframework.transaction.annotation.Transactional
 class UtenlandskPeriodebeløpService(
     utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     private val kompetanseService: KompetanseService,
-    private val skjemaendringService: SkjemaendringService
-) {
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp>>
+) : PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse> {
     val skjemaService = PeriodeOgBarnSkjemaService(
         utenlandskPeriodebeløpRepository,
-        skjemaendringService::utenlandskePeriodebeløpEndret
+        endringsabonnenter
     )
 
     fun hentUtenlandskePeriodebeløp(behandlingId: Long) =
@@ -30,8 +31,21 @@ class UtenlandskPeriodebeløpService(
 
     @Transactional
     fun tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId: Long) {
-        val forrigeUtenlandskePeriodebeløp = hentUtenlandskePeriodebeløp(behandlingId)
         val gjeldendeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+
+        tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId, gjeldendeKompetanser)
+    }
+
+    @Transactional
+    override fun skjemaerEndret(behandlingId: Long, endretTil: Collection<Kompetanse>) {
+        tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId, endretTil)
+    }
+
+    private fun tilpassUtenlandskPeriodebeløpTilKompetanser(
+        behandlingId: Long,
+        gjeldendeKompetanser: Collection<Kompetanse>
+    ) {
+        val forrigeUtenlandskePeriodebeløp = hentUtenlandskePeriodebeløp(behandlingId)
 
         val oppdaterteUtenlandskPeriodebeløp = tilpassUtenlandskePeriodebeløpTilKompetanser(
             forrigeUtenlandskePeriodebeløp,

@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.SkjemaendringService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -12,11 +13,11 @@ import org.springframework.transaction.annotation.Transactional
 class ValutakursService(
     valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
-    private val skjemaendringService: SkjemaendringService
-) {
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs>>
+) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     val skjemaService = PeriodeOgBarnSkjemaService(
         valutakursRepository,
-        skjemaendringService::valutakurserEndret
+        endringsabonnenter
     )
 
     fun hentValutakurser(behandlingId: Long) =
@@ -30,8 +31,24 @@ class ValutakursService(
 
     @Transactional
     fun tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId: Long) {
-        val forrigeValutakurser = hentValutakurser(behandlingId)
         val gjeldendeUtenlandskePeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
+
+        tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId, gjeldendeUtenlandskePeriodebeløp)
+    }
+
+    @Transactional
+    override fun skjemaerEndret(
+        behandlingId: Long,
+        endretTil: Collection<UtenlandskPeriodebeløp>
+    ) {
+        tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId, endretTil)
+    }
+
+    private fun tilpassValutakursTilUtenlandskPeriodebeløp(
+        behandlingId: Long,
+        gjeldendeUtenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>
+    ) {
+        val forrigeValutakurser = hentValutakurser(behandlingId)
 
         val oppdaterteValutakurser = tilpassValutakurserTilUtenlandskePeriodebeløp(
             forrigeValutakurser,
