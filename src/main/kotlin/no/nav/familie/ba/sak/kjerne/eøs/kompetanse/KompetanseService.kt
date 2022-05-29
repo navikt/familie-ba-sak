@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
@@ -22,14 +23,14 @@ class KompetanseService(
         endringsabonnenter
     )
 
-    fun hentKompetanser(behandlingId: Long) =
+    fun hentKompetanser(behandlingId: BehandlingId) =
         skjemaService.hentMedBehandlingId(behandlingId)
 
     fun hentKompetanse(kompetanseId: Long) =
         skjemaService.hentMedId(kompetanseId)
 
     @Transactional
-    fun endreKompetanse(behandlingId: Long, oppdatering: Kompetanse) =
+    fun endreKompetanse(behandlingId: BehandlingId, oppdatering: Kompetanse) =
         skjemaService.endreSkjemaer(behandlingId, oppdatering)
 
     @Transactional
@@ -37,7 +38,7 @@ class KompetanseService(
         skjemaService.slettSkjema(kompetanseId)
 
     @Transactional
-    fun tilpassKompetanserTilRegelverk(behandlingId: Long) {
+    fun tilpassKompetanserTilRegelverk(behandlingId: BehandlingId) {
         val gjeldendeKompetanser = hentKompetanser(behandlingId)
         val barnasRegelverkResultatTidslinjer =
             vilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId)
@@ -47,6 +48,6 @@ class KompetanseService(
             barnasRegelverkResultatTidslinjer
         ).medBehandlingId(behandlingId)
 
-        skjemaService.lagreSkjemaDifferanse(gjeldendeKompetanser, oppdaterteKompetanser)
+        skjemaService.lagreSkjemaDifferanse(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
     }
 }

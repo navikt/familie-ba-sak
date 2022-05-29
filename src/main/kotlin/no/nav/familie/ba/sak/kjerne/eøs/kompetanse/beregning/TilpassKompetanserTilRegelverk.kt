@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
@@ -32,7 +33,7 @@ fun tilpassKompetanserTilRegelverk(
         .tilSkjemaer()
 }
 
-fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<RegelverkResultat, Måned>> =
+fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId: BehandlingId): Map<Aktør, Tidslinje<RegelverkResultat, Måned>> =
     this.hentTidslinjerThrows(behandlingId).barnasTidslinjer()
         .mapValues { (_, tidslinjer) ->
             tidslinjer.regelverkResultatTidslinje

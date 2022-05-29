@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
@@ -20,29 +21,29 @@ class UtenlandskPeriodebeløpService(
         endringsabonnenter
     )
 
-    fun hentUtenlandskePeriodebeløp(behandlingId: Long) =
+    fun hentUtenlandskePeriodebeløp(behandlingId: BehandlingId) =
         skjemaService.hentMedBehandlingId(behandlingId)
 
-    fun oppdaterUtenlandskPeriodebeløp(behandlingId: Long, utenlandskPeriodebeløp: UtenlandskPeriodebeløp) =
+    fun oppdaterUtenlandskPeriodebeløp(behandlingId: BehandlingId, utenlandskPeriodebeløp: UtenlandskPeriodebeløp) =
         skjemaService.endreSkjemaer(behandlingId, utenlandskPeriodebeløp)
 
     fun slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId: Long) =
         skjemaService.slettSkjema(utenlandskPeriodebeløpId)
 
     @Transactional
-    fun tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId: Long) {
+    fun tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId: BehandlingId) {
         val gjeldendeKompetanser = kompetanseService.hentKompetanser(behandlingId)
 
         tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId, gjeldendeKompetanser)
     }
 
     @Transactional
-    override fun skjemaerEndret(behandlingId: Long, endretTil: Collection<Kompetanse>) {
+    override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Kompetanse>) {
         tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId, endretTil)
     }
 
     private fun tilpassUtenlandskPeriodebeløpTilKompetanser(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         gjeldendeKompetanser: Collection<Kompetanse>
     ) {
         val forrigeUtenlandskePeriodebeløp = hentUtenlandskePeriodebeløp(behandlingId)
@@ -52,6 +53,10 @@ class UtenlandskPeriodebeløpService(
             gjeldendeKompetanser
         ).medBehandlingId(behandlingId)
 
-        skjemaService.lagreSkjemaDifferanse(forrigeUtenlandskePeriodebeløp, oppdaterteUtenlandskPeriodebeløp)
+        skjemaService.lagreSkjemaDifferanse(
+            behandlingId,
+            forrigeUtenlandskePeriodebeløp,
+            oppdaterteUtenlandskPeriodebeløp
+        )
     }
 }

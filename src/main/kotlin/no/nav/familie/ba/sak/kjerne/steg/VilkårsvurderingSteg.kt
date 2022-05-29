@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaSe
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -69,7 +70,7 @@ class VilkårsvurderingSteg(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            kompetanseService.tilpassKompetanserTilRegelverk(behandling.id)
+            kompetanseService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
         }
 
         behandlingstemaService.oppdaterBehandlingstema(

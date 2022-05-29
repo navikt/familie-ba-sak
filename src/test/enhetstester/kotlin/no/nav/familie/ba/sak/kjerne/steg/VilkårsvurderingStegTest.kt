@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaSe
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -78,7 +79,7 @@ class VilkårsvurderingStegTest {
             behandling
         )
 
-        every { kompetanseService.tilpassKompetanserTilRegelverk(behandling.id) } just Runs
+        every { kompetanseService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
         every { featureToggleService.isEnabled(any()) } returns true
     }
 

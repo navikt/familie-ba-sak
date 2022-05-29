@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
@@ -8,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 
 class UtenlandskPeriodebeløpBuilder(
     startMåned: Tidspunkt<Måned> = jan(2020),
-    behandlingId: Long = 1
+    behandlingId: BehandlingId = BehandlingId(1)
 ) : SkjemaBuilder<UtenlandskPeriodebeløp, UtenlandskPeriodebeløpBuilder>(startMåned, behandlingId) {
     fun medBeløp(k: String, valutakode: String?, vararg barn: Person) = medSkjema(k, barn.toList()) {
         when {

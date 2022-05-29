@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
@@ -41,7 +42,7 @@ internal class KompetanseServiceTest {
 
     @Test
     fun `bare reduksjon av periode skal ikke føre til endring i kompetansen`() {
-        val behandlingId = 10L
+        val behandlingId = BehandlingId(10L)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
 
         val lagretKompetanse = kompetanse(jan(2020), behandlingId, "SSSSSSSS", barn1)
@@ -57,7 +58,7 @@ internal class KompetanseServiceTest {
 
     @Test
     fun `oppdatering som splitter kompetanse fulgt av sletting skal returnere til utgangspunktet`() {
-        val behandlingId = 10L
+        val behandlingId = BehandlingId(10L)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
         val barn3 = tilfeldigPerson(personType = PersonType.BARN)
@@ -86,7 +87,7 @@ internal class KompetanseServiceTest {
 
     @Test
     fun `oppdatering som endrer deler av en kompetanse, skal resultarere i en splitt`() {
-        val behandlingId = 10L
+        val behandlingId = BehandlingId(10L)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
         val barn3 = tilfeldigPerson(personType = PersonType.BARN)
@@ -111,7 +112,7 @@ internal class KompetanseServiceTest {
 
     @Test
     fun `skal kunne sende inn oppdatering som overlapper flere kompetanser`() {
-        val behandlingId = 10L
+        val behandlingId = BehandlingId(10L)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
         val barn3 = tilfeldigPerson(personType = PersonType.BARN)
@@ -137,7 +138,7 @@ internal class KompetanseServiceTest {
 
     @Test
     fun `skal kunne lukke åpen kompetanse ved å sende inn identisk skjema med til-og-med-dato`() {
-        val behandlingId = 10L
+        val behandlingId = BehandlingId(10L)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
         val barn3 = tilfeldigPerson(personType = PersonType.BARN)
@@ -162,7 +163,7 @@ internal class KompetanseServiceTest {
 
     @Test
     fun `skal opprette tomt skjema for barn som fjernes fra ellers uendret skjema`() {
-        val behandlingId = 10L
+        val behandlingId = BehandlingId(10L)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
         val barn3 = tilfeldigPerson(personType = PersonType.BARN)
@@ -188,7 +189,7 @@ internal class KompetanseServiceTest {
 
     @Test
     fun `kompetanse skal vare uendelig når til regelverk-tidslinjer fortsetter etter nåtidspunktet`() {
-        val behandlingId = 10L
+        val behandlingId = BehandlingId(10L)
 
         val treMånederSiden = MånedTidspunkt.nå().flytt(-3)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
@@ -219,7 +220,7 @@ internal class KompetanseServiceTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2)
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
@@ -232,7 +233,7 @@ internal class KompetanseServiceTest {
 
     @Test
     fun `kompetanse skal ha sluttdato når til regelverk-tidslinjer avsluttes før nåtidspunktet`() {
-        val behandlingId = 10L
+        val behandlingId = BehandlingId(10L)
 
         val seksMånederSiden = MånedTidspunkt.nå().flytt(-6)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
@@ -264,7 +265,7 @@ internal class KompetanseServiceTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2)
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
@@ -277,7 +278,7 @@ internal class KompetanseServiceTest {
 
     @Test
     fun `skal tilpasse kompetanser til endrede regelverk-tidslinjer`() {
-        val behandlingId = 10L
+        val behandlingId = BehandlingId(10L)
 
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
@@ -306,7 +307,7 @@ internal class KompetanseServiceTest {
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2, barn3)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2, barn3)
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
@@ -325,13 +326,13 @@ internal class KompetanseServiceTest {
     }
 }
 
-fun kompetanse(tidspunkt: Tidspunkt<Måned>, behandlingId: Long, s: String, vararg barn: Person) =
+fun kompetanse(tidspunkt: Tidspunkt<Måned>, behandlingId: BehandlingId, s: String, vararg barn: Person) =
     KompetanseBuilder(tidspunkt, behandlingId).medKompetanse(s, *barn).byggKompetanser().first()
 
 fun kompetanse(tidspunkt: Tidspunkt<Måned>, s: String, vararg barn: Person) =
     KompetanseBuilder(tidspunkt).medKompetanse(s, *barn).byggKompetanser().first()
 
-private fun KompetanseService.finnKompetanse(behandlingId: Long, kompetanse: Kompetanse): Kompetanse {
+private fun KompetanseService.finnKompetanse(behandlingId: BehandlingId, kompetanse: Kompetanse): Kompetanse {
     return this.hentKompetanser(behandlingId)
         .first { it == kompetanse }
 }
