@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
@@ -44,7 +44,7 @@ class VilkårsvurderingStegTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk(relaxed = true)
     private val behandlingstemaService: BehandlingstemaService = mockk(relaxed = true)
     private val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk()
-    private val kompetanseService: KompetanseService = mockk()
+    private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg = VilkårsvurderingSteg(
@@ -54,7 +54,7 @@ class VilkårsvurderingStegTest {
         beregningService,
         persongrunnlagService,
         tilbakestillBehandlingService,
-        kompetanseService,
+        tilpassKompetanserTilRegelverkService,
         featureToggleService
     )
 
@@ -79,7 +79,7 @@ class VilkårsvurderingStegTest {
             behandling
         )
 
-        every { kompetanseService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
+        every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
         every { featureToggleService.isEnabled(any()) } returns true
     }
 

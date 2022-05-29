@@ -30,6 +30,11 @@ internal class KompetanseServiceTest {
     val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService = mockk()
 
     val kompetanseService = KompetanseService(
+        mockKompetanseRepository,
+        emptyList(),
+    )
+
+    val tilpassKompetanserTilRegelverkService = TilpassKompetanserTilRegelverkService(
         vilkårsvurderingTidslinjeService,
         mockKompetanseRepository,
         emptyList(),
@@ -225,7 +230,7 @@ internal class KompetanseServiceTest {
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
 
-        kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -270,7 +275,7 @@ internal class KompetanseServiceTest {
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
 
-        kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -312,7 +317,7 @@ internal class KompetanseServiceTest {
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
 
-        kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
 

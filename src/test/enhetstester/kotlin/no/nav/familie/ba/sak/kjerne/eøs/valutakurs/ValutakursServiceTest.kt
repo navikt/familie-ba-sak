@@ -21,8 +21,13 @@ internal class ValutakursServiceTest {
 
     val valutakursService = ValutakursService(
         valutakursRepository,
-        utenlandskPeriodebeløpService,
         emptyList()
+    )
+
+    val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(
+        valutakursRepository,
+        utenlandskPeriodebeløpService,
+        emptyList(),
     )
 
     @BeforeEach
@@ -48,7 +53,7 @@ internal class ValutakursServiceTest {
 
         every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns utenlandskePeriodebeløp
 
-        valutakursService.tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId)
+        tilpassValutakurserTilUtenlandskePeriodebeløpService.tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId)
 
         val faktiskeValutakurser = valutakursService.hentValutakurser(behandlingId)
 

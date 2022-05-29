@@ -1,9 +1,13 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
+package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
+import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceLast
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
@@ -22,6 +26,34 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+@Service
+class TilpassKompetanserTilRegelverkService(
+    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
+    kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>
+) {
+    val skjemaService = PeriodeOgBarnSkjemaService(
+        kompetanseRepository,
+        endringsabonnenter
+    )
+
+    @Transactional
+    fun tilpassKompetanserTilRegelverk(behandlingId: BehandlingId) {
+        val gjeldendeKompetanser = skjemaService.hentMedBehandlingId(behandlingId)
+        val barnasRegelverkResultatTidslinjer =
+            vilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId)
+
+        val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
+            gjeldendeKompetanser,
+            barnasRegelverkResultatTidslinjer
+        ).medBehandlingId(behandlingId)
+
+        skjemaService.lagreSkjemaDifferanse(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
+    }
+}
 
 fun tilpassKompetanserTilRegelverk(
     gjeldendeKompetanser: Collection<Kompetanse>,

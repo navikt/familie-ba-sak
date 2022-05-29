@@ -23,8 +23,13 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     val utenlandskPeriodebeløpService = UtenlandskPeriodebeløpService(
         utenlandskPeriodebeløpRepository,
-        kompetanseService,
         emptyList()
+    )
+
+    val tilpassUtenlandskePeriodebeløpTilKompetanserService = TilpassUtenlandskePeriodebeløpTilKompetanserService(
+        utenlandskPeriodebeløpRepository,
+        emptyList(),
+        kompetanseService
     )
 
     @BeforeEach
@@ -52,7 +57,8 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
         every { kompetanseService.hentKompetanser(behandlingId) } returns kompetanser
 
-        utenlandskPeriodebeløpService.tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId)
+        tilpassUtenlandskePeriodebeløpTilKompetanserService
+            .tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId)
 
         val faktiskeUtenlandskePeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
 

@@ -4,17 +4,12 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.hentBarnasRegelverkResultatTidslinjer
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class KompetanseService(
-    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>
 ) {
@@ -36,18 +31,4 @@ class KompetanseService(
     @Transactional
     fun slettKompetanse(kompetanseId: Long) =
         skjemaService.slettSkjema(kompetanseId)
-
-    @Transactional
-    fun tilpassKompetanserTilRegelverk(behandlingId: BehandlingId) {
-        val gjeldendeKompetanser = hentKompetanser(behandlingId)
-        val barnasRegelverkResultatTidslinjer =
-            vilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId)
-
-        val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
-            gjeldendeKompetanser,
-            barnasRegelverkResultatTidslinjer
-        ).medBehandlingId(behandlingId)
-
-        skjemaService.lagreSkjemaDifferanse(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
-    }
 }
