@@ -5,5 +5,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 
 data class RestVedtaksbegrunnelse(
     val standardbegrunnelse: Standardbegrunnelse,
+    val vedtakBegrunnelseSpesifikasjon: Standardbegrunnelse,
     val vedtakBegrunnelseType: VedtakBegrunnelseType,
 )
