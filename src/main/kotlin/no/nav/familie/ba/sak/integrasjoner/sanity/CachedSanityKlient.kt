@@ -13,7 +13,7 @@ class CachedSanityKlient(
 
     @Cacheable("sanityNasjonaleBegrunnelser", cacheManager = "shortCache")
     fun hentSanityBegrunnelserCached(): List<SanityBegrunnelse> {
-        return hentNasjonaleBegrunnelser(datasett = sanityDatasett)
+        return hentBegrunnelser(datasett = sanityDatasett)
     }
 
     @Cacheable("sanityEØSBegrunnelser", cacheManager = "shortCache")

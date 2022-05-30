@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentNasjonaleBegrunnelser
+import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -343,7 +343,7 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "§§ 2, 4, 10 og 11",
             hentHjemmeltekst(
-                utvidetVedtaksperioderMedBegrunnelser.map { it.tilMinimertVedtaksperiode(hentNasjonaleBegrunnelser()) },
+                utvidetVedtaksperioderMedBegrunnelser.map { it.tilMinimertVedtaksperiode(hentBegrunnelser()) },
                 listOf(
                     lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
@@ -384,7 +384,7 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        hentNasjonaleBegrunnelser()
+                        hentBegrunnelser()
                     )
                 },
                 sanityBegrunnelser = listOf(
@@ -428,7 +428,7 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        hentNasjonaleBegrunnelser()
+                        hentBegrunnelser()
                     )
                 },
                 sanityBegrunnelser = listOf(

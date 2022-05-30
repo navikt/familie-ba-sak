@@ -17,7 +17,7 @@ data class SanityNasjonaleBegrunnelserRespons(
 
 const val sanityBaseUrl = "https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query"
 
-fun hentNasjonaleBegrunnelser(datasett: String = "ba-brev"): List<SanityBegrunnelse> {
+fun hentBegrunnelser(datasett: String = "ba-brev"): List<SanityBegrunnelse> {
     val sanityUrl = "$sanityBaseUrl/$datasett"
     val hentNasjonaleBegrunnelserQuery = java.net.URLEncoder.encode(hentNasjonaleBegrunnelser, "utf-8")
 
