@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.finnHøyesteKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
@@ -39,7 +39,7 @@ fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUn
 }
 
 fun utledLøpendeKategori(
-    barnasTidslinjer: Map<Aktør, Tidslinjer.BarnetsTidslinjer>?,
+    barnasTidslinjer: Map<Aktør, VilkårsvurderingTidslinjer.BarnetsTidslinjer>?,
 ): BehandlingKategori {
     if (barnasTidslinjer == null) return BehandlingKategori.NASJONAL
 

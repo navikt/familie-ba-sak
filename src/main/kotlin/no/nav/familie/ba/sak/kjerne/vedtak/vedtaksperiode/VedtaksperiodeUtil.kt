@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erDagenFør
-import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -201,36 +199,6 @@ private fun utledTom(
     gammeltSegment: LocalDateSegment<Int>,
     overlappendePeriode: LocalDateSegment<Int>
 ) = if (gammeltSegment.tom > overlappendePeriode.tom) overlappendePeriode.tom else gammeltSegment.tom
-
-fun finnOgOppdaterOverlappendeUtbetalingsperiode(
-    utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
-    perioderMedReduksjonFraSistIverksatteBehandling: List<VedtaksperiodeMedBegrunnelser>
-): List<VedtaksperiodeMedBegrunnelser> {
-    val overlappendePerioder =
-        utbetalingsperioder.filter {
-            perioderMedReduksjonFraSistIverksatteBehandling.any { reduksjonsperiode ->
-                reduksjonsperiode.fom!!.isSameOrAfter(it.fom!!) && reduksjonsperiode.tom!!.isSameOrBefore(
-                    it.tom!!
-                )
-            }
-        }
-    val oppdatertUtbetalingsperioder = mutableListOf<VedtaksperiodeMedBegrunnelser>()
-    utbetalingsperioder.forEach {
-        val overlappendePeriode =
-            overlappendePerioder.firstOrNull { periode -> it.fom == periode.fom && it.tom == periode.tom }
-        if (overlappendePeriode != null) {
-            oppdatertUtbetalingsperioder.addAll(
-                perioderMedReduksjonFraSistIverksatteBehandling.filter { reduksjonsperiode ->
-                    reduksjonsperiode.fom!! >= overlappendePeriode.fom &&
-                        reduksjonsperiode.tom!! <= overlappendePeriode.tom
-                }
-            )
-        } else {
-            oppdatertUtbetalingsperioder.add(it)
-        }
-    }
-    return oppdatertUtbetalingsperioder.sortedBy { it.fom }
-}
 
 fun hentGyldigeBegrunnelserForVedtaksperiode(
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,

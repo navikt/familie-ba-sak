@@ -1,10 +1,10 @@
-package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.rest
+package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.rest
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.VilkårRegelverkResultat
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
@@ -24,7 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import java.time.LocalDate
 import java.util.Random
 
-fun Tidslinjer.tilRestTidslinjer(): RestTidslinjer {
+fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
     val barnasTidslinjer = this.barnasTidslinjer()
     val søkersTidslinjer = this.søkersTidslinjer()
 

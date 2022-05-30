@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -121,7 +121,7 @@ class VedtakServiceTest(
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
 
     @Autowired
-    private val tidslinjeService: TidslinjeService,
+    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
 
 ) : AbstractSpringIntegrationTest() {
 

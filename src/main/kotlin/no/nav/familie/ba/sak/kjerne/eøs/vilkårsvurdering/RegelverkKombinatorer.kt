@@ -1,11 +1,11 @@
-package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
+package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.IKKE_FULLT_VURDERT
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.OPPFYLT_BLANDET_REGELVERK
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.OPPFYLT_NASJONALE_REGLER
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.IKKE_FULLT_VURDERT
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_BLANDET_REGELVERK
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_NASJONALE_REGLER
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
