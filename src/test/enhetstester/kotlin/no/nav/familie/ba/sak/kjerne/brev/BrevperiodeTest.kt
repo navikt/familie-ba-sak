@@ -56,14 +56,15 @@ class BrevperiodeTest {
             )
 
             val brevperiode = try {
-                minimertVedtaksperiode.tilBrevPeriode(
+                BrevPeriodeGenerator(
+                    minimertVedtaksperiode = minimertVedtaksperiode,
                     restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
                     barnMedReduksjonFraForrigeBehandlingIdent = behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
                         .map { it.personIdent },
-                )
+                ).genererBrevPeriode()
             } catch (e: Exception) {
                 testReporter.publishEntry(
                     "Feil i test: $it" +

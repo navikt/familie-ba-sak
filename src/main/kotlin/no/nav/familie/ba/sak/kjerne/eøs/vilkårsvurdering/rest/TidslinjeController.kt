@@ -1,6 +1,6 @@
-package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.rest
+package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.rest
 
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class TidslinjeController(
-    private val tidslinjeService: TidslinjeService
+    private val tidslinjeService: VilkårsvurderingTidslinjeService
 ) {
 
     @GetMapping("/{behandlingId}")
