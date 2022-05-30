@@ -73,6 +73,7 @@ class Vedtaksbegrunnelse(
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
     standardbegrunnelse = this.standardbegrunnelse,
     vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
+    vedtakBegrunnelseSpesifikasjon = standardbegrunnelse
 )
 
 interface Begrunnelse
