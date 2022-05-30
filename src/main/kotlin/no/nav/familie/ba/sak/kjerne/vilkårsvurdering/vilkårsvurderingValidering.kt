@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.harBlandetRegelverk
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.harBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
@@ -42,8 +42,8 @@ fun validerIkkeBlandetRegelverk(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     vilkårsvurdering: Vilkårsvurdering,
 ) {
-    val tidslinjer = Tidslinjer(vilkårsvurdering, personopplysningGrunnlag)
-    if (tidslinjer.harBlandetRegelverk()) {
+    val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(vilkårsvurdering, personopplysningGrunnlag)
+    if (vilkårsvurderingTidslinjer.harBlandetRegelverk()) {
         throw FunksjonellFeil(
             melding = "Det er forskjellig regelverk for en eller flere perioder for søker eller barna"
         )

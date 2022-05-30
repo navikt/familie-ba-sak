@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMed
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.SkjemaTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
@@ -16,7 +16,7 @@ fun slåSammenUtbetalingsperioderMedKompetanse(
 ): List<VedtaksperiodeMedBegrunnelser> {
     if (kompetanser.isEmpty()) return utbetalingsperioder
 
-    val kompetanseTidslinje = SkjemaTidslinje(kompetanser)
+    val kompetanseTidslinje = kompetanser.tilTidslinje()
     val utbetalingsTidslinje = VedtaksperiodeMedBegrunnelserTidslinjeMåned(utbetalingsperioder)
 
     val kombinertTidslinje =

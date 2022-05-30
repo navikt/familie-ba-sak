@@ -2,14 +2,14 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MinnebasertKompetanseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
+import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -26,37 +26,19 @@ import org.junit.jupiter.api.Test
 
 internal class KompetanseServiceTest {
 
-    val minnebasertKompetanseRepository = MinnebasertKompetanseRepository()
-    val mockKompetanseRepository = mockk<KompetanseRepository>()
+    val mockKompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse> = mockPeriodeBarnSkjemaRepository()
     val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk(relaxed = true)
-    val tidslinjeService: TidslinjeService = mockk()
+    val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService = mockk()
 
     val kompetanseService = KompetanseService(
-        tidslinjeService,
+        vilkårsvurderingTidslinjeService,
         mockKompetanseRepository,
         tilbakestillBehandlingService,
     )
 
     @BeforeEach
     fun init() {
-        val idSlot = slot<Long>()
-        val kompetanseListeSlot = slot<Iterable<Kompetanse>>()
-
-        every { mockKompetanseRepository.findByBehandlingId(capture(idSlot)) } answers {
-            minnebasertKompetanseRepository.hentKompetanser(idSlot.captured)
-        }
-
-        every { mockKompetanseRepository.getById(capture(idSlot)) } answers {
-            minnebasertKompetanseRepository.hentKompetanse(idSlot.captured)
-        }
-
-        every { mockKompetanseRepository.saveAll(capture(kompetanseListeSlot)) } answers {
-            minnebasertKompetanseRepository.save(kompetanseListeSlot.captured)
-        }
-
-        every { mockKompetanseRepository.deleteAll(capture(kompetanseListeSlot)) } answers {
-            minnebasertKompetanseRepository.delete(kompetanseListeSlot.captured)
-        }
+        mockKompetanseRepository.deleteAll()
     }
 
     @Test
@@ -237,12 +219,12 @@ internal class KompetanseServiceTest {
             .medKompetanse("->", barn1, barn2)
             .byggKompetanser()
 
-        val tidslinjer = Tidslinjer(
+        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2)
         )
 
-        every { tidslinjeService.hentTidslinjerThrows(behandlingId) } returns tidslinjer
+        every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
 
         kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -282,16 +264,65 @@ internal class KompetanseServiceTest {
             .medKompetanse("   ->", barn1) // Bare barn 1 har EØS-regelverk etter nå-tidspunktet
             .byggKompetanser()
 
-        val tidslinjer = Tidslinjer(
+        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2)
         )
 
-        every { tidslinjeService.hentTidslinjerThrows(behandlingId) } returns tidslinjer
+        every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
 
         kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
 
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `skal tilpasse kompetanser til endrede regelverk-tidslinjer`() {
+        val behandlingId = 10L
+
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
+
+        KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("SS   SS", barn1)
+            .medKompetanse("  PPP", barn1, barn2, barn3)
+            .medKompetanse("--   ----", barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>()
+            .forPerson(søker, jan(2020))
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)
+            .forPerson(barn1, jan(2020))
+            .medVilkår("+++++++++++", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+            .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
+            .forPerson(barn2, jan(2020))
+            .medVilkår("  +++", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+            .medVilkår("  EEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
+            .forPerson(barn3, jan(2020))
+            .medVilkår("+>", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+            .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
+
+        val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
+        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2, barn3)
+        )
+
+        every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
+
+        kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
+
+        val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+
+        val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse(" SP  SS-----", barn1)
+            .medKompetanse("     -", barn2)
+            .medKompetanse("   PP ", barn1, barn2)
+            .byggKompetanser()
+
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 }
@@ -307,11 +338,11 @@ private fun KompetanseService.finnKompetanse(behandlingId: Long, kompetanse: Kom
         .first { it == kompetanse }
 }
 
-private fun KompetanseBuilder.lagreTil(kompetanseRepository: KompetanseRepository): List<Kompetanse> {
+fun KompetanseBuilder.lagreTil(kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>): List<Kompetanse> {
     val byggKompetanser = this.byggKompetanser()
     return kompetanseRepository.saveAll(byggKompetanser)
 }
 
-private fun Kompetanse.lagreTil(kompetanseRepository: KompetanseRepository): Kompetanse {
+fun Kompetanse.lagreTil(kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>): Kompetanse {
     return kompetanseRepository.saveAll(listOf(this)).first()
 }

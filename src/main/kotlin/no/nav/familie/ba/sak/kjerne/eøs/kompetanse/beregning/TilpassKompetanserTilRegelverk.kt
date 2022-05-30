@@ -1,78 +1,67 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.beregning
 
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.settFomOgTom
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.trekkFra
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceLast
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.AktørKompetanseTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerForAlleNøklerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
-val overflødigKompetanseMapKombinator = { _: Aktør ->
-    { kompetanse: Kompetanse?, regelverk: Regelverk? ->
-        if (regelverk != Regelverk.EØS_FORORDNINGEN && kompetanse != null) kompetanse else null
-    }
-}
-
-val manglendeKompetanseMapKombinator = { aktør: Aktør ->
-    { kompetanse: Kompetanse?, regelverk: Regelverk? ->
-        if (regelverk == Regelverk.EØS_FORORDNINGEN && kompetanse == null)
-            Kompetanse(fom = null, tom = null, barnAktører = setOf(aktør))
-        else null
-    }
-}
-
 fun tilpassKompetanserTilRegelverk(
-    kompetanser: Collection<Kompetanse>,
-    barnTilRegelverkTidslinjer: Map<Aktør, Tidslinje<Regelverk, Måned>>
+    gjeldendeKompetanser: Collection<Kompetanse>,
+    barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>
 ): Collection<Kompetanse> {
-    val kompetanserUtenOverflødige = fjernOverflødigeKompetanserRekursivt(kompetanser, barnTilRegelverkTidslinjer)
-
-    val barnTilKompetanseTidslinje = kompetanserUtenOverflødige.tilTidslinjerForBarna()
-
-    val manglendeKompetanser = barnTilKompetanseTidslinje
-        .kombinerForAlleNøklerMed(barnTilRegelverkTidslinjer, manglendeKompetanseMapKombinator)
-        .slåSammen()
-
-    return (kompetanserUtenOverflødige + manglendeKompetanser).slåSammen()
+    val barnasEøsRegelverkTidslinjer = barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer()
+    return gjeldendeKompetanser.tilSeparateTidslinjerForBarna()
+        .tilpassTil(barnasEøsRegelverkTidslinjer) { kompetanse, _ -> kompetanse ?: Kompetanse.NULL }
+        .tilSkjemaer()
 }
 
-fun fjernOverflødigeKompetanserRekursivt(
-    kompetanser: Collection<Kompetanse>,
-    barnTilRegelverkTidslinjer: Map<Aktør, Tidslinje<Regelverk, Måned>>
-): Collection<Kompetanse> {
-    val barnTilKompetanseTidslinje = kompetanser.tilTidslinjerForBarna()
+fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId: Long): Map<Aktør, Tidslinje<RegelverkResultat, Måned>> =
+    this.hentTidslinjerThrows(behandlingId).barnasTidslinjer()
+        .mapValues { (_, tidslinjer) ->
+            tidslinjer.regelverkResultatTidslinje
+        }
 
-    val overflødigeKompetanser = barnTilKompetanseTidslinje
-        .kombinerForAlleNøklerMed(barnTilRegelverkTidslinjer, overflødigKompetanseMapKombinator)
-        .slåSammen()
-
-    return if (overflødigeKompetanser.isNotEmpty()) {
-        val kompetanserUtenOverflødig = kompetanser.trekkFra(overflødigeKompetanser.first())
-        fjernOverflødigeKompetanserRekursivt(kompetanserUtenOverflødig, barnTilRegelverkTidslinjer)
-    } else {
-        kompetanser
+private fun Map<Aktør, Tidslinje<RegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer() =
+    this.mapValues { (_, tidslinjer) ->
+        tidslinjer.map { it?.regelverk }
+            .filtrer { it == Regelverk.EØS_FORORDNINGEN }
+            .filtrerIkkeNull()
+            .forlengFremtidTilUendelig(MånedTidspunkt.nå())
     }
+
+private fun <I, T : Tidsenhet> Tidslinje<I, T>.forlengFremtidTilUendelig(nå: Tidspunkt<T>): Tidslinje<I, T> {
+    return if (this.tilOgMed() > nå)
+        this.flyttTilOgMed(this.tilOgMed().somUendeligLengeTil())
+    else
+        this
 }
 
-fun Iterable<Kompetanse>.tilTidslinjerForBarna(): Map<Aktør, Tidslinje<Kompetanse, Måned>> {
-    if (this.toList().isEmpty()) return emptyMap()
+private fun <I, T : Tidsenhet> Tidslinje<I, T>.flyttTilOgMed(tilTidspunkt: Tidspunkt<T>): Tidslinje<I, T> {
+    val tidslinje = this
 
-    val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
-
-    return alleBarnAktørIder.associateWith { aktør ->
-        AktørKompetanseTidslinje(aktør, this.filter { it.barnAktører.contains(aktør) })
-    }
+    return if (tilTidspunkt < tidslinje.fraOgMed())
+        TomTidslinje()
+    else
+        object : Tidslinje<I, T>() {
+            override fun lagPerioder(): Collection<Periode<I, T>> = tidslinje.perioder()
+                .filter { it.fraOgMed <= tilTidspunkt }
+                .replaceLast { Periode(it.fraOgMed, tilTidspunkt, it.innhold) }
+        }
 }
-
-fun Map<Aktør, Tidslinje<Kompetanse, Måned>>.slåSammen() =
-    this.flatMap { (_, tidslinjer) -> tidslinjer.tilKompetanser() }
-        .slåSammen()
-
-fun Tidslinje<Kompetanse, Måned>.tilKompetanser() =
-    this.perioder().mapNotNull { periode ->
-        periode.innhold?.settFomOgTom(periode)
-    }

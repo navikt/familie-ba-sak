@@ -1,9 +1,9 @@
-package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.rest
+package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.rest
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
@@ -37,12 +37,12 @@ internal class RestTidslinjerTest {
             .medVilkår("EEEENNEEE>", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++>", Vilkår.GIFT_PARTNERSKAP)
 
-        val tidslinjer = Tidslinjer(
+        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
         )
 
-        val restTidslinjer = tidslinjer.tilRestTidslinjer()
+        val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
         val barnetsTidslinjer = restTidslinjer.barnasTidslinjer[barn1.aktør.aktivFødselsnummer()]!!
 
         // Stopper ved søkers siste til-og-med-dato fordi Regelverk er <null> etter det, som filtreres bort
@@ -92,12 +92,12 @@ internal class RestTidslinjerTest {
             .medVilkår("E>", Vilkår.BOR_MED_SØKER)
             .medVilkår("+>", Vilkår.GIFT_PARTNERSKAP)
 
-        val tidslinjer = Tidslinjer(
+        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
         )
 
-        val restTidslinjer = tidslinjer.tilRestTidslinjer()
+        val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
         val søkersTidslinjer = restTidslinjer.søkersTidslinjer
 
         // Stopper ved siste dag i måneden før yngste barn fyller 18 år
