@@ -43,7 +43,7 @@ data class SanityEØSBegrunnelserRespons(
 )
 
 fun hentEØSBegrunnelser(datasett: String = "ba-brev"): List<SanityEØSBegrunnelse> {
-    val sanityUrl = "https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query/$datasett"
+val sanityUrl = "$sanityBaseUrl/$datasett"
     val hentEØSBegrunnelserQuery = java.net.URLEncoder.encode(hentEØSBegrunnelser, "utf-8")
 
     val uri = URI.create("$sanityUrl?query=$hentEØSBegrunnelserQuery")
