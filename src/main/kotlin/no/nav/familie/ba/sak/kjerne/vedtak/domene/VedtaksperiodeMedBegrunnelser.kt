@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.lagUtbetalingsperiodeDetaljer
@@ -75,6 +76,14 @@ data class VedtaksperiodeMedBegrunnelser(
     )
     @SortComparator(BegrunnelseComparator::class)
     val begrunnelser: MutableSet<Vedtaksbegrunnelse> = sortedSetOf(comparator),
+
+    @OneToMany(
+        fetch = FetchType.EAGER,
+        mappedBy = "vedtaksperiodeMedBegrunnelser",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true
+    )
+    val eøsBegrunnelser: MutableSet<EØSBegrunnelse> = mutableSetOf(),
 
     // Bruker list for å bevare rekkefølgen som settes frontend.
     @OneToMany(

@@ -71,6 +71,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestEØSVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -873,7 +874,6 @@ fun lagRestVedtaksbegrunnelse(
 ) = RestVedtaksbegrunnelse(
     standardbegrunnelse = standardbegrunnelse,
     vedtakBegrunnelseType = vedtakBegrunnelseType,
-    vedtakBegrunnelseSpesifikasjon = standardbegrunnelse
 )
 
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(
@@ -884,6 +884,7 @@ fun lagUtvidetVedtaksperiodeMedBegrunnelser(
     begrunnelser: List<RestVedtaksbegrunnelse> = listOf(lagRestVedtaksbegrunnelse()),
     fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
     utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
+    eøsBegrunnelser: List<RestEØSVedtaksbegrunnelse> = emptyList(),
 ) = UtvidetVedtaksperiodeMedBegrunnelser(
     id = id,
     fom = fom,
@@ -891,7 +892,8 @@ fun lagUtvidetVedtaksperiodeMedBegrunnelser(
     type = type,
     begrunnelser = begrunnelser,
     fritekster = fritekster.map { it.fritekst },
-    utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
+    utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer,
+    eøsBegrunnelser = eøsBegrunnelser,
 )
 
 fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(

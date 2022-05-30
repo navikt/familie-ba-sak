@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelserMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
@@ -34,6 +35,7 @@ data class BrevPeriodeTestConfig(
     val tom: LocalDate?,
     val vedtaksperiodetype: Vedtaksperiodetype,
     val begrunnelser: List<BrevBegrunnelseGrunnlagConfig>,
+    val EØSBegrunnelser: List<EØSStandardbegrunnelse>?,
     val fritekster: List<String>,
 
     val personerPåBehandling: List<BrevPeriodeTestPerson>,
@@ -185,7 +187,7 @@ data class BrevPeriodeOutput(
 data class BrevBegrunnelseGrunnlagConfig(
     val standardbegrunnelse: Standardbegrunnelse,
 ) {
-    fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BrevBegrunnelseGrunnlag(
+    fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BegrunnelserMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,
         triggesAv = this.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
     )
