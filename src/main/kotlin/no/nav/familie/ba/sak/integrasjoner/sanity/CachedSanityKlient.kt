@@ -11,7 +11,7 @@ class CachedSanityKlient(
     @Value("\${SANITY_DATASET}") private val sanityDatasett: String,
 ) {
 
-    @Cacheable("sanityNasjonaleBegrunnelser", cacheManager = "shortCache")
+    @Cacheable("sanityBegrunnelser", cacheManager = "shortCache")
     fun hentSanityBegrunnelserCached(): List<SanityBegrunnelse> {
         return hentBegrunnelser(datasett = sanityDatasett)
     }
