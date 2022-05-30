@@ -7,9 +7,9 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.TidslinjeService
-import no.nav.familie.ba.sak.kjerne.eøs.tidslinjer.Tidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -28,10 +28,10 @@ internal class KompetanseServiceTest {
 
     val mockKompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse> = mockPeriodeBarnSkjemaRepository()
     val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk(relaxed = true)
-    val tidslinjeService: TidslinjeService = mockk()
+    val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService = mockk()
 
     val kompetanseService = KompetanseService(
-        tidslinjeService,
+        vilkårsvurderingTidslinjeService,
         mockKompetanseRepository,
         tilbakestillBehandlingService,
     )
@@ -219,12 +219,12 @@ internal class KompetanseServiceTest {
             .medKompetanse("->", barn1, barn2)
             .byggKompetanser()
 
-        val tidslinjer = Tidslinjer(
+        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2)
         )
 
-        every { tidslinjeService.hentTidslinjerThrows(behandlingId) } returns tidslinjer
+        every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
 
         kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -264,12 +264,12 @@ internal class KompetanseServiceTest {
             .medKompetanse("   ->", barn1) // Bare barn 1 har EØS-regelverk etter nå-tidspunktet
             .byggKompetanser()
 
-        val tidslinjer = Tidslinjer(
+        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2)
         )
 
-        every { tidslinjeService.hentTidslinjerThrows(behandlingId) } returns tidslinjer
+        every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
 
         kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -306,12 +306,12 @@ internal class KompetanseServiceTest {
             .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
 
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
-        val tidslinjer = Tidslinjer(
+        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId, søker, barn1, barn2, barn3)
         )
 
-        every { tidslinjeService.hentTidslinjerThrows(behandlingId) } returns tidslinjer
+        every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
 
         kompetanseService.tilpassKompetanserTilRegelverk(behandlingId)
 
