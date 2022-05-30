@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertPerson
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
+import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
@@ -43,7 +43,7 @@ internal class StandardbegrunnelseTest {
 
     private val aktørerMedUtbetaling = listOf(søker.aktør, barn.aktør)
 
-    private val sanityBegrunnelser = hentSanityBegrunnelser()
+    private val sanityBegrunnelser = hentBegrunnelser()
 
     @Test
     fun `Oppfyller vilkår skal gi true`() {
