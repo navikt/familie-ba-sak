@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelserMedTriggere
+import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
@@ -187,7 +187,7 @@ data class BrevPeriodeOutput(
 data class BrevBegrunnelseGrunnlagConfig(
     val standardbegrunnelse: Standardbegrunnelse,
 ) {
-    fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BegrunnelserMedTriggere(
+    fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BegrunnelseMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,
         triggesAv = this.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
     )

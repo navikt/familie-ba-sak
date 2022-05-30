@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.delOpp
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 
-data class BegrunnelserMedTriggere(
+data class BegrunnelseMedTriggere(
     val standardbegrunnelse: Standardbegrunnelse,
     val triggesAv: TriggesAv,
 ) {
@@ -71,8 +71,8 @@ data class BegrunnelserMedTriggere(
 
 fun RestVedtaksbegrunnelse.tilBrevBegrunnelseGrunnlag(
     sanityBegrunnelser: List<SanityBegrunnelse>
-): BegrunnelserMedTriggere {
-    return BegrunnelserMedTriggere(
+): BegrunnelseMedTriggere {
+    return BegrunnelseMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,
         triggesAv = sanityBegrunnelser
             .firstOrNull { it.apiNavn == this.standardbegrunnelse.sanityApiNavn }!!

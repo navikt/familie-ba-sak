@@ -13,7 +13,7 @@ data class MinimertVedtaksperiode(
     val fom: LocalDate?,
     val tom: LocalDate?,
     val type: Vedtaksperiodetype,
-    val begrunnelser: List<BegrunnelserMedTriggere>,
+    val begrunnelser: List<BegrunnelseMedTriggere>,
     val eøsBegrunnelser: List<EØSBegrunnelseMedTriggere>,
     val fritekster: List<String> = emptyList(),
     val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList(),
