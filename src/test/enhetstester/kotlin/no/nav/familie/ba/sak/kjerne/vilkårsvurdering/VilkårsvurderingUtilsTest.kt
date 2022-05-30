@@ -30,7 +30,7 @@ class VilkårsvurderingUtilsTest {
             personResultat = personResultat,
             periodeFom = LocalDate.of(2020, 1, 1),
             periodeTom = null,
-            vilkårType = Vilkår.BOR_MED_SØKER,
+            vilkårType = Vilkår.LOVLIG_OPPHOLD,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
             behandlingId = 0
@@ -39,7 +39,7 @@ class VilkårsvurderingUtilsTest {
 
         val avslagUtenPeriode = RestVilkårResultat(
             id = 123,
-            vilkårType = Vilkår.BOR_MED_SØKER,
+            vilkårType = Vilkår.LOVLIG_OPPHOLD,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = null,
             periodeTom = null,
@@ -68,7 +68,7 @@ class VilkårsvurderingUtilsTest {
             personResultat = personResultat,
             periodeFom = null,
             periodeTom = null,
-            vilkårType = Vilkår.BOR_MED_SØKER,
+            vilkårType = Vilkår.LOVLIG_OPPHOLD,
             resultat = Resultat.IKKE_OPPFYLT,
             begrunnelse = "",
             behandlingId = 0,
@@ -78,7 +78,7 @@ class VilkårsvurderingUtilsTest {
 
         val løpendeOppfylt = RestVilkårResultat(
             id = 123,
-            vilkårType = Vilkår.BOR_MED_SØKER,
+            vilkårType = Vilkår.LOVLIG_OPPHOLD,
             resultat = Resultat.OPPFYLT,
             periodeFom = LocalDate.of(2020, 1, 1),
             periodeTom = null,
@@ -92,6 +92,44 @@ class VilkårsvurderingUtilsTest {
             VilkårsvurderingUtils.validerAvslagUtenPeriodeMedLøpende(
                 personSomEndres = personResultat,
                 vilkårSomEndres = løpendeOppfylt
+            )
+        }
+    }
+
+    @Test
+    fun `skal ikke kaste feil hvis vilkåret er bor med søker`() {
+        val personResultat = PersonResultat(
+            vilkårsvurdering = uvesentligVilkårsvurdering,
+            aktør = randomAktørId()
+        )
+        val løpendeOppfylt = VilkårResultat(
+            personResultat = personResultat,
+            periodeFom = LocalDate.of(2020, 1, 1),
+            periodeTom = null,
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            resultat = Resultat.OPPFYLT,
+            begrunnelse = "",
+            behandlingId = 0
+        )
+        personResultat.vilkårResultater.add(løpendeOppfylt)
+
+        val avslagUtenPeriode = RestVilkårResultat(
+            id = 123,
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            resultat = Resultat.IKKE_OPPFYLT,
+            periodeFom = null,
+            periodeTom = null,
+            begrunnelse = "",
+            endretAv = "",
+            endretTidspunkt = LocalDateTime.now(),
+            behandlingId = 0,
+            erEksplisittAvslagPåSøknad = true
+        )
+
+        assertDoesNotThrow {
+            VilkårsvurderingUtils.validerAvslagUtenPeriodeMedLøpende(
+                personSomEndres = personResultat,
+                vilkårSomEndres = avslagUtenPeriode
             )
         }
     }
