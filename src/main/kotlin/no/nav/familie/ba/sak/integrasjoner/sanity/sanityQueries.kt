@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.sanity
 
-const val hentNasjonaleBegrunnelser =
+const val hentBegrunnelser =
     "*[_type == \"begrunnelse\"]{" +
         "apiNavn," +
         "navnISystem," +
