@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -402,5 +403,59 @@ class BehandleSmåbarnstilleggTest(
             vedtakService = vedtakService,
             stegService = stegService
         )
+    }
+
+    @Test
+    @Order(5)
+    fun `Skal begrunne ny periode med småbarnstillegg som er etterfølgende en gammel småbarnstillegg-periode`() {
+        EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
+
+        val søkersIdent = scenario.søker.ident!!
+        val søkersAktør = personidentService.hentAktør(søkersIdent)
+
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+            perioder = listOf(
+                PeriodeOvergangsstønad(
+                    personIdent = søkersIdent,
+                    fomDato = periodeMedFullOvergangsstønadFom,
+                    tomDato = LocalDate.now(),
+                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                ),
+                PeriodeOvergangsstønad(
+                    personIdent = søkersIdent,
+                    fomDato = LocalDate.now().nesteMåned().førsteDagIInneværendeMåned(),
+                    tomDato = LocalDate.now().plusMonths(3),
+                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                )
+            )
+        )
+        autovedtakStegService.kjørBehandlingSmåbarnstillegg(
+            mottakersAktør = søkersAktør,
+            behandlingsdata = søkersAktør
+        )
+        val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
+        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+
+        val andelerTilkjentYtelse =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+                behandlingId = aktivBehandling.id
+            )
+
+        val småbarnstilleggAndeler = andelerTilkjentYtelse.filter { it.erSmåbarnstillegg() }
+
+        assertEquals(2, småbarnstilleggAndeler.size)
+        assertEquals(YearMonth.now(), småbarnstilleggAndeler.first().stønadTom)
+        assertEquals(YearMonth.now().plusMonths(1), småbarnstilleggAndeler.last().stønadFom)
+        assertEquals(YearMonth.now().plusMonths(3), småbarnstilleggAndeler.last().stønadTom)
+
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(
+            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id)
+        )
+
+        val aktuellVedtaksperiode =
+            vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == YearMonth.now().nesteMåned() }
+
+        assertNotNull(aktuellVedtaksperiode)
+        assertTrue(aktuellVedtaksperiode?.begrunnelser?.any { it.standardbegrunnelse == Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG } == true)
     }
 }
