@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
+package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
