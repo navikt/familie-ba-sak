@@ -93,14 +93,13 @@ object VilkårsvurderingUtils {
             personSomEndres.vilkårResultater.filter { it.vilkårType == vilkårSomEndres.vilkårType && it.id != vilkårSomEndres.id }
         when {
             // For bor med søker-vilkåret kan avslag og innvilgelse være overlappende, da man kan f.eks. avslå full barnetrygd, men innvilge delt
-            vilkårSomEndres.erAvslagUtenPeriode() && resultaterPåVilkår.any { it.resultat == Resultat.OPPFYLT && it.harFremtidigTom() } &&
-                vilkårSomEndres.vilkårType != Vilkår.BOR_MED_SØKER ->
+            vilkårSomEndres.vilkårType == Vilkår.BOR_MED_SØKER -> return
+            vilkårSomEndres.erAvslagUtenPeriode() && resultaterPåVilkår.any { it.resultat == Resultat.OPPFYLT && it.harFremtidigTom() } ->
                 throw FunksjonellFeil(
                     "Finnes løpende oppfylt ved forsøk på å legge til avslag uten periode ",
                     "Du kan ikke legge til avslag uten datoer fordi det finnes oppfylt løpende periode på vilkåret."
                 )
-            vilkårSomEndres.harFremtidigTom() && resultaterPåVilkår.any { it.erAvslagUtenPeriode() } &&
-                vilkårSomEndres.vilkårType != Vilkår.BOR_MED_SØKER ->
+            vilkårSomEndres.harFremtidigTom() && resultaterPåVilkår.any { it.erAvslagUtenPeriode() } ->
                 throw FunksjonellFeil(
                     "Finnes avslag uten periode ved forsøk på å legge til løpende oppfylt",
                     "Du kan ikke legge til løpende periode fordi det er vurdert avslag uten datoer på vilkåret."
