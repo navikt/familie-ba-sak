@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.config
+package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
@@ -24,7 +24,7 @@ class TilbakestillBehandlingÉnGangService(
 }
 
 @Service
-class TilbakestillBehandlingPgaKompetanseEndringService(
+class TilbakestillBehandlingFraKompetanseEndringService(
     private val tilbakestillBehandlingService: TilbakestillBehandlingÉnGangService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Kompetanse>) {
@@ -33,7 +33,7 @@ class TilbakestillBehandlingPgaKompetanseEndringService(
 }
 
 @Service
-class TilbakestillBehandlingPgaUtenlandskPeriodebeløpEndringService(
+class TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(
     private val tilbakestillBehandlingService: TilbakestillBehandlingÉnGangService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<UtenlandskPeriodebeløp>) {
@@ -42,7 +42,7 @@ class TilbakestillBehandlingPgaUtenlandskPeriodebeløpEndringService(
 }
 
 @Service
-class TilbakestillBehandlingPgaValutakursEndringService(
+class TilbakestillBehandlingFraValutakursEndringService(
     private val tilbakestillBehandlingService: TilbakestillBehandlingÉnGangService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Valutakurs>) {
