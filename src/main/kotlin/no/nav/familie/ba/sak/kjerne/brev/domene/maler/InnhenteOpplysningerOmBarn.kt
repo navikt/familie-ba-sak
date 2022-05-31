@@ -37,7 +37,7 @@ data class InnhenteOpplysningerOmBarnData(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-        val barnasFodselsdager: Flettefelt,
+        val barnasFodselsdatoer: Flettefelt,
         val dokumentliste: Flettefelt,
     ) : FlettefelterForDokument {
 
@@ -49,7 +49,7 @@ data class InnhenteOpplysningerOmBarnData(
         ) : this(
             navn = flettefelt(navn),
             fodselsnummer = flettefelt(fodselsnummer),
-            barnasFodselsdager = flettefelt(barnasFødselsdager),
+            barnasFodselsdatoer = flettefelt(barnasFødselsdager),
             dokumentliste = flettefelt(dokumentliste)
         )
     }
