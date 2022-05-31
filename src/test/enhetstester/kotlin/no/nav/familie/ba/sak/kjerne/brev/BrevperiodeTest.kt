@@ -51,7 +51,7 @@ class BrevperiodeTest {
                     minimerteUtbetalingsperiodeDetaljer = behandlingsresultatPersonTestConfig
                         .personerPåBehandling
                         .flatMap { it.tilUtbetalingsperiodeDetaljer() },
-                    eøsBegrunnelser = behandlingsresultatPersonTestConfig.EØSBegrunnelser?.map {
+                    eøsBegrunnelser = behandlingsresultatPersonTestConfig.eøsBegrunnelser?.map {
                         EØSBegrunnelseMedTriggere(it, sanityEØSBegrunnelser.finnBegrunnelse(it)!!)
                     } ?: emptyList()
                 )

@@ -35,7 +35,7 @@ data class BrevPeriodeTestConfig(
     val tom: LocalDate?,
     val vedtaksperiodetype: Vedtaksperiodetype,
     val begrunnelser: List<BrevBegrunnelseGrunnlagConfig>,
-    val EØSBegrunnelser: List<EØSStandardbegrunnelse>?,
+    val eøsBegrunnelser: List<EØSStandardbegrunnelse>?,
     val fritekster: List<String>,
 
     val personerPåBehandling: List<BrevPeriodeTestPerson>,
