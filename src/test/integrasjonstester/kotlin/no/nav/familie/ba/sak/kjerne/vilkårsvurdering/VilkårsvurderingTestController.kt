@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -10,17 +10,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Uendelighet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -44,16 +41,15 @@ class VilkårsvurderingTestController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
-    private val søknadGrunnlagService: SøknadGrunnlagService,
-    private val persongrunnlagService: PersongrunnlagService,
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val aktørIdRepository: AktørIdRepository,
+    private val kompetanseService: KompetanseService
 ) {
 
     @PostMapping()
     fun opprettBehandlingMedVilkårsvurdering(
-        @RequestBody personresultater: List<TestPersonResultat>
+        @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val personer = personresultater.tilPersoner()
             .map { it.copy(aktør = aktørIdRepository.saveAndFlush(it.aktør)) }
@@ -73,13 +69,10 @@ class VilkårsvurderingTestController(
                 barnasIdenter = barn.map { it.aktør.aktivFødselsnummer() }
             )
         )
-        
-        // Registrere persongrunnlag fra søknad
-        val persongrunnlag = persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-            behandling = behandling,
-            aktør = søker.aktør,
-            barnFraInneværendeBehandling = barn.map { it.aktør },
-            målform = Målform.NB
+
+        // Opprett persongrunnlag
+        val persongrunnlag = personopplysningGrunnlagRepository.save(
+            lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray())
         )
 
         // Opprett og lagre vilkårsvurdering
@@ -92,52 +85,32 @@ class VilkårsvurderingTestController(
             vilkårsvurdering
         )
 
-        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandling.id)
+        kompetanseService.tilpassKompetanserTilRegelverk(behandling.id)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 }
 
-data class TestVilkårsvurdering(
-    val personresultater: List<TestPersonResultat>
-)
-
-data class TestPersonResultat(
-    val startTidspunkt: LocalDate,
-    val vilkårsresultater: List<TestVilkårResult>
-)
-
-data class TestVilkårResult(
-    val tidslinje: String,
-    val vilkår: Vilkår
-)
-
-private fun Iterable<TestPersonResultat>.tilPersoner(): List<Person> {
-    val personer = this.mapIndexed() { indeks, personresultat ->
+private fun Map<LocalDate, Map<Vilkår, String>>.tilPersoner(): List<Person> {
+    return this.keys.mapIndexed { indeks, startdato ->
         when (indeks) {
-            0 -> tilfeldigPerson(personType = PersonType.SØKER)
-            else -> tilfeldigPerson(personType = PersonType.BARN)
+            0 -> tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = startdato.minusYears(25))
+            else -> tilfeldigPerson(personType = PersonType.BARN, fødselsdato = startdato)
         }
-    }
-    return personer
+    }.map {
+        it.copy(id = 0).also { it.sivilstander.clear() }
+    } // tilfeldigPerson inneholder litt for mye, så fjerner det
 }
 
-fun Iterable<TestPersonResultat>.tilVilkårsvurdering(
+fun Map<LocalDate, Map<Vilkår, String>>.tilVilkårsvurdering(
     behandling: Behandling,
     personer: List<Person>
 ): Vilkårsvurdering {
 
     val builder = VilkårsvurderingBuilder<Måned>(behandling)
 
-    this.forEachIndexed { indeks, personresultat ->
-        val person = personer[indeks]
-
-        val personBuilder =
-            builder.forPerson(person, MånedTidspunkt(personresultat.startTidspunkt.toYearMonth(), Uendelighet.INGEN))
-
-        personresultat.vilkårsresultater.forEach { vilkårresultat ->
-            personBuilder.medVilkår(vilkårresultat.tidslinje, vilkårresultat.vilkår)
-        }
-
+    this.entries.forEachIndexed { indeks, (startTidspunkt, vilkårsresultater) ->
+        val personBuilder = builder.forPerson(personer[indeks], startTidspunkt.tilMånedTidspunkt())
+        vilkårsresultater.forEach { (vilkår, tidslinje) -> personBuilder.medVilkår(tidslinje, vilkår) }
         personBuilder.byggPerson()
     }
 
