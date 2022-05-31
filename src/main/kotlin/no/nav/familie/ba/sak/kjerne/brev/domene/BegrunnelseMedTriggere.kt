@@ -69,7 +69,7 @@ data class BegrunnelseMedTriggere(
     )
 }
 
-fun RestVedtaksbegrunnelse.tilBrevBegrunnelseGrunnlag(
+fun RestVedtaksbegrunnelse.tilBegrunnelseMedTriggere(
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): BegrunnelseMedTriggere {
     return BegrunnelseMedTriggere(
