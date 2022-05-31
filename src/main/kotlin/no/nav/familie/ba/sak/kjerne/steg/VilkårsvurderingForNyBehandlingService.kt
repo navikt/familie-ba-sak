@@ -18,15 +18,14 @@ class VilkårsvurderingForNyBehandlingService(
 
     fun opprettVilkårsvurderingUtenomHovedflyt(
         behandling: Behandling,
+        forrigeBehandlingSomErVedtatt: Behandling?,
         nyMigreringsdato: LocalDate? = null
     ) {
         when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
                 vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                     behandling = behandling,
-                    forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-                        behandling
-                    ),
+                    forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
                     nyMigreringsdato = nyMigreringsdato!!
                 )
                 // Lagre ned migreringsdato
@@ -44,9 +43,7 @@ class VilkårsvurderingForNyBehandlingService(
                 vilkårService.initierVilkårsvurderingForBehandling(
                     behandling = behandling,
                     bekreftEndringerViaFrontend = true,
-                    forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-                        behandling
-                    )
+                    forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt
                 )
             }
             else -> logger.info(
