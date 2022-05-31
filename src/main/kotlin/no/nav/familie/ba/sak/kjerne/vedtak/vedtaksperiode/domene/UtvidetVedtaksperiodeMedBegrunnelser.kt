@@ -19,6 +19,7 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
     val tom: LocalDate?,
     val type: Vedtaksperiodetype,
     val begrunnelser: List<RestVedtaksbegrunnelse>,
+    val eøsBegrunnelser: List<RestEØSVedtaksbegrunnelse>,
     val fritekster: List<String> = emptyList(),
     val gyldigeBegrunnelser: List<Standardbegrunnelse> = emptyList(),
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
@@ -50,6 +51,7 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         tom = this.tom,
         type = this.type,
         begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
+        eøsBegrunnelser = this.eøsBegrunnelser.map { it.tilRestEØSVedtaksbegrunnelse() },
         fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
         utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
     )
