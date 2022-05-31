@@ -14,6 +14,8 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.Period
 
 @Service
 class PersonopplysningerService(
@@ -24,8 +26,14 @@ class PersonopplysningerService(
 
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
+
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
-        val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
+
+        val erUnder18År = Period.between(personinfo.fødselsdato, LocalDate.now()).years < 18
+
+        val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.filter {
+            erUnder18År || it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN
+        }.mapNotNull {
             val harTilgang =
                 familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(it.aktør.aktivFødselsnummer()))
                     .harTilgang
