@@ -35,7 +35,8 @@ class VilkårsvurderingForNyBehandlingService(
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
                 genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                     behandling = behandling,
-                    forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
+                    forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt
+                        ?: throw Feil("Kan ikke opprette behandling med årsak 'Endre migreringsdato' hvis det ikke finnes en tidligere behandling som er iverksatt"),
                     nyMigreringsdato = nyMigreringsdato!!
                 )
                 // Lagre ned migreringsdato
@@ -65,13 +66,13 @@ class VilkårsvurderingForNyBehandlingService(
 
     fun genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
         behandling: Behandling,
-        forrigeBehandlingSomErVedtatt: Behandling? = null,
+        forrigeBehandlingSomErVedtatt: Behandling,
         nyMigreringsdato: LocalDate
     ): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
             personResultater = lagVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                 this,
-                forrigeBehandlingSomErVedtatt!!,
+                forrigeBehandlingSomErVedtatt,
                 nyMigreringsdato
             )
         }
