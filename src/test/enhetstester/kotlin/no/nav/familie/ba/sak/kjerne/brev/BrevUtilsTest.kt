@@ -389,7 +389,8 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        hentBegrunnelser(), emptyList()
+                        sanityBegrunnelser = hentBegrunnelser(),
+                        sanityEØSBegrunnelser = emptyList()
                     )
                 },
                 sanityBegrunnelser = listOf(
@@ -433,7 +434,8 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        hentBegrunnelser(), emptyList()
+                        sanityBegrunnelser = hentBegrunnelser(),
+                        sanityEØSBegrunnelser = emptyList()
                     )
                 },
                 sanityBegrunnelser = listOf(
