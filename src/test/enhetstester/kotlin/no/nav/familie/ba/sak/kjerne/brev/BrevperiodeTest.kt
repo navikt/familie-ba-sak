@@ -7,9 +7,12 @@ import FritekstBegrunnelseTestConfig
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
+import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.finnBegrunnelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
@@ -22,6 +25,7 @@ class BrevperiodeTest {
         val testmappe = File("./src/test/resources/brevperiodeCaser")
 
         val sanityBegrunnelser = hentBegrunnelser()
+        val sanityEØSBegrunnelser = hentEØSBegrunnelser()
 
         val antallFeil = testmappe.list()?.fold(0) { acc, it ->
 
@@ -46,7 +50,13 @@ class BrevperiodeTest {
                     fritekster = behandlingsresultatPersonTestConfig.fritekster,
                     minimerteUtbetalingsperiodeDetaljer = behandlingsresultatPersonTestConfig
                         .personerPåBehandling
-                        .flatMap { it.tilUtbetalingsperiodeDetaljer() }
+                        .flatMap { it.tilUtbetalingsperiodeDetaljer() },
+                    eøsBegrunnelser = behandlingsresultatPersonTestConfig.eøsBegrunnelser?.map {
+                        EØSBegrunnelseMedTriggere(
+                            eøsBegrunnelse = it,
+                            sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(it)!!
+                        )
+                    } ?: emptyList()
                 )
 
             val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
