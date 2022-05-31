@@ -45,7 +45,7 @@ data class VarselbrevMedÅrsakerOgBarnData(
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
         val varselAarsaker: Flettefelt,
-        val barnasFodselsdager: Flettefelt,
+        val barnasFodselsdatoer: Flettefelt,
     ) : FlettefelterForDokument {
 
         constructor(
@@ -57,7 +57,7 @@ data class VarselbrevMedÅrsakerOgBarnData(
             navn = flettefelt(navn),
             fodselsnummer = flettefelt(fodselsnummer),
             varselAarsaker = flettefelt(varselÅrsaker),
-            barnasFodselsdager = flettefelt(barnasFødselsdager)
+            barnasFodselsdatoer = flettefelt(barnasFødselsdager)
         )
     }
 
