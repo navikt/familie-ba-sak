@@ -138,7 +138,7 @@ class VurderTilbakekrevingStegTest {
     }
 
     @Test
-    fun `skal ikke utføre steg for migreringsbehandling med endre migreringsdato når det finnes etterbetaling mindre enn maks beløp`() {
+    fun `skal utføre steg for migreringsbehandling med endre migreringsdato når det finnes etterbetaling mindre enn maks beløp`() {
         val behandling: Behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
