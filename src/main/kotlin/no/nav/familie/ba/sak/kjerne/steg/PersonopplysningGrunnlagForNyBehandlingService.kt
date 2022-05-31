@@ -26,7 +26,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
 
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
             val forrigePersongrunnlagBarna =
-                beregningService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = forrigeBehandlingSomErVedtatt.id)
+                beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandlingSomErVedtatt.id)
             val forrigeMålform =
                 persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErVedtatt.id)
 
