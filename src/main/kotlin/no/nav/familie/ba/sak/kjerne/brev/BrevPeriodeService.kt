@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -13,6 +14,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
@@ -39,7 +42,8 @@ class BrevPeriodeService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
-    private val personidentService: PersonidentService
+    private val personidentService: PersonidentService,
+    private val kompetanseService: KompetanseService
 ) {
 
     fun hentBrevperioderData(
@@ -63,6 +67,9 @@ class BrevPeriodeService(
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn()
                 ?: emptyList()
 
+        val kompetanser =
+            kompetanseService.hentKompetanser(behandlingId = behandlingId)
+
         return vedtaksperioderId.map {
             hentBrevperiodeData(
                 vedtaksperiodeId = it,
@@ -72,6 +79,7 @@ class BrevPeriodeService(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 uregistrerteBarn = uregistrerteBarn,
                 skalLogge = skalLogge,
+                kompetanser = kompetanser.toList(),
             )
         }
     }
@@ -83,7 +91,9 @@ class BrevPeriodeService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         uregistrerteBarn: List<BarnMedOpplysninger>,
-        skalLogge: Boolean = true
+        kompetanser: List<Kompetanse>,
+
+        skalLogge: Boolean = true,
     ): BrevperiodeData {
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
@@ -116,13 +126,20 @@ class BrevPeriodeService(
             uregistrerteBarn = minimerteUregistrerteBarn,
             brevMålform = personopplysningGrunnlag.søker.målform,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
-                andelerTilkjentYtelse,
-                utvidetVedtaksperiodeMedBegrunnelse.fom
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                periodeFom = utvidetVedtaksperiodeMedBegrunnelse.fom
             ),
             barnMedReduksjonFraForrigeBehandlingIdent = hentBarnsPersonIdentMedRedusertPeriode(
-                vedtaksperiodeMedBegrunnelser,
-                andelerTilkjentYtelse
+                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            ),
+            minimerteKompetanser = hentMinimerteKompetanserForPeriode(
+                kompetanser = kompetanser,
+                fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
+                tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
+                personopplysningGrunnlag = personopplysningGrunnlag
             )
+
         )
 
         if (skalLogge) {

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertAnnenVurdering
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
@@ -15,6 +16,9 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -27,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 data class BrevPeriodeTestConfig(
     val beskrivelse: String,
@@ -53,6 +58,16 @@ data class BrevPeriodeTestConfig(
         hentPersonerMedReduksjonFraForrigeBehandling().filter { it.type == PersonType.BARN }
 }
 
+data class BrevPeriodeTestKompetanse(
+    val fom: YearMonth,
+    val tom: YearMonth,
+    val søkersAktivitet: SøkersAktivitet,
+    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val annenForeldersAktivitetsland: String,
+    val barnetsBostedsland: String,
+    val resultat: KompetanseResultat,
+)
+
 data class BrevPeriodeTestPerson(
     val personIdent: String = randomFnr(),
     val fødselsdato: LocalDate,
@@ -62,6 +77,7 @@ data class BrevPeriodeTestPerson(
     val endredeUtbetalinger: List<EndretRestUtbetalingAndelPåPerson>,
     val utbetalinger: List<UtbetalingPåPerson>,
     val harReduksjonFraForrigeBehandling: Boolean = false,
+    val kompetanse: BrevPeriodeTestKompetanse? = null,
 ) {
     fun tilMinimertPerson() = MinimertRestPerson(personIdent = personIdent, fødselsdato = fødselsdato, type = type)
     fun tilUtbetalingsperiodeDetaljer() = utbetalinger.map {
@@ -77,6 +93,21 @@ data class BrevPeriodeTestPerson(
             minimerteVilkårResultater = hentVilkårForPerson(),
             minimerteAndreVurderinger = this.andreVurderinger,
         )
+    }
+
+    fun tilMinimertKompetanse(): MinimertKompetanse? {
+        return kompetanse?.let {
+            MinimertKompetanse(
+                fom = kompetanse.fom,
+                tom = kompetanse.tom,
+                søkersAktivitet = kompetanse.søkersAktivitet,
+                annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
+                annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
+                barnetsBostedsland = kompetanse.barnetsBostedsland,
+                resultat = kompetanse.resultat,
+                person = this.tilMinimertPerson()
+            )
+        }
     }
 
     private fun hentVilkårForPerson() =

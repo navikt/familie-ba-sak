@@ -13,7 +13,8 @@ data class BrevperiodeData(
     val uregistrerteBarn: List<MinimertUregistrertBarn>,
     val brevMålform: Målform,
     val minimertVedtaksperiode: MinimertVedtaksperiode,
-    val barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList()
+    val barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
+    val minimerteKompetanser: List<MinimertKompetanse>,
 ) : Comparable<BrevperiodeData> {
 
     fun tilBrevPeriodeGenerator() = BrevPeriodeGenerator(
@@ -23,6 +24,7 @@ data class BrevperiodeData(
         brevMålform = brevMålform,
         minimertVedtaksperiode = minimertVedtaksperiode,
         barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
+        minimerteKompetanser = minimerteKompetanser
     )
 
     fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {
