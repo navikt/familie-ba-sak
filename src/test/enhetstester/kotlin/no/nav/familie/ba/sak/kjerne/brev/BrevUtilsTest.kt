@@ -343,7 +343,12 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "§§ 2, 4, 10 og 11",
             hentHjemmeltekst(
-                utvidetVedtaksperioderMedBegrunnelser.map { it.tilMinimertVedtaksperiode(hentBegrunnelser()) },
+                utvidetVedtaksperioderMedBegrunnelser.map {
+                    it.tilMinimertVedtaksperiode(
+                        hentBegrunnelser(),
+                        emptyList()
+                    )
+                },
                 listOf(
                     lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
@@ -384,7 +389,8 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        hentBegrunnelser()
+                        sanityBegrunnelser = hentBegrunnelser(),
+                        sanityEØSBegrunnelser = emptyList()
                     )
                 },
                 sanityBegrunnelser = listOf(
@@ -428,7 +434,8 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        hentBegrunnelser()
+                        sanityBegrunnelser = hentBegrunnelser(),
+                        sanityEØSBegrunnelser = emptyList()
                     )
                 },
                 sanityBegrunnelser = listOf(
