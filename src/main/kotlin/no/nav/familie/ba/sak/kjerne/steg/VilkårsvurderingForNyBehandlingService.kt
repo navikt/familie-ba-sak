@@ -37,7 +37,8 @@ class VilkårsvurderingForNyBehandlingService(
                     behandling = behandling,
                     forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt
                         ?: throw Feil("Kan ikke opprette behandling med årsak 'Endre migreringsdato' hvis det ikke finnes en tidligere behandling som er iverksatt"),
-                    nyMigreringsdato = nyMigreringsdato!!
+                    nyMigreringsdato = nyMigreringsdato
+                        ?: throw Feil("Kan ikke opprette behandling med årsak 'Endre migreringsdato' uten en migreringsdato")
                 )
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
@@ -45,7 +46,8 @@ class VilkårsvurderingForNyBehandlingService(
             BehandlingÅrsak.HELMANUELL_MIGRERING -> {
                 genererVilkårsvurderingForHelmanuellMigrering(
                     behandling = behandling,
-                    nyMigreringsdato = nyMigreringsdato!!
+                    nyMigreringsdato = nyMigreringsdato
+                        ?: throw Feil("Kan ikke opprette behandling med årsak 'Helmanuell migrering' uten en migreringsdato")
                 )
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
