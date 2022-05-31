@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePeriodebeløpTilKompetanserService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -20,7 +20,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> =
         mockPeriodeBarnSkjemaRepository()
-    val kompetanseService: KompetanseService = mockk()
+    val kompetanseRepository: KompetanseRepository = mockk()
 
     val utenlandskPeriodebeløpService = UtenlandskPeriodebeløpService(
         utenlandskPeriodebeløpRepository,
@@ -30,7 +30,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
     val tilpassUtenlandskePeriodebeløpTilKompetanserService = TilpassUtenlandskePeriodebeløpTilKompetanserService(
         utenlandskPeriodebeløpRepository,
         emptyList(),
-        kompetanseService
+        kompetanseRepository
     )
 
     @BeforeEach
@@ -56,7 +56,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
             .medKompetanse("--   ----", barn2, barn3)
             .byggKompetanser()
 
-        every { kompetanseService.hentKompetanser(behandlingId) } returns kompetanser
+        every { kompetanseRepository.findByBehandlingId(behandlingId.id) } returns kompetanser
 
         tilpassUtenlandskePeriodebeløpTilKompetanserService
             .tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId)

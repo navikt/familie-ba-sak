@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerF
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
@@ -23,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 class TilpassUtenlandskePeriodebeløpTilKompetanserService(
     utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp>>,
-    private val kompetanseService: KompetanseService
+    private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse> {
     val skjemaService = PeriodeOgBarnSkjemaService(
         utenlandskPeriodebeløpRepository,
@@ -32,7 +31,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
 
     @Transactional
     fun tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId: BehandlingId) {
-        val gjeldendeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+        val gjeldendeKompetanser = kompetanseRepository.findByBehandlingId(behandlingId.id)
 
         tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId, gjeldendeKompetanser)
     }

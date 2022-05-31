@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
-import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class TilpassValutakurserTilUtenlandskePeriodebeløpService(
     valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
-    private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
+    private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs>>
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     val skjemaService = PeriodeOgBarnSkjemaService(
@@ -27,7 +26,7 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
 
     @Transactional
     fun tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId: BehandlingId) {
-        val gjeldendeUtenlandskePeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
+        val gjeldendeUtenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.findByBehandlingId(behandlingId.id)
 
         tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId, gjeldendeUtenlandskePeriodebeløp)
     }

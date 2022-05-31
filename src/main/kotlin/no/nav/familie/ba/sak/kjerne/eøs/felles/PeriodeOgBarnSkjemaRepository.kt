@@ -6,5 +6,5 @@ import org.springframework.data.repository.NoRepositoryBean
 @NoRepositoryBean
 interface PeriodeOgBarnSkjemaRepository<T : PeriodeOgBarnSkjemaEntitet<T>> : JpaRepository<T, Long> {
 
-    fun findByBehandlingId(behandlingId: Long): List<T>
+    fun findByBehandlingId(behandlingId: Long): Collection<T>
 }

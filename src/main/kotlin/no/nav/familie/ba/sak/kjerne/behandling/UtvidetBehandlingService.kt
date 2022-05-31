@@ -88,7 +88,7 @@ class UtvidetBehandlingService(
 
         val kanBehandleEøs = featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)
 
-        val kompetanser: List<Kompetanse> =
+        val kompetanser: Collection<Kompetanse> =
             if (kanBehandleEøs) kompetanseRepository.findByBehandlingId(behandlingId) else emptyList()
 
         val valutakurser =

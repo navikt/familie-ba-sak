@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
-import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 
 internal class ValutakursServiceTest {
     val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs> = mockPeriodeBarnSkjemaRepository()
-    val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService = mockk()
+    val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository = mockk()
 
     val valutakursService = ValutakursService(
         valutakursRepository,
@@ -27,7 +27,7 @@ internal class ValutakursServiceTest {
 
     val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(
         valutakursRepository,
-        utenlandskPeriodebeløpService,
+        utenlandskPeriodebeløpRepository,
         emptyList(),
     )
 
@@ -52,7 +52,7 @@ internal class ValutakursServiceTest {
             .medBeløp("  777777777", "EUR", barn1)
             .bygg()
 
-        every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns utenlandskePeriodebeløp
+        every { utenlandskPeriodebeløpRepository.findByBehandlingId(behandlingId.id) } returns utenlandskePeriodebeløp
 
         tilpassValutakurserTilUtenlandskePeriodebeløpService.tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId)
 
