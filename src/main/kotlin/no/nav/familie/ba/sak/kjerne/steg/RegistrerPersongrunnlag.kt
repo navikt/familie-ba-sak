@@ -31,6 +31,7 @@ class RegistrerPersongrunnlag(
 
         vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
             behandling = behandling,
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
             nyMigreringsdato = data.nyMigreringsdato
         )
 
