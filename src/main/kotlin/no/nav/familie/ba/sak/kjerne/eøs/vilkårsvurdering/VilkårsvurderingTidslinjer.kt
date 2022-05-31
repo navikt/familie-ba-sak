@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
+package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
-class Tidslinjer(
+class VilkårsvurderingTidslinjer(
     vilkårsvurdering: Vilkårsvurdering,
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ) {
@@ -51,7 +51,7 @@ class Tidslinjer(
         barnasTidslinjer.entries.associate { it.key to it.value }
 
     class SøkersTidslinjer(
-        tidslinjer: Tidslinjer,
+        tidslinjer: VilkårsvurderingTidslinjer,
         aktør: Aktør,
     ) {
         val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
@@ -66,7 +66,7 @@ class Tidslinjer(
     }
 
     class BarnetsTidslinjer(
-        tidslinjer: Tidslinjer,
+        tidslinjer: VilkårsvurderingTidslinjer,
         aktør: Aktør,
     ) {
         private val søkersTidslinje = tidslinjer.søkersTidslinje
@@ -106,7 +106,7 @@ fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, M�
     }
 }
 
-fun Tidslinjer.harBlandetRegelverk(): Boolean {
+fun VilkårsvurderingTidslinjer.harBlandetRegelverk(): Boolean {
     return søkersTidslinjer().regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) ||
         barnasTidslinjer().values.any { it.egetRegelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) }
 }

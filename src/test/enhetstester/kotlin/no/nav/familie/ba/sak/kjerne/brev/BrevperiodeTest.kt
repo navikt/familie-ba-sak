@@ -6,7 +6,7 @@ import BrevPeriodeTestConfig
 import FritekstBegrunnelseTestConfig
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
+import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
@@ -21,7 +21,7 @@ class BrevperiodeTest {
     fun test(testReporter: TestReporter) {
         val testmappe = File("./src/test/resources/brevperiodeCaser")
 
-        val sanityBegrunnelser = hentSanityBegrunnelser()
+        val sanityBegrunnelser = hentBegrunnelser()
 
         val antallFeil = testmappe.list()?.fold(0) { acc, it ->
 
@@ -56,14 +56,15 @@ class BrevperiodeTest {
             )
 
             val brevperiode = try {
-                minimertVedtaksperiode.tilBrevPeriode(
+                BrevPeriodeGenerator(
+                    minimertVedtaksperiode = minimertVedtaksperiode,
                     restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
                     barnMedReduksjonFraForrigeBehandlingIdent = behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
                         .map { it.personIdent },
-                )
+                ).genererBrevPeriode()
             } catch (e: Exception) {
                 testReporter.publishEntry(
                     "Feil i test: $it" +

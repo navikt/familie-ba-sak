@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.sanity
 
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import org.springframework.core.env.Environment
 import org.springframework.retry.annotation.Backoff
@@ -20,15 +21,13 @@ class SanityService(
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
-    fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
-        val erIMiljø = environment.activeProfiles.any {
-            listOf("preprod", "prod").contains(it.trim(' '))
-        }
+    fun hentSanityBegrunnelser(): List<SanityBegrunnelse> = cachedSanityKlient.hentSanityBegrunnelserCached()
 
-        return if (erIMiljø) {
-            brevKlient.hentSanityBegrunnelser()
-        } else {
-            cachedSanityKlient.hentSanityBegrunnelserCached()
-        }
-    }
+    @Retryable(
+        value = [Exception::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
+    )
+    fun hentSanityEØSBegrunnelser(): List<SanityEØSBegrunnelse> =
+        cachedSanityKlient.hentEØSBegrunnelserCached()
 }
