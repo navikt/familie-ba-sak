@@ -2,11 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
-import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -19,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -58,9 +53,9 @@ class VilkårsvurderingTestController(
 
     @PostMapping()
     fun opprettBehandlingMedVilkårsvurdering(
-        @RequestBody testVilkårsvurdering: TestVilkårsvurdering
+        @RequestBody personresultater: List<TestPersonResultat>
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val personer = testVilkårsvurdering.tilPersoner()
+        val personer = personresultater.tilPersoner()
             .map { it.copy(aktør = aktørIdRepository.saveAndFlush(it.aktør)) }
 
         val søker = personer.first { it.type == PersonType.SØKER }
@@ -78,28 +73,7 @@ class VilkårsvurderingTestController(
                 barnasIdenter = barn.map { it.aktør.aktivFødselsnummer() }
             )
         )
-
-        val søknadDTO = SøknadDTO(
-            BehandlingUnderkategori.ORDINÆR,
-            SøkerMedOpplysninger(søker.aktør.aktivFødselsnummer()),
-            barn.map { person ->
-                BarnMedOpplysninger(
-                    person.aktør.aktivFødselsnummer(),
-                    person.navn,
-                    person.fødselsdato
-                )
-            },
-            ""
-        )
-
-        // Lagre søknad
-        søknadGrunnlagService.lagreOgDeaktiverGammel(
-            SøknadGrunnlag(
-                behandlingId = behandling.id,
-                søknad = søknadDTO.writeValueAsString()
-            )
-        )
-
+        
         // Registrere persongrunnlag fra søknad
         val persongrunnlag = persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             behandling = behandling,
@@ -109,11 +83,11 @@ class VilkårsvurderingTestController(
         )
 
         // Opprett og lagre vilkårsvurdering
-        val vilkårsvurdering = testVilkårsvurdering.tilVilkårsvurdering(
+        val vilkårsvurdering = personresultater.tilVilkårsvurdering(
             behandling,
             personer.map { p -> persongrunnlag.personer.first { lagret -> lagret.aktør.aktivFødselsnummer() == p.aktør.aktivFødselsnummer() } }
         )
-        
+
         vilkårsvurderingService.lagreInitielt(
             vilkårsvurdering
         )
@@ -137,8 +111,8 @@ data class TestVilkårResult(
     val vilkår: Vilkår
 )
 
-private fun TestVilkårsvurdering.tilPersoner(): List<Person> {
-    val personer = this.personresultater.mapIndexed() { indeks, personresultat ->
+private fun Iterable<TestPersonResultat>.tilPersoner(): List<Person> {
+    val personer = this.mapIndexed() { indeks, personresultat ->
         when (indeks) {
             0 -> tilfeldigPerson(personType = PersonType.SØKER)
             else -> tilfeldigPerson(personType = PersonType.BARN)
@@ -147,14 +121,14 @@ private fun TestVilkårsvurdering.tilPersoner(): List<Person> {
     return personer
 }
 
-fun TestVilkårsvurdering.tilVilkårsvurdering(
+fun Iterable<TestPersonResultat>.tilVilkårsvurdering(
     behandling: Behandling,
     personer: List<Person>
 ): Vilkårsvurdering {
 
     val builder = VilkårsvurderingBuilder<Måned>(behandling)
 
-    personresultater.forEachIndexed { indeks, personresultat ->
+    this.forEachIndexed { indeks, personresultat ->
         val person = personer[indeks]
 
         val personBuilder =
