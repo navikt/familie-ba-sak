@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -10,8 +14,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -23,13 +30,17 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/test/vilkaarsvurdering")
-@ProtectedWithClaims(issuer = "azuread")
+// @ProtectedWithClaims(issuer = "azuread")
+@Unprotected
 @Validated
 @Profile("!prod")
 class VilkårsvurderingTestController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
+    private val søknadGrunnlagService: SøknadGrunnlagService,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val vilkårService: VilkårService,
     private val vilkårsvurderingService: VilkårsvurderingService
 ) {
 
@@ -55,10 +66,33 @@ class VilkårsvurderingTestController(
             )
         )
 
-        // registrere søknad
+        val søknadDTO = SøknadDTO(
+            BehandlingUnderkategori.ORDINÆR,
+            SøkerMedOpplysninger(søker.aktør.aktivFødselsnummer()),
+            barn.map { person -> BarnMedOpplysninger(person.aktør.aktivFødselsnummer(), person.navn, person.fødselsdato) },
+            ""
+        )
 
-        // lagre vilkårsvurdering
-        //vilkårsvurderingService.lagreInitielt()
+        // Lagre søknad
+        val søknadGrunnlag = søknadGrunnlagService.lagreOgDeaktiverGammel(
+            SøknadGrunnlag(
+                behandlingId = behandling.id,
+                søknad = søknadDTO.writeValueAsString()
+            )
+        )
+
+        // Registrere persongrunnlag fra søknad
+        persongrunnlagService.registrerBarnFraSøknad(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = null,
+            søknadDTO = søknadDTO
+        )
+
+        // Opprett og lagre vilkårsvurdering
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+            behandling = behandling,
+            bekreftEndringerViaFrontend = true
+        )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
