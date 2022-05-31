@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
@@ -12,7 +12,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
@@ -21,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPe
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.slf4j.LoggerFactory
@@ -36,27 +39,57 @@ class BrevPeriodeService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
-    private val featureToggleService: FeatureToggleService,
     private val personidentService: PersonidentService
 ) {
 
-    fun hentBrevperiodeData(vedtaksperiodeId: Long, skalLogge: Boolean = true): BrevperiodeData {
-        val vedtaksperiodeMedBegrunnelser =
-            vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
-
-        val behandlingId = vedtaksperiodeMedBegrunnelser.vedtak.behandling.id
-
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
+    fun hentBrevperioderData(
+        vedtaksperioderId: List<Long>,
+        behandlingId: Long,
+        skalLogge: Boolean = true,
+    ): List<BrevperiodeData> {
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+
         val endredeUtbetalingAndeler =
             endretUtbetalingAndelService.hentForBehandling(behandlingId = behandlingId)
+
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
+
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+            behandlingId
+        )
 
         val uregistrerteBarn =
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn()
-                ?.map { it.tilMinimertUregisrertBarn() } ?: emptyList()
+                ?: emptyList()
+
+        return vedtaksperioderId.map {
+            hentBrevperiodeData(
+                vedtaksperiodeId = it,
+                vilkårsvurdering = vilkårsvurdering,
+                endredeUtbetalingAndeler = endredeUtbetalingAndeler,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                uregistrerteBarn = uregistrerteBarn,
+                skalLogge = skalLogge,
+            )
+        }
+    }
+
+    private fun hentBrevperiodeData(
+        vedtaksperiodeId: Long,
+        vilkårsvurdering: Vilkårsvurdering,
+        endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        uregistrerteBarn: List<BarnMedOpplysninger>,
+        skalLogge: Boolean = true
+    ): BrevperiodeData {
+        val vedtaksperiodeMedBegrunnelser =
+            vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
+
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
 
         val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
             vilkårsvurdering = vilkårsvurdering,
@@ -64,14 +97,12 @@ class BrevPeriodeService(
             persongrunnlag = personopplysningGrunnlag
         )
 
+        val minimerteUregistrerteBarn = uregistrerteBarn.map { it.tilMinimertUregisrertBarn() }
+
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
-            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandlingId
-            ),
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
         )
-
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
 
         val minimertVedtaksperiode =
             utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(
@@ -82,7 +113,7 @@ class BrevPeriodeService(
         val brevperiodeData = BrevperiodeData(
             minimertVedtaksperiode = minimertVedtaksperiode,
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-            uregistrerteBarn = uregistrerteBarn,
+            uregistrerteBarn = minimerteUregistrerteBarn,
             brevMålform = personopplysningGrunnlag.søker.målform,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
                 andelerTilkjentYtelse,
@@ -136,7 +167,14 @@ class BrevPeriodeService(
 
     fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
 
-        val begrunnelseDataForVedtaksperiode = hentBrevperiodeData(vedtaksperiodeId)
+        val vedtaksperiodeMedBegrunnelser =
+            vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
+
+        val begrunnelseDataForVedtaksperiode =
+            hentBrevperioderData(
+                vedtaksperioderId = listOf(vedtaksperiodeId),
+                behandlingId = vedtaksperiodeMedBegrunnelser.vedtak.behandling.id
+            ).single()
         return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
     }
 
