@@ -1,18 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -103,52 +98,13 @@ class VilkårsvurderingForNyBehandlingService(
         nyMigreringsdato: LocalDate
     ): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
-            personResultater = lagVilkårsvurderingForHelmanuellMigrering(this, nyMigreringsdato)
+            personResultater = VilkårsvurderingForNyBehandlingUtils.lagPersonResultaterForHelmanuellMigrering(
+                vilkårsvurdering = this,
+                nyMigreringsdato = nyMigreringsdato,
+                personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+            )
         }
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
-    }
-
-    private fun lagVilkårsvurderingForHelmanuellMigrering(
-        vilkårsvurdering: Vilkårsvurdering,
-        nyMigreringsdato: LocalDate
-    ): Set<PersonResultat> {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id)
-
-        return personopplysningGrunnlag.søkerOgBarn.map { person ->
-            val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
-
-            val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)
-            val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
-                val fom = when {
-                    vilkår.gjelderAlltidFraBarnetsFødselsdato() -> person.fødselsdato
-                    nyMigreringsdato.isBefore(person.fødselsdato) -> person.fødselsdato
-                    else -> nyMigreringsdato
-                }
-
-                val tom: LocalDate? = when (vilkår) {
-                    Vilkår.UNDER_18_ÅR -> person.fødselsdato.plusYears(18)
-                        .minusDays(1)
-                    else -> null
-                }
-
-                val begrunnelse = "Migrering"
-
-                VilkårResultat(
-                    personResultat = personResultat,
-                    erAutomatiskVurdert = false,
-                    resultat = Resultat.OPPFYLT,
-                    vilkårType = vilkår,
-                    periodeFom = fom,
-                    periodeTom = tom,
-                    begrunnelse = begrunnelse,
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id
-                )
-            }.toSortedSet(VilkårResultat.VilkårResultatComparator)
-
-            personResultat.setSortedVilkårResultater(vilkårResultater)
-
-            personResultat
-        }.toSet()
     }
 
     companion object {
