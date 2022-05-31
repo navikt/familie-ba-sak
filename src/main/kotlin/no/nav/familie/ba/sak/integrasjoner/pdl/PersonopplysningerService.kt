@@ -29,10 +29,12 @@ class PersonopplysningerService(
 
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
 
-        val erUnder18År = Period.between(personinfo.fødselsdato, LocalDate.now()).years < 18
+        val personErUnder18År = Period.between(personinfo.fødselsdato, LocalDate.now()).years < 18
 
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.filter {
-            erUnder18År || it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN
+            // Hvis personen vi ser på er under 18 år ønsker vi å ha med alle relasjoner
+            // Hvis personen er over 18 år ønsker vi kun å se på barna til personen
+            personErUnder18År || it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN
         }.mapNotNull {
             val harTilgang =
                 familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(it.aktør.aktivFødselsnummer()))
