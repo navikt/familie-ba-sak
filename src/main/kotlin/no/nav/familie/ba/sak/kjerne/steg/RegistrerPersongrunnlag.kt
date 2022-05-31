@@ -3,12 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -19,10 +14,8 @@ import java.time.LocalDate
 class RegistrerPersongrunnlag(
     private val behandlingService: BehandlingService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val beregningService: BeregningService,
-    private val persongrunnlagService: PersongrunnlagService,
-    private val personidentService: PersonidentService,
-    private val vilkårService: VilkårService
+    private val vilkårService: VilkårService,
+    private val personopplysningGrunnlagForNyBehandlingService: PersonopplysningGrunnlagForNyBehandlingService
 ) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
 
     @Transactional
@@ -33,30 +26,14 @@ class RegistrerPersongrunnlag(
         val forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
             behandling
         )
-        val aktør = personidentService.hentOgLagreAktør(data.ident, true)
-        val barnaAktør = personidentService.hentOgLagreAktørIder(data.barnasIdenter, true)
 
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
-            val forrigePersongrunnlagBarna =
-                beregningService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = forrigeBehandlingSomErVedtatt.id)
-            val forrigeMålform =
-                persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErVedtatt.id)
+        personopplysningGrunnlagForNyBehandlingService.opprettPersonopplysningGrunnlag(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
+            søkerIdent = data.ident,
+            barnasIdenter = data.barnasIdenter
+        )
 
-            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = aktør,
-                barnFraInneværendeBehandling = barnaAktør,
-                barnFraForrigeBehandling = forrigePersongrunnlagBarna,
-                behandling = behandling,
-                målform = forrigeMålform
-            )
-        } else {
-            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = aktør,
-                barnFraInneværendeBehandling = barnaAktør,
-                behandling = behandling,
-                målform = Målform.NB
-            )
-        }
         when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
                 vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
