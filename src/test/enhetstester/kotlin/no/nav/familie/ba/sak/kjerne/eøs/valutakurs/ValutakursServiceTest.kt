@@ -52,7 +52,7 @@ internal class ValutakursServiceTest {
             .medBeløp("  777777777", "EUR", barn1)
             .bygg()
 
-        every { utenlandskPeriodebeløpRepository.findByBehandlingId(behandlingId.id) } returns utenlandskePeriodebeløp
+        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id) } returns utenlandskePeriodebeløp
 
         tilpassValutakurserTilUtenlandskePeriodebeløpService.tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId)
 

@@ -89,13 +89,13 @@ class UtvidetBehandlingService(
         val kanBehandleEøs = featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)
 
         val kompetanser: Collection<Kompetanse> =
-            if (kanBehandleEøs) kompetanseRepository.findByBehandlingId(behandlingId) else emptyList()
+            if (kanBehandleEøs) kompetanseRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
         val valutakurser =
-            if (kanBehandleEøs) valutakursRepository.findByBehandlingId(behandlingId) else emptyList()
+            if (kanBehandleEøs) valutakursRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
         val utenlandskePeriodebeløp =
-            if (kanBehandleEøs) utenlandskPeriodebeløpRepository.findByBehandlingId(behandlingId) else emptyList()
+            if (kanBehandleEøs) utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,

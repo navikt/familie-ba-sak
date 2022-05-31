@@ -10,7 +10,7 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
 ) {
 
     fun hentMedBehandlingId(behandlingId: BehandlingId): Collection<S> {
-        return periodeOgBarnSkjemaRepository.findByBehandlingId(behandlingId.id)
+        return periodeOgBarnSkjemaRepository.finnFraBehandlingId(behandlingId.id)
     }
 
     fun hentMedId(id: Long): S {

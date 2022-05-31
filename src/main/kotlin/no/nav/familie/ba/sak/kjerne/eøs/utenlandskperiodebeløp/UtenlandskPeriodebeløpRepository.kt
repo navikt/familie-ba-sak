@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.Query
 interface UtenlandskPeriodebeløpRepository : PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> {
 
     @Query("SELECT upb FROM UtenlandskPeriodebeløp upb WHERE upb.behandlingId = :behandlingId")
-    override fun findByBehandlingId(behandlingId: Long): Collection<UtenlandskPeriodebeløp>
+    override fun finnFraBehandlingId(behandlingId: Long): Collection<UtenlandskPeriodebeløp>
 }

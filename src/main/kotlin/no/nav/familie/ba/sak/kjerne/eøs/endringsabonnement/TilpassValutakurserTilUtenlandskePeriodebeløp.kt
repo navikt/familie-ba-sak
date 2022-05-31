@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class TilpassValutakurserTilUtenlandskePeriodebeløpService(
     valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
-    private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
+    private val utenlandskPeriodebeløpRepository: FinnPeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs>>
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     val skjemaService = PeriodeOgBarnSkjemaService(
@@ -26,7 +27,7 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
 
     @Transactional
     fun tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId: BehandlingId) {
-        val gjeldendeUtenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.findByBehandlingId(behandlingId.id)
+        val gjeldendeUtenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
         tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId, gjeldendeUtenlandskePeriodebeløp)
     }

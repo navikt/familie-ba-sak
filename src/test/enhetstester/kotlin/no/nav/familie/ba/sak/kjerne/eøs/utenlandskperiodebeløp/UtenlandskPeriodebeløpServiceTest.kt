@@ -56,7 +56,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
             .medKompetanse("--   ----", barn2, barn3)
             .byggKompetanser()
 
-        every { kompetanseRepository.findByBehandlingId(behandlingId.id) } returns kompetanser
+        every { kompetanseRepository.finnFraBehandlingId(behandlingId.id) } returns kompetanser
 
         tilpassUtenlandskePeriodebeløpTilKompetanserService
             .tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId)
