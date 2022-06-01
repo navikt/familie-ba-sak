@@ -23,26 +23,23 @@ class VurderTilbakekrevingSteg(
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestTilbakekreving?): StegType {
 
         if (!tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)) {
-
             tilbakekrevingService.validerRestTilbakekreving(data, behandling.id)
             if (data != null) {
                 tilbakekrevingService.lagreTilbakekreving(data, behandling.id)
             }
         }
 
+        // manuelle migreringer kan ikke fortsettes om det finnes en feilutbetaling
+        // eller en etterbetaling større enn 220 KR
         if (!featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING)) {
             val finnesFeilutbetaling = simuleringService.hentFeilutbetaling(behandling.id) != BigDecimal.ZERO
-            val finnesEtterbetaling = simuleringService.hentEtterbetaling(behandling.id) != BigDecimal.ZERO
-            when {
-                behandling.erManuellMigreringForEndreMigreringsdato() &&
-                    (finnesFeilutbetaling || finnesEtterbetaling) -> kastException(behandling)
-                behandling.erHelmanuellMigrering() && (
-                    finnesFeilutbetaling ||
-                        finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandling.id)
-                    ) -> kastException(behandling)
+            if (behandling.erManuellMigrering() && (
+                finnesFeilutbetaling || finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandling.id)
+                )
+            ) {
+                kastException(behandling)
             }
         }
-
         return hentNesteStegForNormalFlyt(behandling)
     }
 

@@ -86,6 +86,8 @@ spec:
           cluster: dev-gcp
         - application: familie-ba-migrering
           cluster: dev-gcp
+      external:
+        - host: xsrv1mh6.api.sanity.io
   replicas:
     min: 2
     max: 4

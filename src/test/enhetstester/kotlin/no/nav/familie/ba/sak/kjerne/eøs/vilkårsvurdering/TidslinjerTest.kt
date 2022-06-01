@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.tidslinjer
+package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -54,14 +54,14 @@ internal class TidslinjerTest {
             .byggPerson()
         val barn2Result = "?EEE!!!E!!EEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
-        val tidslinjer = Tidslinjer(
+        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
         )
 
-        assertEquals(søkerResult, tidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
-        assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkResultatTidslinje)
-        assertEquals(barn2Result, tidslinjer.forBarn(barn2).regelverkResultatTidslinje)
+        assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
+        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
+        assertEquals(barn2Result, vilkårsvurderingTidslinjer.forBarn(barn2).regelverkResultatTidslinje)
     }
 
     @Test
@@ -89,13 +89,13 @@ internal class TidslinjerTest {
             .byggPerson()
         val barn1Result = "?????!!!!!!EE!!!?????".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
 
-        val tidslinjer = Tidslinjer(
+        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
         )
 
-        assertEquals(søkerResult, tidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
-        assertEquals(barn1Result, tidslinjer.forBarn(barn1).regelverkResultatTidslinje)
+        assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
+        assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
     }
 
     @Test
@@ -118,14 +118,14 @@ internal class TidslinjerTest {
             .medVilkår("+>", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
 
-        val tidslinjer = Tidslinjer(
+        val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
         )
 
         assertEquals(
             barn1.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(),
-            tidslinjer.forBarn(barn1).egetRegelverkResultatTidslinje.filtrerIkkeNull()
+            vilkårsvurderingTidslinjer.forBarn(barn1).egetRegelverkResultatTidslinje.filtrerIkkeNull()
                 .perioder().maxOf { it.tilOgMed.tilYearMonth() }
         )
     }

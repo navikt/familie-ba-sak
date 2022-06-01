@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
@@ -8,10 +9,14 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 
 class EndringstidspunktUtilsTest {
@@ -484,5 +489,130 @@ class EndringstidspunktUtilsTest {
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         )
         assertEquals(YearMonth.parse("2021-11").førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
+    }
+
+    @Test
+    fun `skal finne endringer i kompetanse perioder når kompetanse perioder er delt opp i revurdering`() {
+        val annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV
+        val forrigeKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2021, 11),
+                tom = YearMonth.of(2021, 12),
+                annenForeldersAktivitet = annenForeldersAktivitet
+            ),
+            lagKompetanse(fom = YearMonth.of(2022, 1))
+        )
+        val nyKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2021, 11),
+                tom = YearMonth.of(2021, 12),
+                annenForeldersAktivitet = annenForeldersAktivitet
+            ),
+            lagKompetanse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2022, 1),
+                annenForeldersAktivitet = annenForeldersAktivitet
+            ),
+            lagKompetanse(
+                fom = YearMonth.of(2022, 2),
+                annenForeldersAktivitet = annenForeldersAktivitet
+            )
+        )
+        assertEquals(
+            LocalDate.of(2022, 1, 31),
+            nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
+        )
+    }
+
+    @Test
+    fun `skal finne endringer i kompetanse perioder når revurdering har endringer på samme kompetanse perioder`() {
+        val annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV
+        val forrigeKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2021, 11),
+                tom = YearMonth.of(2021, 12),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet
+            ),
+            lagKompetanse(fom = YearMonth.of(2022, 1))
+        )
+        val nyKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2021, 11),
+                tom = YearMonth.of(2021, 12),
+                søkersAktivitet = SøkersAktivitet.SELVSTENDIG_NÆRINGSDRIVENDE,
+                annenForeldersAktivitet = annenForeldersAktivitet
+            ),
+            lagKompetanse(
+                fom = YearMonth.of(2022, 1),
+                annenForeldersAktivitet = annenForeldersAktivitet
+            )
+        )
+        assertEquals(
+            LocalDate.of(2021, 11, 30),
+            nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
+        )
+    }
+
+    @Test
+    fun `skal finne første endringspunkt når revurdering har flere endringer`() {
+        val annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV
+        val forrigeKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2021, 11),
+                tom = YearMonth.of(2021, 12),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet
+            ),
+            lagKompetanse(fom = YearMonth.of(2022, 1))
+        )
+        val nyKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2021, 11),
+                tom = YearMonth.of(2021, 12),
+                søkersAktivitet = SøkersAktivitet.MOTTAR_UFØRETRYGD_FRA_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet
+            ),
+            lagKompetanse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2022, 1),
+                annenForeldersAktivitet = annenForeldersAktivitet
+            ),
+            lagKompetanse(
+                fom = YearMonth.of(2022, 2),
+                annenForeldersAktivitet = annenForeldersAktivitet
+            )
+        )
+        assertEquals(
+            LocalDate.of(2021, 11, 30),
+            nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
+        )
+    }
+
+    @Test
+    fun `skal ikke finne endringer når kompetanse perioder ikke endres`() {
+        val annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV
+        val forrigeKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2021, 11),
+                tom = YearMonth.of(2021, 12),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet
+            ),
+            lagKompetanse(fom = YearMonth.of(2022, 1))
+        )
+        val nyKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2021, 11),
+                tom = YearMonth.of(2021, 12),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet
+            ),
+            lagKompetanse(fom = YearMonth.of(2022, 1))
+        )
+        assertEquals(
+            TIDENES_ENDE,
+            nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
+        )
     }
 }

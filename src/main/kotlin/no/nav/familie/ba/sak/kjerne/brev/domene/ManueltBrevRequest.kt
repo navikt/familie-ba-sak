@@ -221,9 +221,10 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
         )
     Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED ->
         InnhenteOpplysningerOmBarn(
-            mal = Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
+            mal = Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             navn = this.mottakerNavn,
             fødselsnummer = this.mottakerIdent,
+            dokumentliste = this.multiselectVerdier,
             enhet = this.enhetNavn(),
             barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager()
         )

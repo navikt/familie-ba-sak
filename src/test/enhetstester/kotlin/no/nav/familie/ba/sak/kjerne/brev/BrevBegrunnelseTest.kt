@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
+import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelserTestConfig
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentGyldigeBegrunnelserForVedtaksperiodeMinimert
@@ -17,7 +17,7 @@ class BrevBegrunnelseTest {
     fun `Tester begrunnelser knyttet til brev`(testReporter: TestReporter) {
         val testmappe = File("./src/test/resources/brevbegrunnelserCaser")
 
-        val sanityBegrunnelser = hentSanityBegrunnelser()
+        val sanityBegrunnelser = hentBegrunnelser()
 
         val antallFeil = testmappe.list()?.fold(0) { acc, it ->
             val fil = File("$testmappe/$it")

@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
-import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriodeTestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
@@ -12,45 +13,15 @@ data class MinimertVedtaksperiode(
     val fom: LocalDate?,
     val tom: LocalDate?,
     val type: Vedtaksperiodetype,
-    val begrunnelser: List<BrevBegrunnelseGrunnlag>,
+    val begrunnelser: List<BegrunnelseMedTriggere>,
+    val eøsBegrunnelser: List<EØSBegrunnelseMedTriggere>,
     val fritekster: List<String> = emptyList(),
     val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList(),
-) {
-    fun tilBrevPeriodeGrunnlagMedPersoner(
-        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-        erFørsteVedtaksperiodePåFagsak: Boolean,
-        erUregistrerteBarnPåbehandling: Boolean,
-        barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
-    ): BrevPeriodeGrunnlagMedPersoner {
-        return BrevPeriodeGrunnlagMedPersoner(
-            fom = this.fom,
-            tom = this.tom,
-            type = this.type,
-            begrunnelser = this.begrunnelser.flatMap {
-                it.tilBrevBegrunnelseGrunnlagMedPersoner(
-                    periode = NullablePeriode(
-                        fom = this.fom,
-                        tom = this.tom
-                    ),
-                    vedtaksperiodetype = type,
-                    restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                    identerMedUtbetalingPåPeriode = this.minimerteUtbetalingsperiodeDetaljer
-                        .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
-                    minimerteUtbetalingsperiodeDetaljer = this.minimerteUtbetalingsperiodeDetaljer,
-                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                    erUregistrerteBarnPåbehandling = erUregistrerteBarnPåbehandling,
-                    barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
-                )
-            },
-            fritekster = this.fritekster,
-            minimerteUtbetalingsperiodeDetaljer = this.minimerteUtbetalingsperiodeDetaljer,
-            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-        )
-    }
-}
+)
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
-    sanityBegrunnelser: List<SanityBegrunnelse>
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>
 ): MinimertVedtaksperiode {
     return MinimertVedtaksperiode(
         fom = this.fom,
@@ -58,7 +29,8 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
         type = this.type,
         fritekster = this.fritekster,
         minimerteUtbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer.map { it.tilMinimertUtbetalingsperiodeDetalj() },
-        begrunnelser = this.begrunnelser.map { it.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser) }
+        begrunnelser = this.begrunnelser.map { it.tilBegrunnelseMedTriggere(sanityBegrunnelser) },
+        eøsBegrunnelser = this.eøsBegrunnelser.mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }
     )
 }
 

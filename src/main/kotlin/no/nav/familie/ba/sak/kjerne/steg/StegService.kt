@@ -124,7 +124,7 @@ class StegService(
 
     private fun hentBarnFraForrigeAvsluttedeBehandling(behandling: Behandling): List<String> {
         val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
-        return beregningService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
+        return beregningService.finnBarnFraBehandlingMedTilkjentYtelse(sisteBehandling.id)
             .map { it.aktivFødselsnummer() }
     }
 

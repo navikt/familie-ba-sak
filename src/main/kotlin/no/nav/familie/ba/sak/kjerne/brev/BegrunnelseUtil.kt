@@ -35,7 +35,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
     val erUtbetalingMedReduksjonFraSistIverksatteBehandling =
         vedtaksperiodetype == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING &&
-            vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON
+            vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON && !triggesAv.vilkår.contains(Vilkår.UNDER_18_ÅR)
 
     fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
         minimertePersonResultater = restBehandlingsgrunnlagForBrev.minimertePersonResultater,

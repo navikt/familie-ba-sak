@@ -4,18 +4,26 @@ Saksbehandling for barnetrygd
 
 ## Kjøring lokalt
 
-For å kjøre opp appen lokalt kan en kjøre `DevLauncherPostgres` med Spring-profilen `postgres` satt. Dette kan feks
-gjøres ved å sette
-`-Dspring.profiles.active=postgres` under `Edit Configurations -> VM Options`. Appen tilgjengeliggjøres da
-på `localhost:8089`. Se [databasekapittelet](#database) for hvordan du setter opp databasen. For å tillate kall fra
-frontend, se [Autentisering](#autentisering).
+For å kjøre opp appen lokalt kan en kjøre
 
-Du kan også kjøre med en embedded database. Da må du sette `--dbcontainer` under `Edit Configurations -> VM Options`
+* `DevLauncher`, som kjører opp en H2-(minnebasert) database (vil gi mange feilmeldinger fra task-rammeverket)
+* `DevLauncherPostgres`, som kjører opp med Spring-profilen `postgres` satt, og forventer en kjørende database. Samme
+  effekt kan du med `DevLauncher` med
+  `-Dspring.profiles.active=postgres` satt under `Edit Configurations -> VM Options`.
+
+Appen tilgjengeliggjøres da på `localhost:8089`. Se [Database](#database) for hvordan du setter opp databasen. For å
+tillate kall fra frontend, se [Autentisering](#autentisering).
 
 ### Database
 
-Dersom man vil kjøre med postgres, kan man bytte til Spring-profilen `postgres`. Da må man sette opp postgres-databasen,
-dette gjøres slik:
+#### Embedded database
+
+Bruker du `DevLauncherPostgres`, kan du kjøre opp en embedded database. Da må du sette `--dbcontainer`
+under `Edit Configurations -> VM Options`
+
+#### Database i egen container
+
+Postgres-databasen kan settes opp slik:
 
 ```
 docker run --name familie-ba-sak-postgres -e POSTGRES_PASSWORD=test -d -p 5432:5432 postgres
@@ -25,15 +33,16 @@ psql -U postgres
 CREATE DATABASE "familie-ba-sak";
 ```
 
-Obs! Husk å sette VM Options til `-Dspring.profiles.active=postgres`.
-
 ### Autentisering
 
 For å kalle applikasjonen fra fontend må du sette miljøvariablene BA_SAK_CLIENT_ID og CLIENT_SECRET. Dette kan gjøres
 under `Edit Configurations -> Environment Variables`. Miljøvariablene kan hentes fra `azuread-familie-ba-sak-lokal` i
-dev-gcp clusteret ved å kjøre kommandoen:
+dev-gcp-clusteret ved å gjøre følgende:
 
-`kubectl -n teamfamilie get secret azuread-familie-ba-sak-lokal -o json | jq '.data | map_values(@base64d)'`.
+1. Logg på `gcloud`, typisk med kommandoen: `gcloud auth login`
+2. Koble deg til dev-gcp-cluster'et: `kubectl config use-context dev-gcp`
+3. Hent info:  
+   `kubectl -n teamfamilie get secret azuread-familie-ba-sak-lokal -o json | jq '.data | map_values(@base64d)'`.
 
 BA_SAK_CLIENT_ID må settes til `AZURE_APP_CLIENT_ID` og CLIENT_SECRET til`AZURE_APP_CLIENT_SECRET`
 
@@ -49,6 +58,40 @@ Til slutt skal miljøvariablene se slik ut:
 * CLIENT_SECRET=`AZURE_APP_CLIENT_SECRET` (fra `azuread-familie-ba-sak-lokal`)
 * Scope for den aktuelle tjenesten
   (fra [Vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/familie-ba-sak/default))
+
+### Bruke Postman
+
+Du kan bruke Postman til å kalle APIene i ba-sak. Det krever at du har satt opp [autentisering](#autentisering) riktig,
+og har et token som gjør at du kaller som ba-sak-frontend.
+
+Den nødvendige informasjonen for å få frontend-token'et får du ved å kalle:
+
+`kubectl -n teamfamilie get secret azuread-familie-ba-sak-frontend-lokal -o json | jq '.data | map_values(@base64d)'`.
+
+I Postman gjør du et GET-kall med følgende oppsett:
+
+* URL: `https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token`
+* Headers -> Cookie: `fpc=AsRNnIJ3MI9FqfN68mC5KW4`
+* Body: `x-www-form-urlencoded` med følgende key-values
+    * `grant_type`: `client_credentials`
+    * `client_id`: <`AZURE_APP_CLIENT_ID`> fra kubectl-kallet over
+    * `client_secret`: <`AZURE_APP_CLIENT_SECRET`> fra kubectl-kallet over
+    * `scope`: `api://dev-gcp.teamfamilie.familie-ba-sak-lokal/.default
+
+Et triks kan være å sette opp en "test" under *Tests* i request'en:
+
+```
+pm.test("Lagre token globalt", function () {
+    var jsonData = pm.response.json();
+    pm.globals.set("azure-familie-ba-sak", jsonData.access_token);
+});
+```
+
+som vil plukke ut token'et og lagre det i en global variabel, her `azure-familie-ba-sak`
+
+Når du lager kall mot APIet, så kan du sette følgende i header'en for å sende med token'et:
+
+* `Authorization`: `Bearer {{azure-familie-ba-sak}}`
 
 ### Ktlint
 
@@ -70,7 +113,6 @@ kjøre [navkafka-docker-compose](https://github.com/navikt/navkafka-docker-compo
 navkafka-docker-compose for mer info om hvordan man kjører den.
 
 Topicen vi lytter på må da opprettes via deres api med følgende kommando:
-
 
 ```
 curl -X POST "http://igroup:itest@localhost:8840/api/v1/topics" -H "Accept: application/json" -H "Content-Type: application/json" --data "{"name": "aapen-barnetrygd-vedtak-v1", "members": [{ "member": "srvc01", "role": "CONSUMER" }], "numPartitions": 1 }"
@@ -159,7 +201,8 @@ Kjør så:
 
 For NAV-interne kan henvendelser om applikasjonen rettes til #team-familie på slack. Ellers kan man opprette et issue
 her på github.
-  
+
 ## Tilgang til databasene i prod og preprod
+
 Se https://github.com/navikt/familie/blob/master/doc/utvikling/gcp/gcp_kikke_i_databasen.md
 
