@@ -106,7 +106,7 @@ class VurderTilbakekrevingStegTest {
     }
 
     @Test
-    fun `skal ikke utføre steg for migreringsbehandling med endre migreringsdato når det finnes etterbetaling`() {
+    fun `skal ikke utføre steg for migreringsbehandling med endre migreringsdato når det finnes etterbetaling mer enn maks beløp`() {
         val behandling: Behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
@@ -114,7 +114,16 @@ class VurderTilbakekrevingStegTest {
         )
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-        every { simuleringService.hentEtterbetaling(behandling.id) } returns BigDecimal(2500)
+        // etterbetaling 1000 KR
+        val posteringer = listOf(
+            mockVedtakSimuleringPostering(beløp = 1000, betalingType = BetalingType.DEBIT),
+            mockVedtakSimuleringPostering(beløp = -1000, betalingType = BetalingType.KREDIT),
+            mockVedtakSimuleringPostering(beløp = 1000, betalingType = BetalingType.DEBIT)
+        )
+        val simuleringMottaker =
+            listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
+
+        every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns simuleringMottaker
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
@@ -129,6 +138,34 @@ class VurderTilbakekrevingStegTest {
     }
 
     @Test
+    fun `skal utføre steg for migreringsbehandling med endre migreringsdato når det finnes etterbetaling mindre enn maks beløp`() {
+        val behandling: Behandling = lagBehandling(
+            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+            førsteSteg = StegType.VURDER_TILBAKEKREVING
+        )
+        every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
+        every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
+        // etterbetaling 200 KR
+        val posteringer = listOf(
+            mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
+            mockVedtakSimuleringPostering(beløp = -200, betalingType = BetalingType.KREDIT),
+            mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT)
+        )
+        val simuleringMottaker =
+            listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
+
+        every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns simuleringMottaker
+
+        val stegType = assertDoesNotThrow {
+            vurderTilbakekrevingSteg.utførStegOgAngiNeste(
+                behandling, restTilbakekreving
+            )
+        }
+        assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
+    }
+
+    @Test
     fun `skal ikke utføre steg for helmanuell migrering når det finnes feilutbetaling`() {
         val behandling: Behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -137,7 +174,6 @@ class VurderTilbakekrevingStegTest {
         )
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal(2500)
-        every { simuleringService.hentEtterbetaling(behandling.id) } returns BigDecimal.ZERO
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
@@ -160,8 +196,8 @@ class VurderTilbakekrevingStegTest {
         )
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-        every { simuleringService.hentEtterbetaling(behandling.id) } returns BigDecimal(1000)
 
+        // etterbetaling 1000 KR
         val posteringer = listOf(
             mockVedtakSimuleringPostering(beløp = 1000, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(beløp = -1000, betalingType = BetalingType.KREDIT),
@@ -193,13 +229,13 @@ class VurderTilbakekrevingStegTest {
         )
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-        every { simuleringService.hentEtterbetaling(behandling.id) } returns BigDecimal(440)
 
         val fom = LocalDate.of(2021, 1, 1)
         val tom = LocalDate.of(2021, 1, 31)
         val fom2 = LocalDate.of(2021, 2, 1)
         val tom2 = LocalDate.of(2021, 2, 28)
 
+        // etterbetaling 440 KR
         val posteringer = listOf(
             mockVedtakSimuleringPostering(fom = fom, tom = tom, beløp = 300, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(fom = fom, tom = tom, beløp = -300, betalingType = BetalingType.KREDIT),
@@ -234,8 +270,8 @@ class VurderTilbakekrevingStegTest {
         )
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-        every { simuleringService.hentEtterbetaling(behandling.id) } returns BigDecimal(200)
 
+        // etterbetaling 200 KR
         val posteringer = listOf(
             mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(beløp = -200, betalingType = BetalingType.KREDIT),
@@ -263,13 +299,13 @@ class VurderTilbakekrevingStegTest {
         )
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-        every { simuleringService.hentEtterbetaling(behandling.id) } returns BigDecimal(440)
 
         val fom = LocalDate.of(2021, 1, 1)
         val tom = LocalDate.of(2021, 1, 31)
         val fom2 = LocalDate.of(2021, 2, 1)
         val tom2 = LocalDate.of(2021, 2, 28)
 
+        // etterbetaling 440 KR
         val posteringer = listOf(
             mockVedtakSimuleringPostering(fom = fom, tom = tom, beløp = 220, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(fom = fom, tom = tom, beløp = -220, betalingType = BetalingType.KREDIT),

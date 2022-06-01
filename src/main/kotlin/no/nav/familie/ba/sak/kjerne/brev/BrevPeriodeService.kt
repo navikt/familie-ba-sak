@@ -47,6 +47,7 @@ class BrevPeriodeService(
         val behandlingId = vedtaksperiodeMedBegrunnelser.vedtak.behandling.id
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
         val endredeUtbetalingAndeler =
@@ -72,7 +73,11 @@ class BrevPeriodeService(
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
 
-        val minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(sanityBegrunnelser)
+        val minimertVedtaksperiode =
+            utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(
+                sanityBegrunnelser = sanityBegrunnelser,
+                sanityEØSBegrunnelser = sanityEØSBegrunnelser
+            )
 
         val brevperiodeData = BrevperiodeData(
             minimertVedtaksperiode = minimertVedtaksperiode,
