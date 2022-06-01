@@ -118,11 +118,11 @@ class BeregningService(
         val barnMedUtbetalingSomIkkeBlittEndretISisteBehandling =
             finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandling.id)
 
-        val alleBarnISisteBehanlding = finnBarnFraBehandlingMedTilkjentYtsele(behandling.id)
+        val alleBarnISisteBehanlding = finnBarnFraBehandlingMedTilkjentYtelse(behandling.id)
 
         val alleBarnISistIverksattBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)?.let {
-                finnBarnFraBehandlingMedTilkjentYtsele(
+                finnBarnFraBehandlingMedTilkjentYtelse(
                     it.id
                 )
             }
@@ -223,7 +223,7 @@ class BeregningService(
     /**
      * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse.
      */
-    fun finnBarnFraBehandlingMedTilkjentYtsele(behandlingId: Long): List<Aktør> =
+    fun finnBarnFraBehandlingMedTilkjentYtelse(behandlingId: Long): List<Aktør> =
         personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
             ?.filter {
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
