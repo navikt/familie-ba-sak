@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
@@ -71,14 +72,14 @@ class VilkårsvurderingTestController(
         )
 
         // Opprett persongrunnlag
-        val persongrunnlag = personopplysningGrunnlagRepository.save(
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.save(
             lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray())
         )
 
         // Opprett og lagre vilkårsvurdering
         val vilkårsvurdering = personresultater.tilVilkårsvurdering(
             behandling,
-            personer.map { p -> persongrunnlag.personer.first { lagret -> lagret.aktør.aktivFødselsnummer() == p.aktør.aktivFødselsnummer() } }
+            personopplysningGrunnlag
         )
 
         vilkårsvurderingService.lagreInitielt(
@@ -91,10 +92,10 @@ class VilkårsvurderingTestController(
 }
 
 private fun Map<LocalDate, Map<Vilkår, String>>.tilPersoner(): List<Person> {
-    return this.keys.mapIndexed { indeks, startdato ->
+    return this.keys.mapIndexed { indeks, startTidspunkt ->
         when (indeks) {
-            0 -> tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = startdato.minusYears(25))
-            else -> tilfeldigPerson(personType = PersonType.BARN, fødselsdato = startdato)
+            0 -> tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = startTidspunkt)
+            else -> tilfeldigPerson(personType = PersonType.BARN, fødselsdato = startTidspunkt)
         }
     }.map {
         it.copy(id = 0).also { it.sivilstander.clear() }
@@ -103,13 +104,15 @@ private fun Map<LocalDate, Map<Vilkår, String>>.tilPersoner(): List<Person> {
 
 fun Map<LocalDate, Map<Vilkår, String>>.tilVilkårsvurdering(
     behandling: Behandling,
-    personer: List<Person>
+    personopplysningGrunnlag: PersonopplysningGrunnlag
 ): Vilkårsvurdering {
 
     val builder = VilkårsvurderingBuilder<Måned>(behandling)
 
-    this.entries.forEachIndexed { indeks, (startTidspunkt, vilkårsresultater) ->
-        val personBuilder = builder.forPerson(personer[indeks], startTidspunkt.tilMånedTidspunkt())
+    this.entries.forEach { (startTidspunkt, vilkårsresultater) ->
+        val person = personopplysningGrunnlag.personer.first { it.fødselsdato == startTidspunkt }
+
+        val personBuilder = builder.forPerson(person, startTidspunkt.tilMånedTidspunkt())
         vilkårsresultater.forEach { (vilkår, tidslinje) -> personBuilder.medVilkår(tidslinje, vilkår) }
         personBuilder.byggPerson()
     }
