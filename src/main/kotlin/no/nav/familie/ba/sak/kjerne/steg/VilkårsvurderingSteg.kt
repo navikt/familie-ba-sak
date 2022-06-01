@@ -24,7 +24,8 @@ class VilkårsvurderingSteg(
     private val persongrunnlagService: PersongrunnlagService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val kompetanseService: KompetanseService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -56,7 +57,7 @@ class VilkårsvurderingSteg(
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-            vilkårService.initierVilkårsvurderingForBehandling(
+            vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
                 behandling = behandling,
                 bekreftEndringerViaFrontend = true,
                 forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(

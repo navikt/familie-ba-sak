@@ -45,6 +45,7 @@ class VilkårsvurderingStegTest {
     private val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk()
     private val kompetanseService: KompetanseService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService = mockk()
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg = VilkårsvurderingSteg(
         behandlingHentOgPersisterService,
@@ -54,7 +55,8 @@ class VilkårsvurderingStegTest {
         persongrunnlagService,
         tilbakestillBehandlingService,
         kompetanseService,
-        featureToggleService
+        featureToggleService,
+        vilkårsvurderingForNyBehandlingService
     )
 
     val behandling = lagBehandling(
