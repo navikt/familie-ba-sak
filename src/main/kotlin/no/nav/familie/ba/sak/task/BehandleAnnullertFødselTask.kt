@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -43,9 +44,9 @@ class BehandleAnnullertFødselTask(
                 behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId).aktiv
             }
             ) {
-                logger.warn("Finnes aktiv behandling(er) for annullert fødselshendelse.")
-            } else {
-                logger.info("Finnes ikke åpen task eller aktiv behandling for annullertfødsel")
+                logger.error("Finnes aktiv behandling(er) for annullert fødselshendelse.")
+                secureLogger.error("Finnes aktiv behandling(er) for annullert fødselshendelse. ${dto.barnasIdenter}")
+                // TODO opprett vurder livshendelse oppgave for annulert melding
             }
         } else {
             logger.info("Finnes åpen task(er) for annullertfødsel tidligere Id = ${dto.tidligereHendelseId}")

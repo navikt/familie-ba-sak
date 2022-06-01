@@ -83,41 +83,6 @@ class VilkårsvurderingStegTest {
     }
 
     @Test
-    fun `skal ikke fortsette til neste steg når helmanuell migreringsbehandling ikke har del bosted`() {
-        val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
-        val søkerPersonResultat = lagPersonResultat(
-            vilkårsvurdering = vikårsvurdering,
-            aktør = søkerAktørId,
-            resultat = Resultat.OPPFYLT,
-            periodeFom = LocalDate.of(1984, 1, 1),
-            periodeTom = LocalDate.now(),
-            lagFullstendigVilkårResultat = true,
-            personType = PersonType.SØKER,
-            erDeltBosted = false
-        )
-        val barnPersonResultat = lagPersonResultat(
-            vilkårsvurdering = vikårsvurdering,
-            aktør = barnAktørId,
-            resultat = Resultat.OPPFYLT,
-            periodeFom = LocalDate.of(2019, 1, 1),
-            periodeTom = LocalDate.now(),
-            lagFullstendigVilkårResultat = true,
-            personType = PersonType.BARN,
-            erDeltBosted = false
-        )
-        vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
-        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED) } returns false
-
-        val exception = assertThrows<RuntimeException> { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, "") }
-        assertEquals(
-            "Behandling ${behandling.id} kan ikke fortsettes uten delt bosted " +
-                "i vilkårsvurdering for minst ett av barna",
-            exception.message
-        )
-    }
-
-    @Test
     fun `skal fortsette til neste steg når helmanuell migreringsbehandling har del bosted`() {
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerPersonResultat = lagPersonResultat(

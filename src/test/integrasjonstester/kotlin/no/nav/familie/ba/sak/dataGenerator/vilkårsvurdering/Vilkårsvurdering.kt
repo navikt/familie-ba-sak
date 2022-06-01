@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagVilkårResultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -9,6 +11,8 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
@@ -74,5 +78,82 @@ fun lagVilkårsvurderingFraRestScenario(
         søker = søker,
         barna = barna,
         overstyrendeVilkårResultater = overstyrendeVilkårResultater
+    )
+}
+
+fun lagSøkerVilkårResultat(
+    søkerPersonResultat: PersonResultat,
+    periodeFom: LocalDate,
+    periodeTom: LocalDate? = null,
+    behandlingId: Long
+): Set<VilkårResultat> {
+    return setOf(
+        lagVilkårResultat(
+            personResultat = søkerPersonResultat,
+            vilkårType = Vilkår.BOSATT_I_RIKET,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
+            behandlingId = behandlingId
+        ),
+        lagVilkårResultat(
+            personResultat = søkerPersonResultat,
+            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
+            behandlingId = behandlingId
+        )
+    )
+}
+
+fun lagBarnVilkårResultat(
+    barnPersonResultat: PersonResultat,
+    barnetsFødselsdato: LocalDate,
+    behandlingId: Long,
+    forrigeMigreringsdato: LocalDate,
+    flytteSak: Boolean = false
+): Set<VilkårResultat> {
+    return setOf(
+        lagVilkårResultat(
+            personResultat = barnPersonResultat,
+            vilkårType = Vilkår.UNDER_18_ÅR,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = barnetsFødselsdato,
+            periodeTom = barnetsFødselsdato.plusYears(18).minusMonths(1),
+            behandlingId = behandlingId
+        ),
+        lagVilkårResultat(
+            personResultat = barnPersonResultat,
+            vilkårType = Vilkår.GIFT_PARTNERSKAP,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = barnetsFødselsdato,
+            periodeTom = null,
+            behandlingId = behandlingId
+        ),
+        lagVilkårResultat(
+            personResultat = barnPersonResultat,
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = forrigeMigreringsdato,
+            periodeTom = null,
+            behandlingId = behandlingId
+        ),
+        lagVilkårResultat(
+            personResultat = barnPersonResultat,
+            vilkårType = Vilkår.BOSATT_I_RIKET,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = if (flytteSak) barnetsFødselsdato else forrigeMigreringsdato,
+            periodeTom = null,
+            behandlingId = behandlingId
+        ),
+        lagVilkårResultat(
+            personResultat = barnPersonResultat,
+            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = if (flytteSak) barnetsFødselsdato else forrigeMigreringsdato,
+            periodeTom = null,
+            behandlingId = behandlingId
+        )
     )
 }
