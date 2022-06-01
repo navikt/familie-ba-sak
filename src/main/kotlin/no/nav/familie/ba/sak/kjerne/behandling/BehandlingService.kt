@@ -295,7 +295,7 @@ class BehandlingService(
                 .finnSisteMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
                 ?.toYearMonth()
                 ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
-                    ?.let {
+                    ?.takeIf { it.erMigrering() }?.let { // fordi migreringsdato kun kan lagret for migreringsbehandling
                         vilkårsvurderingService.hentTidligsteVilkårsvurderingKnyttetTilMigrering(
                             behandlingId = it.id
                         )
