@@ -33,7 +33,7 @@
         <mockk.version>1.12.4</mockk.version>
         <token-validation-spring.version>2.0.20</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>1.6.8</springdoc.version>
+        <springdoc.version>1.6.9</springdoc.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
