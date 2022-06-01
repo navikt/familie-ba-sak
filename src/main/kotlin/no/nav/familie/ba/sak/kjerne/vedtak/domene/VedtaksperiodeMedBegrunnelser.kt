@@ -14,14 +14,13 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.hentAndelerForSegment
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.lagUtbetalingsperiodeDetaljer
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateSegment
-import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.persistence.CascadeType
@@ -73,8 +72,15 @@ data class VedtaksperiodeMedBegrunnelser(
         cascade = [CascadeType.ALL],
         orphanRemoval = true
     )
-    @SortComparator(BegrunnelseComparator::class)
-    val begrunnelser: MutableSet<Vedtaksbegrunnelse> = sortedSetOf(comparator),
+    val begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(),
+
+    @OneToMany(
+        fetch = FetchType.EAGER,
+        mappedBy = "vedtaksperiodeMedBegrunnelser",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true
+    )
+    val eøsBegrunnelser: MutableSet<EØSBegrunnelse> = mutableSetOf(),
 
     // Bruker list for å bevare rekkefølgen som settes frontend.
     @OneToMany(
@@ -137,10 +143,6 @@ data class VedtaksperiodeMedBegrunnelser(
             localDateSegment.fom.isSameOrBefore(this.fom ?: TIDENES_MORGEN) &&
                 localDateSegment.tom.isSameOrAfter(this.tom ?: TIDENES_ENDE)
         } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
-
-    companion object {
-        val comparator = BegrunnelseComparator()
-    }
 }
 
 fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
@@ -157,13 +159,4 @@ private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<Andel
     return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
         ?: sorterteSegmenter.firstOrNull()
         ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
-}
-
-class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {
-
-    override fun compare(o1: Vedtaksbegrunnelse, o2: Vedtaksbegrunnelse): Int {
-        return if (o1.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
-            -1
-        } else 1
-    }
 }
