@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakEier
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
