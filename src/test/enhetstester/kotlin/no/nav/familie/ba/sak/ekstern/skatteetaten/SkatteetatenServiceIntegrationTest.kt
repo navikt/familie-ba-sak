@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakEier
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
@@ -658,8 +659,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             personidentRepository.saveAll(aktør.personidenter.filter { !it.aktiv })
         }
 
-        val fagsak = Fagsak(aktør = aktør)
-        fagsakRepository.saveAndFlush(fagsak)
+        val fagsak = fagsakRepository.finnFagsakForAktør(aktør) ?: fagsakRepository.saveAndFlush(Fagsak(aktør = aktør))
 
         val behandling = Behandling(
             fagsak = fagsak,
