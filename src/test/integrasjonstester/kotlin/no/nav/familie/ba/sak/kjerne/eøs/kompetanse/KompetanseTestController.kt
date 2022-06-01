@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -37,17 +38,18 @@ class KompetanseTestController(
         @PathVariable behandlingId: Long,
         @RequestBody restKompetanser: Map<LocalDate, String>
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!
+        val behandlingId = BehandlingId(behandlingId)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId.id)!!
         restKompetanser.tilKompetanser(behandlingId, personopplysningGrunnlag).forEach {
             kompetanseService.endreKompetanse(behandlingId, it)
         }
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId.id)))
     }
 }
 
 private fun Map<LocalDate, String>.tilKompetanser(
-    behandlingId: Long,
+    behandlingId: BehandlingId,
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ): Collection<Kompetanse> {
     return this.map { (dato, tidslinje) ->
