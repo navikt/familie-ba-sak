@@ -32,25 +32,25 @@ object VilkårsvurderingForNyBehandlingUtils {
             when {
                 behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD &&
                     behandling.opprettetÅrsak == BehandlingÅrsak.MIGRERING -> {
-                    personResultater = lagVilkårsvurderingForMigreringsbehandling(
+                    personResultater = lagPersonResultaterForMigreringsbehandling(
                         vilkårsvurdering = this,
                         personopplysningGrunnlag = personopplysningGrunnlag
                     )
                 }
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
-                    personResultater = lagVilkårsvurderingForFødselshendelse(
+                    personResultater = lagPersonResultaterForFødselshendelse(
                         vilkårsvurdering = this,
                         barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
                         personopplysningGrunnlag = personopplysningGrunnlag
                     )
                 }
                 !behandling.skalBehandlesAutomatisk -> {
-                    personResultater = lagManuellVilkårsvurdering(
+                    personResultater = lagPersonResultaterForManuellVilkårsvurdering(
                         vilkårsvurdering = this,
                         personopplysningGrunnlag = personopplysningGrunnlag
                     )
                 }
-                else -> personResultater = lagTomVilkårsvurdering(
+                else -> personResultater = lagPersonResultaterForTomVilkårsvurdering(
                     vilkårsvurdering = this,
                     personopplysningGrunnlag = personopplysningGrunnlag
                 )
@@ -80,7 +80,7 @@ object VilkårsvurderingForNyBehandlingUtils {
         return vilkårsvurdering
     }
 
-    private fun lagVilkårsvurderingForMigreringsbehandling(
+    private fun lagPersonResultaterForMigreringsbehandling(
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag
     ): Set<PersonResultat> {
@@ -121,7 +121,7 @@ object VilkårsvurderingForNyBehandlingUtils {
         }.toSet()
     }
 
-    private fun lagVilkårsvurderingForFødselshendelse(
+    private fun lagPersonResultaterForFødselshendelse(
         vilkårsvurdering: Vilkårsvurdering,
         barnaAktørSomAlleredeErVurdert: List<Aktør>,
         personopplysningGrunnlag: PersonopplysningGrunnlag
@@ -153,7 +153,7 @@ object VilkårsvurderingForNyBehandlingUtils {
         }.toSet()
     }
 
-    private fun lagManuellVilkårsvurdering(
+    private fun lagPersonResultaterForManuellVilkårsvurdering(
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag
     ): Set<PersonResultat> {
@@ -162,7 +162,7 @@ object VilkårsvurderingForNyBehandlingUtils {
         }.toSet()
     }
 
-    private fun lagTomVilkårsvurdering(
+    private fun lagPersonResultaterForTomVilkårsvurdering(
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag
     ): Set<PersonResultat> {
