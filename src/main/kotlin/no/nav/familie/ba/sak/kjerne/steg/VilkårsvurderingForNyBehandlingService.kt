@@ -5,10 +5,12 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingUtils.førstegangskjøringAvVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingUtils.genererInitiellVilkårsvurdering
@@ -116,61 +118,115 @@ class VilkårsvurderingForNyBehandlingService(
     ): Vilkårsvurdering {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
 
-        if (behandling.skalBehandlesAutomatisk && personopplysningGrunnlag.barna.isEmpty()) {
-            throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
-        }
+        validerAtFødselshendelseInneholderMinstEttBarn(behandling, personopplysningGrunnlag)
 
         val aktivVilkårsvurdering = hentVilkårsvurdering(behandling.id)
-        val barnaAktørSomAlleredeErVurdert = aktivVilkårsvurdering?.personResultater?.mapNotNull {
-            personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
-        }?.filter { it.type == PersonType.BARN }?.map { it.aktør } ?: emptyList()
 
         val initiellVilkårsvurdering =
             genererInitiellVilkårsvurdering(
                 behandling = behandling,
-                barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
+                barnaAktørSomAlleredeErVurdert = aktivVilkårsvurdering?.personResultater?.mapNotNull {
+                    personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
+                }?.filter { it.type == PersonType.BARN }?.map { it.aktør } ?: emptyList(),
                 personopplysningGrunnlag = personopplysningGrunnlag
             )
 
-        if (førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering) && behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-            vilkårsvurderingMetrics.tellMetrikker(initiellVilkårsvurdering)
-        }
+        tellMetrikkerForFødselshendelse(
+            aktivVilkårsvurdering = aktivVilkårsvurdering,
+            behandling = behandling,
+            initiellVilkårsvurdering = initiellVilkårsvurdering
+        )
 
         val løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(behandling.fagsak.id)
 
-        return if (forrigeBehandlingSomErVedtatt != null && aktivVilkårsvurdering == null) {
-            val vilkårsvurdering = genererVilkårsvurderingFraForrigeVedtattBehandling(
+        val finnesVilkårsvurderingPåInneværendeBehandling = aktivVilkårsvurdering != null
+        val førsteVilkårsvurderingPåBehandlingOgFinnesTidligereVedtattBehandling =
+            forrigeBehandlingSomErVedtatt != null && !finnesVilkårsvurderingPåInneværendeBehandling
+
+        return if (førsteVilkårsvurderingPåBehandlingOgFinnesTidligereVedtattBehandling) {
+            genererVilkårsvurderingFraForrigeVedtatteBehandling(
                 initiellVilkårsvurdering = initiellVilkårsvurdering,
-                forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
+                forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt!!,
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 løpendeUnderkategori = løpendeUnderkategori
             )
-            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
-                behandling,
-                forrigeBehandlingSomErVedtatt
-            )
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
-        } else if (aktivVilkårsvurdering != null) {
-            val (initieltSomErOppdatert, aktivtSomErRedusert) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
+        } else if (finnesVilkårsvurderingPåInneværendeBehandling) {
+            genererNyVilkårsvurderingForBehandling(
                 initiellVilkårsvurdering = initiellVilkårsvurdering,
-                aktivVilkårsvurdering = aktivVilkårsvurdering,
+                aktivVilkårsvurdering = aktivVilkårsvurdering!!,
                 løpendeUnderkategori = løpendeUnderkategori,
-                forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) hentVilkårsvurdering(
-                    forrigeBehandlingSomErVedtatt.id
-                ) else null
+                forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
+                bekreftEndringerViaFrontend = bekreftEndringerViaFrontend
             )
-
-            if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
-                throw FunksjonellFeil(
-                    melding = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
-                    frontendFeilmelding = VilkårsvurderingUtils.lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
-                )
-            }
-            vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
         } else {
             vilkårsvurderingService.lagreInitielt(initiellVilkårsvurdering)
         }
+    }
+
+    private fun genererNyVilkårsvurderingForBehandling(
+        initiellVilkårsvurdering: Vilkårsvurdering,
+        aktivVilkårsvurdering: Vilkårsvurdering,
+        løpendeUnderkategori: BehandlingUnderkategori?,
+        forrigeBehandlingSomErVedtatt: Behandling?,
+        bekreftEndringerViaFrontend: Boolean
+    ): Vilkårsvurdering {
+        val (initieltSomErOppdatert, aktivtSomErRedusert) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
+            initiellVilkårsvurdering = initiellVilkårsvurdering,
+            aktivVilkårsvurdering = aktivVilkårsvurdering,
+            løpendeUnderkategori = løpendeUnderkategori,
+            forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) hentVilkårsvurdering(
+                forrigeBehandlingSomErVedtatt.id
+            ) else null
+        )
+
+        if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
+            throw FunksjonellFeil(
+                melding = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
+                frontendFeilmelding = VilkårsvurderingUtils.lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
+            )
+        }
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
+    }
+
+    private fun tellMetrikkerForFødselshendelse(
+        aktivVilkårsvurdering: Vilkårsvurdering?,
+        behandling: Behandling,
+        initiellVilkårsvurdering: Vilkårsvurdering
+    ) {
+        if (førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering) && behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+            vilkårsvurderingMetrics.tellMetrikker(initiellVilkårsvurdering)
+        }
+    }
+
+    private fun validerAtFødselshendelseInneholderMinstEttBarn(
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
+    ) {
+        if (behandling.skalBehandlesAutomatisk && personopplysningGrunnlag.barna.isEmpty()) {
+            throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
+        }
+    }
+
+    private fun genererVilkårsvurderingFraForrigeVedtatteBehandling(
+        initiellVilkårsvurdering: Vilkårsvurdering,
+        forrigeBehandlingSomErVedtatt: Behandling,
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        løpendeUnderkategori: BehandlingUnderkategori?
+    ): Vilkårsvurdering {
+        val vilkårsvurdering = genererVilkårsvurderingFraForrigeVedtattBehandling(
+            initiellVilkårsvurdering = initiellVilkårsvurdering,
+            forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
+            behandling = behandling,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            løpendeUnderkategori = løpendeUnderkategori
+        )
+        endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+            behandling,
+            forrigeBehandlingSomErVedtatt
+        )
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
