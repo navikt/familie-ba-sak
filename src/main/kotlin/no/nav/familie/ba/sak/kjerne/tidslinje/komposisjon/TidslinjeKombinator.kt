@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
  * Kombintor-funksjonen tar inn (nullable) av V og H og returnerer (nullable) R
  * Resultatet er en tidslinje med tidsenhet T og innhold R
  */
-fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
+fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
     høyreTidslinje: Tidslinje<H, T>,
     kombinator: (V?, H?) -> R?
 ): Tidslinje<R, T> {
@@ -36,7 +36,7 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.snittKombinerMed(
  * Null-verdier fjernes før de sendes til kombinator-funksjonen, som betyr at en tom iterator kan bli sendt
  * Resultatet er en tidslnije med tidsenhet T og innhold R
  */
-fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.snittKombinerUtenNull(
+fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNull(
     listeKombinator: (Iterable<I>) -> R?
 ): Tidslinje<R, T> {
     val tidslinjer = this

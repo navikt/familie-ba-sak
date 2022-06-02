@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
@@ -60,7 +60,7 @@ class VilkårsvurderingTidslinjer(
             vilkårsresultatTidslinjer.map { it.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() }
 
         val regelverkResultatTidslinje = vilkårsresultatMånedTidslinjer
-            .snittKombinerUtenNull {
+            .kombinerUtenNull {
                 kombinerVilkårResultaterTilRegelverkResultat(PersonType.SØKER, it)
             }
     }
@@ -81,11 +81,11 @@ class VilkårsvurderingTidslinjer(
 
         val egetRegelverkResultatTidslinje: Tidslinje<RegelverkResultat, Måned> =
             vilkårsresultatMånedTidslinjer
-                .snittKombinerUtenNull { kombinerVilkårResultaterTilRegelverkResultat(PersonType.BARN, it) }
+                .kombinerUtenNull { kombinerVilkårResultaterTilRegelverkResultat(PersonType.BARN, it) }
                 .beskjærEtter(erUnder18ÅrVilkårTidslinje)
 
         val regelverkResultatTidslinje = egetRegelverkResultatTidslinje
-            .snittKombinerMed(søkersTidslinje.regelverkResultatTidslinje) { barnetsResultat, søkersResultat ->
+            .kombinerMed(søkersTidslinje.regelverkResultatTidslinje) { barnetsResultat, søkersResultat ->
                 barnetsResultat.kombinerMed(søkersResultat)
             }
             // Barnets egne tidslinjer kan på dette tidspunktet strekke seg 18 år frem i tid,

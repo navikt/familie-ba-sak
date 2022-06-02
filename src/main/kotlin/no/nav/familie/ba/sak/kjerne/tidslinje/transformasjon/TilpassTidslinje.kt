@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 
 /**
@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 fun <I, M, T : Tidsenhet> Tidslinje<I, T>.tilpassTil(
     mønsterTidslinje: Tidslinje<M, T>,
     tilpassInnhold: (I?, M) -> I
-) = this.snittKombinerMed(mønsterTidslinje) { thisInnhold: I?, mønsterInnhold: M? ->
+) = this.kombinerMed(mønsterTidslinje) { thisInnhold: I?, mønsterInnhold: M? ->
     when {
         mønsterInnhold == null -> null
         else -> tilpassInnhold(thisInnhold, mønsterInnhold)

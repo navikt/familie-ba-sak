@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 
@@ -36,7 +36,7 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerIkkeNull(): Tidslinje<I, T> = filt
  * men innholdet blir null hvis den boolske tidslinjen er false
  */
 fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerMed(boolskTidslinje: Tidslinje<Boolean, T>): Tidslinje<I, T> {
-    return this.snittKombinerMed(boolskTidslinje) { innhold, erSann ->
+    return this.kombinerMed(boolskTidslinje) { innhold, erSann ->
         when (erSann) {
             true -> innhold
             else -> null
