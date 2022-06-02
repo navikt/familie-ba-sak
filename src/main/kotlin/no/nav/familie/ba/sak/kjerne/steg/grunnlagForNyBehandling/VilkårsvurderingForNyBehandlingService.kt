@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.steg
+package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
