@@ -26,7 +26,7 @@ class TilbakestillBehandlingService(
 ) {
 
     @Transactional
-    fun initierOgSettBehandlingTilVilårsvurdering(
+    fun initierOgSettBehandlingTilVilkårsvurdering(
         behandling: Behandling,
         bekreftEndringerViaFrontend: Boolean = true
     ) {
