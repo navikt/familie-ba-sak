@@ -152,6 +152,10 @@ class VilkårsvurderingForNyBehandlingService(
                 personopplysningGrunnlag = personopplysningGrunnlag
             )
 
+        if (førstegangskjøringAvVilkårsvurdering(behandlingId = behandling.id) && behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+            vilkårsvurderingMetrics.tellMetrikker(initiellVilkårsvurdering)
+        }
+
         return if (forrigeBehandlingSomErVedtatt != null && aktivVilkårsvurdering == null) {
             val vilkårsvurdering = genererVilkårsvurderingFraForrigeVedtattBehandling(
                 initiellVilkårsvurdering,
@@ -202,10 +206,6 @@ class VilkårsvurderingForNyBehandlingService(
                         barnaSomAlleredeErVurdert = barnaSomAlleredeErVurdert,
                         personopplysningGrunnlag = personopplysningGrunnlag
                     )
-
-                    if (førstegangskjøringAvVilkårsvurdering(this)) {
-                        vilkårsvurderingMetrics.tellMetrikker(this)
-                    }
                 }
                 !behandling.skalBehandlesAutomatisk -> {
                     personResultater = lagManuellVilkårsvurdering(
@@ -391,8 +391,8 @@ class VilkårsvurderingForNyBehandlingService(
         )
     }
 
-    private fun førstegangskjøringAvVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Boolean {
-        return hentVilkårsvurdering(vilkårsvurdering.behandling.id) == null
+    private fun førstegangskjøringAvVilkårsvurdering(behandlingId: Long): Boolean {
+        return hentVilkårsvurdering(behandlingId) == null
     }
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
