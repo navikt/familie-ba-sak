@@ -135,8 +135,8 @@ class FagsakService(
         lagre(fagsak)
     }
 
-    fun hentMinimalFagsakForPerson(aktør: Aktør): Ressurs<RestMinimalFagsak> {
-        val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
+    fun hentMinimalFagsakForPerson(aktør: Aktør, fagsakEier: FagsakEier = OMSORGSPERSON): Ressurs<RestMinimalFagsak> {
+        val fagsak = fagsakRepository.finnFagsakForAktør(aktør, fagsakEier)
         return if (fagsak != null) Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id)) else Ressurs.failure(
             errorMessage = "Fant ikke fagsak på person"
         )

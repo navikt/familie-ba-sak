@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
+import no.nav.familie.ba.sak.ekstern.restDomene.fagsakEier
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -85,7 +86,7 @@ class FagsakController(
 
         return Result.runCatching {
             val aktør = personidentService.hentAktør(request.personIdent)
-            fagsakService.hentMinimalFagsakForPerson(aktør)
+            fagsakService.hentMinimalFagsakForPerson(aktør, request.fagsakEier)
         }.fold(
             onSuccess = { return ResponseEntity.ok().body(it) },
             onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
