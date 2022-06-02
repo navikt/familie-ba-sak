@@ -129,6 +129,7 @@ data class FritekstBegrunnelse(
 
 data class EØSBegrunnelseData(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
+    val apiNavn: String,
     val annenForeldersAktivitet: String,
     val annenForeldersAktivitetsland: String,
     val barnetsBostedsland: String,

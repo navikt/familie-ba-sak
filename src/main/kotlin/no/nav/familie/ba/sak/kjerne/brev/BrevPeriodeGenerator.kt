@@ -73,6 +73,7 @@ class BrevPeriodeGenerator(
             begrunnelseMedData.kompetanser.map { kompetanse ->
                 EØSBegrunnelseData(
                     vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
+                    apiNavn = begrunnelse.sanityApiNavn,
                     annenForeldersAktivitet = kompetanse.annenForeldersAktivitet.tilTekst(),
                     annenForeldersAktivitetsland = hentLandITekstformat(kompetanse.annenForeldersAktivitetsland),
                     barnetsBostedsland = hentLandITekstformat(kompetanse.barnetsBostedsland),
