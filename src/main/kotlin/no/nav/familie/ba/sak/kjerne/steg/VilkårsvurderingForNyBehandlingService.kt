@@ -158,10 +158,14 @@ class VilkårsvurderingForNyBehandlingService(
 
         return if (forrigeBehandlingSomErVedtatt != null && aktivVilkårsvurdering == null) {
             val vilkårsvurdering = genererVilkårsvurderingFraForrigeVedtattBehandling(
-                initiellVilkårsvurdering,
-                forrigeBehandlingSomErVedtatt,
+                initiellVilkårsvurdering = initiellVilkårsvurdering,
+                forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
+                behandling = behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag
+            )
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
                 behandling,
-                personopplysningGrunnlag
+                forrigeBehandlingSomErVedtatt
             )
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         } else if (aktivVilkårsvurdering != null) {
@@ -223,16 +227,15 @@ class VilkårsvurderingForNyBehandlingService(
 
     private fun genererVilkårsvurderingFraForrigeVedtattBehandling(
         initiellVilkårsvurdering: Vilkårsvurdering,
-        forrigeBehandlingSomErVedtatt: Behandling,
+        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag
     ): Vilkårsvurdering {
-        val forrigeBehandlingsVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
         val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
-            aktivVilkårsvurdering = forrigeBehandlingsVilkårsvurdering,
+            aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
-            forrigeBehandlingVilkårsvurdering = forrigeBehandlingsVilkårsvurdering
+            forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
         )
 
         if (behandling.type == BehandlingType.REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
@@ -240,10 +243,6 @@ class VilkårsvurderingForNyBehandlingService(
                 vilkårResultat.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
             }
         }
-        endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
-            behandling,
-            forrigeBehandlingSomErVedtatt
-        )
         return vilkårsvurdering
     }
 
