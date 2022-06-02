@@ -23,6 +23,10 @@ import java.time.LocalDate
 
 object VilkårsvurderingForNyBehandlingUtils {
 
+    fun førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering: Vilkårsvurdering?): Boolean {
+        return aktivVilkårsvurdering == null
+    }
+
     fun genererInitiellVilkårsvurdering(
         behandling: Behandling,
         barnaAktørSomAlleredeErVurdert: List<Aktør>,

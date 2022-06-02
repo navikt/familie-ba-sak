@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelServic
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingUtils.førstegangskjøringAvVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingUtils.genererInitiellVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingUtils.genererVilkårsvurderingFraForrigeVedtattBehandling
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -142,7 +143,7 @@ class VilkårsvurderingForNyBehandlingService(
                 personopplysningGrunnlag = personopplysningGrunnlag
             )
 
-        if (førstegangskjøringAvVilkårsvurdering(behandlingId = behandling.id) && behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+        if (førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering) && behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             vilkårsvurderingMetrics.tellMetrikker(initiellVilkårsvurdering)
         }
 
@@ -181,10 +182,6 @@ class VilkårsvurderingForNyBehandlingService(
         } else {
             vilkårsvurderingService.lagreInitielt(initiellVilkårsvurdering)
         }
-    }
-
-    private fun førstegangskjøringAvVilkårsvurdering(behandlingId: Long): Boolean {
-        return hentVilkårsvurdering(behandlingId) == null
     }
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
