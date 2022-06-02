@@ -21,12 +21,8 @@ class PubliserVedtakV2Task(
 
     override fun doTask(task: Task) {
         val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(task.payload.toLong())
-        if (env.erProd()) {
-            LOG.info("Hopper over å sende VedtakV2 til DVH i prod, behandling id ${vedtakV2DVH.behandlingsId}")
-        } else {
-            LOG.info("Send VedtakV2 til DVH i preprod, behandling id ${vedtakV2DVH.behandlingsId}")
-            task.metadata["offset"] = kafkaProducer.sendMessageForTopicVedtakV2(vedtakV2DVH).toString()
-        }
+        LOG.info("Send VedtakV2 til DVH, behandling id ${vedtakV2DVH.behandlingsId}")
+        task.metadata["offset"] = kafkaProducer.sendMessageForTopicVedtakV2(vedtakV2DVH).toString()
     }
 
     companion object {
