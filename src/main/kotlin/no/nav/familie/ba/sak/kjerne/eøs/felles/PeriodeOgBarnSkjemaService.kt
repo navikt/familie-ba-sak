@@ -23,7 +23,11 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         val justertOppdatering = oppdatering.somInversOppdateringEllersNull(gjeldendeSkjemaer) ?: oppdatering
         val oppdaterteKompetanser = oppdaterSkjemaerRekursivt(gjeldendeSkjemaer, justertOppdatering)
 
-        lagreSkjemaDifferanse(behandlingId, gjeldendeSkjemaer, oppdaterteKompetanser.medBehandlingId(behandlingId))
+        lagreDifferanseOgVarsleAbonnenter(
+            behandlingId,
+            gjeldendeSkjemaer,
+            oppdaterteKompetanser.medBehandlingId(behandlingId)
+        )
     }
 
     fun slettSkjema(skjemaId: Long) {
@@ -35,7 +39,7 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         val oppdaterteKompetanser = gjeldendeSkjemaer.minus(skjemaTilSletting).plus(blanktSkjema)
             .slåSammen().medBehandlingId(behandlingId)
 
-        lagreSkjemaDifferanse(behandlingId, gjeldendeSkjemaer, oppdaterteKompetanser)
+        lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeSkjemaer, oppdaterteKompetanser)
     }
 
     fun kopierOgErstattSkjemaer(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) {
@@ -48,7 +52,11 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         periodeOgBarnSkjemaRepository.saveAll(kopiAvFraSkjemaer)
     }
 
-    fun lagreSkjemaDifferanse(behandlingId: BehandlingId, gjeldende: Collection<S>, oppdaterte: Collection<S>) {
+    fun lagreDifferanseOgVarsleAbonnenter(
+        behandlingId: BehandlingId,
+        gjeldende: Collection<S>,
+        oppdaterte: Collection<S>
+    ) {
         val skalSlettes = gjeldende - oppdaterte
         val skalLagres = oppdaterte - gjeldende
 

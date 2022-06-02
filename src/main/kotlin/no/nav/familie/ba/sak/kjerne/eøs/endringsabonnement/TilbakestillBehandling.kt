@@ -7,45 +7,30 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.springframework.stereotype.Service
-import java.util.UUID
-
-@Service
-class TilbakestillBehandlingÉnGangService(
-    private val tilbakestillBehandlingService: TilbakestillBehandlingService
-) {
-    var gjeldendeKorrelasjonId: UUID? = null
-
-    fun tilbakeStillBehandling(behandlingId: BehandlingId) {
-        if (behandlingId.korrelasjonsid != gjeldendeKorrelasjonId) {
-            tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId.id)
-            gjeldendeKorrelasjonId = behandlingId.korrelasjonsid
-        }
-    }
-}
 
 @Service
 class TilbakestillBehandlingFraKompetanseEndringService(
-    private val tilbakestillBehandlingService: TilbakestillBehandlingÉnGangService
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Kompetanse>) {
-        tilbakestillBehandlingService.tilbakeStillBehandling(behandlingId)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId.id)
     }
 }
 
 @Service
 class TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(
-    private val tilbakestillBehandlingService: TilbakestillBehandlingÉnGangService
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<UtenlandskPeriodebeløp>) {
-        tilbakestillBehandlingService.tilbakeStillBehandling(behandlingId)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId.id)
     }
 }
 
 @Service
 class TilbakestillBehandlingFraValutakursEndringService(
-    private val tilbakestillBehandlingService: TilbakestillBehandlingÉnGangService
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Valutakurs>) {
-        tilbakestillBehandlingService.tilbakeStillBehandling(behandlingId)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId.id)
     }
 }

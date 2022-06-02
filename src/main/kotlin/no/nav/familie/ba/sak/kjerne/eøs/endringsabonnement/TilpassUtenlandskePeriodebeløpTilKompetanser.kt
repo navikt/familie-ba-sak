@@ -53,7 +53,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
             gjeldendeKompetanser
         ).medBehandlingId(behandlingId)
 
-        skjemaService.lagreSkjemaDifferanse(
+        skjemaService.lagreDifferanseOgVarsleAbonnenter(
             behandlingId,
             forrigeUtenlandskePeriodebeløp,
             oppdaterteUtenlandskPeriodebeløp

@@ -51,7 +51,7 @@ class TilpassKompetanserTilRegelverkService(
             barnasRegelverkResultatTidslinjer
         ).medBehandlingId(behandlingId)
 
-        skjemaService.lagreSkjemaDifferanse(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
+        skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
     }
 }
 

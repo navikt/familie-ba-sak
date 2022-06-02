@@ -51,7 +51,7 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
             gjeldendeUtenlandskePeriodebeløp
         ).medBehandlingId(behandlingId)
 
-        skjemaService.lagreSkjemaDifferanse(behandlingId, forrigeValutakurser, oppdaterteValutakurser)
+        skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, forrigeValutakurser, oppdaterteValutakurser)
     }
 }
 
