@@ -35,4 +35,8 @@ class UtenlandskPeriodebeløpService(
 
         skjemaService.lagreSkjemaDifferanse(forrigeUtenlandskePeriodebeløp, oppdaterteUtenlandskPeriodebeløp)
     }
+
+    @Transactional
+    fun kopierOgErstattUtenlandskPeriodebeløp(fraBehandlingId: Long, tilBehandlingId: Long) =
+        skjemaService.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }

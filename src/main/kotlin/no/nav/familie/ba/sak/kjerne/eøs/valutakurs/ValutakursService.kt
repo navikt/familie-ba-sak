@@ -35,4 +35,8 @@ class ValutakursService(
 
         skjemaService.lagreSkjemaDifferanse(forrigeValutakurser, oppdaterteValutakurser)
     }
+
+    @Transactional
+    fun kopierOgErstattValutakurser(fraBehandlingId: Long, tilBehandlingId: Long) =
+        skjemaService.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }
