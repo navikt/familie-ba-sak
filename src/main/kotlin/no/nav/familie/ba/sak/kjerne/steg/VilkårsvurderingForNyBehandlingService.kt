@@ -83,27 +83,17 @@ class VilkårsvurderingForNyBehandlingService(
                 VilkårsvurderingForNyBehandlingUtils.lagPersonResultaterForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                     vilkårsvurdering = this,
                     nyMigreringsdato = nyMigreringsdato,
-                    forrigeBehandlingVilkårsvurdering = hentForrigeBehandlingVilkårsvurdering(
-                        forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
-                        nyBehandlingId = behandling.id
+                    forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(
+                        forrigeBehandlingSomErVedtatt.id,
+                        feilmelding =
+                        "Kan ikke kopiere vilkårsvurdering fra forrige behandling ${forrigeBehandlingSomErVedtatt.id}" +
+                            "til behandling ${behandling.id}"
                     ),
                     personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
                 )
         }
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
-
-    private fun hentForrigeBehandlingVilkårsvurdering(
-        forrigeBehandlingSomErVedtatt: Behandling,
-        nyBehandlingId: Long
-    ) = (
-        vilkårsvurderingService
-            .hentAktivForBehandling(forrigeBehandlingSomErVedtatt.id)
-            ?: throw Feil(
-                "Kan ikke kopiere vilkårsvurdering fra forrige behandling ${forrigeBehandlingSomErVedtatt.id}" +
-                    "til behandling $nyBehandlingId"
-            )
-        )
 
     fun genererVilkårsvurderingForHelmanuellMigrering(
         behandling: Behandling,
@@ -187,10 +177,13 @@ class VilkårsvurderingForNyBehandlingService(
         behandlingId = behandlingId
     )
 
-    fun hentVilkårsvurderingThrows(behandlingId: Long): Vilkårsvurdering =
+    fun hentVilkårsvurderingThrows(
+        behandlingId: Long,
+        feilmelding: String? = null
+    ): Vilkårsvurdering =
         hentVilkårsvurdering(behandlingId) ?: throw Feil(
-            message = "Fant ikke aktiv vilkårsvurdering for behandling $behandlingId",
-            frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering for behandling."
+            message = feilmelding ?: "Fant ikke aktiv vilkårsvurdering for behandling $behandlingId",
+            frontendFeilmelding = feilmelding ?: "Fant ikke aktiv vilkårsvurdering for behandling."
         )
 
     companion object {
