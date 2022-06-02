@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.hentUtbetalingstidslinjeForSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -55,6 +59,20 @@ fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
             kombinertTidslinje.toSegments().mapNotNull { it.tilSegmentMedEndringer() }
         )
     }.filter { it.value.toSegments().isNotEmpty() }
+}
+
+fun List<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: List<Kompetanse>): LocalDate {
+    val kompetanseDiff = this.tilTidslinje()
+        .snittKombinerMed(forrigeKompetansePerioder.tilTidslinje()) { nyKompetanse, forrigeKompetanse ->
+            when {
+                nyKompetanse == forrigeKompetanse -> null
+                nyKompetanse == null -> forrigeKompetanse
+                forrigeKompetanse == null -> nyKompetanse
+                nyKompetanse != forrigeKompetanse -> nyKompetanse
+                else -> null
+            }
+        }
+    return kompetanseDiff.perioder().firstOrNull { it.innhold != null }?.fraOgMed?.tilLocalDate() ?: TIDENES_ENDE
 }
 
 private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>.tilSegmentMedEndringer(): LocalDateSegment<Int>? {

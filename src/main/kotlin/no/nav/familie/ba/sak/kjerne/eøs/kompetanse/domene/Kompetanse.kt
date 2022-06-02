@@ -77,7 +77,7 @@ data class Kompetanse(
     @Transient
     var status: KompetanseStatus? = KompetanseStatus.IKKE_UTFYLT
 
-    override fun utenSkjema() = this.copy(
+    override fun utenInnhold() = this.copy(
         søkersAktivitet = null,
         annenForeldersAktivitet = null,
         annenForeldersAktivitetsland = null,
