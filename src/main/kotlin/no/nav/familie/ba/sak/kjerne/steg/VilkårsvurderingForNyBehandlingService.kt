@@ -157,12 +157,15 @@ class VilkårsvurderingForNyBehandlingService(
             vilkårsvurderingMetrics.tellMetrikker(initiellVilkårsvurdering)
         }
 
+        val løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(behandling.fagsak.id)
+
         return if (forrigeBehandlingSomErVedtatt != null && aktivVilkårsvurdering == null) {
             val vilkårsvurdering = genererVilkårsvurderingFraForrigeVedtattBehandling(
                 initiellVilkårsvurdering = initiellVilkårsvurdering,
                 forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
                 behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                løpendeUnderkategori = løpendeUnderkategori
             )
             endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
                 behandling,
@@ -173,7 +176,7 @@ class VilkårsvurderingForNyBehandlingService(
             val (initieltSomErOppdatert, aktivtSomErRedusert) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
                 initiellVilkårsvurdering = initiellVilkårsvurdering,
                 aktivVilkårsvurdering = aktivVilkårsvurdering,
-                løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
+                løpendeUnderkategori = løpendeUnderkategori,
                 forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) hentVilkårsvurdering(
                     forrigeBehandlingSomErVedtatt.id
                 ) else null
@@ -230,12 +233,13 @@ class VilkårsvurderingForNyBehandlingService(
         initiellVilkårsvurdering: Vilkårsvurdering,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
         behandling: Behandling,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        løpendeUnderkategori: BehandlingUnderkategori?
     ): Vilkårsvurdering {
         val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
             aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
             initiellVilkårsvurdering = initiellVilkårsvurdering,
-            løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
+            løpendeUnderkategori = løpendeUnderkategori,
             forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
         )
 
