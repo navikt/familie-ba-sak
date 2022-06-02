@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingUtils.førstegangskjøringAvVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingUtils.genererInitiellVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingUtils.genererVilkårsvurderingFraForrigeVedtattBehandling
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
@@ -191,7 +190,7 @@ class VilkårsvurderingForNyBehandlingService(
     fun hentVilkårsvurderingThrows(behandlingId: Long): Vilkårsvurdering =
         hentVilkårsvurdering(behandlingId) ?: throw Feil(
             message = "Fant ikke aktiv vilkårsvurdering for behandling $behandlingId",
-            frontendFeilmelding = VilkårService.fantIkkeAktivVilkårsvurderingFeilmelding
+            frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering for behandling."
         )
 
     companion object {
