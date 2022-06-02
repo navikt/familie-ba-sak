@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
@@ -141,14 +142,14 @@ class VilkårsvurderingForNyBehandlingService(
         }
 
         val aktivVilkårsvurdering = hentVilkårsvurdering(behandling.id)
-        val barnaSomAlleredeErVurdert = aktivVilkårsvurdering?.personResultater?.mapNotNull {
+        val barnaAktørSomAlleredeErVurdert = aktivVilkårsvurdering?.personResultater?.mapNotNull {
             personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
-        }?.filter { it.type == PersonType.BARN }?.map { it.aktør.aktørId } ?: emptyList()
+        }?.filter { it.type == PersonType.BARN }?.map { it.aktør } ?: emptyList()
 
         val initiellVilkårsvurdering =
             genererInitiellVilkårsvurdering(
                 behandling = behandling,
-                barnaSomAlleredeErVurdert = barnaSomAlleredeErVurdert,
+                barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
                 personopplysningGrunnlag = personopplysningGrunnlag
             )
 
@@ -192,7 +193,7 @@ class VilkårsvurderingForNyBehandlingService(
 
     fun genererInitiellVilkårsvurdering(
         behandling: Behandling,
-        barnaSomAlleredeErVurdert: List<String>,
+        barnaAktørSomAlleredeErVurdert: List<Aktør>,
         personopplysningGrunnlag: PersonopplysningGrunnlag
     ): Vilkårsvurdering {
         return Vilkårsvurdering(behandling = behandling).apply {
@@ -207,7 +208,7 @@ class VilkårsvurderingForNyBehandlingService(
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
                     personResultater = lagVilkårsvurderingForFødselshendelse(
                         vilkårsvurdering = this,
-                        barnaSomAlleredeErVurdert = barnaSomAlleredeErVurdert,
+                        barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert,
                         personopplysningGrunnlag = personopplysningGrunnlag
                     )
                 }
@@ -289,11 +290,9 @@ class VilkårsvurderingForNyBehandlingService(
 
     private fun lagVilkårsvurderingForFødselshendelse(
         vilkårsvurdering: Vilkårsvurdering,
-        barnaSomAlleredeErVurdert: List<String>,
+        barnaAktørSomAlleredeErVurdert: List<Aktør>,
         personopplysningGrunnlag: PersonopplysningGrunnlag
     ): Set<PersonResultat> {
-        val barnaAktørSomAlleredeErVurdert = personidentService.hentAktørIder(barnaSomAlleredeErVurdert)
-
         val annenForelder = personopplysningGrunnlag.annenForelder
         val eldsteBarnSomVurderesSinFødselsdato =
             personopplysningGrunnlag.barna.filter { !barnaAktørSomAlleredeErVurdert.contains(it.aktør) }
