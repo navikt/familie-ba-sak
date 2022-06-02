@@ -5,11 +5,14 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedKompetanser
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.hentKompetanserForEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
@@ -18,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevBegrunnelse
@@ -36,8 +40,13 @@ class BrevPeriodeGenerator(
 
     fun genererBrevPeriode(): BrevPeriode? {
         val begrunnelseGrunnlagMedPersoner = hentBegrunnelsegrunnlagMedPersoner()
+        val eøsBegrunnelserMedKompetanser = hentEøsBegrunnelserMedPersoner()
 
-        val begrunnelserOgFritekster = byggBegrunnelserOgFritekster(begrunnelseGrunnlagMedPersoner)
+        val begrunnelserOgFritekster =
+            byggBegrunnelserOgFritekster(
+                begrunnelserGrunnlagMedPersoner = begrunnelseGrunnlagMedPersoner,
+                eøsBegrunnelserMedKompetanser = eøsBegrunnelserMedKompetanser
+            )
 
         if (begrunnelserOgFritekster.isEmpty()) return null
 
@@ -56,6 +65,38 @@ class BrevPeriodeGenerator(
             identerIBegrunnelene = identerIBegrunnelene
         )
     }
+
+    fun hentEØSBegrunnelseData(eøsBegrunnelserMedKompetanser: List<EØSBegrunnelseMedKompetanser>): List<EØSBegrunnelseData> =
+        eøsBegrunnelserMedKompetanser.flatMap { begrunnelseMedData ->
+            val begrunnelse = begrunnelseMedData.begrunnelse
+
+            begrunnelseMedData.kompetanser.map { kompetanse ->
+                EØSBegrunnelseData(
+                    vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
+                    annenForeldersAktivitet = kompetanse.annenForeldersAktivitet.tilTekst(),
+                    annenForeldersAktivitetsland = hentLandITekstformat(kompetanse.annenForeldersAktivitetsland),
+                    barnetsBostedsland = hentLandITekstformat(kompetanse.barnetsBostedsland),
+                    barnasFodselsdatoer = Utils.slåSammen(kompetanse.personer.map { it.fødselsdato.tilKortString() }),
+                    antallBarn = kompetanse.personer.size,
+                    maalform = brevMålform.tilSanityFormat(),
+                )
+            }
+        }
+
+    fun hentLandITekstformat(landkode: String): String {
+        if (landkode == "NO") return "Norge"
+        // TODO: Konverter landkode til tekstformat f.eks. AD -> ANDORRA
+        throw Feil("Klarer ikke å konvertere landkode $landkode")
+    }
+
+    fun hentEøsBegrunnelserMedPersoner(): List<EØSBegrunnelseMedKompetanser> =
+        minimertVedtaksperiode.eøsBegrunnelser.map { eøsBegrunnelseMedTriggere ->
+            val kompetanser = hentKompetanserForEØSBegrunnelse(eøsBegrunnelseMedTriggere, minimerteKompetanser)
+            EØSBegrunnelseMedKompetanser(
+                begrunnelse = eøsBegrunnelseMedTriggere.eøsBegrunnelse,
+                kompetanser = kompetanser
+            )
+        }
 
     fun hentBegrunnelsegrunnlagMedPersoner() = minimertVedtaksperiode.begrunnelser.flatMap {
         it.tilBrevBegrunnelseGrunnlagMedPersoner(
@@ -76,9 +117,10 @@ class BrevPeriodeGenerator(
 
     fun byggBegrunnelserOgFritekster(
         begrunnelserGrunnlagMedPersoner: List<BrevBegrunnelseGrunnlagMedPersoner>,
+        eøsBegrunnelserMedKompetanser: List<EØSBegrunnelseMedKompetanser>
     ): List<Begrunnelse> {
 
-        val brevBegrunnelser = begrunnelserGrunnlagMedPersoner.sorted()
+        val brevBegrunnelser = begrunnelserGrunnlagMedPersoner
             .map {
                 it.tilBrevBegrunnelse(
                     vedtaksperiode = NullablePeriode(minimertVedtaksperiode.fom, minimertVedtaksperiode.tom),
@@ -90,9 +132,11 @@ class BrevPeriodeGenerator(
                 )
             }
 
+        val eøsBegrunnelser = hentEØSBegrunnelseData(eøsBegrunnelserMedKompetanser)
+
         val fritekster = minimertVedtaksperiode.fritekster.map { FritekstBegrunnelse(it) }
 
-        return brevBegrunnelser + fritekster
+        return (brevBegrunnelser + eøsBegrunnelser + fritekster).sorted()
     }
 
     private fun byggBrevPeriode(

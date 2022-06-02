@@ -11,40 +11,36 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import java.time.YearMonth
 
 data class MinimertKompetanse(
-    val fom: YearMonth,
-    val tom: YearMonth,
+    val fom: YearMonth?,
+    val tom: YearMonth?,
     val søkersAktivitet: SøkersAktivitet,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String,
     val barnetsBostedsland: String,
     val resultat: KompetanseResultat,
-    val person: MinimertRestPerson
+    val personer: List<MinimertRestPerson>
 )
 
-fun Kompetanse.tilMinimertKompetanse(personopplysningGrunnlag: PersonopplysningGrunnlag): List<MinimertKompetanse> {
+fun Kompetanse.tilMinimertKompetanse(personopplysningGrunnlag: PersonopplysningGrunnlag): MinimertKompetanse {
 
-    if (this.fom == null || this.tom == null || søkersAktivitet == null || annenForeldersAktivitet == null || annenForeldersAktivitetsland == null || barnetsBostedsland == null || resultat == null) {
-        throw Feil("Kompetanse mangler verdier")
-    }
+    this.validerFelterErSatt()
 
-    return this.barnAktører.map { aktør ->
-
-        val fødselsdato = personopplysningGrunnlag.barna.find { it.aktør == aktør }?.fødselsdato
-            ?: throw Feil("Fant ikke aktør i personopplysninggrunnlaget")
-
-        MinimertKompetanse(
-            fom = this.fom,
-            tom = this.tom,
-            søkersAktivitet = this.søkersAktivitet,
-            annenForeldersAktivitet = this.annenForeldersAktivitet,
-            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
-            barnetsBostedsland = this.barnetsBostedsland,
-            resultat = this.resultat,
-            person = MinimertRestPerson(
+    return MinimertKompetanse(
+        fom = this.fom,
+        tom = this.tom,
+        søkersAktivitet = this.søkersAktivitet!!,
+        annenForeldersAktivitet = this.annenForeldersAktivitet!!,
+        annenForeldersAktivitetsland = this.annenForeldersAktivitetsland!!,
+        barnetsBostedsland = this.barnetsBostedsland!!,
+        resultat = this.resultat!!,
+        personer = this.barnAktører.map { aktør ->
+            val fødselsdato = personopplysningGrunnlag.barna.find { it.aktør == aktør }?.fødselsdato
+                ?: throw Feil("Fant ikke aktør i personopplysninggrunnlaget")
+            MinimertRestPerson(
                 personIdent = aktør.aktivFødselsnummer(),
                 fødselsdato = fødselsdato,
                 type = PersonType.BARN,
             )
-        )
-    }
+        }
+    )
 }

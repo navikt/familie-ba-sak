@@ -74,7 +74,11 @@ class BrevperiodeTest {
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
                     barnMedReduksjonFraForrigeBehandlingIdent = behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
                         .map { it.personIdent },
-                    minimerteKompetanser = behandlingsresultatPersonTestConfig.personerPåBehandling.mapNotNull { it.tilMinimertKompetanse() },
+                    minimerteKompetanser = behandlingsresultatPersonTestConfig.kompetanse?.map {
+                        it.tilMinimertKompetanse(
+                            behandlingsresultatPersonTestConfig.personerPåBehandling
+                        )
+                    } ?: emptyList(),
                 ).genererBrevPeriode()
             } catch (e: Exception) {
                 testReporter.publishEntry(

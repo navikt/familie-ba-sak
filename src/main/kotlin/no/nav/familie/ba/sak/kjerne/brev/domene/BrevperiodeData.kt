@@ -29,7 +29,10 @@ data class BrevperiodeData(
 
     fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {
         val brevPeriodeGenereator = this.tilBrevPeriodeGenerator()
-        return brevPeriodeGenereator.byggBegrunnelserOgFritekster(brevPeriodeGenereator.hentBegrunnelsegrunnlagMedPersoner())
+        return brevPeriodeGenereator.byggBegrunnelserOgFritekster(
+            begrunnelserGrunnlagMedPersoner = brevPeriodeGenereator.hentBegrunnelsegrunnlagMedPersoner(),
+            eøsBegrunnelserMedKompetanser = emptyList()
+        )
     }
 
     fun tilBrevperiodeForLogging() =

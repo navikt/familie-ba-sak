@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
@@ -49,7 +50,9 @@ data class BrevPeriodeTestConfig(
     val erFørsteVedtaksperiodePåFagsak: Boolean = false,
     val brevMålform: Målform,
 
-    val forventetOutput: BrevPeriodeOutput?
+    val kompetanse: List<BrevPeriodeTestKompetanse>? = null,
+
+    val forventetOutput: BrevPeriodeOutput?,
 ) {
     fun hentPersonerMedReduksjonFraForrigeBehandling(): List<BrevPeriodeTestPerson> =
         this.personerPåBehandling.filter { it.harReduksjonFraForrigeBehandling }
@@ -59,6 +62,7 @@ data class BrevPeriodeTestConfig(
 }
 
 data class BrevPeriodeTestKompetanse(
+    val id: String,
     val fom: YearMonth,
     val tom: YearMonth,
     val søkersAktivitet: SøkersAktivitet,
@@ -66,7 +70,20 @@ data class BrevPeriodeTestKompetanse(
     val annenForeldersAktivitetsland: String,
     val barnetsBostedsland: String,
     val resultat: KompetanseResultat,
-)
+) {
+    fun tilMinimertKompetanse(personer: List<BrevPeriodeTestPerson>): MinimertKompetanse {
+        return MinimertKompetanse(
+            fom = this.fom,
+            tom = this.tom,
+            søkersAktivitet = this.søkersAktivitet,
+            annenForeldersAktivitet = this.annenForeldersAktivitet,
+            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
+            barnetsBostedsland = this.barnetsBostedsland,
+            resultat = this.resultat,
+            personer = personer.filter { it.kompetanseIder.contains(this.id) }.map { it.tilMinimertPerson() },
+        )
+    }
+}
 
 data class BrevPeriodeTestPerson(
     val personIdent: String = randomFnr(),
@@ -77,7 +94,7 @@ data class BrevPeriodeTestPerson(
     val endredeUtbetalinger: List<EndretRestUtbetalingAndelPåPerson>,
     val utbetalinger: List<UtbetalingPåPerson>,
     val harReduksjonFraForrigeBehandling: Boolean = false,
-    val kompetanse: BrevPeriodeTestKompetanse? = null,
+    val kompetanseIder: List<String>
 ) {
     fun tilMinimertPerson() = MinimertRestPerson(personIdent = personIdent, fødselsdato = fødselsdato, type = type)
     fun tilUtbetalingsperiodeDetaljer() = utbetalinger.map {
@@ -93,21 +110,6 @@ data class BrevPeriodeTestPerson(
             minimerteVilkårResultater = hentVilkårForPerson(),
             minimerteAndreVurderinger = this.andreVurderinger,
         )
-    }
-
-    fun tilMinimertKompetanse(): MinimertKompetanse? {
-        return kompetanse?.let {
-            MinimertKompetanse(
-                fom = kompetanse.fom,
-                tom = kompetanse.tom,
-                søkersAktivitet = kompetanse.søkersAktivitet,
-                annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
-                annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
-                barnetsBostedsland = kompetanse.barnetsBostedsland,
-                resultat = kompetanse.resultat,
-                person = this.tilMinimertPerson()
-            )
-        }
     }
 
     private fun hentVilkårForPerson() =
@@ -183,7 +185,8 @@ data class BegrunnelseDataTestConfig(
     val belop: Int,
     val soknadstidspunkt: String?,
     val avtaletidspunktDeltBosted: String?,
-    val sokersRettTilUtvidet: String?
+    val sokersRettTilUtvidet: String?,
+    val vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
 ) : TestBegrunnelse {
 
     fun tilBegrunnelseData() = BegrunnelseData(
@@ -201,7 +204,8 @@ data class BegrunnelseDataTestConfig(
         soknadstidspunkt = this.soknadstidspunkt ?: "",
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: "",
         sokersRettTilUtvidet = this.sokersRettTilUtvidet
-            ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat()
+            ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
+        vedtakBegrunnelseType = vedtakBegrunnelseType
     )
 }
 

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -91,6 +92,18 @@ data class Kompetanse(
             barnAktører = barnAktører
         )
 
+    fun validerFelterErSatt() {
+        if (søkersAktivitet == null ||
+            annenForeldersAktivitet == null ||
+            annenForeldersAktivitetsland == null ||
+            barnetsBostedsland == null ||
+            resultat == null ||
+            barnAktører.isEmpty()
+        ) {
+            throw Feil("Kompetanse mangler verdier")
+        }
+    }
+
     companion object {
         val NULL = Kompetanse(null, null, emptySet())
     }
@@ -118,7 +131,18 @@ enum class AnnenForeldersAktivitet {
     FORSIKRET_I_BOSTEDSLAND,
     MOTTAR_PENSJON,
     INAKTIV,
-    IKKE_AKTUELT
+    IKKE_AKTUELT;
+
+    fun tilTekst(): String {
+        return when (this) {
+            I_ARBEID -> "i arbeid"
+            MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN -> "mottar utbetaling som erstatter lønn"
+            FORSIKRET_I_BOSTEDSLAND -> "forsikret i bostedsland"
+            MOTTAR_PENSJON -> "mottar pensjon"
+            INAKTIV -> "inaktiv"
+            IKKE_AKTUELT -> "ikke aktuelt"
+        }
+    }
 }
 
 enum class KompetanseResultat {

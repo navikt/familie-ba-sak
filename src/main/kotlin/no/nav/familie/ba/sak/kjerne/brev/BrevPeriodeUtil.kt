@@ -61,9 +61,12 @@ fun hentMinimerteKompetanserForPeriode(
             tilOgMed = tom.tilTidspunktEllerUendeligLengeTil()
         ).perioder()
         .mapNotNull { it.innhold }
-        .flatMap { it.tilMinimertKompetanse(personopplysningGrunnlag) }
+        .map { it.tilMinimertKompetanse(personopplysningGrunnlag) }
 
-    val unikePersonerIKompetanseForPeriode = minimerteKompetanser.map { it.person.personIdent }.distinct().count()
+    val unikePersonerIKompetanseForPeriode =
+        minimerteKompetanser
+            .flatMap { minimertKompetanse -> minimertKompetanse.personer.map { it.personIdent } }
+            .distinct().count()
     if (unikePersonerIKompetanseForPeriode != minimerteKompetanser.size) {
         throw Feil("Det finnes flere kompetanser for samme person i perioden")
     }
