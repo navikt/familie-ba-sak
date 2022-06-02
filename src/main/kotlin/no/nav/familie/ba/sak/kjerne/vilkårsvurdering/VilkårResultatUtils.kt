@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.LocalDate
 
-object PersonResultatUtils {
+object VilkårResultatUtils {
 
     fun genererVilkårResultatForEtVilkårPåEnPerson(
         person: Person,
