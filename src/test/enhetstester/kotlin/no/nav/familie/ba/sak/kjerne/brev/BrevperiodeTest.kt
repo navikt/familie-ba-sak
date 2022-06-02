@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import BegrunnelseDataTestConfig
 import BrevPeriodeOutput
 import BrevPeriodeTestConfig
+import EØSBegrunnelseTestConfig
 import FritekstBegrunnelseTestConfig
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
@@ -74,7 +75,7 @@ class BrevperiodeTest {
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
                     barnMedReduksjonFraForrigeBehandlingIdent = behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
                         .map { it.personIdent },
-                    minimerteKompetanser = behandlingsresultatPersonTestConfig.kompetanse?.map {
+                    minimerteKompetanser = behandlingsresultatPersonTestConfig.kompetanser?.map {
                         it.tilMinimertKompetanse(
                             behandlingsresultatPersonTestConfig.personerPåBehandling
                         )
@@ -148,6 +149,7 @@ class BrevperiodeTest {
                 when (it) {
                     is BegrunnelseDataTestConfig -> it.tilBegrunnelseData()
                     is FritekstBegrunnelseTestConfig -> it.fritekst
+                    is EØSBegrunnelseTestConfig -> it.tilEØSBegrunnelseData()
                     else -> throw IllegalArgumentException("Ugyldig testconfig")
                 }
             }

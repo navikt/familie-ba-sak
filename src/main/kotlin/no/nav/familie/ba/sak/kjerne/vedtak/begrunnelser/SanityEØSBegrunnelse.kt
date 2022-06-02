@@ -4,7 +4,13 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivit
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 
 enum class BarnetsBostedsland {
-    Norge
+    NORGE;
+
+    fun tilLandkode(): String {
+        return when (this) {
+            NORGE -> "NO"
+        }
+    }
 }
 
 data class SanityEØSBegrunnelse(

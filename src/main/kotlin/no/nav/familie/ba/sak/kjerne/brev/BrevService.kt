@@ -162,7 +162,7 @@ class BrevService(
 
         val utvidetVedtaksperioderMedBegrunnelser =
             vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak).filter {
-                it.begrunnelser.isNotEmpty() || it.fritekster.isNotEmpty()
+                !(it.begrunnelser.isEmpty() && it.fritekster.isEmpty() && it.eøsBegrunnelser.isEmpty())
             }.sortedBy { it.fom }
 
         if (utvidetVedtaksperioderMedBegrunnelser.isEmpty()) {

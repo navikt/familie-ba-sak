@@ -89,10 +89,10 @@ interface Begrunnelse : Comparable<Begrunnelse> {
     override fun compareTo(other: Begrunnelse): Int {
 
         return when {
-            this.type == Begrunnelsetype.FRITEKST -> -Int.MAX_VALUE
-            other.type == Begrunnelsetype.FRITEKST -> Int.MAX_VALUE
-            this.vedtakBegrunnelseType == null -> -Int.MAX_VALUE
-            other.vedtakBegrunnelseType == null -> Int.MAX_VALUE
+            this.type == Begrunnelsetype.FRITEKST -> Int.MAX_VALUE
+            other.type == Begrunnelsetype.FRITEKST -> -Int.MAX_VALUE
+            this.vedtakBegrunnelseType == null -> Int.MAX_VALUE
+            other.vedtakBegrunnelseType == null -> -Int.MAX_VALUE
 
             else -> this.vedtakBegrunnelseType!!.sorteringsrekkefølge - other.vedtakBegrunnelseType!!.sorteringsrekkefølge
         }

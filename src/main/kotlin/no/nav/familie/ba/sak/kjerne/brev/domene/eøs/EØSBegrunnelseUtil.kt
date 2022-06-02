@@ -9,7 +9,7 @@ fun hentKompetanserForEØSBegrunnelse(
     minimerteKompetanser.filter { minimertKompetanse ->
         eøsBegrunnelseMedTriggere.sanityEØSBegrunnelse.annenForeldersAktivitet
             .contains(minimertKompetanse.annenForeldersAktivitet) &&
-            eøsBegrunnelseMedTriggere.sanityEØSBegrunnelse.barnetsBostedsland.map { it.name }
+            eøsBegrunnelseMedTriggere.sanityEØSBegrunnelse.barnetsBostedsland.map { it.tilLandkode() }
                 .contains(minimertKompetanse.barnetsBostedsland) &&
             eøsBegrunnelseMedTriggere.sanityEØSBegrunnelse.kompetanseResultat.contains(
                 minimertKompetanse.resultat

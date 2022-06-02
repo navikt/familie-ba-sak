@@ -8,11 +8,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
-import java.time.YearMonth
 
 data class MinimertKompetanse(
-    val fom: YearMonth?,
-    val tom: YearMonth?,
     val søkersAktivitet: SøkersAktivitet,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String,
@@ -26,8 +23,6 @@ fun Kompetanse.tilMinimertKompetanse(personopplysningGrunnlag: PersonopplysningG
     this.validerFelterErSatt()
 
     return MinimertKompetanse(
-        fom = this.fom,
-        tom = this.tom,
         søkersAktivitet = this.søkersAktivitet!!,
         annenForeldersAktivitet = this.annenForeldersAktivitet!!,
         annenForeldersAktivitetsland = this.annenForeldersAktivitetsland!!,

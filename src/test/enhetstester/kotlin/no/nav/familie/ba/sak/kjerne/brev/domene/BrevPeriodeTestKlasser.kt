@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.randomFnr
@@ -23,16 +24,15 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.SøkersRettTilUtvidet
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.YearMonth
 
 data class BrevPeriodeTestConfig(
     val beskrivelse: String,
@@ -50,7 +50,7 @@ data class BrevPeriodeTestConfig(
     val erFørsteVedtaksperiodePåFagsak: Boolean = false,
     val brevMålform: Målform,
 
-    val kompetanse: List<BrevPeriodeTestKompetanse>? = null,
+    val kompetanser: List<BrevPeriodeTestKompetanse>? = null,
 
     val forventetOutput: BrevPeriodeOutput?,
 ) {
@@ -63,8 +63,6 @@ data class BrevPeriodeTestConfig(
 
 data class BrevPeriodeTestKompetanse(
     val id: String,
-    val fom: YearMonth,
-    val tom: YearMonth,
     val søkersAktivitet: SøkersAktivitet,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String,
@@ -73,14 +71,12 @@ data class BrevPeriodeTestKompetanse(
 ) {
     fun tilMinimertKompetanse(personer: List<BrevPeriodeTestPerson>): MinimertKompetanse {
         return MinimertKompetanse(
-            fom = this.fom,
-            tom = this.tom,
             søkersAktivitet = this.søkersAktivitet,
             annenForeldersAktivitet = this.annenForeldersAktivitet,
             annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
             barnetsBostedsland = this.barnetsBostedsland,
             resultat = this.resultat,
-            personer = personer.filter { it.kompetanseIder.contains(this.id) }.map { it.tilMinimertPerson() },
+            personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() },
         )
     }
 }
@@ -94,7 +90,7 @@ data class BrevPeriodeTestPerson(
     val endredeUtbetalinger: List<EndretRestUtbetalingAndelPåPerson>,
     val utbetalinger: List<UtbetalingPåPerson>,
     val harReduksjonFraForrigeBehandling: Boolean = false,
-    val kompetanseIder: List<String>
+    val kompetanseIder: List<String>? = null,
 ) {
     fun tilMinimertPerson() = MinimertRestPerson(personIdent = personIdent, fødselsdato = fødselsdato, type = type)
     fun tilUtbetalingsperiodeDetaljer() = utbetalinger.map {
@@ -166,7 +162,12 @@ data class EndretRestUtbetalingAndelPåPerson(
     property = "type",
     defaultImpl = BegrunnelseDataTestConfig::class
 )
-@JsonSubTypes(value = [JsonSubTypes.Type(value = FritekstBegrunnelseTestConfig::class, name = "fritekst")])
+@JsonSubTypes(
+    value = [
+        JsonSubTypes.Type(value = FritekstBegrunnelseTestConfig::class, name = "fritekst"),
+        JsonSubTypes.Type(value = EØSBegrunnelseTestConfig::class, name = "eøsbegrunnelse")
+    ]
+)
 interface TestBegrunnelse
 
 data class FritekstBegrunnelseTestConfig(val fritekst: String) : TestBegrunnelse
@@ -186,7 +187,6 @@ data class BegrunnelseDataTestConfig(
     val soknadstidspunkt: String?,
     val avtaletidspunktDeltBosted: String?,
     val sokersRettTilUtvidet: String?,
-    val vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
 ) : TestBegrunnelse {
 
     fun tilBegrunnelseData() = BegrunnelseData(
@@ -205,7 +205,32 @@ data class BegrunnelseDataTestConfig(
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: "",
         sokersRettTilUtvidet = this.sokersRettTilUtvidet
             ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
-        vedtakBegrunnelseType = vedtakBegrunnelseType
+        vedtakBegrunnelseType = Standardbegrunnelse.values()
+            .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
+            ?: throw Feil("Fant ikke Standardbegrunnelse med apiNavn ${this.apiNavn}")
+    )
+}
+
+data class EØSBegrunnelseTestConfig(
+    val apiNavn: String,
+    val annenForeldersAktivitet: String,
+    val annenForeldersAktivitetsland: String,
+    val barnetsBostedsland: String,
+    val barnasFodselsdatoer: String,
+    val antallBarn: Int,
+    val maalform: String,
+) : TestBegrunnelse {
+    fun tilEØSBegrunnelseData(): EØSBegrunnelseData = EØSBegrunnelseData(
+        apiNavn = this.apiNavn,
+        annenForeldersAktivitet = this.annenForeldersAktivitet,
+        annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
+        barnetsBostedsland = this.barnetsBostedsland,
+        barnasFodselsdatoer = this.barnasFodselsdatoer,
+        antallBarn = this.antallBarn,
+        maalform = this.maalform,
+        vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
+            .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
+            ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}")
     )
 }
 
