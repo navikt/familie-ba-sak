@@ -658,8 +658,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             personidentRepository.saveAll(aktør.personidenter.filter { !it.aktiv })
         }
 
-        val fagsak = Fagsak(aktør = aktør)
-        fagsakRepository.saveAndFlush(fagsak)
+        val fagsak = fagsakRepository.finnFagsakForAktør(aktør) ?: fagsakRepository.saveAndFlush(Fagsak(aktør = aktør))
 
         val behandling = Behandling(
             fagsak = fagsak,

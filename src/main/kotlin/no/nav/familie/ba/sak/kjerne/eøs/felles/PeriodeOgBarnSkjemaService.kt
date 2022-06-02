@@ -31,7 +31,7 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         val skjemaTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
         val behandlingId = skjemaTilSletting.behandlingId
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
-        val blanktSkjema = skjemaTilSletting.utenSkjema()
+        val blanktSkjema = skjemaTilSletting.utenInnhold()
 
         val oppdaterteKompetanser = gjeldendeSkjemaer.minus(skjemaTilSletting).plus(blanktSkjema)
             .slåSammen().medBehandlingId(behandlingId)

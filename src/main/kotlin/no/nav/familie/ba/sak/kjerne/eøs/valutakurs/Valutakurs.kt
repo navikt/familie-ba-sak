@@ -62,7 +62,7 @@ data class Valutakurs(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     override var behandlingId: Long = 0
 
-    override fun utenSkjema() = copy(
+    override fun utenInnhold() = copy(
         valutakode = null,
         valutakursdato = null,
         kurs = null
