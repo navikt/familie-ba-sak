@@ -85,6 +85,8 @@ spec:
           cluster: prod-gcp
         - application: familie-ba-migrering
           cluster: prod-gcp
+        - application: familie-oppdrag
+          cluster: prod-fss
       external:
         - host: xsrv1mh6.api.sanity.io
   replicas:

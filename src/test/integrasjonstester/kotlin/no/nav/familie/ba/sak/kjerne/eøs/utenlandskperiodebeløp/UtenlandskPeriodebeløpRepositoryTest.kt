@@ -66,7 +66,7 @@ class UtenlandskPeriodebeløpRepositoryTest(
         )
 
         val hentedeUtenlandskePeriodebeløp =
-            utenlandskPeriodebeløpRepository.findByBehandlingId(behandlingId = behandling.id)
+            utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandling.id)
 
         assertEquals(1, hentedeUtenlandskePeriodebeløp.size)
         assertEquals(utenlandskPeriodebeløp, hentedeUtenlandskePeriodebeløp.first())

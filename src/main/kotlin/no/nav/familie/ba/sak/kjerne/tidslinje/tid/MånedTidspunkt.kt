@@ -100,5 +100,7 @@ data class MånedTidspunkt internal constructor(
 
         fun månedOmUendeligLenge(måned: YearMonth = YearMonth.now()) =
             MånedTidspunkt(måned, uendelighet = Uendelighet.FREMTID)
+
+        fun LocalDate.tilMånedTidspunkt() = MånedTidspunkt(this.toYearMonth(), Uendelighet.INGEN)
     }
 }

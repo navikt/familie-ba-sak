@@ -123,7 +123,7 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
@@ -156,7 +156,7 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
@@ -206,7 +206,7 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
@@ -223,7 +223,7 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagMedEkstraBarn)
 
-        val vilkårsvurderingMedEkstraBarn = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurderingMedEkstraBarn = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
@@ -266,7 +266,7 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
@@ -311,7 +311,7 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
@@ -351,7 +351,7 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
 
-        val vilkårsvurdering2 = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering2 = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling2,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = behandling
@@ -389,7 +389,7 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
@@ -414,7 +414,7 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
 
-        val vilkårsvurdering1 = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering1 = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling2,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = behandling
@@ -512,7 +512,7 @@ class VilkårServiceTest(
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
@@ -659,7 +659,7 @@ class VilkårServiceTest(
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-        vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
+        vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false)
         val exception = assertThrows<RuntimeException> {
             vilkårService.postVilkår(
                 behandling.id,
@@ -697,7 +697,7 @@ class VilkårServiceTest(
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
+        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false)
         assertEquals(
             1,
             vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }?.size
@@ -819,7 +819,7 @@ class VilkårServiceTest(
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-        vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
+        vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false)
 
         val exception = assertThrows<RuntimeException> {
             vilkårService.deleteVilkår(
