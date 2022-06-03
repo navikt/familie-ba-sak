@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
@@ -28,6 +29,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -44,6 +46,7 @@ class VilkårsvurderingTestController(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val behandlingRepository: BehandlingRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val aktørIdRepository: AktørIdRepository,
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService
@@ -89,6 +92,27 @@ class VilkårsvurderingTestController(
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+    }
+
+    @PostMapping("/{behandlingId}")
+    fun oppdaterVilkårsvurderingIBehandling(
+        @PathVariable behandlingId: Long,
+        @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
+        val behandling = behandlingRepository.finnBehandling(behandlingId)
+
+        val nyVilkårsvurdering = personresultater.tilVilkårsvurdering(
+            behandling,
+            personopplysningGrunnlag!!
+        )
+
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
+
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
+
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 }
 
