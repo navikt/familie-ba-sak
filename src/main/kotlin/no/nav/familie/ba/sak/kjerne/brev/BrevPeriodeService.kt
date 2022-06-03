@@ -13,10 +13,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -31,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPe
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.slf4j.LoggerFactory
@@ -80,11 +79,16 @@ class BrevPeriodeService(
         val sanityEØSBegrunnelser =
             if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) sanityService.hentSanityEØSBegrunnelser() else emptyList()
 
+        val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
+            vilkårsvurdering = vilkårsvurdering,
+            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
+            persongrunnlag = personopplysningGrunnlag
+        )
+
         return vedtaksperioderId.map {
             hentBrevperiodeData(
                 vedtaksperiodeId = it,
-                vilkårsvurdering = vilkårsvurdering,
-                endredeUtbetalingAndeler = endredeUtbetalingAndeler,
+                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 uregistrerteBarn = uregistrerteBarn,
@@ -98,8 +102,7 @@ class BrevPeriodeService(
 
     private fun hentBrevperiodeData(
         vedtaksperiodeId: Long,
-        vilkårsvurdering: Vilkårsvurdering,
-        endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
+        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         uregistrerteBarn: List<BarnMedOpplysninger>,
@@ -111,12 +114,6 @@ class BrevPeriodeService(
     ): BrevperiodeData {
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
-
-        val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
-            vilkårsvurdering = vilkårsvurdering,
-            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-            persongrunnlag = personopplysningGrunnlag
-        )
 
         val minimerteUregistrerteBarn = uregistrerteBarn.map { it.tilMinimertUregisrertBarn() }
 
