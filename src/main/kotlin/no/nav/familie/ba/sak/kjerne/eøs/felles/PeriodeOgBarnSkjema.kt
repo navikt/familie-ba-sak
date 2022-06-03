@@ -75,9 +75,3 @@ fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraBarnOgTilOgMed(skjema: T): Bo
 
 fun <T : PeriodeOgBarnSkjema<T>> T.harEkteDelmengdeAvBarna(skjema: T): Boolean =
     this.barnAktører.erEkteDelmengdeAv(skjema.barnAktører)
-
-enum class UtfyltStatus {
-    IKKE_UTFYLT,
-    UFULLSTENDIG,
-    OK
-}

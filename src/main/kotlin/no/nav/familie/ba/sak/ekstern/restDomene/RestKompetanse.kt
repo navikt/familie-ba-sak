@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.kjerne.eøs.felles.UtfyltStatus
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
