@@ -4,8 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePeriodebeløpTilKompetanserService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -18,11 +20,17 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> =
         mockPeriodeBarnSkjemaRepository()
-    val kompetanseService: KompetanseService = mockk()
+    val kompetanseRepository: KompetanseRepository = mockk()
 
     val utenlandskPeriodebeløpService = UtenlandskPeriodebeløpService(
         utenlandskPeriodebeløpRepository,
-        kompetanseService
+        emptyList()
+    )
+
+    val tilpassUtenlandskePeriodebeløpTilKompetanserService = TilpassUtenlandskePeriodebeløpTilKompetanserService(
+        utenlandskPeriodebeløpRepository,
+        emptyList(),
+        kompetanseRepository
     )
 
     @BeforeEach
@@ -32,7 +40,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     @Test
     fun `skal tilpasse utenlandsk periodebeløp til endrede kompetanser`() {
-        val behandlingId = 10L
+        val behandlingId = BehandlingId(10L)
 
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
@@ -48,9 +56,10 @@ internal class UtenlandskPeriodebeløpServiceTest {
             .medKompetanse("--   ----", barn2, barn3)
             .byggKompetanser()
 
-        every { kompetanseService.hentKompetanser(behandlingId) } returns kompetanser
+        every { kompetanseRepository.finnFraBehandlingId(behandlingId.id) } returns kompetanser
 
-        utenlandskPeriodebeløpService.tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId)
+        tilpassUtenlandskePeriodebeløpTilKompetanserService
+            .tilpassUtenlandskPeriodebeløpTilKompetanser(behandlingId)
 
         val faktiskeUtenlandskePeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
 
