@@ -16,7 +16,7 @@ class KompetanseUtfyltTest {
     fun `Skal sette UtfyltStatus til OK når alle felter i skjema er fylt ut`() {
         val kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
-            barnetsBostedsland = BarnetsBostedsland.Norge.name,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             annenForeldersAktivitetsland = "NORGE",
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
@@ -31,7 +31,7 @@ class KompetanseUtfyltTest {
     fun `Skal sette UtfyltStatus til OK dersom alle felter unntatt annenForeldersAktivitetsland er fylt ut og annenForeldersAktivitet er IKKE_AKTUELT eller INAKTIV`() {
         var kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.IKKE_AKTUELT,
-            barnetsBostedsland = BarnetsBostedsland.Norge.name,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
         )
@@ -42,7 +42,7 @@ class KompetanseUtfyltTest {
 
         kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
-            barnetsBostedsland = BarnetsBostedsland.Norge.name,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
         )
@@ -56,7 +56,7 @@ class KompetanseUtfyltTest {
     fun `Skal sette UtfyltStatus til UFULLSTENDIG dersom alle felter unntatt annenForeldersAktivitetsland er fylt ut og annenForeldersAktivitet ikke er IKKE_AKTUELT eller INAKTIV`() {
         var kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
-            barnetsBostedsland = BarnetsBostedsland.Norge.name,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
         )
@@ -67,7 +67,7 @@ class KompetanseUtfyltTest {
 
         kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_PENSJON,
-            barnetsBostedsland = BarnetsBostedsland.Norge.name,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
         )
@@ -78,7 +78,7 @@ class KompetanseUtfyltTest {
 
         kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND,
-            barnetsBostedsland = BarnetsBostedsland.Norge.name,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
         )
@@ -89,7 +89,7 @@ class KompetanseUtfyltTest {
 
         kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
-            barnetsBostedsland = BarnetsBostedsland.Norge.name,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
         )
@@ -111,7 +111,7 @@ class KompetanseUtfyltTest {
 
         kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
-            barnetsBostedsland = BarnetsBostedsland.Norge.name,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()
@@ -120,7 +120,7 @@ class KompetanseUtfyltTest {
 
         kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND,
-            barnetsBostedsland = BarnetsBostedsland.Norge.name,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
         )
 
@@ -130,7 +130,7 @@ class KompetanseUtfyltTest {
 
         kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
-            barnetsBostedsland = BarnetsBostedsland.Norge.name,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
         )
