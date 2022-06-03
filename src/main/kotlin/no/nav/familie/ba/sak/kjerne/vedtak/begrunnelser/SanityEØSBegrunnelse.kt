@@ -40,8 +40,8 @@ data class RestSanityEØSBegrunnelse(
             kompetanseResultat = kompetanseResultat?.mapNotNull {
                 konverterTilEnumverdi<KompetanseResultat>(it)
             } ?: emptyList(),
-            hjemlerEOSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
-            hjemlerEOSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
+            hjemlerEØSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
+            hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
         )
     }
@@ -56,8 +56,8 @@ data class SanityEØSBegrunnelse(
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
-    val hjemlerEOSForordningen883: List<String>,
-    val hjemlerEOSForordningen987: List<String>,
+    val hjemlerEØSForordningen883: List<String>,
+    val hjemlerEØSForordningen987: List<String>,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>,
 )
 
