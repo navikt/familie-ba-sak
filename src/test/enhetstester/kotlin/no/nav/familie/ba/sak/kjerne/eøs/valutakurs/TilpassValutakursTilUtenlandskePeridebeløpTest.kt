@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassValutakurserTilUtenlandskePeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
