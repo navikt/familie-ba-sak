@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelServic
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,20 +17,20 @@ import org.springframework.transaction.annotation.Transactional
 class TilbakestillBehandlingService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingService: BehandlingService,
-    private val vilkårService: VilkårService,
     private val beregningService: BeregningService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val vedtakRepository: VedtakRepository,
     private val tilbakekrevingService: TilbakekrevingService,
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
 ) {
 
     @Transactional
-    fun initierOgSettBehandlingTilVilårsvurdering(
+    fun initierOgSettBehandlingTilVilkårsvurdering(
         behandling: Behandling,
         bekreftEndringerViaFrontend: Boolean = true
     ) {
-        vilkårService.initierVilkårsvurderingForBehandling(
+        vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = bekreftEndringerViaFrontend,
             forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
