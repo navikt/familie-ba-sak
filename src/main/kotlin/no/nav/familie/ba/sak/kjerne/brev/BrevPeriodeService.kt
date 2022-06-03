@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -14,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -43,28 +46,29 @@ class BrevPeriodeService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val personidentService: PersonidentService,
-    private val kompetanseService: KompetanseService
+    private val kompetanseService: KompetanseService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun hentBrevperioderData(
         vedtaksperioderId: List<Long>,
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         skalLogge: Boolean = true,
     ): List<BrevperiodeData> {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId.id)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
         val endredeUtbetalingAndeler =
-            endretUtbetalingAndelService.hentForBehandling(behandlingId = behandlingId)
+            endretUtbetalingAndelService.hentForBehandling(behandlingId = behandlingId.id)
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id)
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-            behandlingId
+            behandlingId.id
         )
 
         val uregistrerteBarn =
-            søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn()
+            søknadGrunnlagService.hentAktiv(behandlingId = behandlingId.id)?.hentUregistrerteBarn()
                 ?: emptyList()
 
         val kompetanser =
@@ -99,7 +103,8 @@ class BrevPeriodeService(
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
+        val sanityEØSBegrunnelser =
+            if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) sanityService.hentSanityEØSBegrunnelser() else emptyList()
 
         val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
             vilkårsvurdering = vilkårsvurdering,
@@ -190,7 +195,7 @@ class BrevPeriodeService(
         val begrunnelseDataForVedtaksperiode =
             hentBrevperioderData(
                 vedtaksperioderId = listOf(vedtaksperiodeId),
-                behandlingId = vedtaksperiodeMedBegrunnelser.vedtak.behandling.id
+                behandlingId = BehandlingId(vedtaksperiodeMedBegrunnelser.vedtak.behandling.id)
             ).single()
         return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
     }

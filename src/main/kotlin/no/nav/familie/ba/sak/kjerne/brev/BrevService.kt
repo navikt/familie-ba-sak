@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -174,7 +175,7 @@ class BrevService(
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
         val brevPerioderData = brevPeriodeService.hentBrevperioderData(
             vedtaksperioderId = utvidetVedtaksperioderMedBegrunnelser.map { it.id },
-            behandlingId = vedtak.behandling.id
+            behandlingId = BehandlingId(vedtak.behandling.id)
         )
         val brevperioder = brevPerioderData.sorted().mapNotNull {
             it.tilBrevPeriodeGenerator().genererBrevPeriode()
