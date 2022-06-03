@@ -1,5 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidspunktKombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import java.math.BigDecimal
 import kotlin.math.roundToInt
 
 enum class Intervall {
@@ -53,3 +64,39 @@ fun beregnMånedligUtbetalingsbeløpUtlandINok(
 
     return avrundetUtbetalingsbeløpUtlandINok
 }
+
+fun kalkulerUtenlandskPeriodebeøpINorskeKroner(
+    utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>
+    valutakurser: Collection<Valutakurs>
+): Map<Aktør, Tidslinje<BigDecimal, Måned>> {
+
+    val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
+    val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
+
+    val alleBarnAktørIder = utenlandskePeriodebeløpTidslinjer.keys + valutakursTidslinjer.keys
+
+    return alleBarnAktørIder.associateWith { aktør ->
+        val utenlandskePeriodebeløpTidslinje = utenlandskePeriodebeløpTidslinjer.getOrDefault(aktør, TomTidslinje())
+        val valutakursTidslinje = valutakursTidslinjer.getOrDefault(aktør, TomTidslinje())
+
+        utenlandskePeriodebeløpTidslinje.tidspunktKombinerMed(valutakursTidslinje) { tidspunkt, upb, vk ->
+            when {
+                upb == null || vk == null -> null
+                upb.valutakode != vk.valutakode -> null
+                upb.beløp == null || vk.kurs == null -> null
+                else -> upb.tilMånedligBeløp(tidspunkt)?.multiply(vk.kurs)
+            }
+        }
+    }
+}
+
+fun <T : Tidsenhet> UtenlandskPeriodebeløp.tilMånedligBeløp(tidspunkt: Tidspunkt<T>): BigDecimal? {
+    if (this.beløp == null || this.intervall == null)
+        return null
+
+    return Intervall.valueOf(this.intervall).konverterBeløpTilMånedlig(this.beløp.toDouble(), tidspunkt.erSkuddår())
+        .toBigDecimal()
+}
+
+fun <T : Tidsenhet> Tidspunkt<T>.erSkuddår() = this.tilLocalDateEllerNull()?.isLeapYear() ?: false
+
