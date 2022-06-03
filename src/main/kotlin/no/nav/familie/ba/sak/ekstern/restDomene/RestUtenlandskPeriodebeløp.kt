@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.UtfyltStatus
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.math.BigDecimal
@@ -12,8 +13,13 @@ data class RestUtenlandskPeriodebeløp(
     val barnIdenter: List<String>,
     val beløp: BigDecimal?,
     val valutakode: String?,
-    val intervall: String?
-)
+    val intervall: String?,
+    override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT
+) : AbstractUtfyltStatus<RestUtenlandskPeriodebeløp>() {
+    override fun medUtfyltStatus(): RestUtenlandskPeriodebeløp {
+        return this.copy(status = utfyltStatus(finnAntallUtfylt(listOf(this.beløp, this.valutakode, this.intervall)), 3))
+    }
+}
 
 fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører: List<Aktør>) = UtenlandskPeriodebeløp(
     fom = this.fom,
@@ -32,4 +38,4 @@ fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() = RestUtenlandskPer
     beløp = this.beløp,
     valutakode = this.valutakode,
     intervall = this.intervall
-)
+).medUtfyltStatus()
