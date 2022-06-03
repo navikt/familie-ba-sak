@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.kjerne.eøs.felles.UtfyltStatus
-
 abstract class AbstractUtfyltStatus<T> {
     abstract val status: UtfyltStatus
     abstract fun medUtfyltStatus(): T
@@ -17,4 +15,10 @@ abstract class AbstractUtfyltStatus<T> {
             else -> UtfyltStatus.IKKE_UTFYLT
         }
     }
+}
+
+enum class UtfyltStatus {
+    IKKE_UTFYLT,
+    UFULLSTENDIG,
+    OK
 }
