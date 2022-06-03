@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -54,6 +55,9 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     @Autowired
     private val personidentService: PersonidentService,
 
+    @Autowired
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
+
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig`() {
@@ -84,7 +88,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             )
         )
 
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = null
@@ -161,7 +165,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             )
         )
 
-        vilkårService.initierVilkårsvurderingForBehandling(
+        vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandlingRevurdering,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = iverksattBehandling

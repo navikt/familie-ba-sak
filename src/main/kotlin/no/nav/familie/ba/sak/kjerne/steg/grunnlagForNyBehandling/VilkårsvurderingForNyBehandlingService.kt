@@ -1,12 +1,19 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -14,10 +21,12 @@ import java.time.LocalDate
 
 @Service
 class VilkårsvurderingForNyBehandlingService(
-    private val vilkårService: VilkårService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val behandlingService: BehandlingService,
-    private val persongrunnlagService: PersongrunnlagService
+    private val persongrunnlagService: PersongrunnlagService,
+    private val behandlingstemaService: BehandlingstemaService,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val vilkårsvurderingMetrics: VilkårsvurderingMetrics
 ) {
 
     fun opprettVilkårsvurderingUtenomHovedflyt(
@@ -47,7 +56,7 @@ class VilkårsvurderingForNyBehandlingService(
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
             !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
-                vilkårService.initierVilkårsvurderingForBehandling(
+                initierVilkårsvurderingForBehandling(
                     behandling = behandling,
                     bekreftEndringerViaFrontend = true,
                     forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt
@@ -68,44 +77,169 @@ class VilkårsvurderingForNyBehandlingService(
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
             personResultater =
-                VilkårsvurderingForNyBehandlingUtils.lagPersonResultaterForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+                VilkårsvurderingForNyBehandlingUtils(
+                    personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(
+                        behandling.id
+                    )
+                ).lagPersonResultaterForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                     vilkårsvurdering = this,
                     nyMigreringsdato = nyMigreringsdato,
-                    forrigeBehandlingVilkårsvurdering = hentForrigeBehandlingVilkårsvurdering(
-                        forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
-                        nyBehandlingId = behandling.id
-                    ),
-                    personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+                    forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(
+                        forrigeBehandlingSomErVedtatt.id,
+                        feilmelding =
+                        "Kan ikke kopiere vilkårsvurdering fra forrige behandling ${forrigeBehandlingSomErVedtatt.id}" +
+                            "til behandling ${behandling.id}"
+                    )
                 )
         }
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
-
-    private fun hentForrigeBehandlingVilkårsvurdering(
-        forrigeBehandlingSomErVedtatt: Behandling,
-        nyBehandlingId: Long
-    ) = (
-        vilkårsvurderingService
-            .hentAktivForBehandling(forrigeBehandlingSomErVedtatt.id)
-            ?: throw Feil(
-                "Kan ikke kopiere vilkårsvurdering fra forrige behandling ${forrigeBehandlingSomErVedtatt.id}" +
-                    "til behandling $nyBehandlingId"
-            )
-        )
 
     fun genererVilkårsvurderingForHelmanuellMigrering(
         behandling: Behandling,
         nyMigreringsdato: LocalDate
     ): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
-            personResultater = VilkårsvurderingForNyBehandlingUtils.lagPersonResultaterForHelmanuellMigrering(
-                vilkårsvurdering = this,
-                nyMigreringsdato = nyMigreringsdato,
+            personResultater = VilkårsvurderingForNyBehandlingUtils(
                 personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+            ).lagPersonResultaterForHelmanuellMigrering(
+                vilkårsvurdering = this,
+                nyMigreringsdato = nyMigreringsdato
             )
         }
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
+
+    fun initierVilkårsvurderingForBehandling(
+        behandling: Behandling,
+        bekreftEndringerViaFrontend: Boolean,
+        forrigeBehandlingSomErVedtatt: Behandling? = null
+    ): Vilkårsvurdering {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+
+        validerAtFødselshendelseInneholderMinstEttBarn(behandling, personopplysningGrunnlag)
+
+        val aktivVilkårsvurdering = hentVilkårsvurdering(behandling.id)
+
+        val initiellVilkårsvurdering =
+            VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = personopplysningGrunnlag).genererInitiellVilkårsvurdering(
+                behandling = behandling,
+                barnaAktørSomAlleredeErVurdert = aktivVilkårsvurdering?.personResultater?.mapNotNull {
+                    personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
+                }?.filter { it.type == PersonType.BARN }?.map { it.aktør } ?: emptyList()
+            )
+
+        tellMetrikkerForFødselshendelse(
+            aktivVilkårsvurdering = aktivVilkårsvurdering,
+            behandling = behandling,
+            initiellVilkårsvurdering = initiellVilkårsvurdering
+        )
+
+        val løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(behandling.fagsak.id)
+
+        val finnesVilkårsvurderingPåInneværendeBehandling = aktivVilkårsvurdering != null
+        val førsteVilkårsvurderingPåBehandlingOgFinnesTidligereVedtattBehandling =
+            forrigeBehandlingSomErVedtatt != null && !finnesVilkårsvurderingPåInneværendeBehandling
+
+        return if (førsteVilkårsvurderingPåBehandlingOgFinnesTidligereVedtattBehandling) {
+            genererVilkårsvurderingFraForrigeVedtatteBehandling(
+                initiellVilkårsvurdering = initiellVilkårsvurdering,
+                forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt!!,
+                behandling = behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                løpendeUnderkategori = løpendeUnderkategori
+            )
+        } else if (finnesVilkårsvurderingPåInneværendeBehandling) {
+            genererNyVilkårsvurderingForBehandling(
+                initiellVilkårsvurdering = initiellVilkårsvurdering,
+                aktivVilkårsvurdering = aktivVilkårsvurdering!!,
+                løpendeUnderkategori = løpendeUnderkategori,
+                forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
+                bekreftEndringerViaFrontend = bekreftEndringerViaFrontend
+            )
+        } else {
+            vilkårsvurderingService.lagreInitielt(initiellVilkårsvurdering)
+        }
+    }
+
+    private fun genererNyVilkårsvurderingForBehandling(
+        initiellVilkårsvurdering: Vilkårsvurdering,
+        aktivVilkårsvurdering: Vilkårsvurdering,
+        løpendeUnderkategori: BehandlingUnderkategori?,
+        forrigeBehandlingSomErVedtatt: Behandling?,
+        bekreftEndringerViaFrontend: Boolean
+    ): Vilkårsvurdering {
+        val (initieltSomErOppdatert, aktivtSomErRedusert) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
+            initiellVilkårsvurdering = initiellVilkårsvurdering,
+            aktivVilkårsvurdering = aktivVilkårsvurdering,
+            løpendeUnderkategori = løpendeUnderkategori,
+            forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) hentVilkårsvurdering(
+                forrigeBehandlingSomErVedtatt.id
+            ) else null
+        )
+
+        if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
+            throw FunksjonellFeil(
+                melding = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
+                frontendFeilmelding = VilkårsvurderingUtils.lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
+            )
+        }
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
+    }
+
+    private fun tellMetrikkerForFødselshendelse(
+        aktivVilkårsvurdering: Vilkårsvurdering?,
+        behandling: Behandling,
+        initiellVilkårsvurdering: Vilkårsvurdering
+    ) {
+        if (førstegangskjøringAvVilkårsvurdering(aktivVilkårsvurdering) && behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+            vilkårsvurderingMetrics.tellMetrikker(initiellVilkårsvurdering)
+        }
+    }
+
+    private fun validerAtFødselshendelseInneholderMinstEttBarn(
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
+    ) {
+        if (behandling.skalBehandlesAutomatisk && personopplysningGrunnlag.barna.isEmpty()) {
+            throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
+        }
+    }
+
+    private fun genererVilkårsvurderingFraForrigeVedtatteBehandling(
+        initiellVilkårsvurdering: Vilkårsvurdering,
+        forrigeBehandlingSomErVedtatt: Behandling,
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        løpendeUnderkategori: BehandlingUnderkategori?
+    ): Vilkårsvurdering {
+        val vilkårsvurdering = VilkårsvurderingForNyBehandlingUtils(
+            personopplysningGrunnlag = personopplysningGrunnlag
+        ).genererVilkårsvurderingFraForrigeVedtattBehandling(
+            initiellVilkårsvurdering = initiellVilkårsvurdering,
+            forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
+            behandling = behandling,
+            løpendeUnderkategori = løpendeUnderkategori
+        )
+        endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+            behandling,
+            forrigeBehandlingSomErVedtatt
+        )
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+    }
+
+    fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
+        behandlingId = behandlingId
+    )
+
+    fun hentVilkårsvurderingThrows(
+        behandlingId: Long,
+        feilmelding: String? = null
+    ): Vilkårsvurdering =
+        hentVilkårsvurdering(behandlingId) ?: throw Feil(
+            message = feilmelding ?: "Fant ikke aktiv vilkårsvurdering for behandling $behandlingId",
+            frontendFeilmelding = feilmelding ?: "Fant ikke aktiv vilkårsvurdering for behandling."
+        )
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)

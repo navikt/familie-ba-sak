@@ -578,7 +578,8 @@ fun kjørStegprosessForFGB(
     vilkårsvurderingService: VilkårsvurderingService,
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
-    behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+    behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+    behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL
 ): Behandling {
     fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
     val behandling = stegService.håndterNyBehandling(

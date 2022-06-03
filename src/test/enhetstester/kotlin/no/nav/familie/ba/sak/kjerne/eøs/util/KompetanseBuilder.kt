@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.util.SkjemaBuilder
@@ -9,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 
 class KompetanseBuilder(
     startMåned: Tidspunkt<Måned> = jan(2020),
-    behandlingId: Long = 1
+    behandlingId: BehandlingId = BehandlingId(1)
 ) : SkjemaBuilder<Kompetanse, KompetanseBuilder>(startMåned, behandlingId) {
 
     fun medKompetanse(k: String, vararg barn: Person) = medSkjema(k, barn.toList()) {
