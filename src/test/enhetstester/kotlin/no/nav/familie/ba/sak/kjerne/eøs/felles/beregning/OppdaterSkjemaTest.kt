@@ -14,7 +14,7 @@ internal class OppdaterSkjemaTest {
     val barn2 = tilfeldigPerson(personType = PersonType.BARN)
     val barn3 = tilfeldigPerson(personType = PersonType.BARN)
 
-    val kompetanser = KompetanseBuilder(jan(2020), 1L)
+    val kompetanser = KompetanseBuilder(jan(2020))
         .medKompetanse("    SSSSSPP", barn1)
         .medKompetanse("  ---------", barn2, barn3)
         .medKompetanse("           PPPP", barn1, barn2, barn3)
@@ -52,7 +52,7 @@ internal class OppdaterSkjemaTest {
     fun `oppdatere mer enn gjeldende kompetanser skal bare påvirke eksisterende tidsperioder`() {
         val kompetanse = kompetanse(jan(2020), "PPPPPPPPPPPPPPPPPPPPPP", barn1, barn2, barn3)
 
-        val forventedeKompetanser = KompetanseBuilder(jan(2020), 1L)
+        val forventedeKompetanser = KompetanseBuilder(jan(2020))
             .medKompetanse("    PPPPPPPPPPP", barn1, barn2, barn3)
             .medKompetanse("  PP", barn2, barn3)
             .byggKompetanser()
@@ -65,7 +65,7 @@ internal class OppdaterSkjemaTest {
     fun `oppdatere kompetanser som begynner uendret, skal likevel bli endret`() {
         val kompetanse = kompetanse(jan(2020), "    SSSSSSSSS", barn1)
 
-        val forventedeKompetanser = KompetanseBuilder(jan(2020), 1L)
+        val forventedeKompetanser = KompetanseBuilder(jan(2020))
             .medKompetanse("    SSSSSSSSS", barn1)
             .medKompetanse("  ---------PP", barn2, barn3)
             .medKompetanse("             PP", barn1, barn2, barn3)

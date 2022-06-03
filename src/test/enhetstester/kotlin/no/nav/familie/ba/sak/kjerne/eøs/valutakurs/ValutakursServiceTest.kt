@@ -4,8 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
-import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
@@ -16,11 +18,17 @@ import org.junit.jupiter.api.Test
 
 internal class ValutakursServiceTest {
     val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs> = mockPeriodeBarnSkjemaRepository()
-    val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService = mockk()
+    val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository = mockk()
 
     val valutakursService = ValutakursService(
         valutakursRepository,
-        utenlandskPeriodebeløpService
+        emptyList()
+    )
+
+    val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(
+        valutakursRepository,
+        utenlandskPeriodebeløpRepository,
+        emptyList(),
     )
 
     @BeforeEach
@@ -30,7 +38,7 @@ internal class ValutakursServiceTest {
 
     @Test
     fun `skal tilpasse utenlandsk periodebeløp til endrede kompetanser`() {
-        val behandlingId = 10L
+        val behandlingId = BehandlingId(10L)
 
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
@@ -44,9 +52,9 @@ internal class ValutakursServiceTest {
             .medBeløp("  777777777", "EUR", barn1)
             .bygg()
 
-        every { utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId) } returns utenlandskePeriodebeløp
+        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id) } returns utenlandskePeriodebeløp
 
-        valutakursService.tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId)
+        tilpassValutakurserTilUtenlandskePeriodebeløpService.tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId)
 
         val faktiskeValutakurser = valutakursService.hentValutakurser(behandlingId)
 

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestKompetanse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanse
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -48,7 +49,7 @@ class KompetanseController(
 
         validerOppdatering(kompetanse)
 
-        kompetanseService.endreKompetanse(behandlingId, kompetanse)
+        kompetanseService.oppdaterKompetanse(BehandlingId(behandlingId), kompetanse)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -69,9 +70,10 @@ class KompetanseController(
         val gjeldendeKompetanse = kompetanseService.hentKompetanse(kompetanseId)
         validerOppdatering(gjeldendeKompetanse, kompetanse)
 
-        kompetanseService.endreKompetanse(gjeldendeKompetanse.behandlingId, kompetanse)
+        val behandlingId = BehandlingId(gjeldendeKompetanse.behandlingId)
+        kompetanseService.oppdaterKompetanse(behandlingId, kompetanse)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId.id)))
     }
 
     @DeleteMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
