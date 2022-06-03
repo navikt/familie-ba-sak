@@ -11,7 +11,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -48,7 +49,7 @@ class VilkårsvurderingTestController(
     private val behandlingRepository: BehandlingRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val aktørIdRepository: AktørIdRepository,
-    private val kompetanseService: KompetanseService
+    private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService
 ) {
 
     @PostMapping()
@@ -89,7 +90,7 @@ class VilkårsvurderingTestController(
             vilkårsvurdering
         )
 
-        kompetanseService.tilpassKompetanserTilRegelverk(behandling.id)
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
@@ -109,7 +110,7 @@ class VilkårsvurderingTestController(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
 
-        kompetanseService.tilpassKompetanserTilRegelverk(behandling.id)
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

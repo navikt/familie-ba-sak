@@ -61,7 +61,7 @@ fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
     }.filter { it.value.toSegments().isNotEmpty() }
 }
 
-fun List<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: List<Kompetanse>): LocalDate {
+fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: Iterable<Kompetanse>): LocalDate {
     val kompetanseDiff = this.tilTidslinje()
         .snittKombinerMed(forrigeKompetansePerioder.tilTidslinje()) { nyKompetanse, forrigeKompetanse ->
             when {
