@@ -219,6 +219,7 @@ data class EØSBegrunnelseTestConfig(
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
     val maalform: String,
+    val sokersAktivitet: SøkersAktivitet,
 ) : TestBegrunnelse {
     fun tilEØSBegrunnelseData(): EØSBegrunnelseData = EØSBegrunnelseData(
         apiNavn = this.apiNavn,
@@ -230,7 +231,8 @@ data class EØSBegrunnelseTestConfig(
         maalform = this.maalform,
         vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
             .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
-            ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}")
+            ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
+        sokersAktivitet = this.sokersAktivitet,
     )
 }
 
