@@ -40,7 +40,7 @@ class BrevPeriodeGenerator(
 
     fun genererBrevPeriode(): BrevPeriode? {
         val begrunnelseGrunnlagMedPersoner = hentBegrunnelsegrunnlagMedPersoner()
-        val eøsBegrunnelserMedKompetanser = hentEøsBegrunnelserMedPersoner()
+        val eøsBegrunnelserMedKompetanser = hentEøsBegrunnelserMedKompetanser()
 
         val begrunnelserOgFritekster =
             byggBegrunnelserOgFritekster(
@@ -90,7 +90,7 @@ class BrevPeriodeGenerator(
         throw Feil("Klarer ikke å konvertere landkode $landkode")
     }
 
-    fun hentEøsBegrunnelserMedPersoner(): List<EØSBegrunnelseMedKompetanser> =
+    fun hentEøsBegrunnelserMedKompetanser(): List<EØSBegrunnelseMedKompetanser> =
         minimertVedtaksperiode.eøsBegrunnelser.map { eøsBegrunnelseMedTriggere ->
             val kompetanser = hentKompetanserForEØSBegrunnelse(eøsBegrunnelseMedTriggere, minimerteKompetanser)
             EØSBegrunnelseMedKompetanser(
