@@ -67,7 +67,7 @@ class ValutakursRepositoryTest(
         )
 
         val hentedeValutakurser =
-            valutakursRepository.findByBehandlingId(behandlingId = behandling.id)
+            valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id)
 
         assertEquals(1, hentedeValutakurser.size)
         assertEquals(valutakurs, hentedeValutakurser.first())

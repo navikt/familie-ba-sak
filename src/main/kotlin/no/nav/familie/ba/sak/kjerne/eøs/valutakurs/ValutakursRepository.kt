@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.Query
 interface ValutakursRepository : PeriodeOgBarnSkjemaRepository<Valutakurs> {
 
     @Query("SELECT vk FROM Valutakurs vk WHERE vk.behandlingId = :behandlingId")
-    override fun findByBehandlingId(behandlingId: Long): List<Valutakurs>
+    override fun finnFraBehandlingId(behandlingId: Long): List<Valutakurs>
 }

@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakEier
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -121,9 +122,10 @@ class InnkomendeJournalføringService(
         årsak: BehandlingÅrsak,
         kategori: BehandlingKategori? = null,
         underkategori: BehandlingUnderkategori? = null,
-        søknadMottattDato: LocalDate? = null
+        søknadMottattDato: LocalDate? = null,
+        eier: FagsakEier = FagsakEier.OMSORGSPERSON
     ): Behandling {
-        fagsakService.hentEllerOpprettFagsak(personIdent)
+        fagsakService.hentEllerOpprettFagsak(personIdent, eier = eier)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 kategori = kategori,
@@ -132,7 +134,8 @@ class InnkomendeJournalføringService(
                 behandlingType = type,
                 behandlingÅrsak = årsak,
                 navIdent = navIdent,
-                søknadMottattDato = søknadMottattDato
+                søknadMottattDato = søknadMottattDato,
+                fagsakEier = eier
             )
         )
     }
@@ -156,7 +159,8 @@ class InnkomendeJournalføringService(
                     årsak = request.nyBehandlingsårsak,
                     kategori = request.kategori,
                     underkategori = request.underkategori,
-                    søknadMottattDato = request.datoMottatt?.toLocalDate()
+                    søknadMottattDato = request.datoMottatt?.toLocalDate(),
+                    eier = request.fagsakEier
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
@@ -336,3 +340,6 @@ class InnkomendeJournalføringService(
         private val logger = LoggerFactory.getLogger(InnkomendeJournalføringService::class.java)
     }
 }
+
+private val RestJournalføring.fagsakEier: FagsakEier
+    get() = if (erEnsligMindreårig || erPåInstitusjon) FagsakEier.BARN else FagsakEier.OMSORGSPERSON

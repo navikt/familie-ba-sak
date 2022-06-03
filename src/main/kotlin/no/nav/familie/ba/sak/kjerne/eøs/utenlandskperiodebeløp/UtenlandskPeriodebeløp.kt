@@ -61,7 +61,7 @@ data class UtenlandskPeriodebeløp(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     override var behandlingId: Long = 0
 
-    override fun utenSkjema(): UtenlandskPeriodebeløp = copy(
+    override fun utenInnhold(): UtenlandskPeriodebeløp = copy(
         beløp = null,
         valutakode = null,
         intervall = null

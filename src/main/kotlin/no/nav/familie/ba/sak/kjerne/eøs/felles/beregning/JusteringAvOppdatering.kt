@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.erLikBortsettFraTilOgMed
 import no.nav.familie.ba.sak.kjerne.eøs.felles.harEkteDelmengdeAvBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBarnaSomForsvinnerFra
 import no.nav.familie.ba.sak.kjerne.eøs.felles.periodeBlirLukketAv
-import no.nav.familie.ba.sak.kjerne.eøs.felles.utenSkjemaHeretter
+import no.nav.familie.ba.sak.kjerne.eøs.felles.utenInnholdHeretter
 
 /**
  * Funksjon som inverterer en skjema-oppdatering,[this], som skal endre et sett av [gjeldendeSkjemaer]
@@ -47,11 +47,11 @@ fun <T : PeriodeOgBarnSkjemaEntitet<T>> T.somInversOppdateringEllersNull(gjelden
 
     return when {
         skjemaetDerPeriodeLukkesOgBarnFjernes != null ->
-            oppdatering.medBarnaSomForsvinnerFra(skjemaetDerPeriodeLukkesOgBarnFjernes).utenSkjemaHeretter()
+            oppdatering.medBarnaSomForsvinnerFra(skjemaetDerPeriodeLukkesOgBarnFjernes).utenInnholdHeretter()
         skjemaetDerBarnFjernes != null ->
-            oppdatering.medBarnaSomForsvinnerFra(skjemaetDerBarnFjernes).utenSkjema()
+            oppdatering.medBarnaSomForsvinnerFra(skjemaetDerBarnFjernes).utenInnhold()
         skjemaetDerPeriodeLukkes != null ->
-            oppdatering.utenSkjemaHeretter()
+            oppdatering.utenInnholdHeretter()
         else -> null
     }
 }

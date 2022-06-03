@@ -36,6 +36,8 @@ data class RestJournalføring(
     val navIdent: String,
     val nyBehandlingstype: BehandlingType,
     val nyBehandlingsårsak: BehandlingÅrsak,
+    val erEnsligMindreårig: Boolean = false,
+    val erPåInstitusjon: Boolean = false,
 ) {
 
     fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest {
