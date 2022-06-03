@@ -4,21 +4,27 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivit
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 
 enum class BarnetsBostedsland {
-    NORGE;
+    NORGE,
+    IKKE_NORGE;
+}
 
-    fun tilLandkode(): String {
-        return when (this) {
-            NORGE -> "NO"
-        }
+fun hentBarnetsBostedslandFraLandkode(landKode: String): BarnetsBostedsland {
+    return if (landKode == "NO") {
+        BarnetsBostedsland.NORGE
+    } else {
+        BarnetsBostedsland.IKKE_NORGE
     }
 }
 
 data class RestSanityEØSBegrunnelse(
     val apiNavn: String?,
     val navnISystem: String?,
-    val annenForeldersAktivitet: List<AnnenForeldersAktivitet>? = emptyList(),
-    val barnetsBostedsland: List<BarnetsBostedsland>? = emptyList(),
-    val kompetanseResultat: List<KompetanseResultat>? = emptyList(),
+    val annenForeldersAktivitet: List<AnnenForeldersAktivitet>?,
+    val barnetsBostedsland: List<String>?,
+    val kompetanseResultat: List<String>?,
+    val hjemlerEOSForordningen883: List<String>?,
+    val hjemlerEOSForordningen987: List<String>?,
+    val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -27,11 +33,21 @@ data class RestSanityEØSBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
             annenForeldersAktivitet = annenForeldersAktivitet ?: emptyList(),
-            barnetsBostedsland = barnetsBostedsland ?: emptyList(),
-            kompetanseResultat = kompetanseResultat ?: emptyList()
+            barnetsBostedsland = barnetsBostedsland?.mapNotNull {
+                konverterTilEnumverdi<BarnetsBostedsland>(it)
+            } ?: emptyList(),
+            kompetanseResultat = kompetanseResultat?.mapNotNull {
+                konverterTilEnumverdi<KompetanseResultat>(it)
+            } ?: emptyList(),
+            hjemlerEOSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
+            hjemlerEOSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
+            hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
         )
     }
 }
+
+private inline fun <reified T> konverterTilEnumverdi(it: String): T? where T : Enum<T> =
+    enumValues<T>().find { enum -> enum.name == it }
 
 data class SanityEØSBegrunnelse(
     val apiNavn: String,
@@ -39,6 +55,9 @@ data class SanityEØSBegrunnelse(
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
+    val hjemlerEOSForordningen883: List<String>,
+    val hjemlerEOSForordningen987: List<String>,
+    val hjemlerSeperasjonsavtalenStorbritannina: List<String>,
 )
 
 fun List<SanityEØSBegrunnelse>.finnBegrunnelse(eøsBegrunnelse: EØSStandardbegrunnelse): SanityEØSBegrunnelse? =
