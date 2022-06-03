@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
@@ -62,14 +61,6 @@ fun hentMinimerteKompetanserForPeriode(
         ).perioder()
         .mapNotNull { it.innhold }
         .map { it.tilMinimertKompetanse(personopplysningGrunnlag) }
-
-    val unikePersonerIKompetanseForPeriode =
-        minimerteKompetanser
-            .flatMap { minimertKompetanse -> minimertKompetanse.personer.map { it.personIdent } }
-            .distinct().count()
-    if (unikePersonerIKompetanseForPeriode != minimerteKompetanser.size) {
-        throw Feil("Det finnes flere kompetanser for samme person i perioden")
-    }
 
     return minimerteKompetanser
 }
