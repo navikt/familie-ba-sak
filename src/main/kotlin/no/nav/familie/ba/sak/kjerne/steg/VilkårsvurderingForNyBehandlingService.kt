@@ -12,9 +12,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingUtils.førstegangskjøringAvVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingUtils.genererInitiellVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingUtils.genererVilkårsvurderingFraForrigeVedtattBehandling
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
@@ -82,7 +79,11 @@ class VilkårsvurderingForNyBehandlingService(
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
             personResultater =
-                VilkårsvurderingForNyBehandlingUtils.lagPersonResultaterForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+                VilkårsvurderingForNyBehandlingUtils(
+                    personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(
+                        behandling.id
+                    )
+                ).lagPersonResultaterForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                     vilkårsvurdering = this,
                     nyMigreringsdato = nyMigreringsdato,
                     forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(
@@ -90,8 +91,7 @@ class VilkårsvurderingForNyBehandlingService(
                         feilmelding =
                         "Kan ikke kopiere vilkårsvurdering fra forrige behandling ${forrigeBehandlingSomErVedtatt.id}" +
                             "til behandling ${behandling.id}"
-                    ),
-                    personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+                    )
                 )
         }
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
@@ -102,10 +102,11 @@ class VilkårsvurderingForNyBehandlingService(
         nyMigreringsdato: LocalDate
     ): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
-            personResultater = VilkårsvurderingForNyBehandlingUtils.lagPersonResultaterForHelmanuellMigrering(
-                vilkårsvurdering = this,
-                nyMigreringsdato = nyMigreringsdato,
+            personResultater = VilkårsvurderingForNyBehandlingUtils(
                 personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+            ).lagPersonResultaterForHelmanuellMigrering(
+                vilkårsvurdering = this,
+                nyMigreringsdato = nyMigreringsdato
             )
         }
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
@@ -123,12 +124,11 @@ class VilkårsvurderingForNyBehandlingService(
         val aktivVilkårsvurdering = hentVilkårsvurdering(behandling.id)
 
         val initiellVilkårsvurdering =
-            genererInitiellVilkårsvurdering(
+            VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = personopplysningGrunnlag).genererInitiellVilkårsvurdering(
                 behandling = behandling,
                 barnaAktørSomAlleredeErVurdert = aktivVilkårsvurdering?.personResultater?.mapNotNull {
                     personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
-                }?.filter { it.type == PersonType.BARN }?.map { it.aktør } ?: emptyList(),
-                personopplysningGrunnlag = personopplysningGrunnlag
+                }?.filter { it.type == PersonType.BARN }?.map { it.aktør } ?: emptyList()
             )
 
         tellMetrikkerForFødselshendelse(
@@ -215,11 +215,12 @@ class VilkårsvurderingForNyBehandlingService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         løpendeUnderkategori: BehandlingUnderkategori?
     ): Vilkårsvurdering {
-        val vilkårsvurdering = genererVilkårsvurderingFraForrigeVedtattBehandling(
+        val vilkårsvurdering = VilkårsvurderingForNyBehandlingUtils(
+            personopplysningGrunnlag = personopplysningGrunnlag
+        ).genererVilkårsvurderingFraForrigeVedtattBehandling(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
             behandling = behandling,
-            personopplysningGrunnlag = personopplysningGrunnlag,
             løpendeUnderkategori = løpendeUnderkategori
         )
         endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
