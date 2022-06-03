@@ -52,3 +52,4 @@ class ValutakursUtfyltTest {
         Assertions.assertEquals(UtfyltStatus.IKKE_UTFYLT, restValutakurs.status)
     }
 }
+
