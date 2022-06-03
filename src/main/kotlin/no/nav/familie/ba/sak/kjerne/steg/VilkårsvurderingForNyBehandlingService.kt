@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelServic
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
@@ -25,7 +24,6 @@ class VilkårsvurderingForNyBehandlingService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val behandlingService: BehandlingService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val personidentService: PersonidentService,
     private val behandlingstemaService: BehandlingstemaService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics
