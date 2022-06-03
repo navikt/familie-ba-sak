@@ -66,7 +66,7 @@ fun beregnMånedligUtbetalingsbeløpUtlandINok(
 }
 
 fun kalkulerUtenlandskPeriodebeøpINorskeKroner(
-    utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>
+    utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
     valutakurser: Collection<Valutakurs>
 ): Map<Aktør, Tidslinje<BigDecimal, Måned>> {
 
@@ -98,5 +98,4 @@ fun <T : Tidsenhet> UtenlandskPeriodebeløp.tilMånedligBeløp(tidspunkt: Tidspu
         .toBigDecimal()
 }
 
-fun <T : Tidsenhet> Tidspunkt<T>.erSkuddår() = this.tilLocalDateEllerNull()?.isLeapYear() ?: false
-
+fun <T : Tidsenhet> Tidspunkt<T>.erSkuddår() = this.tilLocalDateEllerNull()?.isLeapYear ?: false
