@@ -55,7 +55,7 @@ internal class KompetanseServiceTest {
             .lagreTil(mockKompetanseRepository)
 
         val oppdatertKompetanse = kompetanse(jan(2020), "  SSSSS  ", barn1)
-        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+        kompetanseService.oppdaterKompetanse(behandlingId, oppdatertKompetanse)
 
         val forventedeKompetanser = listOf(lagretKompetanse)
 
@@ -74,7 +74,7 @@ internal class KompetanseServiceTest {
 
         val oppdatertKompetanse = kompetanse(jan(2020), "  PP", barn2, barn3)
 
-        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+        kompetanseService.oppdaterKompetanse(behandlingId, oppdatertKompetanse)
 
         val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
             .medKompetanse("--", barn1, barn2, barn3)
@@ -105,7 +105,7 @@ internal class KompetanseServiceTest {
             .lagreTil(mockKompetanseRepository)
 
         val oppdatertKompetanse = kompetanse(jan(2020), "PP", barn1)
-        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+        kompetanseService.oppdaterKompetanse(behandlingId, oppdatertKompetanse)
 
         val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
             .medKompetanse("PP", barn1)
@@ -130,7 +130,7 @@ internal class KompetanseServiceTest {
             .lagreTil(mockKompetanseRepository)
 
         val oppdatertKompetanse = kompetanse(mar(2020), "PPP", barn1, barn2, barn3)
-        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+        kompetanseService.oppdaterKompetanse(behandlingId, oppdatertKompetanse)
 
         val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
             .medKompetanse("SS   SS", barn1)
@@ -156,7 +156,7 @@ internal class KompetanseServiceTest {
 
         // Endrer kun til-og-med dato fra uendelig (null) til en gitt dato
         val oppdatertKompetanse = kompetanse(jan(2020), "SSS", barn1, barn2, barn3)
-        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+        kompetanseService.oppdaterKompetanse(behandlingId, oppdatertKompetanse)
 
         // Forventer tomt skjema fra oppdatert dato og fremover
         val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
@@ -181,7 +181,7 @@ internal class KompetanseServiceTest {
 
         // Fjerner ett barn fra gjeldende skjema, ellers likt
         val oppdatertKompetanse = kompetanse(jan(2020), "S>", barn1, barn2)
-        kompetanseService.endreKompetanse(behandlingId, oppdatertKompetanse)
+        kompetanseService.oppdaterKompetanse(behandlingId, oppdatertKompetanse)
 
         // Forventer tomt skjema for samme periode for barnet som ble fjernet
         val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)

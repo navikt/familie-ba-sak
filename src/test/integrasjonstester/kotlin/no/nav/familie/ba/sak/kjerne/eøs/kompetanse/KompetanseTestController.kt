@@ -41,7 +41,7 @@ class KompetanseTestController(
         val behandlingId = BehandlingId(behandlingId)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId.id)!!
         restKompetanser.tilKompetanser(behandlingId, personopplysningGrunnlag).forEach {
-            kompetanseService.endreKompetanse(behandlingId, it)
+            kompetanseService.oppdaterKompetanse(behandlingId, it)
         }
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId.id)))

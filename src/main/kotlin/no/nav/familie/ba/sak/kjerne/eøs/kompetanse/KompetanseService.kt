@@ -25,7 +25,7 @@ class KompetanseService(
         skjemaService.hentMedId(kompetanseId)
 
     @Transactional
-    fun endreKompetanse(behandlingId: BehandlingId, oppdatering: Kompetanse) =
+    fun oppdaterKompetanse(behandlingId: BehandlingId, oppdatering: Kompetanse) =
         skjemaService.endreSkjemaer(behandlingId, oppdatering)
 
     @Transactional

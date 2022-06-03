@@ -109,10 +109,6 @@ class TilbakestillBehandlingService(
         if (behandling.erTilbakestiltTilBehandlingsresultat())
             return behandling
 
-        val gjeldendeSteg = behandling.behandlingStegTilstand.last()
-        if (gjeldendeSteg.behandlingSteg == StegType.BEHANDLINGSRESULTAT && gjeldendeSteg.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT)
-            return behandling
-
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
                 behandlingId
