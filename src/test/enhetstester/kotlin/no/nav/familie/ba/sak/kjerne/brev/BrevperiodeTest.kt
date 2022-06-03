@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.finnBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
@@ -148,7 +149,7 @@ class BrevperiodeTest {
             val forventedeBegrunnelser = forventetOutput.begrunnelser.map {
                 when (it) {
                     is BegrunnelseDataTestConfig -> it.tilBegrunnelseData()
-                    is FritekstBegrunnelseTestConfig -> it.fritekst
+                    is FritekstBegrunnelseTestConfig -> FritekstBegrunnelse(it.fritekst)
                     is EØSBegrunnelseTestConfig -> it.tilEØSBegrunnelseData()
                     else -> throw IllegalArgumentException("Ugyldig testconfig")
                 }
