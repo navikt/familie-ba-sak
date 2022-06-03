@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
@@ -17,19 +16,19 @@ class EøsSkjemaerForNyBehandlingService(
     private val valutakursService: ValutakursService
 ) {
 
-    fun kopierEøsSkjemaer(behandling: Behandling, forrigeBehandlingSomErVedtatt: Behandling?) {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) && forrigeBehandlingSomErVedtatt != null) {
+    fun kopierEøsSkjemaer(behandlingId: BehandlingId, forrigeBehandlingSomErVedtattId: BehandlingId?) {
+        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) && forrigeBehandlingSomErVedtattId != null) {
             kompetanseService.kopierOgErstattKompetanser(
-                fraBehandlingId = BehandlingId(forrigeBehandlingSomErVedtatt.id),
-                tilBehandlingId = BehandlingId(behandling.id)
+                fraBehandlingId = forrigeBehandlingSomErVedtattId,
+                tilBehandlingId = behandlingId
             )
             utenlandskPeriodebeløpService.kopierOgErstattUtenlandskPeriodebeløp(
-                fraBehandlingId = BehandlingId(forrigeBehandlingSomErVedtatt.id),
-                tilBehandlingId = BehandlingId(behandling.id)
+                fraBehandlingId = forrigeBehandlingSomErVedtattId,
+                tilBehandlingId = behandlingId
             )
             valutakursService.kopierOgErstattValutakurser(
-                fraBehandlingId = BehandlingId(forrigeBehandlingSomErVedtatt.id),
-                tilBehandlingId = BehandlingId(behandling.id)
+                fraBehandlingId = forrigeBehandlingSomErVedtattId,
+                tilBehandlingId = behandlingId
             )
         }
     }

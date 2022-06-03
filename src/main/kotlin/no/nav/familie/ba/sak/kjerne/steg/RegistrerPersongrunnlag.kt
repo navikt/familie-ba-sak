@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.EøsSkjemaerForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.PersonopplysningGrunnlagForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
@@ -40,8 +41,10 @@ class RegistrerPersongrunnlag(
         )
 
         eøsSkjemaerForNyBehandlingService.kopierEøsSkjemaer(
-            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
-            behandling = behandling
+            forrigeBehandlingSomErVedtattId = if (forrigeBehandlingSomErVedtatt != null) BehandlingId(
+                forrigeBehandlingSomErVedtatt.id
+            ) else null,
+            behandlingId = BehandlingId(behandling.id)
         )
 
         return hentNesteStegForNormalFlyt(behandling)
