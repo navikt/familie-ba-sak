@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -82,12 +83,12 @@ class StønadsstatistikkService(
             behandlingTypeV2 = BehandlingTypeV2.valueOf(behandling.type.name),
             utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandlingId),
             funksjonellId = UUID.randomUUID().toString(),
-            kompetanseperioder = hentKompetanse(behandlingId),
+            kompetanseperioder = hentKompetanse(BehandlingId(behandlingId)),
             behandlingÅrsakV2 = BehandlingÅrsakV2.valueOf(behandling.opprettetÅrsak.name)
         )
     }
 
-    private fun hentKompetanse(behandlingId: Long): List<Kompetanse> {
+    private fun hentKompetanse(behandlingId: BehandlingId): List<Kompetanse> {
         val kompetanser = kompetanseService.hentKompetanser(behandlingId)
 
         return kompetanser.map { kompetanse ->
@@ -273,6 +274,7 @@ class StønadsstatistikkService(
             personIdent = person.aktør.aktivFødselsnummer()
         )
     }
+
     @Deprecated("kan fjernes når vi ikke lenger publiserer hendelser til kafka onprem")
     private fun mapTilUtbetalingsperiode(
         segment: LocalDateSegment<Int>,
