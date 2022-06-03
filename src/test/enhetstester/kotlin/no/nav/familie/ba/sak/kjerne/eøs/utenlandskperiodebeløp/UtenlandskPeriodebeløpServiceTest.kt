@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -47,7 +49,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
         val barn3 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
 
         UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
-            .medBeløp("4444   555 666", "EUR", barn1, barn2, barn3)
+            .medBeløp("4444   555 666", "EUR", "N", barn1, barn2, barn3)
             .lagreTil(utenlandskPeriodebeløpRepository)
 
         val kompetanser = KompetanseBuilder(jan(2020), behandlingId)
@@ -55,6 +57,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
             .medKompetanse("  PPP", barn1, barn2, barn3)
             .medKompetanse("--   ----", barn2, barn3)
             .byggKompetanser()
+            .map { it.copy(barnetsBostedsland = "N") }
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId.id) } returns kompetanser
 
@@ -64,9 +67,32 @@ internal class UtenlandskPeriodebeløpServiceTest {
         val faktiskeUtenlandskePeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
 
         val forventedeUtenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
-            .medBeløp("44   --555", "EUR", barn1)
+            .medBeløp("44   --555", "EUR", "N", barn1)
             .bygg()
 
         assertEqualsUnordered(forventedeUtenlandskePeriodebeløp, faktiskeUtenlandskePeriodebeløp)
+    }
+
+    @Test
+    fun `Slette et utenlandskPeriodebeløp-skjema skal resultere i et skjema uten innhold, men som fortsatt har utbetalingsland`() {
+        val behandlingId = BehandlingId(10L)
+
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
+
+        val lagretUtenlandskPeriodebeløp = UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
+            .medBeløp("44444444", "EUR", "SE", barn1)
+            .lagreTil(utenlandskPeriodebeløpRepository).single()
+
+        utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(lagretUtenlandskPeriodebeløp.id)
+
+        val faktiskUtenlandskPeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId).single()
+
+        assertEquals("SE", faktiskUtenlandskPeriodebeløp.utbetalingsland)
+        assertNull(faktiskUtenlandskPeriodebeløp.beløp)
+        assertNull(faktiskUtenlandskPeriodebeløp.valutakode)
+        assertNull(faktiskUtenlandskPeriodebeløp.intervall)
+        assertEquals(lagretUtenlandskPeriodebeløp.fom, faktiskUtenlandskPeriodebeløp.fom)
+        assertEquals(lagretUtenlandskPeriodebeløp.tom, faktiskUtenlandskPeriodebeløp.tom)
+        assertEquals(lagretUtenlandskPeriodebeløp.barnAktører, faktiskUtenlandskPeriodebeløp.barnAktører)
     }
 }

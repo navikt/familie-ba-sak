@@ -48,6 +48,9 @@ data class UtenlandskPeriodebeløp(
 
     @Column(name = "intervall")
     val intervall: String? = null,
+
+    @Column(name = "utbetalingsland")
+    val utbetalingsland: String,
 ) : PeriodeOgBarnSkjemaEntitet<UtenlandskPeriodebeløp>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "utenlandsk_periodebeloep_seq_generator")
@@ -74,6 +77,6 @@ data class UtenlandskPeriodebeløp(
     )
 
     companion object {
-        val NULL = UtenlandskPeriodebeløp(null, null, emptySet())
+        val NULL = UtenlandskPeriodebeløp(null, null, emptySet(), utbetalingsland = "")
     }
 }

@@ -12,7 +12,8 @@ data class RestUtenlandskPeriodebeløp(
     val barnIdenter: List<String>,
     val beløp: BigDecimal?,
     val valutakode: String?,
-    val intervall: String?
+    val intervall: String?,
+    val utbetalingsland: String
 )
 
 fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører: List<Aktør>) = UtenlandskPeriodebeløp(
@@ -21,7 +22,8 @@ fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører: List<Ak
     barnAktører = barnAktører.toSet(),
     beløp = this.beløp,
     valutakode = this.valutakode,
-    intervall = this.intervall
+    intervall = this.intervall,
+    utbetalingsland = this.utbetalingsland
 )
 
 fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() = RestUtenlandskPeriodebeløp(
@@ -31,5 +33,6 @@ fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() = RestUtenlandskPer
     barnIdenter = this.barnAktører.map { it.aktivFødselsnummer() },
     beløp = this.beløp,
     valutakode = this.valutakode,
-    intervall = this.intervall
+    intervall = this.intervall,
+    utbetalingsland = this.utbetalingsland
 )
