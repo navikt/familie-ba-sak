@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -12,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
 
 abstract class SkjemaBuilder<S, B>(
     private val startMåned: Tidspunkt<Måned> = jan(2020),
-    private val behandlingId: Long
+    private val behandlingId: BehandlingId
 ) where S : PeriodeOgBarnSkjemaEntitet<S>, B : SkjemaBuilder<S, B> {
     private val skjemaer: MutableList<S> = mutableListOf()
 
@@ -37,7 +38,7 @@ abstract class SkjemaBuilder<S, B>(
     }
 
     fun bygg(): Collection<S> = skjemaer
-        .map { skjema -> skjema.also { it.behandlingId = behandlingId } }
+        .map { skjema -> skjema.also { it.behandlingId = behandlingId.id } }
 
     fun lagreTil(repository: PeriodeOgBarnSkjemaRepository<S>): List<S> {
         return repository.saveAll(bygg())

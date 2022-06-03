@@ -71,7 +71,7 @@ class BehandlingService(
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
         val søkersAktør = personidentService.hentAktør(nyBehandling.søkersIdent)
 
-        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør)
+        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør, nyBehandling.fagsakEier)
             ?: throw FunksjonellFeil(
                 melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
                 frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak"
@@ -295,7 +295,7 @@ class BehandlingService(
                 .finnSisteMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
                 ?.toYearMonth()
                 ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
-                    ?.let {
+                    ?.takeIf { it.erMigrering() }?.let { // fordi migreringsdato kun kan lagret for migreringsbehandling
                         vilkårsvurderingService.hentTidligsteVilkårsvurderingKnyttetTilMigrering(
                             behandlingId = it.id
                         )
