@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.beløpUtbetaltFor
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -76,9 +77,32 @@ fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse
 )
 
-interface Begrunnelse
+enum class Begrunnelsetype {
+    STANDARD_BEGRUNNELSE,
+    EØS_BEGRUNNELSE,
+    FRITEKST,
+}
+
+interface Begrunnelse : Comparable<Begrunnelse> {
+    val type: Begrunnelsetype
+    val vedtakBegrunnelseType: VedtakBegrunnelseType?
+
+    override fun compareTo(other: Begrunnelse): Int {
+
+        return when {
+            this.type == Begrunnelsetype.FRITEKST -> Int.MAX_VALUE
+            other.type == Begrunnelsetype.FRITEKST -> -Int.MAX_VALUE
+            this.vedtakBegrunnelseType == null -> Int.MAX_VALUE
+            other.vedtakBegrunnelseType == null -> -Int.MAX_VALUE
+
+            else -> this.vedtakBegrunnelseType!!.sorteringsrekkefølge - other.vedtakBegrunnelseType!!.sorteringsrekkefølge
+        }
+    }
+}
 
 data class BegrunnelseData(
+    override val vedtakBegrunnelseType: VedtakBegrunnelseType,
+
     val gjelderSoker: Boolean,
     val barnasFodselsdatoer: String,
     val fodselsdatoerBarnOppfyllerTriggereOgHarUtbetaling: String,
@@ -93,9 +117,30 @@ data class BegrunnelseData(
     val soknadstidspunkt: String,
     val avtaletidspunktDeltBosted: String,
     val sokersRettTilUtvidet: String
-) : Begrunnelse
+) : Begrunnelse {
+    override val type: Begrunnelsetype = Begrunnelsetype.STANDARD_BEGRUNNELSE
+}
 
-data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
+data class FritekstBegrunnelse(
+    val fritekst: String,
+) : Begrunnelse {
+    override val vedtakBegrunnelseType: VedtakBegrunnelseType? = null
+    override val type: Begrunnelsetype = Begrunnelsetype.FRITEKST
+}
+
+data class EØSBegrunnelseData(
+    override val vedtakBegrunnelseType: VedtakBegrunnelseType,
+    val apiNavn: String,
+    val annenForeldersAktivitet: String,
+    val annenForeldersAktivitetsland: String,
+    val barnetsBostedsland: String,
+    val barnasFodselsdatoer: String,
+    val antallBarn: Int,
+    val maalform: String,
+    val sokersAktivitet: SøkersAktivitet,
+) : Begrunnelse {
+    override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
+}
 
 fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     vedtaksperiode: NullablePeriode,
@@ -174,7 +219,8 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         belop = Utils.formaterBeløp(beløp),
         soknadstidspunkt = søknadstidspunkt?.tilKortString() ?: "",
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted?.tilKortString() ?: "",
-        sokersRettTilUtvidet = søkersRettTilUtvidet.tilSanityFormat()
+        sokersRettTilUtvidet = søkersRettTilUtvidet.tilSanityFormat(),
+        vedtakBegrunnelseType = this.vedtakBegrunnelseType
     )
 }
 
