@@ -84,6 +84,8 @@ data class MånedTidspunkt internal constructor(
     companion object {
         fun nå() = MånedTidspunkt(YearMonth.now(), Uendelighet.INGEN)
 
+        internal fun YearMonth.tilTidspunkt() = MånedTidspunkt(this, Uendelighet.INGEN)
+        
         internal fun YearMonth?.tilTidspunktEllerTidligereEnn(tidspunkt: YearMonth?) =
             tilTidspunktEllerUendelig(tidspunkt ?: YearMonth.now(), Uendelighet.FORTID)
 
