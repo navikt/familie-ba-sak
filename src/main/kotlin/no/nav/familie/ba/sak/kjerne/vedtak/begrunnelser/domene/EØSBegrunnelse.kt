@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestEØSVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -39,7 +39,11 @@ class EØSBegrunnelse(
     @Column(name = "begrunnelse", updatable = false)
     val begrunnelse: EØSStandardbegrunnelse,
 ) {
-    fun tilRestEØSVedtaksbegrunnelse(): RestEØSVedtaksbegrunnelse {
-        return RestEØSVedtaksbegrunnelse(this.begrunnelse, this.begrunnelse.vedtakBegrunnelseType)
+    fun tilRestVedtaksbegrunnelse(): RestVedtaksbegrunnelse {
+        return RestVedtaksbegrunnelse(
+            standardbegrunnelse = this.begrunnelse,
+            vedtakBegrunnelseSpesifikasjon = this.begrunnelse,
+            vedtakBegrunnelseType = this.begrunnelse.vedtakBegrunnelseType
+        )
     }
 }
