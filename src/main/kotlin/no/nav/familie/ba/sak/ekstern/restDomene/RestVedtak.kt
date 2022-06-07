@@ -1,26 +1,26 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.time.LocalDateTime
 
 data class RestVedtak(
     val aktiv: Boolean,
     val vedtaksdato: LocalDateTime?,
-    val vedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+    val vedtaksperioderMedBegrunnelser: List<RestUtvidetVedtaksperiodeMedBegrunnelser>,
     val id: Long
 )
 
 data class RestVedtakBegrunnelseTilknyttetVilkår(
-    val id: Standardbegrunnelse,
+    val id: IVedtakBegrunnelse,
     val navn: String,
     val vilkår: Vilkår?
 )
 
 fun Vedtak.tilRestVedtak(
-    vedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+    vedtaksperioderMedBegrunnelser: List<RestUtvidetVedtaksperiodeMedBegrunnelser>,
     skalMinimeres: Boolean,
 ) =
     RestVedtak(
