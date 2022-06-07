@@ -177,19 +177,9 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
     } else null
 }
 
-fun hentHjemlerIVedtaksperioderFraSanity(
-    brevPeriodeGrunnlag: List<MinimertVedtaksperiode>,
-    sanityBegrunnelser: List<SanityBegrunnelse>
-): List<String> =
-    brevPeriodeGrunnlag.flatMap { periode ->
-        periode.begrunnelser.mapNotNull {
-            it.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)?.hjemler
-        }.flatten()
-    }
-
 fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
     return when (hjemler.size) {
-        0 -> throw FunksjonellFeil("Ingen hjemler var knyttet til begrunnelsene som er valgt.")
+        0 -> throw Feil("Kan ikke lage hjemmeltekst når ")
         1 -> "§ ${hjemler[0]}"
         else -> "§§ ${Utils.slåSammen(hjemler)}"
     }
@@ -200,29 +190,88 @@ fun hentHjemmeltekst(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     opplysningspliktHjemlerSkalMedIBrev: Boolean = false
 ): String {
-    val hjemler =
-        hentHjemlerIVedtaksperioderFraSanity(minimerteVedtaksperioder, sanityBegrunnelser).toMutableSet()
+
+    val sanityStandardbegrunnelser = minimerteVedtaksperioder.flatMap { vedtaksperiode ->
+        vedtaksperiode.begrunnelser.mapNotNull { begrunnelse ->
+            begrunnelse.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
+        }
+    }
+
+    val sanityEøsBegrunnelser = minimerteVedtaksperioder.flatMap { vedtaksperiode ->
+        vedtaksperiode.eøsBegrunnelser.map { begrunnelse ->
+            begrunnelse.sanityEØSBegrunnelse
+        }
+    }
+
+    val ordinæreHjemler =
+        hentOrdinæreHjemler(
+            hjemler = (sanityStandardbegrunnelser.flatMap { it.hjemler } + sanityEøsBegrunnelser.flatMap { it.hjemler })
+                .toMutableSet(),
+            opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
+            finnesVedtaksperiodeMedFritekst = minimerteVedtaksperioder.flatMap { it.fritekster }.isNotEmpty()
+        )
+
+    val hjemlerFraFolketrygdloven =
+        sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven }
+
+    val hjemlerSeparasjonsavtaleStorbritannia =
+        sanityEøsBegrunnelser.flatMap { it.hjemlerSeperasjonsavtalenStorbritannina }
+    val hjemlerEØSForordningen883 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen883 }
+    val hjemlerEØSForordningen987 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 }
+
+    val alleHjemlerForBegrunnelser = mutableListOf<String>()
+
+    // Rekkefølgen her er viktig
+    if (hjemlerSeparasjonsavtaleStorbritannia.isNotEmpty()) {
+        alleHjemlerForBegrunnelser.add(
+            "Separasjonsavtalen mellom Storbritannia og Norge artikkel ${
+            Utils.slåSammen(
+                hjemlerSeparasjonsavtaleStorbritannia
+            )
+            }"
+        )
+    }
+    if (ordinæreHjemler.isNotEmpty()) {
+        alleHjemlerForBegrunnelser.add("barnetrygdloven ${hjemlerTilHjemmeltekst(ordinæreHjemler)}")
+    }
+    if (hjemlerFraFolketrygdloven.isNotEmpty()) {
+        alleHjemlerForBegrunnelser.add("folketrygdloven ${hjemlerTilHjemmeltekst(hjemlerFraFolketrygdloven)}")
+    }
+    if (hjemlerEØSForordningen883.isNotEmpty()) {
+        alleHjemlerForBegrunnelser.add("EØS-forordningen 883/2004 ${Utils.slåSammen(hjemlerEØSForordningen883)}")
+    }
+    if (hjemlerEØSForordningen987.isNotEmpty()) {
+        alleHjemlerForBegrunnelser.add("EØS-forordningen 987/2009 ${Utils.slåSammen(hjemlerEØSForordningen987)}")
+    }
+
+    validerBegrunnelserErKnyttetTilHjemler(alleHjemlerForBegrunnelser)
+
+    return Utils.slåSammen(alleHjemlerForBegrunnelser)
+}
+
+private fun hentOrdinæreHjemler(
+    hjemler: MutableSet<String>,
+    opplysningspliktHjemlerSkalMedIBrev: Boolean,
+    finnesVedtaksperiodeMedFritekst: Boolean
+): List<String> {
 
     if (opplysningspliktHjemlerSkalMedIBrev) {
         val hjemlerNårOpplysningspliktIkkeOppfylt = listOf("17", "18")
         hjemler.addAll(hjemlerNårOpplysningspliktIkkeOppfylt)
     }
 
-    if (minimerteVedtaksperioder.flatMap { it.fritekster }.isNotEmpty()) {
+    if (finnesVedtaksperiodeMedFritekst) {
         hjemler.addAll(hjemlerTilhørendeFritekst.map { it.toString() }.toSet())
     }
 
     val sorterteHjemler = hjemler.map { it.toInt() }.sorted().map { it.toString() }
-
-    validerBegrunnelserErKnyttetTilHjemler(sorterteHjemler)
-
-    return hjemlerTilHjemmeltekst(sorterteHjemler)
+    return sorterteHjemler
 }
 
 private fun validerBegrunnelserErKnyttetTilHjemler(
-    sorterteHjemler: List<String>,
+    hjemler: List<String>,
 ) {
-    if (sorterteHjemler.isEmpty()) {
+    if (hjemler.isEmpty()) {
         throw FunksjonellFeil(
             "Ingen hjemler var knyttet til begrunnelsen(e) som er valgt. Du må velge minst én begrunnelse som er knyttet til en hjemmel."
         )
