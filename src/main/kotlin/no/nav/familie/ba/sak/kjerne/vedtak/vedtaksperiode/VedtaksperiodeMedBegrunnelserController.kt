@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -52,9 +54,13 @@ class VedtaksperiodeMedBegrunnelserController(
             handling = OPPDATERE_BEGRUNNELSER_HANDLING
         )
 
+        val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull { konverterTilEnumverdi<Standardbegrunnelse>(it) }
+        val eøsStandardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull { konverterTilEnumverdi<EØSStandardbegrunnelse>(it) }
+
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId,
-            restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser
+            vedtaksperiodeId = vedtaksperiodeId,
+            standardbegrunnelserFraFrontend = standardbegrunnelser,
+            eøsStandardBegrunnelser = eøsStandardbegrunnelser
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
@@ -138,6 +144,9 @@ class VedtaksperiodeMedBegrunnelserController(
         )
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
     }
+
+    private inline fun <reified T> konverterTilEnumverdi(it: String): T? where T : Enum<T> =
+        enumValues<T>().find { enum -> enum.name == it }
 
     companion object {
         const val OPPDATERE_BEGRUNNELSER_HANDLING = "oppdatere vedtaksperiode med begrunnelser"

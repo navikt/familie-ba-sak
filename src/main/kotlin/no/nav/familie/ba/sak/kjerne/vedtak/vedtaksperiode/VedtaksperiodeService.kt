@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
@@ -92,7 +93,8 @@ class VedtaksperiodeService(
 
     fun oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId: Long,
-        standardbegrunnelserFraFrontend: List<Standardbegrunnelse>
+        standardbegrunnelserFraFrontend: List<Standardbegrunnelse>,
+        eøsStandardBegrunnelser: List<EØSStandardbegrunnelse>
     ): Vedtak {
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
@@ -390,6 +392,8 @@ class VedtaksperiodeService(
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
+        val sanityEøsBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
+
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
             behandling.id
         )
@@ -408,7 +412,6 @@ class VedtaksperiodeService(
                     endretUtbetalingAndeler = endretUtbetalingAndeler,
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
                 ),
-                gyldigeEøsBegrunnelser = hentGyldigeEøsBegrunnelserForVedtaksperiode()
             )
         }
     }
