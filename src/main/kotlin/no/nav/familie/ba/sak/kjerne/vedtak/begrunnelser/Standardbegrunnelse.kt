@@ -18,6 +18,8 @@ interface IVedtakBegrunnelse {
     val sanityApiNavn: String
     val vedtakBegrunnelseType: VedtakBegrunnelseType
     val kanDelesOpp: Boolean
+
+    fun enumnavnTilString(): String
 }
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
@@ -1242,6 +1244,9 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     };
 
     override val kanDelesOpp: Boolean = false
+
+    override fun enumnavnTilString(): String =
+        this.name
 }
 
 fun Standardbegrunnelse.delOpp(
@@ -1265,7 +1270,8 @@ fun Standardbegrunnelse.delOpp(
                         personIdentFraEndringsperiode = endringsperiode.personIdent
                     )
                 }
-            val deltBostedEndringsperioderGruppertPåAvtaledato = deltBostedEndringsperioder.groupBy { it.avtaletidspunktDeltBosted }
+            val deltBostedEndringsperioderGruppertPåAvtaledato =
+                deltBostedEndringsperioder.groupBy { it.avtaletidspunktDeltBosted }
 
             deltBostedEndringsperioderGruppertPåAvtaledato.map {
                 BrevBegrunnelseGrunnlagMedPersoner(

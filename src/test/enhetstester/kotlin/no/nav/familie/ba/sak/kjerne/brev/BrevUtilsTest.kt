@@ -2,11 +2,12 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -324,16 +325,18 @@ internal class BrevUtilsTest {
         val utvidetVedtaksperioderMedBegrunnelser = listOf(
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
-                    lagRestVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
+                    lagVedtaksbegrunnelse(
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                        vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser()
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
-                    lagRestVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
+                    lagVedtaksbegrunnelse(
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                        vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser()
                     )
                 ),
                 utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
@@ -368,7 +371,7 @@ internal class BrevUtilsTest {
         val utvidetVedtaksperioderMedBegrunnelser = listOf(
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
-                    lagRestVedtaksbegrunnelse(
+                    lagVedtaksbegrunnelse(
                         standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
                     )
                 ),
@@ -376,7 +379,7 @@ internal class BrevUtilsTest {
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
-                    lagRestVedtaksbegrunnelse(
+                    lagVedtaksbegrunnelse(
                         standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
                     )
                 ),
@@ -413,7 +416,7 @@ internal class BrevUtilsTest {
         val utvidetVedtaksperioderMedBegrunnelser = listOf(
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
-                    lagRestVedtaksbegrunnelse(
+                    lagVedtaksbegrunnelse(
                         standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
                     )
                 ),
@@ -421,7 +424,7 @@ internal class BrevUtilsTest {
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
-                    lagRestVedtaksbegrunnelse(
+                    lagVedtaksbegrunnelse(
                         standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
                     )
                 ),

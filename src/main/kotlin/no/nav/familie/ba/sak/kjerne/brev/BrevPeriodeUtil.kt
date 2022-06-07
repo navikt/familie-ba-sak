@@ -54,13 +54,18 @@ fun hentMinimerteKompetanserForPeriode(
     tom: YearMonth?,
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ): List<MinimertKompetanse> {
-    val minimerteKompetanser = kompetanser.tilTidslinje()
-        .beskjær(
-            fraOgMed = fom.tilTidspunktEllerUendeligLengeSiden(),
-            tilOgMed = tom.tilTidspunktEllerUendeligLengeTil()
-        ).perioder()
-        .mapNotNull { it.innhold }
+    val minimerteKompetanser = kompetanser.hentIPeriode(fom, tom)
         .map { it.tilMinimertKompetanse(personopplysningGrunnlag) }
 
     return minimerteKompetanser
 }
+
+fun Collection<Kompetanse>.hentIPeriode(
+    fom: YearMonth?,
+    tom: YearMonth?
+) = tilTidslinje()
+    .beskjær(
+        fraOgMed = fom.tilTidspunktEllerUendeligLengeSiden(),
+        tilOgMed = tom.tilTidspunktEllerUendeligLengeTil()
+    ).perioder()
+    .mapNotNull { it.innhold }
