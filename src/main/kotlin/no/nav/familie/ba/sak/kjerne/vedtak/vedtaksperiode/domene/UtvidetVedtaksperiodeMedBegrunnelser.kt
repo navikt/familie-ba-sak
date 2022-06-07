@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
@@ -18,8 +20,8 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
     val fom: LocalDate?,
     val tom: LocalDate?,
     val type: Vedtaksperiodetype,
-    val begrunnelser: List<RestVedtaksbegrunnelse>,
-    val eøsBegrunnelser: List<RestEØSVedtaksbegrunnelse>,
+    val begrunnelser: List<Vedtaksbegrunnelse>,
+    val eøsBegrunnelser: List<EØSBegrunnelse>,
     val fritekster: List<String> = emptyList(),
     val gyldigeBegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
@@ -50,8 +52,8 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         fom = this.fom,
         tom = this.tom,
         type = this.type,
-        begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
-        eøsBegrunnelser = this.eøsBegrunnelser.map { it.tilRestEØSVedtaksbegrunnelse() },
+        begrunnelser = this.begrunnelser.toList(),
+        eøsBegrunnelser = this.eøsBegrunnelser.toList(),
         fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
         utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
     )
