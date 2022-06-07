@@ -159,7 +159,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.toString()
                 )
             )
         )
@@ -340,7 +340,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.toString()
                 )
             )
         )

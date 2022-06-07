@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import java.time.LocalDate
 
 data class RestPutVedtaksperiodeMedFritekster(
@@ -8,7 +7,7 @@ data class RestPutVedtaksperiodeMedFritekster(
 )
 
 data class RestPutVedtaksperiodeMedStandardbegrunnelser(
-    val standardbegrunnelser: List<Standardbegrunnelse>,
+    val standardbegrunnelser: List<String>,
 )
 
 data class RestGenererVedtaksperioderForOverstyrtEndringstidspunkt(
