@@ -41,8 +41,8 @@ class EØSBegrunnelse(
 ) {
 
     fun tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
-        standardbegrunnelse = this.begrunnelse,
+        standardbegrunnelse = this.begrunnelse.enumnavnTilString(),
         vedtakBegrunnelseType = this.begrunnelse.vedtakBegrunnelseType,
-        vedtakBegrunnelseSpesifikasjon = this.begrunnelse
+        vedtakBegrunnelseSpesifikasjon = this.begrunnelse.enumnavnTilString()
     )
 }

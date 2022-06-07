@@ -86,6 +86,8 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
 
     override val kanDelesOpp: Boolean = false
 
+    override fun enumnavnTilString(): String = this.name
+
     fun tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>): EØSBegrunnelseMedTriggere? {
         val sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(this) ?: return null
         return EØSBegrunnelseMedTriggere(

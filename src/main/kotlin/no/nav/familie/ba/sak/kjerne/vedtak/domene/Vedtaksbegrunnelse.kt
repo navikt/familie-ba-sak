@@ -72,9 +72,9 @@ class Vedtaksbegrunnelse(
 }
 
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
-    standardbegrunnelse = this.standardbegrunnelse,
+    standardbegrunnelse = this.standardbegrunnelse.enumnavnTilString(),
     vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
-    vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse
+    vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse.enumnavnTilString()
 )
 
 enum class Begrunnelsetype {

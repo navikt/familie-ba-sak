@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene
 
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -13,7 +12,7 @@ data class RestUtvidetVedtaksperiodeMedBegrunnelser(
     val type: Vedtaksperiodetype,
     val begrunnelser: List<RestVedtaksbegrunnelse>,
     val fritekster: List<String> = emptyList(),
-    val gyldigeBegrunnelser: List<IVedtakBegrunnelse>,
+    val gyldigeBegrunnelser: List<String>,
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
 )
 
@@ -26,6 +25,6 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilRestUtvidetVedtaksperiodeMedBegrunne
         begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() } + this.eøsBegrunnelser.map { it.tilRestVedtaksbegrunnelse() },
         fritekster = this.fritekster,
         utbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer,
-        gyldigeBegrunnelser = this.gyldigeBegrunnelser
+        gyldigeBegrunnelser = this.gyldigeBegrunnelser.map { it.enumnavnTilString() }
     )
 }
