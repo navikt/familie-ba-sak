@@ -408,8 +408,6 @@ class VedtaksperiodeService(
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
         val kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id)
 
-        val sanityEøsBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
-
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
             behandling.id
         )
@@ -432,8 +430,7 @@ class VedtaksperiodeService(
                     aktørIderMedUtbetaling = aktørIderMedUtbetaling,
                     endretUtbetalingAndeler = endretUtbetalingAndeler,
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
-                ),
-                gyldigeEØSBegrunnelser = hentGyldigeEØSBegrunnelserForPeriode(
+                ) + hentGyldigeEØSBegrunnelserForPeriode(
                     sanityEØSBegrunnelser = sanityEØSBegrunnelser,
                     kompetanserIPeriode = kompetanserIPeriode
                 ),
