@@ -2,8 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.http.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -30,21 +29,11 @@ class BrevKlient(
     }
 
     @Cacheable("begrunnelsestekst", cacheManager = "shortCache")
-    fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseData): String {
+    fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseMedData): String {
         val uri = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")
         secureLogger.info("Kaller familie brev($uri) med data $begrunnelseData")
 
         return kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Henter begrunnelsestekst") {
-            postForEntity(uri, begrunnelseData)
-        }
-    }
-
-    @Cacheable("eøsBegrunnelsestekst", cacheManager = "shortCache")
-    fun hentBegrunnelsestekst(begrunnelseData: EØSBegrunnelseData): String {
-        val uri = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")
-        secureLogger.info("Kaller familie brev($uri) med data $begrunnelseData")
-
-        return kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Henter eøs begrunnelsestekst") {
             postForEntity(uri, begrunnelseData)
         }
     }
