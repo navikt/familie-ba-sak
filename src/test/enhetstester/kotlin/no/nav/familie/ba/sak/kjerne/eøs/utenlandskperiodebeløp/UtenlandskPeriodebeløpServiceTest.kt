@@ -58,7 +58,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
             .medKompetanse("  PPP", barn1, barn2, barn3)
             .medKompetanse("--   ----", barn2, barn3)
             .byggKompetanser()
-            .map { it.copy(barnetsBostedsland = "N") }
+            .map { it.copy(annenForeldersAktivitetsland = "N") }
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId.id) } returns kompetanser
 
