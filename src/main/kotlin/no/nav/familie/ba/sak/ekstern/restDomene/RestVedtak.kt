@@ -30,7 +30,7 @@ fun Vedtak.tilRestVedtak(
         vedtaksperioderMedBegrunnelser = if (skalMinimeres) {
             vedtaksperioderMedBegrunnelser
                 .filter { it.begrunnelser.isNotEmpty() }
-                .map { it.copy(gyldigeBegrunnelser = emptyList()) }
+                .map { it.copy(gyldigeBegrunnelser = emptyList(), gyldigeEøsBegrunnelser = emptyList()) }
         } else {
             vedtaksperioderMedBegrunnelser
         },

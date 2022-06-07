@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
@@ -226,6 +227,11 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
         utvidetVedtaksperiodeMedBegrunnelser
     )
 )
+
+// TODO: Implementasjon
+fun hentGyldigeEøsBegrunnelserForVedtaksperiode(): List<EØSStandardbegrunnelse> {
+    return listOf(EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR)
+}
 
 fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode: MinimertVedtaksperiode,

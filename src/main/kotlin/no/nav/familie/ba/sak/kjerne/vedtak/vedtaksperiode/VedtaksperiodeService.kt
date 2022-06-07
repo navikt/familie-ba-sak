@@ -407,7 +407,8 @@ class VedtaksperiodeService(
                     aktørIderMedUtbetaling = aktørIderMedUtbetaling,
                     endretUtbetalingAndeler = endretUtbetalingAndeler,
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
-                )
+                ),
+                gyldigeEøsBegrunnelser = hentGyldigeEøsBegrunnelserForVedtaksperiode()
             )
         }
     }
