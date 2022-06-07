@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -94,5 +95,31 @@ internal class UtenlandskPeriodebeløpServiceTest {
         assertEquals(lagretUtenlandskPeriodebeløp.fom, faktiskUtenlandskPeriodebeløp.fom)
         assertEquals(lagretUtenlandskPeriodebeløp.tom, faktiskUtenlandskPeriodebeløp.tom)
         assertEquals(lagretUtenlandskPeriodebeløp.barnAktører, faktiskUtenlandskPeriodebeløp.barnAktører)
+    }
+
+    @Test
+    fun `Skal kunne lukke åpen utenlandskPeriodebeløp-skjema ved å sende inn identisk skjema med satt tom-dato`() {
+        val behandlingId = BehandlingId(10L)
+
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
+
+        UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
+            .medBeløp("4>", "EUR", "SE", barn1)
+            .lagreTil(utenlandskPeriodebeløpRepository).single()
+
+        // Oppdaterer UtenlandskPeriodeBeløp med identisk innhold, men med lukket tom for andre mnd.
+        val oppdatertUtenlandskPeriodebeløp = UtenlandskPeriodebeløpBuilder(jan(2020)).medBeløp("44", "EUR", "SE", barn1).bygg().first()
+        utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(behandlingId, oppdatertUtenlandskPeriodebeløp)
+
+        // Forventer en liste på 2 elementer hvor det første dekker 2 mnd og det andre dekker fra mnd 3 og til uendelig (null). Det siste elementet skal ha beløp, valutakode og intervall satt til null, mens utbetalingsland skal være "SE".
+        val faktiskUtenlandskPeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId)
+
+        assertNotNull(faktiskUtenlandskPeriodebeløp)
+
+        assertEquals(2, faktiskUtenlandskPeriodebeløp.size)
+        assertNull(faktiskUtenlandskPeriodebeløp.elementAt(1).beløp)
+        assertNull(faktiskUtenlandskPeriodebeløp.elementAt(1).valutakode)
+        assertNull(faktiskUtenlandskPeriodebeløp.elementAt(1).intervall)
+        assertEquals("SE", faktiskUtenlandskPeriodebeløp.elementAt(1).utbetalingsland)
     }
 }
