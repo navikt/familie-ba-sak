@@ -25,7 +25,7 @@ fun beregnDifferanse(
     valutakurser: Collection<Valutakurs>
 ): TilkjentYtelse {
 
-    if (utenlandskePeriodebeløp.isEmpty() && valutakurser.isEmpty())
+    if (utenlandskePeriodebeløp.isEmpty() || valutakurser.isEmpty())
         return tilkjentYtelse
 
     val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()

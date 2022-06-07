@@ -58,7 +58,7 @@ class TilpassDifferanseberegningEtterValutakursService(
 }
 
 fun TilkjentYtelseRepository.lagreVedEndring(forrigeTilkjentYtelse: TilkjentYtelse, nyTilkjentYtelse: TilkjentYtelse) {
-    if (forrigeTilkjentYtelse != nyTilkjentYtelse) {
+    if (forrigeTilkjentYtelse.andelerTilkjentYtelse.toSet() != nyTilkjentYtelse.andelerTilkjentYtelse.toSet()) {
         this.delete(forrigeTilkjentYtelse)
         this.save(nyTilkjentYtelse)
     }
