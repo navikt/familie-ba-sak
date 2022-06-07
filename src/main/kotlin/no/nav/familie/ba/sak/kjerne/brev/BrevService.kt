@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -162,7 +163,7 @@ class BrevService(
 
         val utvidetVedtaksperioderMedBegrunnelser =
             vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak).filter {
-                it.begrunnelser.isNotEmpty() || it.fritekster.isNotEmpty()
+                !(it.begrunnelser.isEmpty() && it.fritekster.isEmpty() && it.eøsBegrunnelser.isEmpty())
             }.sortedBy { it.fom }
 
         if (utvidetVedtaksperioderMedBegrunnelser.isEmpty()) {
@@ -172,8 +173,10 @@ class BrevService(
         }
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
-        val brevPerioderData =
-            utvidetVedtaksperioderMedBegrunnelser.map { brevPeriodeService.hentBrevperiodeData(it.id) }
+        val brevPerioderData = brevPeriodeService.hentBrevperioderData(
+            vedtaksperioderId = utvidetVedtaksperioderMedBegrunnelser.map { it.id },
+            behandlingId = BehandlingId(vedtak.behandling.id)
+        )
         val brevperioder = brevPerioderData.sorted().mapNotNull {
             it.tilBrevPeriodeGenerator().genererBrevPeriode()
         }

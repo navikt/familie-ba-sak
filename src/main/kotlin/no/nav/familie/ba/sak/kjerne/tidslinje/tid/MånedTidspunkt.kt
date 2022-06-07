@@ -90,6 +90,12 @@ data class MånedTidspunkt internal constructor(
         internal fun YearMonth?.tilTidspunktEllerSenereEnn(tidspunkt: YearMonth?) =
             tilTidspunktEllerUendelig(tidspunkt ?: YearMonth.now(), Uendelighet.FREMTID)
 
+        internal fun YearMonth?.tilTidspunktEllerUendeligLengeSiden() =
+            this.tilTidspunktEllerUendelig(PRAKTISK_TIDLIGSTE_DAG.toYearMonth(), Uendelighet.FORTID)
+
+        internal fun YearMonth?.tilTidspunktEllerUendeligLengeTil() =
+            this.tilTidspunktEllerUendelig(PRAKTISK_SENESTE_DAG.toYearMonth(), Uendelighet.FREMTID)
+
         private fun YearMonth?.tilTidspunktEllerUendelig(default: YearMonth?, uendelighet: Uendelighet) =
             this?.let { MånedTidspunkt(it, Uendelighet.INGEN) } ?: MånedTidspunkt(
                 default ?: YearMonth.now(), uendelighet
