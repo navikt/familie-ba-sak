@@ -27,7 +27,7 @@ data class SanityBegrunnelse(
     val ovrigeTriggere: List<ØvrigTrigger>? = null,
     val endringsaarsaker: List<Årsak>? = null,
     val hjemler: List<String> = emptyList(),
-    val hjemlerFolketrygdloven: List<String>?,
+    val hjemlerFolketrygdloven: List<String> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
