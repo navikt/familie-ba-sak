@@ -344,7 +344,7 @@ internal class BrevUtilsTest {
         )
 
         Assertions.assertEquals(
-            "§§ 2, 4, 10 og 11",
+            "barnetrygdloven §§ 2, 4, 10 og 11",
             hentHjemmeltekst(
                 utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
@@ -388,7 +388,7 @@ internal class BrevUtilsTest {
         )
 
         Assertions.assertEquals(
-            "§§ 2, 4, 10 og 11",
+            "barnetrygdloven §§ 2, 4, 10 og 11",
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
@@ -433,7 +433,7 @@ internal class BrevUtilsTest {
         )
 
         Assertions.assertEquals(
-            "§§ 2, 4, 10, 11, 17 og 18",
+            "barnetrygdloven §§ 2, 4, 10, 11, 17 og 18",
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(

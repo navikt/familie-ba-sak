@@ -219,9 +219,13 @@ fun hentHjemmeltekst(
         hjemlerEØSForordningen987 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 }
     )
 
-    validerMinst1HjemmelKnyttetTilBegrunnelser(alleHjemlerForBegrunnelser)
+    return slåSammenHjemlerAvUlikeTyper(alleHjemlerForBegrunnelser)
+}
 
-    return Utils.slåSammen(alleHjemlerForBegrunnelser)
+private fun slåSammenHjemlerAvUlikeTyper(hjemler: List<String>) = when (hjemler.size) {
+    0 -> throw FunksjonellFeil("Ingen hjemler var knyttet til begrunnelsen(e) som er valgt. Du må velge minst én begrunnelse som er knyttet til en hjemmel.")
+    1 -> hjemler.single()
+    else -> Utils.slåSammen(hjemler)
 }
 
 private fun hentAlleTyperHjemler(
@@ -289,16 +293,6 @@ private fun hentOrdinæreHjemler(
 
     val sorterteHjemler = hjemler.map { it.toInt() }.sorted().map { it.toString() }
     return sorterteHjemler
-}
-
-private fun validerMinst1HjemmelKnyttetTilBegrunnelser(
-    hjemler: List<String>,
-) {
-    if (hjemler.isEmpty()) {
-        throw FunksjonellFeil(
-            "Ingen hjemler var knyttet til begrunnelsen(e) som er valgt. Du må velge minst én begrunnelse som er knyttet til en hjemmel."
-        )
-    }
 }
 
 fun hentVirkningstidspunkt(opphørsperioder: List<Opphørsperiode>, behandlingId: Long) = (
