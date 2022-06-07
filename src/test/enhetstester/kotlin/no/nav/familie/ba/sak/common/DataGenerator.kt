@@ -1000,6 +1000,7 @@ fun lagRestSanityBegrunnelse(
     ovrigeTriggere: List<String>? = emptyList(),
     endringsaarsaker: List<String>? = emptyList(),
     hjemler: List<String> = emptyList(),
+    hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: String = "",
     endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
@@ -1014,6 +1015,7 @@ fun lagRestSanityBegrunnelse(
     ovrigeTriggere = ovrigeTriggere,
     endringsaarsaker = endringsaarsaker,
     hjemler = hjemler,
+    hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
 )
