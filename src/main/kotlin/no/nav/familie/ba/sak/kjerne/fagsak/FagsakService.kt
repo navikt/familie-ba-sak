@@ -136,10 +136,16 @@ class FagsakService(
     }
 
     fun hentMinimalFagsakForPerson(aktør: Aktør, fagsakEier: FagsakEier = OMSORGSPERSON): Ressurs<RestMinimalFagsak> {
-        logger.info("hentMinimalFagsakForPerson fagsakEier = ${fagsakEier}")
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør, fagsakEier)
         return if (fagsak != null) Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id)) else Ressurs.failure(
             errorMessage = "Fant ikke fagsak på person"
+        )
+    }
+
+    fun hentMinimalFagsakerForPerson(aktør: Aktør): Ressurs<List<RestMinimalFagsak>> {
+        val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør)
+        return if (!fagsaker.isEmpty()) Ressurs.success(data = lagRestMinimalFagsaker(fagsaker)) else Ressurs.failure(
+            errorMessage = "Fant ikke fagsaker på person"
         )
     }
 
@@ -147,6 +153,10 @@ class FagsakService(
 
     fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> =
         Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
+
+    fun lagRestMinimalFagsaker(fagsaker: List<Fagsak>): List<RestMinimalFagsak>{
+        return fagsaker.map { lagRestMinimalFagsak(it.id) }
+    }
 
     fun lagRestMinimalFagsak(fagsakId: Long): RestMinimalFagsak {
         val restBaseFagsak = lagRestBaseFagsak(fagsakId)
