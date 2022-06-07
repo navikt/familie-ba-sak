@@ -244,7 +244,7 @@ fun hentHjemmeltekst(
         alleHjemlerForBegrunnelser.add("EØS-forordningen 987/2009 ${Utils.slåSammen(hjemlerEØSForordningen987)}")
     }
 
-    validerBegrunnelserErKnyttetTilHjemler(alleHjemlerForBegrunnelser)
+    validerMinst1HjemmelKnyttetTilBegrunnelser(alleHjemlerForBegrunnelser)
 
     return Utils.slåSammen(alleHjemlerForBegrunnelser)
 }
@@ -268,7 +268,7 @@ private fun hentOrdinæreHjemler(
     return sorterteHjemler
 }
 
-private fun validerBegrunnelserErKnyttetTilHjemler(
+private fun validerMinst1HjemmelKnyttetTilBegrunnelser(
     hjemler: List<String>,
 ) {
     if (hjemler.isEmpty()) {
