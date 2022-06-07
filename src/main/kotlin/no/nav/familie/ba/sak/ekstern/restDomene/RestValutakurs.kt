@@ -17,7 +17,7 @@ data class RestValutakurs(
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT
 ) : AbstractUtfyltStatus<RestValutakurs>() {
     override fun medUtfyltStatus(): RestValutakurs {
-        return this.copy(status = utfyltStatus(finnAntallUtfylt(listOf(this.valutakursdato, this.valutakode, this.kurs)), 3))
+        return this.copy(status = utfyltStatus(finnAntallUtfylt(listOf(this.valutakursdato, this.kurs)), 2))
     }
 }
 
