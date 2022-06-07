@@ -80,18 +80,21 @@ fun kalkulerUtenlandskPeriodebeøpINorskeKroner(
         val valutakursTidslinje = valutakursTidslinjer.getOrDefault(aktør, TomTidslinje())
 
         utenlandskePeriodebeløpTidslinje.tidspunktKombinerMed(valutakursTidslinje) { tidspunkt, upb, vk ->
-            when {
-                upb == null || vk == null -> null
-                upb.valutakode != vk.valutakode -> null
-                upb.beløp == null || vk.kurs == null -> null
-                else -> upb.tilMånedligBeløp(tidspunkt)?.multiply(vk.kurs)
-            }
+            upb.multipliserMed(vk, tidspunkt)
         }
     }
 }
 
-fun <T : Tidsenhet> UtenlandskPeriodebeløp.tilMånedligBeløp(tidspunkt: Tidspunkt<T>): BigDecimal? {
-    if (this.beløp == null || this.intervall == null)
+fun <T : Tidsenhet> UtenlandskPeriodebeløp?.multipliserMed(valutakurs: Valutakurs?, tidspunkt: Tidspunkt<T>) =
+    when {
+        this == null || valutakurs == null -> null
+        this.valutakode != valutakurs.valutakode -> null
+        this.beløp == null || valutakurs.kurs == null -> null
+        else -> this.tilMånedligBeløp(tidspunkt)?.multiply(valutakurs.kurs)
+    }
+
+fun <T : Tidsenhet> UtenlandskPeriodebeløp?.tilMånedligBeløp(tidspunkt: Tidspunkt<T>): BigDecimal? {
+    if (this?.beløp == null || this.intervall == null)
         return null
 
     return Intervall.valueOf(this.intervall).konverterBeløpTilMånedlig(this.beløp.toDouble(), tidspunkt.erSkuddår())

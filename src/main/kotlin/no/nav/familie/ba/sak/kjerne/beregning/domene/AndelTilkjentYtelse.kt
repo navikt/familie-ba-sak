@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -20,6 +22,8 @@ import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
 import java.time.YearMonth
 import java.util.Objects
 import javax.persistence.CascadeType
@@ -41,6 +45,25 @@ import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
+interface AndelTilkjentYtelseDomene<T> where T : AndelTilkjentYtelseDomene<T> {
+    val behandlingId: Long
+    val stønadFom: YearMonth?
+    val stønadTom: YearMonth?
+    val aktør: Aktør
+    val kalkulertUtbetalingsbeløp: Int
+    val type: YtelseType
+    val sats: Int
+    val prosent: BigDecimal
+    val endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+    val utenlandskPeriodebeløp: Int?
+    val nasjonaltPeriodebeløp: Int?
+    val differanseberegnetBeløp: Int?
+
+    fun medPeriode(fraOgMed: YearMonth?, tilOgMed: YearMonth?): T
+    fun utenPeriode() = medPeriode(null, null)
+    fun medUtenlandskPeriodebeløp(beløp: BigDecimal): T
+}
+
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "AndelTilkjentYtelse")
 @Table(name = "ANDEL_TILKJENT_YTELSE")
@@ -55,36 +78,36 @@ data class AndelTilkjentYtelse(
     val id: Long = 0,
 
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
-    val behandlingId: Long,
+    override val behandlingId: Long,
 
     @ManyToOne
     @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
     var tilkjentYtelse: TilkjentYtelse,
 
     @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
-    val aktør: Aktør,
+    override val aktør: Aktør,
 
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
-    val kalkulertUtbetalingsbeløp: Int,
+    override val kalkulertUtbetalingsbeløp: Int,
 
     @Column(name = "stonad_fom", nullable = false, columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val stønadFom: YearMonth,
+    override val stønadFom: YearMonth,
 
     @Column(name = "stonad_tom", nullable = false, columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val stønadTom: YearMonth,
+    override val stønadTom: YearMonth,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    val type: YtelseType,
+    override val type: YtelseType,
 
     @Column(name = "sats", nullable = false)
-    val sats: Int,
+    override val sats: Int,
 
     // TODO: Bør dette hete gradering? I så fall rename og migrer i endringstabell også
     @Column(name = "prosent", nullable = false)
-    val prosent: BigDecimal,
+    override val prosent: BigDecimal,
 
     @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE], fetch = FetchType.EAGER)
     @JoinTable(
@@ -92,7 +115,7 @@ data class AndelTilkjentYtelse(
         joinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")],
         inverseJoinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")]
     )
-    val endretUtbetalingAndeler: MutableList<EndretUtbetalingAndel> = mutableListOf(),
+    override val endretUtbetalingAndeler: MutableList<EndretUtbetalingAndel> = mutableListOf(),
 
     // kildeBehandlingId, periodeOffset og forrigePeriodeOffset trengs kun i forbindelse med
     // iverksetting/konsistensavstemming, og settes først ved generering av selve oppdraget mot økonomi.
@@ -107,9 +130,15 @@ data class AndelTilkjentYtelse(
     var periodeOffset: Long? = null, // Brukes for å koble seg på tidligere kjeder sendt til økonomi
 
     @Column(name = "forrige_periode_offset")
-    var forrigePeriodeOffset: Long? = null
+    var forrigePeriodeOffset: Long? = null,
 
-) : BaseEntitet() {
+    @Transient // TODO: Skal ha et felt i databasen
+    override val utenlandskPeriodebeløp: Int? = null,
+    @Transient // TODO: Skal ha et felt i databasen
+    override val nasjonaltPeriodebeløp: Int? = null,
+    @Transient // TODO: Skal ha et felt i databasen
+    override val differanseberegnetBeløp: Int? = null
+) : AndelTilkjentYtelseDomene<AndelTilkjentYtelse>, BaseEntitet() {
 
     val periode
         get() = MånedPeriode(stønadFom, stønadTom)
@@ -241,6 +270,30 @@ data class AndelTilkjentYtelse(
                 other.none { b -> a.erTilsvarendeForUtbetaling(b) }
             }.toSet()
         }
+    }
+
+    override fun medPeriode(fraOgMed: YearMonth?, tilOgMed: YearMonth?) =
+        copy(
+            stønadFom = fraOgMed ?: MIN_MÅNED,
+            stønadTom = tilOgMed ?: MAX_MÅNED
+        )
+
+    override fun medUtenlandskPeriodebeløp(beløp: BigDecimal): AndelTilkjentYtelse {
+        val nyttNasjonaltPeriodebeløp = when {
+            differanseberegnetBeløp == null -> kalkulertUtbetalingsbeløp
+            differanseberegnetBeløp != kalkulertUtbetalingsbeløp -> kalkulertUtbetalingsbeløp
+            else -> this.nasjonaltPeriodebeløp!!
+        }
+
+        val avrundetUtenlandskPeriodebeløp = beløp.round(MathContext(0, RoundingMode.DOWN)).intValueExact()
+        val nyttDifferanseberegnetBeløp = nyttNasjonaltPeriodebeløp - avrundetUtenlandskPeriodebeløp
+
+        return copy(
+            kalkulertUtbetalingsbeløp = nyttDifferanseberegnetBeløp,
+            nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
+            utenlandskPeriodebeløp = avrundetUtenlandskPeriodebeløp,
+            differanseberegnetBeløp = nyttDifferanseberegnetBeløp
+        )
     }
 }
 
