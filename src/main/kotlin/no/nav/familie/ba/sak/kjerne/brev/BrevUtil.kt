@@ -211,14 +211,26 @@ fun hentHjemmeltekst(
             finnesVedtaksperiodeMedFritekst = minimerteVedtaksperioder.flatMap { it.fritekster }.isNotEmpty()
         )
 
-    val hjemlerFraFolketrygdloven =
-        sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven }
+    val alleHjemlerForBegrunnelser = hentAlleTyperHjemler(
+        hjemlerSeparasjonsavtaleStorbritannia = sanityEøsBegrunnelser.flatMap { it.hjemlerSeperasjonsavtalenStorbritannina },
+        ordinæreHjemler = ordinæreHjemler,
+        hjemlerFraFolketrygdloven = sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven },
+        hjemlerEØSForordningen883 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen883 },
+        hjemlerEØSForordningen987 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 }
+    )
 
-    val hjemlerSeparasjonsavtaleStorbritannia =
-        sanityEøsBegrunnelser.flatMap { it.hjemlerSeperasjonsavtalenStorbritannina }
-    val hjemlerEØSForordningen883 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen883 }
-    val hjemlerEØSForordningen987 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 }
+    validerMinst1HjemmelKnyttetTilBegrunnelser(alleHjemlerForBegrunnelser)
 
+    return Utils.slåSammen(alleHjemlerForBegrunnelser)
+}
+
+private fun hentAlleTyperHjemler(
+    hjemlerSeparasjonsavtaleStorbritannia: List<String>,
+    ordinæreHjemler: List<String>,
+    hjemlerFraFolketrygdloven: List<String>,
+    hjemlerEØSForordningen883: List<String>,
+    hjemlerEØSForordningen987: List<String>
+): MutableList<String> {
     val alleHjemlerForBegrunnelser = mutableListOf<String>()
 
     // Rekkefølgen her er viktig
@@ -232,10 +244,24 @@ fun hentHjemmeltekst(
         )
     }
     if (ordinæreHjemler.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("barnetrygdloven ${hjemlerTilHjemmeltekst(hjemler = ordinæreHjemler, lovForHjemmel = "barnetrygdloven")}")
+        alleHjemlerForBegrunnelser.add(
+            "barnetrygdloven ${
+            hjemlerTilHjemmeltekst(
+                hjemler = ordinæreHjemler,
+                lovForHjemmel = "barnetrygdloven"
+            )
+            }"
+        )
     }
     if (hjemlerFraFolketrygdloven.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("folketrygdloven ${hjemlerTilHjemmeltekst(hjemler = hjemlerFraFolketrygdloven, lovForHjemmel = "folketrygdloven")}")
+        alleHjemlerForBegrunnelser.add(
+            "folketrygdloven ${
+            hjemlerTilHjemmeltekst(
+                hjemler = hjemlerFraFolketrygdloven,
+                lovForHjemmel = "folketrygdloven"
+            )
+            }"
+        )
     }
     if (hjemlerEØSForordningen883.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add("EØS-forordningen 883/2004 ${Utils.slåSammen(hjemlerEØSForordningen883)}")
@@ -243,10 +269,7 @@ fun hentHjemmeltekst(
     if (hjemlerEØSForordningen987.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add("EØS-forordningen 987/2009 ${Utils.slåSammen(hjemlerEØSForordningen987)}")
     }
-
-    validerMinst1HjemmelKnyttetTilBegrunnelser(alleHjemlerForBegrunnelser)
-
-    return Utils.slåSammen(alleHjemlerForBegrunnelser)
+    return alleHjemlerForBegrunnelser
 }
 
 private fun hentOrdinæreHjemler(
