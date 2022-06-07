@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
+
 enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     INNVILGET_PRIMÆRLAND_UK_STANDARD {
         override val sanityApiNavn = "innvilgetPrimarlandUKStandard"
@@ -83,4 +85,12 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     };
 
     override val kanDelesOpp: Boolean = false
+
+    fun tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>): EØSBegrunnelseMedTriggere? {
+        val sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(this) ?: return null
+        return EØSBegrunnelseMedTriggere(
+            eøsBegrunnelse = this,
+            sanityEØSBegrunnelse = sanityEØSBegrunnelse
+        )
+    }
 }

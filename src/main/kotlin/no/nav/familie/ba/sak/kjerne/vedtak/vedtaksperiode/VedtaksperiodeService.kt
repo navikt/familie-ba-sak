@@ -24,8 +24,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
+import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -69,6 +72,7 @@ class VedtaksperiodeService(
     private val endringstidspunktService: EndringstidspunktService,
     private val featureToggleService: FeatureToggleService,
     private val utbetalingsperiodeMedBegrunnelserService: UtbetalingsperiodeMedBegrunnelserService,
+    private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
 ) {
 
     fun oppdaterVedtaksperiodeMedFritekster(
@@ -401,12 +405,19 @@ class VedtaksperiodeService(
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
+        val kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id)
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
             behandling.id
         )
 
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
+            val kompetanserIPeriode = kompetanser.hentIPeriode(
+                fom = utvidetVedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
+                tom = utvidetVedtaksperiodeMedBegrunnelser.tom?.toYearMonth()
+            )
+
             val aktørIderMedUtbetaling =
                 hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }
 
@@ -419,6 +430,10 @@ class VedtaksperiodeService(
                     aktørIderMedUtbetaling = aktørIderMedUtbetaling,
                     endretUtbetalingAndeler = endretUtbetalingAndeler,
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
+                ),
+                gyldigeEØSBegrunnelser = hentGyldigeEØSBegrunnelserForPeriode(
+                    sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+                    kompetanserIPeriode = kompetanserIPeriode
                 )
             )
         }
