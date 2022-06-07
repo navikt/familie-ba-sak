@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import java.time.LocalDate
@@ -56,29 +55,5 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         eøsBegrunnelser = this.eøsBegrunnelser.toList(),
         fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
         utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
-    )
-}
-
-data class RestUtvidetVedtaksperiodeMedBegrunnelser(
-    val id: Long,
-    val fom: LocalDate?,
-    val tom: LocalDate?,
-    val type: Vedtaksperiodetype,
-    val begrunnelser: List<RestVedtaksbegrunnelse>,
-    val fritekster: List<String> = emptyList(),
-    val gyldigeBegrunnelser: List<IVedtakBegrunnelse>,
-    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
-)
-
-fun UtvidetVedtaksperiodeMedBegrunnelser.tilRestUtvidetVedtaksperiodeMedBegrunnelser(): RestUtvidetVedtaksperiodeMedBegrunnelser {
-    return RestUtvidetVedtaksperiodeMedBegrunnelser(
-        id = this.id,
-        fom = this.fom,
-        tom = this.tom,
-        type = this.type,
-        begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() } + this.eøsBegrunnelser.map { it.tilRestVedtaksbegrunnelse() },
-        fritekster = this.fritekster,
-        utbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer,
-        gyldigeBegrunnelser = this.gyldigeBegrunnelser
     )
 }
