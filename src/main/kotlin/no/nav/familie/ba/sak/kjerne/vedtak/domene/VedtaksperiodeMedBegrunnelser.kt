@@ -98,6 +98,11 @@ data class VedtaksperiodeMedBegrunnelser(
         begrunnelser.addAll(nyeBegrunnelser)
     }
 
+    fun settEØSBegrunnelser(nyeEØSBegrunnelser: List<EØSBegrunnelse>) {
+        eøsBegrunnelser.clear()
+        eøsBegrunnelser.addAll(nyeEØSBegrunnelser)
+    }
+
     fun settFritekster(nyeFritekster: List<VedtaksbegrunnelseFritekst>) {
         fritekster.clear()
         fritekster.addAll(nyeFritekster)

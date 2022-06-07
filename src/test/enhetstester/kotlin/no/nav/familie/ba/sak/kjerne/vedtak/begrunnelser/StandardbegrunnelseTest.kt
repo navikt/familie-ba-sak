@@ -313,29 +313,6 @@ internal class StandardbegrunnelseTest {
         assertEquals(vedtakBegrunnelser.size, Standardbegrunnelse.values().size)
     }
 
-    @Test
-    fun `Alle api-navn inkluderer vedtaksbegrunnelsestypen`() {
-        Standardbegrunnelse.values().groupBy { it.vedtakBegrunnelseType }
-            .forEach { (vedtakBegrunnelseType, standardbegrunnelser) ->
-                standardbegrunnelser.forEach {
-                    val prefix = when (vedtakBegrunnelseType) {
-                        VedtakBegrunnelseType.INNVILGET -> "innvilget"
-                        VedtakBegrunnelseType.REDUKSJON -> "reduksjon"
-                        VedtakBegrunnelseType.AVSLAG -> "avslag"
-                        VedtakBegrunnelseType.OPPHØR -> "opphor"
-                        VedtakBegrunnelseType.FORTSATT_INNVILGET -> "fortsattInnvilget"
-                        VedtakBegrunnelseType.ENDRET_UTBETALING -> "endretUtbetaling"
-                        VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> "etterEndretUtbetaling"
-                    }
-                    assertEquals(prefix, it.sanityApiNavn.substring(0, prefix.length), "Forventer $prefix for $it")
-                    assertTrue(
-                        it.sanityApiNavn.substring(prefix.length).startsWithUppercaseLetter(),
-                        "Forventer stor forbokstav etter prefix '$prefix' på $it"
-                    )
-                }
-            }
-    }
-
     private fun String.startsWithUppercaseLetter(): Boolean {
         return this.matches(Regex("[A-Z]{1}.*"))
     }

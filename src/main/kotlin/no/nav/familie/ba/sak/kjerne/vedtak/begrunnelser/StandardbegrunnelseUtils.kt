@@ -137,6 +137,16 @@ fun Standardbegrunnelse.tilSanityBegrunnelse(
     return sanityBegrunnelse
 }
 
+fun EØSStandardbegrunnelse.tilSanityEØSBegrunnelse(
+    eøsSanityBegrunnelser: List<SanityEØSBegrunnelse>
+): SanityEØSBegrunnelse? {
+    val sanityBegrunnelse = eøsSanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
+    if (sanityBegrunnelse == null) {
+        logger.warn("Finner ikke begrunnelse med apinavn '${this.sanityApiNavn}' på '${this.name}' i Sanity")
+    }
+    return sanityBegrunnelse
+}
+
 fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
 
 fun Standardbegrunnelse.tilVedtaksbegrunnelse(
