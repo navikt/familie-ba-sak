@@ -61,7 +61,7 @@ class VedtaksperiodeMedBegrunnelserController(
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId,
             standardbegrunnelserFraFrontend = standardbegrunnelser,
-            eøsStandardBegrunnelser = eøsStandardbegrunnelser
+            eøsStandardbegrunnelserFraFrontend = eøsStandardbegrunnelser
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
