@@ -177,9 +177,9 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
     } else null
 }
 
-fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
+fun hjemlerTilHjemmeltekst(hjemler: List<String>, lovForHjemmel: String): String {
     return when (hjemler.size) {
-        0 -> throw Feil("Kan ikke lage hjemmeltekst når ")
+        0 -> throw Feil("Kan ikke lage hjemmeltekst for $lovForHjemmel når ingen begrunnelser har hjemler fra $lovForHjemmel knyttet til seg.")
         1 -> "§ ${hjemler[0]}"
         else -> "§§ ${Utils.slåSammen(hjemler)}"
     }
@@ -232,10 +232,10 @@ fun hentHjemmeltekst(
         )
     }
     if (ordinæreHjemler.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("barnetrygdloven ${hjemlerTilHjemmeltekst(ordinæreHjemler)}")
+        alleHjemlerForBegrunnelser.add("barnetrygdloven ${hjemlerTilHjemmeltekst(hjemler = ordinæreHjemler, lovForHjemmel = "barnetrygdloven")}")
     }
     if (hjemlerFraFolketrygdloven.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("folketrygdloven ${hjemlerTilHjemmeltekst(hjemlerFraFolketrygdloven)}")
+        alleHjemlerForBegrunnelser.add("folketrygdloven ${hjemlerTilHjemmeltekst(hjemler = hjemlerFraFolketrygdloven, lovForHjemmel = "folketrygdloven")}")
     }
     if (hjemlerEØSForordningen883.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add("EØS-forordningen 883/2004 ${Utils.slåSammen(hjemlerEØSForordningen883)}")
