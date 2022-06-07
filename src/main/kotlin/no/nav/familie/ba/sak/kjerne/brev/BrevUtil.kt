@@ -214,20 +214,17 @@ fun hentHjemmeltekst(
 
     val sorterteHjemler = hjemler.map { it.toInt() }.sorted().map { it.toString() }
 
-    validerBegrunnelserErKnyttetTilHjemler(sorterteHjemler, sanityBegrunnelser)
+    validerBegrunnelserErKnyttetTilHjemler(sorterteHjemler)
 
     return hjemlerTilHjemmeltekst(sorterteHjemler)
 }
 
 private fun validerBegrunnelserErKnyttetTilHjemler(
     sorterteHjemler: List<String>,
-    sanityBegrunnelser: List<SanityBegrunnelse>
 ) {
     if (sorterteHjemler.isEmpty()) {
         throw FunksjonellFeil(
-            "Ingen hjemler var knyttet til begrunnelsen(e) " +
-                Utils.slåSammen(sanityBegrunnelser.map { it.navnISystem }) +
-                ". Du må velge minst én begrunnelse som er knyttet til en hjemmel."
+            "Ingen hjemler var knyttet til begrunnelsen(e) som er valgt. Du må velge minst én begrunnelse som er knyttet til en hjemmel."
         )
     }
 }
