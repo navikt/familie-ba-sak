@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -204,7 +205,36 @@ private fun utledTom(
     overlappendePeriode: LocalDateSegment<Int>
 ) = if (gammeltSegment.tom > overlappendePeriode.tom) overlappendePeriode.tom else gammeltSegment.tom
 
-fun hentGyldigeBegrunnelserForVedtaksperiode(
+fun hentGyldigeBegrunnelserForPeriode(
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    persongrunnlag: PersonopplysningGrunnlag,
+    vilkårsvurdering: Vilkårsvurdering,
+    aktørIderMedUtbetaling: List<String>,
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    kanBehandleEØS: Boolean,
+    sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
+    kompetanserIPeriode: List<Kompetanse>
+): List<IVedtakBegrunnelse> {
+    val standardbegrunnelser = hentGyldigeStandardbegrunnelserForVedtaksperiode(
+        utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+        sanityBegrunnelser = sanityBegrunnelser,
+        persongrunnlag = persongrunnlag,
+        vilkårsvurdering = vilkårsvurdering,
+        aktørIderMedUtbetaling = aktørIderMedUtbetaling,
+        endretUtbetalingAndeler = endretUtbetalingAndeler,
+        andelerTilkjentYtelse = andelerTilkjentYtelse
+    )
+    val eøsBegrunnelser = if (kanBehandleEØS) hentGyldigeEØSBegrunnelserForPeriode(
+        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+        kompetanserIPeriode = kompetanserIPeriode
+    ) else emptyList()
+
+    return standardbegrunnelser + eøsBegrunnelser
+}
+
+fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     persongrunnlag: PersonopplysningGrunnlag,
