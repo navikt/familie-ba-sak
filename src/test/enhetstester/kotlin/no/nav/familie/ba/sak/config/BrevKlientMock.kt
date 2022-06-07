@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
@@ -21,7 +21,7 @@ class BrevKlientMock : BrevKlient(
         return TEST_PDF
     }
 
-    override fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseData): String {
+    override fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseMedData): String {
         return "Dummytekst for ${begrunnelseData.apiNavn}"
     }
 }
