@@ -58,3 +58,27 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
     )
 }
+
+data class RestUtvidetVedtaksperiodeMedBegrunnelser(
+    val id: Long,
+    val fom: LocalDate?,
+    val tom: LocalDate?,
+    val type: Vedtaksperiodetype,
+    val begrunnelser: List<RestVedtaksbegrunnelse>,
+    val fritekster: List<String> = emptyList(),
+    val gyldigeBegrunnelser: List<IVedtakBegrunnelse>,
+    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
+)
+
+fun UtvidetVedtaksperiodeMedBegrunnelser.tilRestUtvidetVedtaksperiodeMedBegrunnelser(): RestUtvidetVedtaksperiodeMedBegrunnelser {
+    return RestUtvidetVedtaksperiodeMedBegrunnelser(
+        id = this.id,
+        fom = this.fom,
+        tom = this.tom,
+        type = this.type,
+        begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() } + this.eøsBegrunnelser.map { it.tilRestVedtaksbegrunnelse() },
+        fritekster = this.fritekster,
+        utbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer,
+        gyldigeBegrunnelser = this.gyldigeBegrunnelser
+    )
+}
