@@ -6,8 +6,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
@@ -22,8 +21,7 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
     val begrunnelser: List<RestVedtaksbegrunnelse>,
     val eøsBegrunnelser: List<RestEØSVedtaksbegrunnelse>,
     val fritekster: List<String> = emptyList(),
-    val gyldigeBegrunnelser: List<Standardbegrunnelse> = emptyList(),
-    val gyldigeEøsBegrunnelser: List<EØSStandardbegrunnelse> = emptyList(),
+    val gyldigeBegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
 ) {
     fun hentMånedPeriode() = MånedPeriode(
