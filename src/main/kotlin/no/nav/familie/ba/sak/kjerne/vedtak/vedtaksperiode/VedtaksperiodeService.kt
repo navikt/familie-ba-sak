@@ -34,8 +34,10 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -92,7 +94,8 @@ class VedtaksperiodeService(
 
     fun oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId: Long,
-        standardbegrunnelserFraFrontend: List<Standardbegrunnelse>
+        standardbegrunnelserFraFrontend: List<Standardbegrunnelse>,
+        eøsStandardbegrunnelserFraFrontend: List<EØSStandardbegrunnelse> = emptyList()
     ): Vedtak {
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
@@ -119,6 +122,15 @@ class VedtaksperiodeService(
                 }
 
                 it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser)
+            }
+        )
+
+        vedtaksperiodeMedBegrunnelser.settEØSBegrunnelser(
+            eøsStandardbegrunnelserFraFrontend.map {
+                EØSBegrunnelse(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    begrunnelse = it
+                )
             }
         )
 
