@@ -161,12 +161,12 @@ class BrevService(
 
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
 
-        val utvidetVedtaksperioderMedBegrunnelser =
-            vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak).filter {
-                !(it.begrunnelser.isEmpty() && it.fritekster.isEmpty() && it.eøsBegrunnelser.isEmpty())
+        val vedtaksperioderMedBegrunnelser =
+            vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).filter {
+                !(it.begrunnelser.isEmpty() && it.fritekster.isEmpty())
             }.sortedBy { it.fom }
 
-        if (utvidetVedtaksperioderMedBegrunnelser.isEmpty()) {
+        if (vedtaksperioderMedBegrunnelser.isEmpty()) {
             throw FunksjonellFeil(
                 "Vedtaket mangler begrunnelser. Du må legge til begrunnelser for å generere vedtaksbrevet."
             )
@@ -174,7 +174,7 @@ class BrevService(
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
         val brevPerioderData = brevPeriodeService.hentBrevperioderData(
-            vedtaksperioderId = utvidetVedtaksperioderMedBegrunnelser.map { it.id },
+            vedtaksperioderId = vedtaksperioderMedBegrunnelser.map { it.id },
             behandlingId = BehandlingId(vedtak.behandling.id)
         )
         val brevperioder = brevPerioderData.sorted().mapNotNull {
