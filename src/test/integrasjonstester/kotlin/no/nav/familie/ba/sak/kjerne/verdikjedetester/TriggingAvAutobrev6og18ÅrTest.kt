@@ -141,7 +141,7 @@ class TriggingAvAutobrev6og18ÅrTest(
             vedtaksperiodeId = førsteVedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.toString()
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.name
                 )
             )
         )
@@ -152,7 +152,7 @@ class TriggingAvAutobrev6og18ÅrTest(
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = reduksjonVedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                standardbegrunnelser = listOf(reduksjonsbegrunnelse.toString())
+                standardbegrunnelser = listOf(reduksjonsbegrunnelse.name)
             )
         )
 

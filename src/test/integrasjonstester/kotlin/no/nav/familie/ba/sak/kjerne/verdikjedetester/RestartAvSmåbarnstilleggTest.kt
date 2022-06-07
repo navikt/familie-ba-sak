@@ -344,7 +344,7 @@ class RestartAvSmåbarnstilleggTest(
                     vedtaksperiodeId = periode.id,
                     restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                         standardbegrunnelser = listOf(
-                            Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG.toString()
+                            Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG.name
                         )
                     )
                 )
