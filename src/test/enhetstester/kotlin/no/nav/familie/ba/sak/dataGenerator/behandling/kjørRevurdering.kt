@@ -383,6 +383,6 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = vedtaksperiode.id,
         standardbegrunnelserFraFrontend = gyldigebegrunnelser.toList(),
-        eøsStandardBegrunnelser = emptyList()
+        eøsStandardbegrunnelserFraFrontend = emptyList()
     )
 }

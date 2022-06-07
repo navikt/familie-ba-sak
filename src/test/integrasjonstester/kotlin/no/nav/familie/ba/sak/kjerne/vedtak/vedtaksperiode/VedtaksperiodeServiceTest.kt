@@ -204,7 +204,7 @@ class VedtaksperiodeServiceTest(
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperioder.first().id,
             standardbegrunnelserFraFrontend = listOf(Standardbegrunnelse.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE),
-            eøsStandardBegrunnelser = emptyList()
+            eøsStandardbegrunnelserFraFrontend = emptyList()
         )
 
         val vedtaksperioderMedUtfylteBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
@@ -218,7 +218,7 @@ class VedtaksperiodeServiceTest(
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperioder.first().id,
             standardbegrunnelserFraFrontend = listOf(Standardbegrunnelse.FORTSATT_INNVILGET_FAST_OMSORG),
-            eøsStandardBegrunnelser = emptyList()
+            eøsStandardbegrunnelserFraFrontend = emptyList()
         )
 
         val vedtaksperioderMedOverskrevneBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
@@ -240,7 +240,7 @@ class VedtaksperiodeServiceTest(
             vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
                 standardbegrunnelserFraFrontend = listOf(Standardbegrunnelse.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER),
-                eøsStandardBegrunnelser = emptyList()
+                eøsStandardbegrunnelserFraFrontend = emptyList()
             )
         }
 
