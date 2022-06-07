@@ -215,6 +215,7 @@ class FagsakService(
             løpendeKategori = behandlingstemaService.hentLøpendeKategori(fagsakId = fagsakId),
             løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsakId),
             gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
+            fagsakEier = fagsak.eier
         )
     }
 
