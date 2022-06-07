@@ -266,10 +266,10 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
     kompetanserIPeriode: List<Kompetanse>
 ) = EØSStandardbegrunnelse.values()
     .mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }
-    .filter {
+    .filter { begrunnelse ->
         kompetanserIPeriode.any { kompetanse ->
             kompetanse.validerFelterErSatt()
-            it.erGyldigForKompetanseMedData(
+            begrunnelse.erGyldigForKompetanseMedData(
                 annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
                 barnetsBostedslandFraKompetanse = kompetanse.barnetsBostedsland!!,
                 resultatFraKompetanse = kompetanse.resultat!!
