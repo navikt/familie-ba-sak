@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.logger
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
@@ -26,7 +27,7 @@ import org.springframework.core.io.ClassPathResource
 import java.time.YearMonth
 
 private val secureLogger = LoggerFactory.getLogger("secureLogger")
-
+val logger = LoggerFactory.getLogger("brevPeriodeUtil")
 fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
     Utils.slåSammen(
         this
@@ -83,6 +84,10 @@ data class LandkodeISO2(
 fun hentLandkodeISO2(landKode: String): String {
     val landkoderFil = ClassPathResource("landkoder/landkoder.json").file
 
-    return objectMapper.readValue<List<LandkodeISO2>>(landkoderFil.readText()).find { it.code == landKode }?.name
+    val landnavn =
+        objectMapper.readValue<List<LandkodeISO2>>(landkoderFil.readText()).find { it.code == landKode }?.name
+
+    logger.info("Landkode '$landKode' ble konvertert til '$landnavn'")
+    return landnavn
         ?: throw Feil("Fant Ikke landkode $landKode")
 }
