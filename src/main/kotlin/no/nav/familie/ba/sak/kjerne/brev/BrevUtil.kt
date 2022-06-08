@@ -238,7 +238,7 @@ private fun hentAlleTyperHjemler(
     hjemlerEØSForordningen883: List<String>,
     hjemlerEØSForordningen987: List<String>,
     målform: Målform
-): MutableList<String> {
+): List<String> {
     val alleHjemlerForBegrunnelser = mutableListOf<String>()
 
     // Rekkefølgen her er viktig
