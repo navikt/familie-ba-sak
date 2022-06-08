@@ -24,7 +24,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.GyldigVilkårsperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -48,9 +48,6 @@ class VilkårVurderingTest(
     private val fagsakService: FagsakService,
 
     @Autowired
-    private val vilkårService: VilkårService,
-
-    @Autowired
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
     @Autowired
@@ -58,6 +55,9 @@ class VilkårVurderingTest(
 
     @Autowired
     private val personidentService: PersonidentService,
+
+    @Autowired
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -110,7 +110,8 @@ class VilkårVurderingTest(
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
+        val vilkårsvurdering =
+            vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false)
 
         val forventetAntallVurderteVilkår =
             Vilkår.hentVilkårFor(PersonType.BARN).size +

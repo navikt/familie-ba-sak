@@ -45,7 +45,7 @@ class GrunnlagController(
             behandling = behandling,
             nyttBarnIdent = leggTilBarnDto.barnIdent
         )
-        tilbakestillService.initierOgSettBehandlingTilVilårsvurdering(behandling)
+        tilbakestillService.initierOgSettBehandlingTilVilkårsvurdering(behandling)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService

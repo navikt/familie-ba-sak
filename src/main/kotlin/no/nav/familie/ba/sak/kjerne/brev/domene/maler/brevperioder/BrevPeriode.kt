@@ -4,8 +4,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Flettefelt
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 
 data class BrevPeriode(
     val fom: Flettefelt,
@@ -44,13 +42,7 @@ data class BrevPeriode(
         antallBarnMedNullutbetaling = flettefelt(antallBarnMedNullutbetaling),
         fodselsdagerBarnMedUtbetaling = flettefelt(fodselsdagerBarnMedUtbetaling),
         fodselsdagerBarnMedNullutbetaling = flettefelt(fodselsdagerBarnMedNullutbetaling),
-        begrunnelser = begrunnelser.map {
-            when (it) {
-                is FritekstBegrunnelse -> it.fritekst
-                is BegrunnelseData -> it
-                else -> error("Begrunnelse er ikke string eller begrunnelseData")
-            }
-        },
+        begrunnelser = begrunnelser,
         type = flettefelt(brevPeriodeType.apiNavn),
     )
 }

@@ -5,58 +5,72 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.somInversOppdateringEllersNull
 
 class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
-    val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>
+    val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>,
+    val endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<S>>
 ) {
 
-    fun hentMedBehandlingId(behandlingId: Long): Collection<S> {
-        return periodeOgBarnSkjemaRepository.findByBehandlingId(behandlingId)
+    fun hentMedBehandlingId(behandlingId: BehandlingId): Collection<S> {
+        return periodeOgBarnSkjemaRepository.finnFraBehandlingId(behandlingId.id)
     }
 
     fun hentMedId(id: Long): S {
         return periodeOgBarnSkjemaRepository.getById(id)
     }
 
-    fun endreSkjemaer(behandlingId: Long, oppdatering: S, kjørTilSlutt: (behandlingId: Long) -> Unit = {}) {
+    fun endreSkjemaer(behandlingId: BehandlingId, oppdatering: S) {
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
 
         val justertOppdatering = oppdatering.somInversOppdateringEllersNull(gjeldendeSkjemaer) ?: oppdatering
         val oppdaterteKompetanser = oppdaterSkjemaerRekursivt(gjeldendeSkjemaer, justertOppdatering)
 
-        lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteKompetanser.medBehandlingId(behandlingId))
-
-        kjørTilSlutt(behandlingId)
+        lagreDifferanseOgVarsleAbonnenter(
+            behandlingId,
+            gjeldendeSkjemaer,
+            oppdaterteKompetanser.medBehandlingId(behandlingId)
+        )
     }
 
-    fun slettSkjema(skjemaId: Long, kjørTilSlutt: (behandlingId: Long) -> Unit = {}) {
+    fun slettSkjema(skjemaId: Long) {
         val skjemaTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
-        val behandlingId = skjemaTilSletting.behandlingId
+        val behandlingId = BehandlingId(skjemaTilSletting.behandlingId)
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
         val blanktSkjema = skjemaTilSletting.utenInnhold()
 
         val oppdaterteKompetanser = gjeldendeSkjemaer.minus(skjemaTilSletting).plus(blanktSkjema)
             .slåSammen().medBehandlingId(behandlingId)
 
-        lagreSkjemaDifferanse(gjeldendeSkjemaer, oppdaterteKompetanser)
-
-        kjørTilSlutt(behandlingId)
+        lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeSkjemaer, oppdaterteKompetanser)
     }
 
-    fun kopierOgErstattSkjemaer(fraBehandlingId: Long, tilBehandlingId: Long) {
+    fun kopierOgErstattSkjemaer(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) {
         val gjeldendeTilSkjemaer = hentMedBehandlingId(tilBehandlingId)
         val kopiAvFraSkjemaer = hentMedBehandlingId(fraBehandlingId)
             .map { it.kopier() }
             .medBehandlingId(tilBehandlingId)
 
-        lagreSkjemaDifferanse(gjeldendeTilSkjemaer, kopiAvFraSkjemaer)
+        periodeOgBarnSkjemaRepository.deleteAll(gjeldendeTilSkjemaer)
+        periodeOgBarnSkjemaRepository.saveAll(kopiAvFraSkjemaer)
     }
 
-    fun lagreSkjemaDifferanse(gjeldende: Collection<S>, oppdaterte: Collection<S>) {
-        periodeOgBarnSkjemaRepository.deleteAll(gjeldende - oppdaterte)
-        periodeOgBarnSkjemaRepository.saveAll(oppdaterte - gjeldende)
+    fun lagreDifferanseOgVarsleAbonnenter(
+        behandlingId: BehandlingId,
+        gjeldende: Collection<S>,
+        oppdaterte: Collection<S>
+    ) {
+        val skalSlettes = gjeldende - oppdaterte
+        val skalLagres = oppdaterte - gjeldende
+
+        periodeOgBarnSkjemaRepository.deleteAll(skalSlettes)
+        periodeOgBarnSkjemaRepository.saveAll(skalLagres)
+
+        val endringer = skalSlettes + skalLagres
+        if (endringer.isNotEmpty()) {
+            endringsabonnenter.forEach { it.skjemaerEndret(behandlingId, oppdaterte) }
+        }
     }
 }
 
-fun <T : PeriodeOgBarnSkjemaEntitet<T>> Collection<T>.medBehandlingId(behandlingId: Long): Collection<T> {
-    this.forEach { it.behandlingId = behandlingId }
+fun <T : PeriodeOgBarnSkjemaEntitet<T>> Collection<T>.medBehandlingId(behandlingId: BehandlingId): Collection<T> {
+    this.forEach { it.behandlingId = behandlingId.id }
     return this
 }

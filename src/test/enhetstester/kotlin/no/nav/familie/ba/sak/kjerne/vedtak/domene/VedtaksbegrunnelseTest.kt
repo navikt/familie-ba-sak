@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.dataGenerator.brev.lagBrevBegrunnelseGrunnlagMedPersoner
+import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -22,9 +22,8 @@ class VedtaksbegrunnelseTest {
     val barn2 = lagPerson(type = PersonType.BARN)
     val barn3 = lagPerson(type = PersonType.BARN)
 
-    val restVedtaksbegrunnelse = lagRestVedtaksbegrunnelse(
-        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-        vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+    val restVedtaksbegrunnelse = lagVedtaksbegrunnelse(
+        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
     )
 
     val vedtaksperiode = NullablePeriode(LocalDate.now().minusMonths(1), LocalDate.now())

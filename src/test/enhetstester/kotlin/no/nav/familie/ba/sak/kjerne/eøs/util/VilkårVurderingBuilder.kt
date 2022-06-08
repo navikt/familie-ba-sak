@@ -33,13 +33,11 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
         val vilkårsvurderingBuilder: VilkårsvurderingBuilder<T>,
         val startTidspunkt: Tidspunkt<T>,
         private val person: Person = tilfeldigPerson(),
-        private val vilkårsresultatTidslinjer: List<Tidslinje<VilkårRegelverkResultat, T>> = emptyList(),
+        private val vilkårsresultatTidslinjer: MutableList<Tidslinje<VilkårRegelverkResultat, T>> = mutableListOf(),
     ) {
         fun medVilkår(v: String, vararg vilkår: Vilkår): PersonResultatBuilder<T> {
-            return copy(
-                vilkårsresultatTidslinjer = this.vilkårsresultatTidslinjer +
-                    vilkår.map { v.tilVilkårRegelverkResultatTidslinje(it, startTidspunkt) }
-            )
+            vilkårsresultatTidslinjer.addAll(vilkår.map { v.tilVilkårRegelverkResultatTidslinje(it, startTidspunkt) })
+            return this
         }
 
         fun forPerson(person: Person, startTidspunkt: Tidspunkt<T>): PersonResultatBuilder<T> {
@@ -79,7 +77,7 @@ internal fun <T : Tidsenhet> Periode<VilkårRegelverkResultat, T>.tilVilkårResu
             periodeFom = this.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
             periodeTom = this.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
             begrunnelse = "",
-            behandlingId = 0
+            behandlingId = personResultat.vilkårsvurdering.behandling.id
         )
     )
 }
