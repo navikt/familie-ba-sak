@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ClassPathResource
+import java.io.BufferedReader
 import java.time.YearMonth
 
 private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -82,10 +83,11 @@ data class LandkodeISO2(
 )
 
 fun hentLandkodeISO2(landKode: String): String {
-    val landkoderFil = ClassPathResource("landkoder/landkoder.json").file
+    val landkoder =
+        ClassPathResource("landkoder/landkoder.json").inputStream.bufferedReader().use(BufferedReader::readText)
 
     val landnavn =
-        objectMapper.readValue<List<LandkodeISO2>>(landkoderFil.readText()).find { it.code == landKode }?.name
+        objectMapper.readValue<List<LandkodeISO2>>(landkoder).find { it.code == landKode }?.name
 
     logger.info("Landkode '$landKode' ble konvertert til '$landnavn'")
     return landnavn
