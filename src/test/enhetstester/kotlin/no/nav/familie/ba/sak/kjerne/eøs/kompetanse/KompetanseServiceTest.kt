@@ -141,6 +141,64 @@ internal class KompetanseServiceTest {
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
+/*
+    @Test
+    fun `skal kopiere over kompetanse-skjema fra forrige behandling til ny behandling`() {
+        val behandlingId1 = BehandlingId(10L)
+        val behandlingId2 = BehandlingId(11L)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        val kompetanser = KompetanseBuilder(jan(2020), behandlingId1)
+            .medKompetanse("SSS", barn1)
+            .medKompetanse("---------", barn2, barn3)
+            .medKompetanse("   SSSS", barn1)
+            .lagreTil(mockKompetanseRepository)
+
+        kompetanseService.kopierOgErstattKompetanser(behandlingId1, behandlingId2)
+
+        val kompetanserBehandling2 = mockKompetanseRepository.finnFraBehandlingId(behandlingId2.id)
+
+        assertEqualsUnordered(kompetanser, kompetanserBehandling2)
+
+        kompetanserBehandling2.forEach {
+            assertEquals(behandlingId2.id, it.behandlingId)
+        }
+
+        val kompetanserBehandling1 = mockKompetanseRepository.finnFraBehandlingId(behandlingId1.id)
+
+        kompetanserBehandling1.forEach {
+            assertEquals(behandlingId1.id, it.behandlingId)
+        }
+
+        assertEqualsUnordered(kompetanser, kompetanserBehandling1)
+    }
+
+    @Test
+    fun `skal kopiere kompetanser fra en behandling til en annen behandling, og overskrive eksisterende`() {
+        val behandlingId1 = BehandlingId(10L)
+        val behandlingId2 = BehandlingId(22L)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        val kompetanser1 = KompetanseBuilder(jan(2020), behandlingId1)
+            .medKompetanse("SS   SS", barn1)
+            .medKompetanse("  PPP", barn1, barn2, barn3)
+            .medKompetanse("--   ----", barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        KompetanseBuilder(jan(2020), behandlingId2)
+            .medKompetanse("PPPSSSPPPPPPP", barn1, barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        kompetanseService.kopierOgErstattKompetanser(behandlingId1, behandlingId2)
+
+        val faktiskeKompetanserBehandling2 = kompetanseService.hentKompetanser(behandlingId2)
+
+        assertEqualsUnordered(kompetanser1, faktiskeKompetanserBehandling2)
+    }*/
 
     @Test
     fun `skal kunne lukke åpen kompetanse ved å sende inn identisk skjema med til-og-med-dato`() {
