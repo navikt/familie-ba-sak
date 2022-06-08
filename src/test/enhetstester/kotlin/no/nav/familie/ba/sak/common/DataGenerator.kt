@@ -35,6 +35,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -61,6 +63,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
@@ -1032,6 +1036,7 @@ fun lagSanityBegrunnelse(
     ovrigeTriggere: List<ØvrigTrigger>? = null,
     endringsaarsaker: List<Årsak>? = null,
     hjemler: List<String> = emptyList(),
+    hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
@@ -1046,8 +1051,33 @@ fun lagSanityBegrunnelse(
     ovrigeTriggere = ovrigeTriggere,
     endringsaarsaker = endringsaarsaker,
     hjemler = hjemler,
+    hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+)
+
+fun lagSanityEøsBegrunnelse(
+    apiNavn: String = "",
+    navnISystem: String = "",
+    annenForeldersAktivitet: List<AnnenForeldersAktivitet> = emptyList(),
+    barnetsBostedsland: List<BarnetsBostedsland> = emptyList(),
+    kompetanseResultat: List<KompetanseResultat> = emptyList(),
+    hjemler: List<String> = emptyList(),
+    hjemlerFolketrygdloven: List<String> = emptyList(),
+    hjemlerEØSForordningen883: List<String> = emptyList(),
+    hjemlerEØSForordningen987: List<String> = emptyList(),
+    hjemlerSeperasjonsavtalenStorbritannina: List<String> = emptyList(),
+): SanityEØSBegrunnelse = SanityEØSBegrunnelse(
+    apiNavn = apiNavn,
+    navnISystem = navnISystem,
+    annenForeldersAktivitet = annenForeldersAktivitet,
+    barnetsBostedsland = barnetsBostedsland,
+    kompetanseResultat = kompetanseResultat,
+    hjemler = hjemler,
+    hjemlerFolketrygdloven = hjemlerFolketrygdloven,
+    hjemlerEØSForordningen883 = hjemlerEØSForordningen883,
+    hjemlerEØSForordningen987 = hjemlerEØSForordningen987,
+    hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina
 )
 
 fun lagTriggesAv(
