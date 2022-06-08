@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingReposito
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -127,7 +128,7 @@ class UtvidetBehandlingService(
             endringstidspunkt = utledEndringstidpunkt(endringstidspunkt, behandling),
             vedtak = vedtak?.tilRestVedtak(
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
-                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).sortedBy { it.fom }
+                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }.sortedBy { it.fom }
                 } else emptyList(),
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),

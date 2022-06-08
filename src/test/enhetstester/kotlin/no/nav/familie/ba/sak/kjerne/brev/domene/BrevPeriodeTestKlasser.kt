@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.randomFnr
@@ -7,7 +8,9 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseMedTriggere
+import no.nav.familie.ba.sak.kjerne.brev.domene.LandNavn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertAnnenVurdering
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
@@ -15,12 +18,16 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.SøkersRettTilUtvidet
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -44,13 +51,35 @@ data class BrevPeriodeTestConfig(
     val erFørsteVedtaksperiodePåFagsak: Boolean = false,
     val brevMålform: Målform,
 
-    val forventetOutput: BrevPeriodeOutput?
+    val kompetanser: List<BrevPeriodeTestKompetanse>? = null,
+
+    val forventetOutput: BrevPeriodeOutput?,
 ) {
     fun hentPersonerMedReduksjonFraForrigeBehandling(): List<BrevPeriodeTestPerson> =
         this.personerPåBehandling.filter { it.harReduksjonFraForrigeBehandling }
 
     fun hentBarnMedReduksjonFraForrigeBehandling() =
         hentPersonerMedReduksjonFraForrigeBehandling().filter { it.type == PersonType.BARN }
+}
+
+data class BrevPeriodeTestKompetanse(
+    val id: String,
+    val søkersAktivitet: SøkersAktivitet,
+    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val annenForeldersAktivitetsland: String,
+    val barnetsBostedsland: String,
+    val resultat: KompetanseResultat,
+) {
+    fun tilMinimertKompetanse(personer: List<BrevPeriodeTestPerson>): MinimertKompetanse {
+        return MinimertKompetanse(
+            søkersAktivitet = this.søkersAktivitet,
+            annenForeldersAktivitet = this.annenForeldersAktivitet,
+            annenForeldersAktivitetslandNavn = LandNavn(this.annenForeldersAktivitetsland),
+            barnetsBostedslandNavn = LandNavn(this.barnetsBostedsland),
+            resultat = this.resultat,
+            personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() },
+        )
+    }
 }
 
 data class BrevPeriodeTestPerson(
@@ -62,6 +91,7 @@ data class BrevPeriodeTestPerson(
     val endredeUtbetalinger: List<EndretRestUtbetalingAndelPåPerson>,
     val utbetalinger: List<UtbetalingPåPerson>,
     val harReduksjonFraForrigeBehandling: Boolean = false,
+    val kompetanseIder: List<String>? = null,
 ) {
     fun tilMinimertPerson() = MinimertRestPerson(personIdent = personIdent, fødselsdato = fødselsdato, type = type)
     fun tilUtbetalingsperiodeDetaljer() = utbetalinger.map {
@@ -133,7 +163,12 @@ data class EndretRestUtbetalingAndelPåPerson(
     property = "type",
     defaultImpl = BegrunnelseDataTestConfig::class
 )
-@JsonSubTypes(value = [JsonSubTypes.Type(value = FritekstBegrunnelseTestConfig::class, name = "fritekst")])
+@JsonSubTypes(
+    value = [
+        JsonSubTypes.Type(value = FritekstBegrunnelseTestConfig::class, name = "fritekst"),
+        JsonSubTypes.Type(value = EØSBegrunnelseTestConfig::class, name = "eøsbegrunnelse")
+    ]
+)
 interface TestBegrunnelse
 
 data class FritekstBegrunnelseTestConfig(val fritekst: String) : TestBegrunnelse
@@ -152,7 +187,7 @@ data class BegrunnelseDataTestConfig(
     val belop: Int,
     val soknadstidspunkt: String?,
     val avtaletidspunktDeltBosted: String?,
-    val sokersRettTilUtvidet: String?
+    val sokersRettTilUtvidet: String?,
 ) : TestBegrunnelse {
 
     fun tilBegrunnelseData() = BegrunnelseData(
@@ -170,7 +205,35 @@ data class BegrunnelseDataTestConfig(
         soknadstidspunkt = this.soknadstidspunkt ?: "",
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: "",
         sokersRettTilUtvidet = this.sokersRettTilUtvidet
-            ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat()
+            ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
+        vedtakBegrunnelseType = Standardbegrunnelse.values()
+            .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
+            ?: throw Feil("Fant ikke Standardbegrunnelse med apiNavn ${this.apiNavn}")
+    )
+}
+
+data class EØSBegrunnelseTestConfig(
+    val apiNavn: String,
+    val annenForeldersAktivitet: String,
+    val annenForeldersAktivitetsland: String,
+    val barnetsBostedsland: String,
+    val barnasFodselsdatoer: String,
+    val antallBarn: Int,
+    val maalform: String,
+    val sokersAktivitet: SøkersAktivitet,
+) : TestBegrunnelse {
+    fun tilEØSBegrunnelseData(): EØSBegrunnelseData = EØSBegrunnelseData(
+        apiNavn = this.apiNavn,
+        annenForeldersAktivitet = this.annenForeldersAktivitet,
+        annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
+        barnetsBostedsland = this.barnetsBostedsland,
+        barnasFodselsdatoer = this.barnasFodselsdatoer,
+        antallBarn = this.antallBarn,
+        maalform = this.maalform,
+        vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
+            .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
+            ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
+        sokersAktivitet = this.sokersAktivitet,
     )
 }
 

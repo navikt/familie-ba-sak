@@ -30,7 +30,11 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
         fritekster = this.fritekster,
         minimerteUtbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer.map { it.tilMinimertUtbetalingsperiodeDetalj() },
         begrunnelser = this.begrunnelser.map { it.tilBegrunnelseMedTriggere(sanityBegrunnelser) },
-        eøsBegrunnelser = this.eøsBegrunnelser.mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }
+        eøsBegrunnelser = this.eøsBegrunnelser.mapNotNull {
+            it.begrunnelse.tilEØSBegrunnelseMedTriggere(
+                sanityEØSBegrunnelser
+            )
+        }
     )
 }
 
