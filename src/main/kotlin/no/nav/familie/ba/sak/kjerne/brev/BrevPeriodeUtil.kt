@@ -52,10 +52,11 @@ fun hentMinimerteKompetanserForPeriode(
     kompetanser: List<Kompetanse>,
     fom: YearMonth?,
     tom: YearMonth?,
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
+    hentLand: (String) -> String
 ): List<MinimertKompetanse> {
     val minimerteKompetanser = kompetanser.hentIPeriode(fom, tom)
-        .map { it.tilMinimertKompetanse(personopplysningGrunnlag) }
+        .map { it.tilMinimertKompetanse(personopplysningGrunnlag = personopplysningGrunnlag, hentLand = hentLand) }
 
     return minimerteKompetanser
 }
