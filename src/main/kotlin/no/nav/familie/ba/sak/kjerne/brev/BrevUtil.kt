@@ -268,10 +268,10 @@ private fun hentAlleTyperHjemler(
         )
     }
     if (hjemlerEØSForordningen883.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordningen 883/2004 ${Utils.slåSammen(hjemlerEØSForordningen883)}")
+        alleHjemlerForBegrunnelser.add("EØS-forordning 883/2004 artikkel ${Utils.slåSammen(hjemlerEØSForordningen883)}")
     }
     if (hjemlerEØSForordningen987.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordningen 987/2009 ${Utils.slåSammen(hjemlerEØSForordningen987)}")
+        alleHjemlerForBegrunnelser.add("EØS-forordning 987/2009 artikkel ${Utils.slåSammen(hjemlerEØSForordningen987)}")
     }
     return alleHjemlerForBegrunnelser
 }
