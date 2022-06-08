@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseMedTriggere
+import no.nav.familie.ba.sak.kjerne.brev.domene.LandNavn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
@@ -73,8 +74,8 @@ data class BrevPeriodeTestKompetanse(
         return MinimertKompetanse(
             søkersAktivitet = this.søkersAktivitet,
             annenForeldersAktivitet = this.annenForeldersAktivitet,
-            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
-            barnetsBostedsland = this.barnetsBostedsland,
+            annenForeldersAktivitetslandNavn = LandNavn(this.annenForeldersAktivitetsland),
+            barnetsBostedslandNavn = LandNavn(this.barnetsBostedsland),
             resultat = this.resultat,
             personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() },
         )
