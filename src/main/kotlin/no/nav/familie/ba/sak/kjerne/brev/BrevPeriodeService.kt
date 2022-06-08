@@ -149,7 +149,7 @@ class BrevPeriodeService(
                 fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
                 tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                hentLand = { landkode -> integrasjonClient.hentLand(landkode).storForbokstav() }
+                hentLand = { landkode -> hentLandkodeISO2(landkode).storForbokstav() }
             )
 
         )
