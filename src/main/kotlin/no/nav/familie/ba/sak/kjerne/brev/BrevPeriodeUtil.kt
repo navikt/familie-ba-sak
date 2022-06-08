@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.LoggerFactory
-import java.io.File
+import org.springframework.core.io.ClassPathResource
 import java.time.YearMonth
 
 private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -81,8 +81,8 @@ data class LandkodeISO2(
 )
 
 fun hentLandkodeISO2(landKode: String): String {
-    val fil = File("./src/main/resources/landkoder/landkoder.json")
+    val landkoderFil = ClassPathResource("landkoder/landkoder.json").file
 
-    return objectMapper.readValue<List<LandkodeISO2>>(fil.readText()).find { it.code == landKode }?.name
+    return objectMapper.readValue<List<LandkodeISO2>>(landkoderFil.readText()).find { it.code == landKode }?.name
         ?: throw Feil("Fant Ikke landkode $landKode")
 }
