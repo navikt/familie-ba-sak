@@ -75,8 +75,8 @@ class BrevPeriodeGenerator(
                     vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
                     apiNavn = begrunnelse.sanityApiNavn,
                     annenForeldersAktivitet = kompetanse.annenForeldersAktivitet.tilTekst(),
-                    annenForeldersAktivitetsland = hentLandITekstformat(kompetanse.annenForeldersAktivitetsland),
-                    barnetsBostedsland = hentLandITekstformat(kompetanse.barnetsBostedsland),
+                    annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetslandNavn.navn,
+                    barnetsBostedsland = kompetanse.barnetsBostedslandNavn.navn,
                     barnasFodselsdatoer = Utils.slåSammen(kompetanse.personer.map { it.fødselsdato.tilKortString() }),
                     antallBarn = kompetanse.personer.size,
                     maalform = brevMålform.tilSanityFormat(),
@@ -84,12 +84,6 @@ class BrevPeriodeGenerator(
                 )
             }
         }
-
-    fun hentLandITekstformat(landkode: String): String {
-        if (landkode == "NO") return "Norge"
-        // TODO: Konverter landkode til tekstformat f.eks. AD -> ANDORRA
-        throw Feil("Klarer ikke å konvertere landkode $landkode")
-    }
 
     fun hentEøsBegrunnelserMedKompetanser(): List<EØSBegrunnelseMedKompetanser> =
         minimertVedtaksperiode.eøsBegrunnelser.map { eøsBegrunnelseMedTriggere ->

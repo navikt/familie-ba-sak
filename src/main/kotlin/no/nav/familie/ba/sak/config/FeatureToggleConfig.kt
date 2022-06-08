@@ -108,6 +108,9 @@ class FeatureToggleConfig(
         const val KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED = "familie-ba-sak.manuell-migrering-ikke-delt-bosted"
         const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING = "familie-ba-sak.endringer.validering.migeringsbehandling"
 
+        const val KAN_BEHANDLE_EØS_SEKUNDERLAND = "familie-ba-sak.behandling.eos-sekunderland"
+        const val KAN_BEHANDLE_EØS_TO_PRIMERLAND = "familie-ba-sak.behandling.eos-to-primerland"
+
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
 }
