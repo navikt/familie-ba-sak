@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
@@ -18,7 +20,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.time.YearMonth
 
 private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -70,3 +74,15 @@ fun Collection<Kompetanse>.hentIPeriode(
         tilOgMed = tom.tilTidspunktEllerUendeligLengeTil()
     ).perioder()
     .mapNotNull { it.innhold }
+
+data class LandkodeISO2(
+    val code: String,
+    val name: String,
+)
+
+fun hentLandkodeISO2(landKode: String): String {
+    val fil = File("./src/main/resources/landkoder/landkoder.json")
+
+    return objectMapper.readValue<List<LandkodeISO2>>(fil.readText()).find { it.code == landKode }?.name
+        ?: throw Feil("Fant Ikke landkode $landKode")
+}
