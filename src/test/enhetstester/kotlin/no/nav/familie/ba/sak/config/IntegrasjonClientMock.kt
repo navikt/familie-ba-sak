@@ -138,6 +138,8 @@ class IntegrasjonClientMock {
 
             every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } just runs
 
+            every { mockIntegrasjonClient.hentLand("NO") } returns "NORGE"
+            every { mockIntegrasjonClient.hentLand("SE") } returns "SVERIGE"
             every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"
 
             every { mockIntegrasjonClient.hentAlleEØSLand() } returns hentKodeverkLand()
