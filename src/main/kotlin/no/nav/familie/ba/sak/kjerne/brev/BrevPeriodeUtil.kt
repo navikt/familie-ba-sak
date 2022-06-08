@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.brev
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.logger
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
@@ -86,10 +85,6 @@ fun hentLandkodeISO2(landKode: String): String {
     val landkoder =
         ClassPathResource("landkoder/landkoder.json").inputStream.bufferedReader().use(BufferedReader::readText)
 
-    val landnavn =
-        objectMapper.readValue<List<LandkodeISO2>>(landkoder).find { it.code == landKode }?.name
-
-    logger.info("Landkode '$landKode' ble konvertert til '$landnavn'")
-    return landnavn
+    return objectMapper.readValue<List<LandkodeISO2>>(landkoder).find { it.code == landKode }?.name
         ?: throw Feil("Fant Ikke landkode $landKode")
 }
