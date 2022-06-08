@@ -63,7 +63,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -71,8 +71,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestEØSVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
@@ -868,25 +866,15 @@ fun lagVedtaksperiodeMedBegrunnelser(
     fritekster = fritekster,
 )
 
-fun lagRestVedtaksbegrunnelse(
-    standardbegrunnelse: Standardbegrunnelse =
-        Standardbegrunnelse.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
-    vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET,
-) = RestVedtaksbegrunnelse(
-    standardbegrunnelse = standardbegrunnelse,
-    vedtakBegrunnelseType = vedtakBegrunnelseType,
-    vedtakBegrunnelseSpesifikasjon = standardbegrunnelse
-)
-
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(
     id: Long = nesteUtvidetVedtaksperiodeId(),
     fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
     tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
     type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
-    begrunnelser: List<RestVedtaksbegrunnelse> = listOf(lagRestVedtaksbegrunnelse()),
+    begrunnelser: List<Vedtaksbegrunnelse> = listOf(lagVedtaksbegrunnelse()),
     fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
     utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
-    eøsBegrunnelser: List<RestEØSVedtaksbegrunnelse> = emptyList(),
+    eøsBegrunnelser: List<EØSBegrunnelse> = emptyList(),
 ) = UtvidetVedtaksperiodeMedBegrunnelser(
     id = id,
     fom = fom,
@@ -912,7 +900,8 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
         vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
         standardbegrunnelserFraFrontend = listOf(
             Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-        )
+        ),
+        eøsStandardbegrunnelserFraFrontend = emptyList()
     )
 }
 

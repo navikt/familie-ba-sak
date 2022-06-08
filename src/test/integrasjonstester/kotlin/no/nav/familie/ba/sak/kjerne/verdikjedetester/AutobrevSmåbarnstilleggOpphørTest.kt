@@ -282,7 +282,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser
+                standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.map { it.toString() }
             )
         )
         val restUtvidetBehandlingEtterSendTilBeslutter =

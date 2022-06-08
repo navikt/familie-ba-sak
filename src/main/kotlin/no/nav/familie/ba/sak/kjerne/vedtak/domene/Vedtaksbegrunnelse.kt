@@ -72,9 +72,9 @@ class Vedtaksbegrunnelse(
 }
 
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
-    standardbegrunnelse = this.standardbegrunnelse,
+    standardbegrunnelse = this.standardbegrunnelse.enumnavnTilString(),
     vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
-    vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse
+    vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse.enumnavnTilString()
 )
 
 enum class Begrunnelsetype {
@@ -100,8 +100,13 @@ interface Begrunnelse : Comparable<Begrunnelse> {
     }
 }
 
+interface BegrunnelseMedData : Begrunnelse {
+    val apiNavn: String
+}
+
 data class BegrunnelseData(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
+    override val apiNavn: String,
 
     val gjelderSoker: Boolean,
     val barnasFodselsdatoer: String,
@@ -112,12 +117,11 @@ data class BegrunnelseData(
     val antallBarnOppfyllerTriggereOgHarNullutbetaling: Int,
     val maanedOgAarBegrunnelsenGjelderFor: String?,
     val maalform: String,
-    val apiNavn: String,
     val belop: String,
     val soknadstidspunkt: String,
     val avtaletidspunktDeltBosted: String,
     val sokersRettTilUtvidet: String
-) : Begrunnelse {
+) : BegrunnelseMedData {
     override val type: Begrunnelsetype = Begrunnelsetype.STANDARD_BEGRUNNELSE
 }
 
@@ -130,7 +134,8 @@ data class FritekstBegrunnelse(
 
 data class EØSBegrunnelseData(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
-    val apiNavn: String,
+    override val apiNavn: String,
+
     val annenForeldersAktivitet: String,
     val annenForeldersAktivitetsland: String,
     val barnetsBostedsland: String,
@@ -138,7 +143,7 @@ data class EØSBegrunnelseData(
     val antallBarn: Int,
     val maalform: String,
     val sokersAktivitet: SøkersAktivitet,
-) : Begrunnelse {
+) : BegrunnelseMedData {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
 }
 
