@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtakspe
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.endretUtbetalingsperiodeBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -271,7 +272,7 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
             kompetanse.validerFelterErSatt()
             begrunnelse.erGyldigForKompetanseMedData(
                 annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
-                barnetsBostedslandFraKompetanse = kompetanse.barnetsBostedsland!!,
+                barnetsBostedslandFraKompetanse = landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland!!),
                 resultatFraKompetanse = kompetanse.resultat!!
             )
         }

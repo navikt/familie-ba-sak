@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -96,6 +97,18 @@ class KompetanseController(
             throw FunksjonellFeil("Fra-og-med er etter til-og-med", httpStatus = HttpStatus.BAD_REQUEST)
         if (oppdatertKompetanse.barnAktører.isEmpty())
             throw FunksjonellFeil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
+        if (oppdatertKompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND && !featureToggleService.isEnabled(
+                FeatureToggleConfig.KAN_BEHANDLE_EØS_SEKUNDERLAND
+            )
+        ) {
+            throw FunksjonellFeil("Sekundærland er ikke støttet", httpStatus = HttpStatus.BAD_REQUEST)
+        }
+        if (oppdatertKompetanse.resultat == KompetanseResultat.TO_PRIMÆRLAND && !featureToggleService.isEnabled(
+                FeatureToggleConfig.KAN_BEHANDLE_EØS_TO_PRIMERLAND
+            )
+        ) {
+            throw FunksjonellFeil("To primærland er ikke støttet", httpStatus = HttpStatus.BAD_REQUEST)
+        }
     }
 
     @Deprecated("Unødvendig med validering av gjeldende kompetanse")

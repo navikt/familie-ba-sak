@@ -8,12 +8,9 @@ enum class BarnetsBostedsland {
     IKKE_NORGE;
 }
 
-fun hentBarnetsBostedslandFraLandkode(landKode: String): BarnetsBostedsland {
-    return if (landKode == "NO") {
-        BarnetsBostedsland.NORGE
-    } else {
-        BarnetsBostedsland.IKKE_NORGE
-    }
+fun landkodeTilBarnetsBostedsland(landkode: String): BarnetsBostedsland = when (landkode) {
+    "NO" -> BarnetsBostedsland.NORGE
+    else -> BarnetsBostedsland.IKKE_NORGE
 }
 
 data class RestSanityEØSBegrunnelse(
