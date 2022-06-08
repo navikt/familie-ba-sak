@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -183,7 +184,8 @@ class BrevService(
 
         val hjemler = hentHjemler(
             behandlingId = vedtak.behandling.id,
-            minimerteVedtaksperioder = brevPerioderData.map { it.minimertVedtaksperiode }
+            minimerteVedtaksperioder = brevPerioderData.map { it.minimertVedtaksperiode },
+            målform = brevPerioderData.first().brevMålform
         )
 
         return VedtakFellesfelter(
@@ -199,7 +201,8 @@ class BrevService(
 
     private fun hentHjemler(
         behandlingId: Long,
-        minimerteVedtaksperioder: List<MinimertVedtaksperiode>
+        minimerteVedtaksperioder: List<MinimertVedtaksperiode>,
+        målform: Målform
     ): String {
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
@@ -210,7 +213,8 @@ class BrevService(
         return hentHjemmeltekst(
             minimerteVedtaksperioder = minimerteVedtaksperioder,
             sanityBegrunnelser = sanityService.hentSanityBegrunnelser(),
-            opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev
+            opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
+            målform = målform
         )
     }
 

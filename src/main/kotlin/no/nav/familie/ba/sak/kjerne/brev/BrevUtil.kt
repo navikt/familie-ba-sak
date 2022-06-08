@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
@@ -188,7 +189,8 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>, lovForHjemmel: String): String
 fun hentHjemmeltekst(
     minimerteVedtaksperioder: List<MinimertVedtaksperiode>,
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    opplysningspliktHjemlerSkalMedIBrev: Boolean = false
+    opplysningspliktHjemlerSkalMedIBrev: Boolean = false,
+    målform: Målform
 ): String {
 
     val sanityStandardbegrunnelser = minimerteVedtaksperioder.flatMap { vedtaksperiode ->
@@ -216,7 +218,8 @@ fun hentHjemmeltekst(
         ordinæreHjemler = ordinæreHjemler,
         hjemlerFraFolketrygdloven = sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven },
         hjemlerEØSForordningen883 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen883 },
-        hjemlerEØSForordningen987 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 }
+        hjemlerEØSForordningen987 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 },
+        målform = målform
     )
 
     return slåSammenHjemlerAvUlikeTyper(alleHjemlerForBegrunnelser)
@@ -233,14 +236,20 @@ private fun hentAlleTyperHjemler(
     ordinæreHjemler: List<String>,
     hjemlerFraFolketrygdloven: List<String>,
     hjemlerEØSForordningen883: List<String>,
-    hjemlerEØSForordningen987: List<String>
+    hjemlerEØSForordningen987: List<String>,
+    målform: Målform
 ): MutableList<String> {
     val alleHjemlerForBegrunnelser = mutableListOf<String>()
 
     // Rekkefølgen her er viktig
     if (hjemlerSeparasjonsavtaleStorbritannia.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
-            "Separasjonsavtalen mellom Storbritannia og Norge artikkel ${
+            "${
+            when (målform) {
+                Målform.NB -> "Separasjonsavtalen mellom Storbritannia og Norge artikkel"
+                Målform.NN -> "Separasjonsavtalen mellom Storbritannia og Noreg artikkel"
+            }
+            } ${
             Utils.slåSammen(
                 hjemlerSeparasjonsavtaleStorbritannia
             )
@@ -249,7 +258,12 @@ private fun hentAlleTyperHjemler(
     }
     if (ordinæreHjemler.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
-            "barnetrygdloven ${
+            "${
+            when (målform) {
+                Målform.NB -> "barnetrygdloven"
+                Målform.NN -> "barnetrygdlova"
+            }
+            } ${
             hjemlerTilHjemmeltekst(
                 hjemler = ordinæreHjemler,
                 lovForHjemmel = "barnetrygdloven"
@@ -259,7 +273,12 @@ private fun hentAlleTyperHjemler(
     }
     if (hjemlerFraFolketrygdloven.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
-            "folketrygdloven ${
+            "${
+            when (målform) {
+                Målform.NB -> "folketrygdloven"
+                Målform.NN -> "folketrygdlova"
+            }
+            } ${
             hjemlerTilHjemmeltekst(
                 hjemler = hjemlerFraFolketrygdloven,
                 lovForHjemmel = "folketrygdloven"
