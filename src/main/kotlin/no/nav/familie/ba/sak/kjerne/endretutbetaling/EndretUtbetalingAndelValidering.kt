@@ -214,17 +214,6 @@ fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
                     "${endretPåUtvidetUtbetalinger.tom} eller fjern endringen på den utvidede ytelsen."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
-
-        val erForskjelligEndringPåutvidetOgDeltBostedISammePeriode =
-            deltBostedEndringerISammePeriode.any { endretPåUtvidetUtbetalinger.prosent != it.prosent }
-
-        if (erForskjelligEndringPåutvidetOgDeltBostedISammePeriode) {
-            val feilmelding =
-                "Endring på delt bosted ytelse og utvidet ytelse i samme periode må være lik, " +
-                    "men endringene i perioden ${endretPåUtvidetUtbetalinger.fom} til ${endretPåUtvidetUtbetalinger.tom} " +
-                    "er forskjellige."
-            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
-        }
     }
 }
 

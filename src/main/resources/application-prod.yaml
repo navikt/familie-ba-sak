@@ -168,6 +168,7 @@ FAMILIE_TILBAKE_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-tilbake/.defau
 FAMILIE_EF_SAK_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-ef-sak/.default
 
 FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.prod-fss-pub.nais.io/api
+FAMILIE_INTEGRASJONER_SCOPE: api://prod-fss.teamfamilie.familie-integrasjoner/.default
 
 FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://prod-fss.teamfamilie.familie-ba-infotrygd-feed/.default
 FAMILIE_BA_INFOTRYGD_SCOPE: api://prod-fss.teamfamilie.familie-ba-infotrygd/.default
@@ -175,6 +176,7 @@ FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.prod-fss-pub.nais.io
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.prod-fss-pub.nais.io/api
 
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.prod-fss-pub.nais.io/api
+FAMILIE_OPPDRAG_SCOPE: api://prod-fss.teamfamilie.familie-oppdrag/.default
 FAMILIE_STATISTIKK_URL: https://familie-ba-statistikk.prod-fss-pub.nais.io/api
 
 ENVIRONMENT_NAME: p

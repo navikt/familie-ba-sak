@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 
 enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     INNVILGET(2),
+    EØS_INNVILGET(2),
     REDUKSJON(1),
     AVSLAG(3),
     OPPHØR(4),
