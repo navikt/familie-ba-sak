@@ -62,8 +62,8 @@ data class Valutakurs(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     override var behandlingId: Long = 0
 
+    // Valutakode skal alltid være satt (muligens til null), så den slettes ikke
     override fun utenInnhold() = copy(
-        valutakode = null,
         valutakursdato = null,
         kurs = null
     )
