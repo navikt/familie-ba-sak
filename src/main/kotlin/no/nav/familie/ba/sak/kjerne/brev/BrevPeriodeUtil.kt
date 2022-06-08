@@ -21,13 +21,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.slf4j.LoggerFactory
 import org.springframework.core.io.ClassPathResource
 import java.io.BufferedReader
 import java.time.YearMonth
 
-private val secureLogger = LoggerFactory.getLogger("secureLogger")
-val logger = LoggerFactory.getLogger("brevPeriodeUtil")
 fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
     Utils.slåSammen(
         this
