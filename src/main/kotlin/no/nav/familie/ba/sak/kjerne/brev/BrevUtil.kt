@@ -214,11 +214,12 @@ fun hentHjemmeltekst(
         )
 
     val alleHjemlerForBegrunnelser = hentAlleTyperHjemler(
-        hjemlerSeparasjonsavtaleStorbritannia = sanityEøsBegrunnelser.flatMap { it.hjemlerSeperasjonsavtalenStorbritannina },
-        ordinæreHjemler = ordinæreHjemler,
-        hjemlerFraFolketrygdloven = sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven },
-        hjemlerEØSForordningen883 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen883 },
-        hjemlerEØSForordningen987 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 },
+        hjemlerSeparasjonsavtaleStorbritannia = sanityEøsBegrunnelser.flatMap { it.hjemlerSeperasjonsavtalenStorbritannina }.distinct(),
+        ordinæreHjemler = ordinæreHjemler.distinct(),
+        hjemlerFraFolketrygdloven = (sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven })
+            .distinct(),
+        hjemlerEØSForordningen883 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen883 }.distinct(),
+        hjemlerEØSForordningen987 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 }.distinct(),
         målform = målform
     )
 
@@ -228,7 +229,17 @@ fun hentHjemmeltekst(
 private fun slåSammenHjemlerAvUlikeTyper(hjemler: List<String>) = when (hjemler.size) {
     0 -> throw FunksjonellFeil("Ingen hjemler var knyttet til begrunnelsen(e) som er valgt. Du må velge minst én begrunnelse som er knyttet til en hjemmel.")
     1 -> hjemler.single()
-    else -> Utils.slåSammen(hjemler)
+    else -> slåSammenListeMedHjemler(hjemler)
+}
+
+private fun slåSammenListeMedHjemler(hjemler: List<String>): String {
+    return hjemler.reduceIndexed { index, acc, s ->
+        when (index) {
+            0 -> acc + s
+            hjemler.size - 1 -> "$acc og $s"
+            else -> "$acc, $s"
+        }
+    }
 }
 
 private fun hentAlleTyperHjemler(
