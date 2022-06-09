@@ -28,9 +28,9 @@ class TilpassValutakursTilUtenlandskePeridebeløpTest {
             .bygg()
 
         val utenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan2020)
-            .medBeløp("2222 --333-", "EUR", barn1)
-            .medBeløp("2223333444 ", "SEK", barn2)
-            .medBeløp("-$$$- -23- ", "DKK", barn3)
+            .medBeløp("2222 --333-", "EUR", "N", barn1)
+            .medBeløp("2223333444 ", "SEK", "N", barn2)
+            .medBeløp("-$$$- -23- ", "DKK", "N", barn3)
             .bygg()
 
         val forventedeValutakurser = ValutakursBuilder(jan2020)

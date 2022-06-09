@@ -54,11 +54,13 @@ fun lagUtenlandskPeriodebeløp(
     beløp: BigDecimal? = null,
     valutakode: String? = null,
     intervall: String? = null,
+    utbetalingsland: String = ""
 ) = UtenlandskPeriodebeløp(
     fom = fom,
     tom = tom,
     barnAktører = barnAktører,
     valutakode = valutakode,
     beløp = beløp,
-    intervall = intervall
+    intervall = intervall,
+    utbetalingsland = utbetalingsland
 ).also { it.behandlingId = behandlingId }
