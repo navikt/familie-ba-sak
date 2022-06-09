@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import BegrunnelseDataTestConfig
 import BrevPeriodeOutput
 import BrevPeriodeTestConfig
+import EØSBegrunnelseTestConfig
 import FritekstBegrunnelseTestConfig
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.finnBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
@@ -74,6 +76,11 @@ class BrevperiodeTest {
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
                     barnMedReduksjonFraForrigeBehandlingIdent = behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
                         .map { it.personIdent },
+                    minimerteKompetanser = behandlingsresultatPersonTestConfig.kompetanser?.map {
+                        it.tilMinimertKompetanse(
+                            behandlingsresultatPersonTestConfig.personerPåBehandling
+                        )
+                    } ?: emptyList(),
                 ).genererBrevPeriode()
             } catch (e: Exception) {
                 testReporter.publishEntry(
@@ -142,7 +149,8 @@ class BrevperiodeTest {
             val forventedeBegrunnelser = forventetOutput.begrunnelser.map {
                 when (it) {
                     is BegrunnelseDataTestConfig -> it.tilBegrunnelseData()
-                    is FritekstBegrunnelseTestConfig -> it.fritekst
+                    is FritekstBegrunnelseTestConfig -> FritekstBegrunnelse(it.fritekst)
+                    is EØSBegrunnelseTestConfig -> it.tilEØSBegrunnelseData()
                     else -> throw IllegalArgumentException("Ugyldig testconfig")
                 }
             }

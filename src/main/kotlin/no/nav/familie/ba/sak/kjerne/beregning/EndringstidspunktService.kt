@@ -38,8 +38,8 @@ class EndringstidspunktService(
 
         val førsteEndringstidspunktIKompetansePerioder =
             if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-                val kompetansePerioder = kompetanseRepository.findByBehandlingId(nyBehandling.id)
-                val forrigeKompetansePerioder = kompetanseRepository.findByBehandlingId(sistIverksatteBehandling.id)
+                val kompetansePerioder = kompetanseRepository.finnFraBehandlingId(nyBehandling.id)
+                val forrigeKompetansePerioder = kompetanseRepository.finnFraBehandlingId(sistIverksatteBehandling.id)
                 kompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
             } else TIDENES_ENDE
 

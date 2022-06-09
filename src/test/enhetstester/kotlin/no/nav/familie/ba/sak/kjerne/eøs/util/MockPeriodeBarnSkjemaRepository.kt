@@ -15,7 +15,7 @@ fun <S : PeriodeOgBarnSkjemaEntitet<S>> mockPeriodeBarnSkjemaRepository(): Perio
     val idSlot = slot<Long>()
     val skjemaListeSlot = slot<Iterable<S>>()
 
-    every { mockSkjemaRepository.findByBehandlingId(capture(idSlot)) } answers {
+    every { mockSkjemaRepository.finnFraBehandlingId(capture(idSlot)) } answers {
         minnebasertSkjemaRepository.hentSkjemaer(idSlot.captured)
     }
 

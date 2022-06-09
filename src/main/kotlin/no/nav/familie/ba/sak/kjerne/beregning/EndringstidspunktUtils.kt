@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -61,9 +61,9 @@ fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
     }.filter { it.value.toSegments().isNotEmpty() }
 }
 
-fun List<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: List<Kompetanse>): LocalDate {
+fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: Iterable<Kompetanse>): LocalDate {
     val kompetanseDiff = this.tilTidslinje()
-        .snittKombinerMed(forrigeKompetansePerioder.tilTidslinje()) { nyKompetanse, forrigeKompetanse ->
+        .kombinerMed(forrigeKompetansePerioder.tilTidslinje()) { nyKompetanse, forrigeKompetanse ->
             when {
                 nyKompetanse == forrigeKompetanse -> null
                 nyKompetanse == null -> forrigeKompetanse
