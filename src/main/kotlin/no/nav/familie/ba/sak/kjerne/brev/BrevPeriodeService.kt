@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_BEHANDLE_EØS
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -47,7 +48,8 @@ class BrevPeriodeService(
         val behandlingId = vedtaksperiodeMedBegrunnelser.vedtak.behandling.id
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-        val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
+        val sanityEØSBegrunnelser =
+            if (featureToggleService.isEnabled(KAN_BEHANDLE_EØS)) sanityService.hentSanityEØSBegrunnelser() else emptyList()
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
         val endredeUtbetalingAndeler =

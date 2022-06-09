@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.sanity
 
 const val hentBegrunnelser =
-    "*[_type == \"begrunnelse\"]{" +
+    "*[_type == \"begrunnelse\" && behandlingstema != \"EØS\" && apiNavn != null && navnISystem != null]{" +
         "apiNavn," +
         "navnISystem," +
         "hjemler," +
