@@ -21,7 +21,6 @@ import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
-import javax.persistence.Transient
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Kompetanse")
@@ -74,9 +73,6 @@ data class Kompetanse(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     override var behandlingId: Long = 0
 
-    @Transient
-    var status: KompetanseStatus? = KompetanseStatus.IKKE_UTFYLT
-
     override fun utenInnhold() = this.copy(
         søkersAktivitet = null,
         annenForeldersAktivitet = null,
@@ -107,12 +103,6 @@ data class Kompetanse(
     companion object {
         val NULL = Kompetanse(null, null, emptySet())
     }
-}
-
-enum class KompetanseStatus {
-    IKKE_UTFYLT,
-    UFULLSTENDIG,
-    OK
 }
 
 enum class SøkersAktivitet {
