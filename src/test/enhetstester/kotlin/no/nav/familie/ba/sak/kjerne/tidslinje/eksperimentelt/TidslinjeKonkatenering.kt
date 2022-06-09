@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
  * Vil krasje med exception fra Iterable.single() hvis to eller flere tidslinjer overlapper
  */
 fun <I, T : Tidsenhet> konkatenerTidslinjer(vararg tidslinje: Tidslinje<I, T>) =
-    tidslinje.toList().snittKombiner {
+    tidslinje.toList().kombiner {
         when {
             it.all { it == null } -> null
             else -> it.single { it != null }
