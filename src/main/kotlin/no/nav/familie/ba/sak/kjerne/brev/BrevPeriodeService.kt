@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
-import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
@@ -131,6 +130,8 @@ class BrevPeriodeService(
                 sanityEØSBegrunnelser = sanityEØSBegrunnelser
             )
 
+        val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
+
         val brevperiodeData = BrevperiodeData(
             minimertVedtaksperiode = minimertVedtaksperiode,
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
@@ -149,7 +150,7 @@ class BrevPeriodeService(
                 fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
                 tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                hentLand = { landkode -> hentLandkodeISO2(landkode).storForbokstav() }
+                landkoderISO2 = landkoderISO2,
             )
 
         )

@@ -18,20 +18,21 @@ data class MinimertKompetanse(
     val personer: List<MinimertRestPerson>
 )
 
-data class LandNavn(val navn: String)
-
 fun Kompetanse.tilMinimertKompetanse(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    hentLand: (String) -> String,
+    landkoderISO2: Map<String, String>,
 ): MinimertKompetanse {
 
     this.validerFelterErSatt()
 
+    val barnetsBostedslandNavn = this.barnetsBostedsland!!.tilLandNavn(landkoderISO2)
+    val annenForeldersAktivitetslandNavn = this.annenForeldersAktivitetsland!!.tilLandNavn(landkoderISO2)
+
     return MinimertKompetanse(
         søkersAktivitet = this.søkersAktivitet!!,
         annenForeldersAktivitet = this.annenForeldersAktivitet!!,
-        annenForeldersAktivitetslandNavn = LandNavn(hentLand(this.annenForeldersAktivitetsland!!)),
-        barnetsBostedslandNavn = LandNavn(hentLand(this.barnetsBostedsland!!)),
+        annenForeldersAktivitetslandNavn = barnetsBostedslandNavn,
+        barnetsBostedslandNavn = annenForeldersAktivitetslandNavn,
         resultat = this.resultat!!,
         personer = this.barnAktører.map { aktør ->
             val fødselsdato = personopplysningGrunnlag.barna.find { it.aktør == aktør }?.fødselsdato
@@ -43,4 +44,19 @@ fun Kompetanse.tilMinimertKompetanse(
             )
         }
     )
+}
+
+data class LandNavn(val navn: String)
+
+private fun String.tilLandNavn(landkoderISO2: Map<String, String>): LandNavn {
+    if (this.length != 2) {
+        throw Feil("LandkoderISO2 forventer en landkode med to tegn")
+    }
+
+    val landNavn = (
+        landkoderISO2[this]
+            ?: throw Feil("Fant ikke navn for landkode $this ")
+        )
+
+    return LandNavn(landNavn)
 }
