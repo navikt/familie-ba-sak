@@ -35,27 +35,35 @@ class VurderTilbakekrevingSteg(
                 featureToggleService.isEnabled(FeatureToggleConfig.ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING) -> {
                     // manuelle migreringer kan ikke fortsettes om det finnes en feilutbetaling
                     // eller en etterbetaling større enn 220 KR
-                    if (behandling.erManuellMigrering() && (
-                        finnesFeilutbetaling || finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandling.id)
-                        )
-                    ) {
-                        kastException(behandling)
-                    }
+                    validerNårToggelenErPå(behandling, finnesFeilutbetaling)
                 }
                 else -> {
-                    val finnesEtterbetaling = simuleringService.hentEtterbetaling(behandling.id) != BigDecimal.ZERO
-                    when {
-                        behandling.erManuellMigreringForEndreMigreringsdato() &&
-                            (finnesFeilutbetaling || finnesEtterbetaling) -> kastException(behandling)
-                        behandling.erHelmanuellMigrering() && (
-                            finnesFeilutbetaling ||
-                                finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandling.id)
-                            ) -> kastException(behandling)
-                    }
+                    validerNårToggelenErAv(behandling, finnesFeilutbetaling)
                 }
             }
         }
         return hentNesteStegForNormalFlyt(behandling)
+    }
+
+    private fun validerNårToggelenErPå(behandling: Behandling, finnesFeilutbetaling: Boolean) {
+        if (behandling.erManuellMigrering() && (
+            finnesFeilutbetaling || finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandling.id)
+            )
+        ) {
+            kastException(behandling)
+        }
+    }
+
+    private fun validerNårToggelenErAv(behandling: Behandling, finnesFeilutbetaling: Boolean) {
+        val finnesEtterbetaling = simuleringService.hentEtterbetaling(behandling.id) != BigDecimal.ZERO
+        when {
+            behandling.erManuellMigreringForEndreMigreringsdato() &&
+                (finnesFeilutbetaling || finnesEtterbetaling) -> kastException(behandling)
+            behandling.erHelmanuellMigrering() && (
+                finnesFeilutbetaling ||
+                    finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandling.id)
+                ) -> kastException(behandling)
+        }
     }
 
     private fun kastException(behandling: Behandling) {
