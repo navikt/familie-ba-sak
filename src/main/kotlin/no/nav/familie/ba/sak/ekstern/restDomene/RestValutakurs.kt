@@ -13,8 +13,13 @@ data class RestValutakurs(
     val barnIdenter: List<String>,
     val valutakursdato: LocalDate?,
     val valutakode: String?,
-    val kurs: BigDecimal?
-)
+    val kurs: BigDecimal?,
+    override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT
+) : AbstractUtfyltStatus<RestValutakurs>() {
+    override fun medUtfyltStatus(): RestValutakurs {
+        return this.copy(status = utfyltStatus(finnAntallUtfylt(listOf(this.valutakursdato, this.kurs)), 2))
+    }
+}
 
 fun RestValutakurs.tilValutakurs(barnAktører: List<Aktør>) = Valutakurs(
     fom = this.fom,
@@ -33,4 +38,4 @@ fun Valutakurs.tilRestValutakurs() = RestValutakurs(
     valutakursdato = this.valutakursdato,
     valutakode = this.valutakode,
     kurs = this.kurs
-)
+).medUtfyltStatus()

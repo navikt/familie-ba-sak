@@ -12,21 +12,26 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 data class MinimertKompetanse(
     val søkersAktivitet: SøkersAktivitet,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
-    val annenForeldersAktivitetsland: String,
-    val barnetsBostedsland: String,
+    val annenForeldersAktivitetslandNavn: LandNavn,
+    val barnetsBostedslandNavn: LandNavn,
     val resultat: KompetanseResultat,
     val personer: List<MinimertRestPerson>
 )
 
-fun Kompetanse.tilMinimertKompetanse(personopplysningGrunnlag: PersonopplysningGrunnlag): MinimertKompetanse {
+data class LandNavn(val navn: String)
+
+fun Kompetanse.tilMinimertKompetanse(
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
+    hentLand: (String) -> String,
+): MinimertKompetanse {
 
     this.validerFelterErSatt()
 
     return MinimertKompetanse(
         søkersAktivitet = this.søkersAktivitet!!,
         annenForeldersAktivitet = this.annenForeldersAktivitet!!,
-        annenForeldersAktivitetsland = this.annenForeldersAktivitetsland!!,
-        barnetsBostedsland = this.barnetsBostedsland!!,
+        annenForeldersAktivitetslandNavn = LandNavn(hentLand(this.annenForeldersAktivitetsland!!)),
+        barnetsBostedslandNavn = LandNavn(hentLand(this.barnetsBostedsland!!)),
         resultat = this.resultat!!,
         personer = this.barnAktører.map { aktør ->
             val fødselsdato = personopplysningGrunnlag.barna.find { it.aktør == aktør }?.fødselsdato

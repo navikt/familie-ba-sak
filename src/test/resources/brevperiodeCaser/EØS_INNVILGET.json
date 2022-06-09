@@ -12,8 +12,8 @@
       "id": "1",
       "søkersAktivitet": "ARBEIDER_I_NORGE",
       "annenForeldersAktivitet": "INAKTIV",
-      "annenForeldersAktivitetsland": "NO",
-      "barnetsBostedsland": "NO",
+      "annenForeldersAktivitetsland": "Sverige",
+      "barnetsBostedsland": "Sverige",
       "resultat": "NORGE_ER_PRIMÆRLAND"
     }
   ],
@@ -59,8 +59,8 @@
       {
         "apiNavn": "innvilgetPrimarlandStandard",
         "annenForeldersAktivitet": "inaktiv",
-        "annenForeldersAktivitetsland": "Norge",
-        "barnetsBostedsland": "Norge",
+        "annenForeldersAktivitetsland": "Sverige",
+        "barnetsBostedsland": "Sverige",
         "barnasFodselsdatoer": "20.01.20",
         "antallBarn": 1,
         "maalform": "bokmaal",

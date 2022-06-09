@@ -13,8 +13,13 @@ data class RestUtenlandskPeriodebeløp(
     val beløp: BigDecimal?,
     val valutakode: String?,
     val intervall: String?,
-    val utbetalingsland: String
-)
+    val utbetalingsland: String?,
+    override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT
+) : AbstractUtfyltStatus<RestUtenlandskPeriodebeløp>() {
+    override fun medUtfyltStatus(): RestUtenlandskPeriodebeløp {
+        return this.copy(status = utfyltStatus(finnAntallUtfylt(listOf(this.beløp, this.valutakode, this.intervall)), 3))
+    }
+}
 
 fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører: List<Aktør>) = UtenlandskPeriodebeløp(
     fom = this.fom,
@@ -35,4 +40,4 @@ fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() = RestUtenlandskPer
     valutakode = this.valutakode,
     intervall = this.intervall,
     utbetalingsland = this.utbetalingsland
-)
+).medUtfyltStatus()
