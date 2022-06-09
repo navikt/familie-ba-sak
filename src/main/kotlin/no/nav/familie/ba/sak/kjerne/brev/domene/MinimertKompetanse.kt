@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -58,5 +59,5 @@ private fun String.tilLandNavn(landkoderISO2: Map<String, String>): LandNavn {
             ?: throw Feil("Fant ikke navn for landkode $this ")
         )
 
-    return LandNavn(landNavn)
+    return LandNavn(landNavn.storForbokstav())
 }
