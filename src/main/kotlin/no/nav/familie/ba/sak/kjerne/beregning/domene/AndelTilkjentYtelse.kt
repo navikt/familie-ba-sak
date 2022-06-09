@@ -285,8 +285,6 @@ fun List<AndelTilkjentYtelse>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>
 }
 
 fun List<AndelTilkjentYtelse>.erUlike(andreAndeler: List<AndelTilkjentYtelse>): Boolean {
-    if (this.size != andreAndeler.size) return true
-
     return this.hentPerioderMedEndringerFra(andreAndeler).isNotEmpty()
 }
 
