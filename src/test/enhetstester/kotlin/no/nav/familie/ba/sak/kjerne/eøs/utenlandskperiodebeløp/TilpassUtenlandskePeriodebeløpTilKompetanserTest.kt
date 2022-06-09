@@ -24,19 +24,19 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
     @Test
     fun `test tilpasning av utenlandske periodebeløp mot kompleks endring av kompetanse`() {
         val forrigeUtenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan2020)
-            .medBeløp("--3456789-----", "EUR", barn1, barn2)
+            .medBeløp("--3456789-----", "EUR", "N", barn1, barn2)
             .bygg()
 
         val gjeldendeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("SSSSPPPSSS", barn1)
-            .medKompetanse("PP--PP--PP", barn2)
-            .medKompetanse("-SSS-PP-S-", barn3)
+            .medKompetanse("SSSSPPPSSS", barn1, annenForeldersAktivitetsland = "N")
+            .medKompetanse("PP--PP--PP", barn2, annenForeldersAktivitetsland = "N")
+            .medKompetanse("-SSS-PP-S-", barn3, annenForeldersAktivitetsland = "N")
             .byggKompetanser()
 
         val forventedeUtenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan2020)
-            .medBeløp("- 34   89-", "EUR", barn1)
-            .medBeløp("  --    - ", null, barn3)
-            .medBeløp(" -        ", null, barn1, barn3)
+            .medBeløp("- 34   89-", "EUR", "N", barn1)
+            .medBeløp("  --    - ", null, "N", barn3)
+            .medBeløp(" -        ", null, "N", barn1, barn3)
             .bygg()
 
         val faktiskeKompetanser =
