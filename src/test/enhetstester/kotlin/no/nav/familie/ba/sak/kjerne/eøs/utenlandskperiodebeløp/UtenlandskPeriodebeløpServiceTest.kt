@@ -54,11 +54,10 @@ internal class UtenlandskPeriodebeløpServiceTest {
             .lagreTil(utenlandskPeriodebeløpRepository)
 
         val kompetanser = KompetanseBuilder(jan(2020), behandlingId)
-            .medKompetanse("SS   SSSSS", barn1)
-            .medKompetanse("  PPP", barn1, barn2, barn3)
-            .medKompetanse("--   ----", barn2, barn3)
+            .medKompetanse("SS   SSSSS", barn1, annenForeldersAktivitetsland = "N")
+            .medKompetanse("  PPP", barn1, barn2, barn3, annenForeldersAktivitetsland = "N")
+            .medKompetanse("--   ----", barn2, barn3, annenForeldersAktivitetsland = "N")
             .byggKompetanser()
-            .map { it.copy(annenForeldersAktivitetsland = "N") }
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId.id) } returns kompetanser
 

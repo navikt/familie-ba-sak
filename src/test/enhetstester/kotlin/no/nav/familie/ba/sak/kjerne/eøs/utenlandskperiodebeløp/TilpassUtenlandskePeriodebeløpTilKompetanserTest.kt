@@ -28,11 +28,10 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
             .bygg()
 
         val gjeldendeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("SSSSPPPSSS", barn1)
-            .medKompetanse("PP--PP--PP", barn2)
-            .medKompetanse("-SSS-PP-S-", barn3)
+            .medKompetanse("SSSSPPPSSS", barn1, annenForeldersAktivitetsland = "N")
+            .medKompetanse("PP--PP--PP", barn2, annenForeldersAktivitetsland = "N")
+            .medKompetanse("-SSS-PP-S-", barn3, annenForeldersAktivitetsland = "N")
             .byggKompetanser()
-            .map { it.copy(annenForeldersAktivitetsland = "N") }
 
         val forventedeUtenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan2020)
             .medBeløp("- 34   89-", "EUR", "N", barn1)
