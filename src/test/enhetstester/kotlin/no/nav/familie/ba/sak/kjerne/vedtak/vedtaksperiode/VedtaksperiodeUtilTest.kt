@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -260,7 +261,6 @@ class VedtaksperiodeUtilTest {
     @Test
     fun `skal finne riktige begrunnelser for kompetanse når barn bor i utlandet`() {
 
-        val sanityEØSBegrunnelser: List<SanityEØSBegrunnelse> = hentEØSBegrunnelser()
         val kompetanserIPeriode: List<Kompetanse> =
             listOf(
                 lagKompetanse(
@@ -296,7 +296,6 @@ class VedtaksperiodeUtilTest {
     @Test
     fun `skal finne riktige begrunnelser for kompetanse når barn bor i Norge`() {
 
-        val sanityEØSBegrunnelser: List<SanityEØSBegrunnelse> = hentEØSBegrunnelser()
         val kompetanserIPeriode: List<Kompetanse> =
             listOf(
                 lagKompetanse(
@@ -327,5 +326,15 @@ class VedtaksperiodeUtilTest {
                 gyldigeEØSBegrunnelserForPeriode.contains(it)
             }
         )
+    }
+
+    companion object {
+        lateinit var sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>
+
+        @BeforeAll
+        @JvmStatic
+        internal fun beforeAll() {
+            sanityEØSBegrunnelser = hentEØSBegrunnelser()
+        }
     }
 }
