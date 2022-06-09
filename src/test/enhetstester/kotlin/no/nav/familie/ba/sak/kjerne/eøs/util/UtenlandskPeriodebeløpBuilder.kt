@@ -11,15 +11,16 @@ class UtenlandskPeriodebeløpBuilder(
     startMåned: Tidspunkt<Måned> = jan(2020),
     behandlingId: BehandlingId = BehandlingId(1)
 ) : SkjemaBuilder<UtenlandskPeriodebeløp, UtenlandskPeriodebeløpBuilder>(startMåned, behandlingId) {
-    fun medBeløp(k: String, valutakode: String?, vararg barn: Person) = medSkjema(k, barn.toList()) {
+    fun medBeløp(k: String, valutakode: String?, utbetalingsland: String, vararg barn: Person) = medSkjema(k, barn.toList()) {
         when {
-            it == '-' -> UtenlandskPeriodebeløp.NULL
-            it == '$' -> UtenlandskPeriodebeløp.NULL.copy(valutakode = valutakode)
+            it == '-' -> UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = utbetalingsland)
+            it == '$' -> UtenlandskPeriodebeløp.NULL.copy(valutakode = valutakode, utbetalingsland = utbetalingsland)
             it?.isDigit() ?: false -> {
                 UtenlandskPeriodebeløp.NULL.copy(
                     beløp = it?.digitToInt()?.toBigDecimal(),
                     valutakode = valutakode,
-                    intervall = "MND"
+                    intervall = "MND",
+                    utbetalingsland = utbetalingsland
                 )
             }
             else -> null
