@@ -245,7 +245,7 @@ class FagsakService(
         return hentPåFagsakId(fagsakId).aktør
     }
 
-    fun hentFagsakPåPerson(aktør: Aktør, fagsakEier: FagsakEier): Fagsak? {
+    fun hentFagsakPåPerson(aktør: Aktør, fagsakEier: FagsakEier = OMSORGSPERSON): Fagsak? {
         return fagsakRepository.finnFagsakForAktør(aktør, fagsakEier)
     }
 
