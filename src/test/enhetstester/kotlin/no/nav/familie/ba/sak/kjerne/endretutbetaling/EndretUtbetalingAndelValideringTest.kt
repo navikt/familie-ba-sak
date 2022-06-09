@@ -640,8 +640,20 @@ class EndretUtbetalingAndelValideringTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         vilkårsvurdering.personResultater = setOf(
-            lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør, periodeFom = LocalDate.now().minusMonths(7), periodeTom = LocalDate.now(), resultat = Resultat.OPPFYLT),
-            lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = randomAktørId(), periodeFom = LocalDate.now().minusMonths(4), periodeTom = LocalDate.now(), resultat = Resultat.OPPFYLT)
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = person.aktør,
+                periodeFom = LocalDate.now().minusMonths(7),
+                periodeTom = LocalDate.now(),
+                resultat = Resultat.OPPFYLT
+            ),
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = randomAktørId(),
+                periodeFom = LocalDate.now().minusMonths(4),
+                periodeTom = LocalDate.now(),
+                resultat = Resultat.OPPFYLT
+            )
         )
 
         val deltBostedPerioder = finnDeltBostedPerioder(person = person, vilkårsvurdering = vilkårsvurdering)
@@ -711,28 +723,6 @@ class EndretUtbetalingAndelValideringTest {
         Assertions.assertThrows(FunksjonellFeil::class.java) {
             validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
                 listOf(endretUtbetalingAndelUtvidetNullutbetaling)
-            )
-        }
-    }
-
-    @Test
-    fun `skal kaste feil dersom det er en endring på utvidet ytelse og delt bosted med forskjellig prosent`() {
-
-        Assertions.assertThrows(FunksjonellFeil::class.java) {
-            validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-                listOf(
-                    endretUtbetalingAndelUtvidetNullutbetaling,
-                    endretUtbetalingAndelDeltBostedFullUtbetaling
-                )
-            )
-        }
-
-        Assertions.assertThrows(FunksjonellFeil::class.java) {
-            validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-                listOf(
-                    endretUtbetalingAndelUtvidetFullUtbetaling,
-                    endretUtbetalingAndelDeltBostedNullutbetaling
-                )
             )
         }
     }
@@ -880,7 +870,12 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal kaste feil hvis perioden skal utbetales, men årsak er 'endre mottaker' eller 'allerede utbetalt'`() {
-        assertThrows<FunksjonellFeil> { validerUtbetalingMotÅrsak(årsak = Årsak.ALLEREDE_UTBETALT, skalUtbetales = true) }
+        assertThrows<FunksjonellFeil> {
+            validerUtbetalingMotÅrsak(
+                årsak = Årsak.ALLEREDE_UTBETALT,
+                skalUtbetales = true
+            )
+        }
         assertThrows<FunksjonellFeil> { validerUtbetalingMotÅrsak(årsak = Årsak.ENDRE_MOTTAKER, skalUtbetales = true) }
     }
 

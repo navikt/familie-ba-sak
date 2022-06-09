@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -20,7 +21,6 @@ import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
-import javax.persistence.Transient
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Kompetanse")
@@ -73,9 +73,6 @@ data class Kompetanse(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     override var behandlingId: Long = 0
 
-    @Transient
-    var status: KompetanseStatus? = KompetanseStatus.IKKE_UTFYLT
-
     override fun utenInnhold() = this.copy(
         søkersAktivitet = null,
         annenForeldersAktivitet = null,
@@ -91,15 +88,21 @@ data class Kompetanse(
             barnAktører = barnAktører
         )
 
+    fun validerFelterErSatt() {
+        if (søkersAktivitet == null ||
+            annenForeldersAktivitet == null ||
+            annenForeldersAktivitetsland == null ||
+            barnetsBostedsland == null ||
+            resultat == null ||
+            barnAktører.isEmpty()
+        ) {
+            throw Feil("Kompetanse mangler verdier")
+        }
+    }
+
     companion object {
         val NULL = Kompetanse(null, null, emptySet())
     }
-}
-
-enum class KompetanseStatus {
-    IKKE_UTFYLT,
-    UFULLSTENDIG,
-    OK
 }
 
 enum class SøkersAktivitet {
@@ -118,7 +121,18 @@ enum class AnnenForeldersAktivitet {
     FORSIKRET_I_BOSTEDSLAND,
     MOTTAR_PENSJON,
     INAKTIV,
-    IKKE_AKTUELT
+    IKKE_AKTUELT;
+
+    fun tilTekst(): String {
+        return when (this) {
+            I_ARBEID -> "i arbeid"
+            MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN -> "mottar utbetaling som erstatter lønn"
+            FORSIKRET_I_BOSTEDSLAND -> "forsikret i bostedsland"
+            MOTTAR_PENSJON -> "mottar pensjon"
+            INAKTIV -> "inaktiv"
+            IKKE_AKTUELT -> "ikke aktuelt"
+        }
+    }
 }
 
 enum class KompetanseResultat {

@@ -3,6 +3,7 @@ import no.nav.familie.ba.sak.config.ApplicationConfig
 import org.springframework.boot.builder.SpringApplicationBuilder
 
 fun main(args: Array<String>) {
+    System.setProperty("spring.profiles.active", "postgres")
     val springBuilder = SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
         "dev",
         "postgres",

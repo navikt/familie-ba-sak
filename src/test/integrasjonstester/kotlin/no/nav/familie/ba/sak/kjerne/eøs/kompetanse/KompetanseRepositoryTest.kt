@@ -67,7 +67,7 @@ class KompetanseRepositoryTest(
             )
         )
 
-        val hentedeKompetanser = kompetanseRepository.findByBehandlingId(behandlingId = behandling.id)
+        val hentedeKompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandling.id)
 
         assertEquals(1, hentedeKompetanser.size)
         assertEquals(kompetanse, hentedeKompetanser.first())

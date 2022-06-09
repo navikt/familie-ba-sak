@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.rest
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -25,7 +26,7 @@ class TidslinjeController(
     fun hentTidslinjer(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestTidslinjer>> {
         return ResponseEntity.ok(
             success(
-                tidslinjeService.hentTidslinjerThrows(behandlingId).tilRestTidslinjer()
+                tidslinjeService.hentTidslinjerThrows(BehandlingId(behandlingId)).tilRestTidslinjer()
             )
         )
     }

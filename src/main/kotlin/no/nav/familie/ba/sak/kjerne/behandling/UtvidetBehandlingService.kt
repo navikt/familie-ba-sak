@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingReposito
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -88,14 +89,14 @@ class UtvidetBehandlingService(
 
         val kanBehandleEøs = featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)
 
-        val kompetanser: List<Kompetanse> =
-            if (kanBehandleEøs) kompetanseRepository.findByBehandlingId(behandlingId) else emptyList()
+        val kompetanser: Collection<Kompetanse> =
+            if (kanBehandleEøs) kompetanseRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
         val valutakurser =
-            if (kanBehandleEøs) valutakursRepository.findByBehandlingId(behandlingId) else emptyList()
+            if (kanBehandleEøs) valutakursRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
         val utenlandskePeriodebeløp =
-            if (kanBehandleEøs) utenlandskPeriodebeløpRepository.findByBehandlingId(behandlingId) else emptyList()
+            if (kanBehandleEøs) utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
@@ -127,7 +128,7 @@ class UtvidetBehandlingService(
             endringstidspunkt = utledEndringstidpunkt(endringstidspunkt, behandling),
             vedtak = vedtak?.tilRestVedtak(
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
-                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).sortedBy { it.fom }
+                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }.sortedBy { it.fom }
                 } else emptyList(),
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),

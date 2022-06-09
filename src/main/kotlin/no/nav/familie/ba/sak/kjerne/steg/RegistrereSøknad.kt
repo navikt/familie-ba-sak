@@ -55,7 +55,7 @@ class RegistrereSøknad(
             søknadDTO = søknadDTO
         )
 
-        tilbakestillBehandlingService.initierOgSettBehandlingTilVilårsvurdering(
+        tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(
             behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
             bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend
         )

@@ -35,6 +35,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -61,9 +63,11 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -71,8 +75,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestEØSVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
@@ -578,7 +580,8 @@ fun kjørStegprosessForFGB(
     vilkårsvurderingService: VilkårsvurderingService,
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
-    behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+    behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+    behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL
 ): Behandling {
     fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
     val behandling = stegService.håndterNyBehandling(
@@ -867,25 +870,15 @@ fun lagVedtaksperiodeMedBegrunnelser(
     fritekster = fritekster,
 )
 
-fun lagRestVedtaksbegrunnelse(
-    standardbegrunnelse: Standardbegrunnelse =
-        Standardbegrunnelse.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
-    vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET,
-) = RestVedtaksbegrunnelse(
-    standardbegrunnelse = standardbegrunnelse,
-    vedtakBegrunnelseType = vedtakBegrunnelseType,
-    vedtakBegrunnelseSpesifikasjon = standardbegrunnelse
-)
-
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(
     id: Long = nesteUtvidetVedtaksperiodeId(),
     fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
     tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
     type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
-    begrunnelser: List<RestVedtaksbegrunnelse> = listOf(lagRestVedtaksbegrunnelse()),
+    begrunnelser: List<Vedtaksbegrunnelse> = listOf(lagVedtaksbegrunnelse()),
     fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
     utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
-    eøsBegrunnelser: List<RestEØSVedtaksbegrunnelse> = emptyList(),
+    eøsBegrunnelser: List<EØSBegrunnelse> = emptyList(),
 ) = UtvidetVedtaksperiodeMedBegrunnelser(
     id = id,
     fom = fom,
@@ -911,7 +904,8 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
         vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
         standardbegrunnelserFraFrontend = listOf(
             Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-        )
+        ),
+        eøsStandardbegrunnelserFraFrontend = emptyList()
     )
 }
 
@@ -1010,6 +1004,7 @@ fun lagRestSanityBegrunnelse(
     ovrigeTriggere: List<String>? = emptyList(),
     endringsaarsaker: List<String>? = emptyList(),
     hjemler: List<String> = emptyList(),
+    hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: String = "",
     endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
@@ -1024,6 +1019,7 @@ fun lagRestSanityBegrunnelse(
     ovrigeTriggere = ovrigeTriggere,
     endringsaarsaker = endringsaarsaker,
     hjemler = hjemler,
+    hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
 )
@@ -1040,6 +1036,7 @@ fun lagSanityBegrunnelse(
     ovrigeTriggere: List<ØvrigTrigger>? = null,
     endringsaarsaker: List<Årsak>? = null,
     hjemler: List<String> = emptyList(),
+    hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
@@ -1054,8 +1051,33 @@ fun lagSanityBegrunnelse(
     ovrigeTriggere = ovrigeTriggere,
     endringsaarsaker = endringsaarsaker,
     hjemler = hjemler,
+    hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+)
+
+fun lagSanityEøsBegrunnelse(
+    apiNavn: String = "",
+    navnISystem: String = "",
+    annenForeldersAktivitet: List<AnnenForeldersAktivitet> = emptyList(),
+    barnetsBostedsland: List<BarnetsBostedsland> = emptyList(),
+    kompetanseResultat: List<KompetanseResultat> = emptyList(),
+    hjemler: List<String> = emptyList(),
+    hjemlerFolketrygdloven: List<String> = emptyList(),
+    hjemlerEØSForordningen883: List<String> = emptyList(),
+    hjemlerEØSForordningen987: List<String> = emptyList(),
+    hjemlerSeperasjonsavtalenStorbritannina: List<String> = emptyList(),
+): SanityEØSBegrunnelse = SanityEØSBegrunnelse(
+    apiNavn = apiNavn,
+    navnISystem = navnISystem,
+    annenForeldersAktivitet = annenForeldersAktivitet,
+    barnetsBostedsland = barnetsBostedsland,
+    kompetanseResultat = kompetanseResultat,
+    hjemler = hjemler,
+    hjemlerFolketrygdloven = hjemlerFolketrygdloven,
+    hjemlerEØSForordningen883 = hjemlerEØSForordningen883,
+    hjemlerEØSForordningen987 = hjemlerEØSForordningen987,
+    hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina
 )
 
 fun lagTriggesAv(
