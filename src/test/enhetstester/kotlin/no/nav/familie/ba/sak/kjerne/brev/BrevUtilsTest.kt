@@ -735,6 +735,157 @@ internal class BrevUtilsTest {
     }
 
     @Test
+    fun `Skal slå sammen hjemlene riktig når det er 3 eller flere hjemler på "siste" hjemmeltype`() {
+        val utvidetVedtaksperioderMedBegrunnelser = listOf(
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagVedtaksbegrunnelse(
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
+                    )
+                ),
+                eøsBegrunnelser = listOf(
+                    EØSBegrunnelse(
+                        vedtaksperiodeMedBegrunnelser = mockk(),
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            ),
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagVedtaksbegrunnelse(
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
+                    )
+                ),
+                eøsBegrunnelser = listOf(
+                    EØSBegrunnelse(
+                        vedtaksperiodeMedBegrunnelser = mockk(),
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            )
+        )
+
+        val sanityBegrunnelser = listOf(
+            lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                hjemler = listOf("11", "4"),
+            ),
+            lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                hjemler = listOf("10"),
+            )
+        )
+
+        val sanityEøsBegrunnelser = listOf(
+            lagSanityEøsBegrunnelse(
+                apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
+                hjemler = listOf("4"),
+                hjemlerEØSForordningen883 = listOf("2", "11-16", "67", "68"),
+                hjemlerSeperasjonsavtalenStorbritannina = listOf("29")
+            ),
+            lagSanityEøsBegrunnelse(
+                apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
+                hjemler = listOf("11"),
+            )
+        )
+
+        Assertions.assertEquals(
+            "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11 og EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68",
+            hentHjemmeltekst(
+                målform = Målform.NN,
+                minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
+                    it.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = sanityEøsBegrunnelser
+                    )
+                },
+                sanityBegrunnelser = sanityBegrunnelser,
+                opplysningspliktHjemlerSkalMedIBrev = false
+            )
+        )
+    }
+
+    @Test
+    fun `Skal kun ta med en hjemmel 1 gang hvis flere begrunnelser er knyttet til samme hjemmel`() {
+        val utvidetVedtaksperioderMedBegrunnelser = listOf(
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagVedtaksbegrunnelse(
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
+                    )
+                ),
+                eøsBegrunnelser = listOf(
+                    EØSBegrunnelse(
+                        vedtaksperiodeMedBegrunnelser = mockk(),
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            ),
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagVedtaksbegrunnelse(
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
+                    )
+                ),
+                eøsBegrunnelser = listOf(
+                    EØSBegrunnelse(
+                        vedtaksperiodeMedBegrunnelser = mockk(),
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            )
+        )
+
+        val sanityBegrunnelser = listOf(
+            lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                hjemler = listOf("11", "4"),
+            ),
+            lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                hjemler = listOf("10"),
+            )
+        )
+
+        val sanityEøsBegrunnelser = listOf(
+            lagSanityEøsBegrunnelse(
+                apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
+                hjemler = listOf("4"),
+                hjemlerEØSForordningen883 = listOf("2", "11-16", "67", "68"),
+                hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
+                hjemlerEØSForordningen987 = listOf("58")
+            ),
+            lagSanityEøsBegrunnelse(
+                apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
+                hjemler = listOf("11"),
+                hjemlerEØSForordningen883 = listOf("2", "67", "68"),
+                hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
+                hjemlerEØSForordningen987 = listOf("58")
+
+            )
+        )
+
+        Assertions.assertEquals(
+            "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68 og EØS-forordning 987/2009 artikkel 58",
+            hentHjemmeltekst(
+                målform = Målform.NN,
+                minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
+                    it.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = sanityEøsBegrunnelser
+                    )
+                },
+                sanityBegrunnelser = sanityBegrunnelser,
+                opplysningspliktHjemlerSkalMedIBrev = false
+            )
+        )
+    }
+
+    @Test
     fun `Skal gi riktig dato for opphørstester`() {
         val sisteFom = LocalDate.now().minusMonths(2)
 
