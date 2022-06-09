@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -259,7 +258,6 @@ class VedtaksperiodeUtilTest {
     }
 
     @Test
-    @Disabled
     fun `skal finne riktige begrunnelser for kompetanse når barn bor i utlandet`() {
 
         val sanityEØSBegrunnelser: List<SanityEØSBegrunnelse> = hentEØSBegrunnelser()
@@ -281,7 +279,7 @@ class VedtaksperiodeUtilTest {
             listOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_STANDARD,
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_STANDARD,
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_OG_UTLAND_STANDARD
             )
 
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
@@ -296,14 +294,13 @@ class VedtaksperiodeUtilTest {
     }
 
     @Test
-    @Disabled
     fun `skal finne riktige begrunnelser for kompetanse når barn bor i Norge`() {
 
         val sanityEØSBegrunnelser: List<SanityEØSBegrunnelse> = hentEØSBegrunnelser()
         val kompetanserIPeriode: List<Kompetanse> =
             listOf(
                 lagKompetanse(
-                    annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                    annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
                     barnetsBostedsland = "NO",
                     kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
 
@@ -317,7 +314,7 @@ class VedtaksperiodeUtilTest {
         val forventedeBegrunnelser =
             listOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_FLYTTET_TIL_NORGE,
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_SÆRKULLSBARN_ANDRE_BARN,
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE,
             )
 
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
