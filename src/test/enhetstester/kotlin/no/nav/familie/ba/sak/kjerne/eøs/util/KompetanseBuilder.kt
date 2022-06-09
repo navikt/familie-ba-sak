@@ -13,7 +13,7 @@ class KompetanseBuilder(
     behandlingId: BehandlingId = BehandlingId(1)
 ) : SkjemaBuilder<Kompetanse, KompetanseBuilder>(startMåned, behandlingId) {
 
-    fun medKompetanse(k: String, vararg barn: Person, annenForeldersAktivitetsland: String = "") = medSkjema(k, barn.toList()) {
+    fun medKompetanse(k: String, vararg barn: Person, annenForeldersAktivitetsland: String? = null) = medSkjema(k, barn.toList()) {
         when (it) {
             '-' -> Kompetanse.NULL.copy(annenForeldersAktivitetsland = annenForeldersAktivitetsland)
             'S' -> Kompetanse.NULL.copy(resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, annenForeldersAktivitetsland = annenForeldersAktivitetsland)
