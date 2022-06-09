@@ -223,7 +223,7 @@ class DokumentService(
             behandlingId = behandlingId,
             brevMal = brevmal,
             loggBehandlerRolle = loggBehandlerRolle,
-            distribusjonstype = brevmal.tilDistribusjonstype()
+            distribusjonstype = brevmal.distribusjonstype
         )
     } catch (ressursException: RessursException) {
         logger.info("Klarte ikke å distribuere brev til journalpost $journalpostId. Httpstatus ${ressursException.httpStatus}")
