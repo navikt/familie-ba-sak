@@ -174,7 +174,8 @@ class FagsakController(
 
 data class FagsakRequest(
     val personIdent: String?,
-    val aktørId: String? = null
+    val aktørId: String? = null,
+    val eier: FagsakEier? = null
 )
 
 data class RestBeslutningPåVedtak(

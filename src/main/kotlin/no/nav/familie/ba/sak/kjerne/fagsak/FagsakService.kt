@@ -89,7 +89,7 @@ class FagsakService(
                 HttpStatus.BAD_REQUEST
             )
         }
-        val fagsak = hentEllerOpprettFagsak(personident)
+        val fagsak = hentEllerOpprettFagsak(personident, eier = fagsakRequest.eier ?: OMSORGSPERSON)
         return hentRestMinimalFagsak(fagsakId = fagsak.id)
     }
 
