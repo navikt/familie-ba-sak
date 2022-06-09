@@ -164,9 +164,10 @@ FAMILIE_TILBAKE_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-tilbake/.defaul
 FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
 
 FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io/api
-
+FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner-q1/.default
 FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd-feed/.default
 FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.default
+FAMILIE_OPPDRAG_SCOPE: api://dev-fss.teamfamilie.familie-oppdrag/.default
 FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.dev-fss-pub.nais.io
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.dev-fss-pub.nais.io/api
 

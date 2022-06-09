@@ -17,8 +17,11 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -338,6 +341,18 @@ fun standardbegrunnelserTilNedtrekksmenytekster(
                 }
         }
 
+fun eøsStandardbegrunnelserTilNedtrekksmenytekster(
+    sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>
+) = EØSStandardbegrunnelse.values().groupBy { it.vedtakBegrunnelseType }
+    .mapValues { begrunnelseGruppe ->
+        begrunnelseGruppe.value.flatMap { vedtakBegrunnelse ->
+            eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
+                sanityEØSBegrunnelser,
+                vedtakBegrunnelse
+            )
+        }
+    }
+
 fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     vedtakBegrunnelse: Standardbegrunnelse,
@@ -364,6 +379,21 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
             )
         }
     }
+}
+
+fun eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
+    sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
+    vedtakBegrunnelse: EØSStandardbegrunnelse
+): List<RestVedtakBegrunnelseTilknyttetVilkår> {
+    val eøsSanityBegrunnelse = vedtakBegrunnelse.tilSanityEØSBegrunnelse(sanityEØSBegrunnelser) ?: return emptyList()
+
+    return listOf(
+        RestVedtakBegrunnelseTilknyttetVilkår(
+            id = vedtakBegrunnelse,
+            navn = eøsSanityBegrunnelse.navnISystem,
+            vilkår = null
+        )
+    )
 }
 
 private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {
