@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.task.DistribuerDødsfallDokumentPåFagsakTask
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -217,7 +218,13 @@ class DokumentService(
         loggBehandlerRolle: BehandlerRolle,
         brevmal: Brevmal,
     ) = try {
-        distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
+        distribuerBrevOgLoggHendlese(
+            journalpostId = journalpostId,
+            behandlingId = behandlingId,
+            brevMal = brevmal,
+            loggBehandlerRolle = loggBehandlerRolle,
+            distribusjonstype = brevmal.tilDistribusjonstype()
+        )
     } catch (ressursException: RessursException) {
         logger.info("Klarte ikke å distribuere brev til journalpost $journalpostId. Httpstatus ${ressursException.httpStatus}")
 
@@ -264,9 +271,10 @@ class DokumentService(
         journalpostId: String,
         behandlingId: Long?,
         brevMal: Brevmal,
-        loggBehandlerRolle: BehandlerRolle
+        loggBehandlerRolle: BehandlerRolle,
+        distribusjonstype: Distribusjonstype
     ) {
-        integrasjonClient.distribuerBrev(journalpostId)
+        integrasjonClient.distribuerBrev(journalpostId = journalpostId, distribusjonstype = distribusjonstype)
 
         if (behandlingId != null) {
             loggService.opprettDistribuertBrevLogg(
