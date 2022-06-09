@@ -27,6 +27,7 @@ data class SanityBegrunnelse(
     val ovrigeTriggere: List<ØvrigTrigger>? = null,
     val endringsaarsaker: List<Årsak>? = null,
     val hjemler: List<String> = emptyList(),
+    val hjemlerFolketrygdloven: List<String> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
@@ -44,6 +45,7 @@ data class RestSanityBegrunnelse(
     val ovrigeTriggere: List<String>? = emptyList(),
     val endringsaarsaker: List<String>? = emptyList(),
     val hjemler: List<String>? = emptyList(),
+    val hjemlerFolketrygdloven: List<String>?,
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: String?,
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
@@ -75,6 +77,7 @@ data class RestSanityBegrunnelse(
                 finnEnumverdi(it, Årsak.values(), apiNavn)
             },
             hjemler = hjemler ?: emptyList(),
+            hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             endretUtbetalingsperiodeDeltBostedUtbetalingTrigger =
             if (endretUtbetalingsperiodeDeltBostedUtbetalingTrigger != null) finnEnumverdi(endretUtbetalingsperiodeDeltBostedUtbetalingTrigger, EndretUtbetalingsperiodeDeltBostedTriggere.values(), apiNavn) else null,
             endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {

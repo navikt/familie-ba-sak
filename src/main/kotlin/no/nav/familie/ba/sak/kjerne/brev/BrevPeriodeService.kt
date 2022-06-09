@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
@@ -49,6 +51,7 @@ class BrevPeriodeService(
     private val personidentService: PersonidentService,
     private val kompetanseService: KompetanseService,
     private val featureToggleService: FeatureToggleService,
+    private val integrasjonClient: IntegrasjonClient,
 ) {
 
     fun hentBrevperioderData(
@@ -145,7 +148,8 @@ class BrevPeriodeService(
                 kompetanser = kompetanser,
                 fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
                 tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
-                personopplysningGrunnlag = personopplysningGrunnlag
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                hentLand = { landkode -> hentLandkodeISO2(landkode).storForbokstav() }
             )
 
         )

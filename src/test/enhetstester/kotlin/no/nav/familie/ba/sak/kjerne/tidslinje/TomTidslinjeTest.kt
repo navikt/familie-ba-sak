@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
@@ -38,7 +38,7 @@ internal class TomTidslinjeTest {
     @Test
     fun `test kombinering av to tomme tidslinjer`() {
         val resultat =
-            TomTidslinje<Boolean, Måned>().snittKombinerMed(TomTidslinje<Boolean, Måned>()) { v, h -> v ?: h }
+            TomTidslinje<Boolean, Måned>().kombinerMed(TomTidslinje<Boolean, Måned>()) { v, h -> v ?: h }
 
         assertEquals(TomTidslinje<Boolean, Måned>(), resultat)
     }
@@ -47,7 +47,7 @@ internal class TomTidslinjeTest {
     fun `test kombinering fra tom tidslinje til tidslinje med innhold`() {
 
         val boolskTidslinje = "tftftftftftft".somBoolskTidslinje(jan(2020))
-        val resultat = TomTidslinje<Boolean, Måned>().snittKombinerMed(boolskTidslinje) { v, h -> v ?: h }
+        val resultat = TomTidslinje<Boolean, Måned>().kombinerMed(boolskTidslinje) { v, h -> v ?: h }
 
         assertEquals(boolskTidslinje, resultat)
     }
@@ -56,7 +56,7 @@ internal class TomTidslinjeTest {
     fun `test kombinering fra tidslinje med innhold til tom tidslinje`() {
 
         val boolskTidslinje = "tftft    ftft".somBoolskTidslinje(jan(2020))
-        val resultat = boolskTidslinje.snittKombinerMed(TomTidslinje<Boolean, Måned>()) { v, h -> v ?: h }
+        val resultat = boolskTidslinje.kombinerMed(TomTidslinje<Boolean, Måned>()) { v, h -> v ?: h }
 
         assertEquals(boolskTidslinje, resultat)
     }

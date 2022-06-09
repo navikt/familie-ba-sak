@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
@@ -30,7 +30,7 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
 
     val erNoenAvBarnaMellom0Og18ÅrTidslinje: Tidslinje<Boolean, Måned> = barnasTidslinjer.values
         .map { it.erUnder18ÅrVilkårTidslinje }
-        .snittKombinerUtenNull { barnaEr0Til18ÅrListe -> barnaEr0Til18ÅrListe.any { it } }
+        .kombinerUtenNull { barnaEr0Til18ÅrListe -> barnaEr0Til18ÅrListe.any { it } }
 
     return RestTidslinjer(
         barnasTidslinjer = barnasTidslinjer.entries.associate {
@@ -121,7 +121,7 @@ fun tilfeldigOppsummering(regelverkResultatTidslinje: Tidslinje<RegelverkResulta
     )
 
     return regelverkResultatTidslinje
-        .snittKombinerMed(tilfeldigTidslinje) { regelverkResultat, rnd ->
+        .kombinerMed(tilfeldigTidslinje) { regelverkResultat, rnd ->
             when (regelverkResultat) {
                 RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN ->
                     BeregningOppsummering(

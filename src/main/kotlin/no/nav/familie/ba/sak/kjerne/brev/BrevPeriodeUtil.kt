@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
@@ -18,10 +20,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import org.slf4j.LoggerFactory
+import no.nav.familie.kontrakter.felles.objectMapper
+import org.springframework.core.io.ClassPathResource
+import java.io.BufferedReader
 import java.time.YearMonth
-
-private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
 fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
     Utils.slåSammen(
@@ -52,10 +54,11 @@ fun hentMinimerteKompetanserForPeriode(
     kompetanser: List<Kompetanse>,
     fom: YearMonth?,
     tom: YearMonth?,
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
+    hentLand: (String) -> String
 ): List<MinimertKompetanse> {
     val minimerteKompetanser = kompetanser.hentIPeriode(fom, tom)
-        .map { it.tilMinimertKompetanse(personopplysningGrunnlag) }
+        .map { it.tilMinimertKompetanse(personopplysningGrunnlag = personopplysningGrunnlag, hentLand = hentLand) }
 
     return minimerteKompetanser
 }
@@ -69,3 +72,16 @@ fun Collection<Kompetanse>.hentIPeriode(
         tilOgMed = tom.tilTidspunktEllerUendeligLengeTil()
     ).perioder()
     .mapNotNull { it.innhold }
+
+data class LandkodeISO2(
+    val code: String,
+    val name: String,
+)
+
+fun hentLandkodeISO2(landKode: String): String {
+    val landkoder =
+        ClassPathResource("landkoder/landkoder.json").inputStream.bufferedReader().use(BufferedReader::readText)
+
+    return objectMapper.readValue<List<LandkodeISO2>>(landkoder).find { it.code == landKode }?.name
+        ?: throw Feil("Fant Ikke landkode $landKode")
+}

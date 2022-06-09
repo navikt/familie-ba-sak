@@ -8,12 +8,9 @@ enum class BarnetsBostedsland {
     IKKE_NORGE;
 }
 
-fun hentBarnetsBostedslandFraLandkode(landKode: String): BarnetsBostedsland {
-    return if (landKode == "NO") {
-        BarnetsBostedsland.NORGE
-    } else {
-        BarnetsBostedsland.IKKE_NORGE
-    }
+fun landkodeTilBarnetsBostedsland(landkode: String): BarnetsBostedsland = when (landkode) {
+    "NO" -> BarnetsBostedsland.NORGE
+    else -> BarnetsBostedsland.IKKE_NORGE
 }
 
 data class RestSanityEØSBegrunnelse(
@@ -22,6 +19,8 @@ data class RestSanityEØSBegrunnelse(
     val annenForeldersAktivitet: List<String>?,
     val barnetsBostedsland: List<String>?,
     val kompetanseResultat: List<String>?,
+    val hjemler: List<String>?,
+    val hjemlerFolketrygdloven: List<String>?,
     val hjemlerEOSForordningen883: List<String>?,
     val hjemlerEOSForordningen987: List<String>?,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
@@ -40,6 +39,8 @@ data class RestSanityEØSBegrunnelse(
             kompetanseResultat = kompetanseResultat?.mapNotNull {
                 konverterTilEnumverdi<KompetanseResultat>(it)
             } ?: emptyList(),
+            hjemler = hjemler ?: emptyList(),
+            hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             hjemlerEØSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
@@ -56,6 +57,8 @@ data class SanityEØSBegrunnelse(
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
+    val hjemler: List<String>,
+    val hjemlerFolketrygdloven: List<String>,
     val hjemlerEØSForordningen883: List<String>,
     val hjemlerEØSForordningen987: List<String>,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>,
