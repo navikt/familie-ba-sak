@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtakspe
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.endretUtbetalingsperiodeBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -62,7 +63,7 @@ fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
         val utbetalingsperioderTidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
         val reduksjonsperioderTidslinje = ReduksjonsperioderFraForrigeBehandlingTidslinje(reduksjonsperioder)
 
-        val kombinertTidslinje = utbetalingsperioderTidslinje.snittKombinerMed(
+        val kombinertTidslinje = utbetalingsperioderTidslinje.kombinerMed(
             reduksjonsperioderTidslinje
         ) { utbetalingsperiode, reduksjonsperiode ->
             when {
@@ -271,7 +272,7 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
             kompetanse.validerFelterErSatt()
             begrunnelse.erGyldigForKompetanseMedData(
                 annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
-                barnetsBostedslandFraKompetanse = kompetanse.barnetsBostedsland!!,
+                barnetsBostedslandFraKompetanse = landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland!!),
                 resultatFraKompetanse = kompetanse.resultat!!
             )
         }
