@@ -24,7 +24,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.GyldigVilkårsperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse

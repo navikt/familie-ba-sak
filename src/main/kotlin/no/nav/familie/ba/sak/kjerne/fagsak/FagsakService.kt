@@ -89,12 +89,16 @@ class FagsakService(
                 HttpStatus.BAD_REQUEST
             )
         }
-        val fagsak = hentEllerOpprettFagsak(personident)
+        val fagsak = hentEllerOpprettFagsak(personident, eier = fagsakRequest.fagsakEier ?: OMSORGSPERSON)
         return hentRestMinimalFagsak(fagsakId = fagsak.id)
     }
 
     @Transactional
-    fun hentEllerOpprettFagsak(personIdent: String, fraAutomatiskBehandling: Boolean = false, eier: FagsakEier = OMSORGSPERSON): Fagsak {
+    fun hentEllerOpprettFagsak(
+        personIdent: String,
+        fraAutomatiskBehandling: Boolean = false,
+        eier: FagsakEier = OMSORGSPERSON
+    ): Fagsak {
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
         var fagsak = fagsakRepository.finnFagsakForAktør(aktør, eier)
         if (fagsak == null) {
@@ -135,10 +139,17 @@ class FagsakService(
         lagre(fagsak)
     }
 
-    fun hentMinimalFagsakForPerson(aktør: Aktør): Ressurs<RestMinimalFagsak> {
-        val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
+    fun hentMinimalFagsakForPerson(aktør: Aktør, fagsakEier: FagsakEier = OMSORGSPERSON): Ressurs<RestMinimalFagsak> {
+        val fagsak = fagsakRepository.finnFagsakForAktør(aktør, fagsakEier)
         return if (fagsak != null) Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id)) else Ressurs.failure(
             errorMessage = "Fant ikke fagsak på person"
+        )
+    }
+
+    fun hentMinimalFagsakerForPerson(aktør: Aktør): Ressurs<List<RestMinimalFagsak>> {
+        val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør)
+        return if (!fagsaker.isEmpty()) Ressurs.success(data = lagRestMinimalFagsaker(fagsaker)) else Ressurs.failure(
+            errorMessage = "Fant ikke fagsaker på person"
         )
     }
 
@@ -146,6 +157,10 @@ class FagsakService(
 
     fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> =
         Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
+
+    fun lagRestMinimalFagsaker(fagsaker: List<Fagsak>): List<RestMinimalFagsak> {
+        return fagsaker.map { lagRestMinimalFagsak(it.id) }
+    }
 
     fun lagRestMinimalFagsak(fagsakId: Long): RestMinimalFagsak {
         val restBaseFagsak = lagRestBaseFagsak(fagsakId)
@@ -204,14 +219,20 @@ class FagsakService(
             løpendeKategori = behandlingstemaService.hentLøpendeKategori(fagsakId = fagsakId),
             løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsakId),
             gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
+            fagsakEier = fagsak.eier
         )
     }
 
-    fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String, fraAutomatiskBehandling: Boolean = false): Fagsak {
-        return hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling)
+    fun hentEllerOpprettFagsakForPersonIdent(
+        fødselsnummer: String,
+        fraAutomatiskBehandling: Boolean = false,
+        fagsakEier: FagsakEier = OMSORGSPERSON
+    ): Fagsak {
+        return hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakEier)
     }
 
-    fun hent(aktør: Aktør): Fagsak? = fagsakRepository.finnFagsakForAktør(aktør)
+    fun hent(aktør: Aktør, fagsakEier: FagsakEier = OMSORGSPERSON): Fagsak? =
+        fagsakRepository.finnFagsakForAktør(aktør, fagsakEier)
 
     fun hentPåFagsakId(fagsakId: Long): Fagsak {
         return fagsakRepository.finnFagsak(fagsakId) ?: throw FunksjonellFeil(
@@ -224,8 +245,8 @@ class FagsakService(
         return hentPåFagsakId(fagsakId).aktør
     }
 
-    fun hentFagsakPåPerson(aktør: Aktør): Fagsak? {
-        return fagsakRepository.finnFagsakForAktør(aktør)
+    fun hentFagsakPåPerson(aktør: Aktør, fagsakEier: FagsakEier = OMSORGSPERSON): Fagsak? {
+        return fagsakRepository.finnFagsakForAktør(aktør, fagsakEier)
     }
 
     fun hentLøpendeFagsaker(): List<Fagsak> {
