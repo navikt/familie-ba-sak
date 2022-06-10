@@ -230,7 +230,9 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
                     equalToJson(
                         "{\"journalpostId\":\"123456789\"," +
                             "\"bestillendeFagsystem\":\"BA\"," +
-                            "\"dokumentProdApp\":\"FAMILIE_BA_SAK\"}"
+                            "\"dokumentProdApp\":\"FAMILIE_BA_SAK\"," +
+                            "\"distribusjonstype\" : \"VIKTIG\"," +
+                            "\"distribusjonstidspunkt\" : \"KJERNETID\"}"
                     )
                 )
         )
