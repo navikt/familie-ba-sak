@@ -116,7 +116,7 @@ class IntegrasjonClientMock {
                 mockIntegrasjonClient.slettLogiskVedlegg(any(), any())
             } returns LogiskVedleggResponse(12345678)
 
-            every { mockIntegrasjonClient.distribuerBrev(any()) } returns "bestillingsId"
+            every { mockIntegrasjonClient.distribuerBrev(any(), any()) } returns "bestillingsId"
 
             every { mockIntegrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
 

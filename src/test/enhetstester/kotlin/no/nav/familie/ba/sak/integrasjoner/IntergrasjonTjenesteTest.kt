@@ -45,6 +45,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -220,7 +221,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
                 .willReturn(okJson(objectMapper.writeValueAsString(success("1234567"))))
         )
 
-        assertDoesNotThrow { integrasjonClient.distribuerBrev("123456789") }
+        assertDoesNotThrow { integrasjonClient.distribuerBrev("123456789", Distribusjonstype.VIKTIG) }
         wireMockServer.verify(
             postRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("distribuerVedtaksbrev"))
@@ -244,7 +245,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
                 .willReturn(okJson(objectMapper.writeValueAsString(success(""))))
         )
 
-        assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev("123456789") }
+        assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev("123456789", Distribusjonstype.VIKTIG) }
     }
 
     @Test
@@ -256,7 +257,12 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
                 .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>(""))))
         )
 
-        val feil = assertThrows<IntegrasjonException> { integrasjonClient.distribuerBrev("123456789") }
+        val feil = assertThrows<IntegrasjonException> {
+            integrasjonClient.distribuerBrev(
+                "123456789",
+                Distribusjonstype.VIKTIG
+            )
+        }
         assertTrue(feil.message?.contains("dokdist") == true)
     }
 
@@ -273,7 +279,12 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
                 )
         )
 
-        assertThrows<HttpClientErrorException.BadRequest> { integrasjonClient.distribuerBrev("123456789") }
+        assertThrows<HttpClientErrorException.BadRequest> {
+            integrasjonClient.distribuerBrev(
+                "123456789",
+                Distribusjonstype.VIKTIG
+            )
+        }
     }
 
     @Test
