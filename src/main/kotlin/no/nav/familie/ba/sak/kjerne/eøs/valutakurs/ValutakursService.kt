@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonne
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ValutakursService(
@@ -24,4 +25,8 @@ class ValutakursService(
 
     fun slettValutakurs(valutakursId: Long) =
         skjemaService.slettSkjema(valutakursId)
+
+    @Transactional
+    fun kopierOgErstattValutakurser(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) =
+        skjemaService.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }

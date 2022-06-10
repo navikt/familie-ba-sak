@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakEier
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.RestTilbakekrevingsbehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
@@ -18,6 +19,7 @@ open class RestBaseFagsak(
     open val løpendeKategori: BehandlingKategori?,
     open val løpendeUnderkategori: BehandlingUnderkategori?,
     open val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
+    open val fagsakEier: FagsakEier = FagsakEier.OMSORGSPERSON
 )
 
 fun Fagsak.tilRestBaseFagsak(
@@ -33,7 +35,8 @@ fun Fagsak.tilRestBaseFagsak(
     underBehandling = underBehandling,
     løpendeKategori = løpendeKategori,
     løpendeUnderkategori = løpendeUnderkategori,
-    gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder
+    gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
+    fagsakEier = this.eier
 )
 
 data class RestFagsak(
@@ -46,7 +49,8 @@ data class RestFagsak(
     override val løpendeUnderkategori: BehandlingUnderkategori?,
     override val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     val behandlinger: List<RestUtvidetBehandling>,
-    val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>
+    val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>,
+    override val fagsakEier: FagsakEier = FagsakEier.OMSORGSPERSON
 ) : RestBaseFagsak(
     opprettetTidspunkt = opprettetTidspunkt,
     id = id,
@@ -55,7 +59,8 @@ data class RestFagsak(
     underBehandling = underBehandling,
     løpendeKategori = løpendeKategori,
     løpendeUnderkategori = løpendeUnderkategori,
-    gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder
+    gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
+    fagsakEier = fagsakEier
 )
 
 fun RestBaseFagsak.tilRestFagsak(
@@ -72,6 +77,7 @@ fun RestBaseFagsak.tilRestFagsak(
     gjeldendeUtbetalingsperioder = this.gjeldendeUtbetalingsperioder,
     behandlinger = restUtvidetBehandlinger,
     tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
+    fagsakEier = this.fagsakEier,
 )
 
 data class RestMinimalFagsak(
@@ -85,7 +91,8 @@ data class RestMinimalFagsak(
     override val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     val behandlinger: List<RestVisningBehandling>,
     val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>,
-    val migreringsdato: LocalDate? = null
+    val migreringsdato: LocalDate? = null,
+    override val fagsakEier: FagsakEier,
 ) : RestBaseFagsak(
     opprettetTidspunkt = opprettetTidspunkt,
     id = id,
@@ -95,6 +102,7 @@ data class RestMinimalFagsak(
     løpendeKategori = løpendeKategori,
     løpendeUnderkategori = løpendeUnderkategori,
     gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
+    fagsakEier = fagsakEier,
 )
 
 fun RestBaseFagsak.tilRestMinimalFagsak(
@@ -112,5 +120,6 @@ fun RestBaseFagsak.tilRestMinimalFagsak(
     gjeldendeUtbetalingsperioder = this.gjeldendeUtbetalingsperioder,
     behandlinger = restVisningBehandlinger,
     tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
-    migreringsdato = migreringsdato
+    migreringsdato = migreringsdato,
+    fagsakEier = this.fagsakEier,
 )

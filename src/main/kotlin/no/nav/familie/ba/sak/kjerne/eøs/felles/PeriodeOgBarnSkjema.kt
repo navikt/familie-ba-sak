@@ -14,7 +14,7 @@ interface PeriodeOgBarnSkjema<out T> where T : PeriodeOgBarnSkjema<T> {
     fun kopier(
         fom: YearMonth? = this.fom,
         tom: YearMonth? = this.tom,
-        barnAktører: Set<Aktør> = this.barnAktører
+        barnAktører: Set<Aktør> = this.barnAktører.map { it.copy() }.toSet()
     ): T
 }
 
