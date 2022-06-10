@@ -9,8 +9,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
-import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -45,24 +43,6 @@ import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
-interface AndelTilkjentYtelseDomene<T> where T : AndelTilkjentYtelseDomene<T> {
-    val behandlingId: Long
-    val stønadFom: YearMonth?
-    val stønadTom: YearMonth?
-    val aktør: Aktør
-    val kalkulertUtbetalingsbeløp: Int
-    val type: YtelseType
-    val sats: Int
-    val prosent: BigDecimal
-    val endretUtbetalingAndeler: List<EndretUtbetalingAndel>
-    val utenlandskPeriodebeløp: Int?
-    val nasjonaltPeriodebeløp: Int?
-    val differanseberegnetBeløp: Int?
-
-    fun medPeriode(fraOgMed: YearMonth?, tilOgMed: YearMonth?): T
-    fun utenPeriode() = medPeriode(null, null)
-}
-
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "AndelTilkjentYtelse")
 @Table(name = "ANDEL_TILKJENT_YTELSE")
@@ -77,36 +57,36 @@ data class AndelTilkjentYtelse(
     val id: Long = 0,
 
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
-    override val behandlingId: Long,
+    val behandlingId: Long,
 
     @ManyToOne
     @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
     var tilkjentYtelse: TilkjentYtelse,
 
     @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
-    override val aktør: Aktør,
+    val aktør: Aktør,
 
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
-    override val kalkulertUtbetalingsbeløp: Int,
+    val kalkulertUtbetalingsbeløp: Int,
 
     @Column(name = "stonad_fom", nullable = false, columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    override val stønadFom: YearMonth,
+    val stønadFom: YearMonth,
 
     @Column(name = "stonad_tom", nullable = false, columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    override val stønadTom: YearMonth,
+    val stønadTom: YearMonth,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    override val type: YtelseType,
+    val type: YtelseType,
 
     @Column(name = "sats", nullable = false)
-    override val sats: Int,
+    val sats: Int,
 
     // TODO: Bør dette hete gradering? I så fall rename og migrer i endringstabell også
     @Column(name = "prosent", nullable = false)
-    override val prosent: BigDecimal,
+    val prosent: BigDecimal,
 
     @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE], fetch = FetchType.EAGER)
     @JoinTable(
@@ -114,7 +94,7 @@ data class AndelTilkjentYtelse(
         joinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")],
         inverseJoinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")]
     )
-    override val endretUtbetalingAndeler: MutableList<EndretUtbetalingAndel> = mutableListOf(),
+    val endretUtbetalingAndeler: MutableList<EndretUtbetalingAndel> = mutableListOf(),
 
     // kildeBehandlingId, periodeOffset og forrigePeriodeOffset trengs kun i forbindelse med
     // iverksetting/konsistensavstemming, og settes først ved generering av selve oppdraget mot økonomi.
@@ -132,12 +112,12 @@ data class AndelTilkjentYtelse(
     var forrigePeriodeOffset: Long? = null,
 
     @Transient // TODO: Skal ha et felt i databasen
-    override val utenlandskPeriodebeløp: Int? = null,
+    val utenlandskPeriodebeløp: Int? = null,
     @Transient // TODO: Skal ha et felt i databasen
-    override val nasjonaltPeriodebeløp: Int? = null,
+    val nasjonaltPeriodebeløp: Int? = null,
     @Transient // TODO: Skal ha et felt i databasen
-    override val differanseberegnetBeløp: Int? = null
-) : AndelTilkjentYtelseDomene<AndelTilkjentYtelse>, BaseEntitet() {
+    val differanseberegnetBeløp: Int? = null
+) : BaseEntitet() {
 
     val periode
         get() = MånedPeriode(stønadFom, stønadTom)
@@ -155,7 +135,10 @@ data class AndelTilkjentYtelse(
             Objects.equals(kalkulertUtbetalingsbeløp, annen.kalkulertUtbetalingsbeløp) &&
             Objects.equals(stønadFom, annen.stønadFom) &&
             Objects.equals(stønadTom, annen.stønadTom) &&
-            Objects.equals(aktør, annen.aktør)
+            Objects.equals(aktør, annen.aktør) &&
+            Objects.equals(nasjonaltPeriodebeløp, annen.nasjonaltPeriodebeløp) &&
+            Objects.equals(utenlandskPeriodebeløp, annen.utenlandskPeriodebeløp) &&
+            Objects.equals(differanseberegnetBeløp, annen.differanseberegnetBeløp)
     }
 
     override fun hashCode(): Int {
@@ -166,13 +149,17 @@ data class AndelTilkjentYtelse(
             kalkulertUtbetalingsbeløp,
             stønadFom,
             stønadTom,
-            aktør
+            aktør,
+            nasjonaltPeriodebeløp,
+            utenlandskPeriodebeløp,
+            differanseberegnetBeløp
         )
     }
 
     override fun toString(): String {
         return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type = $type, prosent = $prosent," +
-            "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
+            "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset), " +
+            "nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, utenlandskPeriodebeløp = $utenlandskPeriodebeløp, differanseberegnetBeløp = $differanseberegnetBeløp"
     }
 
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
@@ -270,12 +257,6 @@ data class AndelTilkjentYtelse(
             }.toSet()
         }
     }
-
-    override fun medPeriode(fraOgMed: YearMonth?, tilOgMed: YearMonth?) =
-        copy(
-            stønadFom = fraOgMed ?: MIN_MÅNED,
-            stønadTom = tilOgMed ?: MAX_MÅNED
-        )
 }
 
 fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp(): List<AndelTilkjentYtelse> {

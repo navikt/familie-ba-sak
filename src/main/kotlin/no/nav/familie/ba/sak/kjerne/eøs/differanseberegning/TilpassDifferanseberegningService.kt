@@ -21,8 +21,8 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
-        val nyTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
-        tilkjentYtelseRepository.lagreVedEndring(tilkjentYtelse, nyTilkjentYtelse)
+        val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+        tilkjentYtelseRepository.save(oppdatertTilkjentYtelse)
     }
 }
 
@@ -38,8 +38,8 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 
-        val nyTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
-        tilkjentYtelseRepository.lagreVedEndring(tilkjentYtelse, nyTilkjentYtelse)
+        val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+        tilkjentYtelseRepository.save(oppdatertTilkjentYtelse)
     }
 }
 
@@ -52,14 +52,7 @@ class TilpassDifferanseberegningEtterValutakursService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
-        val nyTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
-        tilkjentYtelseRepository.lagreVedEndring(tilkjentYtelse, nyTilkjentYtelse)
-    }
-}
-
-fun TilkjentYtelseRepository.lagreVedEndring(forrigeTilkjentYtelse: TilkjentYtelse, nyTilkjentYtelse: TilkjentYtelse) {
-    if (forrigeTilkjentYtelse.andelerTilkjentYtelse.toSet() != nyTilkjentYtelse.andelerTilkjentYtelse.toSet()) {
-        this.delete(forrigeTilkjentYtelse)
-        this.save(nyTilkjentYtelse)
+        val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+        tilkjentYtelseRepository.save(oppdatertTilkjentYtelse)
     }
 }
