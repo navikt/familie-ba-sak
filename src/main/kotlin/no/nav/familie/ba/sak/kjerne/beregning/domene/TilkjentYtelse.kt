@@ -116,3 +116,10 @@ fun TilkjentYtelse.tilTidslinjeMedAndeler(): LocalDateTimeline<List<AndelTilkjen
 
     return lagTidslinjeMedOverlappendePerioderForAndeler(tidslinjer)
 }
+
+fun TilkjentYtelse.erstattAndeler(andeler: Iterable<AndelTilkjentYtelse>): TilkjentYtelse {
+    this.andelerTilkjentYtelse.clear()
+    this.andelerTilkjentYtelse.addAll(andeler)
+
+    return this
+}

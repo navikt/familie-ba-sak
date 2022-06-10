@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.erstattAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.kopierMedUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
@@ -11,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidspunktKombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 
 fun beregnDifferanse(
     tilkjentYtelse: TilkjentYtelse,
@@ -42,7 +42,6 @@ fun beregnDifferanse(
                 beløp?.let { aty.kopierMedUtenlandskPeriodebeløp(it) } ?: aty
             }
             .filtrerIkkeNull()
-            .beskjærEtter(andelTilkjentYtelseTidslinje) // Skal ikke være lenger enn denne
     }
 
     val barnasDifferanseberegnedeAndeler = barnasDifferanseberegnetAndelTilkjentYtelseTidslinjer
@@ -80,11 +79,4 @@ private fun validarSøkersYtelserMotEventueltNegativeAndeler(
                 "samtidig som ett eller flere barn har endt med negative utbetalingsbeløp etter differanseberegning. " +
                 "Det er ikke støttet ennå"
         )
-}
-
-fun TilkjentYtelse.erstattAndeler(andeler: Iterable<AndelTilkjentYtelse>): TilkjentYtelse {
-    this.andelerTilkjentYtelse.clear()
-    this.andelerTilkjentYtelse.addAll(andeler)
-
-    return this
 }
