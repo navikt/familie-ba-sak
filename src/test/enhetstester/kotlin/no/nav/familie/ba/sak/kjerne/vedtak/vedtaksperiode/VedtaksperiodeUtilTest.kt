@@ -3,8 +3,18 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -246,5 +256,85 @@ class VedtaksperiodeUtilTest {
         )
         Assertions.assertEquals(fom3, periode4.fom)
         Assertions.assertEquals(sisteTom, periode4.tom)
+    }
+
+    @Test
+    fun `skal finne riktige begrunnelser for kompetanse når barn bor i utlandet`() {
+
+        val kompetanserIPeriode: List<Kompetanse> =
+            listOf(
+                lagKompetanse(
+                    annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                    barnetsBostedsland = "SE",
+                    kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+
+                    søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                    annenForeldersAktivitetsland = "SE",
+                    barnAktører = setOf(Aktør("1234567891011", mutableSetOf()))
+
+                )
+            )
+
+        val forventedeBegrunnelser =
+            listOf(
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_STANDARD,
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_STANDARD,
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_OG_UTLAND_STANDARD
+            )
+
+        val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
+            sanityEØSBegrunnelser,
+            kompetanserIPeriode
+        )
+        Assertions.assertTrue(
+            forventedeBegrunnelser.all {
+                gyldigeEØSBegrunnelserForPeriode.contains(it)
+            }
+        )
+    }
+
+    @Test
+    fun `skal finne riktige begrunnelser for kompetanse når barn bor i Norge`() {
+
+        val kompetanserIPeriode: List<Kompetanse> =
+            listOf(
+                lagKompetanse(
+                    annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
+                    barnetsBostedsland = "NO",
+                    kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+
+                    søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                    annenForeldersAktivitetsland = "SE",
+                    barnAktører = setOf(Aktør("1234567891011", mutableSetOf()))
+
+                )
+            )
+
+        val forventedeBegrunnelser =
+            listOf(
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_FLYTTET_TIL_NORGE,
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE,
+            )
+
+        val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
+            sanityEØSBegrunnelser,
+            kompetanserIPeriode
+        )
+
+        Assertions.assertTrue(
+            forventedeBegrunnelser.all {
+                gyldigeEØSBegrunnelserForPeriode.contains(it)
+            }
+        )
+    }
+
+    companion object {
+        lateinit var sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>
+
+        @BeforeAll
+        @JvmStatic
+        internal fun beforeAll() {
+            sanityEØSBegrunnelser = hentEØSBegrunnelser()
+        }
     }
 }
