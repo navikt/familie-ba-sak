@@ -61,7 +61,6 @@ interface AndelTilkjentYtelseDomene<T> where T : AndelTilkjentYtelseDomene<T> {
 
     fun medPeriode(fraOgMed: YearMonth?, tilOgMed: YearMonth?): T
     fun utenPeriode() = medPeriode(null, null)
-    fun medUtenlandskPeriodebeløp(beløp: BigDecimal): T
 }
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -277,24 +276,6 @@ data class AndelTilkjentYtelse(
             stønadFom = fraOgMed ?: MIN_MÅNED,
             stønadTom = tilOgMed ?: MAX_MÅNED
         )
-
-    override fun medUtenlandskPeriodebeløp(beløp: BigDecimal): AndelTilkjentYtelse {
-        val nyttNasjonaltPeriodebeløp = when {
-            differanseberegnetBeløp == null -> kalkulertUtbetalingsbeløp
-            differanseberegnetBeløp != kalkulertUtbetalingsbeløp -> kalkulertUtbetalingsbeløp
-            else -> this.nasjonaltPeriodebeløp!!
-        }
-
-        val avrundetUtenlandskPeriodebeløp = beløp.round(MathContext(0, RoundingMode.DOWN)).intValueExact()
-        val nyttDifferanseberegnetBeløp = nyttNasjonaltPeriodebeløp - avrundetUtenlandskPeriodebeløp
-
-        return copy(
-            kalkulertUtbetalingsbeløp = nyttDifferanseberegnetBeløp,
-            nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
-            utenlandskPeriodebeløp = avrundetUtenlandskPeriodebeløp,
-            differanseberegnetBeløp = nyttDifferanseberegnetBeløp
-        )
-    }
 }
 
 fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp(): List<AndelTilkjentYtelse> {
@@ -379,3 +360,25 @@ fun List<AndelTilkjentYtelse>?.hentTidslinje() =
             )
         } ?: emptyList()
     )
+
+fun AndelTilkjentYtelse?.kopierMedUtenlandskPeriodebeløp(beløp: BigDecimal): AndelTilkjentYtelse? {
+    if (this == null)
+        return null
+
+    val nyttNasjonaltPeriodebeløp = when {
+        differanseberegnetBeløp == null -> kalkulertUtbetalingsbeløp
+        differanseberegnetBeløp != kalkulertUtbetalingsbeløp -> kalkulertUtbetalingsbeløp
+        else -> this.nasjonaltPeriodebeløp!!
+    }
+
+    val avrundetUtenlandskPeriodebeløp = beløp.round(MathContext(0, RoundingMode.DOWN)).intValueExact()
+    val nyttDifferanseberegnetBeløp = nyttNasjonaltPeriodebeløp - avrundetUtenlandskPeriodebeløp
+
+    return copy(
+        id = 0, // Lager en ny instans
+        kalkulertUtbetalingsbeløp = nyttDifferanseberegnetBeløp,
+        nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
+        utenlandskPeriodebeløp = avrundetUtenlandskPeriodebeløp,
+        differanseberegnetBeløp = nyttDifferanseberegnetBeløp
+    )
+}

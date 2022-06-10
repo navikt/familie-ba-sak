@@ -1,23 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseDomene
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.kopierMedUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidspunktKombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
-import java.time.LocalDate
 
 fun beregnDifferanse(
     tilkjentYtelse: TilkjentYtelse,
@@ -32,86 +26,65 @@ fun beregnDifferanse(
     val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
     val andelTilkjentYtelseTidslinjer = tilkjentYtelse.tilSeparateTidslinjerForBarna()
 
-    val barnMedAlleTidslinjer: Set<Aktør> =
-        utenlandskePeriodebeløpTidslinjer.keys
-            .intersect(valutakursTidslinjer.keys)
-            .intersect(andelTilkjentYtelseTidslinjer.keys)
+    val alleBarna: Set<Aktør> =
+        utenlandskePeriodebeløpTidslinjer.keys + valutakursTidslinjer.keys + andelTilkjentYtelseTidslinjer.keys
 
-    val barnasAndelerTilkjentYtelse = barnMedAlleTidslinjer.flatMap { aktør ->
-        val utenlandskePeriodebeløpTidslinje = utenlandskePeriodebeløpTidslinjer.getValue(aktør)
-        val valutakursTidslinje = valutakursTidslinjer.getValue(aktør)
-        val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjer.getValue(aktør)
+    val barnasDifferanseberegnetAndelTilkjentYtelseTidslinjer = alleBarna.associateWith { aktør ->
+        val utenlandskePeriodebeløpTidslinje = utenlandskePeriodebeløpTidslinjer.getOrDefault(aktør, TomTidslinje())
+        val valutakursTidslinje = valutakursTidslinjer.getOrDefault(aktør, TomTidslinje())
+        val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjer.getOrDefault(aktør, TomTidslinje())
 
-        val utenlandskePeriodebeløpINorskeKroner =
-            utenlandskePeriodebeløpTidslinje.tidspunktKombinerMed(valutakursTidslinje) { tidspunkt, upb, vk ->
-                upb.multipliserMed(vk, tidspunkt)
+        val utenlandskePeriodebeløpINorskeKroner = utenlandskePeriodebeløpTidslinje
+            .tidspunktKombinerMed(valutakursTidslinje) { tidspunkt, upb, vk -> upb.multipliserMed(vk, tidspunkt) }
+
+        andelTilkjentYtelseTidslinje
+            .snittKombinerMed(utenlandskePeriodebeløpINorskeKroner) { aty, beløp ->
+                beløp?.let { aty.kopierMedUtenlandskPeriodebeløp(it) } ?: aty
             }
-
-        val differanseberegnetAndelTilkjentYtelseTidslinjer =
-            andelTilkjentYtelseTidslinje.kombinerUtenNullMed(utenlandskePeriodebeløpINorskeKroner) { aty, beløp ->
-                aty.medUtenlandskPeriodebeløp(beløp)
-            }
-
-        differanseberegnetAndelTilkjentYtelseTidslinjer
             .filtrerIkkeNull()
             .beskjærEtter(andelTilkjentYtelseTidslinje) // Skal ikke være lenger enn denne
-            .filtrer { it!!.kalkulertUtbetalingsbeløp > 0 } // Vi sender bare positive beløp til oppdragssystemet
-            .tilAndelTilkjentYtelse()
     }
 
-    return tilkjentYtelse.kopierOgErstattBarnasAndeler(barnasAndelerTilkjentYtelse)
+    val barnasDifferanseberegnedeAndeler = barnasDifferanseberegnetAndelTilkjentYtelseTidslinjer
+        .values.flatMap { it.tilAndelTilkjentYtelse() }
+
+    val søkersAndeler = tilkjentYtelse.andelerTilkjentYtelse
+        .filter { it.erSøkersAndel() }
+
+    validarSøkersYtelserMotEventueltNegativeAndeler(
+        barnasDifferanseberegnedeAndeler,
+        søkersAndeler
+    )
+
+    val barnasPositiveAndeler = barnasDifferanseberegnedeAndeler
+        .filter { it.kalkulertUtbetalingsbeløp > 0 }
+
+    return tilkjentYtelse.erstattAndeler(søkersAndeler + barnasPositiveAndeler)
 }
 
-fun TilkjentYtelse.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
+private fun validarSøkersYtelserMotEventueltNegativeAndeler(
+    barnasAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    søkersAndelerTilkjentYtelse: List<AndelTilkjentYtelse>
+) {
+    val barnasSumNegativeUtebetalingsbeløp = barnasAndelerTilkjentYtelse
+        .map { minOf(it.kalkulertUtbetalingsbeløp, 0) }
+        .sum()
 
-    return this.andelerTilkjentYtelse
-        .filter { !it.erSøkersAndel() }
-        .groupBy { it.aktør }
-        .mapValues {
-            tidslinje {
-                it.value.map {
-                    Periode(
-                        it.stønadFom.tilTidspunkt(),
-                        it.stønadTom.tilTidspunkt(),
-                        // Ta bort periode, slik at det ikke blir med på innholdet som vurderes for likhet
-                        it.utenPeriode()
-                    )
-                }
-            }
-        }
+    val søkersSumUtebetalingsbeløp = søkersAndelerTilkjentYtelse
+        .map { it.kalkulertUtbetalingsbeløp }
+        .sum()
+
+    if (barnasSumNegativeUtebetalingsbeløp < 0 && søkersSumUtebetalingsbeløp > 0)
+        TODO(
+            "Søker har småbarnstillegg og/elleer utvidet barnetrygd, " +
+                "samtidig som ett eller flere barn har endt med negative utbetalingsbeløp etter differanseberegning. " +
+                "Det er ikke støttet ennå"
+        )
 }
 
-fun <T : AndelTilkjentYtelseDomene<T>> Tidslinje<T, Måned>.tilAndelTilkjentYtelse(): List<T> {
+fun TilkjentYtelse.erstattAndeler(andeler: Iterable<AndelTilkjentYtelse>): TilkjentYtelse {
+    this.andelerTilkjentYtelse.clear()
+    this.andelerTilkjentYtelse.addAll(andeler)
+
     return this
-        .perioder().map {
-            it.innhold!!.medPeriode(it.fraOgMed.tilYearMonth(), it.tilOgMed.tilYearMonth())
-        }
-}
-
-fun TilkjentYtelse.kopierOgErstattBarnasAndeler(barnasAndeler: Iterable<AndelTilkjentYtelse>): TilkjentYtelse {
-    val nyTilkjentYtelse = TilkjentYtelse(
-        behandling = this.behandling,
-        opprettetDato = LocalDate.now(),
-        endretDato = LocalDate.now()
-    )
-
-    // Fjern koblingen fra endret utebetalingsandel til andel tilkjente ytelser fordi de kan være gamle
-    barnasAndeler
-        .flatMap { andelerTilkjentYtelse -> andelerTilkjentYtelse.endretUtbetalingAndeler }
-        .map { endretUtbetalingAndel -> endretUtbetalingAndel.andelTilkjentYtelser.clear() }
-
-    // Lag tilbakekobling fra endret utebetalingsandel til (ny) andel tilkjent ytelse
-    barnasAndeler.map { andelTilkjentYtelse ->
-        andelTilkjentYtelse.endretUtbetalingAndeler.forEach { it.andelTilkjentYtelser.add(andelTilkjentYtelse) }
-    }
-
-    // Søkers andeler skal være uendret
-    val søkersAndeler = this.andelerTilkjentYtelse.filter { it.erSøkersAndel() }
-    val alleAndeler: Iterable<AndelTilkjentYtelse> = søkersAndeler + barnasAndeler
-
-    nyTilkjentYtelse.andelerTilkjentYtelse.addAll(
-        alleAndeler.map { it.copy(tilkjentYtelse = nyTilkjentYtelse) }
-    )
-
-    return nyTilkjentYtelse
 }
