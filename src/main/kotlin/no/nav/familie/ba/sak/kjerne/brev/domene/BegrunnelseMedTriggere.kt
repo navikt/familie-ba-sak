@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnels
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.delOpp
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 
 data class BegrunnelseMedTriggere(
     val standardbegrunnelse: Standardbegrunnelse,
@@ -69,7 +69,7 @@ data class BegrunnelseMedTriggere(
     )
 }
 
-fun RestVedtaksbegrunnelse.tilBegrunnelseMedTriggere(
+fun Vedtaksbegrunnelse.tilBegrunnelseMedTriggere(
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): BegrunnelseMedTriggere {
     return BegrunnelseMedTriggere(
