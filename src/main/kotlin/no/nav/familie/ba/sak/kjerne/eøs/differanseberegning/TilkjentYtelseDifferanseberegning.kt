@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.snittKombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidspunktKombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 
@@ -38,7 +38,7 @@ fun beregnDifferanse(
             .tidspunktKombinerMed(valutakursTidslinje) { tidspunkt, upb, vk -> upb.multipliserMed(vk, tidspunkt) }
 
         andelTilkjentYtelseTidslinje
-            .snittKombinerMed(utenlandskePeriodebeløpINorskeKroner) { aty, beløp ->
+            .kombinerMed(utenlandskePeriodebeløpINorskeKroner) { aty, beløp ->
                 beløp?.let { aty.kopierMedUtenlandskPeriodebeløp(it) } ?: aty
             }
             .filtrerIkkeNull()
