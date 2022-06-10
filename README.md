@@ -10,6 +10,10 @@ For å kjøre opp appen lokalt kan en kjøre
 * `DevLauncherPostgres`, som kjører opp med Spring-profilen `postgres` satt, og forventer en kjørende database. Samme
   effekt kan du med `DevLauncher` med
   `-Dspring.profiles.active=postgres` satt under `Edit Configurations -> VM Options`.
+* `DevLauncherPostgresPreprod`. Kjører mot intergrasjoner og pdl i preprod(ikke q1, men syntetisk). Har støtte for å
+  kjøre mot andre miljøer, men da må mock manuelt kommenteres ut i DevLauncherPostgresPreprod. BA_SAK_CLIENT_ID og
+  CLIENT_SECRET må settes til familie-ba-sak sin azure client id og secret for å få tilgang til pdl og integrasjoner.
+  Frontend må derfor bruke scope mot familie-ba-sak og ikke familie-ba-sak-lokal
 
 Appen tilgjengeliggjøres da på `localhost:8089`. Se [Database](#database) for hvordan du setter opp databasen. For å
 tillate kall fra frontend, se [Autentisering](#autentisering).
@@ -54,10 +58,17 @@ fra [Vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/famil
 
 Til slutt skal miljøvariablene se slik ut:
 
+DevLauncher/DevLauncherPostgres
+
 * BA_SAK_CLIENT_ID=`AZURE_APP_CLIENT_ID` (fra `azuread-familie-ba-sak-lokal`)
 * CLIENT_SECRET=`AZURE_APP_CLIENT_SECRET` (fra `azuread-familie-ba-sak-lokal`)
-* Scope for den aktuelle tjenesten
-  (fra [Vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/familie-ba-sak/default))
+
+DevLauncherPostgresPreprod:
+krever at man henter azuread fra en pod til familie-ba-sak. Som rulleres oftere enn azuread-familie-ba-sak-lokal
+`kubectl -n teamfamilie exec -c familie-ba-sak -it familie-ba-sak-byttmegmedpodid -- env | grep AZURE_APP_CLIENT`
+
+* BA_SAK_CLIENT_ID=`AZURE_APP_CLIENT_ID` (fra `familie-ba-sak`)
+* CLIENT_SECRET=`AZURE_APP_CLIENT_SECRET` (fra `familie-ba-sak`)
 
 ### Bruke Postman
 
