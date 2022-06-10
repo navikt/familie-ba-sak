@@ -31,7 +31,7 @@
         <familie.kontrakter.stønadsstatistikk>2.0_20220506145321_fda933e</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.12.4</mockk.version>
-        <token-validation-spring.version>2.0.20</token-validation-spring.version>
+        <token-validation-spring.version>2.0.21</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>1.6.9</springdoc.version>
 
@@ -263,7 +263,7 @@
         <dependency>
             <groupId>no.nav.fpsak.tidsserie</groupId>
             <artifactId>fpsak-tidsserie</artifactId>
-            <version>2.6.3</version>
+            <version>2.6.4</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.eksterne.kontrakter</groupId>

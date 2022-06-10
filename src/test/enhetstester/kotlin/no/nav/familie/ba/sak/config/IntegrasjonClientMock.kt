@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.isMockKMock
@@ -21,6 +22,7 @@ import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -28,6 +30,8 @@ import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.core.io.ClassPathResource
+import java.io.BufferedReader
 import java.time.LocalDate
 import java.time.Month
 import java.util.UUID
@@ -139,8 +143,7 @@ class IntegrasjonClientMock {
             every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } just runs
 
             every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"
-            every { mockIntegrasjonClient.hentLand("NO") } returns "NORGE"
-            every { mockIntegrasjonClient.hentLand("SE") } returns "SVERIGE"
+            every { mockIntegrasjonClient.hentLandkoderISO2() } returns hentLandkoderISO2()
 
             every { mockIntegrasjonClient.hentAlleEØSLand() } returns hentKodeverkLand()
 
@@ -196,5 +199,17 @@ class IntegrasjonClientMock {
         val FOM_2004 = LocalDate.of(2004, Month.JANUARY, 1)
         val TOM_2010 = LocalDate.of(2009, Month.DECEMBER, 31)
         val TOM_9999 = LocalDate.of(9999, Month.DECEMBER, 31)
+
+        data class LandkodeISO2(
+            val code: String,
+            val name: String,
+        )
+
+        fun hentLandkoderISO2(): Map<String, String> {
+            val landkoder =
+                ClassPathResource("landkoder/landkoder.json").inputStream.bufferedReader().use(BufferedReader::readText)
+
+            return objectMapper.readValue<List<LandkodeISO2>>(landkoder).associate { it.code to it.name }
+        }
     }
 }

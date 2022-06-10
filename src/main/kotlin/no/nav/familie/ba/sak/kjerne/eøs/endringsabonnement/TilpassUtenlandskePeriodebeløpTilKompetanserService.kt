@@ -70,7 +70,7 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
         .filtrerSekundærland()
 
     return forrigeUtenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
-        .tilpassTil(barnasKompetanseTidslinjer) { upb, _ -> upb ?: UtenlandskPeriodebeløp.NULL }
+        .tilpassTil(barnasKompetanseTidslinjer) { upb, kompetanse -> upb ?: UtenlandskPeriodebeløp(null, null, emptySet(), utbetalingsland = kompetanse.annenForeldersAktivitetsland) }
         .tilSkjemaer()
 }
 

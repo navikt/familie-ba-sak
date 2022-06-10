@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.ba.sak.common.kallEksternTjenesteUtenRespons
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -67,6 +68,10 @@ class IntegrasjonClient(
 
     @Cacheable("land", cacheManager = "kodeverkCache")
     fun hentLand(landkode: String): String {
+        if (landkode.length != 3) {
+            throw Feil("Støtter bare landkoder med tre bokstaver")
+        }
+
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/$landkode")
 
         return kallEksternTjenesteRessurs(
@@ -372,6 +377,19 @@ class IntegrasjonClient(
             formål = "Opprett skyggesak på fagsak $fagsakId"
         ) {
             postForEntity(uri, Skyggesak(aktør.aktørId, fagsakId.toString()))
+        }
+    }
+
+    @Cacheable("landkoder-ISO_3166-1_alfa-2", cacheManager = "kodeverkCache")
+    fun hentLandkoderISO2(): Map<String, String> {
+        val uri = URI.create("$integrasjonUri/kodeverk/landkoderISO2")
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = "kodeverk",
+            uri = uri,
+            formål = "Hent landkoderISO2"
+        ) {
+            getForEntity(uri)
         }
     }
 

@@ -58,7 +58,7 @@ internal class ValutakursServiceTest {
             .lagreTil(valutakursRepository)
 
         val utenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
-            .medBeløp("  777777777", "EUR", barn1)
+            .medBeløp("  777777777", "EUR", "N", barn1)
             .bygg()
 
         every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id) } returns utenlandskePeriodebeløp
