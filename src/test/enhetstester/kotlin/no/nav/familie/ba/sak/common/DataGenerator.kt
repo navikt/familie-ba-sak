@@ -948,6 +948,15 @@ fun lagVilkårResultat(
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
 
+fun lagEndretUtbetalingAndel(behandlingId: Long, barn: Person, fom: YearMonth, tom: YearMonth, prosent: Int) =
+    lagEndretUtbetalingAndel(
+        behandlingId = behandlingId,
+        person = barn,
+        fom = fom,
+        tom = tom,
+        prosent = BigDecimal(prosent)
+    )
+
 fun lagEndretUtbetalingAndel(
     id: Long = 0,
     behandlingId: Long = 0,

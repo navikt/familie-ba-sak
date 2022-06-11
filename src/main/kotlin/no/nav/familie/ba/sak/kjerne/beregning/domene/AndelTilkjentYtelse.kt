@@ -20,8 +20,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.math.BigDecimal
-import java.math.MathContext
-import java.math.RoundingMode
 import java.time.YearMonth
 import java.util.Objects
 import javax.persistence.CascadeType
@@ -112,8 +110,6 @@ data class AndelTilkjentYtelse(
     var forrigePeriodeOffset: Long? = null,
 
     @Transient // TODO: Skal ha et felt i databasen
-    val utenlandskPeriodebeløp: Int? = null,
-    @Transient // TODO: Skal ha et felt i databasen
     val nasjonaltPeriodebeløp: Int? = null,
     @Transient // TODO: Skal ha et felt i databasen
     val differanseberegnetBeløp: Int? = null
@@ -137,7 +133,6 @@ data class AndelTilkjentYtelse(
             Objects.equals(stønadTom, annen.stønadTom) &&
             Objects.equals(aktør, annen.aktør) &&
             Objects.equals(nasjonaltPeriodebeløp, annen.nasjonaltPeriodebeløp) &&
-            Objects.equals(utenlandskPeriodebeløp, annen.utenlandskPeriodebeløp) &&
             Objects.equals(differanseberegnetBeløp, annen.differanseberegnetBeløp)
     }
 
@@ -151,7 +146,6 @@ data class AndelTilkjentYtelse(
             stønadTom,
             aktør,
             nasjonaltPeriodebeløp,
-            utenlandskPeriodebeløp,
             differanseberegnetBeløp
         )
     }
@@ -159,7 +153,7 @@ data class AndelTilkjentYtelse(
     override fun toString(): String {
         return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type = $type, prosent = $prosent," +
             "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset), " +
-            "nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, utenlandskPeriodebeløp = $utenlandskPeriodebeløp, differanseberegnetBeløp = $differanseberegnetBeløp"
+            "nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, differanseberegnetBeløp = $differanseberegnetBeløp"
     }
 
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
@@ -341,25 +335,3 @@ fun List<AndelTilkjentYtelse>?.hentTidslinje() =
             )
         } ?: emptyList()
     )
-
-fun AndelTilkjentYtelse?.kopierMedUtenlandskPeriodebeløp(beløp: BigDecimal): AndelTilkjentYtelse? {
-    if (this == null)
-        return null
-
-    val nyttNasjonaltPeriodebeløp = when {
-        differanseberegnetBeløp == null -> kalkulertUtbetalingsbeløp
-        differanseberegnetBeløp != kalkulertUtbetalingsbeløp -> kalkulertUtbetalingsbeløp
-        else -> this.nasjonaltPeriodebeløp!!
-    }
-
-    val avrundetUtenlandskPeriodebeløp = beløp.round(MathContext(0, RoundingMode.DOWN)).intValueExact()
-    val nyttDifferanseberegnetBeløp = nyttNasjonaltPeriodebeløp - avrundetUtenlandskPeriodebeløp
-
-    return copy(
-        id = 0, // Lager en ny instans
-        kalkulertUtbetalingsbeløp = nyttDifferanseberegnetBeløp,
-        nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
-        utenlandskPeriodebeløp = avrundetUtenlandskPeriodebeløp,
-        differanseberegnetBeløp = nyttDifferanseberegnetBeløp
-    )
-}
