@@ -5,11 +5,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.eøs.util.DeltBostedBuilder
+import no.nav.familie.ba.sak.kjerne.eøs.util.tilEndreteUtebetalingAndeler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilMånedTidspunkt
@@ -36,7 +35,6 @@ class TilkjentYtelseTestController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val beregningService: BeregningService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
 ) {
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -50,16 +48,7 @@ class TilkjentYtelseTestController(
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         restDeltBosted.tilEndretUtbetalingAndeler(personopplysningGrunnlag, tilkjentYtelse).forEach {
-            val endretUtebetalingAndel = endretUtbetalingAndelService
-                .opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
-
-            val person = personopplysningGrunnlag.personer.single { person -> person.aktør == it.person?.aktør!! }
-
-            endretUtebetalingAndel.fraRestEndretUtbetalingAndel(it.tilRestEndretUtbetalingAndel(), person)
-
-            // Har ikke klart å skjønne hvorfor jeg trenger dette steget.
-            // Ser ikke at det blir gjort i EndretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse
-            val lagretEndretUtbetalingAndel = endretUtbetalingAndelRepository.saveAndFlush(endretUtebetalingAndel)
+            val lagretEndretUtbetalingAndel = endretUtbetalingAndelRepository.saveAndFlush(it)
 
             beregningService.oppdaterBehandlingMedBeregning(
                 behandling, personopplysningGrunnlag, lagretEndretUtbetalingAndel
