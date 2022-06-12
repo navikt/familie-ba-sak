@@ -181,7 +181,7 @@ class BeregningService(
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
-        tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(tilkjentYtelse) }
+        tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }
         return lagretTilkjentYtelse
     }
 
