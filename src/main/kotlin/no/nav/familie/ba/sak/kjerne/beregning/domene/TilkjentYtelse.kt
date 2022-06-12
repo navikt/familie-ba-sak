@@ -117,9 +117,25 @@ fun TilkjentYtelse.tilTidslinjeMedAndeler(): LocalDateTimeline<List<AndelTilkjen
     return lagTidslinjeMedOverlappendePerioderForAndeler(tidslinjer)
 }
 
-// Kunne fint vært samme instans og bare mutert andelerTilkjentYtelse.
-// Men prøver å opprettholde et snev av ikke-muterbarhet
-fun TilkjentYtelse.medAndeler(andeler: Iterable<AndelTilkjentYtelse>) =
-    this.copy(andelerTilkjentYtelse = andeler.toMutableSet())
+fun TilkjentYtelse.kopiMedAndeler(andeler: Iterable<AndelTilkjentYtelse>): TilkjentYtelse {
+
+    val nyTilkjentYtelse = this.copy(
+        id = 0,
+        andelerTilkjentYtelse = mutableSetOf(),
+        opprettetDato = this.opprettetDato,
+        endretDato = LocalDate.now()
+    )
+
+    val nyeAndelerTilkjentYtelse = andeler.map {
+        it.copy(
+            id = 0,
+            tilkjentYtelse = nyTilkjentYtelse,
+            endretUtbetalingAndeler = it.endretUtbetalingAndeler.toMutableList()
+        )
+    }
+
+    nyTilkjentYtelse.andelerTilkjentYtelse.addAll(nyeAndelerTilkjentYtelse)
+    return nyTilkjentYtelse
+}
 
 fun TilkjentYtelse.søkersAndeler() = this.andelerTilkjentYtelse.filter { it.erSøkersAndel() }

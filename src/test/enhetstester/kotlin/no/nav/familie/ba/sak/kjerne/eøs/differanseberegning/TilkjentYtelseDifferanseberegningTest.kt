@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.medAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.domene.kopiMedAndeler
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
@@ -31,8 +31,9 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 class TilkjentYtelseDifferanseberegningTest {
+
     @Test
-    fun test() {
+    fun `skal gjøre differanseberegning på en tilkjent ytelse med endringsperioder`() {
 
         val barnsFødselsdato = 13.jan(2020)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
@@ -60,23 +61,23 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(6, tilkjentYtelse.andelerTilkjentYtelse.size)
 
         val tilkjentYtelseMedEndringer = DeltBostedBuilder(startMåned, tilkjentYtelse)
-            .medDeltBosted("///////000000000011111>", barn1, barn2)
+            .medDeltBosted(" //////000000000011111>", barn1, barn2)
             .byggTilkjentYtelse()
 
         assertEquals(8, tilkjentYtelseMedEndringer.andelerTilkjentYtelse.size)
 
         val utenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(startMåned, behandlingId)
-            .medBeløp("444555666>", "EUR", "fr", barn1, barn2)
+            .medBeløp(" 44555666>", "EUR", "fr", barn1, barn2)
             .bygg()
 
         val valutakurser = ValutakursBuilder(startMåned, behandlingId)
-            .medKurs("8888899999>", "EUR", barn1, barn2)
+            .medKurs(" 888899999>", "EUR", barn1, barn2)
             .bygg()
 
         val differanseBeregnetTilkjentYtelse =
             beregnDifferanse(tilkjentYtelseMedEndringer, utenlandskePeriodebeløp, valutakurser)
 
-        assertEquals(12, differanseBeregnetTilkjentYtelse.andelerTilkjentYtelse.size)
+        assertEquals(14, differanseBeregnetTilkjentYtelse.andelerTilkjentYtelse.size)
     }
 }
 
@@ -120,7 +121,7 @@ fun DeltBostedBuilder.byggTilkjentYtelse(): TilkjentYtelse {
             bygg().tilEndreteUtebetalingAndeler()
         )
 
-    return tilkjentYtelse.medAndeler(andelerTilkjentYtelserEtterEUA)
+    return tilkjentYtelse.kopiMedAndeler(andelerTilkjentYtelserEtterEUA)
 }
 
 fun Iterable<DeltBosted>.tilEndreteUtebetalingAndeler(): List<EndretUtbetalingAndel> {

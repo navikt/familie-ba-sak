@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.medAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.domene.kopiMedAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.søkersAndeler
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
@@ -34,7 +34,9 @@ fun beregnDifferanse(
         val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjer.getOrDefault(aktør, TomTidslinje())
 
         val utenlandskePeriodebeløpINorskeKroner = utenlandskePeriodebeløpTidslinje
-            .tidspunktKombinerMed(valutakursTidslinje) { tidspunkt, upb, vk -> upb.multipliserMed(vk, tidspunkt) }
+            .tidspunktKombinerMed(valutakursTidslinje) { tidspunkt, upb, vk ->
+                upb.tilMånedligValutabeløp(tidspunkt) * vk.tilKronerPerValutaenhet()
+            }
 
         andelTilkjentYtelseTidslinje.kombinerMed(utenlandskePeriodebeløpINorskeKroner) { aty, beløp ->
             beløp?.let { aty.kalkulerFraUtenlandskPeriodebeløp(it) } ?: aty
@@ -44,12 +46,12 @@ fun beregnDifferanse(
     val barnasAndeler = barnasDifferanseberegnetAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
     val søkersAndeler = tilkjentYtelse.søkersAndeler()
 
-    validarSøkersYtelserMotEventueltNegativeAndeler(søkersAndeler, barnasAndeler)
+    validarSøkersYtelserMotEventueltNegativeAndelerForBarna(søkersAndeler, barnasAndeler)
 
-    return tilkjentYtelse.medAndeler(søkersAndeler + barnasAndeler)
+    return tilkjentYtelse.kopiMedAndeler(søkersAndeler + barnasAndeler)
 }
 
-private fun validarSøkersYtelserMotEventueltNegativeAndeler(
+private fun validarSøkersYtelserMotEventueltNegativeAndelerForBarna(
     søkersAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     barnasAndelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ) {

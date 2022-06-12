@@ -8,7 +8,16 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
-import kotlin.math.roundToInt
+
+data class KronerPerValutaenhet(
+    val kronerPerValutaenhet: BigDecimal,
+    val valutakode: String,
+)
+
+data class Valutabeløp(
+    val beløp: BigDecimal,
+    val valutakode: String
+)
 
 enum class Intervall {
     ÅRLIG,
@@ -16,9 +25,9 @@ enum class Intervall {
     MÅNEDLIG,
     UKENTLIG;
 
-    fun konverterBeløpTilMånedlig(beløp: Double, erSkuddår: Boolean) = when (this) {
-        ÅRLIG -> beløp / 12
-        KVARTALSVIS -> beløp / 4
+    fun konverterBeløpTilMånedlig(beløp: BigDecimal, erSkuddår: Boolean) = when (this) {
+        ÅRLIG -> beløp / 12.toBigDecimal()
+        KVARTALSVIS -> beløp / 3.toBigDecimal()
         MÅNEDLIG -> beløp
         UKENTLIG -> konverterFraUkentligTilMånedligBeløp(beløp, erSkuddår)
     }
@@ -30,52 +39,30 @@ enum class Intervall {
      * ta utgangspunkt i antall dager i et år. Siden valutajusteringen kun skjer en gang i året bruker
      * vi et gjennomsnitt for hver måned, slik at vi konverterer likt for måneder med forskjellig lengde.
      ***/
-    private fun konverterFraUkentligTilMånedligBeløp(beløp: Double, erSkuddår: Boolean): Double {
+    private fun konverterFraUkentligTilMånedligBeløp(beløp: BigDecimal, erSkuddår: Boolean): BigDecimal {
         val dagerIÅret: Double = if (erSkuddår) 366.0 else 365.0
         val ukerIÅret: Double = dagerIÅret / 7.0
         val ukerIEnMåned: Double = ukerIÅret / 12.0
 
-        return beløp * ukerIEnMåned
+        return beløp.multiply(BigDecimal.valueOf(ukerIEnMåned))
     }
 }
 
-fun beregnDifferanseOrdinær(utbetalingsbeløpNorge: Int, utbetalingsbeløpUtlandINok: Int): Int {
-    val differanse = utbetalingsbeløpNorge - utbetalingsbeløpUtlandINok
-
-    return if (differanse < 0) 0
-    else differanse
-}
-
-fun beregnMånedligUtbetalingsbeløpUtlandINok(
-    satsUtland: Int,
-    kurs: Double,
-    intervall: Intervall,
-    erSkuddår: Boolean
-): Int {
-    val beløpINorskeKroner = satsUtland * kurs
-    val utbetalingsbeløpUtlandINok = intervall.konverterBeløpTilMånedlig(
-        beløp = beløpINorskeKroner,
-        erSkuddår = erSkuddår
-    )
-    val avrundetUtbetalingsbeløpUtlandINok = utbetalingsbeløpUtlandINok.roundToInt()
-
-    return avrundetUtbetalingsbeløpUtlandINok
-}
-
-fun <T : Tidsenhet> UtenlandskPeriodebeløp?.multipliserMed(valutakurs: Valutakurs?, tidspunkt: Tidspunkt<T>) =
-    when {
-        this == null || valutakurs == null -> null
-        this.valutakode != valutakurs.valutakode -> null
-        this.beløp == null || valutakurs.kurs == null -> null
-        else -> this.tilMånedligBeløp(tidspunkt)?.multiply(valutakurs.kurs)
-    }
-
-fun <T : Tidsenhet> UtenlandskPeriodebeløp?.tilMånedligBeløp(tidspunkt: Tidspunkt<T>): BigDecimal? {
-    if (this?.beløp == null || this.intervall == null)
+fun <T : Tidsenhet> UtenlandskPeriodebeløp?.tilMånedligValutabeløp(tidspunkt: Tidspunkt<T>): Valutabeløp? {
+    if (this?.beløp == null || this.intervall == null || this.valutakode == null)
         return null
 
-    return Intervall.valueOf(this.intervall).konverterBeløpTilMånedlig(this.beløp.toDouble(), tidspunkt.erSkuddår())
-        .toBigDecimal()
+    val månedligBeløp =
+        Intervall.valueOf(this.intervall).konverterBeløpTilMånedlig(this.beløp, tidspunkt.erSkuddår())
+
+    return Valutabeløp(månedligBeløp, this.valutakode)
+}
+
+fun Valutakurs?.tilKronerPerValutaenhet(): KronerPerValutaenhet? {
+    if (this?.kurs == null || this.valutakode == null)
+        return null
+
+    return KronerPerValutaenhet(this.kurs, this.valutakode)
 }
 
 fun <T : Tidsenhet> Tidspunkt<T>.erSkuddår() = this.tilLocalDateEllerNull()?.isLeapYear ?: false
@@ -108,4 +95,14 @@ fun AndelTilkjentYtelse?.kalkulerFraUtenlandskPeriodebeløp(utenlandskPeriodebel
         nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
         differanseberegnetBeløp = nyttDifferanseberegnetBeløp
     )
+}
+
+operator fun Valutabeløp?.times(kronerPerValutaenhet: KronerPerValutaenhet?): BigDecimal? {
+    if (this == null || kronerPerValutaenhet == null)
+        return null
+
+    if (this.valutakode != kronerPerValutaenhet.valutakode)
+        throw IllegalArgumentException("Valutabeløp har valutakode $valutakode, som avviker fra ${kronerPerValutaenhet.valutakode}")
+
+    return this.beløp * kronerPerValutaenhet.kronerPerValutaenhet
 }

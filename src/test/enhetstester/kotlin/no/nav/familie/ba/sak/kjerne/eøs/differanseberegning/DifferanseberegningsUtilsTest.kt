@@ -1,94 +1,140 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.Intervall.KVARTALSVIS
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.Intervall.MÅNEDLIG
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.Intervall.UKENTLIG
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.Intervall.ÅRLIG
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.math.MathContext
+import java.math.RoundingMode
+import java.time.YearMonth
 
 class DifferanseberegningsUtilsTest {
     val utbetalingsbeløpNorge = 2000
 
     @Test
-    fun `Skal gi riktig differanse for årlig utbetaling ved ordinær sekundærlandssak`() {
+    fun `Skal multiplisere valutabeløp med valutakurs`() {
 
-        val utenlandskSatsÅrlig = 1200
+        val valutabeløp = 1200.i("EUR")
+        val kurs = 9.731.kronerPer("EUR")
 
-        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
-            satsUtland = utenlandskSatsÅrlig, kurs = 10.0, intervall = Intervall.ÅRLIG, erSkuddår = false
-        )
-
-        Assertions.assertEquals(1000, utbetalingsbeløpUtlandINok)
-        Assertions.assertEquals(1000, beregnDifferanseOrdinær(utbetalingsbeløpNorge, utbetalingsbeløpUtlandINok))
+        Assertions.assertEquals(11_677.toBigDecimal(), (valutabeløp * kurs)?.round(MathContext(5)))
     }
 
     @Test
-    fun `Skal gi riktig differanse for kvartalvis utbetaling ved ordinær sekundærlandssak`() {
+    fun `Skal ikke multiplisere valutabeløp med valutakurs når valuta er forskjellig`() {
 
-        val utenlandskSatsKvartalsvis = 400
+        val valutabeløp = 1200.i("EUR")
+        val kurs = 9.73.kronerPer("DKK")
 
-        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
-            satsUtland = utenlandskSatsKvartalsvis, kurs = 10.0, intervall = Intervall.KVARTALSVIS, erSkuddår = false
-        )
-
-        Assertions.assertEquals(1000, utbetalingsbeløpUtlandINok)
-        Assertions.assertEquals(1000, beregnDifferanseOrdinær(utbetalingsbeløpNorge, utbetalingsbeløpUtlandINok))
+        assertThrows<IllegalArgumentException> { valutabeløp * kurs }
     }
 
     @Test
-    fun `Skal gi riktig differanse for månedlig utbetaling ved ordinær sekundærlandssak`() {
+    fun `Skal konvertere årlig utenlandsk periodebeløp til månedlig`() {
 
-        val utenlandskSatsMåendlig = 100
+        val månedligValutabeløp = 1200.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
+            .tilMånedligValutabeløp(jan(2021))
 
-        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
-            satsUtland = utenlandskSatsMåendlig, kurs = 10.0, intervall = Intervall.MÅNEDLIG, erSkuddår = false
-        )
-
-        Assertions.assertEquals(1000, utbetalingsbeløpUtlandINok)
-        Assertions.assertEquals(1000, beregnDifferanseOrdinær(utbetalingsbeløpNorge, utbetalingsbeløpUtlandINok))
+        Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
     }
 
     @Test
-    fun `Skal gi riktig differanse for ukentlig utbetaling ved ordinær sekundærlandssak`() {
+    fun `Skal konvertere kvartalsvis utenlandsk periodebeløp til månedlig`() {
 
-        val utenlandskSatsUkentlig = 25
+        val månedligValutabeløp = 300.i("EUR").somUtenlandskPeriodebeløp(KVARTALSVIS)
+            .tilMånedligValutabeløp(jan(2021))
 
-        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
-            satsUtland = utenlandskSatsUkentlig, kurs = 10.0, intervall = Intervall.UKENTLIG, erSkuddår = false
-        )
-
-        Assertions.assertEquals(1086, utbetalingsbeløpUtlandINok)
-        Assertions.assertEquals(914, beregnDifferanseOrdinær(utbetalingsbeløpNorge, utbetalingsbeløpUtlandINok))
+        Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
     }
 
     @Test
-    fun `Skal gi riktig differanse for ukentlig utbetaling ved skuddår ved ordinær sekundærlandssak`() {
+    fun `Månedlig utenlandsk periodebeløp skal ikke endres`() {
 
-        val utenlandskSatsUkentlig = 25
+        val månedligValutabeløp = 100.i("EUR").somUtenlandskPeriodebeløp(MÅNEDLIG)
+            .tilMånedligValutabeløp(jan(2021))
 
-        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
-            satsUtland = utenlandskSatsUkentlig, kurs = 10.0, intervall = Intervall.UKENTLIG, erSkuddår = true
-        )
+        Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
+    }
 
-        Assertions.assertEquals(1089, utbetalingsbeløpUtlandINok)
-        Assertions.assertEquals(911, beregnDifferanseOrdinær(utbetalingsbeløpNorge, utbetalingsbeløpUtlandINok))
+    @Test
+    fun `Skal konvertere ukentlig utenlandsk periodebeløp til månedlig`() {
+
+        val månedligValutabeløp = 25.i("EUR").somUtenlandskPeriodebeløp(UKENTLIG)
+            .tilMånedligValutabeløp(jan(2021))?.rundNed(5)
+
+        Assertions.assertEquals(108.63.i("EUR"), månedligValutabeløp)
+    }
+
+    @Test
+    fun `Skal konvertere ukentlig utenlandsk periodebeløp til månedlig i skuddår`() {
+
+        val månedligValutabeløp = 25.i("EUR").somUtenlandskPeriodebeløp(UKENTLIG)
+            .tilMånedligValutabeløp(jan(2020))?.rundNed(5)
+
+        Assertions.assertEquals(108.92.i("EUR"), månedligValutabeløp)
     }
 
     @Test
     fun `Skal ha presisjon i kronekonverteringen til norske kroner`() {
+        val månedligValutabeløp = 0.0123767453453.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
+            .tilMånedligValutabeløp(jan(2021))?.rundNed(10)
 
-        val utenlandskSatsÅrlig = 12000000
-
-        val utbetalingsbeløpUtlandINok = beregnMånedligUtbetalingsbeløpUtlandINok(
-            satsUtland = utenlandskSatsÅrlig, kurs = 12.3456775, intervall = Intervall.ÅRLIG, erSkuddår = false
-        )
-
-        Assertions.assertEquals(12345678, utbetalingsbeløpUtlandINok)
+        Assertions.assertEquals(0.001031395445.i("EUR"), månedligValutabeløp)
     }
 
     @Test
-    fun `Skal gi null dersom utenlandsk beløp er større en det norske når det ikke er småbarnstilleg eller utvidet`() {
+    fun `Skal håndtere gjentakende endring og differanseberegning på andel tilkjent ytelse`() {
+        val aty1 = lagAndelTilkjentYtelse(beløp = 50)
+            .kalkulerFraUtenlandskPeriodebeløp(100.toBigDecimal())
 
-        Assertions.assertEquals(
-            0,
-            beregnDifferanseOrdinær(utbetalingsbeløpNorge = 1000, utbetalingsbeløpUtlandINok = 2000)
-        )
+        Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
+        Assertions.assertEquals(-50, aty1?.differanseberegnetBeløp)
+        Assertions.assertEquals(50, aty1?.nasjonaltPeriodebeløp)
+
+        val aty2 = aty1?.copy(kalkulertUtbetalingsbeløp = 1)
+            ?.kalkulerFraUtenlandskPeriodebeløp(75.toBigDecimal())
+
+        Assertions.assertEquals(0, aty2?.kalkulertUtbetalingsbeløp)
+        Assertions.assertEquals(-74, aty2?.differanseberegnetBeløp)
+        Assertions.assertEquals(1, aty2?.nasjonaltPeriodebeløp)
+
+        val aty3 = aty2?.copy(kalkulertUtbetalingsbeløp = 250)
+            ?.kalkulerFraUtenlandskPeriodebeløp(75.toBigDecimal())
+
+        Assertions.assertEquals(175, aty3?.kalkulertUtbetalingsbeløp)
+        Assertions.assertEquals(175, aty3?.differanseberegnetBeløp)
+        Assertions.assertEquals(250, aty3?.nasjonaltPeriodebeløp)
     }
 }
+
+fun lagAndelTilkjentYtelse(beløp: Int) = lagAndelTilkjentYtelse(
+    fom = YearMonth.now(),
+    tom = YearMonth.now().plusYears(1),
+    beløp = beløp
+)
+
+fun Double.kronerPer(valuta: String) = KronerPerValutaenhet(
+    valutakode = valuta,
+    kronerPerValutaenhet = this.toBigDecimal()
+)
+
+fun Double.i(valuta: String) = Valutabeløp(this.toBigDecimal(), valuta)
+fun Int.i(valuta: String) = Valutabeløp(this.toBigDecimal(), valuta)
+
+fun Valutabeløp.somUtenlandskPeriodebeløp(intervall: Intervall): UtenlandskPeriodebeløp =
+    UtenlandskPeriodebeløp(
+        fom = null,
+        tom = null,
+        beløp = this.beløp,
+        valutakode = this.valutakode,
+        intervall = intervall.name
+    )
+
+fun Valutabeløp.rundNed(presisjon: Int) =
+    Valutabeløp(this.beløp.round(MathContext(presisjon, RoundingMode.DOWN)), this.valutakode)

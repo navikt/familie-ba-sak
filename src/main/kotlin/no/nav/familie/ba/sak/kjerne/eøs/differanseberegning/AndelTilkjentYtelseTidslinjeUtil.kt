@@ -20,6 +20,10 @@ fun TilkjentYtelse.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<AndelT
         .mapValues { (_, andeler) -> tidslinje { andeler.map { it.tilPeriode() } } }
 }
 
+fun Iterable<Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
+    return this.flatMap { it.tilAndelTilkjentYtelse() }
+}
+
 fun Tidslinje<AndelTilkjentYtelse, Måned>.tilAndelTilkjentYtelse(): List<AndelTilkjentYtelse> {
     return this
         .perioder().map {
