@@ -117,11 +117,3 @@ fun TilkjentYtelse.tilTidslinjeMedAndeler(): LocalDateTimeline<List<AndelTilkjen
 
     return lagTidslinjeMedOverlappendePerioderForAndeler(tidslinjer)
 }
-
-fun TilkjentYtelse.medAndeler(andeler: Iterable<AndelTilkjentYtelse>): TilkjentYtelse {
-    this.andelerTilkjentYtelse.clear()
-    this.andelerTilkjentYtelse.addAll(andeler)
-    return this
-}
-
-fun TilkjentYtelse.søkersAndeler() = this.andelerTilkjentYtelse.filter { it.erSøkersAndel() }

@@ -1,10 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.Intervall.KVARTALSVIS
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.Intervall.MÅNEDLIG
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.Intervall.UKENTLIG
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.Intervall.ÅRLIG
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall.KVARTALSVIS
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall.MÅNEDLIG
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall.UKENTLIG
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall.ÅRLIG
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.KronerPerValutaenhet
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Valutabeløp
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Assertions
