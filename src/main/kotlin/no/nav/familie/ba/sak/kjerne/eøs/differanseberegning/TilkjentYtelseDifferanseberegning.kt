@@ -57,7 +57,7 @@ private fun validarSøkersYtelserMotEventueltNegativeAndelerForBarna(
     barnasAndelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ) {
     val barnasSumNegativeDifferansebeløp = barnasAndelerTilkjentYtelse
-        .map { minOf(it.differanseberegnetBeløp ?: 0, 0) }
+        .map { minOf(it.differanseberegnetPeriodebeløp ?: 0, 0) }
         .sum()
 
     val søkersSumUtbetalingsbeløp = søkersAndelerTilkjentYtelse

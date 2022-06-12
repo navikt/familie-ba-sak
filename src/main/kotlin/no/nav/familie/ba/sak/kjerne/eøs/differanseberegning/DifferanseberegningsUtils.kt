@@ -44,9 +44,9 @@ fun AndelTilkjentYtelse?.kalkulerFraUtenlandskPeriodebeløp(utenlandskPeriodebel
         return null
 
     val nyttNasjonaltPeriodebeløp = when {
-        differanseberegnetBeløp == null || nasjonaltPeriodebeløp == null -> kalkulertUtbetalingsbeløp
-        differanseberegnetBeløp < 0 && kalkulertUtbetalingsbeløp > 0 -> kalkulertUtbetalingsbeløp
-        differanseberegnetBeløp != kalkulertUtbetalingsbeløp -> kalkulertUtbetalingsbeløp
+        differanseberegnetPeriodebeløp == null || nasjonaltPeriodebeløp == null -> kalkulertUtbetalingsbeløp
+        differanseberegnetPeriodebeløp < 0 && kalkulertUtbetalingsbeløp > 0 -> kalkulertUtbetalingsbeløp
+        differanseberegnetPeriodebeløp != kalkulertUtbetalingsbeløp -> kalkulertUtbetalingsbeløp
         else -> nasjonaltPeriodebeløp
     }
 
@@ -58,6 +58,6 @@ fun AndelTilkjentYtelse?.kalkulerFraUtenlandskPeriodebeløp(utenlandskPeriodebel
         id = 0, // Lager en ny instans
         kalkulertUtbetalingsbeløp = maxOf(nyttDifferanseberegnetBeløp, 0),
         nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
-        differanseberegnetBeløp = nyttDifferanseberegnetBeløp
+        differanseberegnetPeriodebeløp = nyttDifferanseberegnetBeløp
     )
 }
