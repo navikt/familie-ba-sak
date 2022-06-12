@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursTestController
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingTestController
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -66,12 +67,10 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
             vilkårsvurderingTestController.opprettBehandlingMedVilkårsvurdering(vilkårsvurderingRequest)
                 .body?.data!!
 
-        tilkjentYtelseTestController.lagInitiellTilkjentYtelse(utvidetBehandling1.behandlingId)
-        /*
+        // tilkjentYtelseTestController.lagInitiellTilkjentYtelse(utvidetBehandling1.behandlingId)
         tilkjentYtelseTestController.oppdaterEndretUtebetalingAndeler(
             utvidetBehandling1.behandlingId, deltBosteRequest
         )
-         */
 
         kompetanseTestController.endreKompetanser(utvidetBehandling1.behandlingId, kompetanseRequest)
         utenlandskPeriodebeløpTestController.endreUtenlandskePeriodebeløp(
@@ -79,6 +78,11 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
             utenlandskPeriodebeløpRequest
         )
 
-        valutakursTestController.endreValutakurser(utvidetBehandling1.behandlingId, valutakursRequest)
+        val utvidetbehandling2 = valutakursTestController
+            .endreValutakurser(utvidetBehandling1.behandlingId, valutakursRequest)
+            .body?.data!!
+
+        Assertions.assertEquals(3, utvidetbehandling2.endretUtbetalingAndeler.size)
+        Assertions.assertEquals(10, utvidetbehandling2.utbetalingsperioder.size)
     }
 }

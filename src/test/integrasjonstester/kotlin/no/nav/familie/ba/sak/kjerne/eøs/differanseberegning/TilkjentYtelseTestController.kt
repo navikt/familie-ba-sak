@@ -7,6 +7,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilMånedTidspunkt
@@ -17,7 +20,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -35,20 +37,8 @@ class TilkjentYtelseTestController(
     private val beregningService: BeregningService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
 ) {
-
-    @PostMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun lagInitiellTilkjentYtelse(
-        @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!
-
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
-    }
-
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterEndretUtebetalingAndeler(
         @PathVariable behandlingId: Long,
@@ -60,8 +50,20 @@ class TilkjentYtelseTestController(
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         restDeltBosted.tilEndretUtbetalingAndeler(personopplysningGrunnlag, tilkjentYtelse).forEach {
-            endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
-            beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, it)
+            val endretUtebetalingAndel = endretUtbetalingAndelService
+                .opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
+
+            val person = personopplysningGrunnlag.personer.single { person -> person.aktør == it.person?.aktør!! }
+
+            endretUtebetalingAndel.fraRestEndretUtbetalingAndel(it.tilRestEndretUtbetalingAndel(), person)
+
+            // Har ikke klart å skjønne hvorfor jeg trenger dette steget.
+            // Ser ikke at det blir gjort i EndretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse
+            val lagretEndretUtbetalingAndel = endretUtbetalingAndelRepository.saveAndFlush(endretUtebetalingAndel)
+
+            beregningService.oppdaterBehandlingMedBeregning(
+                behandling, personopplysningGrunnlag, lagretEndretUtbetalingAndel
+            )
         }
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

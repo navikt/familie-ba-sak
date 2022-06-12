@@ -57,7 +57,7 @@ data class AndelTilkjentYtelse(
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandlingId: Long,
 
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.MERGE])
     @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
     var tilkjentYtelse: TilkjentYtelse,
 

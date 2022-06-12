@@ -66,7 +66,8 @@ data class TilkjentYtelse(
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "tilkjentYtelse",
-        cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE]
+        cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE],
+        orphanRemoval = true
     )
     val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf()
 )
@@ -117,25 +118,10 @@ fun TilkjentYtelse.tilTidslinjeMedAndeler(): LocalDateTimeline<List<AndelTilkjen
     return lagTidslinjeMedOverlappendePerioderForAndeler(tidslinjer)
 }
 
-fun TilkjentYtelse.kopiMedAndeler(andeler: Iterable<AndelTilkjentYtelse>): TilkjentYtelse {
-
-    val nyTilkjentYtelse = this.copy(
-        id = 0,
-        andelerTilkjentYtelse = mutableSetOf(),
-        opprettetDato = this.opprettetDato,
-        endretDato = LocalDate.now()
-    )
-
-    val nyeAndelerTilkjentYtelse = andeler.map {
-        it.copy(
-            id = 0,
-            tilkjentYtelse = nyTilkjentYtelse,
-            endretUtbetalingAndeler = it.endretUtbetalingAndeler.toMutableList()
-        )
-    }
-
-    nyTilkjentYtelse.andelerTilkjentYtelse.addAll(nyeAndelerTilkjentYtelse)
-    return nyTilkjentYtelse
+fun TilkjentYtelse.medAndeler(andeler: Iterable<AndelTilkjentYtelse>): TilkjentYtelse {
+    this.andelerTilkjentYtelse.clear()
+    this.andelerTilkjentYtelse.addAll(andeler)
+    return this
 }
 
 fun TilkjentYtelse.søkersAndeler() = this.andelerTilkjentYtelse.filter { it.erSøkersAndel() }

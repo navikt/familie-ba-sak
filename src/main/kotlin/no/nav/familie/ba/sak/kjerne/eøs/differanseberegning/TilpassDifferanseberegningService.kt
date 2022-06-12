@@ -25,7 +25,7 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
         val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
-        tilkjentYtelseRepository.erstatt(tilkjentYtelse, oppdatertTilkjentYtelse)
+        tilkjentYtelseRepository.saveAndFlush(oppdatertTilkjentYtelse)
     }
 }
 
@@ -43,7 +43,7 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 
         val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
-        tilkjentYtelseRepository.erstatt(tilkjentYtelse, oppdatertTilkjentYtelse)
+        tilkjentYtelseRepository.saveAndFlush(oppdatertTilkjentYtelse)
     }
 }
 
@@ -59,12 +59,6 @@ class TilpassDifferanseberegningEtterValutakursService(
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
         val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
-        tilkjentYtelseRepository.erstatt(tilkjentYtelse, oppdatertTilkjentYtelse)
+        tilkjentYtelseRepository.saveAndFlush(oppdatertTilkjentYtelse)
     }
-}
-
-fun TilkjentYtelseRepository.erstatt(gammel: TilkjentYtelse, ny: TilkjentYtelse): TilkjentYtelse {
-    this.delete(gammel)
-    this.flush()
-    return this.save(ny)
 }

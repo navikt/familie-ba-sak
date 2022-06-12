@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.kopiMedAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.domene.medAndeler
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
@@ -121,7 +121,7 @@ fun DeltBostedBuilder.byggTilkjentYtelse(): TilkjentYtelse {
             bygg().tilEndreteUtebetalingAndeler()
         )
 
-    return tilkjentYtelse.kopiMedAndeler(andelerTilkjentYtelserEtterEUA)
+    return tilkjentYtelse.medAndeler(andelerTilkjentYtelserEtterEUA)
 }
 
 fun Iterable<DeltBosted>.tilEndreteUtebetalingAndeler(): List<EndretUtbetalingAndel> {
