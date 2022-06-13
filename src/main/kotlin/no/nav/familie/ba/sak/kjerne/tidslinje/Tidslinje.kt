@@ -71,7 +71,7 @@ abstract class Tidslinje<I, T : Tidsenhet> {
         }
 
         data class TidslinjeFeilException(val tidslinjeFeil: Collection<TidslinjeFeil>) :
-            IllegalStateException()
+            IllegalStateException(tidslinjeFeil.toString())
     }
 }
 
