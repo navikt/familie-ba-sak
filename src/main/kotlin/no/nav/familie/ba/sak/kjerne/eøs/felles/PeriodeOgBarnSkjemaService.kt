@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.felles
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.oppdaterSkjemaerRekursivt
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.somInversOppdateringEllersNull
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.valider
 
 class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
     val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>,
@@ -48,6 +49,8 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
             .map { it.kopier() }
             .medBehandlingId(tilBehandlingId)
 
+        kopiAvFraSkjemaer.valider()
+
         periodeOgBarnSkjemaRepository.deleteAll(gjeldendeTilSkjemaer)
         periodeOgBarnSkjemaRepository.saveAll(kopiAvFraSkjemaer)
     }
@@ -59,6 +62,8 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
     ) {
         val skalSlettes = gjeldende - oppdaterte
         val skalLagres = oppdaterte - gjeldende
+
+        skalLagres.valider()
 
         periodeOgBarnSkjemaRepository.deleteAll(skalSlettes)
         periodeOgBarnSkjemaRepository.saveAll(skalLagres)

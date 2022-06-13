@@ -9,14 +9,16 @@ abstract class Tidslinje<I, T : Tidsenhet> {
     fun perioder(): Collection<Periode<I, T>> {
         return periodeCache ?: lagPerioder().sortedBy { it.fraOgMed }.toList()
             .also {
-                valider(it)
+                validerPerioder(it)
                 periodeCache = it
             }
     }
 
+    fun valider() = validerPerioder(lagPerioder().sortedBy { it.fraOgMed })
+
     protected abstract fun lagPerioder(): Collection<Periode<I, T>>
 
-    protected open fun valider(perioder: List<Periode<I, T>>) {
+    protected open fun validerPerioder(perioder: List<Periode<I, T>>) {
 
         val feilInnenforPerioder = perioder.map {
             when {

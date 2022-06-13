@@ -47,6 +47,8 @@ fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilSeparateTidslinjerForBarna(): Ma
     }
 }
 
+fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.valider() = this.tilTidslinje().valider()
+
 fun <S : PeriodeOgBarnSkjemaEntitet<S>> Map<Aktør, Tidslinje<S, Måned>>.tilSkjemaer() =
     this.flatMap { (aktør, tidslinjer) -> tidslinjer.tilSkjemaer(aktør) }
         .slåSammen()
