@@ -30,6 +30,7 @@ import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
 import org.springframework.core.io.ClassPathResource
 import java.io.BufferedReader
 import java.time.LocalDate
@@ -37,6 +38,7 @@ import java.time.Month
 import java.util.UUID
 
 @TestConfiguration
+@Profile("dev", "postgres")
 class IntegrasjonClientMock {
 
     @Bean
