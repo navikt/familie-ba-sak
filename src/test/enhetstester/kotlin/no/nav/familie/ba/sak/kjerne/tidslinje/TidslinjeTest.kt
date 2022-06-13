@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -78,6 +79,22 @@ internal class TidslinjeTest {
                 Periode(1.mar(2020), 30.apr(2020), 'B')
             ).perioder()
         }
+    }
+
+    @Test
+    fun `skal presentere tidslinjefeil på et forstålig format`() {
+        val tidslinjeFeil = assertThrows<TidslinjeFeilException> {
+            TestTidslinje(
+                Periode(1.jan(2020), 31.jan(2020), 'A'),
+                Periode(1.feb(2020), 29.feb(2020).somUendeligLengeTil(), 'A'),
+                Periode(1.mar(2020), 30.apr(2020), 'B')
+            ).perioder()
+        }
+
+        Assertions.assertEquals(
+            "[TidslinjeFeil(type=UENDELIG_FREMTID_FØR_SISTE_PERIODE, periode=2020-02-01 - 2020-02-29-->: A, tidslinje=2020-01-01 - 2020-01-31: A | 2020-02-01 - 2020-02-29-->: A | 2020-03-01 - 2020-04-30: B)]",
+            tidslinjeFeil.message
+        )
     }
 }
 

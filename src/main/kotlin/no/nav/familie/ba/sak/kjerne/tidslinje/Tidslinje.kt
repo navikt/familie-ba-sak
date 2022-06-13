@@ -21,7 +21,7 @@ abstract class Tidslinje<I, T : Tidsenhet> {
         val feilInnenforPerioder = perioder.map {
             when {
                 it.fraOgMed > it.tilOgMed ->
-                    TidslinjeFeil(it, this, TidslinjeFeilType.TOM_ER_FØR_FOM)
+                    TidslinjeFeil(periode = it, tidslinje = this, type = TidslinjeFeilType.TOM_ER_FØR_FOM)
                 else -> null
             }
         }
@@ -29,11 +29,23 @@ abstract class Tidslinje<I, T : Tidsenhet> {
         val feilMellomPåfølgendePerioder = perioder.windowed(2) { (periode1, periode2) ->
             when {
                 periode2.fraOgMed.erUendeligLengeSiden() ->
-                    TidslinjeFeil(periode2, this, TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE)
+                    TidslinjeFeil(
+                        periode = periode2,
+                        tidslinje = this,
+                        type = TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE
+                    )
                 periode1.tilOgMed.erUendeligLengeTil() ->
-                    TidslinjeFeil(periode1, this, TidslinjeFeilType.UENDELIG_FREMTID_FØR_SISTE_PERIODE)
+                    TidslinjeFeil(
+                        periode = periode1,
+                        tidslinje = this,
+                        type = TidslinjeFeilType.UENDELIG_FREMTID_FØR_SISTE_PERIODE
+                    )
                 periode1.tilOgMed >= periode2.fraOgMed ->
-                    TidslinjeFeil(periode1, this, TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE)
+                    TidslinjeFeil(
+                        periode = periode1,
+                        tidslinje = this,
+                        type = TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE
+                    )
                 else -> null
             }
         }
@@ -58,9 +70,9 @@ abstract class Tidslinje<I, T : Tidsenhet> {
 
     companion object {
         data class TidslinjeFeil(
+            val type: TidslinjeFeilType,
             val periode: Periode<*, *>,
             val tidslinje: Tidslinje<*, *>,
-            val type: TidslinjeFeilType
         )
 
         enum class TidslinjeFeilType {
@@ -71,7 +83,7 @@ abstract class Tidslinje<I, T : Tidsenhet> {
         }
 
         data class TidslinjeFeilException(val tidslinjeFeil: Collection<TidslinjeFeil>) :
-            IllegalStateException()
+            IllegalStateException(tidslinjeFeil.toString())
     }
 }
 
