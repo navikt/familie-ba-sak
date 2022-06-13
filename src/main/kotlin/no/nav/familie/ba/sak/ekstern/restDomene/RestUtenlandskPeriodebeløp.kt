@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.math.BigDecimal
@@ -12,7 +13,7 @@ data class RestUtenlandskPeriodebeløp(
     val barnIdenter: List<String>,
     val beløp: BigDecimal?,
     val valutakode: String?,
-    val intervall: String?,
+    val intervall: Intervall?,
     val utbetalingsland: String?,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT
 ) : AbstractUtfyltStatus<RestUtenlandskPeriodebeløp>() {
