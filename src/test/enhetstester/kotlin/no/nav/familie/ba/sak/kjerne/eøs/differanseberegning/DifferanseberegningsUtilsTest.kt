@@ -148,7 +148,7 @@ fun Valutabeløp.somUtenlandskPeriodebeløp(intervall: Intervall): UtenlandskPer
         tom = null,
         beløp = this.beløp,
         valutakode = this.valutakode,
-        intervall = intervall.name
+        intervall = intervall
     )
 
 fun Valutabeløp.rundNed(presisjon: Int) =

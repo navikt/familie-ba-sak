@@ -33,7 +33,7 @@ fun <T : Tidsenhet> UtenlandskPeriodebeløp?.tilMånedligValutabeløp(tidspunkt:
         return null
 
     val månedligBeløp =
-        Intervall.valueOf(this.intervall).konverterBeløpTilMånedlig(this.beløp, tidspunkt.erSkuddår())
+        this.intervall.konverterBeløpTilMånedlig(this.beløp, tidspunkt.erSkuddår())
 
     return Valutabeløp(månedligBeløp, this.valutakode)
 }
