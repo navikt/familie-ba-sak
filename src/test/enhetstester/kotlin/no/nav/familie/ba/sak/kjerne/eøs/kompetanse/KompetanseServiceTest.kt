@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTids
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
@@ -25,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class KompetanseServiceTest {
 
@@ -399,6 +401,30 @@ internal class KompetanseServiceTest {
 
         kompetanserBehandling1EtterEndring.forEach {
             assertEquals(behandlingId1.id, it.behandlingId)
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil dersom vi prøver å kopiere over ugyldige verdier`() {
+        val behandlingId1 = BehandlingId(100L)
+        val behandlingId2 = BehandlingId(222L)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+
+        KompetanseBuilder(jan(2020), behandlingId1)
+            .medKompetanse("S>", barn1)
+            .medKompetanse(" S>", barn1)
+            .lagreTil(mockKompetanseRepository)
+
+        KompetanseBuilder(jan(2020), behandlingId2)
+            .medKompetanse("S>", barn2)
+            .lagreTil(mockKompetanseRepository)
+
+        assertThrows<Tidslinje.Companion.TidslinjeFeilException> {
+            kompetanseService.kopierOgErstattKompetanser(
+                behandlingId1,
+                behandlingId2
+            )
         }
     }
 }
