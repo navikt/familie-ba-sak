@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
 
@@ -149,6 +150,38 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Ingen dokumenttype for $this")
+        }
+
+    val distribusjonstype: Distribusjonstype
+        get() = when (this) {
+            INFORMASJONSBREV_DELT_BOSTED -> Distribusjonstype.VIKTIG
+            INNHENTE_OPPLYSNINGER -> Distribusjonstype.VIKTIG
+            INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
+            HENLEGGE_TRUKKET_SØKNAD -> Distribusjonstype.ANNET
+            VARSEL_OM_REVURDERING -> Distribusjonstype.VIKTIG
+            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> Distribusjonstype.VIKTIG
+            VARSEL_OM_REVURDERING_SAMBOER -> Distribusjonstype.ANNET
+            VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
+            VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> Distribusjonstype.VIKTIG
+            SVARTIDSBREV -> Distribusjonstype.ANNET
+            FORLENGET_SVARTIDSBREV -> Distribusjonstype.ANNET
+            INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Distribusjonstype.ANNET
+            INFORMASJONSBREV_FØDSEL_UMYNDIG -> Distribusjonstype.ANNET
+            INFORMASJONSBREV_KAN_SØKE -> Distribusjonstype.ANNET
+            INFORMASJONSBREV_KAN_SØKE_EØS -> Distribusjonstype.ANNET
+            INFORMASJONSBREV_FØDSEL_GENERELL -> Distribusjonstype.ANNET
+            VEDTAK_FØRSTEGANGSVEDTAK -> Distribusjonstype.VEDTAK
+            VEDTAK_ENDRING -> Distribusjonstype.VEDTAK
+            VEDTAK_OPPHØRT -> Distribusjonstype.VEDTAK
+            VEDTAK_OPPHØR_MED_ENDRING -> Distribusjonstype.VEDTAK
+            VEDTAK_AVSLAG -> Distribusjonstype.VEDTAK
+            VEDTAK_FORTSATT_INNVILGET -> Distribusjonstype.VEDTAK
+            VEDTAK_KORREKSJON_VEDTAKSBREV -> Distribusjonstype.VEDTAK
+            VEDTAK_OPPHØR_DØDSFALL -> Distribusjonstype.VEDTAK
+            DØDSFALL -> throw Feil("Dødsfall skal ikke brukes")
+            AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG -> Distribusjonstype.VEDTAK
+            AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> Distribusjonstype.VEDTAK
+            AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> Distribusjonstype.VEDTAK
         }
 
     fun setterBehandlingPåVent(): Boolean =

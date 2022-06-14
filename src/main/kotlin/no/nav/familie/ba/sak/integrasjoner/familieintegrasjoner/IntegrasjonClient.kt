@@ -21,6 +21,8 @@ import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
+import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -120,7 +122,7 @@ class IntegrasjonClient(
         }
     }
 
-    fun distribuerBrev(journalpostId: String): String {
+    fun distribuerBrev(journalpostId: String, distribusjonstype: Distribusjonstype): String {
         val uri = URI.create("$integrasjonUri/dist/v1")
 
         val resultat: String = kallEksternTjenesteRessurs(
@@ -129,7 +131,11 @@ class IntegrasjonClient(
             formål = "Distribuer brev"
         ) {
             val journalpostRequest = DistribuerJournalpostRequest(
-                journalpostId, Fagsystem.BA, "FAMILIE_BA_SAK"
+                journalpostId = journalpostId,
+                bestillendeFagsystem = Fagsystem.BA,
+                dokumentProdApp = "FAMILIE_BA_SAK",
+                distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
+                distribusjonstype = distribusjonstype
             )
             postForEntity(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8())
         }
