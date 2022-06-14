@@ -57,7 +57,7 @@ data class AndelTilkjentYtelse(
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandlingId: Long,
 
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.MERGE])
     @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
     var tilkjentYtelse: TilkjentYtelse,
 
@@ -107,8 +107,13 @@ data class AndelTilkjentYtelse(
     var periodeOffset: Long? = null, // Brukes for å koble seg på tidligere kjeder sendt til økonomi
 
     @Column(name = "forrige_periode_offset")
-    var forrigePeriodeOffset: Long? = null
+    var forrigePeriodeOffset: Long? = null,
 
+    @Column(name = "nasjonalt_periodebelop")
+    val nasjonaltPeriodebeløp: Int? = null,
+
+    @Column(name = "differanseberegnet_periodebelop")
+    val differanseberegnetPeriodebeløp: Int? = null
 ) : BaseEntitet() {
 
     val periode
@@ -127,7 +132,9 @@ data class AndelTilkjentYtelse(
             Objects.equals(kalkulertUtbetalingsbeløp, annen.kalkulertUtbetalingsbeløp) &&
             Objects.equals(stønadFom, annen.stønadFom) &&
             Objects.equals(stønadTom, annen.stønadTom) &&
-            Objects.equals(aktør, annen.aktør)
+            Objects.equals(aktør, annen.aktør) &&
+            Objects.equals(nasjonaltPeriodebeløp, annen.nasjonaltPeriodebeløp) &&
+            Objects.equals(differanseberegnetPeriodebeløp, annen.differanseberegnetPeriodebeløp)
     }
 
     override fun hashCode(): Int {
@@ -138,13 +145,16 @@ data class AndelTilkjentYtelse(
             kalkulertUtbetalingsbeløp,
             stønadFom,
             stønadTom,
-            aktør
+            aktør,
+            nasjonaltPeriodebeløp,
+            differanseberegnetPeriodebeløp
         )
     }
 
     override fun toString(): String {
         return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type = $type, prosent = $prosent," +
-            "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
+            "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset), " +
+            "nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, differanseberegnetBeløp = $differanseberegnetPeriodebeløp"
     }
 
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
