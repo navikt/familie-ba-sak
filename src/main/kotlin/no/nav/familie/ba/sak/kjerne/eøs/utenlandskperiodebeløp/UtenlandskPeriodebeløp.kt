@@ -52,6 +52,9 @@ data class UtenlandskPeriodebeløp(
 
     @Column(name = "utbetalingsland")
     val utbetalingsland: String? = null,
+
+    @Column(name = "kalkulert_maanedlig_beloep")
+    val kalkulertMånedligBeløp: BigDecimal? = null
 ) : PeriodeOgBarnSkjemaEntitet<UtenlandskPeriodebeløp>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "utenlandsk_periodebeloep_seq_generator")

@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.erSkuddår
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.konverterBeløpTilMånedlig
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunkt
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -14,7 +17,7 @@ data class RestUtenlandskPeriodebeløp(
     val beløp: BigDecimal?,
     val valutakode: String?,
     val intervall: Intervall?,
-    val utbetalingsland: String?,
+    val kalkulertMånedligBeløp: BigDecimal?,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT
 ) : AbstractUtfyltStatus<RestUtenlandskPeriodebeløp>() {
     override fun medUtfyltStatus(): RestUtenlandskPeriodebeløp {
@@ -22,15 +25,23 @@ data class RestUtenlandskPeriodebeløp(
     }
 }
 
-fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører: List<Aktør>) = UtenlandskPeriodebeløp(
+fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører: List<Aktør>, eksisterendeUtenlandskPeriodebeløp: UtenlandskPeriodebeløp) = UtenlandskPeriodebeløp(
     fom = this.fom,
     tom = this.tom,
     barnAktører = barnAktører.toSet(),
     beløp = this.beløp,
     valutakode = this.valutakode,
     intervall = this.intervall,
-    utbetalingsland = this.utbetalingsland
+    utbetalingsland = eksisterendeUtenlandskPeriodebeløp.utbetalingsland,
+    kalkulertMånedligBeløp = this.tilKalkulertMånedligBeløp()
 )
+
+fun RestUtenlandskPeriodebeløp.tilKalkulertMånedligBeløp() =
+    if (this.intervall != null && this.beløp != null && this.fom != null) {
+        this.intervall.konverterBeløpTilMånedlig(
+            this.beløp, this.fom.tilTidspunkt().erSkuddår()
+        )
+    } else null
 
 fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() = RestUtenlandskPeriodebeløp(
     id = this.id,
@@ -40,5 +51,5 @@ fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() = RestUtenlandskPer
     beløp = this.beløp,
     valutakode = this.valutakode,
     intervall = this.intervall,
-    utbetalingsland = this.utbetalingsland
+    kalkulertMånedligBeløp = this.kalkulertMånedligBeløp
 ).medUtfyltStatus()
