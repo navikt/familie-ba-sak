@@ -73,13 +73,13 @@ fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder:
     return unikeBarn.minOfOrNull { aktør ->
         val kompetansetidslinje: Tidslinje<Kompetanse, Måned>? =
             separateTidslinjerForBarna[aktør]
-        val forrigeKompetansePerioderForBarn: Tidslinje<Kompetanse, Måned>? =
+        val forrigeKompetansetidslinje: Tidslinje<Kompetanse, Måned>? =
             separateTidslinjerForBarnaForrigeBehandling[aktør]
 
         when {
-            kompetansetidslinje == null -> forrigeKompetansePerioderForBarn?.fraOgMed()?.tilLocalDate() ?: TIDENES_ENDE
-            forrigeKompetansePerioderForBarn == null -> kompetansetidslinje.fraOgMed().tilLocalDate()
-            else -> kompetansetidslinje.finnFørsteEndringstidspunkt(forrigeKompetansePerioderForBarn)
+            kompetansetidslinje == null -> forrigeKompetansetidslinje?.fraOgMed()?.tilLocalDate() ?: TIDENES_ENDE
+            forrigeKompetansetidslinje == null -> kompetansetidslinje.fraOgMed().tilLocalDate()
+            else -> kompetansetidslinje.finnFørsteEndringstidspunkt(forrigeKompetansetidslinje)
         }
     } ?: TIDENES_ENDE
 }
