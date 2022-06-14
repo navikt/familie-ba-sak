@@ -137,7 +137,7 @@ data class EØSBegrunnelseData(
     override val apiNavn: String,
 
     val annenForeldersAktivitet: String,
-    val annenForeldersAktivitetsland: String,
+    val annenForeldersAktivitetsland: String?,
     val barnetsBostedsland: String,
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
