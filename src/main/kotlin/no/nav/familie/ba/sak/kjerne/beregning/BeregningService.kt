@@ -36,7 +36,8 @@ class BeregningService(
     private val behandlingRepository: BehandlingRepository,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val småbarnstilleggService: SmåbarnstilleggService
+    private val småbarnstilleggService: SmåbarnstilleggService,
+    private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList()
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
@@ -179,7 +180,9 @@ class BeregningService(
         tilkjentYtelse.andelerTilkjentYtelse.clear()
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
-        return tilkjentYtelseRepository.save(tilkjentYtelse)
+        val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
+        tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }
+        return lagretTilkjentYtelse
     }
 
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
@@ -277,4 +280,8 @@ class BeregningService(
             this.opphørFom = opphørsdato?.toYearMonth()
         }
     }
+}
+
+interface TilkjentYtelseEndretAbonnent {
+    fun endretTilkjentYtelse(tilkjentYtelse: TilkjentYtelse)
 }
