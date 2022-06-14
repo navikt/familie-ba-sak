@@ -328,7 +328,7 @@ class FagsakService(
                                     navn = personInfoMedRelasjoner.navn,
                                     ident = aktør.aktivFødselsnummer(),
                                     // we set the role to unknown when the person is not a child because the person may not have a child
-                                    rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
+                                    rolle = FagsakDeltagerRolle.FORELDER,
                                     kjønn = personInfoMedRelasjoner.kjønn,
                                     fagsakId = fagsak.id,
                                     fagsakEier = fagsak.eier
