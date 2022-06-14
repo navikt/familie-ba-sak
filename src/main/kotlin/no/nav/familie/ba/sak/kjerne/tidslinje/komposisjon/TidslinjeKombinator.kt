@@ -28,6 +28,34 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
 }
 
 /**
+ * Extension-metode for å kombinere to tidslinjer
+ * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
+ * fra minste fraOgMed til største tilOgMed fra begge tidslinjene
+ * Tidsenhet (T) må være av samme type
+ * Hver av tidslinjene kan ha ulik innholdstype, hhv V og H
+ * Hvis innholdet V eller H er null returneres null
+ * Kombintor-funksjonen tar ellers V og H og returnerer (nullable) R
+ * Resultatet er en tidslinje med tidsenhet T og innhold R
+ */
+fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerUtenNullMed(
+    høyreTidslinje: Tidslinje<H, T>,
+    kombinator: (V, H) -> R?
+): Tidslinje<R, T> {
+    val venstreTidslinje = this
+    return object : TidslinjeSomStykkerOppTiden<R, T>(venstreTidslinje, høyreTidslinje) {
+        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? {
+            val venstre = venstreTidslinje.innholdForTidspunkt(tidspunkt)
+            val høyre = høyreTidslinje.innholdForTidspunkt(tidspunkt)
+
+            return when {
+                venstre == null || høyre == null -> null
+                else -> kombinator(venstre, høyre)
+            }
+        }
+    }
+}
+
+/**
  * Extension-metode for å kombinere liste av tidslinjer
  * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
  * fra minste fraOgMed til største fraOgMed() fra alle tidslinjene
@@ -43,5 +71,29 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNull(
     return object : TidslinjeSomStykkerOppTiden<R, T>(tidslinjer) {
         override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
             listeKombinator(tidslinjer.map { it.innholdForTidspunkt(tidspunkt) }.filterNotNull())
+    }
+}
+
+/**
+ * Extension-metode for å kombinere to tidslinjer
+ * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
+ * fra minste fraOgMed til største tilOgMed fra begge tidslinjene
+ * Tidsenhet (T) må være av samme type
+ * Hver av tidslinjene kan ha ulik innholdstype, hhv V og H
+ * Kombintor-funksjonen tar inn tidspunktet og (nullable) av V og H og returnerer (nullable) R
+ * Resultatet er en tidslinje med tidsenhet T og innhold R
+ */
+fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.tidspunktKombinerMed(
+    høyreTidslinje: Tidslinje<H, T>,
+    kombinator: (Tidspunkt<T>, V?, H?) -> R?
+): Tidslinje<R, T> {
+    val venstreTidslinje = this
+    return object : TidslinjeSomStykkerOppTiden<R, T>(venstreTidslinje, høyreTidslinje) {
+        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
+            kombinator(
+                tidspunkt,
+                venstreTidslinje.innholdForTidspunkt(tidspunkt),
+                høyreTidslinje.innholdForTidspunkt(tidspunkt)
+            )
     }
 }

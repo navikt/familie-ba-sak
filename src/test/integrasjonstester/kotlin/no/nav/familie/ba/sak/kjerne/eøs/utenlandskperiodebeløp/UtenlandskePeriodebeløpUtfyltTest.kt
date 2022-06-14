@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestUtenlandskPeriodebeløp
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.Intervall
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagUtenlandskPeriodebeløp
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

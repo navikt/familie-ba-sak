@@ -2,12 +2,11 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -79,7 +78,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 4))
         )
             .map {
-                lagEndretUtbetalingAndel(barn1, it.fom, it.tom, 50)
+                lagEndretUtbetalingAndel(behandling.id, barn1, it.fom, it.tom, 50)
             }
 
         val endretUtbetalingerForBarn2 = listOf(
@@ -88,7 +87,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             MånedPeriode(YearMonth.of(2021, 11), YearMonth.of(2021, 12))
         )
             .map {
-                lagEndretUtbetalingAndel(barn2, it.fom, it.tom, 50)
+                lagEndretUtbetalingAndel(behandling.id, barn2, it.fom, it.tom, 50)
             }
 
         val andelerTilkjentYtelserEtterEUA =
@@ -264,17 +263,4 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         sats = beløp.toInt(),
         prosent = BigDecimal(100)
     )
-
-    private fun lagEndretUtbetalingAndel(barn: Person, fom: YearMonth, tom: YearMonth, prosent: Int) =
-        EndretUtbetalingAndel(
-            behandlingId = behandling.id,
-            person = barn,
-            prosent = BigDecimal(prosent),
-            fom = fom,
-            tom = tom,
-            årsak = Årsak.DELT_BOSTED,
-            begrunnelse = "Begrunnelse for endring",
-            søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now()
-        )
 }
