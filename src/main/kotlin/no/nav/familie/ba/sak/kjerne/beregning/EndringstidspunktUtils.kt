@@ -6,9 +6,12 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.hentUtbetalingstidslinjeForSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -62,8 +65,28 @@ fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
 }
 
 fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: Iterable<Kompetanse>): LocalDate {
-    val kompetanseDiff = this.tilTidslinje()
-        .kombinerMed(forrigeKompetansePerioder.tilTidslinje()) { nyKompetanse, forrigeKompetanse ->
+    val separateTidslinjerForBarna = this.tilSeparateTidslinjerForBarna()
+    val separateTidslinjerForBarnaForrigeBehandling = forrigeKompetansePerioder.tilSeparateTidslinjerForBarna()
+
+    val unikeBarn = separateTidslinjerForBarna.keys + separateTidslinjerForBarnaForrigeBehandling.keys
+
+    return unikeBarn.minOfOrNull { aktør ->
+        val kompetansetidslinje: Tidslinje<Kompetanse, Måned>? =
+            separateTidslinjerForBarna[aktør]
+        val forrigeKompetansePerioderForBarn: Tidslinje<Kompetanse, Måned>? =
+            separateTidslinjerForBarnaForrigeBehandling[aktør]
+
+        when {
+            kompetansetidslinje == null -> forrigeKompetansePerioderForBarn?.fraOgMed()?.tilLocalDate() ?: TIDENES_ENDE
+            forrigeKompetansePerioderForBarn == null -> kompetansetidslinje.fraOgMed().tilLocalDate()
+            else -> kompetansetidslinje.finnFørsteEndringstidspunkt(forrigeKompetansePerioderForBarn)
+        }
+    } ?: TIDENES_ENDE
+}
+
+fun Tidslinje<Kompetanse, Måned>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: Tidslinje<Kompetanse, Måned>): LocalDate {
+    val kompetanseDiff = this
+        .kombinerMed(forrigeKompetansePerioder) { nyKompetanse, forrigeKompetanse ->
             when {
                 nyKompetanse == forrigeKompetanse -> null
                 nyKompetanse == null -> forrigeKompetanse
