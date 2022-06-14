@@ -8,7 +8,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -66,9 +67,9 @@ fun hentMinimerteKompetanserForPeriode(
 fun Collection<Kompetanse>.hentIPeriode(
     fom: YearMonth?,
     tom: YearMonth?
-) = tilTidslinje()
-    .beskjær(
+) = tilSeparateTidslinjerForBarna().map { (aktør, tidslinje) ->
+    aktør to tidslinje.beskjær(
         fraOgMed = fom.tilTidspunktEllerUendeligLengeSiden(),
         tilOgMed = tom.tilTidspunktEllerUendeligLengeTil()
-    ).perioder()
-    .mapNotNull { it.innhold }
+    )
+}.toMap().tilSkjemaer()
