@@ -264,9 +264,9 @@ class DokumentService(
         journalpostId: String,
         behandlingId: Long?,
         brevMal: Brevmal,
-        loggBehandlerRolle: BehandlerRolle
+        loggBehandlerRolle: BehandlerRolle,
     ) {
-        integrasjonClient.distribuerBrev(journalpostId)
+        integrasjonClient.distribuerBrev(journalpostId = journalpostId, distribusjonstype = brevMal.distribusjonstype)
 
         if (behandlingId != null) {
             loggService.opprettDistribuertBrevLogg(
