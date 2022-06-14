@@ -1,0 +1,46 @@
+package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene
+
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.erSkuddår
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.konverterBeløpTilMånedlig
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import java.math.BigDecimal
+
+data class KronerPerValutaenhet(
+    val kronerPerValutaenhet: BigDecimal,
+    val valutakode: String,
+)
+
+data class Valutabeløp(
+    val beløp: BigDecimal,
+    val valutakode: String
+)
+
+operator fun Valutabeløp?.times(kronerPerValutaenhet: KronerPerValutaenhet?): BigDecimal? {
+    if (this == null || kronerPerValutaenhet == null)
+        return null
+
+    if (this.valutakode != kronerPerValutaenhet.valutakode)
+        throw IllegalArgumentException("Valutabeløp har valutakode $valutakode, som avviker fra ${kronerPerValutaenhet.valutakode}")
+
+    return this.beløp * kronerPerValutaenhet.kronerPerValutaenhet
+}
+
+fun <T : Tidsenhet> UtenlandskPeriodebeløp?.tilMånedligValutabeløp(tidspunkt: Tidspunkt<T>): Valutabeløp? {
+    if (this?.beløp == null || this.intervall == null || this.valutakode == null)
+        return null
+
+    val månedligBeløp =
+        Intervall.valueOf(this.intervall).konverterBeløpTilMånedlig(this.beløp, tidspunkt.erSkuddår())
+
+    return Valutabeløp(månedligBeløp, this.valutakode)
+}
+
+fun Valutakurs?.tilKronerPerValutaenhet(): KronerPerValutaenhet? {
+    if (this?.kurs == null || this.valutakode == null)
+        return null
+
+    return KronerPerValutaenhet(this.kurs, this.valutakode)
+}

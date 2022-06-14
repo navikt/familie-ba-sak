@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
@@ -15,10 +19,11 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 
 data class VilkårsvurderingBuilder<T : Tidsenhet>(
-    private val behandling: Behandling = lagBehandling(),
+    val behandling: Behandling = lagBehandling(),
     private val vilkårsvurdering: Vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 ) {
     val personresultater: MutableSet<PersonResultat> = mutableSetOf()
+    val personer: MutableSet<Person> = mutableSetOf()
 
     fun forPerson(person: Person, startTidspunkt: Tidspunkt<T>): PersonResultatBuilder<T> {
         return PersonResultatBuilder(this, startTidspunkt, person)
@@ -27,6 +32,10 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
     fun byggVilkårsvurdering(): Vilkårsvurdering {
         vilkårsvurdering.personResultater = personresultater
         return vilkårsvurdering
+    }
+
+    fun byggPersonopplysningGrunnlag(): PersonopplysningGrunnlag {
+        return lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray())
     }
 
     data class PersonResultatBuilder<T : Tidsenhet>(
@@ -45,6 +54,7 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
         }
 
         fun byggVilkårsvurdering(): Vilkårsvurdering = byggPerson().byggVilkårsvurdering()
+        fun byggPersonopplysningGrunnlag(): PersonopplysningGrunnlag = byggPerson().byggPersonopplysningGrunnlag()
 
         fun byggPerson(): VilkårsvurderingBuilder<T> {
 
@@ -61,6 +71,7 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
 
             personResultat.vilkårResultater.addAll(vilkårresultater)
             vilkårsvurderingBuilder.personresultater.add(personResultat)
+            vilkårsvurderingBuilder.personer.add(person)
 
             return vilkårsvurderingBuilder
         }
@@ -81,3 +92,13 @@ internal fun <T : Tidsenhet> Periode<VilkårRegelverkResultat, T>.tilVilkårResu
         )
     )
 }
+
+fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer() =
+    VilkårsvurderingTidslinjer(this.byggVilkårsvurdering(), this.byggPersonopplysningGrunnlag())
+
+fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
+    TilkjentYtelseUtils.beregnTilkjentYtelse(
+        vilkårsvurdering = this.byggVilkårsvurdering(),
+        personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
+        behandling = behandling
+    )
