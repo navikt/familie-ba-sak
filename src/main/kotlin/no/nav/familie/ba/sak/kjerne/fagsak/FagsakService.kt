@@ -278,9 +278,8 @@ class FagsakService(
         val erBarn = Period.between(personInfoMedRelasjoner.fødselsdato, LocalDate.now()).years < 18
 
         if (assosierteFagsakDeltagere.find { it.ident == aktør.aktivFødselsnummer() } == null) {
-            val fagsaker =
-                if (!erBarn) fagsakRepository.finnFagsakerForAktør(aktør) else null
-            fagsaker?.forEach { fagsak ->
+            val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).ifEmpty { listOf(null) }
+            fagsaker.forEach { fagsak ->
                 assosierteFagsakDeltagere.add(
                     RestFagsakDeltager(
                         navn = personInfoMedRelasjoner.navn,
@@ -288,8 +287,8 @@ class FagsakService(
                         // we set the role to unknown when the person is not a child because the person may not have a child
                         rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
                         kjønn = personInfoMedRelasjoner.kjønn,
-                        fagsakId = fagsak.id,
-                        fagsakEier = fagsak.eier
+                        fagsakId = fagsak?.id,
+                        fagsakEier = fagsak?.eier
                     )
                 )
             }
@@ -320,18 +319,16 @@ class FagsakService(
                             }
                         )
 
-                        val fagsaker =
-                            if (!erBarn) fagsakRepository.finnFagsakerForAktør(aktør) else null
-                        fagsaker?.forEach { fagsak ->
+                        val fagsaker = fagsakRepository.finnFagsakerForAktør(relasjon.aktør).ifEmpty { listOf(null) }
+                        fagsaker.forEach { fagsak ->
                             assosierteFagsakDeltagere.add(
                                 RestFagsakDeltager(
-                                    navn = personInfoMedRelasjoner.navn,
-                                    ident = aktør.aktivFødselsnummer(),
-                                    // we set the role to unknown when the person is not a child because the person may not have a child
+                                    navn = forelderInfo.navn,
+                                    ident = relasjon.aktør.aktivFødselsnummer(),
                                     rolle = FagsakDeltagerRolle.FORELDER,
-                                    kjønn = personInfoMedRelasjoner.kjønn,
-                                    fagsakId = fagsak.id,
-                                    fagsakEier = fagsak.eier
+                                    kjønn = forelderInfo.kjønn,
+                                    fagsakId = fagsak?.id,
+                                    fagsakEier = fagsak?.eier
                                 )
                             )
                         }
