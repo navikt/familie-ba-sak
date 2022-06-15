@@ -11,12 +11,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 
-/**
- * ADVARSEL: Muterer TilkjentYtelse
- * Denne BURDE gjøres ikke-muterbar og returnere en ny instans av TilkjentYtelse
- * Muteringen skyldes at TilkjentYtelse er under JPA-kontekst og ikke "tåler" copy(andelerTilkjentYtelse = ...)
- * Starten på én løsning er at EndretUtebetalingPeriode kobles løs fra AndelTilkjentYtelse og kobles rett på behandlingen
- */
 fun beregnDifferanse(
     andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
@@ -35,7 +29,8 @@ fun beregnDifferanse(
         val valutakursTidslinje = valutakursTidslinjer.getOrDefault(aktør, TomTidslinje())
         val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjer.getOrDefault(aktør, TomTidslinje())
 
-        val utenlandskePeriodebeløpINorskeKroner = utenlandskePeriodebeløpTidslinje.kombinerMed(valutakursTidslinje) { upb, valutakurs -> upb.tilMånedligValutabeløp() * valutakurs.tilKronerPerValutaenhet() }
+        val utenlandskePeriodebeløpINorskeKroner =
+            utenlandskePeriodebeløpTidslinje.kombinerMed(valutakursTidslinje) { upb, valutakurs -> upb.tilMånedligValutabeløp() * valutakurs.tilKronerPerValutaenhet() }
 
         andelTilkjentYtelseTidslinje.kombinerMed(utenlandskePeriodebeløpINorskeKroner) { aty, beløp ->
             aty.oppdaterDifferanseberegning(beløp)
@@ -47,7 +42,6 @@ fun beregnDifferanse(
 
     validarSøkersYtelserMotEventueltNegativeAndelerForBarna(søkersAndeler, barnasAndeler)
 
-    // Muterer tilkjentYtelse, lager IKKE ny instans
     return søkersAndeler + barnasAndeler
 }
 
