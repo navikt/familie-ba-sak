@@ -278,18 +278,20 @@ class FagsakService(
         val erBarn = Period.between(personInfoMedRelasjoner.fødselsdato, LocalDate.now()).years < 18
 
         if (assosierteFagsakDeltagere.find { it.ident == aktør.aktivFødselsnummer() } == null) {
-            val fagsakId =
-                if (!erBarn) fagsakRepository.finnFagsakForAktør(aktør)?.id else null
-            assosierteFagsakDeltagere.add(
-                RestFagsakDeltager(
-                    navn = personInfoMedRelasjoner.navn,
-                    ident = aktør.aktivFødselsnummer(),
-                    // we set the role to unknown when the person is not a child because the person may not have a child
-                    rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
-                    kjønn = personInfoMedRelasjoner.kjønn,
-                    fagsakId = fagsakId
+            val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).ifEmpty { listOf(null) }
+            fagsaker.forEach { fagsak ->
+                assosierteFagsakDeltagere.add(
+                    RestFagsakDeltager(
+                        navn = personInfoMedRelasjoner.navn,
+                        ident = aktør.aktivFødselsnummer(),
+                        // we set the role to unknown when the person is not a child because the person may not have a child
+                        rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
+                        kjønn = personInfoMedRelasjoner.kjønn,
+                        fagsakId = fagsak?.id,
+                        fagsakEier = fagsak?.eier
+                    )
                 )
-            )
+            }
         }
 
         if (erBarn) {
@@ -317,16 +319,19 @@ class FagsakService(
                             }
                         )
 
-                        val fagsak = fagsakRepository.finnFagsakForAktør(relasjon.aktør)
-                        assosierteFagsakDeltagere.add(
-                            RestFagsakDeltager(
-                                navn = forelderInfo.navn,
-                                ident = relasjon.aktør.aktivFødselsnummer(),
-                                rolle = FagsakDeltagerRolle.FORELDER,
-                                kjønn = forelderInfo.kjønn,
-                                fagsakId = fagsak?.id
+                        val fagsaker = fagsakRepository.finnFagsakerForAktør(relasjon.aktør).ifEmpty { listOf(null) }
+                        fagsaker.forEach { fagsak ->
+                            assosierteFagsakDeltagere.add(
+                                RestFagsakDeltager(
+                                    navn = forelderInfo.navn,
+                                    ident = relasjon.aktør.aktivFødselsnummer(),
+                                    rolle = FagsakDeltagerRolle.FORELDER,
+                                    kjønn = forelderInfo.kjønn,
+                                    fagsakId = fagsak?.id,
+                                    fagsakEier = fagsak?.eier
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -366,14 +371,15 @@ class FagsakService(
                             ident = behandling.fagsak.aktør.aktivFødselsnummer(),
                             rolle = FagsakDeltagerRolle.FORELDER,
                             kjønn = personInfoMedRelasjoner.kjønn,
-                            fagsakId = behandling.fagsak.id
+                            fagsakId = behandling.fagsak.id,
+                            fagsakEier = behandling.fagsak.eier
                         )
                     } else {
                         val maskertForelder =
                             hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.aktør)
                         if (maskertForelder != null) {
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] =
-                                maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER)
+                                maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER, fagsakEier = behandling.fagsak.eier)
                         } else {
                             val personinfo =
                                 runCatching {
@@ -390,7 +396,8 @@ class FagsakService(
                                 ident = behandling.fagsak.aktør.aktivFødselsnummer(),
                                 rolle = FagsakDeltagerRolle.FORELDER,
                                 kjønn = personinfo.kjønn,
-                                fagsakId = behandling.fagsak.id
+                                fagsakId = behandling.fagsak.id,
+                                fagsakEier = behandling.fagsak.eier
                             )
                         }
                     }
