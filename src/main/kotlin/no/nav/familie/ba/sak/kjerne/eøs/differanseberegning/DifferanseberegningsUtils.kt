@@ -32,7 +32,7 @@ fun <T : Tidsenhet> Tidspunkt<T>.erSkuddår() = this.tilLocalDateEllerNull()?.is
 
 /**
  * Kalkulerer nytt utbetalingsbeløp fra [utenlandskPeriodebeløpINorskeKroner]
- * Beløpet konverteres fra desimaltall til heltall ved å strippe deismalene, og dermed øke den norske ytelsen med inntil én krone
+ * Beløpet konverteres fra desimaltall til heltall ved å strippe desimalene, og dermed øke den norske ytelsen med inntil én krone
  * Må håndtere tilfellet der [kalkulertUtebetalngsbeløp] blir modifisert andre steder i koden, men antar at det aldri vil være negativt
  * [nasjonaltPeriodebeløp] settes til den originale, nasjonale beregningen (aldri negativt)
  * [differanseberegnetBeløp] er differansen mellom [nasjonaltPeriodebeløp] og (avrundet) [utenlandskPeriodebeløpINorskeKroner] (kan bli negativt)
