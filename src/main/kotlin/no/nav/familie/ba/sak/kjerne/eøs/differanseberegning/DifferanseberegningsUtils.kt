@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import java.math.BigDecimal
-import java.math.MathContext
-import java.math.RoundingMode
 
 fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal, erSkuddår: Boolean) = when (this) {
     Intervall.ÅRLIG -> beløp / 12.toBigDecimal()
@@ -34,6 +32,7 @@ fun <T : Tidsenhet> Tidspunkt<T>.erSkuddår() = this.tilLocalDateEllerNull()?.is
 
 /**
  * Kalkulerer nytt utbetalingsbeløp fra [utenlandskPeriodebeløpINorskeKroner]
+ * Beløpet konverteres fra desimaltall til heltall ved å strippe desimalene, og dermed øke den norske ytelsen med inntil én krone
  * Må håndtere tilfellet der [kalkulertUtebetalngsbeløp] blir modifisert andre steder i koden, men antar at det aldri vil være negativt
  * [nasjonaltPeriodebeløp] settes til den originale, nasjonale beregningen (aldri negativt)
  * [differanseberegnetBeløp] er differansen mellom [nasjonaltPeriodebeløp] og (avrundet) [utenlandskPeriodebeløpINorskeKroner] (kan bli negativt)
@@ -51,7 +50,8 @@ fun AndelTilkjentYtelse?.kalkulerFraUtenlandskPeriodebeløp(utenlandskPeriodebel
     }
 
     val avrundetUtenlandskPeriodebeløp = utenlandskPeriodebeløpINorskeKroner
-        .round(MathContext(0, RoundingMode.DOWN)).intValueExact() // Rund ned for å gi fordel til bruker
+        .toBigInteger().intValueExact() // Fjern desimaler for å gi fordel til søker
+
     val nyttDifferanseberegnetBeløp = nyttNasjonaltPeriodebeløp - avrundetUtenlandskPeriodebeløp
 
     return copy(
