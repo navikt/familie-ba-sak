@@ -67,9 +67,9 @@ fun hentMinimerteKompetanserForPeriode(
 fun Collection<Kompetanse>.hentIPeriode(
     fom: YearMonth?,
     tom: YearMonth?
-) = tilSeparateTidslinjerForBarna().map { (aktør, tidslinje) ->
-    aktør to tidslinje.beskjær(
+): Collection<Kompetanse> = tilSeparateTidslinjerForBarna().mapValues { (_, tidslinje) ->
+    tidslinje.beskjær(
         fraOgMed = fom.tilTidspunktEllerUendeligLengeSiden(),
         tilOgMed = tom.tilTidspunktEllerUendeligLengeTil()
     )
-}.toMap().tilSkjemaer()
+}.tilSkjemaer()
