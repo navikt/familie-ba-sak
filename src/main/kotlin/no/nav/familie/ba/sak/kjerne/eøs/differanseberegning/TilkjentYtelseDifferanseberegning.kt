@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidspunktKombinerMed
 
 fun beregnDifferanse(
     tilkjentYtelse: TilkjentYtelse,
@@ -34,10 +33,7 @@ fun beregnDifferanse(
         val valutakursTidslinje = valutakursTidslinjer.getOrDefault(aktør, TomTidslinje())
         val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjer.getOrDefault(aktør, TomTidslinje())
 
-        val utenlandskePeriodebeløpINorskeKroner = utenlandskePeriodebeløpTidslinje
-            .tidspunktKombinerMed(valutakursTidslinje) { tidspunkt, upb, vk ->
-                upb.tilMånedligValutabeløp(tidspunkt) * vk.tilKronerPerValutaenhet()
-            }
+        val utenlandskePeriodebeløpINorskeKroner = utenlandskePeriodebeløpTidslinje.kombinerMed(valutakursTidslinje) { upb, valutakurs -> upb.tilMånedligValutabeløp() * valutakurs.tilKronerPerValutaenhet() }
 
         andelTilkjentYtelseTidslinje.kombinerMed(utenlandskePeriodebeløpINorskeKroner) { aty, beløp ->
             beløp?.let { aty.kalkulerFraUtenlandskPeriodebeløp(it) } ?: aty
