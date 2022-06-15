@@ -71,7 +71,8 @@ data class UtenlandskPeriodebeløp(
     override fun utenInnhold(): UtenlandskPeriodebeløp = copy(
         beløp = null,
         valutakode = null,
-        intervall = null
+        intervall = null,
+        kalkulertMånedligBeløp = null
     )
 
     override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) = copy(

@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.erSkuddår
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.konverterBeløpTilMånedlig
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunkt
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -36,12 +34,19 @@ fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører: List<Ak
     kalkulertMånedligBeløp = this.tilKalkulertMånedligBeløp()
 )
 
-fun RestUtenlandskPeriodebeløp.tilKalkulertMånedligBeløp() =
-    if (this.intervall != null && this.beløp != null && this.fom != null) {
-        this.intervall.konverterBeløpTilMånedlig(
-            this.beløp, this.fom.tilTidspunkt().erSkuddår()
-        )
-    } else null
+fun RestUtenlandskPeriodebeløp.tilKalkulertMånedligBeløp(): BigDecimal? {
+    if (this.beløp == null || this.intervall == null)
+        return null
+
+    return this.intervall.konverterBeløpTilMånedlig(this.beløp)
+}
+
+fun UtenlandskPeriodebeløp.tilKalkulertMånedligBeløp(): BigDecimal? {
+    if (this.beløp == null || this.intervall == null)
+        return null
+
+    return this.intervall.konverterBeløpTilMånedlig(this.beløp)
+}
 
 fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() = RestUtenlandskPeriodebeløp(
     id = this.id,
