@@ -116,6 +116,16 @@ class DifferanseberegningsUtilsTest {
         Assertions.assertEquals(175, aty3?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(250, aty3?.nasjonaltPeriodebeløp)
     }
+
+    @Test
+    fun `Skal fjerne desimaler i utenlandskperiodebeløp, effektivt øke den norske ytelsen med inntil én krone`() {
+        val aty1 = lagAndelTilkjentYtelse(beløp = 50)
+            .kalkulerFraUtenlandskPeriodebeløp(100.987654.toBigDecimal()) // Blir til rundet til 100
+
+        Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
+        Assertions.assertEquals(-50, aty1?.differanseberegnetPeriodebeløp)
+        Assertions.assertEquals(50, aty1?.nasjonaltPeriodebeløp)
+    }
 }
 
 fun lagAndelTilkjentYtelse(beløp: Int) = lagAndelTilkjentYtelse(
