@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeMedBegrunnelserTidslinjeMåned
 
@@ -20,33 +20,11 @@ fun slåSammenUtbetalingsperioderMedKompetanse(
     val kompetanseTidslinjer = kompetanser.tilSeparateTidslinjerForBarna()
     val utbetalingsTidslinje = VedtaksperiodeMedBegrunnelserTidslinjeMåned(utbetalingsperioder)
 
-    val initiellKombinertTidslinje = utbetalingsTidslinje.map {
-        it?.let {
-            UtbetalingsperiodeMedOverlappendeKompetanse(
-                it,
-                emptyList()
-            )
-        }
-    }
-
-    val kombinertTidslinje = kompetanseTidslinjer.values.fold(
-        initiellKombinertTidslinje
-    ) { acc, kompetanseTidslinje ->
-        acc.kombinerMed(kompetanseTidslinje) { utbetalingsperiodeMedOverlappendeKompetanse, kompetanse ->
-            utbetalingsperiodeMedOverlappendeKompetanse?.let {
-                if (kompetanse == null) {
-                    utbetalingsperiodeMedOverlappendeKompetanse
-                } else {
-                    UtbetalingsperiodeMedOverlappendeKompetanse(
-                        utbetalingsperiodeMedOverlappendeKompetanse.vedtaksperiodeMedBegrunnelser,
-                        utbetalingsperiodeMedOverlappendeKompetanse.kompetanser + kompetanse
-                    )
-                }
-            }
-        }
-    }
-
-    return kombinertTidslinje.lagVedtaksperioderMedBegrunnelser()
+    return kompetanseTidslinjer.values
+        .kombinerUtenNull { it.toList() }
+        .kombinerUtenNullMed(utbetalingsTidslinje) { kompetanser, vedtaksperiodeMedBegrunnelse ->
+            UtbetalingsperiodeMedOverlappendeKompetanse(vedtaksperiodeMedBegrunnelse, kompetanser)
+        }.lagVedtaksperioderMedBegrunnelser()
 }
 
 data class UtbetalingsperiodeMedOverlappendeKompetanse(
