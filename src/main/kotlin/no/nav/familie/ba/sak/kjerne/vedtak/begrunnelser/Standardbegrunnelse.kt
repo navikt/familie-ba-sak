@@ -357,6 +357,46 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstOpphorUtvidetNyfoedtBarn"
     },
+    INNVILGET_TILLEGGSTEKST_SAMBOER_UNDER_12_MÅNEDER_FØR_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTillleggstekstSamboerUnder12MaanederForGift"
+    },
+    INNVILGET_TILLEGGSTEKST_SAMBOER_UNDER_12_MÅNEDER_FØR_NYTT_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstSamboerUnder12MaanederForNyttBarn"
+    },
+    INNVILGET_TILLEGGSTEKST_SAMBOER_UNDER_12_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstSamboerUnder12Maaneder"
+    },
+    INNVILGET_TILLEGGSTEKST_EØS_BORGER_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstEosBorgerJobber"
+    },
+    INNVILGET_TILLEGGSTEKST_EØS_BORGER_UTBETALING_NAV {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstEosBorgerUtbetalingNav"
+    },
+    INNVILGET_TILLEGGSTEKST_EØS_BORGER_EKTEFELLE_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstEosBorgerEktefelleJobber"
+    },
+    INNVILGET_TILLEGGSTEKST_EØS_BORGER_SAMBOER_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstEosBorgerSamboerJobber"
+    },
+    INNVILGET_TILLEGGSTEKST_EØS_BORGER_EKTEFELLE_UTBETALING_NAV {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstEosBorgerEktefelleUtbetalingNav"
+    },
+    INNVILGET_TILLEGGSTEKST_EØS_BORGER_SAMBOER_UTBETALING_NAV {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstEosBorgerSamboerUtbetalingNav"
+    },
+    INNVILGET_TILLEGGSTEKST_TREDJELANDSBORGER_OPPHOLDSTILLATELSE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstTredjelandsborgerOppholdstillatelse"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
