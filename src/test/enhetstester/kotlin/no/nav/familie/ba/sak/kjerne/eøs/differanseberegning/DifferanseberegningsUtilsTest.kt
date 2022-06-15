@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Valutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -44,7 +43,7 @@ class DifferanseberegningsUtilsTest {
     fun `Skal konvertere årlig utenlandsk periodebeløp til månedlig`() {
 
         val månedligValutabeløp = 1200.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
-            .tilMånedligValutabeløp(jan(2021))
+            .tilMånedligValutabeløp()
 
         Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
     }
@@ -53,7 +52,7 @@ class DifferanseberegningsUtilsTest {
     fun `Skal konvertere kvartalsvis utenlandsk periodebeløp til månedlig`() {
 
         val månedligValutabeløp = 300.i("EUR").somUtenlandskPeriodebeløp(KVARTALSVIS)
-            .tilMånedligValutabeløp(jan(2021))
+            .tilMånedligValutabeløp()
 
         Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
     }
@@ -62,7 +61,7 @@ class DifferanseberegningsUtilsTest {
     fun `Månedlig utenlandsk periodebeløp skal ikke endres`() {
 
         val månedligValutabeløp = 100.i("EUR").somUtenlandskPeriodebeløp(MÅNEDLIG)
-            .tilMånedligValutabeløp(jan(2021))
+            .tilMånedligValutabeløp()
 
         Assertions.assertEquals(100.i("EUR"), månedligValutabeløp)
     }
@@ -71,24 +70,15 @@ class DifferanseberegningsUtilsTest {
     fun `Skal konvertere ukentlig utenlandsk periodebeløp til månedlig`() {
 
         val månedligValutabeløp = 25.i("EUR").somUtenlandskPeriodebeløp(UKENTLIG)
-            .tilMånedligValutabeløp(jan(2021))?.rundNed(5)
+            .tilMånedligValutabeløp()?.rundNed(5)
 
-        Assertions.assertEquals(108.63.i("EUR"), månedligValutabeløp)
-    }
-
-    @Test
-    fun `Skal konvertere ukentlig utenlandsk periodebeløp til månedlig i skuddår`() {
-
-        val månedligValutabeløp = 25.i("EUR").somUtenlandskPeriodebeløp(UKENTLIG)
-            .tilMånedligValutabeløp(jan(2020))?.rundNed(5)
-
-        Assertions.assertEquals(108.92.i("EUR"), månedligValutabeløp)
+        Assertions.assertEquals(108.75.i("EUR"), månedligValutabeløp)
     }
 
     @Test
     fun `Skal ha presisjon i kronekonverteringen til norske kroner`() {
         val månedligValutabeløp = 0.0123767453453.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
-            .tilMånedligValutabeløp(jan(2021))?.rundNed(10)
+            .tilMånedligValutabeløp()?.rundNed(10)
 
         Assertions.assertEquals(0.001031395445.i("EUR"), månedligValutabeløp)
     }
@@ -148,7 +138,8 @@ fun Valutabeløp.somUtenlandskPeriodebeløp(intervall: Intervall): UtenlandskPer
         tom = null,
         beløp = this.beløp,
         valutakode = this.valutakode,
-        intervall = intervall
+        intervall = intervall,
+        kalkulertMånedligBeløp = intervall.konverterBeløpTilMånedlig(this.beløp)
     )
 
 fun Valutabeløp.rundNed(presisjon: Int) =
