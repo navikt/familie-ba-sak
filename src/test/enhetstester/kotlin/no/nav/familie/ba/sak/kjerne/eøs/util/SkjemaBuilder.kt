@@ -37,6 +37,15 @@ abstract class SkjemaBuilder<S, B>(
         return this as B
     }
 
+    protected fun medTransformasjon(transformasjon: (S) -> S): B {
+        val transformerteSkjemaer = skjemaer.map { skjema -> transformasjon(skjema) }
+        skjemaer.clear()
+        skjemaer.addAll(transformerteSkjemaer)
+
+        @Suppress("UNCHECKED_CAST")
+        return this as B
+    }
+
     fun bygg(): Collection<S> = skjemaer
         .map { skjema -> skjema.also { it.behandlingId = behandlingId.id } }
 

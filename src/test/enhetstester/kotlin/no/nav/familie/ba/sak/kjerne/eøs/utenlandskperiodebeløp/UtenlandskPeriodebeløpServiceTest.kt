@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePeriodebeløpTilKompetanserService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -91,6 +92,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
         assertNull(faktiskUtenlandskPeriodebeløp.beløp)
         assertNull(faktiskUtenlandskPeriodebeløp.valutakode)
         assertNull(faktiskUtenlandskPeriodebeløp.intervall)
+        assertNull(faktiskUtenlandskPeriodebeløp.kalkulertMånedligBeløp)
         assertEquals(lagretUtenlandskPeriodebeløp.fom, faktiskUtenlandskPeriodebeløp.fom)
         assertEquals(lagretUtenlandskPeriodebeløp.tom, faktiskUtenlandskPeriodebeløp.tom)
         assertEquals(lagretUtenlandskPeriodebeløp.barnAktører, faktiskUtenlandskPeriodebeløp.barnAktører)
@@ -104,10 +106,11 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
         UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
             .medBeløp("4>", "EUR", "SE", barn1)
+            .medIntervall(Intervall.UKENTLIG)
             .lagreTil(utenlandskPeriodebeløpRepository).single()
 
         // Oppdaterer UtenlandskPeriodeBeløp med identisk innhold, men med lukket tom for andre mnd.
-        val oppdatertUtenlandskPeriodebeløp = UtenlandskPeriodebeløpBuilder(jan(2020)).medBeløp("44", "EUR", "SE", barn1).bygg().first()
+        val oppdatertUtenlandskPeriodebeløp = UtenlandskPeriodebeløpBuilder(jan(2020)).medBeløp("44", "EUR", "SE", barn1).medIntervall(Intervall.UKENTLIG).bygg().first()
         utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(behandlingId, oppdatertUtenlandskPeriodebeløp)
 
         // Forventer en liste på 2 elementer hvor det første dekker 2 mnd og det andre dekker fra mnd 3 og til uendelig (null). Det siste elementet skal ha beløp, valutakode og intervall satt til null, mens utbetalingsland skal være "SE".
@@ -119,6 +122,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
         assertNull(faktiskUtenlandskPeriodebeløp.elementAt(1).beløp)
         assertNull(faktiskUtenlandskPeriodebeløp.elementAt(1).valutakode)
         assertNull(faktiskUtenlandskPeriodebeløp.elementAt(1).intervall)
+        assertNull(faktiskUtenlandskPeriodebeløp.elementAt(1).kalkulertMånedligBeløp)
         assertEquals("SE", faktiskUtenlandskPeriodebeløp.elementAt(1).utbetalingsland)
     }
 }

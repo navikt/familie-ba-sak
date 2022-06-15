@@ -13,6 +13,13 @@ fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal, erSkuddår: Boolea
     Intervall.UKENTLIG -> konverterFraUkentligTilMånedligBeløp(beløp, erSkuddår)
 }
 
+fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal) = when (this) {
+    Intervall.ÅRLIG -> beløp / 12.toBigDecimal()
+    Intervall.KVARTALSVIS -> beløp / 3.toBigDecimal()
+    Intervall.MÅNEDLIG -> beløp
+    Intervall.UKENTLIG -> beløp.multiply(4.35.toBigDecimal())
+}
+
 /***
  * Det finnes ingen offisiell dokumentasjon på hvordan vi skal konvertere fra ukentlig til
  * månedlig betaling i NAV per dags dato (19.05.2022). Til nå har saksbehandlere gjort dette manuelt og
