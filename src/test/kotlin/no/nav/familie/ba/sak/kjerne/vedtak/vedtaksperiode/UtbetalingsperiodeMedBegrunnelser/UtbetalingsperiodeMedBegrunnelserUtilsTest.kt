@@ -47,7 +47,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
             tom = periode5.tom.sisteDagIInneværendeMåned()
         )
 
-        val utbetalingsperiodeMedKompetanseSplitter = slåSammenUtbetalingsperioderMedKompetanse(
+        val utbetalingsperiodeMedKompetanseSplitter = splittUtbetalingsperioderPåKompetanser(
             utbetalingsperioder = listOf(
                 utbetalingsperiode1,
                 utbetalingsperiode2,
@@ -78,7 +78,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
             MånedPeriode(YearMonth.of(2021, 9), YearMonth.of(2021, 12)),
             MånedPeriode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
             MånedPeriode(YearMonth.of(2022, 4), YearMonth.of(2038, 3)),
-        ).map {
+        ).mapIndexed { index, it ->
             lagVedtaksperiodeMedBegrunnelser(
                 type = Vedtaksperiodetype.UTBETALING,
                 fom = it.fom.førsteDagIInneværendeMåned(),
@@ -89,7 +89,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
         val kompetanse =
             lagKompetanse(fom = YearMonth.of(2020, 5), tom = YearMonth.of(2021, 5), barnAktører = setOf(barnAktør1))
 
-        val utbetalingsperiodeMedKompetanseSplitter = slåSammenUtbetalingsperioderMedKompetanse(
+        val utbetalingsperiodeMedKompetanseSplitter = splittUtbetalingsperioderPåKompetanser(
             utbetalingsperioder = utbetalingsperioder,
             kompetanser = listOf(kompetanse)
         )
@@ -100,8 +100,8 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
     @Test
     fun `Skal splitte opp utbetalingsperiodene riktig når det er kompetanse på forskjellige personer`() {
 
-        val periode1 = MånedPeriode(YearMonth.of(2021, 1), YearMonth.of(2021, 5))
-        val periode2 = MånedPeriode(YearMonth.of(2021, 5), YearMonth.of(2021, 7))
+        val periode1 = MånedPeriode(YearMonth.of(2021, 1), YearMonth.of(2021, 4))
+        val periode2 = MånedPeriode(YearMonth.of(2021, 5), YearMonth.of(2021, 6))
         val periode3 = MånedPeriode(YearMonth.of(2021, 7), YearMonth.of(2022, 1))
 
         val utbetalingsperiode1 = lagVedtaksperiodeMedBegrunnelser(
@@ -118,7 +118,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
         val forventedePerioder =
             listOf(periode1, periode2, periode3)
 
-        val utbetalingsperiodeMedKompetanseSplitter = slåSammenUtbetalingsperioderMedKompetanse(
+        val utbetalingsperiodeMedKompetanseSplitter = splittUtbetalingsperioderPåKompetanser(
             utbetalingsperioder = listOf(utbetalingsperiode1),
             kompetanser = listOf(kompetanse1, kompetanse2)
         )
