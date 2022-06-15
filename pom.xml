@@ -28,7 +28,7 @@
         <eksterne-kontrakter-bisys.version>2.0_20220503154019_02ec0eb</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>2.0_20220609092924_6265395</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20220506145321_fda933e</familie.kontrakter.stønadsstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20220614135934_8423c48</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.12.4</mockk.version>
         <token-validation-spring.version>2.0.21</token-validation-spring.version>

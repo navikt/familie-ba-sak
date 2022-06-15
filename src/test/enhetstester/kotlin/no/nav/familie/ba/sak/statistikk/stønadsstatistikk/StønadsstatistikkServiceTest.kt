@@ -29,7 +29,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.eksterne.kontrakter.Kompetanse
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -116,7 +115,9 @@ internal class StønadsstatistikkServiceTest(
                 barnAktører = setOf(barn1.aktør),
                 søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
                 annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
-                annenForeldersAktivitetsland = "PL", barnetsBostedsland = "PL", resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND
+                annenForeldersAktivitetsland = "PL",
+                barnetsBostedsland = "PL",
+                resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND
             )
         )
 
@@ -201,7 +202,7 @@ internal class StønadsstatistikkServiceTest(
     }
 
     /**
-     * Nye årsaker må legges til VedtakDVH når det legges til i Behandling
+     * Nye årsaker må legges til VedtakDVH i familie-eksterne-kontrakter når det legges til i Behandling
      *
      * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en årsak, så må man være sikker på at det ikke er sendt
      * et slik vedtak til stønaddstatistikk.
@@ -220,7 +221,7 @@ internal class StønadsstatistikkServiceTest(
     }
 
     /**
-     * Nye AnnenForeldersAktivitet må legges til VedtakDVHV2 når det legges til i Behandling
+     * Nye AnnenForeldersAktivitet må legges til VedtakDVHV2 i familie-eksterne-kontrakter når det legges til i Behandling
      *
      * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en AnnenForeldersAktivitet, så må man være sikker på at det ikke er sendt
      * et slik vedtak til stønaddstatistikk.
@@ -239,7 +240,7 @@ internal class StønadsstatistikkServiceTest(
     }
 
     /**
-     * Nye søkersAktivitet må legges til VedtakDVHV2 når det legges til i Behandling
+     * Nye søkersAktivitet må legges til VedtakDVHV2 i familie-eksterne-kontrakter når det legges til i Behandling
      *
      * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en SøkersAktivitet, så må man være sikker på at det ikke er sendt
      * et slik vedtak til stønaddstatistikk.
@@ -258,7 +259,7 @@ internal class StønadsstatistikkServiceTest(
     }
 
     /**
-     * Nye KompetanseResultat må legges til VedtakDVHV2 når det legges til i Behandling
+     * Nye KompetanseResultat må legges til VedtakDVHV2 i familie-eksterne-kontrakter når det legges til i Behandling
      *
      * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en KompetanseResultat, så må man være sikker på at det ikke er sendt
      * et slik vedtak til stønaddstatistikk.
@@ -277,7 +278,7 @@ internal class StønadsstatistikkServiceTest(
     }
 
     /**
-     * Nye behandlingstyper må legges til VedtakDVH når det legges til i Behandling
+     * Nye behandlingstyper må legges til VedtakDVH i familie-eksterne-kontrakter når det legges til i Behandling
      *
      * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en type, så må man være sikker på at det ikke er sendt
      * et slik vedtak til stønaddstatistikk.
