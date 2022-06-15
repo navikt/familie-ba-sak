@@ -13,7 +13,7 @@ class UtenlandskPeriodebeløpBuilder(
     startMåned: Tidspunkt<Måned> = jan(2020),
     behandlingId: BehandlingId = BehandlingId(1)
 ) : SkjemaBuilder<UtenlandskPeriodebeløp, UtenlandskPeriodebeløpBuilder>(startMåned, behandlingId) {
-    fun medBeløp(k: String, valutakode: String?, utbetalingsland: String, vararg barn: Person) =
+    fun medBeløp(k: String, valutakode: String?, utbetalingsland: String?, vararg barn: Person) =
         medSkjema(k, barn.toList()) {
             when {
                 it == '-' -> UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = utbetalingsland)

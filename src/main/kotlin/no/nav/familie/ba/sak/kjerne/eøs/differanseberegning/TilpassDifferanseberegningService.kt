@@ -24,7 +24,8 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
-        val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+        val oppdatertTilkjentYtelse =
+            beregnDifferanseOgOppdaterTilkjentYtelse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
         tilkjentYtelseRepository.saveAndFlush(oppdatertTilkjentYtelse)
     }
 }
@@ -42,7 +43,8 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 
-        val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+        val oppdatertTilkjentYtelse =
+            beregnDifferanseOgOppdaterTilkjentYtelse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
         tilkjentYtelseRepository.saveAndFlush(oppdatertTilkjentYtelse)
     }
 }
@@ -58,7 +60,8 @@ class TilpassDifferanseberegningEtterValutakursService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
-        val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+        val oppdatertTilkjentYtelse =
+            beregnDifferanseOgOppdaterTilkjentYtelse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
         tilkjentYtelseRepository.saveAndFlush(oppdatertTilkjentYtelse)
     }
 }
