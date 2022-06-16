@@ -799,9 +799,9 @@ class MigreringServiceTest(
         )
 
         val ident = randomFnr()
-        every { mockkPersonidentService.hentIdenter(any(), true) } returns listOf(
-            IdentInformasjon(ident, false, "FOLKEREGISTERIDENT"),
-        )
+        every { mockkPersonidentService.hentIdenter(any(), true) } answers {
+            listOf(IdentInformasjon(firstArg(), false, "FOLKEREGISTERIDENT"))
+        }
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
