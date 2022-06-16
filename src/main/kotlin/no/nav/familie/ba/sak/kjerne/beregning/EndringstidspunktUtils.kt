@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.hentUtbetalingstidslinjeForSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -10,12 +11,12 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerF
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 import java.time.LocalDate
+import java.time.YearMonth
 
 enum class BehandlingAlder {
     NY,
@@ -64,7 +65,7 @@ fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
     }.filter { it.value.toSegments().isNotEmpty() }
 }
 
-fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: Iterable<Kompetanse>): LocalDate {
+fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: Iterable<Kompetanse>): YearMonth {
     val separateTidslinjerForBarna = this.tilSeparateTidslinjerForBarna()
     val separateTidslinjerForBarnaForrigeBehandling = forrigeKompetansePerioder.tilSeparateTidslinjerForBarna()
 
@@ -77,9 +78,8 @@ fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder:
             else -> null
         }
     }.values
-        .kombinerUtenNull { it.firstOrNull() } // Vil bare vite at det finnes "noe", dvs en endring
-        .filtrerIkkeNull() // Ta bort alle perioder som ikke har innhold, da vil tidslinjen starte ved første endring
-        .fraOgMed().tilLocalDateEllerNull() ?: TIDENES_ENDE // fraOgMed på tidslinja er nå første endring
+        .mapNotNull { it.filtrerIkkeNull().fraOgMed().tilYearMonthEllerNull() }
+        .minOfOrNull { it } ?: TIDENES_ENDE.toYearMonth()
 }
 
 private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>.tilSegmentMedEndringer(): LocalDateSegment<Int>? {
