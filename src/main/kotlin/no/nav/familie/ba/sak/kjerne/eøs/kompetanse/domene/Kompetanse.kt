@@ -91,7 +91,6 @@ data class Kompetanse(
     fun validerFelterErSatt() {
         if (søkersAktivitet == null ||
             annenForeldersAktivitet == null ||
-            annenForeldersAktivitetsland == null ||
             barnetsBostedsland == null ||
             resultat == null ||
             barnAktører.isEmpty()

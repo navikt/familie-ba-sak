@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilpassTil
 
 fun <S : PeriodeOgBarnSkjema<S>> S.tilTidslinje() = listOf(this).tilTidslinje()
 
-fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilTidslinje() =
+internal fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilTidslinje() =
     tidslinje {
         this.map {
             Periode(
