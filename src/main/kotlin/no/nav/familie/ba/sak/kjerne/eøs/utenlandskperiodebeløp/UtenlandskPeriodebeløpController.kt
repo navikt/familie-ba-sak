@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/api/differanseberegning/utenlandskperidebeløp")
@@ -34,7 +35,7 @@ class UtenlandskPeriodebeløpController(
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterUtenlandskPeriodebeløp(
         @PathVariable behandlingId: Long,
-        @RequestBody restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp
+        @Valid @RequestBody restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()

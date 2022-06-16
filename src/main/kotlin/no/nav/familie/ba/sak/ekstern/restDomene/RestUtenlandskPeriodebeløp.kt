@@ -4,13 +4,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.math.BigDecimal
 import java.time.YearMonth
+import javax.validation.constraints.DecimalMin
 
 data class RestUtenlandskPeriodebeløp(
     val id: Long,
     val fom: YearMonth?,
     val tom: YearMonth?,
     val barnIdenter: List<String>,
-    val beløp: BigDecimal?,
+    @field:DecimalMin(value = "0.0", message = "Beløp kan ikke være negativt.") val beløp: BigDecimal?,
     val valutakode: String?,
     val intervall: String?,
     val utbetalingsland: String?,
