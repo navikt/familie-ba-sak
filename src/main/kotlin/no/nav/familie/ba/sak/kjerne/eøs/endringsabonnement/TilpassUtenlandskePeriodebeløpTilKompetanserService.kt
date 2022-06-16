@@ -70,7 +70,13 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
         .filtrerSekundærland()
 
     return forrigeUtenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
-        .tilpassTil(barnasKompetanseTidslinjer) { upb, kompetanse -> upb ?: UtenlandskPeriodebeløp(null, null, emptySet(), utbetalingsland = kompetanse.annenForeldersAktivitetsland) }
+        .tilpassTil(barnasKompetanseTidslinjer) { upb, kompetanse ->
+            when {
+                upb == null || upb.utbetalingsland != kompetanse.annenForeldersAktivitetsland ->
+                    UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = kompetanse.annenForeldersAktivitetsland)
+                else -> upb
+            }
+        }
         .tilSkjemaer()
 }
 
