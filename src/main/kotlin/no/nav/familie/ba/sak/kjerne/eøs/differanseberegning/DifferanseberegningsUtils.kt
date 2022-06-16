@@ -2,33 +2,14 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import java.math.BigDecimal
 
-fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal, erSkuddår: Boolean) = when (this) {
+fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal) = when (this) {
     Intervall.ÅRLIG -> beløp / 12.toBigDecimal()
     Intervall.KVARTALSVIS -> beløp / 3.toBigDecimal()
     Intervall.MÅNEDLIG -> beløp
-    Intervall.UKENTLIG -> konverterFraUkentligTilMånedligBeløp(beløp, erSkuddår)
+    Intervall.UKENTLIG -> beløp.multiply(4.35.toBigDecimal())
 }
-
-/***
- * Det finnes ingen offisiell dokumentasjon på hvordan vi skal konvertere fra ukentlig til
- * månedlig betaling i NAV per dags dato (19.05.2022). Til nå har saksbehandlere gjort dette manuelt og
- * brukt 52/12=4.33 for å konvertere fra ukentlig til månedlige beløp. Teamet har blitt enige om at vi burde
- * ta utgangspunkt i antall dager i et år. Siden valutajusteringen kun skjer en gang i året bruker
- * vi et gjennomsnitt for hver måned, slik at vi konverterer likt for måneder med forskjellig lengde.
- ***/
-private fun konverterFraUkentligTilMånedligBeløp(beløp: BigDecimal, erSkuddår: Boolean): BigDecimal {
-    val dagerIÅret: Double = if (erSkuddår) 366.0 else 365.0
-    val ukerIÅret: Double = dagerIÅret / 7.0
-    val ukerIEnMåned: Double = ukerIÅret / 12.0
-
-    return beløp.multiply(BigDecimal.valueOf(ukerIEnMåned))
-}
-
-fun <T : Tidsenhet> Tidspunkt<T>.erSkuddår() = this.tilLocalDateEllerNull()?.isLeapYear ?: false
 
 /**
  * Kalkulerer nytt utbetalingsbeløp fra [utenlandskPeriodebeløpINorskeKroner]

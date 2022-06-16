@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -61,7 +62,7 @@ class UtenlandskPeriodebeløpRepositoryTest(
                 tom = YearMonth.of(2021, 12),
                 beløp = BigDecimal.valueOf(1_234),
                 valutakode = "EUR",
-                intervall = "UKE"
+                intervall = Intervall.UKENTLIG
             )
         )
 

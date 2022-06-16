@@ -15,7 +15,7 @@ class UtenlandskePeriodebeløpUtfyltTest {
         val utenlandskPeriodebeløp = lagUtenlandskPeriodebeløp(
             beløp = BigDecimal.valueOf(500),
             valutakode = "NOK",
-            intervall = Intervall.MÅNEDLIG.name
+            intervall = Intervall.MÅNEDLIG
         )
 
         val restUtenlandskPeriodebeløp = utenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp()

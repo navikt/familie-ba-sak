@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -53,7 +54,7 @@ fun lagUtenlandskPeriodebeløp(
     barnAktører: Set<Aktør> = emptySet(),
     beløp: BigDecimal? = null,
     valutakode: String? = null,
-    intervall: String? = null,
+    intervall: Intervall? = null,
     utbetalingsland: String = ""
 ) = UtenlandskPeriodebeløp(
     fom = fom,
