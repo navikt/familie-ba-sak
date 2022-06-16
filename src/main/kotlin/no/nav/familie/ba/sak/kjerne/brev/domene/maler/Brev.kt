@@ -186,6 +186,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
 
     fun setterBehandlingPåVent(): Boolean =
         when (this) {
+            FORLENGET_SVARTIDSBREV,
             INNHENTE_OPPLYSNINGER,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
@@ -195,7 +196,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             else -> false
         }
 
-    fun ventefristDager(): Long =
+    fun ventefristDager(manuellFrist: Long?): Long =
         when (this) {
             INNHENTE_OPPLYSNINGER,
             VARSEL_OM_REVURDERING,
@@ -203,6 +204,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> 3 * 7
+            FORLENGET_SVARTIDSBREV -> manuellFrist ?: throw Feil("Ventefrist var ikke satt for $this")
             else -> throw Feil("Ventefrist ikke definert for brevtype $this")
         }
 
@@ -214,6 +216,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            FORLENGET_SVARTIDSBREV -> TODO("Årsak for FORLENGET_SVARTIDSBREV er ikke avklart")
             else -> throw Feil("Venteårsak ikke definert for brevtype $this")
         }
 }
