@@ -3,16 +3,20 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.hentUtbetalingstidslinjeForSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 import java.time.LocalDate
+import java.time.YearMonth
 
 enum class BehandlingAlder {
     NY,
@@ -61,18 +65,21 @@ fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
     }.filter { it.value.toSegments().isNotEmpty() }
 }
 
-fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: Iterable<Kompetanse>): LocalDate {
-    val kompetanseDiff = this.tilTidslinje()
-        .kombinerMed(forrigeKompetansePerioder.tilTidslinje()) { nyKompetanse, forrigeKompetanse ->
-            when {
-                nyKompetanse == forrigeKompetanse -> null
-                nyKompetanse == null -> forrigeKompetanse
-                forrigeKompetanse == null -> nyKompetanse
-                nyKompetanse != forrigeKompetanse -> nyKompetanse
-                else -> null
-            }
+fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: Iterable<Kompetanse>): YearMonth {
+    val separateTidslinjerForBarna = this.tilSeparateTidslinjerForBarna()
+    val separateTidslinjerForBarnaForrigeBehandling = forrigeKompetansePerioder.tilSeparateTidslinjerForBarna()
+
+    return separateTidslinjerForBarna.outerJoin(separateTidslinjerForBarnaForrigeBehandling) { nyKompetanse, forrigeKompetanse ->
+        when {
+            nyKompetanse == forrigeKompetanse -> null
+            nyKompetanse == null -> forrigeKompetanse
+            forrigeKompetanse == null -> nyKompetanse
+            nyKompetanse != forrigeKompetanse -> nyKompetanse
+            else -> null
         }
-    return kompetanseDiff.perioder().firstOrNull { it.innhold != null }?.fraOgMed?.tilLocalDate() ?: TIDENES_ENDE
+    }.values
+        .mapNotNull { it.filtrerIkkeNull().fraOgMed().tilYearMonthEllerNull() }
+        .minOfOrNull { it } ?: TIDENES_ENDE.toYearMonth()
 }
 
 private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>.tilSegmentMedEndringer(): LocalDateSegment<Int>? {

@@ -52,7 +52,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
         return if (featureToggleService.isEnabled(KAN_BEHANDLE_EØS)) {
             val kompetanser = kompetanseRepository.finnFraBehandlingId(vedtak.behandling.id)
 
-            slåSammenUtbetalingsperioderMedKompetanse(
+            splittUtbetalingsperioderPåKompetanser(
                 utbetalingsperioder = utbetalingsperioderMedReduksjon,
                 kompetanser = kompetanser.toList()
             )

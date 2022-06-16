@@ -6,20 +6,25 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 
 class EndringstidspunktUtilsTest {
+
+    val barnAktør1 = Aktør(aktørId = "1111111111111")
+    val barnAktør2 = Aktør(aktørId = "2222222222222")
 
     @Test
     fun `Skal finne endringer i beløp`() {
@@ -498,7 +503,8 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(fom = YearMonth.of(2022, 1))
         )
@@ -506,20 +512,23 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(
                 fom = YearMonth.of(2022, 1),
                 tom = YearMonth.of(2022, 1),
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(
                 fom = YearMonth.of(2022, 2),
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             )
         )
         assertEquals(
-            LocalDate.of(2022, 1, 31),
+            YearMonth.of(2022, 1),
             nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
         )
     }
@@ -532,7 +541,8 @@ class EndringstidspunktUtilsTest {
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
                 søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(fom = YearMonth.of(2022, 1))
         )
@@ -541,15 +551,17 @@ class EndringstidspunktUtilsTest {
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
                 søkersAktivitet = SøkersAktivitet.SELVSTENDIG_NÆRINGSDRIVENDE,
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(
                 fom = YearMonth.of(2022, 1),
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             )
         )
         assertEquals(
-            LocalDate.of(2021, 11, 30),
+            YearMonth.of(2021, 11),
             nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
         )
     }
@@ -562,7 +574,8 @@ class EndringstidspunktUtilsTest {
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
                 søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(fom = YearMonth.of(2022, 1))
         )
@@ -571,20 +584,23 @@ class EndringstidspunktUtilsTest {
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
                 søkersAktivitet = SøkersAktivitet.MOTTAR_UFØRETRYGD_FRA_NORGE,
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(
                 fom = YearMonth.of(2022, 1),
                 tom = YearMonth.of(2022, 1),
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(
                 fom = YearMonth.of(2022, 2),
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             )
         )
         assertEquals(
-            LocalDate.of(2021, 11, 30),
+            YearMonth.of(2021, 11),
             nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
         )
     }
@@ -597,21 +613,137 @@ class EndringstidspunktUtilsTest {
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
                 søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             ),
-            lagKompetanse(fom = YearMonth.of(2022, 1))
+            lagKompetanse(
+                fom = YearMonth.of(2022, 1),
+                barnAktører = setOf(barnAktør1)
+            )
         )
         val nyKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
                 søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
-                annenForeldersAktivitet = annenForeldersAktivitet
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
             ),
-            lagKompetanse(fom = YearMonth.of(2022, 1))
+            lagKompetanse(
+                fom = YearMonth.of(2022, 1),
+                barnAktører = setOf(barnAktør1)
+            )
         )
         assertEquals(
-            TIDENES_ENDE,
+            TIDENES_ENDE.toYearMonth(),
+            nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
+        )
+    }
+
+    @Test
+    fun `Skal kunne håndtere at vi legger til kompetanse på andre barn`() {
+        val annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV
+        val forrigeKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2022, 6),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
+            ),
+        )
+        val nyKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2022, 6),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
+            ),
+            lagKompetanse(
+                fom = YearMonth.of(2022, 6),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør2)
+            ),
+        )
+        assertEquals(
+            YearMonth.of(2022, 6),
+            nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
+        )
+    }
+
+    @Test
+    fun `Skal kunne håndtere at vi fjerner kompetanse fra et barn`() {
+        val annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV
+        val forrigeKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2022, 6),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
+            ),
+            lagKompetanse(
+                fom = YearMonth.of(2022, 6),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør2)
+            ),
+        )
+        val nyKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2022, 6),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
+            ),
+        )
+        assertEquals(
+            YearMonth.of(2022, 6),
+            nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
+        )
+    }
+
+    @Test
+    fun `Skal kunne håndtere tomme kompetanser`() {
+        val forrigeKompetansePerioder = emptyList<Kompetanse>()
+        val nyKompetansePerioder = emptyList<Kompetanse>()
+        assertEquals(
+            TIDENES_ENDE.toYearMonth(),
+            nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
+        )
+    }
+
+    @Test
+    fun `Skal kunne håndtere at nye kompetanser er tom`() {
+        val annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV
+        val forrigeKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2022, 6),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
+            ),
+        )
+        val nyKompetansePerioder = emptyList<Kompetanse>()
+        assertEquals(
+            YearMonth.of(2022, 6),
+            nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
+        )
+    }
+
+    @Test
+    fun `Skal kunne håndtere at forrige kompetanser er tom`() {
+        val annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV
+        val forrigeKompetansePerioder = emptyList<Kompetanse>()
+        val nyKompetansePerioder = listOf(
+            lagKompetanse(
+                fom = YearMonth.of(2022, 6),
+                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                annenForeldersAktivitet = annenForeldersAktivitet,
+                barnAktører = setOf(barnAktør1)
+            ),
+        )
+        assertEquals(
+            YearMonth.of(2022, 6),
             nyKompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
         )
     }
