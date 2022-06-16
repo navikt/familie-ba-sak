@@ -23,7 +23,7 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.1.0</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
-        <prosessering.version>1.20220608142436_6807720</prosessering.version>
+        <prosessering.version>1.20220615100415_97e6d04</prosessering.version>
         <felles.version>1.20220503150007_21cbfef</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20220609214258_f30c3ce</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>2.0_20220609092924_6265395</felles-kontrakter.version>
@@ -121,7 +121,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.3.6</version>
+            <version>42.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
