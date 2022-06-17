@@ -139,6 +139,7 @@ data class AndelTilkjentYtelse(
 
     override fun hashCode(): Int {
         return Objects.hash(
+            id,
             behandlingId,
             type,
             kalkulertUtbetalingsbeløp,
