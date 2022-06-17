@@ -45,4 +45,24 @@ class TilpassValutakursTilUtenlandskePeridebeløpTest {
 
         assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
     }
+
+    @Test
+    fun `test at endret valuta i utenlandsk periodebeløp fører til endring i valutakurs`() {
+        val gjeldendeValutakurser = ValutakursBuilder(jan2020)
+            .medKurs("333333", "EUR", barn1)
+            .bygg()
+
+        val utenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(jan2020)
+            .medBeløp("222222", "DKK", "DK", barn1)
+            .bygg()
+
+        val forventedeValutakurser = ValutakursBuilder(jan2020)
+            .medKurs("$$$$$$", "DKK", barn1)
+            .bygg()
+
+        val faktiskeValutakurser =
+            tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp)
+
+        assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
+    }
 }

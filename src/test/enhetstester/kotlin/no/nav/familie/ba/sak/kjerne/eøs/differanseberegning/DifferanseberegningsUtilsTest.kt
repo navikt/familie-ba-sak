@@ -85,22 +85,25 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal håndtere gjentakende endring og differanseberegning på andel tilkjent ytelse`() {
-        val aty1 = lagAndelTilkjentYtelse(beløp = 50)
-            .kalkulerFraUtenlandskPeriodebeløp(100.toBigDecimal())
+        val aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
+            100.toBigDecimal()
+        )
 
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(-50, aty1?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(50, aty1?.nasjonaltPeriodebeløp)
 
-        val aty2 = aty1?.copy(kalkulertUtbetalingsbeløp = 1)
-            ?.kalkulerFraUtenlandskPeriodebeløp(75.toBigDecimal())
+        val aty2 = aty1?.copy(kalkulertUtbetalingsbeløp = 1).oppdaterDifferanseberegning(
+            75.toBigDecimal()
+        )
 
         Assertions.assertEquals(0, aty2?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(-74, aty2?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(1, aty2?.nasjonaltPeriodebeløp)
 
-        val aty3 = aty2?.copy(kalkulertUtbetalingsbeløp = 250)
-            ?.kalkulerFraUtenlandskPeriodebeløp(75.toBigDecimal())
+        val aty3 = aty2?.copy(kalkulertUtbetalingsbeløp = 250).oppdaterDifferanseberegning(
+            75.toBigDecimal()
+        )
 
         Assertions.assertEquals(175, aty3?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(175, aty3?.differanseberegnetPeriodebeløp)
@@ -109,8 +112,9 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal fjerne desimaler i utenlandskperiodebeløp, effektivt øke den norske ytelsen med inntil én krone`() {
-        val aty1 = lagAndelTilkjentYtelse(beløp = 50)
-            .kalkulerFraUtenlandskPeriodebeløp(100.987654.toBigDecimal()) // Blir til rundet til 100
+        val aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
+            100.987654.toBigDecimal()
+        ) // Blir til rundet til 100
 
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(-50, aty1?.differanseberegnetPeriodebeløp)
