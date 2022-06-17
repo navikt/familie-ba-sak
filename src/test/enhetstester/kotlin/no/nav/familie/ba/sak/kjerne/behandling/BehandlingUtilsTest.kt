@@ -4,8 +4,11 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategoriVedOpprettelse
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.utledLøpendeUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
@@ -244,6 +247,7 @@ class BehandlingUtilsTest {
     @Test
     fun `Skal kaste feil etter at vedtaksbrev er distribuert`() {
         val fgb = lagBehandling()
+        fgb.behandlingStegTilstand.clear()
         fgb.behandlingStegTilstand.add(
             BehandlingStegTilstand(
                 behandlingSteg = StegType.DISTRIBUER_VEDTAKSBREV,
@@ -258,6 +262,7 @@ class BehandlingUtilsTest {
     @Test
     fun `Skal kaste feil etter iverksetting mot økonomi`() {
         val fgb = lagBehandling()
+        fgb.behandlingStegTilstand.clear()
         fgb.behandlingStegTilstand.add(
             BehandlingStegTilstand(
                 behandlingSteg = StegType.IVERKSETT_MOT_OPPDRAG,
@@ -272,6 +277,7 @@ class BehandlingUtilsTest {
     @Test
     fun `Skal kaste feil etter at brev er journalført`() {
         val fgb = lagBehandling()
+        fgb.behandlingStegTilstand.clear()
         fgb.behandlingStegTilstand.add(
             BehandlingStegTilstand(
                 behandlingSteg = StegType.JOURNALFØR_VEDTAKSBREV,
@@ -281,5 +287,83 @@ class BehandlingUtilsTest {
         )
 
         assertThrows<FunksjonellFeil> { validerBehandlingIkkeSendtTilEksterneTjenester(fgb) }
+    }
+
+    @Test
+    fun `skal få gitt behandlingskategori ved opprettelse av FGB`() {
+        assertEquals(
+            BehandlingKategori.EØS,
+            bestemKategoriVedOpprettelse(
+                overstyrtKategori = BehandlingKategori.EØS,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
+            )
+        )
+    }
+
+    @Test
+    fun `skal få gitt behandlingskategori ved opprettelse av Revurdering med søknad`() {
+        assertEquals(
+            BehandlingKategori.EØS,
+            bestemKategoriVedOpprettelse(
+                overstyrtKategori = BehandlingKategori.EØS,
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
+            )
+        )
+    }
+
+    @Test
+    fun `skal få NASJONAL kategori ved opprettelse av migreringsbehandling med helmanuell migrering`() {
+        assertEquals(
+            BehandlingKategori.NASJONAL,
+            bestemKategoriVedOpprettelse(
+                overstyrtKategori = null,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
+            )
+        )
+    }
+
+    @Test
+    fun `skal få NASJONAL kategori ved opprettelse av automatisk migreringsbehandling `() {
+        assertEquals(
+            BehandlingKategori.NASJONAL,
+            bestemKategoriVedOpprettelse(
+                overstyrtKategori = null,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                behandlingÅrsak = BehandlingÅrsak.MIGRERING,
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
+            )
+        )
+    }
+
+    @Test
+    fun `skal få EØS kategori ved opprettelse av revurdering når siste behandling er EØS og har løpende utbetaling `() {
+        assertEquals(
+            BehandlingKategori.EØS,
+            bestemKategoriVedOpprettelse(
+                overstyrtKategori = null,
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                kategoriFraLøpendeBehandling = BehandlingKategori.EØS
+            )
+        )
+    }
+
+    @Test
+    fun `skal få NASJONAL kategori ved opprettelse av revurdering når siste behandling er NASJONAL og har løpende utbetaling `() {
+        assertEquals(
+            BehandlingKategori.NASJONAL,
+            bestemKategoriVedOpprettelse(
+                overstyrtKategori = null,
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL
+            )
+        )
     }
 }

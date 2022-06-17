@@ -36,9 +36,9 @@ class BehandlingstemaService(
         manueltOppdatert: Boolean = false
     ): Behandling {
         if (behandling.skalBehandlesAutomatisk) return behandling
-        else if (manueltOppdatert && (overstyrtKategori == null || overstyrtUnderkategori == null)) throw FunksjonellFeil(
-            "Du må velge behandlingstema."
-        )
+        if (manueltOppdatert && (overstyrtKategori == null || overstyrtUnderkategori == null)) {
+            throw FunksjonellFeil("Du må velge behandlingstema.")
+        }
 
         val utledetKategori = bestemKategori(
             overstyrtKategori = overstyrtKategori,
