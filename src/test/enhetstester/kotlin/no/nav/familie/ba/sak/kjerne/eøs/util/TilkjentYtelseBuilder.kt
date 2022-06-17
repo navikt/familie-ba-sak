@@ -1,28 +1,23 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
+import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.satstypeTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.tilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
 import java.math.BigDecimal
@@ -75,7 +70,7 @@ class TilkjentYtelseBuilder(
 
                 val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
                 val tilleggOrbaTidslinje = satstypeTidslinje(SatsType.TILLEGG_ORBA)
-                    .filtrerMed(under6ÅrTidslinje(person))
+                    .filtrerMed(erUnder6ÅrTidslinje(person))
                 val satsTidslinje = orbaTidslinje.kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
 
                 andelTilkjentYtelseTidslinje.kombinerUtenNullMed(satsTidslinje) { aty, sats ->
@@ -93,28 +88,4 @@ class TilkjentYtelseBuilder(
     }
 
     fun bygg(): TilkjentYtelse = tilkjentYtelse
-}
-
-private fun satstypeTidslinje(satsType: SatsType) = tidslinje {
-    SatsService.hentAllesatser()
-        .filter { it.type == satsType }
-        .map {
-            val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.toYearMonth()
-            val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.toYearMonth()
-            Periode(
-                fraOgMed = fom.tilTidspunktEllerTidligereEnn(tom),
-                tilOgMed = tom.tilTidspunktEllerSenereEnn(fom),
-                it.beløp
-            )
-        }
-}
-
-private fun under6ÅrTidslinje(person: Person) = tidslinje {
-    listOf(
-        Periode(
-            person.fødselsdato.toYearMonth().tilTidspunkt(),
-            person.fødselsdato.toYearMonth().plusYears(6).minusMonths(1).tilTidspunkt(),
-            true
-        )
-    )
 }
