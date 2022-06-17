@@ -29,6 +29,7 @@ import javax.validation.Valid
 class UtenlandskPeriodebeløpController(
     private val featureToggleService: FeatureToggleService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
+    private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
@@ -41,12 +42,15 @@ class UtenlandskPeriodebeløpController(
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
 
         val barnAktører = restUtenlandskPeriodebeløp.barnIdenter.map { personidentService.hentAktør(it) }
-        val utenlandskPeriodebeløp = restUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører = barnAktører)
+
+        val eksisterendeUtenlandskPeriodeBeløp = utenlandskPeriodebeløpRepository.getById(restUtenlandskPeriodebeløp.id)
+
+        val utenlandskPeriodebeløp = restUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører, eksisterendeUtenlandskPeriodeBeløp)
 
         utenlandskPeriodebeløpService
             .oppdaterUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløp)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId)))
     }
 
     @DeleteMapping(path = ["{behandlingId}/{utenlandskPeriodebeløpId}"], produces = [MediaType.APPLICATION_JSON_VALUE])

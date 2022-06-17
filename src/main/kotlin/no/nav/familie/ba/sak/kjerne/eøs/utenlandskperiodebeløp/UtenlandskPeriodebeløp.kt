@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -10,6 +11,8 @@ import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -47,10 +50,14 @@ data class UtenlandskPeriodebeløp(
     val valutakode: String? = null,
 
     @Column(name = "intervall")
-    val intervall: String? = null,
+    @Enumerated(EnumType.STRING)
+    val intervall: Intervall? = null,
 
     @Column(name = "utbetalingsland")
     val utbetalingsland: String? = null,
+
+    @Column(name = "kalkulert_maanedlig_beloep")
+    val kalkulertMånedligBeløp: BigDecimal? = null
 ) : PeriodeOgBarnSkjemaEntitet<UtenlandskPeriodebeløp>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "utenlandsk_periodebeloep_seq_generator")
@@ -67,7 +74,8 @@ data class UtenlandskPeriodebeløp(
     override fun utenInnhold(): UtenlandskPeriodebeløp = copy(
         beløp = null,
         valutakode = null,
-        intervall = null
+        intervall = null,
+        kalkulertMånedligBeløp = null
     )
 
     override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) = copy(
