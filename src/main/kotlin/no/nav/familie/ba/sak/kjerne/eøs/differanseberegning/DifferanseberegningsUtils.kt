@@ -18,11 +18,23 @@ fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal) = when (this) {
  * [nasjonaltPeriodebeløp] settes til den originale, nasjonale beregningen (aldri negativt)
  * [differanseberegnetBeløp] er differansen mellom [nasjonaltPeriodebeløp] og (avrundet) [utenlandskPeriodebeløpINorskeKroner] (kan bli negativt)
  * [kalkulertUtebetalngsbeløp] blir satt til [differanseberegnetBeløp], med mindre det er negativt. Da blir det 0 (null)
+ * Hvis [utenlandskPeriodebeløpINorskeKroner] er <null>, så skal utbetalingsbeløpet reverteres til det originale nasjonale beløpet
  */
-fun AndelTilkjentYtelse?.kalkulerFraUtenlandskPeriodebeløp(utenlandskPeriodebeløpINorskeKroner: BigDecimal): AndelTilkjentYtelse? {
-    if (this == null)
-        return null
+fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
+    utenlandskPeriodebeløpINorskeKroner: BigDecimal?
+): AndelTilkjentYtelse? {
+    val nyAndelTilkjentYtelse = when {
+        this == null -> null
+        utenlandskPeriodebeløpINorskeKroner == null -> this.utenDifferanseberegning()
+        else -> this.medDifferanseberegning(utenlandskPeriodebeløpINorskeKroner)
+    }
 
+    return nyAndelTilkjentYtelse
+}
+
+private fun AndelTilkjentYtelse.medDifferanseberegning(
+    utenlandskPeriodebeløpINorskeKroner: BigDecimal
+): AndelTilkjentYtelse {
     val nyttNasjonaltPeriodebeløp = when {
         differanseberegnetPeriodebeløp == null || nasjonaltPeriodebeløp == null -> kalkulertUtbetalingsbeløp
         differanseberegnetPeriodebeløp < 0 && kalkulertUtbetalingsbeløp > 0 -> kalkulertUtbetalingsbeløp
@@ -36,9 +48,18 @@ fun AndelTilkjentYtelse?.kalkulerFraUtenlandskPeriodebeløp(utenlandskPeriodebel
     val nyttDifferanseberegnetBeløp = nyttNasjonaltPeriodebeløp - avrundetUtenlandskPeriodebeløp
 
     return copy(
-        id = 0, // Lager en ny instans
+        id = 0,
         kalkulertUtbetalingsbeløp = maxOf(nyttDifferanseberegnetBeløp, 0),
         nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
         differanseberegnetPeriodebeløp = nyttDifferanseberegnetBeløp
+    )
+}
+
+private fun AndelTilkjentYtelse.utenDifferanseberegning(): AndelTilkjentYtelse {
+    return copy(
+        id = 0,
+        kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp ?: kalkulertUtbetalingsbeløp,
+        nasjonaltPeriodebeløp = null,
+        differanseberegnetPeriodebeløp = null
     )
 }
