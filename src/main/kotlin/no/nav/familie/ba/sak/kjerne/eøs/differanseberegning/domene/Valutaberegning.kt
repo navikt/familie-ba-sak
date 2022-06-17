@@ -1,11 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene
 
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.erSkuddår
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.konverterBeløpTilMånedlig
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import java.math.BigDecimal
 
 data class KronerPerValutaenhet(
@@ -28,14 +24,11 @@ operator fun Valutabeløp?.times(kronerPerValutaenhet: KronerPerValutaenhet?): B
     return this.beløp * kronerPerValutaenhet.kronerPerValutaenhet
 }
 
-fun <T : Tidsenhet> UtenlandskPeriodebeløp?.tilMånedligValutabeløp(tidspunkt: Tidspunkt<T>): Valutabeløp? {
-    if (this?.beløp == null || this.intervall == null || this.valutakode == null)
+fun UtenlandskPeriodebeløp?.tilMånedligValutabeløp(): Valutabeløp? {
+    if (this?.kalkulertMånedligBeløp == null || this.valutakode == null)
         return null
 
-    val månedligBeløp =
-        Intervall.valueOf(this.intervall).konverterBeløpTilMånedlig(this.beløp, tidspunkt.erSkuddår())
-
-    return Valutabeløp(månedligBeløp, this.valutakode)
+    return Valutabeløp(this.kalkulertMånedligBeløp, this.valutakode)
 }
 
 fun Valutakurs?.tilKronerPerValutaenhet(): KronerPerValutaenhet? {

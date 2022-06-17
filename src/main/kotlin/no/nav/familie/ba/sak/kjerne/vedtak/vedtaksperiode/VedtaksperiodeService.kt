@@ -417,7 +417,7 @@ class VedtaksperiodeService(
             val kompetanserIPeriode = kompetanser.hentIPeriode(
                 fom = utvidetVedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
                 tom = utvidetVedtaksperiodeMedBegrunnelser.tom?.toYearMonth()
-            )
+            ).toList()
 
             val aktørIderMedUtbetaling =
                 hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }

@@ -75,7 +75,7 @@ class BrevPeriodeGenerator(
                     vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
                     apiNavn = begrunnelse.sanityApiNavn,
                     annenForeldersAktivitet = kompetanse.annenForeldersAktivitet.tilTekst(),
-                    annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetslandNavn.navn,
+                    annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetslandNavn?.navn,
                     barnetsBostedsland = kompetanse.barnetsBostedslandNavn.navn,
                     barnasFodselsdatoer = Utils.slåSammen(kompetanse.personer.map { it.fødselsdato.tilKortString() }),
                     antallBarn = kompetanse.personer.size,
