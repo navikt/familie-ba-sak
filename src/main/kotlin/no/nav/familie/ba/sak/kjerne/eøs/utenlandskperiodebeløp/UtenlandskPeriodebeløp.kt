@@ -11,6 +11,8 @@ import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -48,6 +50,7 @@ data class UtenlandskPeriodebeløp(
     val valutakode: String? = null,
 
     @Column(name = "intervall")
+    @Enumerated(EnumType.STRING)
     val intervall: Intervall? = null,
 
     @Column(name = "utbetalingsland")
