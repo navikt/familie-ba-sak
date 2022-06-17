@@ -77,14 +77,15 @@ fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
     tilkjentYtelse: TilkjentYtelse,
     oppdaterteAndeler: List<AndelTilkjentYtelse>
 ) {
-    if (tilkjentYtelse.andelerTilkjentYtelse == oppdaterteAndeler)
+    val gamleAndeler = tilkjentYtelse.andelerTilkjentYtelse
+    if (gamleAndeler.size == oppdaterteAndeler.size && gamleAndeler.containsAll(oppdaterteAndeler))
         return
 
-    val skalFjernes = tilkjentYtelse.andelerTilkjentYtelse - oppdaterteAndeler
-    val skalLeggesTil = oppdaterteAndeler - tilkjentYtelse.andelerTilkjentYtelse
+    val skalFjernes = gamleAndeler - oppdaterteAndeler
+    val skalLeggesTil = oppdaterteAndeler - gamleAndeler
 
-    tilkjentYtelse.andelerTilkjentYtelse.removeAll(skalFjernes)
-    tilkjentYtelse.andelerTilkjentYtelse.addAll(skalLeggesTil)
+    gamleAndeler.removeAll(skalFjernes)
+    gamleAndeler.addAll(skalLeggesTil)
 
     this.saveAndFlush(tilkjentYtelse)
 }
