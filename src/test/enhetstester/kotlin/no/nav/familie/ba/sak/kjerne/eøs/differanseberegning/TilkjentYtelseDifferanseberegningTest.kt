@@ -20,11 +20,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_Å
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-/**
- * Merk at operasjoner som tilsynelatende lager en ny instans av TilkjentYtelse, faktisk returner samme.
- * Det skyldes at JPA krever muterbare objekter.
- * Ikke-muterbarhet krever en omskrivning av koden. F.eks å koble vekk EndretUtbetalingPeriode fra AndelTilkjentYtelse
- */
 class TilkjentYtelseDifferanseberegningTest {
 
     @Test

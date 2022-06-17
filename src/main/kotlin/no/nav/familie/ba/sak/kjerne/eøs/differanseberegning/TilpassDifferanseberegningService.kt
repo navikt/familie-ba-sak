@@ -73,6 +73,11 @@ class TilpassDifferanseberegningEtterValutakursService(
     }
 }
 
+/**
+ * En litt risikabel funksjon, som lener seg på at AndelTilkjentYtelse.equals() fortsetter å sjekke _funksjonell_ likhet,
+ * dvs utelukker [id], [tilkjentYtelse] og [endretUtbetalingAndeler], blant annet
+ * Merk også at det er en inkonsistens mellom hashCode() og equals(), som potensielt gjør likhetssjekk ustabil
+ */
 fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
     tilkjentYtelse: TilkjentYtelse,
     oppdaterteAndeler: List<AndelTilkjentYtelse>
