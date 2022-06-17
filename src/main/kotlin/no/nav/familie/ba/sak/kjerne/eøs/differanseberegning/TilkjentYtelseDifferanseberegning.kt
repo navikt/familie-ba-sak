@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
@@ -18,15 +17,15 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
  * Muteringen skyldes at TilkjentYtelse er under JPA-kontekst og ikke "tåler" copy(andelerTilkjentYtelse = ...)
  * Starten på én løsning er at EndretUtebetalingPeriode kobles løs fra AndelTilkjentYtelse og kobles rett på behandlingen
  */
-fun beregnDifferanseOgOppdaterTilkjentYtelse(
-    tilkjentYtelse: TilkjentYtelse,
+fun beregnDifferanse(
+    andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
     valutakurser: Collection<Valutakurs>
-): TilkjentYtelse {
+): List<AndelTilkjentYtelse> {
 
     val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
     val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
-    val andelTilkjentYtelseTidslinjer = tilkjentYtelse.tilSeparateTidslinjerForBarna()
+    val andelTilkjentYtelseTidslinjer = andelerTilkjentYtelse.tilSeparateTidslinjerForBarna()
 
     val alleBarna: Set<Aktør> =
         utenlandskePeriodebeløpTidslinjer.keys + valutakursTidslinjer.keys + andelTilkjentYtelseTidslinjer.keys
@@ -44,12 +43,12 @@ fun beregnDifferanseOgOppdaterTilkjentYtelse(
     }
 
     val barnasAndeler = barnasDifferanseberegnetAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
-    val søkersAndeler = tilkjentYtelse.søkersAndeler()
+    val søkersAndeler = andelerTilkjentYtelse.søkersAndeler()
 
     validarSøkersYtelserMotEventueltNegativeAndelerForBarna(søkersAndeler, barnasAndeler)
 
     // Muterer tilkjentYtelse, lager IKKE ny instans
-    return tilkjentYtelse.medAndeler(søkersAndeler + barnasAndeler)
+    return søkersAndeler + barnasAndeler
 }
 
 private fun validarSøkersYtelserMotEventueltNegativeAndelerForBarna(

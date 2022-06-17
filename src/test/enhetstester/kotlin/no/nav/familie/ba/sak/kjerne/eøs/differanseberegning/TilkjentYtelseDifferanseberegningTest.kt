@@ -69,9 +69,10 @@ class TilkjentYtelseDifferanseberegningTest {
             .medKurs(" 888899999>", "EUR", barn1, barn2)
             .bygg()
 
-        beregnDifferanseOgOppdaterTilkjentYtelse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+        val andelerMedDifferanse =
+            beregnDifferanse(tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
 
-        assertEquals(14, tilkjentYtelse.andelerTilkjentYtelse.size)
+        assertEquals(14, andelerMedDifferanse.size)
     }
 
     @Test
@@ -108,21 +109,23 @@ class TilkjentYtelseDifferanseberegningTest {
             .medKurs(" 888899999>", "EUR", barn1, barn2)
             .bygg()
 
-        // Er samme instans som tilkjentYtelse
-        beregnDifferanseOgOppdaterTilkjentYtelse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+        val andelerMedDiff =
+            beregnDifferanse(tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
 
-        assertEquals(12, tilkjentYtelse.andelerTilkjentYtelse.size)
+        assertEquals(12, andelerMedDiff.size)
 
         val blanktUtenlandskPeridebeløp = UtenlandskPeriodebeløpBuilder(startMåned, behandlingId)
             .medBeløp(" >", null, null, barn1, barn2)
             .bygg()
 
-        beregnDifferanseOgOppdaterTilkjentYtelse(tilkjentYtelse, blanktUtenlandskPeridebeløp, valutakurser)
+        val andelerUtenDiff =
+            beregnDifferanse(tilkjentYtelse.andelerTilkjentYtelse, blanktUtenlandskPeridebeløp, valutakurser)
 
-        assertEquals(6, tilkjentYtelse.andelerTilkjentYtelse.size)
+        assertEquals(6, andelerUtenDiff.size)
 
-        beregnDifferanseOgOppdaterTilkjentYtelse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+        val andelerMedDiffIgjen =
+            beregnDifferanse(tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
 
-        assertEquals(12, tilkjentYtelse.andelerTilkjentYtelse.size)
+        assertEquals(12, andelerMedDiffIgjen.size)
     }
 }
