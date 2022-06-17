@@ -38,12 +38,12 @@ fun beregnDifferanse(
         val utenlandskePeriodebeløpINorskeKroner = utenlandskePeriodebeløpTidslinje.kombinerMed(valutakursTidslinje) { upb, valutakurs -> upb.tilMånedligValutabeløp() * valutakurs.tilKronerPerValutaenhet() }
 
         andelTilkjentYtelseTidslinje.kombinerMed(utenlandskePeriodebeløpINorskeKroner) { aty, beløp ->
-            differanseBeregnUtbetalingsbeløp(aty, beløp)
+            aty.oppdaterDifferanseberegning(beløp)
         }
     }
 
     val barnasAndeler = barnasDifferanseberegnetAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
-    val søkersAndeler = andelerTilkjentYtelse.søkersAndeler()
+    val søkersAndeler = andelerTilkjentYtelse.filter { it.erSøkersAndel() }
 
     validarSøkersYtelserMotEventueltNegativeAndelerForBarna(søkersAndeler, barnasAndeler)
 

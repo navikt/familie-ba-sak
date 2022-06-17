@@ -20,18 +20,16 @@ fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal) = when (this) {
  * [kalkulertUtebetalngsbeløp] blir satt til [differanseberegnetBeløp], med mindre det er negativt. Da blir det 0 (null)
  * Hvis [utenlandskPeriodebeløpINorskeKroner] er <null>, så skal utbetalingsbeløpet reverteres til det originale nasjonale beløpet
  */
-fun differanseBeregnUtbetalingsbeløp(
-    andelTilkjentYtelse: AndelTilkjentYtelse?,
+fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
     utenlandskPeriodebeløpINorskeKroner: BigDecimal?
 ): AndelTilkjentYtelse? {
     val nyAndelTilkjentYtelse = when {
-        andelTilkjentYtelse == null -> null
-        utenlandskPeriodebeløpINorskeKroner == null -> andelTilkjentYtelse.utenDifferanseberegning()
-        else -> andelTilkjentYtelse.medDifferanseberegning(utenlandskPeriodebeløpINorskeKroner)
+        this == null -> null
+        utenlandskPeriodebeløpINorskeKroner == null -> this.utenDifferanseberegning()
+        else -> this.medDifferanseberegning(utenlandskPeriodebeløpINorskeKroner)
     }
 
-    // Beholder den eksisterende hvis de er funksjonelt like
-    return if (nyAndelTilkjentYtelse != andelTilkjentYtelse) nyAndelTilkjentYtelse else andelTilkjentYtelse
+    return nyAndelTilkjentYtelse
 }
 
 private fun AndelTilkjentYtelse.medDifferanseberegning(

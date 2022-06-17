@@ -85,8 +85,7 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal håndtere gjentakende endring og differanseberegning på andel tilkjent ytelse`() {
-        val aty1 = differanseBeregnUtbetalingsbeløp(
-            lagAndelTilkjentYtelse(beløp = 50),
+        val aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
             100.toBigDecimal()
         )
 
@@ -94,8 +93,7 @@ class DifferanseberegningsUtilsTest {
         Assertions.assertEquals(-50, aty1?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(50, aty1?.nasjonaltPeriodebeløp)
 
-        val aty2 = differanseBeregnUtbetalingsbeløp(
-            aty1?.copy(kalkulertUtbetalingsbeløp = 1),
+        val aty2 = aty1?.copy(kalkulertUtbetalingsbeløp = 1).oppdaterDifferanseberegning(
             75.toBigDecimal()
         )
 
@@ -103,8 +101,7 @@ class DifferanseberegningsUtilsTest {
         Assertions.assertEquals(-74, aty2?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(1, aty2?.nasjonaltPeriodebeløp)
 
-        val aty3 = differanseBeregnUtbetalingsbeløp(
-            aty2?.copy(kalkulertUtbetalingsbeløp = 250),
+        val aty3 = aty2?.copy(kalkulertUtbetalingsbeløp = 250).oppdaterDifferanseberegning(
             75.toBigDecimal()
         )
 
@@ -115,8 +112,7 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal fjerne desimaler i utenlandskperiodebeløp, effektivt øke den norske ytelsen med inntil én krone`() {
-        val aty1 = differanseBeregnUtbetalingsbeløp(
-            lagAndelTilkjentYtelse(beløp = 50),
+        val aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
             100.987654.toBigDecimal()
         ) // Blir til rundet til 100
 
