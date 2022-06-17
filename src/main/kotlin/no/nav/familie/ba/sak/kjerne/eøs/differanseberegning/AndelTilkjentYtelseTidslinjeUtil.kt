@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -12,9 +11,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilT
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import java.time.YearMonth
 
-fun TilkjentYtelse.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
+fun Iterable<AndelTilkjentYtelse>.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
 
-    return this.andelerTilkjentYtelse
+    return this
         .filter { !it.erSøkersAndel() }
         .groupBy { it.aktør }
         .mapValues { (_, andeler) -> tidslinje { andeler.map { it.tilPeriode() } } }

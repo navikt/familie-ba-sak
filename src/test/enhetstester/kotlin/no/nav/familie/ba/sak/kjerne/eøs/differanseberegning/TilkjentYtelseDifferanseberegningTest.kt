@@ -64,9 +64,9 @@ class TilkjentYtelseDifferanseberegningTest {
             .medKurs(" 888899999>", "EUR", barn1, barn2)
             .bygg()
 
-        val differanseBeregnetTilkjentYtelse =
-            beregnDifferanse(tilkjentYtelseMedEndringer, utenlandskePeriodebeløp, valutakurser)
+        val differanseBeregneteAndeler =
+            beregnDifferanse(tilkjentYtelseMedEndringer.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
 
-        assertEquals(14, differanseBeregnetTilkjentYtelse.andelerTilkjentYtelse.size)
+        assertEquals(14, differanseBeregneteAndeler.size)
     }
 }

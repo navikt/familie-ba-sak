@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
@@ -13,17 +12,14 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 
 fun beregnDifferanse(
-    tilkjentYtelse: TilkjentYtelse,
+    andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
     valutakurser: Collection<Valutakurs>
-): TilkjentYtelse {
-
-    if (utenlandskePeriodebeløp.isEmpty() || valutakurser.isEmpty())
-        return tilkjentYtelse
+): List<AndelTilkjentYtelse> {
 
     val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
     val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
-    val andelTilkjentYtelseTidslinjer = tilkjentYtelse.tilSeparateTidslinjerForBarna()
+    val andelTilkjentYtelseTidslinjer = andelerTilkjentYtelse.tilSeparateTidslinjerForBarna()
 
     val alleBarna: Set<Aktør> =
         utenlandskePeriodebeløpTidslinjer.keys + valutakursTidslinjer.keys + andelTilkjentYtelseTidslinjer.keys
@@ -33,7 +29,8 @@ fun beregnDifferanse(
         val valutakursTidslinje = valutakursTidslinjer.getOrDefault(aktør, TomTidslinje())
         val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjer.getOrDefault(aktør, TomTidslinje())
 
-        val utenlandskePeriodebeløpINorskeKroner = utenlandskePeriodebeløpTidslinje.kombinerMed(valutakursTidslinje) { upb, valutakurs -> upb.tilMånedligValutabeløp() * valutakurs.tilKronerPerValutaenhet() }
+        val utenlandskePeriodebeløpINorskeKroner =
+            utenlandskePeriodebeløpTidslinje.kombinerMed(valutakursTidslinje) { upb, valutakurs -> upb.tilMånedligValutabeløp() * valutakurs.tilKronerPerValutaenhet() }
 
         andelTilkjentYtelseTidslinje.kombinerMed(utenlandskePeriodebeløpINorskeKroner) { aty, beløp ->
             beløp?.let { aty.kalkulerFraUtenlandskPeriodebeløp(it) } ?: aty
@@ -41,11 +38,11 @@ fun beregnDifferanse(
     }
 
     val barnasAndeler = barnasDifferanseberegnetAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
-    val søkersAndeler = tilkjentYtelse.søkersAndeler()
+    val søkersAndeler = andelerTilkjentYtelse.filter { it.erSøkersAndel() }
 
     validarSøkersYtelserMotEventueltNegativeAndelerForBarna(søkersAndeler, barnasAndeler)
 
-    return tilkjentYtelse.medAndeler(søkersAndeler + barnasAndeler)
+    return søkersAndeler + barnasAndeler
 }
 
 private fun validarSøkersYtelserMotEventueltNegativeAndelerForBarna(

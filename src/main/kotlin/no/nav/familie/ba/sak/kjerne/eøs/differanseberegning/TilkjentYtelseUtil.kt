@@ -8,5 +8,3 @@ fun TilkjentYtelse.medAndeler(andeler: Iterable<AndelTilkjentYtelse>): TilkjentY
     this.andelerTilkjentYtelse.addAll(andeler)
     return this
 }
-
-fun TilkjentYtelse.søkersAndeler() = this.andelerTilkjentYtelse.filter { it.erSøkersAndel() }

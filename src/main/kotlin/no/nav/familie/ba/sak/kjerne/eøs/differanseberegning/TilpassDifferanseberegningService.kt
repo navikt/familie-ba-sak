@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -24,8 +25,11 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
-        val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
-        tilkjentYtelseRepository.saveAndFlush(oppdatertTilkjentYtelse)
+        val oppdaterteAndeler = beregnDifferanse(
+            tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
+        )
+
+        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }
 
@@ -42,8 +46,11 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 
-        val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
-        tilkjentYtelseRepository.saveAndFlush(oppdatertTilkjentYtelse)
+        val oppdaterteAndeler = beregnDifferanse(
+            tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
+        )
+
+        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }
 
@@ -58,7 +65,27 @@ class TilpassDifferanseberegningEtterValutakursService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
-        val oppdatertTilkjentYtelse = beregnDifferanse(tilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
-        tilkjentYtelseRepository.saveAndFlush(oppdatertTilkjentYtelse)
+        val oppdaterteAndeler = beregnDifferanse(
+            tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
+        )
+
+        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
+}
+
+fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
+    tilkjentYtelse: TilkjentYtelse,
+    oppdaterteAndeler: List<AndelTilkjentYtelse>
+) {
+    val gamleAndeler = tilkjentYtelse.andelerTilkjentYtelse
+    if (gamleAndeler.size == oppdaterteAndeler.size && gamleAndeler.containsAll(oppdaterteAndeler))
+        return
+
+    val skalFjernes = gamleAndeler - oppdaterteAndeler
+    val skalLeggesTil = oppdaterteAndeler - gamleAndeler
+
+    gamleAndeler.removeAll(skalFjernes)
+    gamleAndeler.addAll(skalLeggesTil)
+
+    this.saveAndFlush(tilkjentYtelse)
 }
