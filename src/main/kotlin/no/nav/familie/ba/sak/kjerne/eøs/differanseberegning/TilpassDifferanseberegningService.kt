@@ -1,9 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.AndelTilkjentYtelsePraktiskLikhet.erIPraksisLik
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.AndelTilkjentYtelsePraktiskLikhet.inneholderIPraksis
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -16,7 +20,8 @@ import org.springframework.transaction.annotation.Transactional
 class TilpassDifferanseberegningEtterTilkjentYtelseService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val featureToggleService: FeatureToggleService
 ) : TilkjentYtelseEndretAbonnent {
 
     @Transactional
@@ -29,14 +34,16 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
             tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
         )
 
-        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
+        if (featureToggleService.kanHåndtereEøsUtenomPrimærland())
+            tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }
 
 @Service
 class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val featureToggleService: FeatureToggleService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     @Transactional
     override fun skjemaerEndret(
@@ -50,14 +57,16 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
             tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
         )
 
-        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
+        if (featureToggleService.kanHåndtereEøsUtenomPrimærland())
+            tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }
 
 @Service
 class TilpassDifferanseberegningEtterValutakursService(
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val featureToggleService: FeatureToggleService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
 
     @Transactional
@@ -69,28 +78,45 @@ class TilpassDifferanseberegningEtterValutakursService(
             tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
         )
 
-        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
+        if (featureToggleService.kanHåndtereEøsUtenomPrimærland())
+            tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }
 
 /**
- * En litt risikabel funksjon, som lener seg på at AndelTilkjentYtelse.equals() fortsetter å sjekke _funksjonell_ likhet,
- * dvs utelukker [id], [tilkjentYtelse] og [endretUtbetalingAndeler], blant annet
- * Merk også at det er en inkonsistens mellom hashCode() og equals(), som potensielt gjør likhetssjekk ustabil
+ * En litt risikabel funksjon, som benytter "funksjonell likhet" for å sjekke etter endringer
+ * på andel tilkjent ytelse
  */
 fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
     tilkjentYtelse: TilkjentYtelse,
     oppdaterteAndeler: List<AndelTilkjentYtelse>
 ) {
-    val gamleAndeler = tilkjentYtelse.andelerTilkjentYtelse
-    if (gamleAndeler.size == oppdaterteAndeler.size && gamleAndeler.containsAll(oppdaterteAndeler))
+    if (tilkjentYtelse.andelerTilkjentYtelse.erIPraksisLik(oppdaterteAndeler))
         return
 
-    val skalFjernes = gamleAndeler - oppdaterteAndeler
-    val skalLeggesTil = oppdaterteAndeler - gamleAndeler
+    // Her er det viktig å beholde de originale andelene, som styres av JPA og har alt av innhold
+    val skalBeholdes = tilkjentYtelse.andelerTilkjentYtelse
+        .filter { oppdaterteAndeler.inneholderIPraksis(it) }
 
-    gamleAndeler.removeAll(skalFjernes)
-    gamleAndeler.addAll(skalLeggesTil)
+    val skalLeggesTil = oppdaterteAndeler
+        .filter { !tilkjentYtelse.andelerTilkjentYtelse.inneholderIPraksis(it) }
+
+    // Forsikring: Sjekk at det ikke oppstår eller forsvinner andeler når de sjekkes for likhet
+    if (oppdaterteAndeler.size != (skalBeholdes.size + skalLeggesTil.size))
+        throw IllegalStateException("Avvik mellom antall innsendte andeler og kalkulerte endringer")
+
+    tilkjentYtelse.andelerTilkjentYtelse.clear()
+    tilkjentYtelse.andelerTilkjentYtelse.addAll(skalBeholdes + skalLeggesTil)
+
+    // Ekstra forsikring: Bygger tidslinjene på nytt for å sjekke at det ikke er introdusert feil
+    // Krasjer med TidslinjeException hvis det forekommer perioder (per barn) som overlapper
+    // Bør fjernes hvis det ikke forekommer feil
+    tilkjentYtelse.andelerTilkjentYtelse.tilSeparateTidslinjerForBarna()
 
     this.saveAndFlush(tilkjentYtelse)
 }
+
+fun FeatureToggleService.kanHåndtereEøsUtenomPrimærland() =
+    this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) &&
+        this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_SEKUNDERLAND) &&
+        this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_TO_PRIMERLAND)

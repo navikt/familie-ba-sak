@@ -447,6 +447,51 @@ class MigreringServiceTest(
     }
 
     @Test
+    fun `migrering skal feile dersom løpende sak i infotrygd er av type I, Det er da mest sannsynlig institusjon`() {
+        val fødselsnrBarn = FoedselsnummerGenerator().foedselsnummer(LocalDate.now()).asString
+
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(
+            listOf(
+                Sak(
+                    stønad = Stønad(
+                        barn = listOf(
+                            Barn(
+                                FoedselsnummerGenerator().foedselsnummer(LocalDate.now()).asString,
+                                barnetrygdTom = "000000"
+                            )
+                        ),
+                        antallBarn = 1,
+                        delytelse = listOf(
+                            Delytelse(
+                                fom = LocalDate.now(),
+                                tom = null,
+                                beløp = 2048.0,
+                                typeDelytelse = "MS",
+                                typeUtbetaling = "J",
+                            )
+                        ),
+                        opphørsgrunn = "0",
+                    ),
+                    status = "FB",
+                    valg = "OR",
+                    undervalg = "OS",
+                    type = "I"
+                )
+
+            ),
+            emptyList()
+        )
+
+        assertThatThrownBy {
+            migreringService.migrer(fødselsnrBarn)
+        }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.INSTITUSJON)
+    }
+
+    @Test
     fun `happy case - personer over 18 skal ignoreres hvis antallBarn på stønaden stemmer overens med antall barn etter at de over at er filtrert vekk`() {
         val fødselsnrBarn =
             FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
@@ -799,9 +844,9 @@ class MigreringServiceTest(
         )
 
         val ident = randomFnr()
-        every { mockkPersonidentService.hentIdenter(any(), true) } returns listOf(
-            IdentInformasjon(ident, false, "FOLKEREGISTERIDENT"),
-        )
+        every { mockkPersonidentService.hentIdenter(any(), true) } answers {
+            listOf(IdentInformasjon(firstArg(), false, "FOLKEREGISTERIDENT"))
+        }
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())

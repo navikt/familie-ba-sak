@@ -35,7 +35,8 @@ fun beregnDifferanse(
         val valutakursTidslinje = valutakursTidslinjer.getOrDefault(aktør, TomTidslinje())
         val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjer.getOrDefault(aktør, TomTidslinje())
 
-        val utenlandskePeriodebeløpINorskeKroner = utenlandskePeriodebeløpTidslinje.kombinerMed(valutakursTidslinje) { upb, valutakurs -> upb.tilMånedligValutabeløp() * valutakurs.tilKronerPerValutaenhet() }
+        val utenlandskePeriodebeløpINorskeKroner =
+            utenlandskePeriodebeløpTidslinje.kombinerMed(valutakursTidslinje) { upb, valutakurs -> upb.tilMånedligValutabeløp() * valutakurs.tilKronerPerValutaenhet() }
 
         andelTilkjentYtelseTidslinje.kombinerMed(utenlandskePeriodebeløpINorskeKroner) { aty, beløp ->
             aty.oppdaterDifferanseberegning(beløp)
@@ -47,7 +48,6 @@ fun beregnDifferanse(
 
     validarSøkersYtelserMotEventueltNegativeAndelerForBarna(søkersAndeler, barnasAndeler)
 
-    // Muterer tilkjentYtelse, lager IKKE ny instans
     return søkersAndeler + barnasAndeler
 }
 
