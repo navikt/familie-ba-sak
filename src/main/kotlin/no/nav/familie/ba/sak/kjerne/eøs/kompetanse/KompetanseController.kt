@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestKompetanse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanse
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
@@ -34,7 +35,8 @@ class KompetanseController(
     private val featureToggleService: FeatureToggleService,
     private val kompetanseService: KompetanseService,
     private val personidentService: PersonidentService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val tilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) {
 
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -48,6 +50,7 @@ class KompetanseController(
         val barnAktører = restKompetanse.barnIdenter.map { personidentService.hentAktør(it) }
         val kompetanse = restKompetanse.tilKompetanse(barnAktører = barnAktører)
 
+        validerUtvidedEøsOgSekundærland(kompetanse, behandlingId)
         validerOppdatering(kompetanse)
 
         kompetanseService.oppdaterKompetanse(BehandlingId(behandlingId), kompetanse)
@@ -124,5 +127,14 @@ class KompetanseController(
                 "Oppdaterer barn som ikke er knyttet til kompetansen",
                 httpStatus = HttpStatus.BAD_REQUEST
             )
+    }
+
+    private fun validerUtvidedEøsOgSekundærland(kompetanse: Kompetanse, behandlingId: Long) {
+        if (kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND)) {
+            val utvidetEllerSmåbarnstillegg = tilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId).any { andelTilkjentYtelse -> andelTilkjentYtelse.erSøkersAndel() }
+            if (utvidetEllerSmåbarnstillegg) {
+                throw FunksjonellFeil("Støtter foreløpig ikke utvidet barnetrygd og/eller småbarnstillegg i kombinasjon med sekundærland.", "Søker har utvidet barnetrygd og/eller småbarnstillegg. Dette er ikke støttet i sekundærlandssaker enda. Ta kontakt med Team Familie", HttpStatus.BAD_REQUEST)
+            }
+        }
     }
 }
