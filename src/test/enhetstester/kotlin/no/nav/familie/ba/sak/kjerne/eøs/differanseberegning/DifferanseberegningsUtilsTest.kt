@@ -80,7 +80,7 @@ class DifferanseberegningsUtilsTest {
         val månedligValutabeløp = 0.0123767453453.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
             .tilMånedligValutabeløp()
 
-        Assertions.assertEquals(0.001.i("EUR"), månedligValutabeløp)
+        Assertions.assertEquals(0.0010313954.i("EUR"), månedligValutabeløp)
     }
 
     @Test

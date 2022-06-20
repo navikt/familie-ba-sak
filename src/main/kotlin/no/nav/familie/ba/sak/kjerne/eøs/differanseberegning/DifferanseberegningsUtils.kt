@@ -6,19 +6,13 @@ import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
 
-fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal {
-    val konvertertBeløp = when (this) {
+fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =
+    when (this) {
         Intervall.ÅRLIG -> beløp.divide(12.toBigDecimal(), 10, RoundingMode.HALF_DOWN)
         Intervall.KVARTALSVIS -> beløp.divide(3.toBigDecimal(), 10, RoundingMode.HALF_DOWN)
         Intervall.MÅNEDLIG -> beløp
         Intervall.UKENTLIG -> beløp.multiply(4.35.toBigDecimal(), MathContext(10, RoundingMode.HALF_DOWN))
-    }
-    return try {
-        konvertertBeløp.setScale(4)
-    } catch (e: ArithmeticException) {
-        konvertertBeløp.setScale(4, RoundingMode.HALF_DOWN)
     }.stripTrailingZeros().toPlainString().toBigDecimal()
-}
 
 /**
  * Kalkulerer nytt utbetalingsbeløp fra [utenlandskPeriodebeløpINorskeKroner]
