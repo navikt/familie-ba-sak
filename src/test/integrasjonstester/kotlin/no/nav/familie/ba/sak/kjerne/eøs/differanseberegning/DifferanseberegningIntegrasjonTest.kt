@@ -4,7 +4,15 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseTestController
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpTestController
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursTestController
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilMånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingTestController
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
@@ -63,26 +71,80 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
             barnStartdato /*                */ to "5555566644234489"
         )
 
-        val utvidetBehandling1 =
+        val utvidetBehandlingFørsteGang =
             vilkårsvurderingTestController.opprettBehandlingMedVilkårsvurdering(vilkårsvurderingRequest)
                 .body?.data!!
 
-        // tilkjentYtelseTestController.lagInitiellTilkjentYtelse(utvidetBehandling1.behandlingId)
-        tilkjentYtelseTestController.oppdaterEndretUtebetalingAndeler(
-            utvidetBehandling1.behandlingId, deltBosteRequest
-        )
+        val sumUtbetalingFørsteGang = utvidetBehandlingFørsteGang.utbetalingsperioder.sumUtbetaling()
 
-        kompetanseTestController.endreKompetanser(utvidetBehandling1.behandlingId, kompetanseRequest)
+        // tilkjentYtelseTestController.lagInitiellTilkjentYtelse(utvidetBehandling1.behandlingId)
+        val sumUtbetalingDelt = tilkjentYtelseTestController
+            .oppdaterEndretUtebetalingAndeler(utvidetBehandlingFørsteGang.behandlingId, deltBosteRequest)
+            .body?.data!!.utbetalingsperioder.sumUtbetaling()
+
+        kompetanseTestController.endreKompetanser(utvidetBehandlingFørsteGang.behandlingId, kompetanseRequest)
         utenlandskPeriodebeløpTestController.endreUtenlandskePeriodebeløp(
-            utvidetBehandling1.behandlingId,
+            utvidetBehandlingFørsteGang.behandlingId,
             utenlandskPeriodebeløpRequest
         )
 
-        val utvidetbehandling2 = valutakursTestController
-            .endreValutakurser(utvidetBehandling1.behandlingId, valutakursRequest)
+        val utvidetbehandlingDifferanseberegnet = valutakursTestController
+            .endreValutakurser(utvidetBehandlingFørsteGang.behandlingId, valutakursRequest)
             .body?.data!!
 
-        Assertions.assertEquals(3, utvidetbehandling2.endretUtbetalingAndeler.size)
-        Assertions.assertEquals(10, utvidetbehandling2.utbetalingsperioder.size)
+        val sumUtbetalingDifferanseberegnet =
+            utvidetbehandlingDifferanseberegnet.utbetalingsperioder.sumUtbetaling()
+
+        Assertions.assertEquals(3, utvidetbehandlingDifferanseberegnet.endretUtbetalingAndeler.size)
+        Assertions.assertEquals(10, utvidetbehandlingDifferanseberegnet.utbetalingsperioder.size)
+
+        val vilkårsvurderingRequest2 = mapOf(
+            søkerStartdato to mapOf(
+                Vilkår.BOSATT_I_RIKET /*    */ to "NNNNNNNNNNNNNNNN",
+                Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE"
+            ),
+            barnStartdato to mapOf(
+                Vilkår.UNDER_18_ÅR /*       */ to "++++++++++++++++",
+                Vilkår.GIFT_PARTNERSKAP /*  */ to "++++++++++++++++",
+                Vilkår.BOSATT_I_RIKET /*    */ to "EEEEEEEEEEEEEEEE",
+                Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE",
+                Vilkår.BOR_MED_SØKER /*     */ to "EEEEEEEEEEEEEEEE"
+            )
+        )
+
+        val utvidetBehandlingTilbakestilt = vilkårsvurderingTestController
+            .oppdaterVilkårsvurderingIBehandling(
+                utvidetbehandlingDifferanseberegnet.behandlingId,
+                vilkårsvurderingRequest2
+            )
+            .body?.data!!
+
+        val sumUtbetalingTilbakestilt =
+            utvidetBehandlingTilbakestilt.utbetalingsperioder.sumUtbetaling()
+
+        Assertions.assertEquals(3, utvidetBehandlingTilbakestilt.endretUtbetalingAndeler.size)
+        Assertions.assertEquals(3, utvidetBehandlingTilbakestilt.utbetalingsperioder.size)
+
+        Assertions.assertTrue(sumUtbetalingFørsteGang > 0)
+        Assertions.assertTrue(sumUtbetalingDelt < sumUtbetalingFørsteGang)
+        Assertions.assertTrue(sumUtbetalingDifferanseberegnet < sumUtbetalingDelt)
+        Assertions.assertTrue(sumUtbetalingTilbakestilt == sumUtbetalingDelt)
+    }
+}
+
+fun Iterable<Utbetalingsperiode>.sumUtbetaling(): Int {
+
+    val tidslinje = tidslinje {
+        this.map {
+            Periode(
+                it.periodeFom.tilMånedTidspunkt(),
+                it.periodeTom.tilMånedTidspunkt(),
+                it.utbetaltPerMnd
+            )
+        }
+    }
+
+    return (tidslinje.fraOgMed()..tidslinje.tilOgMed()).fold(0) { sum, tidspunkt ->
+        sum + (tidslinje.innholdForTidspunkt(tidspunkt) ?: 0)
     }
 }
