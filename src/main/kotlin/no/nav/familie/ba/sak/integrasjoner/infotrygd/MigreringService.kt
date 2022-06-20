@@ -106,6 +106,10 @@ class MigreringService(
 
             secureLog.info("barnasIdenter=$barnasIdenter")
 
+            if (løpendeInfotrygdsak.type == "I") {
+                secureLog.info("Løpendesak er av type institusjon for $personIdent")
+                kastOgTellMigreringsFeil(MigreringsfeilType.INSTITUSJON)
+            }
             if (personIdent in barnasIdenter) {
                 secureLog.info("Migrering: $personIdent er lik barn registert på stønad=${løpendeInfotrygdsak.stønad?.id}")
                 kastOgTellMigreringsFeil(MigreringsfeilType.INSTITUSJON)
