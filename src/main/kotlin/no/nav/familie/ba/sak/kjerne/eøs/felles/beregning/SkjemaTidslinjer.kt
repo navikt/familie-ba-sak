@@ -6,12 +6,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.utenPeriode
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilpassTil
 
 fun <S : PeriodeOgBarnSkjema<S>> S.tilTidslinje() = listOf(this).tilTidslinje()
 
@@ -59,22 +57,3 @@ private fun <S : PeriodeOgBarnSkjema<S>> Tidslinje<S, Måned>.tilSkjemaer(aktør
             barnAktører = setOf(aktør)
         )
     }
-
-/**
- * En spesialisering av Tidslinje.tilpassTil, som i stedet for enkelttidslinjer opperer på en Map
- * med aktør som key og tidslinje soom value. Tilsvarende er parameteren en Map av aktær-til-tidslinje-par
- * Resultatet er en map med unionen av aktører som nøkler og tilpassede tidslinjer som verdier
- */
-fun <S : PeriodeOgBarnSkjema<S>, M> Map<Aktør, Tidslinje<S, Måned>>.tilpassTil(
-    aktørTilMønsterTidslinje: Map<Aktør, Tidslinje<M, Måned>>,
-    nyttSkjemaFactory: (S?, M) -> S
-): Map<Aktør, Tidslinje<S, Måned>> {
-    val alleBarnAktørIder = this.keys + aktørTilMønsterTidslinje.keys
-
-    return alleBarnAktørIder.associateWith { aktør ->
-        val skjemaTidslinje = this.getOrDefault(aktør, TomTidslinje())
-        val mønsterTidslinje = aktørTilMønsterTidslinje.getOrDefault(aktør, TomTidslinje())
-
-        skjemaTidslinje.tilpassTil(mønsterTidslinje, nyttSkjemaFactory)
-    }
-}

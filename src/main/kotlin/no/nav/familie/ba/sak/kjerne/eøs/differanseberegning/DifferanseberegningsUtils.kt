@@ -3,13 +3,16 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
 
-fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal) = when (this) {
-    Intervall.ÅRLIG -> beløp / 12.toBigDecimal()
-    Intervall.KVARTALSVIS -> beløp / 3.toBigDecimal()
-    Intervall.MÅNEDLIG -> beløp
-    Intervall.UKENTLIG -> beløp.multiply(4.35.toBigDecimal())
-}
+fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =
+    when (this) {
+        Intervall.ÅRLIG -> beløp.divide(12.toBigDecimal(), 10, RoundingMode.HALF_UP)
+        Intervall.KVARTALSVIS -> beløp.divide(3.toBigDecimal(), 10, RoundingMode.HALF_UP)
+        Intervall.MÅNEDLIG -> beløp
+        Intervall.UKENTLIG -> beløp.multiply(4.35.toBigDecimal(), MathContext(10, RoundingMode.HALF_UP))
+    }.stripTrailingZeros().toPlainString().toBigDecimal()
 
 /**
  * Kalkulerer nytt utbetalingsbeløp fra [utenlandskPeriodebeløpINorskeKroner]
