@@ -206,7 +206,12 @@ class DokumentService(
             settPåVentService.settBehandlingPåVent(
                 behandlingId = behandling.id,
                 frist = LocalDate.now()
-                    .plusDays(manueltBrevRequest.brevmal.ventefristDager(manueltBrevRequest.antallUkerSvarfrist?.toLong(),behandlingKategori = behandling.kategori,)),
+                    .plusDays(
+                        manueltBrevRequest.brevmal.ventefristDager(
+                            manuellFrist = manueltBrevRequest.antallUkerSvarfrist?.toLong(),
+                            behandlingKategori = behandling.kategori,
+                        )
+                    ),
                 årsak = manueltBrevRequest.brevmal.venteårsak()
             )
         }
