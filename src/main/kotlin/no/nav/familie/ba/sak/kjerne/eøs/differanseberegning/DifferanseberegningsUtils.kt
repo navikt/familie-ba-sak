@@ -8,10 +8,10 @@ import java.math.RoundingMode
 
 fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =
     when (this) {
-        Intervall.ÅRLIG -> beløp.divide(12.toBigDecimal(), 10, RoundingMode.HALF_DOWN)
-        Intervall.KVARTALSVIS -> beløp.divide(3.toBigDecimal(), 10, RoundingMode.HALF_DOWN)
+        Intervall.ÅRLIG -> beløp.divide(12.toBigDecimal(), 10, RoundingMode.HALF_UP)
+        Intervall.KVARTALSVIS -> beløp.divide(3.toBigDecimal(), 10, RoundingMode.HALF_UP)
         Intervall.MÅNEDLIG -> beløp
-        Intervall.UKENTLIG -> beløp.multiply(4.35.toBigDecimal(), MathContext(10, RoundingMode.HALF_DOWN))
+        Intervall.UKENTLIG -> beløp.multiply(4.35.toBigDecimal(), MathContext(10, RoundingMode.HALF_UP))
     }.stripTrailingZeros().toPlainString().toBigDecimal()
 
 /**
