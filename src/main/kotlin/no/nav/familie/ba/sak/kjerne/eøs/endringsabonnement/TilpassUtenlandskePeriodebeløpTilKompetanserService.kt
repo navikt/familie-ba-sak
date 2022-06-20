@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -15,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -70,8 +70,9 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
         .filtrerSekundærland()
 
     return forrigeUtenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
-        .tilpassTil(barnasKompetanseTidslinjer) { upb, kompetanse ->
+        .outerJoin(barnasKompetanseTidslinjer) { upb, kompetanse ->
             when {
+                kompetanse == null -> null
                 upb == null || upb.utbetalingsland != kompetanse.annenForeldersAktivitetsland ->
                     UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = kompetanse.annenForeldersAktivitetsland)
                 else -> upb
