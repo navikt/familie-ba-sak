@@ -130,7 +130,7 @@ class KompetanseController(
     }
 
     private fun validerUtvidedEøsOgSekundærland(kompetanse: Kompetanse, behandlingId: Long) {
-        if (kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND && featureToggleService.isEnabled(FeatureToggleConfig.KAN_IKKE_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND)) {
+        if (kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND)) {
             val utvidetEllerSmåbarnstillegg = tilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId).any { andelTilkjentYtelse -> andelTilkjentYtelse.erSøkersAndel() }
             if (utvidetEllerSmåbarnstillegg) {
                 throw FunksjonellFeil("Støtter foreløpig ikke utvidet barnetrygd og/eller småbarnstillegg i kombinasjon med sekundærland.", "Søker har utvidet barnetrygd og/eller småbarnstillegg. Dette er ikke støttet i sekundærlandssaker enda. Ta kontakt med Team Familie", HttpStatus.BAD_REQUEST)
