@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
@@ -191,11 +192,12 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
-            VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> true
+            VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
+            SVARTIDSBREV -> true
             else -> false
         }
 
-    fun ventefristDager(): Long =
+    fun ventefristDager(behandlingKategori: BehandlingKategori?): Long =
         when (this) {
             INNHENTE_OPPLYSNINGER,
             VARSEL_OM_REVURDERING,
@@ -203,6 +205,13 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> 3 * 7
+
+            SVARTIDSBREV -> when (behandlingKategori) {
+                BehandlingKategori.EØS -> 30 * 3
+                BehandlingKategori.NASJONAL -> 3 * 7
+                else -> throw Feil("Behandlingskategori er ikke satt")
+            }
+
             else -> throw Feil("Ventefrist ikke definert for brevtype $this")
         }
 
@@ -213,7 +222,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
-            VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
+            SVARTIDSBREV -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
             else -> throw Feil("Venteårsak ikke definert for brevtype $this")
         }
 }
