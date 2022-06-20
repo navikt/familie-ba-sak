@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -16,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 class TilpassDifferanseberegningEtterTilkjentYtelseService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val featureToggleService: FeatureToggleService
 ) : TilkjentYtelseEndretAbonnent {
 
     @Transactional
@@ -29,7 +31,8 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
             tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
         )
 
-        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
+        if (featureToggleService.isEnabled("Må stoppe potensielle feil asap"))
+            tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }
 
