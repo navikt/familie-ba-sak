@@ -82,6 +82,18 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     INNVILGET_PRIMÆRLAND_ALENEANSVAR {
         override val sanityApiNavn = "innvilgetPrimarlandAleneansvar"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SEKUNDÆRLAND_STANDARD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetSekundaerlandStandard"
+    },
+    OPPHØR_EØS_STANDARD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorEosStandard"
+    },
+    OPPHØR_EØS_SØKER_BER_OM_OPPHØR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorEosSokerBerOmOpphor"
     };
 
     override val kanDelesOpp: Boolean = false
