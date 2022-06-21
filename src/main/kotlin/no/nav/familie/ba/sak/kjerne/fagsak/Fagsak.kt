@@ -38,7 +38,7 @@ data class Fagsak(
         nullable = true,
         updatable = false
     )
-    val institusjon: Institusjon,
+    val institusjon: Institusjon? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
