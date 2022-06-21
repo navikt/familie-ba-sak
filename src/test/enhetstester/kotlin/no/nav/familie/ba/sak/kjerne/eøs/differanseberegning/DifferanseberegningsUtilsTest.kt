@@ -31,12 +31,12 @@ class DifferanseberegningsUtilsTest {
     }
 
     @Test
-    fun `Skal ikke multiplisere valutabeløp med valutakurs når valuta er forskjellig`() {
+    fun `Skal ikke multiplisere valutabeløp med valutakurs når valuta er forskjellig, men returnere null`() {
 
         val valutabeløp = 1200.i("EUR")
         val kurs = 9.73.kronerPer("DKK")
 
-        assertThrows<IllegalArgumentException> { valutabeløp * kurs }
+        Assertions.assertNull(valutabeløp * kurs)
     }
 
     @Test
