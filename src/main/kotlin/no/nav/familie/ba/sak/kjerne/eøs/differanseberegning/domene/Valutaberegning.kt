@@ -19,7 +19,7 @@ operator fun Valutabeløp?.times(kronerPerValutaenhet: KronerPerValutaenhet?): B
         return null
 
     if (this.valutakode != kronerPerValutaenhet.valutakode)
-        throw IllegalArgumentException("Valutabeløp har valutakode $valutakode, som avviker fra ${kronerPerValutaenhet.valutakode}")
+        return null
 
     return this.beløp * kronerPerValutaenhet.kronerPerValutaenhet
 }
