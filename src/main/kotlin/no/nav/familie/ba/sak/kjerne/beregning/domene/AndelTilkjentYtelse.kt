@@ -205,7 +205,7 @@ data class AndelTilkjentYtelse(
     }
 
     fun erAndelSomSkalSendesTilOppdrag(): Boolean {
-        return this.kalkulertUtbetalingsbeløp >= 0
+        return this.kalkulertUtbetalingsbeløp > 0
     }
 
     fun erLøpendeNullutbetaling(): Boolean {
