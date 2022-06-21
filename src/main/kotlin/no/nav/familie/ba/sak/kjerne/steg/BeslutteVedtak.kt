@@ -137,7 +137,10 @@ class BeslutteVedtak(
             val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
                 beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling)
 
-            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder) {
+            val harBareLøpendeNullutbetalinger =
+                beregningService.harBareLøpendeNullutbetalinger(behandlingId = behandling.id)
+
+            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder || harBareLøpendeNullutbetalinger) {
                 return StegType.JOURNALFØR_VEDTAKSBREV
             }
         }

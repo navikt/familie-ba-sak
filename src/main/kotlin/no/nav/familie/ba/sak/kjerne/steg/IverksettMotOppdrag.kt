@@ -55,14 +55,10 @@ class IverksettMotOppdrag(
         data: IverksettingTaskDTO
     ): StegType {
 
-        val vedtak = vedtakService.hent(data.vedtaksId)
-
-        if (!beregningService.harBareLøpendeNullutbetalinger(vedtak.behandling.id)) {
-            økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
-                vedtak = vedtak,
-                saksbehandlerId = data.saksbehandlerId
-            )
-        }
+        økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+            vedtak = vedtakService.hent(data.vedtaksId),
+            saksbehandlerId = data.saksbehandlerId
+        )
 
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
