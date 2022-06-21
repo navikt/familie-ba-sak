@@ -208,8 +208,16 @@ data class AndelTilkjentYtelse(
         return this.kalkulertUtbetalingsbeløp > 0
     }
 
+    /**
+     * Returnerer true når det er snakk om differanseberegning under EØS-regelverket,
+     * og utenlandsk periodebeløp (i norske kroner) er like stort eller større enn norsk sats.
+     * Da blir [kalkulertUtbetalingsbeløp] 0, selv om [prosent] er positiv.
+     *
+     * [kalkulertUtbetalingsbeløp] blir også 0 hvis [prosent] er satt til 0, som betyr at utbetalingen er stanset.
+     * Da skal det returnes false
+     */
     fun erLøpendeNullutbetaling(): Boolean {
-        return this.kalkulertUtbetalingsbeløp == 0 && this.prosent != BigDecimal.ZERO
+        return this.kalkulertUtbetalingsbeløp == 0 && this.prosent > BigDecimal.ZERO
     }
 
     fun harEndringsutbetalingIPerioden(fom: YearMonth?, tom: YearMonth?) =

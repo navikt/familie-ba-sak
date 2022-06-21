@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
@@ -21,7 +22,8 @@ class IverksettMotOppdrag(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
+    private val beregningService: BeregningService
 ) : BehandlingSteg<IverksettingTaskDTO> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -53,10 +55,14 @@ class IverksettMotOppdrag(
         data: IverksettingTaskDTO
     ): StegType {
 
-        økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
-            vedtak = vedtakService.hent(data.vedtaksId),
-            saksbehandlerId = data.saksbehandlerId
-        )
+        val vedtak = vedtakService.hent(data.vedtaksId)
+
+        if (!beregningService.harBareLøpendeNullutbetalinger(vedtak.behandling.id)) {
+            økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+                vedtak = vedtak,
+                saksbehandlerId = data.saksbehandlerId
+            )
+        }
 
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
