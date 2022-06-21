@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.math.abs
 
 object TilkjentYtelseUtils {
 
@@ -74,13 +75,15 @@ object TilkjentYtelseUtils {
                         beløpsperioder.map { beløpsperiode ->
                             val prosent =
                                 if (periodeResultatBarn.erDeltBostedSomSkalDeles()) BigDecimal(50) else BigDecimal(100)
+                            val nasjonaltPeriodebeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent)
                             AndelTilkjentYtelse(
                                 behandlingId = vilkårsvurdering.behandling.id,
                                 tilkjentYtelse = tilkjentYtelse,
                                 aktør = person.aktør,
                                 stønadFom = beløpsperiode.fraOgMed,
                                 stønadTom = beløpsperiode.tilOgMed,
-                                kalkulertUtbetalingsbeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent),
+                                kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp,
+                                nasjonaltPeriodebeløp = nasjonaltPeriodebeløp,
                                 type = finnYtelseType(behandling.underkategori, person.type),
                                 sats = beløpsperiode.sats,
                                 prosent = prosent
@@ -155,12 +158,14 @@ object TilkjentYtelseUtils {
                 nyeAndelerForPerson.addAll(
                     perioderMedEndring.map { månedPeriodeEndret ->
                         val endretUtbetalingAndel = endringerForPerson.single { it.overlapperMed(månedPeriodeEndret) }
+                        val nyttNasjonaltPeriodebeløp = andelForPerson.sats
+                            .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!)
                         andelForPerson.copy(
                             prosent = endretUtbetalingAndel.prosent!!,
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
-                            kalkulertUtbetalingsbeløp = andelForPerson.sats
-                                .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!),
+                            kalkulertUtbetalingsbeløp = nyttNasjonaltPeriodebeløp,
+                            nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
                             endretUtbetalingAndeler = (andelForPerson.endretUtbetalingAndeler + endretUtbetalingAndel).toMutableList(),
                         )
                     }
