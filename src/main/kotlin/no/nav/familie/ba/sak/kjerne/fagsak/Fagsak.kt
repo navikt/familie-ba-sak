@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.util.Objects
 import javax.persistence.Column
@@ -31,6 +32,14 @@ data class Fagsak(
     )
     val aktør: Aktør,
 
+    @OneToOne(optional = false)
+    @JoinColumn(
+        name = "fk_institusjon_id",
+        nullable = true,
+        updatable = false
+    )
+    val institusjon: Institusjon,
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     var status: FagsakStatus = FagsakStatus.OPPRETTET,
@@ -38,6 +47,10 @@ data class Fagsak(
     @Enumerated(EnumType.STRING)
     @Column(name = "eier", nullable = false)
     val eier: FagsakEier = FagsakEier.OMSORGSPERSON,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    val type: FagsakType = FagsakType.NORMAL,
 
     @Column(name = "arkivert", nullable = false)
     var arkivert: Boolean = false,
@@ -72,4 +85,10 @@ enum class FagsakStatus {
 enum class FagsakEier {
     OMSORGSPERSON,
     BARN
+}
+
+enum class FagsakType {
+    NORMAL,
+    BARN_ENSLIG_MINDREÅRLIG,
+    INSTITUSJON,
 }
