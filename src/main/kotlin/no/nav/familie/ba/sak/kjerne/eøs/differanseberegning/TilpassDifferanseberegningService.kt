@@ -60,6 +60,11 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         if (featureToggleService.kanHåndtereEøsUtenomPrimærland())
             tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
+
+    // Sørger for at differanseberegning er siste abonnent som kalles.
+    override fun abonnentIndeks(): Int {
+        return 10
+    }
 }
 
 @Service
@@ -80,6 +85,11 @@ class TilpassDifferanseberegningEtterValutakursService(
 
         if (featureToggleService.kanHåndtereEøsUtenomPrimærland())
             tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
+    }
+
+    // Sørger for at differanseberegning er siste abonnent som kalles.
+    override fun abonnentIndeks(): Int {
+        return 10
     }
 }
 
