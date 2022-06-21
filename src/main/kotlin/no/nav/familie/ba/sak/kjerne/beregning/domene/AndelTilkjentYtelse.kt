@@ -208,6 +208,10 @@ data class AndelTilkjentYtelse(
         return this.kalkulertUtbetalingsbeløp >= 0
     }
 
+    fun erLøpendeNullutbetaling(): Boolean {
+        return this.kalkulertUtbetalingsbeløp == 0 && this.prosent != BigDecimal.ZERO
+    }
+
     fun harEndringsutbetalingIPerioden(fom: YearMonth?, tom: YearMonth?) =
         endretUtbetalingAndeler.any { it.fom == fom && it.tom == tom }
 
