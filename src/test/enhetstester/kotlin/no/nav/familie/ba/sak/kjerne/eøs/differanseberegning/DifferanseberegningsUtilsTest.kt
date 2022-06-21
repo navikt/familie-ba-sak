@@ -93,7 +93,7 @@ class DifferanseberegningsUtilsTest {
         Assertions.assertEquals(-50, aty1?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(50, aty1?.nasjonaltPeriodebeløp)
 
-        val aty2 = aty1?.copy(kalkulertUtbetalingsbeløp = 1).oppdaterDifferanseberegning(
+        val aty2 = aty1?.copy(nasjonaltPeriodebeløp = 1).oppdaterDifferanseberegning(
             75.toBigDecimal()
         )
 
@@ -101,7 +101,7 @@ class DifferanseberegningsUtilsTest {
         Assertions.assertEquals(-74, aty2?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(1, aty2?.nasjonaltPeriodebeløp)
 
-        val aty3 = aty2?.copy(kalkulertUtbetalingsbeløp = 250).oppdaterDifferanseberegning(
+        val aty3 = aty2?.copy(nasjonaltPeriodebeløp = 250).oppdaterDifferanseberegning(
             75.toBigDecimal()
         )
 

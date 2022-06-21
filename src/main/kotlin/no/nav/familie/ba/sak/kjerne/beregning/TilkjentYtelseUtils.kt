@@ -33,7 +33,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import kotlin.math.abs
 
 object TilkjentYtelseUtils {
 
