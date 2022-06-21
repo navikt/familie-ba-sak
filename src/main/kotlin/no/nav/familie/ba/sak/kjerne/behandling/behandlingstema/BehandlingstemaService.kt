@@ -42,7 +42,7 @@ class BehandlingstemaService(
 
         val utledetKategori = bestemKategori(
             overstyrtKategori = overstyrtKategori,
-            kategoriFraLøpendeBehandling = hentLøpendeKategori(behandling.fagsak.id),
+            kategoriFraSisteIverksattBehandling = hentLøpendeKategori(behandling.fagsak.id),
             kategoriFraInneværendeBehandling = hentKategoriFraInneværendeBehandling(behandling.fagsak.id),
         )
 

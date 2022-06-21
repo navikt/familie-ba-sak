@@ -51,7 +51,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns mockBarnAutomatiskBehandling
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
-        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
@@ -67,7 +67,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns mockBarnGift
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
-        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
@@ -92,7 +92,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns søker
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
-        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
@@ -136,7 +136,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns søker
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
-        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
+        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)

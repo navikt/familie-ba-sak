@@ -20,13 +20,13 @@ fun bestemKategoriVedOpprettelse(
     // siste iverksatt behandling som har løpende utbetaling. Hvis løpende utbetaling ikke finnes, settes det til NASJONAL
     kategoriFraLøpendeBehandling: BehandlingKategori
 ): BehandlingKategori {
-    val behandlingsTypeNavn = behandlingType.visningsnavn
     return when {
         behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING ||
             behandlingType == BehandlingType.REVURDERING && behandlingÅrsak == BehandlingÅrsak.SØKNAD -> {
             overstyrtKategori
                 ?: throw FunksjonellFeil(
-                    "Behandling med type $behandlingsTypeNavn krever behandlingskategori",
+                    "Behandling med type ${behandlingType.visningsnavn} " +
+                        "og årsak ${behandlingÅrsak.visningsnavn} $ krever behandlingskategori",
                 )
         }
         behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && behandlingÅrsak.erFørstegangMigreringsårsak() -> {
@@ -40,17 +40,18 @@ fun bestemKategoriVedOpprettelse(
 
 fun bestemKategori(
     overstyrtKategori: BehandlingKategori?,
-    kategoriFraLøpendeBehandling: BehandlingKategori,
+    // kategori fra siste iverksatt behandling eller NASJONAL når det ikke finnes noe
+    kategoriFraSisteIverksattBehandling: BehandlingKategori,
     kategoriFraInneværendeBehandling: BehandlingKategori,
 ): BehandlingKategori {
     // når saksbehandler overstyrer behandlingstema manuelt
     if (overstyrtKategori != null) return overstyrtKategori
 
     // når saken har en løpende EØS utbetaling
-    if (kategoriFraLøpendeBehandling == BehandlingKategori.EØS) return BehandlingKategori.EØS
+    if (kategoriFraSisteIverksattBehandling == BehandlingKategori.EØS) return BehandlingKategori.EØS
 
     // når løpende utbetaling er NASJONAL og inneværende behandling får EØS
-    val oppdatertKategori = listOf(kategoriFraLøpendeBehandling, kategoriFraInneværendeBehandling).finnHøyesteKategori()
+    val oppdatertKategori = listOf(kategoriFraSisteIverksattBehandling, kategoriFraInneværendeBehandling).finnHøyesteKategori()
 
     return oppdatertKategori ?: BehandlingKategori.NASJONAL
 }

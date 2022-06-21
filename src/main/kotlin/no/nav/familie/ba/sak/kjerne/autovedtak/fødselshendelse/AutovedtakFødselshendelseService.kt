@@ -113,7 +113,7 @@ class AutovedtakFødselshendelseService(
             nyBehandlingHendelse = nyBehandling
         )
 
-        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(
+        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(
             nyBehandling.copy(
                 barnasIdenter = barnSomSkalBehandlesForMor
             )

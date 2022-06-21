@@ -131,7 +131,7 @@ class StegService(
     }
 
     @Transactional
-    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
+    fun opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
         val fagsak = try {
             fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true)
         } catch (exception: Exception) {
