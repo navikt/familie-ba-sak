@@ -23,6 +23,10 @@ fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse
     return this.values.flatMap { it.tilAndelTilkjentYtelse() }
 }
 
+fun Iterable<Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
+    return this.flatMap { it.tilAndelTilkjentYtelse() }
+}
+
 fun Tidslinje<AndelTilkjentYtelse, Måned>.tilAndelTilkjentYtelse(): List<AndelTilkjentYtelse> {
     return this
         .perioder().map {
