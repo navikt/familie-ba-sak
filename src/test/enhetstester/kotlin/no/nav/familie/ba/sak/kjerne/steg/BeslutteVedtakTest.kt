@@ -109,6 +109,7 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling) } returns false
+        every { beregningService.harBareLøpendeNullutbetalinger(behandlingId = behandling.id) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -161,6 +162,7 @@ class BeslutteVedtakTest {
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling) } returns true
+        every { beregningService.harBareLøpendeNullutbetalinger(behandling.id) } returns false
 
         mockkObject(JournalførVedtaksbrevTask.Companion)
         every {
@@ -174,6 +176,7 @@ class BeslutteVedtakTest {
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
         verify(exactly = 1) { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling) }
+        verify(exactly = 1) { beregningService.harBareLøpendeNullutbetalinger(behandling.id) }
 
         verify(exactly = 1) {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
@@ -221,5 +224,41 @@ class BeslutteVedtakTest {
         )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
+    }
+
+    @Test
+    fun `Skal ikke iverksette hvis det er løpende nullutbetalinger`() {
+        val behandling = lagBehandling()
+        val vedtak = lagVedtak(behandling)
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+        every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
+        every { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling) } returns false
+        every { beregningService.harBareLøpendeNullutbetalinger(behandling.id) } returns true
+
+        mockkObject(JournalførVedtaksbrevTask.Companion)
+        every {
+            JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+                any(),
+                any(),
+                any(),
+            )
+        } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+
+        val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+
+        verify(exactly = 1) { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling) }
+        verify(exactly = 1) { beregningService.harBareLøpendeNullutbetalinger(behandling.id) }
+
+        verify(exactly = 1) {
+            JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+                personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                behandlingId = behandling.id,
+                vedtakId = vedtak.id,
+            )
+        }
+        Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, nesteSteg)
     }
 }
