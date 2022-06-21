@@ -110,6 +110,7 @@ class FeatureToggleConfig(
 
         const val KAN_BEHANDLE_EØS_SEKUNDERLAND = "familie-ba-sak.behandling.eos-sekunderland"
         const val KAN_BEHANDLE_EØS_TO_PRIMERLAND = "familie-ba-sak.behandling.eos-to-primerland"
+        const val KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND = "familie-ba-sak.behandling.utvidet-eos-sekunderland"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
