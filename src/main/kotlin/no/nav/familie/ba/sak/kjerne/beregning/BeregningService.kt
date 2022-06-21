@@ -57,9 +57,10 @@ class BeregningService(
         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
-    fun harBareLøpendeNullutbetalinger(behandlingId: Long): Boolean =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
-            .all { it.erLøpendeNullutbetaling() }
+    fun harBareLøpendeNullutbetalinger(behandlingId: Long): Boolean {
+        val andeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+        return andeler.isNotEmpty() && andeler.all { it.erLøpendeNullutbetaling() }
+    }
 
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
