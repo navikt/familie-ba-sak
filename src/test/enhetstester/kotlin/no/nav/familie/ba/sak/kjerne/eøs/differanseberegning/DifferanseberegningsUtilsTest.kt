@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.math.MathContext
 import java.math.RoundingMode
 import java.time.YearMonth
@@ -31,12 +30,12 @@ class DifferanseberegningsUtilsTest {
     }
 
     @Test
-    fun `Skal ikke multiplisere valutabeløp med valutakurs når valuta er forskjellig`() {
+    fun `Skal ikke multiplisere valutabeløp med valutakurs når valuta er forskjellig, men returnere null`() {
 
         val valutabeløp = 1200.i("EUR")
         val kurs = 9.73.kronerPer("DKK")
 
-        assertThrows<IllegalArgumentException> { valutabeløp * kurs }
+        Assertions.assertNull(valutabeløp * kurs)
     }
 
     @Test
