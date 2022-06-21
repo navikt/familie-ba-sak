@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import org.junit.jupiter.api.Assertions
@@ -15,7 +16,8 @@ class BrevTypeTest {
         Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
         Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
         Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
-        Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED
+        Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
+        Brevmal.SVARTIDSBREV
     )
 
     private val førerIkkeTilAvventingAvDokumentasjon = Brevmal.values().filter { it !in førerTilAvventerDokumentasjon }
@@ -38,14 +40,19 @@ class BrevTypeTest {
     }
 
     @Test
-    fun `Skal gi riktig ventefrist`() {
+    fun `Skal gi riktig ventefrist nasjonal`() {
         førerTilAvventerDokumentasjon.forEach {
-            Assertions.assertEquals(21L, it.ventefristDager())
+            Assertions.assertEquals(21L, it.ventefristDager(BehandlingKategori.NASJONAL))
         }
 
         førerIkkeTilAvventingAvDokumentasjon.forEach {
-            assertThrows<Feil> { it.ventefristDager() }
+            assertThrows<Feil> { it.ventefristDager(BehandlingKategori.NASJONAL) }
         }
+    }
+
+    @Test
+    fun `Skal gi riktig ventefrist eøs`() {
+        Assertions.assertEquals(90L, Brevmal.SVARTIDSBREV.ventefristDager(BehandlingKategori.EØS))
     }
 
     @Test
