@@ -110,7 +110,7 @@ data class AndelTilkjentYtelse(
     var forrigePeriodeOffset: Long? = null,
 
     @Column(name = "nasjonalt_periodebelop")
-    val nasjonaltPeriodebeløp: Int? = null,
+    val nasjonaltPeriodebeløp: Int,
 
     @Column(name = "differanseberegnet_periodebelop")
     val differanseberegnetPeriodebeløp: Int? = null

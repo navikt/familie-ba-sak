@@ -65,7 +65,7 @@ class TilkjentYtelseBuilder(
                             stønadFom = MIN_MÅNED,
                             stønadTom = MAX_MÅNED,
                             kalkulertUtbetalingsbeløp = 0, // Overskrives under
-                            nasjonaltPeriodebeløp = null, // Overskrives under
+                            nasjonaltPeriodebeløp = 0, // Overskrives under
                             differanseberegnetPeriodebeløp = null, // Overskrives under
                             prosent = BigDecimal.valueOf(prosent),
                             sats = 0, // Overskrives under
@@ -82,7 +82,7 @@ class TilkjentYtelseBuilder(
                     aty.copy(
                         sats = sats,
                         kalkulertUtbetalingsbeløp = kalkulert(sats),
-                        nasjonaltPeriodebeløp = nasjonalt(sats),
+                        nasjonaltPeriodebeløp = nasjonalt(sats) ?: kalkulert(sats),
                         differanseberegnetPeriodebeløp = differanse(sats)
                     )
                 }
