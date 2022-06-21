@@ -120,6 +120,19 @@ class DifferanseberegningsUtilsTest {
         Assertions.assertEquals(-50, aty1?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(50, aty1?.nasjonaltPeriodebeløp)
     }
+
+    @Test
+    fun `Skal beholde originalt nasjonaltPeriodebeløp når vi oppdatererDifferanseberegning gjentatte ganger`() {
+        var aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
+            100.987654.toBigDecimal()
+        )
+
+        Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
+        aty1 = aty1.oppdaterDifferanseberegning(13.6.toBigDecimal())
+        Assertions.assertEquals(37, aty1?.kalkulertUtbetalingsbeløp)
+        aty1 = aty1.oppdaterDifferanseberegning(49.2.toBigDecimal())
+        Assertions.assertEquals(1, aty1?.kalkulertUtbetalingsbeløp)
+    }
 }
 
 fun lagAndelTilkjentYtelse(beløp: Int) = lagAndelTilkjentYtelse(
