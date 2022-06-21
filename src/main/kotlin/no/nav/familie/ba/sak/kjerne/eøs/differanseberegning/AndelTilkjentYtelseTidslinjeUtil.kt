@@ -19,6 +19,10 @@ fun Iterable<AndelTilkjentYtelse>.tilSeparateTidslinjerForBarna(): Map<Aktør, T
         .mapValues { (_, andeler) -> tidslinje { andeler.map { it.tilPeriode() } } }
 }
 
+fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
+    return this.values.flatMap { it.tilAndelTilkjentYtelse() }
+}
+
 fun Iterable<Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
     return this.flatMap { it.tilAndelTilkjentYtelse() }
 }
