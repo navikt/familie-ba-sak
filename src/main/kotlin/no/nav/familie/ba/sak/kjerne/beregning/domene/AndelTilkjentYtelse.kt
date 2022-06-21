@@ -205,10 +205,7 @@ data class AndelTilkjentYtelse(
     }
 
     fun erAndelSomSkalSendesTilOppdrag(): Boolean {
-        return this.kalkulertUtbetalingsbeløp != 0 ||
-            this.endretUtbetalingAndeler.any {
-                it.årsak!!.kanGiNullutbetaling()
-            }
+        return this.kalkulertUtbetalingsbeløp >= 0
     }
 
     fun harEndringsutbetalingIPerioden(fom: YearMonth?, tom: YearMonth?) =

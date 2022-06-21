@@ -35,7 +35,7 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.prosent = BigDecimal(0)
         endretUtbetalingAndel.fom = YearMonth.of(2020, 11)
         endretUtbetalingAndel.tom = YearMonth.of(2020, 10)
-        endretUtbetalingAndel.årsak = Årsak.EØS_SEKUNDÆRLAND
+        endretUtbetalingAndel.årsak = Årsak.ALLEREDE_UTBETALT
         endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
         endretUtbetalingAndel.begrunnelse = "begrunnelse"
 
@@ -53,7 +53,7 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.prosent = BigDecimal(0)
         endretUtbetalingAndel.fom = YearMonth.of(2020, 10)
         endretUtbetalingAndel.tom = YearMonth.of(2020, 10)
-        endretUtbetalingAndel.årsak = Årsak.EØS_SEKUNDÆRLAND
+        endretUtbetalingAndel.årsak = Årsak.ALLEREDE_UTBETALT
         endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
         endretUtbetalingAndel.begrunnelse = "begrunnelse"
 
