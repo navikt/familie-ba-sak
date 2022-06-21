@@ -70,7 +70,7 @@ class DifferanseberegningsUtilsTest {
     fun `Skal konvertere ukentlig utenlandsk periodebeløp til månedlig`() {
 
         val månedligValutabeløp = 25.i("EUR").somUtenlandskPeriodebeløp(UKENTLIG)
-            .tilMånedligValutabeløp()?.rundNed(5)
+            .tilMånedligValutabeløp()
 
         Assertions.assertEquals(108.75.i("EUR"), månedligValutabeløp)
     }
@@ -78,9 +78,9 @@ class DifferanseberegningsUtilsTest {
     @Test
     fun `Skal ha presisjon i kronekonverteringen til norske kroner`() {
         val månedligValutabeløp = 0.0123767453453.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
-            .tilMånedligValutabeløp()?.rundNed(10)
+            .tilMånedligValutabeløp()
 
-        Assertions.assertEquals(0.001031395445.i("EUR"), månedligValutabeløp)
+        Assertions.assertEquals(0.0010313954.i("EUR"), månedligValutabeløp)
     }
 
     @Test

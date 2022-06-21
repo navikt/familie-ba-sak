@@ -7,10 +7,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilpassTil
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -63,8 +63,9 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
         .tilSeparateTidslinjerForBarna()
 
     return forrigeValutakurser.tilSeparateTidslinjerForBarna()
-        .tilpassTil(barnasUtenlandskePeriodebeløpTidslinjer) { valutakurs, utenlandskPeriodebeløp ->
+        .outerJoin(barnasUtenlandskePeriodebeløpTidslinjer) { valutakurs, utenlandskPeriodebeløp ->
             when {
+                utenlandskPeriodebeløp == null -> null
                 valutakurs == null || valutakurs.valutakode != utenlandskPeriodebeløp.valutakode ->
                     Valutakurs.NULL.copy(valutakode = utenlandskPeriodebeløp.valutakode)
                 else -> valutakurs
