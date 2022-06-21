@@ -65,7 +65,7 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
 
         val endringer = skalSlettes + skalLagres
         if (endringer.isNotEmpty()) {
-            endringsabonnenter.sortedBy { it.abonnentIndeks() }.forEach { it.skjemaerEndret(behandlingId, oppdaterte) }
+            endringsabonnenter.forEach { it.skjemaerEndret(behandlingId, oppdaterte) }
         }
     }
 }
