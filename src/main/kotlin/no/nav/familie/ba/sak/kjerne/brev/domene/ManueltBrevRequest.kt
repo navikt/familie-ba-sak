@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EnkeltInformasjonsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FlettefelterForDokumentImpl
@@ -20,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerOmBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Svartidsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Data
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboerBrev
@@ -44,6 +46,7 @@ data class ManueltBrevRequest(
     val enhet: Enhet? = null,
     val antallUkerSvarfrist: Int? = null,
     val barnasFødselsdager: List<LocalDate>? = null,
+    val behandlingKategori: BehandlingKategori? = null
 ) {
 
     override fun toString(): String {
@@ -160,11 +163,14 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             )
         )
     Brevmal.SVARTIDSBREV ->
-        EnkeltInformasjonsbrev(
+        Svartidsbrev(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
-            mal = Brevmal.SVARTIDSBREV
+            mal = Brevmal.SVARTIDSBREV,
+            erEøsBehandling = if (this.behandlingKategori == null) {
+                throw Feil("Trenger å vite om behandling er EØS for å sende ut svartidsbrev.")
+            } else this.behandlingKategori == BehandlingKategori.EØS
         )
     Brevmal.FORLENGET_SVARTIDSBREV ->
         ForlengetSvartidsbrev(
