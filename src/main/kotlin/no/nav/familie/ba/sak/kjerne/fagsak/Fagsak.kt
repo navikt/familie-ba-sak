@@ -32,7 +32,7 @@ data class Fagsak(
     )
     val aktør: Aktør,
 
-    @OneToOne(optional = false)
+    @OneToOne(optional = true)
     @JoinColumn(
         name = "fk_institusjon_id",
         nullable = true,
