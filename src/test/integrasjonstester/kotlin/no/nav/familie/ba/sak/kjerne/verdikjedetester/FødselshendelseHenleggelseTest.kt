@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -31,6 +32,7 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -354,6 +356,66 @@ class FødselshendelseHenleggelseTest(
                 behandlingId = revurdering!!.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Mor mottar utvidet barnetrygd."
+            )
+        }
+    }
+
+    @Test
+    fun `Skal sende tredjelandsborgere fra Ukraina til manuel oppfølging (midlertidig regel for ukrainakonflikten)`() {
+
+        val fødselsdato = "1993-01-12"
+        val barnFødselsdato = LocalDate.now()
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = fødselsdato, fornavn = "Mor", etternavn = "Søker").copy(
+                    statsborgerskap = listOf(
+                        Statsborgerskap(
+                            land = "UKR",
+                            gyldigFraOgMed = LocalDate.parse(fødselsdato),
+                            bekreftelsesdato = LocalDate.parse(fødselsdato),
+                            gyldigTilOgMed = null
+                        )
+                    )
+                ),
+                barna = listOf(
+                    RestScenarioPerson(
+                        fødselsdato = barnFødselsdato.toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen"
+                    ).copy(
+                        statsborgerskap = listOf(
+                            Statsborgerskap(
+                                land = "UKR",
+                                gyldigFraOgMed = barnFødselsdato,
+                                bekreftelsesdato = barnFødselsdato,
+                                gyldigTilOgMed = null
+                            )
+                        )
+                    ),
+                )
+            )
+        )
+        val behandling = behandleFødselshendelse(
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = scenario.søker.ident!!,
+                barnasIdenter = listOf(scenario.barna.first().ident!!)
+            ),
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            vedtakService = vedtakService,
+            stegService = stegService,
+            personidentService = personidentService,
+        )!!
+
+        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling.resultat)
+        assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling.steg)
+
+        verify(exactly = 1) {
+            opprettTaskService.opprettOppgaveTask(
+                behandlingId = behandling.id,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
+                beskrivelse = "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE.beskrivelse}",
             )
         }
     }
