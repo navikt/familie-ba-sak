@@ -415,8 +415,8 @@ class FødselshendelseHenleggelseTest(
             opprettTaskService.opprettOppgaveTask(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN_MANUELT.beskrivelse}",
+                beskrivelse = "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN.beskrivelse}",
             )
-        }s
+        }
     }
 }

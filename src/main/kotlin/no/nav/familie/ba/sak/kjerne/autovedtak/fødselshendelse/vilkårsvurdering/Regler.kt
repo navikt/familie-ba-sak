@@ -169,7 +169,7 @@ data class VurderPersonHarLovligOpphold(
                 val morErUkrainskStatsborger = morLovligOppholdFaktaEØS.statsborgerskap.any { it.landkode == "UKR" }
                 // Midlertidig regel for Ukrainakonflikten
                 if (morErUkrainskStatsborger)
-                    Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN_MANUELT)
+                    Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN)
                 else if (opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse()) {
                     Evaluering.oppfylt(VilkårOppfyltÅrsak.TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD)
                 } else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)

@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 enum class VilkårKanskjeOppfyltÅrsak(val beskrivelse: String, val vilkår: Vilkår) : EvalueringÅrsak {
 
     // Lovlig opphold
-    LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN_MANUELT(
-        "Må vurdere lengden på oppholdstillatelsen manuelt.",
+    LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN(
+        "Må vurdere lengden på oppholdstillatelsen.",
         Vilkår.LOVLIG_OPPHOLD
     ),
     LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE("Kan ikke avgjøre om personen har lovlig opphold.", Vilkår.LOVLIG_OPPHOLD),
