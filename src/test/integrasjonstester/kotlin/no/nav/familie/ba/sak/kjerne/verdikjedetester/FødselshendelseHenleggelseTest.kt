@@ -4,7 +4,12 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.Filtreringsregel
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -31,6 +36,9 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import no.nav.familie.prosessering.domene.TaskRepository
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -49,7 +57,10 @@ class FødselshendelseHenleggelseTest(
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired private val utvidetBehandlingService: UtvidetBehandlingService
+    @Autowired private val utvidetBehandlingService: UtvidetBehandlingService,
+    @Autowired private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
+    @Autowired private val oppgaveRepository: OppgaveRepository,
+    @Autowired private val taskRepository: TaskRepository,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -354,6 +365,88 @@ class FødselshendelseHenleggelseTest(
                 behandlingId = revurdering!!.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Mor mottar utvidet barnetrygd."
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kjøre satsendring på løpende fagsak2`() {
+
+        val fødselsdato = "1993-01-12"
+        val barnFødselsdato = LocalDate.now()
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = fødselsdato, fornavn = "Mor", etternavn = "Søker").copy(
+                    statsborgerskap = listOf(
+                        Statsborgerskap(
+                            land = "UKR",
+                            gyldigFraOgMed = LocalDate.parse(fødselsdato),
+                            bekreftelsesdato = LocalDate.parse(fødselsdato),
+                            gyldigTilOgMed = null
+                        )
+                    )
+                ),
+                barna = listOf(
+                    RestScenarioPerson(
+                        fødselsdato = barnFødselsdato.toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen"
+                    ).copy(
+                        statsborgerskap = listOf(
+                            Statsborgerskap(
+                                land = "UKR",
+                                gyldigFraOgMed = barnFødselsdato,
+                                bekreftelsesdato = barnFødselsdato,
+                                gyldigTilOgMed = null
+                            )
+                        )
+                    ),
+                )
+            )
+        )
+        val behandling = behandleFødselshendelse(
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = scenario.søker.ident!!,
+                barnasIdenter = listOf(scenario.barna.first().ident!!)
+            ),
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            vedtakService = vedtakService,
+            stegService = stegService,
+            personidentService = personidentService,
+        )!!
+
+        val fødselshendelseFiltreringliste =
+            fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandling.id)
+
+        Assertions.assertFalse(
+            fødselshendelseFiltreringliste.erOppfylt()
+        )
+
+        val fødselshendelseMidlertidigUkrainaFiltrering =
+            fødselshendelseFiltreringliste.filter { it.resultat == Resultat.IKKE_OPPFYLT }.single()
+
+        assertEquals(
+            Filtreringsregel.MÅ_IKKE_VURDERE_LENDEN_PÅ_OPPHOLDSTILLATELSEN_MANUELT,
+            fødselshendelseMidlertidigUkrainaFiltrering.filtreringsregel
+        )
+
+        assertEquals(
+            FiltreringsregelIkkeOppfylt.MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN_UKRAINSK_STATSBORGER.beskrivelse,
+            fødselshendelseMidlertidigUkrainaFiltrering.begrunnelse
+        )
+
+        assertEquals(
+            Resultat.IKKE_OPPFYLT,
+            fødselshendelseMidlertidigUkrainaFiltrering.resultat
+        )
+
+        verify(exactly = 1) {
+            opprettTaskService.opprettOppgaveTask(
+                behandlingId = behandling.id,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
+                beskrivelse = "Fødselshendelse: ${FiltreringsregelIkkeOppfylt.MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN_UKRAINSK_STATSBORGER.beskrivelse}",
             )
         }
     }

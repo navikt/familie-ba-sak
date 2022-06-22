@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -97,12 +98,17 @@ class FiltreringsreglerService(
 
         val migreringsdatoPåFagsak = behandlingService.hentMigreringsdatoPåFagsak(behandling.fagsak.id)
 
+        val søker = personopplysningGrunnlag.søker
+        val erMedlemINordenEllerEØS =
+            listOf(Medlemskap.NORDEN, Medlemskap.EØS).contains(søker.hentSterkesteMedlemskap())
+        val landkodeUkraina = "UKR"
+
         val fakta = FiltreringsreglerFakta(
-            mor = personopplysningGrunnlag.søker,
+            mor = søker,
             morMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
             barnaFraHendelse = barnaFraHendelse,
             restenAvBarna = finnRestenAvBarnasPersonInfo(morsAktørId, barnaFraHendelse),
-            morLever = !personopplysningGrunnlag.søker.erDød(),
+            morLever = !søker.erDød(),
             barnaLever = personopplysningGrunnlag.barna.none { it.erDød() },
             morHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
             dagensDato = localDateService.now(),
@@ -113,7 +119,8 @@ class FiltreringsreglerService(
             løperBarnetrygdForBarnetPåAnnenForelder = tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
                 behandling = behandling,
                 barna = barnaFraHendelse
-            )
+            ),
+            morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = !erMedlemINordenEllerEØS && søker.statsborgerskap.any { it.landkode == landkodeUkraina }
         )
         val evalueringer = evaluerFiltreringsregler(fakta)
         oppdaterMetrikker(evalueringer)

@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreringsregel: Filtreringsregel) :
     EvalueringÅrsak {
 
-    MOR_HAR_GYLDIG_FNR("Mor har gyldig fødselsnummer", Filtreringsregel.MOR_GYLDIG_FNR),
-    BARN_HAR_GYLDIG_FNR("Barn har gyldig fødselsnummer", Filtreringsregel.BARN_GYLDIG_FNR),
+    MOR_HAR_GYLDIG_FNR("Mor har gyldig fødselsnummer.", Filtreringsregel.MOR_GYLDIG_FNR),
+    BARN_HAR_GYLDIG_FNR("Barn har gyldig fødselsnummer.", Filtreringsregel.BARN_GYLDIG_FNR),
     MOR_ER_OVER_18_ÅR("Mor er over 18 år.", Filtreringsregel.MOR_ER_OVER_18_ÅR),
     MOR_ER_MYNDIG("Mor er myndig.", Filtreringsregel.MOR_HAR_IKKE_VERGE),
     MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(
@@ -25,8 +25,12 @@ enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreri
         Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT
     ),
     LØPER_IKKE_BARNETRYGD_FOR_BARNET(
-        "Det løper ikke barnetrygd for barnet på annen forelder",
+        "Det løper ikke barnetrygd for barnet på annen forelder.",
         Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET
+    ),
+    MÅ_IKKE_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN_MANUELT(
+        "Trenger ikke vurdere lengden på oppholdstillatelsen.",
+        Filtreringsregel.MÅ_IKKE_VURDERE_LENDEN_PÅ_OPPHOLDSTILLATELSEN_MANUELT
     );
 
     override fun hentBeskrivelse(): String {

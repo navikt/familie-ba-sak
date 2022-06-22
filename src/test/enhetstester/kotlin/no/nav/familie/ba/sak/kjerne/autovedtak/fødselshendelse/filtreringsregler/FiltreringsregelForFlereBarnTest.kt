@@ -291,6 +291,7 @@ class FiltreringsregelForFlereBarnTest {
             dagensDato = LocalDate.now(),
             erFagsakenMigrertEtterBarnFødt = false,
             løperBarnetrygdForBarnetPåAnnenForelder = false,
+            morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false
         )
     }
 }

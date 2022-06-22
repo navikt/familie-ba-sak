@@ -17,7 +17,10 @@ enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering)
     MOR_HAR_IKKE_VERGE(vurder = { morHarIkkeVerge(this) }),
     MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(vurder = { morMottarIkkeLøpendeUtvidet(this) }),
     FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT(vurder = { fagsakIkkeMigrertEtterBarnBleFødt(this) }),
-    LØPER_IKKE_BARNETRYGD_FOR_BARNET(vurder = { løperIkkeBarnetrygdPåAnnenForelder(this) });
+    LØPER_IKKE_BARNETRYGD_FOR_BARNET(vurder = { løperIkkeBarnetrygdPåAnnenForelder(this) }),
+    MÅ_IKKE_VURDERE_LENDEN_PÅ_OPPHOLDSTILLATELSEN_MANUELT(vurder = {
+        måIkkeVurdereLengdenPåOppholdstillatelsenManuelt(this)
+    });
 }
 
 fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.values()
@@ -95,6 +98,14 @@ fun løperIkkeBarnetrygdPåAnnenForelder(fakta: FiltreringsreglerFakta): Evaluer
         FiltreringsregelOppfylt.LØPER_IKKE_BARNETRYGD_FOR_BARNET
     ) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.LØPER_ALLEREDE_FOR_ANNEN_FORELDER
+    )
+
+fun måIkkeVurdereLengdenPåOppholdstillatelsenManuelt(fakta: FiltreringsreglerFakta): Evaluering =
+    if (!fakta.morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger) Evaluering.oppfylt(
+        FiltreringsregelOppfylt.MÅ_IKKE_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN_MANUELT
+    ) else Evaluering.ikkeOppfylt(
+        // Midlertidig regel for Ukrainakonflikten
+        FiltreringsregelIkkeOppfylt.MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN_UKRAINSK_STATSBORGER
     )
 
 fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering {

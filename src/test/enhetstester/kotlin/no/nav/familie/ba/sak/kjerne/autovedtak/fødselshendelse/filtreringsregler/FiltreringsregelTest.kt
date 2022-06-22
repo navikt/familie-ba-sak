@@ -26,6 +26,7 @@ internal class FiltreringsregelTest {
 
         val evalueringer = evaluerFiltreringsregler(
             FiltreringsreglerFakta(
+                morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                 mor = mor,
                 barnaFraHendelse = listOf(barnet),
                 restenAvBarna = restenAvBarna,
@@ -48,6 +49,7 @@ internal class FiltreringsregelTest {
 
         val evalueringer = evaluerFiltreringsregler(
             FiltreringsreglerFakta(
+                morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                 mor = mor,
                 morMottarLøpendeUtvidet = true,
                 barnaFraHendelse = listOf(barnet),
@@ -72,6 +74,7 @@ internal class FiltreringsregelTest {
 
         val evalueringer = evaluerFiltreringsregler(
             FiltreringsreglerFakta(
+                morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                 mor = mor,
                 barnaFraHendelse = listOf(barnet),
                 restenAvBarna = restenAvBarna,
@@ -99,6 +102,7 @@ internal class FiltreringsregelTest {
 
         val evaluering = Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
             FiltreringsreglerFakta(
+                morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                 mor = mor,
                 barnaFraHendelse = listOf(barnet1, barnet2),
                 restenAvBarna = restenAvBarna,
@@ -124,6 +128,7 @@ internal class FiltreringsregelTest {
 
         val evaluering = Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
             FiltreringsreglerFakta(
+                morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                 mor = mor,
                 barnaFraHendelse = listOf(barnet1, barnet2),
                 restenAvBarna = restenAvBarna,
@@ -146,6 +151,7 @@ internal class FiltreringsregelTest {
 
         val evalueringer = evaluerFiltreringsregler(
             FiltreringsreglerFakta(
+                morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                 mor = mor,
                 barnaFraHendelse = listOf(barnet),
                 restenAvBarna = restenAvBarna,
@@ -169,6 +175,7 @@ internal class FiltreringsregelTest {
 
         val evalueringer = evaluerFiltreringsregler(
             FiltreringsreglerFakta(
+                morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                 mor = mor,
                 barnaFraHendelse = listOf(barnet),
                 restenAvBarna = restenAvBarna,
@@ -192,6 +199,7 @@ internal class FiltreringsregelTest {
 
         val evalueringer = evaluerFiltreringsregler(
             FiltreringsreglerFakta(
+                morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                 mor = mor,
                 barnaFraHendelse = listOf(barnet),
                 restenAvBarna = restenAvBarna,
@@ -229,6 +237,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -253,6 +262,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -276,6 +286,7 @@ internal class FiltreringsregelTest {
 
         val evaluering = Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
             FiltreringsreglerFakta(
+                morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                 mor = mor,
                 barnaFraHendelse = listOf(barn1Person),
                 restenAvBarna = listOf(barn2PersonInfo),
@@ -300,6 +311,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -324,6 +336,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -348,6 +361,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -372,6 +386,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
                     restenAvBarna = listOf(barn2PersonInfo),
@@ -399,6 +414,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person, barn2Person),
                     restenAvBarna = listOf(barn3PersonInfo),
@@ -423,6 +439,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
                     restenAvBarna = listOf(barn3PersonInfo),
@@ -448,6 +465,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person, barn2Person),
                     restenAvBarna = listOf(),
@@ -471,6 +489,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
                     restenAvBarna = listOf(),
@@ -500,6 +519,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
                     restenAvBarna = listOf(),
@@ -523,6 +543,7 @@ internal class FiltreringsregelTest {
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
+                    morErIkkeMedlemAvNordenEllerEØSOgErUkrainskStatsborger = false,
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
                     restenAvBarna = listOf(),
