@@ -106,7 +106,8 @@ class FeatureToggleConfig(
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
         const val KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED = "familie-ba-sak.manuell-migrering-ikke-delt-bosted"
-        const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING = "familie-ba-sak.endringer.validering.migeringsbehandling"
+        const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING =
+            "familie-ba-sak.endringer.validering.migeringsbehandling"
 
         const val KAN_BEHANDLE_EØS_SEKUNDERLAND = "familie-ba-sak.behandling.eos-sekunderland"
         const val KAN_BEHANDLE_EØS_TO_PRIMERLAND = "familie-ba-sak.behandling.eos-to-primerland"
@@ -124,3 +125,8 @@ interface FeatureToggleService {
 
     fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean
 }
+
+fun FeatureToggleService.kanHåndtereEøsUtenomPrimærland() =
+    this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) &&
+        this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_SEKUNDERLAND) &&
+        this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_TO_PRIMERLAND)

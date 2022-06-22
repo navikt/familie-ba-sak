@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.kanHåndtereEøsUtenomPrimærland
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -32,11 +34,14 @@ class SimuleringService(
     private val tilgangService: TilgangService,
     private val vedtakRepository: VedtakRepository,
     private val behandlingRepository: BehandlingRepository,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
 
-        if (beregningService.harBareLøpendeNullutbetalinger(vedtak.behandling.id))
+        if (featureToggleService.kanHåndtereEøsUtenomPrimærland() &&
+            beregningService.harBareLøpendeNullutbetalinger(vedtak.behandling.id)
+        )
             return null
 
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||

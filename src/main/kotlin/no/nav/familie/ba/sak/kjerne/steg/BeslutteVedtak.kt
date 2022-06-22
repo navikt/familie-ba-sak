@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.kanHåndtereEøsUtenomPrimærland
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -138,7 +139,8 @@ class BeslutteVedtak(
                 beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling)
 
             val harBareLøpendeNullutbetalinger =
-                beregningService.harBareLøpendeNullutbetalinger(behandlingId = behandling.id)
+                featureToggleService.kanHåndtereEøsUtenomPrimærland() &&
+                    beregningService.harBareLøpendeNullutbetalinger(behandlingId = behandling.id)
 
             if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder || harBareLøpendeNullutbetalinger) {
                 return StegType.JOURNALFØR_VEDTAKSBREV

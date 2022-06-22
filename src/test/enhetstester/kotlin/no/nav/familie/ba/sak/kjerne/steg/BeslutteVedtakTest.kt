@@ -82,7 +82,7 @@ class BeslutteVedtakTest {
         every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
-        every { featureToggleService.isEnabled(any()) } returns false
+        every { featureToggleService.isEnabled(any()) } returns true
 
         beslutteVedtak = BeslutteVedtak(
             toTrinnKontrollService,
@@ -210,6 +210,7 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
+        every { featureToggleService.isEnabled(any()) } returns false
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
