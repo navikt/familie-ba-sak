@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.config.CustomKeyValue
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.Sporingsdata
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service
 class TilgangService(
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val personopplysningerService: PersonopplysningerService,
     private val persongrunnlagService: PersongrunnlagService,
     private val rolleConfig: RolleConfig,
     private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
@@ -96,8 +98,25 @@ class TilgangService(
                 custom1 = CustomKeyValue("fagsak", fagsakId.toString())
             )
         }
-        val personIdenter = listOf(personIdent)
-        if (!harTilgangTilPersoner(personIdenter)) {
+        // val personIdenter = listOf(personIdent)
+        // if (!harTilgangTilPersoner(personIdenter)) {
+        //     throw RolleTilgangskontrollFeil(
+        //         melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+        //             "har ikke tilgang til fagsak=$fagsakId.",
+        //         frontendFeilmelding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+        //             "har ikke tilgang til fagsak=$fagsakId."
+        //     )
+        // }
+        val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
+        val personIdenterIFagsak = behandlinger.flatMap { behandling ->
+            val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
+            when {
+                personopplysningGrunnlag != null -> personopplysningGrunnlag.søkerOgBarn.map { person -> person.aktør.aktivFødselsnummer() }
+                else -> emptyList()
+            }
+        }.distinct()
+        val harTilgang = harTilgangTilPersoner(personIdenterIFagsak)
+        if (!harTilgang) {
             throw RolleTilgangskontrollFeil(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                     "har ikke tilgang til fagsak=$fagsakId.",
@@ -114,7 +133,7 @@ class TilgangService(
      * @param verdi verdiet som man ønsket å hente cache for, eks behandlingId, eller personIdent
      */
     private fun <T> harSaksbehandlerTilgang(cacheName: String, verdi: T, hentVerdi: () -> Boolean): Boolean {
-        if (SikkerhetContext.erSystemKontekst()) return true
+        if (!SikkerhetContext.erSystemKontekst()) return true
 
         val cache = cacheManager.getCache(cacheName) ?: error("Finner ikke cache=$cacheName")
         return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler())) {
