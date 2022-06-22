@@ -198,7 +198,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             else -> false
         }
 
-    fun ventefristDager(manuellFrist: Long?, behandlingKategori: BehandlingKategori?): Long =
+    fun ventefristDager(manuellFrist: Long? = null, behandlingKategori: BehandlingKategori?): Long =
         when (this) {
             INNHENTE_OPPLYSNINGER,
             VARSEL_OM_REVURDERING,

@@ -42,17 +42,17 @@ class BrevTypeTest {
     @Test
     fun `Skal gi riktig ventefrist nasjonal`() {
         førerTilAvventerDokumentasjon.forEach {
-            Assertions.assertEquals(21L, it.ventefristDager(BehandlingKategori.NASJONAL))
+            Assertions.assertEquals(21L, it.ventefristDager(behandlingKategori = BehandlingKategori.NASJONAL))
         }
 
         førerIkkeTilAvventingAvDokumentasjon.forEach {
-            assertThrows<Feil> { it.ventefristDager(BehandlingKategori.NASJONAL) }
+            assertThrows<Feil> { it.ventefristDager(behandlingKategori = BehandlingKategori.NASJONAL) }
         }
     }
 
     @Test
     fun `Skal gi riktig ventefrist eøs`() {
-        Assertions.assertEquals(90L, Brevmal.SVARTIDSBREV.ventefristDager(BehandlingKategori.EØS))
+        Assertions.assertEquals(90L, Brevmal.SVARTIDSBREV.ventefristDager(behandlingKategori = BehandlingKategori.EØS))
     }
 
     @Test
