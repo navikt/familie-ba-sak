@@ -86,13 +86,15 @@ data class UtvidetBarnetrygdGenerator(
                 ?: error("Finner ikke prosent for periode fom=${segment.fom}, tom=${segment.tom}")
 
         return ordinæreSatserForPeriode.map { satsperiode ->
+            val nasjonaltPeriodebeløp = satsperiode.sats.avrundetHeltallAvProsent(prosentForPeriode)
             AndelTilkjentYtelse(
                 behandlingId = behandlingId,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = søkerAktør,
                 stønadFom = satsperiode.fraOgMed,
                 stønadTom = satsperiode.tilOgMed,
-                kalkulertUtbetalingsbeløp = satsperiode.sats.avrundetHeltallAvProsent(prosentForPeriode),
+                kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp,
+                nasjonaltPeriodebeløp = nasjonaltPeriodebeløp,
                 type = YtelseType.UTVIDET_BARNETRYGD,
                 sats = satsperiode.sats,
                 prosent = prosentForPeriode
