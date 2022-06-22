@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.math.MathContext
 import java.math.RoundingMode
 import java.time.YearMonth
@@ -31,12 +30,12 @@ class DifferanseberegningsUtilsTest {
     }
 
     @Test
-    fun `Skal ikke multiplisere valutabeløp med valutakurs når valuta er forskjellig`() {
+    fun `Skal ikke multiplisere valutabeløp med valutakurs når valuta er forskjellig, men returnere null`() {
 
         val valutabeløp = 1200.i("EUR")
         val kurs = 9.73.kronerPer("DKK")
 
-        assertThrows<IllegalArgumentException> { valutabeløp * kurs }
+        Assertions.assertNull(valutabeløp * kurs)
     }
 
     @Test
@@ -70,7 +69,7 @@ class DifferanseberegningsUtilsTest {
     fun `Skal konvertere ukentlig utenlandsk periodebeløp til månedlig`() {
 
         val månedligValutabeløp = 25.i("EUR").somUtenlandskPeriodebeløp(UKENTLIG)
-            .tilMånedligValutabeløp()?.rundNed(5)
+            .tilMånedligValutabeløp()
 
         Assertions.assertEquals(108.75.i("EUR"), månedligValutabeløp)
     }
@@ -78,9 +77,9 @@ class DifferanseberegningsUtilsTest {
     @Test
     fun `Skal ha presisjon i kronekonverteringen til norske kroner`() {
         val månedligValutabeløp = 0.0123767453453.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
-            .tilMånedligValutabeløp()?.rundNed(10)
+            .tilMånedligValutabeløp()
 
-        Assertions.assertEquals(0.001031395445.i("EUR"), månedligValutabeløp)
+        Assertions.assertEquals(0.0010313954.i("EUR"), månedligValutabeløp)
     }
 
     @Test
@@ -93,7 +92,7 @@ class DifferanseberegningsUtilsTest {
         Assertions.assertEquals(-50, aty1?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(50, aty1?.nasjonaltPeriodebeløp)
 
-        val aty2 = aty1?.copy(kalkulertUtbetalingsbeløp = 1).oppdaterDifferanseberegning(
+        val aty2 = aty1?.copy(nasjonaltPeriodebeløp = 1).oppdaterDifferanseberegning(
             75.toBigDecimal()
         )
 
@@ -101,7 +100,7 @@ class DifferanseberegningsUtilsTest {
         Assertions.assertEquals(-74, aty2?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(1, aty2?.nasjonaltPeriodebeløp)
 
-        val aty3 = aty2?.copy(kalkulertUtbetalingsbeløp = 250).oppdaterDifferanseberegning(
+        val aty3 = aty2?.copy(nasjonaltPeriodebeløp = 250).oppdaterDifferanseberegning(
             75.toBigDecimal()
         )
 
@@ -119,6 +118,19 @@ class DifferanseberegningsUtilsTest {
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(-50, aty1?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(50, aty1?.nasjonaltPeriodebeløp)
+    }
+
+    @Test
+    fun `Skal beholde originalt nasjonaltPeriodebeløp når vi oppdatererDifferanseberegning gjentatte ganger`() {
+        var aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
+            100.987654.toBigDecimal()
+        )
+
+        Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
+        aty1 = aty1.oppdaterDifferanseberegning(13.6.toBigDecimal())
+        Assertions.assertEquals(37, aty1?.kalkulertUtbetalingsbeløp)
+        aty1 = aty1.oppdaterDifferanseberegning(49.2.toBigDecimal())
+        Assertions.assertEquals(1, aty1?.kalkulertUtbetalingsbeløp)
     }
 }
 

@@ -104,6 +104,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                     stønadFom = it.fom.toYearMonth(),
                     stønadTom = it.tom.toYearMonth(),
                     kalkulertUtbetalingsbeløp = ordinærSatsForPeriode,
+                    nasjonaltPeriodebeløp = ordinærSatsForPeriode,
                     type = YtelseType.SMÅBARNSTILLEGG,
                     sats = ordinærSatsForPeriode,
                     prosent = BigDecimal(100)

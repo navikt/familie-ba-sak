@@ -130,6 +130,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,
+        nasjonaltPeriodebeløp = 1054,
         stønadFom = LocalDate.now()
             .minusMonths(12)
             .toYearMonth(),

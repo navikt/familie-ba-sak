@@ -257,6 +257,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         tilkjentYtelse = tilkjentYtelse,
         aktør = barn.aktør,
         kalkulertUtbetalingsbeløp = beløp.toInt(),
+        nasjonaltPeriodebeløp = beløp.toInt(),
         stønadFom = fom,
         stønadTom = tom,
         type = YtelseType.ORDINÆR_BARNETRYGD,

@@ -85,7 +85,10 @@ class MigreringService(
     @Transactional
     fun migrer(personIdent: String): MigreringResponseDto {
         try {
-            validerAtIdentErAktiv(personIdent)
+            if (erIdentHistorisk(personIdent)) {
+                secureLog.warn("Personident $personIdent er historisk, og kan ikke brukes til å migrere$personIdent")
+                kastOgTellMigreringsFeil(MigreringsfeilType.IDENT_IKKE_LENGER_AKTIV)
+            }
 
             val løpendeInfotrygdsak = hentLøpendeSakFraInfotrygd(personIdent)
             val underkategori = kastFeilEllerHentUnderkategori(løpendeInfotrygdsak)
@@ -94,6 +97,19 @@ class MigreringService(
             secureLog.info("Migrering: fant løpende sak for $personIdent sak=${løpendeInfotrygdsak.id} stønad=${løpendeInfotrygdsak.stønad?.id}")
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeInfotrygdsak)
+            barnasIdenter.forEach {
+                if (erIdentHistorisk(it)) {
+                    secureLog.warn("barnets ident $it er historisk, og kan ikke brukes til å migrere$personIdent")
+                    kastOgTellMigreringsFeil(MigreringsfeilType.IDENT_BARN_IKKE_LENGER_AKTIV)
+                }
+            }
+
+            secureLog.info("barnasIdenter=$barnasIdenter")
+
+            if (løpendeInfotrygdsak.type == "I") {
+                secureLog.info("Løpendesak er av type institusjon for $personIdent")
+                kastOgTellMigreringsFeil(MigreringsfeilType.INSTITUSJON)
+            }
             if (personIdent in barnasIdenter) {
                 secureLog.info("Migrering: $personIdent er lik barn registert på stønad=${løpendeInfotrygdsak.stønad?.id}")
                 kastOgTellMigreringsFeil(MigreringsfeilType.INSTITUSJON)
@@ -189,6 +205,7 @@ class MigreringService(
     }
 
     private fun kastFeilVedDobbeltforekomstViaHistoriskIdent(barnasAktør: List<Aktør>, barnasIdenter: List<String>) {
+        secureLog.info("barnasAktør=$barnasAktør")
         val dobbeltforekomster =
             barnasAktør.filter { barnasAktør.count { barn -> barn.aktørId == it.aktørId } > 1 }.toSet()
 
@@ -201,14 +218,11 @@ class MigreringService(
         }
     }
 
-    private fun validerAtIdentErAktiv(personIdent: String) {
+    private fun erIdentHistorisk(personIdent: String): Boolean {
         val søkerIdenter = personidentService.hentIdenter(personIdent = personIdent, historikk = true)
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
 
-        if (søkerIdenter.single { it.ident == personIdent }.historisk) {
-            secureLog.warn("Personident $personIdent er historisk, og kan ikke brukes til å migrere$søkerIdenter")
-            kastOgTellMigreringsFeil(MigreringsfeilType.IDENT_IKKE_LENGER_AKTIV)
-        }
+        return søkerIdenter.single { it.ident == personIdent }.historisk
     }
 
     private fun kastFeilDersomAlleredeMigrert(fagsak: Fagsak) {
@@ -474,6 +488,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     FLERE_LØPENDE_SAKER_INFOTRYGD("Fant mer enn én aktiv sak på bruker i infotrygd"),
     HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD("Listen med barn fra Infotrygd har identer tilhørende samme barn"),
     IDENT_IKKE_LENGER_AKTIV("Ident ikke lenger aktiv"),
+    IDENT_BARN_IKKE_LENGER_AKTIV("Ident barn ikke lenger aktiv"),
     IKKE_GYLDIG_KJØREDATO("Ikke gyldig kjøredato"),
     IKKE_STØTTET_SAKSTYPE("Kan kun migrere ordinære(OR OS) og utvidet(UT EF) saker"),
     INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD("Fant ingen barn med løpende stønad på sak"),

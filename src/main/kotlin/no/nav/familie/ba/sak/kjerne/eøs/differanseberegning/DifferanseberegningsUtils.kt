@@ -3,13 +3,16 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
 
-fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal) = when (this) {
-    Intervall.ÅRLIG -> beløp / 12.toBigDecimal()
-    Intervall.KVARTALSVIS -> beløp / 3.toBigDecimal()
-    Intervall.MÅNEDLIG -> beløp
-    Intervall.UKENTLIG -> beløp.multiply(4.35.toBigDecimal())
-}
+fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =
+    when (this) {
+        Intervall.ÅRLIG -> beløp.divide(12.toBigDecimal(), 10, RoundingMode.HALF_UP)
+        Intervall.KVARTALSVIS -> beløp.divide(3.toBigDecimal(), 10, RoundingMode.HALF_UP)
+        Intervall.MÅNEDLIG -> beløp
+        Intervall.UKENTLIG -> beløp.multiply(4.35.toBigDecimal(), MathContext(10, RoundingMode.HALF_UP))
+    }.stripTrailingZeros().toPlainString().toBigDecimal()
 
 /**
  * Kalkulerer nytt utbetalingsbeløp fra [utenlandskPeriodebeløpINorskeKroner]
@@ -35,22 +38,15 @@ fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
 private fun AndelTilkjentYtelse.medDifferanseberegning(
     utenlandskPeriodebeløpINorskeKroner: BigDecimal
 ): AndelTilkjentYtelse {
-    val nyttNasjonaltPeriodebeløp = when {
-        differanseberegnetPeriodebeløp == null || nasjonaltPeriodebeløp == null -> kalkulertUtbetalingsbeløp
-        differanseberegnetPeriodebeløp < 0 && kalkulertUtbetalingsbeløp > 0 -> kalkulertUtbetalingsbeløp
-        differanseberegnetPeriodebeløp != kalkulertUtbetalingsbeløp -> kalkulertUtbetalingsbeløp
-        else -> nasjonaltPeriodebeløp
-    }
 
     val avrundetUtenlandskPeriodebeløp = utenlandskPeriodebeløpINorskeKroner
         .toBigInteger().intValueExact() // Fjern desimaler for å gi fordel til søker
 
-    val nyttDifferanseberegnetBeløp = nyttNasjonaltPeriodebeløp - avrundetUtenlandskPeriodebeløp
+    val nyttDifferanseberegnetBeløp = (nasjonaltPeriodebeløp ?: kalkulertUtbetalingsbeløp) - avrundetUtenlandskPeriodebeløp
 
     return copy(
         id = 0,
         kalkulertUtbetalingsbeløp = maxOf(nyttDifferanseberegnetBeløp, 0),
-        nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
         differanseberegnetPeriodebeløp = nyttDifferanseberegnetBeløp
     )
 }
@@ -58,8 +54,7 @@ private fun AndelTilkjentYtelse.medDifferanseberegning(
 private fun AndelTilkjentYtelse.utenDifferanseberegning(): AndelTilkjentYtelse {
     return copy(
         id = 0,
-        kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp ?: kalkulertUtbetalingsbeløp,
-        nasjonaltPeriodebeløp = null,
+        kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp ?: this.kalkulertUtbetalingsbeløp,
         differanseberegnetPeriodebeløp = null
     )
 }

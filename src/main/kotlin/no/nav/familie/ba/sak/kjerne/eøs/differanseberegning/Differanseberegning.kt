@@ -7,9 +7,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 
 /**
  * ADVARSEL: Muterer TilkjentYtelse
@@ -27,27 +25,21 @@ fun beregnDifferanse(
     val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
     val andelTilkjentYtelseTidslinjer = andelerTilkjentYtelse.tilSeparateTidslinjerForBarna()
 
-    val alleBarna: Set<Aktør> =
-        utenlandskePeriodebeløpTidslinjer.keys + valutakursTidslinjer.keys + andelTilkjentYtelseTidslinjer.keys
+    val barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer =
+        utenlandskePeriodebeløpTidslinjer.outerJoin(valutakursTidslinjer) { upb, valutakurs ->
+            upb.tilMånedligValutabeløp() * valutakurs.tilKronerPerValutaenhet()
+        }
 
-    val barnasDifferanseberegnetAndelTilkjentYtelseTidslinjer = alleBarna.map { aktør ->
-        val utenlandskePeriodebeløpTidslinje = utenlandskePeriodebeløpTidslinjer.getOrDefault(aktør, TomTidslinje())
-        val valutakursTidslinje = valutakursTidslinjer.getOrDefault(aktør, TomTidslinje())
-        val andelTilkjentYtelseTidslinje = andelTilkjentYtelseTidslinjer.getOrDefault(aktør, TomTidslinje())
-
-        val utenlandskePeriodebeløpINorskeKroner = utenlandskePeriodebeløpTidslinje.kombinerMed(valutakursTidslinje) { upb, valutakurs -> upb.tilMånedligValutabeløp() * valutakurs.tilKronerPerValutaenhet() }
-
-        andelTilkjentYtelseTidslinje.kombinerMed(utenlandskePeriodebeløpINorskeKroner) { aty, beløp ->
+    val barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer =
+        andelTilkjentYtelseTidslinjer.outerJoin(barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer) { aty, beløp ->
             aty.oppdaterDifferanseberegning(beløp)
         }
-    }
 
-    val barnasAndeler = barnasDifferanseberegnetAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
+    val barnasAndeler = barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
     val søkersAndeler = andelerTilkjentYtelse.filter { it.erSøkersAndel() }
 
     validarSøkersYtelserMotEventueltNegativeAndelerForBarna(søkersAndeler, barnasAndeler)
 
-    // Muterer tilkjentYtelse, lager IKKE ny instans
     return søkersAndeler + barnasAndeler
 }
 
