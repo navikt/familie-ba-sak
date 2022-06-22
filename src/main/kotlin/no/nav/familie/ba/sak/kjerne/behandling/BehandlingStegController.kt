@@ -183,7 +183,7 @@ class BehandlingStegController(
     fun registerVerge(
         @PathVariable behandlingId: Long,
         @RequestBody vergeInfo: RestRegisterVerge
-    ):ResponseEntity<Ressurs<RestUtvidetBehandling>>{
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
