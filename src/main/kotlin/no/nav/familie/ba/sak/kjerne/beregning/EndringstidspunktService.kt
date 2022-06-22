@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
@@ -41,7 +42,12 @@ class EndringstidspunktService(
             if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
                 val kompetansePerioder = kompetanseRepository.finnFraBehandlingId(nyBehandling.id)
                 val forrigeKompetansePerioder = kompetanseRepository.finnFraBehandlingId(sistIverksatteBehandling.id)
-                kompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder).førsteDagIInneværendeMåned()
+                val førsteEndingstidspunkt = kompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
+                if (førsteEndingstidspunkt != TIDENES_ENDE.toYearMonth()) {
+                    førsteEndingstidspunkt.førsteDagIInneværendeMåned()
+                } else {
+                    TIDENES_ENDE
+                }
             } else TIDENES_ENDE
 
         return minOf(førsteEndringstidspunktFraAndelTilkjentYtelse, førsteEndringstidspunktIKompetansePerioder)
