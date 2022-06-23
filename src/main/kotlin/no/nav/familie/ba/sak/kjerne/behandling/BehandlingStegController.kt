@@ -185,6 +185,11 @@ class BehandlingStegController(
         @RequestBody vergeInfo: RestRegistrerVerge
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        if(vergeInfo.tilVerge() == null && vergeInfo.tilInstitusjon() == null){
+            return ResponseEntity.ok(Ressurs.failure("Ugydig verge info"))
+        }
+
+        stegService.håndterRegistrerVerge(behandling, vergeInfo)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 }

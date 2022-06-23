@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
@@ -365,6 +366,16 @@ class StegService(
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
+        }
+    }
+
+    @Transactional
+    fun håndterRegistrerVerge(behandling: Behandling, vergeInfo: RestRegistrerVerge): Behandling {
+        val behandlingSteg: RegistrerVerge =
+            hentBehandlingSteg(StegType.REGISTRERE_VERGE) as RegistrerVerge
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, vergeInfo)
         }
     }
 
