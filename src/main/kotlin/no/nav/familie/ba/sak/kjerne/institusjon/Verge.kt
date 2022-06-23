@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.institusjon
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigInteger
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.OneToOne
 import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -24,5 +27,13 @@ data class Verge(
     val Adresse: String,
 
     @Column(name = "ident", updatable = true, length = 20)
-    val Ident: String?
+    val Ident: String?,
+
+    @OneToOne(optional = false)
+    @JoinColumn(
+        name = "fk_behandling_id",
+        nullable = false,
+        updatable = false
+    )
+    val behandling: Behandling,
 ) : BaseEntitet()
