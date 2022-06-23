@@ -17,7 +17,8 @@ class BrevTypeTest {
         Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
         Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
         Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
-        Brevmal.SVARTIDSBREV
+        Brevmal.SVARTIDSBREV,
+        Brevmal.FORLENGET_SVARTIDSBREV,
     )
 
     private val førerIkkeTilAvventingAvDokumentasjon = Brevmal.values().filter { it !in førerTilAvventerDokumentasjon }
@@ -42,17 +43,20 @@ class BrevTypeTest {
     @Test
     fun `Skal gi riktig ventefrist nasjonal`() {
         førerTilAvventerDokumentasjon.forEach {
-            Assertions.assertEquals(21L, it.ventefristDager(BehandlingKategori.NASJONAL))
+            Assertions.assertEquals(
+                21L,
+                it.ventefristDager(manuellFrist = 21L, behandlingKategori = BehandlingKategori.NASJONAL)
+            )
         }
 
         førerIkkeTilAvventingAvDokumentasjon.forEach {
-            assertThrows<Feil> { it.ventefristDager(BehandlingKategori.NASJONAL) }
+            assertThrows<Feil> { it.ventefristDager(behandlingKategori = BehandlingKategori.NASJONAL) }
         }
     }
 
     @Test
     fun `Skal gi riktig ventefrist eøs`() {
-        Assertions.assertEquals(90L, Brevmal.SVARTIDSBREV.ventefristDager(BehandlingKategori.EØS))
+        Assertions.assertEquals(90L, Brevmal.SVARTIDSBREV.ventefristDager(behandlingKategori = BehandlingKategori.EØS))
     }
 
     @Test
