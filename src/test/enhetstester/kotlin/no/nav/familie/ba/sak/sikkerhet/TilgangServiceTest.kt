@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.config.AuditLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -39,7 +38,6 @@ class TilgangServiceTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val fagsakService: FagsakService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val personopplysningerService: PersonopplysningerService = mockk()
     private val cacheManager = ConcurrentMapCacheManager()
     private val kode6Gruppe = "kode6"
     private val kode7Gruppe = "kode7"
@@ -50,7 +48,6 @@ class TilgangServiceTest {
             familieIntegrasjonerTilgangskontrollClient = mockFamilieIntegrasjonerTilgangskontrollClient,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             persongrunnlagService = persongrunnlagService,
-            personopplysningerService = personopplysningerService,
             fagsakService = fagsakService,
             rolleConfig = rolleConfig,
             cacheManager = cacheManager,
