@@ -9,6 +9,9 @@ import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -128,3 +131,17 @@ fun fomErPåSatsendring(fom: LocalDate?): Boolean =
     SatsService
         .finnSatsendring(fom?.førsteDagIInneværendeMåned() ?: TIDENES_MORGEN)
         .isNotEmpty()
+
+fun satstypeTidslinje(satsType: SatsType) = tidslinje {
+    SatsService.hentAllesatser()
+        .filter { it.type == satsType }
+        .map {
+            val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.toYearMonth()
+            val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.toYearMonth()
+            no.nav.familie.ba.sak.kjerne.tidslinje.Periode(
+                fraOgMed = fom.tilTidspunktEllerTidligereEnn(tom),
+                tilOgMed = tom.tilTidspunktEllerSenereEnn(fom),
+                it.beløp
+            )
+        }
+}
