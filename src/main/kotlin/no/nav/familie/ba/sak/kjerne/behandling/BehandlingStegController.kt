@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_VEDLIKEHOLD_HENLEGGELSE
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisterVerge
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -182,7 +182,7 @@ class BehandlingStegController(
     @PostMapping(path = ["register-verge"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registerVerge(
         @PathVariable behandlingId: Long,
-        @RequestBody vergeInfo: RestRegisterVerge
+        @RequestBody vergeInfo: RestRegistrerVerge
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))

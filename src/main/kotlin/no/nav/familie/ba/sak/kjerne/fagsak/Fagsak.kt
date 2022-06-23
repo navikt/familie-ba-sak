@@ -39,7 +39,7 @@ data class Fagsak(
         nullable = true,
         updatable = false
     )
-    val institusjon: Institusjon? = null,
+    var institusjon: Institusjon? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(
@@ -47,7 +47,7 @@ data class Fagsak(
         nullable = true,
         updatable = false
     )
-    val verge: Verge? = null,
+    var verge: Verge? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

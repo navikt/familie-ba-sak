@@ -74,6 +74,25 @@ class LoggService(
         )
     }
 
+    fun opprettRegistrerVergeLogg(behandling: Behandling, type: RegistrerVergeLoggType) {
+        val tittel = when(type) {
+            RegistrerVergeLoggType.VERGE_REGISTRERT -> "verge ble registrert"
+            RegistrerVergeLoggType.INSTITUSJON_REGISTRERT -> "institusjon ble registrert"
+        }
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.VERGE_REGISTRERT,
+                tittel = tittel,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tekst = ""
+            )
+        )
+    }
+
     fun opprettRegistrertSøknadLogg(behandling: Behandling, søknadFinnesFraFør: Boolean) {
         val tittel = if (!søknadFinnesFraFør) "Søknaden ble registrert" else "Søknaden ble endret"
         lagre(
@@ -374,8 +393,14 @@ class LoggService(
     }
 
     companion object {
+
         private fun tilBehandlingstema(underkategori: BehandlingUnderkategori, kategori: BehandlingKategori): String {
             return "${kategori.visningsnavn}  ${underkategori.visningsnavn.lowercase()}"
         }
     }
+}
+
+enum class RegistrerVergeLoggType {
+    VERGE_REGISTRERT,
+    INSTITUSJON_REGISTRERT,
 }
