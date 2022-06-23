@@ -18,7 +18,7 @@ data class Institusjon(
     val id: BigInteger,
 
     @Column(name = "org_nummer", updatable = false, length = 50)
-    val orgNummer: String,
+    val orgNummer: String?,
 
     @Column(name = "tss_ekstern_id", updatable = false, length = 50)
     val tssEksternId: String,
