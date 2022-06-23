@@ -1,14 +1,12 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
-import no.nav.familie.ba.sak.common.logger
 import no.nav.familie.ba.sak.config.AuditLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.CustomKeyValue
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.Sporingsdata
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Service
 class TilgangService(
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val personopplysningerService: PersonopplysningerService,
     private val persongrunnlagService: PersongrunnlagService,
     private val rolleConfig: RolleConfig,
     private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
@@ -106,8 +103,6 @@ class TilgangService(
                 else -> emptyList()
             }
         }.distinct()
-        logger.info("Fant {} unike identer i fagsak", personIdenterIFagsak.size)
-        logger.info("Identer: " + personIdenterIFagsak.joinToString())
         val harTilgang = harTilgangTilPersoner(personIdenterIFagsak)
         if (!harTilgang) {
             throw RolleTilgangskontrollFeil(
