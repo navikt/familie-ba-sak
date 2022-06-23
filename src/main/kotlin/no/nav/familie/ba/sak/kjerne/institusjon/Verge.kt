@@ -21,13 +21,13 @@ data class Verge(
     val id: BigInteger,
 
     @Column(name = "navn", updatable = true, length = 100)
-    val Navn: String,
+    var Navn: String,
 
     @Column(name = "adresse", updatable = true, length = 500)
-    val Adresse: String,
+    var Adresse: String,
 
     @Column(name = "ident", updatable = true, length = 20)
-    val Ident: String?,
+    var Ident: String?,
 
     @OneToOne(optional = false)
     @JoinColumn(

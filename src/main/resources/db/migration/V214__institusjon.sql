@@ -1,16 +1,15 @@
-create TABLE INSTITUSJON
-(
-    ID              BIGINT                              PRIMARY KEY,
-    ORG_NUMMER      VARCHAR NOT NULL,
-    TSS_EKSTERN_ID  VARCHAR NOT NULL,
-    VERSJON         bigint       default 0              not null,
-    OPPRETTET_AV    VARCHAR(20)  default 'VL'           not null,
-    OPPRETTET_TID   TIMESTAMP(3) default localtimestamp not null,
-    ENDRET_AV       VARCHAR(20),
-    ENDRET_TID      TIMESTAMP(3)
+CREATE TABLE institusjon (
+    id             BIGINT PRIMARY KEY,
+    org_nummer     VARCHAR,
+    tss_ekstern_id VARCHAR                             NOT NULL,
+    versjon        BIGINT       DEFAULT 0              NOT NULL,
+    opprettet_av   VARCHAR(20)  DEFAULT 'VL'           NOT NULL,
+    opprettet_tid  TIMESTAMP(3) DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av      VARCHAR(20),
+    endret_tid     TIMESTAMP(3)
 );
 
-create sequence institusjon_seq increment by 50 start with 1000000 NO CYCLE;
+CREATE SEQUENCE institusjon_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
 
-CREATE UNIQUE INDEX uidx_institusjon_org_nummer ON institusjon(org_nummer);
-CREATE UNIQUE INDEX uidx_institusjon_tss_ekstern_id ON institusjon(tss_ekstern_id)
+CREATE UNIQUE INDEX uidx_institusjon_org_nummer ON institusjon (org_nummer);
+CREATE UNIQUE INDEX uidx_institusjon_tss_ekstern_id ON institusjon (tss_ekstern_id)
