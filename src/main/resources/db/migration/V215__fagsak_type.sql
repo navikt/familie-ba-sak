@@ -4,4 +4,9 @@ ALTER TABLE FAGSAK
     ADD FOREIGN KEY (fk_institusjon_id) REFERENCES INSTITUSJON (ID);
 
 CREATE UNIQUE INDEX uidx_fagsak_type_aktoer_institusjon_ikke_arkivert ON fagsak(type, fk_aktoer_id, fk_institusjon_id)
-    WHERE arkivert = false;
+    WHERE fagsak.fk_institusjon_id IS NOT NULL
+        AND arkivert = false;
+
+CREATE UNIQUE INDEX uidx_fagsak_type_aktoer_ikke_arkivert ON fagsak(type, fk_aktoer_id)
+    WHERE fagsak.fk_institusjon_id IS NULL
+        AND arkivert = false;
