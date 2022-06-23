@@ -187,6 +187,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
 
     fun setterBehandlingPåVent(): Boolean =
         when (this) {
+            FORLENGET_SVARTIDSBREV,
             INNHENTE_OPPLYSNINGER,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
@@ -197,7 +198,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             else -> false
         }
 
-    fun ventefristDager(behandlingKategori: BehandlingKategori?): Long =
+    fun ventefristDager(manuellFrist: Long? = null, behandlingKategori: BehandlingKategori?): Long =
         when (this) {
             INNHENTE_OPPLYSNINGER,
             VARSEL_OM_REVURDERING,
@@ -209,14 +210,17 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             SVARTIDSBREV -> when (behandlingKategori) {
                 BehandlingKategori.EØS -> 30 * 3
                 BehandlingKategori.NASJONAL -> 3 * 7
-                else -> throw Feil("Behandlingskategori er ikke satt")
+                else -> throw Feil("Behandlingskategori er ikke satt fot $this")
             }
+
+            FORLENGET_SVARTIDSBREV -> manuellFrist ?: throw Feil("Ventefrist var ikke satt for $this")
 
             else -> throw Feil("Ventefrist ikke definert for brevtype $this")
         }
 
     fun venteårsak() =
         when (this) {
+            FORLENGET_SVARTIDSBREV,
             INNHENTE_OPPLYSNINGER,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
