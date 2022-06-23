@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.common.logger
 import no.nav.familie.ba.sak.config.AuditLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.CustomKeyValue
@@ -90,7 +91,6 @@ class TilgangService(
 
     fun validerTilgangTilFagsak(fagsakId: Long, event: AuditLoggerEvent) {
         val aktør = fagsakService.hentAktør(fagsakId)
-        val personIdent = aktør.aktivFødselsnummer()
         aktør.personidenter.forEach {
             Sporingsdata(
                 event = event,
@@ -98,15 +98,6 @@ class TilgangService(
                 custom1 = CustomKeyValue("fagsak", fagsakId.toString())
             )
         }
-        // val personIdenter = listOf(personIdent)
-        // if (!harTilgangTilPersoner(personIdenter)) {
-        //     throw RolleTilgangskontrollFeil(
-        //         melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-        //             "har ikke tilgang til fagsak=$fagsakId.",
-        //         frontendFeilmelding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-        //             "har ikke tilgang til fagsak=$fagsakId."
-        //     )
-        // }
         val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
         val personIdenterIFagsak = behandlinger.flatMap { behandling ->
             val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
@@ -115,6 +106,8 @@ class TilgangService(
                 else -> emptyList()
             }
         }.distinct()
+        logger.info("Fant {} unike identer i fagsak", personIdenterIFagsak.size)
+        logger.info("Identer: " + personIdenterIFagsak.joinToString())
         val harTilgang = harTilgangTilPersoner(personIdenterIFagsak)
         if (!harTilgang) {
             throw RolleTilgangskontrollFeil(
@@ -133,7 +126,7 @@ class TilgangService(
      * @param verdi verdiet som man ønsket å hente cache for, eks behandlingId, eller personIdent
      */
     private fun <T> harSaksbehandlerTilgang(cacheName: String, verdi: T, hentVerdi: () -> Boolean): Boolean {
-        if (!SikkerhetContext.erSystemKontekst()) return true
+        if (SikkerhetContext.erSystemKontekst()) return true
 
         val cache = cacheManager.getCache(cacheName) ?: error("Finner ikke cache=$cacheName")
         return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler())) {
