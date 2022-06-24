@@ -107,14 +107,15 @@ class BehandlingstemaService(
             val aktivBehandling =
                 behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsakId)
                     ?: return BehandlingKategori.NASJONAL
-            val erVilkårMedEØSRegelverkBehandlet =
+            val vilkårsvurdering =
                 vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
-                    ?.personResultater
-                    ?.flatMap { it.vilkårResultater }
-                    ?.filter { it.behandlingId == aktivBehandling.id }
-                    ?.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
+                    ?: return aktivBehandling.kategori
+            val erVilkårMedEØSRegelverkBehandlet = vilkårsvurdering.personResultater
+                .flatMap { it.vilkårResultater }
+                .filter { it.behandlingId == aktivBehandling.id }
+                .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
 
-            return if (erVilkårMedEØSRegelverkBehandlet == true) {
+            return if (erVilkårMedEØSRegelverkBehandlet) {
                 BehandlingKategori.EØS
             } else {
                 BehandlingKategori.NASJONAL
