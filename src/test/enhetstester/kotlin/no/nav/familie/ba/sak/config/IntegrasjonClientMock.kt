@@ -22,6 +22,7 @@ import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkSpråk
+import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
@@ -140,6 +141,13 @@ class IntegrasjonClientMock {
                     "100",
                     "NAV Familie- og pensjonsytelser Oslo 1"
                 )
+            )
+
+            every { mockIntegrasjonClient.hentEnhet(any()) } returns NavKontorEnhet(
+                101,
+                "NAV Familie- og pensjonsytelser Oslo 1",
+                "101",
+                ""
             )
 
             every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } just runs

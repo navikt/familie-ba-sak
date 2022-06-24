@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.behandling.behandlingstema
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.finnHøyesteKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
@@ -10,14 +13,45 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
+fun bestemKategoriVedOpprettelse(
+    overstyrtKategori: BehandlingKategori?,
+    behandlingType: BehandlingType,
+    behandlingÅrsak: BehandlingÅrsak,
+    // siste iverksatt behandling som har løpende utbetaling. Hvis løpende utbetaling ikke finnes, settes det til NASJONAL
+    kategoriFraLøpendeBehandling: BehandlingKategori
+): BehandlingKategori {
+    return when {
+        behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING ||
+            behandlingType == BehandlingType.REVURDERING && behandlingÅrsak == BehandlingÅrsak.SØKNAD -> {
+            overstyrtKategori
+                ?: throw FunksjonellFeil(
+                    "Behandling med type ${behandlingType.visningsnavn} " +
+                        "og årsak ${behandlingÅrsak.visningsnavn} $ krever behandlingskategori",
+                )
+        }
+        behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && behandlingÅrsak.erFørstegangMigreringsårsak() -> {
+            BehandlingKategori.NASJONAL
+        }
+        else -> {
+            kategoriFraLøpendeBehandling
+        }
+    }
+}
+
 fun bestemKategori(
     overstyrtKategori: BehandlingKategori?,
-    kategoriFraLøpendeBehandling: BehandlingKategori?,
-    kategoriFraInneværendeBehandling: BehandlingKategori? = null,
+    // kategori fra siste iverksatt behandling eller NASJONAL når det ikke finnes noe
+    kategoriFraSisteIverksattBehandling: BehandlingKategori,
+    kategoriFraInneværendeBehandling: BehandlingKategori,
 ): BehandlingKategori {
-    if (kategoriFraLøpendeBehandling == BehandlingKategori.EØS) return BehandlingKategori.EØS
+    // når saksbehandler overstyrer behandlingstema manuelt
+    if (overstyrtKategori != null) return overstyrtKategori
 
-    val oppdatertKategori = listOf(overstyrtKategori, kategoriFraInneværendeBehandling).finnHøyesteKategori()
+    // når saken har en løpende EØS utbetaling
+    if (kategoriFraSisteIverksattBehandling == BehandlingKategori.EØS) return BehandlingKategori.EØS
+
+    // når løpende utbetaling er NASJONAL og inneværende behandling får EØS
+    val oppdatertKategori = listOf(kategoriFraSisteIverksattBehandling, kategoriFraInneværendeBehandling).finnHøyesteKategori()
 
     return oppdatertKategori ?: BehandlingKategori.NASJONAL
 }
@@ -47,7 +81,7 @@ fun utledLøpendeKategori(
 
     val etBarnHarMinstEnLøpendeEØSPeriode = barnasTidslinjer
         .values
-        .map { it.regelverkResultatTidslinje.innholdForTidspunkt(nå) }
+        .map { it.egetRegelverkResultatTidslinje.innholdForTidspunkt(nå) }
         .any { it?.regelverk == Regelverk.EØS_FORORDNINGEN }
 
     return if (etBarnHarMinstEnLøpendeEØSPeriode) {

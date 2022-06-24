@@ -13,7 +13,9 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForD�
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -139,7 +141,16 @@ class PersongrunnlagIntegrationTest(
             kontaktinformasjonForDoedsbo = null
         )
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
-        val behandling = behandlingService.opprettBehandling(NyBehandling(skalBehandlesAutomatisk = true, søkersIdent = morAktør.aktivFødselsnummer(), behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE, behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING))
+        val behandling = behandlingService.opprettBehandling(
+            NyBehandling(
+                skalBehandlesAutomatisk = true,
+                søkersIdent = morAktør.aktivFødselsnummer(),
+                behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                kategori = BehandlingKategori.NASJONAL, // alltid NASJONAL for fødselshendelse
+                underkategori = BehandlingUnderkategori.ORDINÆR
+            )
+        )
 
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = morAktør,
@@ -181,7 +192,16 @@ class PersongrunnlagIntegrationTest(
             kontaktinformasjonForDoedsbo = null
         )
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
-        val behandling = behandlingService.opprettBehandling(NyBehandling(skalBehandlesAutomatisk = true, søkersIdent = morAktør.aktivFødselsnummer(), behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE, behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING))
+        val behandling = behandlingService.opprettBehandling(
+            NyBehandling(
+                skalBehandlesAutomatisk = true,
+                søkersIdent = morAktør.aktivFødselsnummer(),
+                behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR
+            )
+        )
 
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = morAktør,
