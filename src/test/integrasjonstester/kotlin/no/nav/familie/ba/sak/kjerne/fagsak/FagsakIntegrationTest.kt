@@ -15,7 +15,7 @@ class FagsakIntegrationTest(
     fun `hentMinimalFagsakerForPerson() skal return begge fagsaker for en person`() {
         val personFnr = randomFnr()
         val fagsakOmsorgperson = fagsakService.hentEllerOpprettFagsak(personFnr)
-        val fagsakBarn = fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakEier.BARN)
+        val fagsakBarn = fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakEier.BARN, FagsakType.INSTITUSJON)
 
         val minimalFagsakList = fagsakService.hentMinimalFagsakerForPerson(fagsakOmsorgperson.aktør)
 
@@ -26,7 +26,7 @@ class FagsakIntegrationTest(
     fun `hentMinimalFagsakForPerson() skal return riktig fagsak for en person`() {
         val personFnr = randomFnr()
         val fagsakOmsorgperson = fagsakService.hentEllerOpprettFagsak(personFnr)
-        val fagsakBarn = fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakEier.BARN)
+        val fagsakBarn = fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakEier.BARN, FagsakType.INSTITUSJON)
 
         val defaultMinimalFagsak = fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør)
         assertThat(defaultMinimalFagsak.data!!.id).isEqualTo(fagsakOmsorgperson.id)
@@ -35,7 +35,8 @@ class FagsakIntegrationTest(
             fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør, FagsakEier.OMSORGSPERSON)
         assertThat(omsorgpersonMinimalFagsak.data!!.id).isEqualTo(fagsakOmsorgperson.id)
 
-        val barnMinimalFagsak = fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør, FagsakEier.BARN)
+        val barnMinimalFagsak =
+            fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør, FagsakEier.BARN)
         assertThat(barnMinimalFagsak.data!!.id).isEqualTo(fagsakBarn.id)
     }
 }
