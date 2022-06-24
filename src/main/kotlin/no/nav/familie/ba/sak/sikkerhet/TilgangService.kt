@@ -102,7 +102,7 @@ class TilgangService(
                 personopplysningGrunnlag != null -> personopplysningGrunnlag.søkerOgBarn.map { person -> person.aktør.aktivFødselsnummer() }
                 else -> emptyList()
             }
-        }.distinct()
+        }.distinct().ifEmpty { listOf(aktør.aktivFødselsnummer()) }
         val harTilgang = harTilgangTilPersoner(personIdenterIFagsak)
         if (!harTilgang) {
             throw RolleTilgangskontrollFeil(
