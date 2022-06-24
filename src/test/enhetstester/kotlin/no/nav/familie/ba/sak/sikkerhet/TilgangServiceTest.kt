@@ -13,7 +13,13 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
@@ -24,6 +30,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import java.time.LocalDate
 
 class TilgangServiceTest {
 
@@ -161,5 +168,24 @@ class TilgangServiceTest {
         verify(exactly = 2) {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
         }
+    }
+
+    @Test
+    fun `validerTilgangTilFagsak - skal kaste feil dersom søker eller et eller flere av barna har diskresjonskode og saksbehandler mangler tilgang`() {
+
+        every { fagsakService.hentAktør(fagsak.id) }.returns(aktør)
+        every { behandlingHentOgPersisterService.hentBehandlinger(fagsak.id) }.returns(listOf(behandling))
+        every { persongrunnlagService.hentAktiv(behandling.id) }.returns(
+            PersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+                personer = mutableSetOf<Person>(
+                    Person(aktør = Aktør(aktørId = "6543456372112", personidenter = mutableSetOf(Personident(fødselsnummer = "65434563721", aktiv = true, aktør = Aktør("6543456372112", mutableSetOf())))), type = PersonType.SØKER, fødselsdato = LocalDate.now(), kjønn = Kjønn.MANN, personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(), aktiv = true)),
+                    Person(aktør = Aktør(aktørId = "1234567891012", personidenter = mutableSetOf(Personident(fødselsnummer = "12345678910", aktiv = true, aktør = Aktør("1234567891012", mutableSetOf())))), type = PersonType.BARN, fødselsdato = LocalDate.now(), kjønn = Kjønn.MANN, personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(), aktiv = true))
+                )
+            )
+        )
+        every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf("65434563721", "12345678910")) }.returns(Tilgang(false, null))
+        mockBrukerContext("A")
+        assertThrows<RolleTilgangskontrollFeil> { tilgangService.validerTilgangTilFagsak(fagsak.id, AuditLoggerEvent.ACCESS) }
     }
 }

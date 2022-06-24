@@ -306,6 +306,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                 stønadFom = stønadPeriode.fraOgMed.toYearMonth(),
                 stønadTom = stønadPeriode.tilOgMed!!.toYearMonth(),
                 kalkulertUtbetalingsbeløp = beløp.toInt(),
+                nasjonaltPeriodebeløp = beløp.toInt(),
                 type = YtelseType.valueOf(type),
                 sats = beløp.toInt(),
                 prosent = BigDecimal(100)

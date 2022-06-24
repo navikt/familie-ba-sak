@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenBack2BackAndelsperioderMedSammeBeløp
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -20,7 +21,8 @@ data class RestYtelsePeriode(
     val beløp: Int,
     val stønadFom: YearMonth,
     val stønadTom: YearMonth,
-    val ytelseType: YtelseType
+    val ytelseType: YtelseType,
+    val skalUtbetales: Boolean
 )
 
 fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner: List<AndelTilkjentYtelse>): List<RestPersonMedAndeler> =
@@ -40,10 +42,11 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
                 stønadTom = sammenslåtteAndeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),
                 ytelsePerioder = sammenslåtteAndeler.map { it1 ->
                     RestYtelsePeriode(
-                        it1.kalkulertUtbetalingsbeløp,
-                        it1.stønadFom,
-                        it1.stønadTom,
-                        it1.type
+                        beløp = it1.kalkulertUtbetalingsbeløp,
+                        stønadFom = it1.stønadFom,
+                        stønadTom = it1.stønadTom,
+                        ytelseType = it1.type,
+                        skalUtbetales = it1.prosent > BigDecimal.ZERO
                     )
                 }
             )
