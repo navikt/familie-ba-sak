@@ -58,7 +58,7 @@
     "begrunnelser": [
       {
         "apiNavn": "innvilgetPrimarlandStandard",
-        "annenForeldersAktivitet": "inaktiv",
+        "annenForeldersAktivitet": "INAKTIV",
         "annenForeldersAktivitetsland": "Sverige",
         "barnetsBostedsland": "Sverige",
         "barnasFodselsdatoer": "20.01.20",
