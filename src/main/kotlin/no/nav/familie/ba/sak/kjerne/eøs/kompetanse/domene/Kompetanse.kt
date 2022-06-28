@@ -127,18 +127,7 @@ enum class AnnenForeldersAktivitet {
     FORSIKRET_I_BOSTEDSLAND,
     MOTTAR_PENSJON,
     INAKTIV,
-    IKKE_AKTUELT;
-
-    fun tilTekst(): String {
-        return when (this) {
-            I_ARBEID -> "i arbeid"
-            MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN -> "mottar utbetaling som erstatter lønn"
-            FORSIKRET_I_BOSTEDSLAND -> "forsikret i bostedsland"
-            MOTTAR_PENSJON -> "mottar pensjon"
-            INAKTIV -> "inaktiv"
-            IKKE_AKTUELT -> "ikke aktuelt"
-        }
-    }
+    IKKE_AKTUELT
 }
 
 enum class KompetanseResultat {
