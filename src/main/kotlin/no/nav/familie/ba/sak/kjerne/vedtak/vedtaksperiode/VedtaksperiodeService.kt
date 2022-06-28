@@ -419,6 +419,8 @@ class VedtaksperiodeService(
                 tom = utvidetVedtaksperiodeMedBegrunnelser.tom?.toYearMonth()
             ).toList()
 
+            val kompetanserSomStopperRettFørPeriode = kompetanser.filter { it.tom?.plusMonths(1) == utvidetVedtaksperiodeMedBegrunnelser.fom?.toYearMonth() }
+
             val aktørIderMedUtbetaling =
                 hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }
 
@@ -433,7 +435,8 @@ class VedtaksperiodeService(
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
                     sanityEØSBegrunnelser = sanityEØSBegrunnelser,
                     kompetanserIPeriode = kompetanserIPeriode,
-                    kanBehandleEØS = featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)
+                    kanBehandleEØS = featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS),
+                    kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
                 )
             )
         }
