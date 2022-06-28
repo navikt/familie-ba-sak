@@ -99,7 +99,7 @@ class TilpassDifferanseberegningEtterValutakursService(
  */
 fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
     tilkjentYtelse: TilkjentYtelse,
-    oppdaterteAndeler: List<AndelTilkjentYtelse>
+    oppdaterteAndeler: Collection<AndelTilkjentYtelse>
 ) {
     if (tilkjentYtelse.andelerTilkjentYtelse.erIPraksisLik(oppdaterteAndeler)) {
         return
@@ -129,13 +129,13 @@ fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
 }
 
 @Deprecated("Brukes som sikkerhetsnett for å sjekke at det ikke oppstår duplikater. Burde være unødvendig")
-private fun Iterable<AndelTilkjentYtelse>.sjekkForDuplikater() {
+internal fun Iterable<AndelTilkjentYtelse>.sjekkForDuplikater() {
 
     try {
         // Det skal ikke være overlapp i andeler for en gitt ytelsestype og aktør
         this.groupBy { it.aktør.aktørId + it.type }
             .mapValues { (_, andeler) -> tidslinje { andeler.map { it.tilPeriode() } } }
-            .values
+            .values.forEach { it.perioder() }
     } catch (throwable: Throwable) {
         throw IllegalStateException(
             "Endring av andeler tilkjent ytelse i differanseberegning holder på å introdusere duplikater",
