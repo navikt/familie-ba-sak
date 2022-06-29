@@ -37,6 +37,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.YearMonth
 
 @Service
 class BrevPeriodeService(
@@ -153,12 +154,12 @@ class BrevPeriodeService(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 landkoderISO2 = landkoderISO2,
             ),
-            minimerteKompetanserSomSlutterRettFørPeriode = kompetanser.filter { it.tom?.plusMonths(1) == minimertVedtaksperiode.fom?.toYearMonth() }.map {
-                it.tilMinimertKompetanse(
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    landkoderISO2 = landkoderISO2
-                )
-            }
+            minimerteKompetanserSomSlutterRettFørPeriode = hentMinimerteKompetanserSomSlutterRettFørPeriode(
+                kompetanser = kompetanser,
+                periodeFom = minimertVedtaksperiode.fom?.toYearMonth(),
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                landkoderISO2 = landkoderISO2
+            )
 
         )
 
@@ -170,6 +171,18 @@ class BrevPeriodeService(
         }
 
         return brevperiodeData
+    }
+
+    private fun hentMinimerteKompetanserSomSlutterRettFørPeriode(
+        kompetanser: List<Kompetanse>,
+        periodeFom: YearMonth?,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        landkoderISO2: Map<String, String>
+    ) = kompetanser.filter { it.tom?.plusMonths(1) == periodeFom }.map {
+        it.tilMinimertKompetanse(
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            landkoderISO2 = landkoderISO2
+        )
     }
 
     private fun hentBarnsPersonIdentMedRedusertPeriode(
