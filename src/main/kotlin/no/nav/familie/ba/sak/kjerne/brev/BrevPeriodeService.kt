@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -37,7 +36,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.YearMonth
 
 @Service
 class BrevPeriodeService(
@@ -171,18 +169,6 @@ class BrevPeriodeService(
         }
 
         return brevperiodeData
-    }
-
-    private fun hentMinimerteKompetanserSomSlutterRettFørPeriode(
-        kompetanser: List<Kompetanse>,
-        periodeFom: YearMonth?,
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
-        landkoderISO2: Map<String, String>
-    ) = kompetanser.filter { it.tom?.plusMonths(1) == periodeFom }.map {
-        it.tilMinimertKompetanse(
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            landkoderISO2 = landkoderISO2
-        )
     }
 
     private fun hentBarnsPersonIdentMedRedusertPeriode(
