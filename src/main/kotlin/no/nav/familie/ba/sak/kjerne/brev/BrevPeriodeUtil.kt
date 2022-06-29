@@ -64,7 +64,7 @@ fun hentMinimerteKompetanserForPeriode(
     return minimerteKompetanser
 }
 
-fun hentKompetanserSomSlutterRettFørPeriode(
+fun hentKompetanserSomStopperRettFørPeriode(
     kompetanser: List<Kompetanse>,
     periodeFom: YearMonth?
 ) = kompetanser.filter { it.tom?.plusMonths(1) == periodeFom }

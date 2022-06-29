@@ -15,7 +15,7 @@ data class BrevperiodeData(
     val minimertVedtaksperiode: MinimertVedtaksperiode,
     val barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
     val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
-    val minimerteKompetanserSomSlutterRettFørPeriode: List<MinimertKompetanse>
+    val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>
 ) : Comparable<BrevperiodeData> {
 
     fun tilBrevPeriodeGenerator() = BrevPeriodeGenerator(
@@ -26,7 +26,7 @@ data class BrevperiodeData(
         minimertVedtaksperiode = minimertVedtaksperiode,
         barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
         minimerteKompetanserForPeriode = minimerteKompetanserForPeriode,
-        minimerteKompetanserSomSlutterRettFørPeriode = minimerteKompetanserSomSlutterRettFørPeriode
+        minimerteKompetanserSomStopperRettFørPeriode = minimerteKompetanserSomStopperRettFørPeriode
     )
 
     fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {

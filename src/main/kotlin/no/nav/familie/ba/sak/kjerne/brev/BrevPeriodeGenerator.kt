@@ -36,7 +36,7 @@ class BrevPeriodeGenerator(
     private val minimertVedtaksperiode: MinimertVedtaksperiode,
     private val barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
     private val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
-    private val minimerteKompetanserSomSlutterRettFørPeriode: List<MinimertKompetanse>
+    private val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>
 ) {
 
     fun genererBrevPeriode(): BrevPeriode? {
@@ -90,7 +90,7 @@ class BrevPeriodeGenerator(
         minimertVedtaksperiode.eøsBegrunnelser.map { eøsBegrunnelseMedTriggere ->
             val kompetanser = when (eøsBegrunnelseMedTriggere.eøsBegrunnelse.vedtakBegrunnelseType) {
                 VedtakBegrunnelseType.EØS_INNVILGET -> hentKompetanserForEØSBegrunnelse(eøsBegrunnelseMedTriggere, minimerteKompetanserForPeriode)
-                VedtakBegrunnelseType.EØS_OPPHØR -> hentKompetanserForEØSBegrunnelse(eøsBegrunnelseMedTriggere, minimerteKompetanserSomSlutterRettFørPeriode)
+                VedtakBegrunnelseType.EØS_OPPHØR -> hentKompetanserForEØSBegrunnelse(eøsBegrunnelseMedTriggere, minimerteKompetanserSomStopperRettFørPeriode)
                 else -> emptyList()
             }
             EØSBegrunnelseMedKompetanser(
