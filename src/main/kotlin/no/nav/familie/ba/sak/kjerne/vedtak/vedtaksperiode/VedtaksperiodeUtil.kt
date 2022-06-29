@@ -272,15 +272,13 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
     .mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }
     .filter { begrunnelse ->
         when (begrunnelse.eøsBegrunnelse.vedtakBegrunnelseType) {
-            VedtakBegrunnelseType.EØS_INNVILGET -> {
-                kompetanserIPeriode.any { kompetanse ->
-                    kompetanse.validerFelterErSatt()
-                    begrunnelse.erGyldigForKompetanseMedData(
-                        annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
-                        barnetsBostedslandFraKompetanse = landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland!!),
-                        resultatFraKompetanse = kompetanse.resultat!!
-                    )
-                }
+            VedtakBegrunnelseType.EØS_INNVILGET -> kompetanserIPeriode.any { kompetanse ->
+                kompetanse.validerFelterErSatt()
+                begrunnelse.erGyldigForKompetanseMedData(
+                    annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
+                    barnetsBostedslandFraKompetanse = landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland!!),
+                    resultatFraKompetanse = kompetanse.resultat!!
+                )
             }
             VedtakBegrunnelseType.EØS_OPPHØR -> kompetanserSomStopperRettFørPeriode.any { kompetanse ->
                 kompetanse.validerFelterErSatt()
