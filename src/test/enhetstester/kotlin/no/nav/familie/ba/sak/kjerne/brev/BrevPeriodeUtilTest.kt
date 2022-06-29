@@ -109,7 +109,7 @@ private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtakspe
             eøsBegrunnelser = emptyList(),
         ),
         uregistrerteBarn = emptyList(),
-        minimerteKompetanser = emptyList(),
+        minimerteKompetanserForPeriode = emptyList(),
         minimerteKompetanserSomSlutterRettFørPeriode = emptyList()
     )
 }

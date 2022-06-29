@@ -146,7 +146,7 @@ class BrevPeriodeService(
                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                 andelerTilkjentYtelse = andelerTilkjentYtelse
             ),
-            minimerteKompetanser = hentMinimerteKompetanserForPeriode(
+            minimerteKompetanserForPeriode = hentMinimerteKompetanserForPeriode(
                 kompetanser = kompetanser,
                 fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
                 tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),

@@ -76,7 +76,7 @@ class BrevperiodeTest {
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
                     barnMedReduksjonFraForrigeBehandlingIdent = behandlingsresultatPersonTestConfig.hentBarnMedReduksjonFraForrigeBehandling()
                         .map { it.personIdent },
-                    minimerteKompetanser = behandlingsresultatPersonTestConfig.kompetanser?.map {
+                    minimerteKompetanserForPeriode = behandlingsresultatPersonTestConfig.kompetanser?.map {
                         it.tilMinimertKompetanse(
                             behandlingsresultatPersonTestConfig.personerPåBehandling
                         )

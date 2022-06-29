@@ -14,7 +14,7 @@ data class BrevperiodeData(
     val brevMålform: Målform,
     val minimertVedtaksperiode: MinimertVedtaksperiode,
     val barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
-    val minimerteKompetanser: List<MinimertKompetanse>,
+    val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
     val minimerteKompetanserSomSlutterRettFørPeriode: List<MinimertKompetanse>
 ) : Comparable<BrevperiodeData> {
 
@@ -25,7 +25,7 @@ data class BrevperiodeData(
         brevMålform = brevMålform,
         minimertVedtaksperiode = minimertVedtaksperiode,
         barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
-        minimerteKompetanser = minimerteKompetanser,
+        minimerteKompetanserForPeriode = minimerteKompetanserForPeriode,
         minimerteKompetanserSomSlutterRettFørPeriode = minimerteKompetanserSomSlutterRettFørPeriode
     )
 
