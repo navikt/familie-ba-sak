@@ -75,7 +75,7 @@ class BrevPeriodeGenerator(
                 EØSBegrunnelseData(
                     vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
                     apiNavn = begrunnelse.sanityApiNavn,
-                    annenForeldersAktivitet = kompetanse.annenForeldersAktivitet.tilTekst(),
+                    annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
                     annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetslandNavn?.navn,
                     barnetsBostedsland = kompetanse.barnetsBostedslandNavn.navn,
                     barnasFodselsdatoer = Utils.slåSammen(kompetanse.personer.map { it.fødselsdato.tilKortString() }),
