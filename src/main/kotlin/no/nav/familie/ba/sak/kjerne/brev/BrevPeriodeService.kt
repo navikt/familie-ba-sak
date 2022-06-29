@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -152,13 +153,15 @@ class BrevPeriodeService(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 landkoderISO2 = landkoderISO2,
             ),
-            minimerteKompetanserSomSlutterRettFørPeriode = hentMinimerteKompetanserSomSlutterRettFørPeriode(
+            minimerteKompetanserSomSlutterRettFørPeriode = hentKompetanserSomSlutterRettFørPeriode(
                 kompetanser = kompetanser,
-                periodeFom = minimertVedtaksperiode.fom?.toYearMonth(),
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                landkoderISO2 = landkoderISO2
-            )
-
+                periodeFom = minimertVedtaksperiode.fom?.toYearMonth()
+            ).map {
+                it.tilMinimertKompetanse(
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    landkoderISO2 = landkoderISO2
+                )
+            }
         )
 
         if (skalLogge) {

@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
+import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomSlutterRettFørPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -419,7 +420,7 @@ class VedtaksperiodeService(
                 tom = utvidetVedtaksperiodeMedBegrunnelser.tom?.toYearMonth()
             ).toList()
 
-            val kompetanserSomStopperRettFørPeriode = kompetanser.filter { it.tom?.plusMonths(1) == utvidetVedtaksperiodeMedBegrunnelser.fom?.toYearMonth() }
+            val kompetanserSomStopperRettFørPeriode = hentKompetanserSomSlutterRettFørPeriode(kompetanser = kompetanser.toList(), periodeFom = utvidetVedtaksperiodeMedBegrunnelser.fom?.toYearMonth())
 
             val aktørIderMedUtbetaling =
                 hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }

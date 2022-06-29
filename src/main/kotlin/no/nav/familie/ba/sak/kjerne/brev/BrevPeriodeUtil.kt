@@ -64,17 +64,10 @@ fun hentMinimerteKompetanserForPeriode(
     return minimerteKompetanser
 }
 
-fun hentMinimerteKompetanserSomSlutterRettFørPeriode(
+fun hentKompetanserSomSlutterRettFørPeriode(
     kompetanser: List<Kompetanse>,
-    periodeFom: YearMonth?,
-    personopplysningGrunnlag: PersonopplysningGrunnlag,
-    landkoderISO2: Map<String, String>
-) = kompetanser.filter { it.tom?.plusMonths(1) == periodeFom }.map {
-    it.tilMinimertKompetanse(
-        personopplysningGrunnlag = personopplysningGrunnlag,
-        landkoderISO2 = landkoderISO2
-    )
-}
+    periodeFom: YearMonth?
+) = kompetanser.filter { it.tom?.plusMonths(1) == periodeFom }
 
 fun Collection<Kompetanse>.hentIPeriode(
     fom: YearMonth?,
