@@ -283,9 +283,9 @@ class VedtaksperiodeUtilTest {
             )
 
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
-            sanityEØSBegrunnelser,
-            kompetanserIPeriode,
-            emptyList()
+            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+            kompetanserIPeriode = kompetanserIPeriode,
+            kompetanserSomStopperRettFørPeriode = emptyList()
         )
         Assertions.assertTrue(
             forventedeBegrunnelser.all {
@@ -318,9 +318,9 @@ class VedtaksperiodeUtilTest {
             )
 
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
-            sanityEØSBegrunnelser,
-            kompetanserIPeriode,
-            emptyList()
+            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+            kompetanserIPeriode = kompetanserIPeriode,
+            kompetanserSomStopperRettFørPeriode = emptyList()
         )
 
         Assertions.assertTrue(
