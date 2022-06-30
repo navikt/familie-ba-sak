@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.beløpUtbetaltFor
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -136,7 +137,7 @@ data class EØSBegrunnelseData(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
     override val apiNavn: String,
 
-    val annenForeldersAktivitet: String,
+    val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String?,
     val barnetsBostedsland: String,
     val barnasFodselsdatoer: String,
