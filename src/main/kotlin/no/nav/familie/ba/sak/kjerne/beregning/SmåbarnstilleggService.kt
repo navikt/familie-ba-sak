@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsst
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.tilPeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -56,6 +57,8 @@ class SmåbarnstilleggService(
             hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør).map { it.tilInternPeriodeOvergangsstønad() }
                 .slåSammenTidligerePerioder()
 
+        secureLogger.info("Perioder med overgangsstønad fra EF: ${nyePerioderMedFullOvergangsstønad.map { "Periode(fom=${it.fomDato}, tom=${it.tomDato})" }}")
+
         return vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = sistIverksatteBehandling.id,
@@ -76,5 +79,9 @@ class SmåbarnstilleggService(
         return efSakRestClient.hentPerioderMedFullOvergangsstønad(
             aktør.aktivFødselsnummer()
         ).perioder
+    }
+
+    companion object {
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
