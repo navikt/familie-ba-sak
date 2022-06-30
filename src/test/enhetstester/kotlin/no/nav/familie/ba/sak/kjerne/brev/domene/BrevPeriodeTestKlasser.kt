@@ -52,7 +52,7 @@ data class BrevPeriodeTestConfig(
     val brevMålform: Målform,
 
     val kompetanser: List<BrevPeriodeTestKompetanse>? = null,
-    val kompetanserSomSlutterRettFørPeriode: List<BrevPeriodeTestKompetanse>? = null,
+    val kompetanserSomStopperRettFørPeriode: List<BrevPeriodeTestKompetanse>? = null,
 
     val forventetOutput: BrevPeriodeOutput?,
 ) {

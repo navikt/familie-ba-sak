@@ -81,7 +81,7 @@ class BrevperiodeTest {
                             behandlingsresultatPersonTestConfig.personerPåBehandling
                         )
                     } ?: emptyList(),
-                    minimerteKompetanserSomStopperRettFørPeriode = behandlingsresultatPersonTestConfig.kompetanserSomSlutterRettFørPeriode?.map {
+                    minimerteKompetanserSomStopperRettFørPeriode = behandlingsresultatPersonTestConfig.kompetanserSomStopperRettFørPeriode?.map {
                         it.tilMinimertKompetanse(
                             behandlingsresultatPersonTestConfig.personerPåBehandling
                         )
