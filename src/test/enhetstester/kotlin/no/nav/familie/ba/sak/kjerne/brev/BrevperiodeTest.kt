@@ -81,7 +81,11 @@ class BrevperiodeTest {
                             behandlingsresultatPersonTestConfig.personerPåBehandling
                         )
                     } ?: emptyList(),
-                    minimerteKompetanserSomStopperRettFørPeriode = emptyList()
+                    minimerteKompetanserSomStopperRettFørPeriode = behandlingsresultatPersonTestConfig.kompetanserSomSlutterRettFørPeriode?.map {
+                        it.tilMinimertKompetanse(
+                            behandlingsresultatPersonTestConfig.personerPåBehandling
+                        )
+                    } ?: emptyList()
                 ).genererBrevPeriode()
             } catch (e: Exception) {
                 testReporter.publishEntry(
