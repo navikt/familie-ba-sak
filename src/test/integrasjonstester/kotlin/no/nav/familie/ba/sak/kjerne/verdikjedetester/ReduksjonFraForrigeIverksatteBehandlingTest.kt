@@ -76,11 +76,11 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         )
 
         val perioderBehandling2 = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtakService.hentAktivForBehandling(behandling2.id)!!)
-        val periodeMedReduksjon = perioderBehandling2.single { it.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING }
+        val periodeMedReduksjon = perioderBehandling2.singleOrNull { it.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING }
 
         Assertions.assertEquals(0, perioderBehandling2.filter { it.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size)
         Assertions.assertNotNull(periodeMedReduksjon)
-        Assertions.assertEquals(osFom, periodeMedReduksjon.fom)
+        Assertions.assertEquals(osFom, periodeMedReduksjon!!.fom)
         Assertions.assertEquals(osTom, periodeMedReduksjon.tom)
     }
 
