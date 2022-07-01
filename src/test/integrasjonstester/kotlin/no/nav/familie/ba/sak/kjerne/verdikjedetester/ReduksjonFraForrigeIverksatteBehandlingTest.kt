@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -51,8 +53,8 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         val personScenario: RestScenario = lagScenario(barnFødselsdato)
         val fagsak: RestMinimalFagsak = lagFagsak(personScenario)
 
-        val osFom = LocalDate.of(2022, 6, 1)
-        val osTom = LocalDate.of(2022, 8, 31)
+        val osFom = LocalDate.now().førsteDagIInneværendeMåned()
+        val osTom = LocalDate.now().plusMonths(2).sisteDagIMåned()
 
         val behandling1 = fullførBehandlingMedOvergangsstønad(
             fagsak = fagsak, personScenario = personScenario, barnFødselsdato = barnFødselsdato,
