@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_VEDLIKEHOLD_HENLEGGELSE
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -8,6 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
@@ -166,11 +168,19 @@ class BehandlingStegController(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
+        val tekniskVedlikeholdHenleggelseToggle = featureToggleService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE)
+
         validerhenleggelsestype(
             henleggÅrsak = henleggInfo.årsak,
-            tekniskVedlikeholdToggel = featureToggleService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE),
+            tekniskVedlikeholdToggel = tekniskVedlikeholdHenleggelseToggle,
             behandlingId = behandling.id,
         )
+
+        val behandlingErTekniskOpprettet = behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING || behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
+
+        if (behandlingErTekniskOpprettet && !tekniskVedlikeholdHenleggelseToggle) {
+            throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak}")
+        }
 
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
 
