@@ -177,7 +177,7 @@ class BehandlingStegController(
 
         validerTilgangTilHenleggelseAvBehandling(
             behandling = behandling,
-            tekniskVedlikeholdHenleggelseToggle = featureToggleService.isEnabled(TEKNISK_ENDRING)
+            tekniskEndringToggle = featureToggleService.isEnabled(TEKNISK_ENDRING)
         )
 
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
@@ -188,9 +188,9 @@ class BehandlingStegController(
 
     private fun validerTilgangTilHenleggelseAvBehandling(
         behandling: Behandling,
-        tekniskVedlikeholdHenleggelseToggle: Boolean
+        tekniskEndringToggle: Boolean
     ) {
-        if (behandling.erTekniskBehandling() && !tekniskVedlikeholdHenleggelseToggle) {
+        if (behandling.erTekniskBehandling() && !tekniskEndringToggle) {
             throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak}. Ta kontakt med teamet dersom dette ikke stemmer.")
         }
     }
