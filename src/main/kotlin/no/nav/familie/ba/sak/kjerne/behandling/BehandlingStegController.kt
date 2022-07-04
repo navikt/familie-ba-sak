@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -175,14 +176,24 @@ class BehandlingStegController(
             behandlingId = behandling.id,
         )
 
-        if (behandling.erTekniskBehandling() && !tekniskVedlikeholdHenleggelseToggle) {
-            throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak}. Ta kontakt med teamet dersom dette ikke stemmer.")
-        }
+        validerTilgangTilHenleggelseAvBehandling(
+            behandling = behandling,
+            tekniskVedlikeholdHenleggelseToggle = tekniskVedlikeholdHenleggelseToggle
+        )
 
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
 
         stegService.håndterHenleggBehandling(behandling, henleggInfo)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+    }
+
+    private fun validerTilgangTilHenleggelseAvBehandling(
+        behandling: Behandling,
+        tekniskVedlikeholdHenleggelseToggle: Boolean
+    ) {
+        if (behandling.erTekniskBehandling() && !tekniskVedlikeholdHenleggelseToggle) {
+            throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak}. Ta kontakt med teamet dersom dette ikke stemmer.")
+        }
     }
 }
 
