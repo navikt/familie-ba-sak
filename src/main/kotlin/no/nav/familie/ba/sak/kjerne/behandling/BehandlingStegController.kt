@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
@@ -176,9 +175,7 @@ class BehandlingStegController(
             behandlingId = behandling.id,
         )
 
-        val behandlingErTekniskOpprettet = behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING || behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
-
-        if (behandlingErTekniskOpprettet && !tekniskVedlikeholdHenleggelseToggle) {
+        if (behandling.erTekniskBehandling() && !tekniskVedlikeholdHenleggelseToggle) {
             throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak}. Ta kontakt med teamet dersom dette ikke stemmer.")
         }
 
