@@ -179,7 +179,7 @@ class BehandlingStegController(
         val behandlingErTekniskOpprettet = behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING || behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
 
         if (behandlingErTekniskOpprettet && !tekniskVedlikeholdHenleggelseToggle) {
-            throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak}")
+            throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak}. Ta kontakt med teamet dersom dette ikke stemmer.")
         }
 
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
