@@ -6,6 +6,7 @@ object DevLauncher {
     @JvmStatic
     fun main(args: Array<String>) {
         System.setProperty("spring.profiles.active", "dev")
+        System.setProperty("prosessering.enabled", "false")
         val app = SpringApplicationBuilder(ApplicationConfig::class.java)
             .profiles(
                 "dev",

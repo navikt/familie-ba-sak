@@ -6,7 +6,7 @@ Saksbehandling for barnetrygd
 
 For å kjøre opp appen lokalt kan en kjøre
 
-* `DevLauncher`, som kjører opp en H2-(minnebasert) database (vil gi mange feilmeldinger fra task-rammeverket)
+* `DevLauncher`, som kjører opp en H2-(minnebasert) database (obs: kjører med task-rammeverket deaktivert)
 * `DevLauncherPostgres`, som kjører opp med Spring-profilen `postgres` satt, og forventer en kjørende database. Samme
   effekt kan du med `DevLauncher` med
   `-Dspring.profiles.active=postgres` satt under `Edit Configurations -> VM Options`.
