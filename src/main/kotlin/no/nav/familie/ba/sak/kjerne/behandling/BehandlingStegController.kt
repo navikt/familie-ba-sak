@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_ENDRING
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_VEDLIKEHOLD_HENLEGGELSE
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -168,17 +169,15 @@ class BehandlingStegController(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        val tekniskVedlikeholdHenleggelseToggle = featureToggleService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE)
-
         validerhenleggelsestype(
             henleggÅrsak = henleggInfo.årsak,
-            tekniskVedlikeholdToggel = tekniskVedlikeholdHenleggelseToggle,
+            tekniskVedlikeholdToggel = featureToggleService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE),
             behandlingId = behandling.id,
         )
 
         validerTilgangTilHenleggelseAvBehandling(
             behandling = behandling,
-            tekniskVedlikeholdHenleggelseToggle = tekniskVedlikeholdHenleggelseToggle
+            tekniskVedlikeholdHenleggelseToggle = featureToggleService.isEnabled(TEKNISK_ENDRING)
         )
 
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
