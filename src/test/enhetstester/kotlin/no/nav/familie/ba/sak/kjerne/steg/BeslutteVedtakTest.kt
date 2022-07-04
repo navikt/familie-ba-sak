@@ -222,4 +222,22 @@ class BeslutteVedtakTest {
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
     }
+
+    @Test
+    fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
+
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+        mockkObject(FerdigstillOppgaver.Companion)
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(
+            type = FerdigstillOppgaver.TASK_STEP_TYPE,
+            payload = ""
+        )
+
+        assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
+    }
 }
