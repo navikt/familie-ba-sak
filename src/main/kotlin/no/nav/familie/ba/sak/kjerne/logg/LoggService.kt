@@ -47,7 +47,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLENDE_ENHET_ENDRET,
-                tittel = "Endret enhet på behandling",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -101,7 +100,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLINGSTYPE_ENDRET,
-                tittel = "Endret behandlingstema",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -151,7 +149,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.AUTOVEDTAK_TIL_MANUELL_BEHANDLING,
-                tittel = "Automatisk behandling stoppet",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -234,7 +231,6 @@ class LoggService(
             Logg(
                 behandlingId = behandlingId,
                 type = LoggType.DISTRIBUERE_BREV,
-                tittel = "Brev sendt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, rolle),
                 tekst = tekst
             )
@@ -246,7 +242,6 @@ class LoggService(
             Logg(
                 behandlingId = behandlingId,
                 type = LoggType.BREV_IKKE_DISTRIBUERT,
-                tittel = "Brevet ble ikke distribuert fordi mottaker har ukjent adresse",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
                 tekst = brevnavn
             )
@@ -258,7 +253,6 @@ class LoggService(
             Logg(
                 behandlingId = behandlingId,
                 type = LoggType.BREV_IKKE_DISTRIBUERT_UKJENT_DØDSBO,
-                tittel = "Mottaker har ukjent dødsboadresse, og brevet blir ikke sendt før adressen er satt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
                 tekst = brevnavn
             )
@@ -270,7 +264,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.FERDIGSTILLE_BEHANDLING,
-                tittel = "Ferdigstilt behandling",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
                 tekst = ""
             )
@@ -282,7 +275,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.HENLEGG_BEHANDLING,
-                tittel = "Behandlingen er henlagt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -299,7 +291,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BARN_LAGT_TIL,
-                tittel = LoggType.BARN_LAGT_TIL.visningsnavn,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -314,7 +305,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLIG_SATT_PÅ_VENT,
-                tittel = LoggType.BEHANDLIG_SATT_PÅ_VENT.visningsnavn,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -339,7 +329,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.VENTENDE_BEHANDLING_ENDRET,
-                tittel = LoggType.VENTENDE_BEHANDLING_ENDRET.visningsnavn,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -354,7 +343,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLIG_GJENOPPTATT,
-                tittel = LoggType.BEHANDLIG_GJENOPPTATT.visningsnavn,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
