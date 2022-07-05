@@ -200,12 +200,10 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = if (behandling.erManuellMigrering()) LoggType.SEND_TIL_SYSTEM else LoggType.SEND_TIL_BESLUTTER,
-                tittel = if (behandling.erManuellMigrering()) "Sendt til system" else "Sendt til beslutter",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
-                ),
-                tekst = ""
+                )
             )
         )
     }
@@ -265,7 +263,6 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.FERDIGSTILLE_BEHANDLING,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
-                tekst = ""
             )
         )
     }
@@ -346,8 +343,7 @@ class LoggService(
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
-                ),
-                tekst = ""
+                )
             )
         )
     }

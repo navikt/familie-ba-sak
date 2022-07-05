@@ -50,7 +50,7 @@ data class Logg(
     @Column(name = "tekst")
     val tekst: String
 ) {
-    constructor(behandlingId: Long, type: LoggType, rolle: BehandlerRolle, tekst: String) : this(
+    constructor(behandlingId: Long, type: LoggType, rolle: BehandlerRolle, tekst: String = "") : this(
         behandlingId = behandlingId,
         type = type,
         tittel = type.tittel,
@@ -70,10 +70,10 @@ enum class LoggType(val visningsnavn: String, val tittel: String = visningsnavn)
     DOKUMENT_MOTTATT("Dokument ble mottatt"),
     SØKNAD_REGISTRERT("Søknaden ble registrert"),
     VILKÅRSVURDERING("Vilkårsvurdering"),
-    SEND_TIL_BESLUTTER("Send til beslutter"),
-    SEND_TIL_SYSTEM("Send til system"),
-    GODKJENNE_VEDTAK("Godkjenne vedtak"),
-    MIGRERING_BEKREFTET("Migrering bekreftet"),
+    SEND_TIL_BESLUTTER("Send til beslutter", "Sendt til beslutter"),
+    SEND_TIL_SYSTEM("Send til system", "Sendt til system"),
+    GODKJENNE_VEDTAK("Godkjenne vedtak", "Vedtak godkjent"),
+    MIGRERING_BEKREFTET("Migrering bekreftet", "Migrering bekreftet"),
     DISTRIBUERE_BREV("Distribuere brev", "Brev sendt"),
     BREV_IKKE_DISTRIBUERT("Brev ikke distribuert", "Brevet ble ikke distribuert fordi mottaker har ukjent adresse"),
     BREV_IKKE_DISTRIBUERT_UKJENT_DØDSBO(
