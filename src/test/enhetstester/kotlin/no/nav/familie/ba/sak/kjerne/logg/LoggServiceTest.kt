@@ -87,7 +87,7 @@ class LoggServiceTest(
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
         assertEquals(2, loggForBehandling.size)
-        assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE })
+        assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE && it.tekst == "Gjelder ${barnetsIdent}" })
         assertTrue(loggForBehandling.any { it.type == LoggType.BEHANDLING_OPPRETTET })
         assertTrue(loggForBehandling.none { it.rolle != BehandlerRolle.SYSTEM })
     }
@@ -136,7 +136,7 @@ class LoggServiceTest(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
         )
-        loggService.opprettBehandlingLogg(behandling)
+        loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
         loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
         loggService.opprettSendTilBeslutterLogg(behandling)
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT, "begrunnelse")

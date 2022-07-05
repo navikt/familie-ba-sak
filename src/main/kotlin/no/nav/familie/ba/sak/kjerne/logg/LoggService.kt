@@ -161,26 +161,27 @@ class LoggService(
         )
     }
 
-    private fun opprettLivshendelseLogg(behandling: Behandling, tittel: String) {
+    private fun opprettLivshendelseLogg(behandling: BehandlingLoggRequest, tittel: String) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandling.id,
                 type = LoggType.LIVSHENDELSE,
                 tittel = tittel,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
                 ),
-                tekst = ""
+                tekst = "Gjelder ${Utils.slåSammen(behandling.barnasIdenter)}"
             )
         )
     }
 
-    fun opprettBehandlingLogg(behandling: Behandling) {
+    fun opprettBehandlingLogg(behandlingLogg: BehandlingLoggRequest) {
+        val behandling = behandlingLogg.behandling
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-            opprettLivshendelseLogg(behandling = behandling, tittel = "Mottok fødselshendelse")
+            opprettLivshendelseLogg(behandling = behandlingLogg, tittel = "Mottok fødselshendelse")
         } else if (behandling.skalBehandlesAutomatisk && behandling.erSmåbarnstillegg()) {
-            opprettLivshendelseLogg(behandling = behandling, tittel = "Mottok overgansstønadshendelse")
+            opprettLivshendelseLogg(behandling = behandlingLogg, tittel = "Mottok overgansstønadshendelse")
         }
 
         lagre(
