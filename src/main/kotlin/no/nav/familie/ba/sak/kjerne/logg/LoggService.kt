@@ -168,6 +168,7 @@ class LoggService(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
                 ),
+                // TODO: Endre frå ident til fødselsdato her
                 tekst = "Gjelder ${Utils.slåSammen(behandling.barnasIdenter)}"
             )
         )
