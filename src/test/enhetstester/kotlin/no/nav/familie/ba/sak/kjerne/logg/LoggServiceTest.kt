@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDateTime
 
 class LoggServiceTest(
     @Autowired
@@ -87,7 +88,7 @@ class LoggServiceTest(
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
         assertEquals(2, loggForBehandling.size)
-        assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE && it.tekst == "Gjelder ${barnetsIdent}" })
+        assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE && it.tekst == "Gjelder $barnetsIdent" })
         assertTrue(loggForBehandling.any { it.type == LoggType.BEHANDLING_OPPRETTET })
         assertTrue(loggForBehandling.none { it.rolle != BehandlerRolle.SYSTEM })
     }
@@ -174,5 +175,34 @@ class LoggServiceTest(
                     it.tittel == "Ferdigstilt behandling"
             }
         }
+    }
+
+    @Test
+    fun `Om to logginnslag blir oppretta i samme sekund skal vi sortere med den første først`() {
+        val behandlingId = 1L
+        val tidspunkt = LocalDateTime.now()
+        val logg1 = loggService.lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.LIVSHENDELSE,
+                tittel = "Mottok fødselshendelse",
+                rolle = BehandlerRolle.SAKSBEHANDLER,
+                tekst = "",
+                opprettetTidspunkt = tidspunkt
+            )
+        )
+        val logg2 = loggService.lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "Førstegangbehandling opprettet",
+                rolle = BehandlerRolle.SAKSBEHANDLER,
+                tekst = "",
+                opprettetTidspunkt = tidspunkt
+            )
+        )
+
+        val logginnslag = loggService.hentLoggForBehandling(behandlingId)
+        assertEquals(listOf(logg2.id, logg1.id), logginnslag.map { it.id })
     }
 }
