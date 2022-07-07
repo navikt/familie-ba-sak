@@ -191,7 +191,7 @@ class BehandlingStegController(
         tekniskEndringToggle: Boolean
     ) {
         if (behandling.erTekniskBehandling() && !tekniskEndringToggle) {
-            throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak}. Ta kontakt med teamet dersom dette ikke stemmer.")
+            throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer.")
         }
     }
 }
