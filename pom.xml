@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <kotlin.version>1.7.0</kotlin.version>
+        <kotlin.version>1.7.10</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
@@ -31,7 +31,7 @@
         <familie.kontrakter.stønadsstatistikk>2.0_20220614135934_8423c48</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.12.4</mockk.version>
-        <token-validation-spring.version>2.1.1</token-validation-spring.version>
+        <token-validation-spring.version>2.1.2</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>1.6.9</springdoc.version>
 
