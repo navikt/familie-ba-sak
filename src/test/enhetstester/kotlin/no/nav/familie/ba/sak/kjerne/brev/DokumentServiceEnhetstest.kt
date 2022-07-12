@@ -100,6 +100,6 @@ internal class DokumentServiceEnhetstest {
             brevmal = Brevmal.SVARTIDSBREV
         )
 
-        verify(exactly = 1) { dokumentService.logger.warn(alleredeDistribuertMelding(journalpostId, behandlingId)) }
+        verify { dokumentService.logger.warn(alleredeDistribuertMelding(journalpostId, behandlingId)) }
     }
 }
