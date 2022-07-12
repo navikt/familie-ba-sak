@@ -55,6 +55,7 @@ class DokumentService(
     private val settPåVentService: SettPåVentService,
     private val utgåendeJournalføringService: UtgåendeJournalføringService,
 ) {
+    val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
         Metrics.counter(
@@ -231,15 +232,17 @@ class DokumentService(
             mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null ->
                 loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
 
-            mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null -> {
+            mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null ->
                 håndterMottakerDødIngenAdressePåBehandling(journalpostId, brevmal, behandlingId)
-            }
+
+            dokumentetErAlleredeDistribuert(ressursException) ->
+                logger.warn(alleredeDistribuertMelding(journalpostId, behandlingId))
 
             else -> throw ressursException
         }
     }
 
-    private fun håndterMottakerDødIngenAdressePåBehandling(
+    internal fun håndterMottakerDødIngenAdressePåBehandling(
         journalpostId: String,
         brevmal: Brevmal,
         behandlingId: Long
@@ -286,6 +289,8 @@ class DokumentService(
     }
 
     companion object {
-        val logger: Logger = LoggerFactory.getLogger(this::class.java)
+        fun alleredeDistribuertMelding(journalpostId: String, behandlingId: Long?) =
+            "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering." +
+                if (behandlingId != null) " BehandlingId=$behandlingId." else ""
     }
 }
