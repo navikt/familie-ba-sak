@@ -231,9 +231,11 @@ class DokumentService(
             mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null ->
                 loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
 
-            mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null -> {
+            mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null ->
                 håndterMottakerDødIngenAdressePåBehandling(journalpostId, brevmal, behandlingId)
-            }
+
+            dokumentetErAlleredeDistribuert(ressursException) ->
+                logger.warn("Journalpost med Id=$journalpostId er allerede distirbuert. Hopper over distribuering.")
 
             else -> throw ressursException
         }
