@@ -25,6 +25,7 @@ class TilkjentYtelseValideringServiceTest {
     private val totrinnskontrollServiceMock = mockk<TotrinnskontrollService>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
     private val personidentServiceMock = mockk<PersonidentService>()
+    private val tilkjentYtelseHentOgPersiserServiceMock = mockk<TilkjentYtelseHentOgPersiserService>()
 
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
 
@@ -35,7 +36,8 @@ class TilkjentYtelseValideringServiceTest {
             totrinnskontrollService = totrinnskontrollServiceMock,
             persongrunnlagService = persongrunnlagServiceMock,
             personidentService = personidentServiceMock,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilkjentYtelseHentOgPersiserService = tilkjentYtelseHentOgPersiserServiceMock,
         )
 
         every {
@@ -134,10 +136,10 @@ class TilkjentYtelseValideringServiceTest {
             )
         )
 
-        every { beregningServiceMock.hentTilkjentYtelseForBehandling(behandlingId = behandling.id) } answers { tilkjentYtelse }
+        every { tilkjentYtelseHentOgPersiserServiceMock.hentTilkjentYtelseForBehandlingThrows(behandlingId = behandling.id) } answers { tilkjentYtelse }
         every { behandlingHentOgPersisterService.hent(behandlingId = behandling.id) } answers { behandling }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling) } answers { forrigeBehandling }
-        every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeTilkjentYtelse }
+        every { tilkjentYtelseHentOgPersiserServiceMock.hentTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeTilkjentYtelse }
         every { personidentServiceMock.hentAktør(person1.aktør.aktørId) } answers { person1.aktør }
         every { personidentServiceMock.hentAktør(person2.aktør.aktørId) } answers { person2.aktør }
 

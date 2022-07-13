@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseHentOgPersiserService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -62,17 +63,20 @@ internal class StønadsstatistikkServiceTest(
 
     @MockK
     private val vedtakRepository: VedtakRepository,
+
+    @MockK
+    private val tilkjentYtelseHentOgPersiserService: TilkjentYtelseHentOgPersiserService,
 ) {
 
     private val stønadsstatistikkService =
         StønadsstatistikkService(
-            behandlingHentOgPersisterService,
-            persongrunnlagService,
-            beregningService,
-            vedtakService,
-            personopplysningerService,
-            vedtakRepository,
-            kompetanseService
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            persongrunnlagService = persongrunnlagService,
+            vedtakService = vedtakService,
+            personopplysningerService = personopplysningerService,
+            vedtakRepository = vedtakRepository,
+            kompetanseService = kompetanseService,
+            tilkjentYtelseHentOgPersiserService = tilkjentYtelseHentOgPersiserService
         )
     private val behandling = lagBehandling()
     private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
@@ -132,7 +136,7 @@ internal class StønadsstatistikkServiceTest(
 
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { kompetanseService.hentKompetanser(any()) } returns kompetanseperioder
-        every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
+        every { tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(any()) } returns
             tilkjentYtelse.copy(
                 andelerTilkjentYtelse = mutableSetOf(
                     andelTilkjentYtelseBarn1,

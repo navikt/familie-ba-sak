@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseHentOgPersiserService
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -49,11 +49,11 @@ import java.util.UUID
 class StønadsstatistikkService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val beregningService: BeregningService,
     private val vedtakService: VedtakService,
     private val personopplysningerService: PersonopplysningerService,
     private val vedtakRepository: VedtakRepository,
-    private val kompetanseService: KompetanseService
+    private val kompetanseService: KompetanseService,
+    private val tilkjentYtelseHentOgPersiserService: TilkjentYtelseHentOgPersiserService,
 ) {
 
     fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
@@ -155,7 +155,7 @@ class StønadsstatistikkService(
 
     private fun hentUtbetalingsperioderV2(behandlingId: Long): List<UtbetalingsperiodeDVHV2> {
 
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
+        val tilkjentYtelse = tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
 
         if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return emptyList()
@@ -185,7 +185,7 @@ class StønadsstatistikkService(
     @Deprecated("kan fjernes når vi ikke lenger publiserer hendelser til kafka onprem")
     private fun hentUtbetalingsperioder(behandlingId: Long): List<UtbetalingsperiodeDVH> {
 
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
+        val tilkjentYtelse = tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
 
         if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return emptyList()
@@ -214,7 +214,7 @@ class StønadsstatistikkService(
 
     private fun utledEnsligForsørger(behandlingId: Long): Boolean {
 
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
+        val tilkjentYtelse = tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandlingId)
         if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return false
 
         return tilkjentYtelse.andelerTilkjentYtelse.find { it.type == YtelseType.UTVIDET_BARNETRYGD } != null

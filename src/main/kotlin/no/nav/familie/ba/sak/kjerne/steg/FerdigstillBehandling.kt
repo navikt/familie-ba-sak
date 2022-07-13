@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseHentOgPersiserService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -18,10 +18,10 @@ import org.springframework.stereotype.Service
 class FerdigstillBehandling(
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
     private val behandlingMetrikker: BehandlingMetrikker,
-    private val loggService: LoggService
+    private val loggService: LoggService,
+    private val tilkjentYtelseHentOgPersiserService: TilkjentYtelseHentOgPersiserService,
 ) : BehandlingSteg<String> {
 
     override fun utførStegOgAngiNeste(
@@ -59,7 +59,8 @@ class FerdigstillBehandling(
     }
 
     private fun oppdaterFagsakStatus(behandling: Behandling) {
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        val tilkjentYtelse =
+            tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandlingId = behandling.id)
         val erLøpende = tilkjentYtelse.andelerTilkjentYtelse.any { it.stønadTom >= inneværendeMåned() }
         if (erLøpende) {
             fagsakService.oppdaterStatus(behandling.fagsak, FagsakStatus.LØPENDE)

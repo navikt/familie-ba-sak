@@ -60,6 +60,7 @@ class BeregningServiceTest {
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val tilkjentYtelseHentOgPersiserService = mockk<TilkjentYtelseHentOgPersiserService>()
 
     private lateinit var beregningService: BeregningService
 
@@ -68,15 +69,16 @@ class BeregningServiceTest {
         val fagsakService = mockk<FagsakService>()
 
         beregningService = BeregningService(
-            andelTilkjentYtelseRepository,
-            fagsakService,
-            behandlingHentOgPersisterService,
-            tilkjentYtelseRepository,
-            vilkårsvurderingRepository,
-            behandlingRepository,
-            personopplysningGrunnlagRepository,
-            endretUtbetalingAndelRepository,
-            småbarnstilleggService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            behandlingRepository = behandlingRepository,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+            endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
+            småbarnstilleggService = småbarnstilleggService,
+            tilkjentYtelseHentOgPersiserService = tilkjentYtelseHentOgPersiserService,
         )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs

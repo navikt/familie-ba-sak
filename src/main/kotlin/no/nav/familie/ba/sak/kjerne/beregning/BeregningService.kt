@@ -37,6 +37,7 @@ class BeregningService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val småbarnstilleggService: SmåbarnstilleggService,
+    private val tilkjentYtelseHentOgPersiserService: TilkjentYtelseHentOgPersiserService,
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList()
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
@@ -59,12 +60,6 @@ class BeregningService(
 
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
-
-    fun hentTilkjentYtelseForBehandling(behandlingId: Long) =
-        tilkjentYtelseRepository.findByBehandling(behandlingId)
-
-    fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
-        tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
@@ -105,7 +100,7 @@ class BeregningService(
                 }
             }
         }.map {
-            hentTilkjentYtelseForBehandling(behandlingId = it.id)
+            tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandlingId = it.id)
         }.filter {
             personopplysningGrunnlagRepository
                 .findByBehandlingAndAktiv(behandlingId = it.behandling.id)

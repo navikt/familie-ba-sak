@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseHentOgPersiserService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -68,7 +69,10 @@ class SøknadGrunnlagTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val tilkjentYtelseHentOgPersiserService: TilkjentYtelseHentOgPersiserService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -208,7 +212,7 @@ class SøknadGrunnlagTest(
         )
 
         val tilkjentYtelse =
-            beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
+            tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
         val steg = behandlingEtterVilkårsvurderingSteg.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
         assertEquals(
             setOf(
@@ -247,7 +251,11 @@ class SøknadGrunnlagTest(
         )
 
         val error =
-            assertThrows<EmptyResultDataAccessException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
+            assertThrows<EmptyResultDataAccessException> {
+                tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(
+                    behandlingId = behandlingEtterNyRegistrering.id
+                )
+            }
         val stegEtterNyRegistrering =
             behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
         assertEquals("Result must not be null!", error.message)
