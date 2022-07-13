@@ -564,7 +564,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Skal generere utvidet andeler i riktige perioder med korrekt sats`() {
+    fun `Skal oppdatere utvidet andeler med riktig periode og sats ved endringsperioder`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(7))
         val søker = lagPerson(type = PersonType.SØKER)
         val behandling = lagBehandling()
