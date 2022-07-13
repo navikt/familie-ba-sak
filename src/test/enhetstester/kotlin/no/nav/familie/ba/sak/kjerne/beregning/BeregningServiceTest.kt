@@ -564,9 +564,9 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Skal oppdatere utvidet andeler med riktig periode og sats ved endringsperioder`() {
-        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(7))
-        val søker = lagPerson(type = PersonType.SØKER)
+    fun `Skal oppdatere utvidet andeler med riktig periode og sats ved endringsperioder, men småbarnstillegg skal ikke endres`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(2))
+        val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.now().minusYears(31))
         val behandling = lagBehandling()
         val vilkårsvurdering = lagVilkårsvurdering(søkerAktør = søker.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
 
@@ -575,7 +575,7 @@ class BeregningServiceTest {
             aktør = søker.aktør
         )
 
-        val fom = LocalDate.now().minusYears(1)
+        val fom = LocalDate.now().minusMonths(11)
         val tom = LocalDate.now().plusYears(3)
 
         val utvidetFom = LocalDate.now().minusMonths(3)
@@ -710,7 +710,7 @@ class BeregningServiceTest {
         )
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
-        Assertions.assertEquals(5, slot.captured.andelerTilkjentYtelse.size)
+        Assertions.assertEquals(6, slot.captured.andelerTilkjentYtelse.size)
 
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
 
@@ -735,18 +735,29 @@ class BeregningServiceTest {
         Assertions.assertEquals(endretUtbetalingAndel.tom!!.plusMonths(1), andelerBarn[2].stønadFom)
         Assertions.assertEquals(tom.toYearMonth(), andelerBarn[2].stønadTom)
 
-        Assertions.assertEquals(2, andelerSøker.size)
-        // Søker under endringsperiode
-        Assertions.assertEquals(søker.aktør, andelerSøker[0].aktør)
-        Assertions.assertEquals(BigDecimal.ZERO, andelerSøker[0].prosent)
-        Assertions.assertEquals(utvidetFom.plusMonths(1).toYearMonth(), andelerSøker[0].stønadFom)
-        Assertions.assertEquals(endretUtbetalingAndel.tom, andelerSøker[0].stønadTom)
+        Assertions.assertEquals(3, andelerSøker.size)
 
-        // Søker etter endringsperiode
-        Assertions.assertEquals(søker.aktør, andelerSøker[1].aktør)
-        Assertions.assertEquals(BigDecimal(100), andelerSøker[1].prosent)
-        Assertions.assertEquals(endretUtbetalingAndel.tom!!.plusMonths(1), andelerSøker[1].stønadFom)
-        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerSøker[1].stønadTom)
+        val (andelerUtvidet, andelerSmåbarnstillegg) = andelerSøker.partition { it.erUtvidet() }
+
+        Assertions.assertEquals(2, andelerUtvidet.size)
+        // Søker - utvidet under endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerUtvidet[0].aktør)
+        Assertions.assertEquals(BigDecimal.ZERO, andelerUtvidet[0].prosent)
+        Assertions.assertEquals(utvidetFom.plusMonths(1).toYearMonth(), andelerUtvidet[0].stønadFom)
+        Assertions.assertEquals(endretUtbetalingAndel.tom, andelerUtvidet[0].stønadTom)
+
+        // Søker - utvidet etter endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerUtvidet[1].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerUtvidet[1].prosent)
+        Assertions.assertEquals(endretUtbetalingAndel.tom!!.plusMonths(1), andelerUtvidet[1].stønadFom)
+        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerUtvidet[1].stønadTom)
+
+        Assertions.assertEquals(1, andelerSmåbarnstillegg.size)
+        // Søker - småbarnstillegg
+        Assertions.assertEquals(søker.aktør, andelerSmåbarnstillegg[0].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerSmåbarnstillegg[0].prosent)
+        Assertions.assertEquals(utvidetFom.plusMonths(1).toYearMonth(), andelerSmåbarnstillegg[0].stønadFom)
+        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerSmåbarnstillegg[0].stønadTom)
     }
 
     @Test
