@@ -404,7 +404,7 @@ class MigreringService(
 
     private fun finnFørsteAndelerTilkjentYtelse(behandlingId: Long): List<AndelTilkjentYtelse> {
         val andelerTilkjentYtelse =
-            tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse
+            tilkjentYtelseRepository.findByBehandling(behandlingId)?.andelerTilkjentYtelse
                 ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_ANDEL_TILKJENT_YTELSE)
         val førsteUtbetalingsMåned = andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
             ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_ANDEL_TILKJENT_YTELSE)

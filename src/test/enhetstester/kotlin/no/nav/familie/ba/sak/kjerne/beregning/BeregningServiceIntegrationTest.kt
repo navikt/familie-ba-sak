@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -38,7 +37,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
     private lateinit var fagsakService: FagsakService
 
     @Autowired
-    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    private lateinit var tilkjentYtelseHentOgPersiserService: TilkjentYtelseHentOgPersiserService
 
     @Autowired
     private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
@@ -243,7 +242,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
+        val tilkjentYtelse = tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling.id)
         val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktivFødselsnummer() == barn1Id }
         val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktivFødselsnummer() == barn2Id }
 
@@ -263,11 +262,11 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     private fun opprettTilkjentYtelse(behandling: Behandling) {
-        tilkjentYtelseRepository.saveAndFlush(lagInitiellTilkjentYtelse(behandling))
+        tilkjentYtelseHentOgPersiserService.lagreOgFlush(lagInitiellTilkjentYtelse(behandling))
     }
 
     private fun leggTilAndelTilkjentYtelsePåTilkjentYtelse(behandling: Behandling, fom: YearMonth, tom: YearMonth) {
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
+        val tilkjentYtelse = tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling.id)
         val tilfeldigperson = tilfeldigPerson(aktør = tilAktør(randomFnr()))
         aktørIdRepository.saveAndFlush(tilfeldigperson.aktør)
 
@@ -282,6 +281,6 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         )
 
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
-        tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)
+        tilkjentYtelseHentOgPersiserService.lagreOgFlush(tilkjentYtelse)
     }
 }

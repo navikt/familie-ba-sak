@@ -91,7 +91,7 @@ class StønadsstatistikkController(
     }
 
     private fun erIverksattBehandling(behandlingId: Long): Boolean {
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
 
         return if (tilkjentYtelse != null) {
             tilkjentYtelse.utbetalingsoppdrag != null

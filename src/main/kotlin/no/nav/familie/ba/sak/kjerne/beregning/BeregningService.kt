@@ -41,7 +41,7 @@ class BeregningService(
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList()
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
-        tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
+        tilkjentYtelseRepository.findByBehandling(behandlingId)
             ?.let { tilkjentYtelseRepository.delete(it) }
 
     fun hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
@@ -264,7 +264,7 @@ class BeregningService(
         }
 
         val tilkjentYtelse =
-            tilkjentYtelseRepository.findByBehandling(behandling.id)
+            tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling.id)
 
         return tilkjentYtelse.apply {
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)

@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseHentOgPersiserService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.statistikk.producer.DefaultKafkaProducer
@@ -37,13 +37,13 @@ class SendMeldingTilBisysTaskTest {
     data class Mocks(
         val behandlingRepository: BehandlingRepository,
         val kafkaProducer: DefaultKafkaProducer,
-        val tilkjentYtelseRepository: TilkjentYtelseRepository,
+        val tilkjentYtelseHentOgPersiserService: TilkjentYtelseHentOgPersiserService,
         val kafkaResult: ListenableFuture<SendResult<String, String>>,
         val behandling: List<Behandling>
     )
 
     fun setupMocks(): Mocks {
-        val tilkjentYtelseRepositoryMock = mockk<TilkjentYtelseRepository>()
+        val tilkjentYtelseHentOgPersiserServiceMock = mockk<TilkjentYtelseHentOgPersiserService>()
         val kafkaProducer = DefaultKafkaProducer(mockk())
         val listenableFutureMock = mockk<ListenableFuture<SendResult<String, String>>>()
         val behandlingRepositoryMock = mockk<BehandlingRepository>()
@@ -70,7 +70,7 @@ class SendMeldingTilBisysTaskTest {
         return Mocks(
             behandlingRepositoryMock,
             kafkaProducer,
-            tilkjentYtelseRepositoryMock,
+            tilkjentYtelseHentOgPersiserServiceMock,
             listenableFutureMock,
             listOf(forrigeBehandling, nyBehandling)
         )
@@ -78,13 +78,13 @@ class SendMeldingTilBisysTaskTest {
 
     @Test
     fun `Skal send riktig melding til Bisys hvis barnetrygd er opphørt`() {
-        val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, kafkaResult, behandling) = setupMocks()
+        val (behandlingRepository, kafkaProducer, tilkjentYtelseHentOgPersiserService, kafkaResult, behandling) = setupMocks()
         val sendMeldingTilBisysTask =
-            SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
+            SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseHentOgPersiserService, behandlingRepository)
 
         val barn1 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.of(2020, 1), tom = YearMonth.of(2037, 12), prosent = BigDecimal(100),
@@ -92,7 +92,7 @@ class SendMeldingTilBisysTaskTest {
                 )
             )
         }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
             // Barn1 opphør fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
@@ -124,13 +124,13 @@ class SendMeldingTilBisysTaskTest {
 
     @Test
     fun `Skal send riktig melding til Bisys hvis barnetrygd er redusert`() {
-        val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, kafkaResult, behandling) = setupMocks()
+        val (behandlingRepository, kafkaProducer, tilkjentYtelseHentOgPersiserService, kafkaResult, behandling) = setupMocks()
         val sendMeldingTilBisysTask =
-            SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
+            SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseHentOgPersiserService, behandlingRepository)
 
         val barn1 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.of(2020, 1), tom = YearMonth.of(2037, 12), prosent = BigDecimal(100),
@@ -138,7 +138,7 @@ class SendMeldingTilBisysTaskTest {
                 )
             )
         }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
             // Barn1 reduser fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
@@ -176,16 +176,16 @@ class SendMeldingTilBisysTaskTest {
 
     @Test
     fun `finnBarnEndretOpplysning() skal return riktig endret opplysning for barn`() {
-        val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, _, behandling) = setupMocks()
+        val (behandlingRepository, kafkaProducer, tilkjentYtelseHentOgPersiserService, _, behandling) = setupMocks()
 
         val sendMeldingTilBisysTask =
-            SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
+            SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseHentOgPersiserService, behandlingRepository)
 
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
         val barn3 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.of(2020, 1), tom = YearMonth.of(2037, 12), prosent = BigDecimal(100),
@@ -205,7 +205,7 @@ class SendMeldingTilBisysTaskTest {
                 )
             )
         }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
             // Barn1 opphør fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
@@ -269,13 +269,13 @@ class SendMeldingTilBisysTaskTest {
 
     @Test
     fun `Skal ikke sende melding til bisys hvis endring ikke er reduksjon eller opphøring`() {
-        val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, _, behandling) = setupMocks()
+        val (behandlingRepository, kafkaProducer, tilkjentYtelseHentOgPersiserService, _, behandling) = setupMocks()
         val sendMeldingTilBisysTask =
-            SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
+            SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseHentOgPersiserService, behandlingRepository)
 
         val barn1 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.of(2020, 1), tom = YearMonth.of(2021, 1), prosent = BigDecimal(100),
@@ -283,7 +283,7 @@ class SendMeldingTilBisysTaskTest {
                 )
             )
         }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
             // Barn1 legger til period fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(

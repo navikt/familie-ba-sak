@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseHentOgPersiserService
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.eksterne.kontrakter.bisys.BarnEndretOpplysning
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdBisysMelding
@@ -28,7 +28,7 @@ import java.util.Properties
 )
 class SendMeldingTilBisysTask(
     private val kafkaProducer: KafkaProducer,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val tilkjentYtelseHentOgPersiserService: TilkjentYtelseHentOgPersiserService,
     private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
 
@@ -70,8 +70,9 @@ class SendMeldingTilBisysTask(
             behandlingFørFølgende = behandling
         ) ?: error("Finnes ikke forrige behandling for behandling ${behandling.id}")
 
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
-        val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(forrigeIverksatteBehandling.id)
+        val tilkjentYtelse = tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(behandling.id)
+        val forrigeTilkjentYtelse =
+            tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(forrigeIverksatteBehandling.id)
 
         val endretOpplysning: MutableMap<String, MutableList<BarnEndretOpplysning>> = mutableMapOf()
 

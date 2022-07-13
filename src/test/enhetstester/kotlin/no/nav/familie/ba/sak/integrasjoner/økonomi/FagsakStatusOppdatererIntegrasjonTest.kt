@@ -10,10 +10,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseHentOgPersiserService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -37,7 +37,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
     private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
-    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    private lateinit var tilkjentYtelseHentOgPersiserService: TilkjentYtelseHentOgPersiserService
 
     @Autowired
     private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
@@ -79,10 +79,11 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         val førstegangsbehandling =
             opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
 
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(førstegangsbehandling.id)
+        val tilkjentYtelse =
+            tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandlingThrows(førstegangsbehandling.id)
 
         tilkjentYtelse.stønadTom = LocalDate.now().minusMonths(1).toYearMonth()
-        tilkjentYtelseRepository.save(tilkjentYtelse)
+        tilkjentYtelseHentOgPersiserService.lagre(tilkjentYtelse)
 
         fagsakService.oppdaterLøpendeStatusPåFagsaker()
         val fagsak = fagsakService.hentLøpendeFagsaker()
@@ -100,7 +101,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         behandling.status = medStatus
         behandlingRepository.save(behandling)
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
-        tilkjentYtelseRepository.save(tilkjentYtelse)
+        tilkjentYtelseHentOgPersiserService.lagre(tilkjentYtelse)
         offsetPåAndeler.forEach {
             andelTilkjentYtelseRepository.save(
                 andelPåTilkjentYtelse(

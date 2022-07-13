@@ -41,7 +41,7 @@ class SendVedtakTilInfotrygdTask(
     }
 
     private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDate {
-        return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse
+        return tilkjentYtelseRepository.findByBehandling(behandlingId)?.andelerTilkjentYtelse
             ?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
                 if (andelerTilkjentYtelse.isNotEmpty()) {
                     val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)

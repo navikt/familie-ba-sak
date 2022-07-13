@@ -50,7 +50,7 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         behandlingId: BehandlingId,
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>
     ) {
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId.id) ?: return
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 
         val oppdaterteAndeler = beregnDifferanse(
@@ -71,7 +71,7 @@ class TilpassDifferanseberegningEtterValutakursService(
 
     @Transactional
     override fun skjemaerEndret(behandlingId: BehandlingId, valutakurser: Collection<Valutakurs>) {
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId.id) ?: return
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
         val oppdaterteAndeler = beregnDifferanse(
