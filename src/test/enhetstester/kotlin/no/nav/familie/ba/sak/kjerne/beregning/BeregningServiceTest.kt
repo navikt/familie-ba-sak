@@ -72,7 +72,6 @@ class BeregningServiceTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             fagsakService = fagsakService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            tilkjentYtelseRepository = tilkjentYtelseRepository,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             behandlingRepository = behandlingRepository,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
