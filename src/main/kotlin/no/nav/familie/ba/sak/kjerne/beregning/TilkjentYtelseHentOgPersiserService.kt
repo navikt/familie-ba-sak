@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import org.springframework.stereotype.Service
@@ -20,6 +21,15 @@ class TilkjentYtelseHentOgPersiserService(
     fun lagre(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
+    fun slett(tilkjentYtelse: TilkjentYtelse) =
+        tilkjentYtelseRepository.save(tilkjentYtelse)
+
+    fun slettTilkjentYtelseFor(behandling: Behandling) =
+        tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
+
     fun lagreOgFlush(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)
+
+    fun hentForBehandlingOgHarUtbetalingsoppdrag(behandlingId: Long) =
+        tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId)
 }

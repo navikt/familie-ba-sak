@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -31,7 +30,6 @@ class BeregningService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingRepository: BehandlingRepository,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
@@ -41,8 +39,8 @@ class BeregningService(
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList()
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
-        tilkjentYtelseRepository.findByBehandling(behandlingId)
-            ?.let { tilkjentYtelseRepository.delete(it) }
+        tilkjentYtelseHentOgPersiserService.hentTilkjentYtelseForBehandling(behandlingId)
+            ?.let { tilkjentYtelseHentOgPersiserService.slett(it) }
 
     fun hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
         behandlingIder: List<Long>,
@@ -59,12 +57,12 @@ class BeregningService(
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
-        tilkjentYtelseRepository.save(tilkjentYtelse)
+        tilkjentYtelseHentOgPersiserService.lagre(tilkjentYtelse)
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
         return iverksatteBehandlinger.mapNotNull {
-            tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
+            tilkjentYtelseHentOgPersiserService.hentForBehandlingOgHarUtbetalingsoppdrag(
                 it.id
             )
         }
@@ -152,7 +150,7 @@ class BeregningService(
             }
         }
 
-        tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
+        tilkjentYtelseHentOgPersiserService.slettTilkjentYtelseFor(behandling)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
@@ -175,7 +173,7 @@ class BeregningService(
         tilkjentYtelse.andelerTilkjentYtelse.clear()
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
-        val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
+        val lagretTilkjentYtelse = tilkjentYtelseHentOgPersiserService.lagre(tilkjentYtelse)
         tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }
         return lagretTilkjentYtelse
     }
@@ -186,7 +184,7 @@ class BeregningService(
     ): TilkjentYtelse {
 
         val nyTilkjentYtelse = populerTilkjentYtelse(behandling, utbetalingsoppdrag)
-        return tilkjentYtelseRepository.save(nyTilkjentYtelse)
+        return tilkjentYtelseHentOgPersiserService.lagre(nyTilkjentYtelse)
     }
 
     fun kanAutomatiskIverksetteSmåbarnstilleggEndring(
