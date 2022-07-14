@@ -165,20 +165,14 @@ class BeregningService(
             .beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandling
+                behandling = behandling,
+                endretUtbetalingAndeler = endretUtbetalingAndeler
             ) { aktørId ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     aktør = aktørId,
                     behandlingId = behandling.id
                 )
             }
-
-        val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            tilkjentYtelse.andelerTilkjentYtelse,
-            endretUtbetalingAndeler
-        )
-        tilkjentYtelse.andelerTilkjentYtelse.clear()
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
         tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }

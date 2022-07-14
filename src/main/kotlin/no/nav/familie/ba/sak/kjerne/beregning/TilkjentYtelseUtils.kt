@@ -40,6 +40,7 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
@@ -91,6 +92,11 @@ object TilkjentYtelseUtils {
                     }
             }
 
+        val andelerTilkjentYtelseBarnaOppdatert = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            andelTilkjentYtelser = andelerTilkjentYtelseBarna.toMutableSet(),
+            endretUtbetalingAndeler = endretUtbetalingAndeler,
+        ).toList()
+
         val andelerTilkjentYtelseSøker = UtvidetBarnetrygdGenerator(
             behandlingId = vilkårsvurdering.behandling.id,
             tilkjentYtelse = tilkjentYtelse
@@ -99,10 +105,15 @@ object TilkjentYtelseUtils {
                 utvidetVilkår = vilkårsvurdering.personResultater
                     .flatMap { it.vilkårResultater }
                     .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT },
-                andelerBarna = andelerTilkjentYtelseBarna
+                andelerBarna = andelerTilkjentYtelseBarnaOppdatert
             )
 
-        val andelerTilkjentYtelseSmåbarnstillegg = if (andelerTilkjentYtelseSøker.isNotEmpty()) {
+        val andelerTilkjentYtelseUtvidetOppdatert = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            andelTilkjentYtelser = andelerTilkjentYtelseSøker.toMutableSet(),
+            endretUtbetalingAndeler = endretUtbetalingAndeler
+        ).toList()
+
+        val andelerTilkjentYtelseSmåbarnstillegg = if (andelerTilkjentYtelseUtvidetOppdatert.isNotEmpty()) {
             val perioderMedFullOvergangsstønad =
                 hentPerioderMedFullOvergangsstønad(
                     personopplysningGrunnlag.søker.aktør
@@ -114,7 +125,7 @@ object TilkjentYtelseUtils {
             )
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
-                    andelerTilkjentYtelse = andelerTilkjentYtelseSøker + andelerTilkjentYtelseBarna,
+                    andelerTilkjentYtelse = andelerTilkjentYtelseUtvidetOppdatert + andelerTilkjentYtelseBarnaOppdatert,
                     barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
                         Pair(
                             it.aktør,
@@ -124,7 +135,7 @@ object TilkjentYtelseUtils {
                 )
         } else emptyList()
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker + andelerTilkjentYtelseSmåbarnstillegg)
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaOppdatert + andelerTilkjentYtelseUtvidetOppdatert + andelerTilkjentYtelseSmåbarnstillegg)
 
         return tilkjentYtelse
     }
