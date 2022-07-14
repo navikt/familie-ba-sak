@@ -48,13 +48,20 @@ data class SmåbarnstilleggBarnetrygdGenerator(
             )
 
         val søkersTidslinje = LocalDateTimeline(
-            søkersAndeler.map { andel ->
-                LocalDateSegment(
-                    andel.stønadFom.førsteDagIInneværendeMåned(),
-                    andel.stønadTom.sisteDagIInneværendeMåned(),
-                    listOf(SmåbarnstilleggKombinator.UTVIDET)
+            søkersAndeler.map {
+                DatoIntervallEntitet(
+                    fom = it.stønadFom.førsteDagIInneværendeMåned(),
+                    tom = it.stønadTom.sisteDagIInneværendeMåned()
                 )
             }
+                .slåSammenSammenhengendePerioder()
+                .map { andel ->
+                    LocalDateSegment(
+                        andel.fom,
+                        andel.tom,
+                        listOf(SmåbarnstilleggKombinator.UTVIDET)
+                    )
+                }
         )
 
         val perioderMedBarnSomGirRettTilSmåbarnstillegg = LocalDateTimeline(
