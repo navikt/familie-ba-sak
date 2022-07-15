@@ -23,10 +23,10 @@ import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
 
-    private val ikkeStøttetFeil =
+    private fun ikkeStøttetFeil(behandlingsresultater: MutableSet<YtelsePersonResultat>) =
         Feil(
             frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
-            message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet."
+            message = "Kombiansjonen av behandlingsresultatene $behandlingsresultater er ikke støttet i løsningen."
         )
 
     fun utledBehandlingsresultatDataForPerson(
@@ -154,7 +154,7 @@ object BehandlingsresultatUtils {
             samledeResultater.matcherAltOgHarBådeEndretOgOpphørtResultat(
                 setOf(YtelsePersonResultat.AVSLÅTT)
             ) -> Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
-            else -> throw ikkeStøttetFeil
+            else -> throw ikkeStøttetFeil(samledeResultater)
         }
     }
 
