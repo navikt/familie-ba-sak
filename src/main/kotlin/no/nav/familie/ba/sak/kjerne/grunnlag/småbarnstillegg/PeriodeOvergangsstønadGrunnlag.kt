@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
@@ -50,7 +51,13 @@ class PeriodeOvergangsstønadGrunnlag(
     @Enumerated(EnumType.STRING)
     @Column(name = "datakilde", nullable = false)
     val datakilde: PeriodeOvergangsstønad.Datakilde,
-) : BaseEntitet()
+) : BaseEntitet() {
+    fun tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
+        personIdent = this.aktør.aktivFødselsnummer(),
+        fomDato = this.fom,
+        tomDato = this.tom
+    )
+}
 
 fun PeriodeOvergangsstønad.tilPeriodeOvergangsstønadGrunnlag(behandlingId: Long, aktør: Aktør) =
     PeriodeOvergangsstønadGrunnlag(

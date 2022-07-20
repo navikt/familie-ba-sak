@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import java.time.LocalDate
 
@@ -32,4 +33,36 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
                 sammenslåttePerioder.apply { add(removeLast().copy(tomDato = nestePeriode.tomDato)) }
             } else sammenslåttePerioder.apply { add(nestePeriode) }
         }
+}
+
+/***
+ * Dersom vi i en behandling har overgangsstønad i tre måneder:
+ * |OOO-----|
+ * som fører til småbarnstillegg.
+ * Og så utvides overgangsstønadsperioden til fem måneder:
+ * |OOOOO---|
+ * som fører til småbarnstillegg i alle månedene.
+ * Ønsker vi å kunne begrunne de to siste månedene med småbarnstillegg.
+ * Splitter derfor opp overgangsstønads-perioden slik at vi kan begrunne endringen for søker i riktig periode.
+ * |OOO-----|
+ * |---OO---|
+ *
+ ***/
+fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandling(
+    gamleOvergangsstønadPerioder: List<InternPeriodeOvergangsstønad>
+): List<InternPeriodeOvergangsstønad> {
+    val tidligerePerioder = this.filter { it.tomDato.isSameOrBefore(LocalDate.now()) }
+    val framtidigePerioder = this.minus(tidligerePerioder)
+    val nyeOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(framtidigePerioder)
+
+    val gammelOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(gamleOvergangsstønadPerioder)
+
+    val oppsplittedeFramtigigePerioder = gammelOvergangsstønadTidslinje
+        .kombinerMed(nyeOvergangsstønadTidslinje) { gammelOvergangsstønadPeriode, nyOvergangsstønadPeriode ->
+            if (nyOvergangsstønadPeriode == null) null
+            else gammelOvergangsstønadPeriode ?: nyOvergangsstønadPeriode
+        }
+        .lagInternePerioderOvergangsstønad()
+
+    return tidligerePerioder + oppsplittedeFramtigigePerioder
 }

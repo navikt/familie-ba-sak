@@ -484,9 +484,8 @@ class BehandleSmåbarnstilleggTest(
     fun `Skal kunne begrunne utvidet periode når overgangsstønad blir utvidet`() {
         val testScenario = mockServerKlient().lagScenario(restScenario)
 
-        val fomDato1 = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned()
+        val fomDato = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned()
         val tomDato1 = LocalDate.now().sisteDagIMåned()
-        val fomDato2 = fomDato1
         val tomDato2 = barnFødselsdato.plusYears(3)
 
         val søkersIdent2 = testScenario.søker.ident!!
@@ -497,7 +496,7 @@ class BehandleSmåbarnstilleggTest(
                 perioder = listOf(
                     PeriodeOvergangsstønad(
                         personIdent = søkersIdent2,
-                        fomDato = fomDato1,
+                        fomDato = fomDato,
                         tomDato = tomDato1,
                         datakilde = PeriodeOvergangsstønad.Datakilde.EF
                     ),
@@ -512,7 +511,7 @@ class BehandleSmåbarnstilleggTest(
             perioder = listOf(
                 PeriodeOvergangsstønad(
                     personIdent = søkersIdent2,
-                    fomDato = fomDato2,
+                    fomDato = fomDato,
                     tomDato = tomDato2,
                     datakilde = PeriodeOvergangsstønad.Datakilde.EF
                 ),
@@ -534,10 +533,10 @@ class BehandleSmåbarnstilleggTest(
         val småbarnstilleggAndeler = andelerTilkjentYtelse.filter { it.erSmåbarnstillegg() }
 
         assertEquals(2, småbarnstilleggAndeler.size)
-        assertEquals(fomDato2, småbarnstilleggAndeler.first().stønadFom)
-        assertEquals(tomDato1, småbarnstilleggAndeler.first().stønadTom)
-        assertEquals(tomDato1.plusDays(1), småbarnstilleggAndeler.last().stønadFom)
-        assertEquals(tomDato2, småbarnstilleggAndeler.last().stønadTom)
+        assertEquals(fomDato.toYearMonth(), småbarnstilleggAndeler.first().stønadFom)
+        assertEquals(tomDato1.toYearMonth(), småbarnstilleggAndeler.first().stønadTom)
+        assertEquals(tomDato1.plusDays(1).toYearMonth(), småbarnstilleggAndeler.last().stønadFom)
+        assertEquals(tomDato2.toYearMonth(), småbarnstilleggAndeler.last().stønadTom)
     }
 
     private fun opprettOgKjørGjennomUtvidetBehandling(
