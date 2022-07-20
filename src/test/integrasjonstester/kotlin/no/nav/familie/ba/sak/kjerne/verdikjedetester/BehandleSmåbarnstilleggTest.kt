@@ -488,14 +488,14 @@ class BehandleSmåbarnstilleggTest(
         val tomDato1 = LocalDate.now().sisteDagIMåned()
         val tomDato2 = barnFødselsdato.plusYears(3)
 
-        val søkersIdent2 = testScenario.søker.ident!!
-        val søkersAktør2 = personidentService.hentAktør(søkersIdent2)
+        val søkersIdent = testScenario.søker.ident!!
+        val søkersAktør = personidentService.hentAktør(søkersIdent)
 
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
             PerioderOvergangsstønadResponse(
                 perioder = listOf(
                     PeriodeOvergangsstønad(
-                        personIdent = søkersIdent2,
+                        personIdent = søkersIdent,
                         fomDato = fomDato,
                         tomDato = tomDato1,
                         datakilde = PeriodeOvergangsstønad.Datakilde.EF
@@ -510,7 +510,7 @@ class BehandleSmåbarnstilleggTest(
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = listOf(
                 PeriodeOvergangsstønad(
-                    personIdent = søkersIdent2,
+                    personIdent = søkersIdent,
                     fomDato = fomDato,
                     tomDato = tomDato2,
                     datakilde = PeriodeOvergangsstønad.Datakilde.EF
@@ -518,19 +518,16 @@ class BehandleSmåbarnstilleggTest(
             )
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
-            mottakersAktør = søkersAktør2,
-            behandlingsdata = søkersAktør2
+            mottakersAktør = søkersAktør,
+            behandlingsdata = søkersAktør
         )
 
-        val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør2)
+        val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
 
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandlingId = aktivBehandling.id
-            )
-
-        val småbarnstilleggAndeler = andelerTilkjentYtelse.filter { it.erSmåbarnstillegg() }
+        val småbarnstilleggAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+            behandlingId = aktivBehandling.id
+        ).filter { it.erSmåbarnstillegg() }
 
         assertEquals(2, småbarnstilleggAndeler.size)
         assertEquals(fomDato.toYearMonth(), småbarnstilleggAndeler.first().stønadFom)
