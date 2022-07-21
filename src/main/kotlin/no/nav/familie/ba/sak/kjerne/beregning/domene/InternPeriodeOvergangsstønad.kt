@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -51,6 +52,11 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
 fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandling(
     gamleOvergangsstønadPerioder: List<InternPeriodeOvergangsstønad>
 ): List<InternPeriodeOvergangsstønad> {
+    val erOvergangsstønadForMerEnnEnPerson =
+        (this + gamleOvergangsstønadPerioder).map { it.personIdent }.toSet().size > 1
+    if (erOvergangsstønadForMerEnnEnPerson)
+        throw Feil("Antar overgangsstønad for kun søker, men fant overgangsstønad for mer enn en person.")
+
     val tidligerePerioder = this.filter { it.tomDato.isSameOrBefore(LocalDate.now()) }
     val framtidigePerioder = this.minus(tidligerePerioder)
     val nyeOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(framtidigePerioder)
