@@ -475,7 +475,7 @@ class BehandleSmåbarnstilleggTest(
     }
 
     @Test
-    fun `Skal kunne begrunne utvidet periode når overgangsstønad blir utvidet`() {
+    fun `Skal kunne begrunne ny periode når overgangsstønad blir forlenget`() {
         val testScenario = mockServerKlient().lagScenario(restScenario)
 
         val fomDato = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned()
