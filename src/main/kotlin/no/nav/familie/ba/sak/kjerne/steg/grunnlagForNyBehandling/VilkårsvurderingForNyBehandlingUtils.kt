@@ -76,11 +76,14 @@ data class VilkårsvurderingForNyBehandlingUtils(
     fun hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         val søkersVilkårResultater =
             vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater
+
+        val dødsdato = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato ?: return vilkårsvurdering
+
         Vilkår.values().forEach { vilkårType ->
             val søkersVilkårAvTypeMedSenesteTom = søkersVilkårResultater.filter { it.vilkårType == vilkårType }
                 .maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
-            if (søkersVilkårAvTypeMedSenesteTom != null) {
-                søkersVilkårAvTypeMedSenesteTom.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
+            if (søkersVilkårAvTypeMedSenesteTom != null && dødsdato.isBefore(søkersVilkårAvTypeMedSenesteTom.periodeTom ?: TIDENES_ENDE) && dødsdato.isAfter(søkersVilkårAvTypeMedSenesteTom.periodeFom)) {
+                søkersVilkårAvTypeMedSenesteTom.periodeTom = dødsdato
             }
         }
         return vilkårsvurdering
