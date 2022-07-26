@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -68,8 +69,12 @@ data class VilkårsvurderingForNyBehandlingUtils(
         )
 
         if (behandling.type == BehandlingType.REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
-            vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater.forEach { vilkårResultat ->
-                vilkårResultat.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
+            val søkersVilkårResultater = vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater
+            Vilkår.values().forEach { vilkårType ->
+                val søkersVilkårAvTypeMedSenesteTom = søkersVilkårResultater.filter { it.vilkårType == vilkårType }.maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
+                if (søkersVilkårAvTypeMedSenesteTom != null) {
+                    søkersVilkårAvTypeMedSenesteTom.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
+                }
             }
         }
         return vilkårsvurdering
