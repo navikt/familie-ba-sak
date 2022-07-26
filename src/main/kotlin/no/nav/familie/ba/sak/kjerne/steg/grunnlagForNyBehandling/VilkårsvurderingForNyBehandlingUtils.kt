@@ -73,7 +73,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
         } else vilkårsvurdering
     }
 
-    private fun hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
+    fun hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         val søkersVilkårResultater =
             vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater
         Vilkår.values().forEach { vilkårType ->
