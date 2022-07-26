@@ -68,13 +68,19 @@ data class VilkårsvurderingForNyBehandlingUtils(
             forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
         )
 
-        if (behandling.type == BehandlingType.REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
-            val søkersVilkårResultater = vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater
-            Vilkår.values().forEach { vilkårType ->
-                val søkersVilkårAvTypeMedSenesteTom = søkersVilkårResultater.filter { it.vilkårType == vilkårType }.maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
-                if (søkersVilkårAvTypeMedSenesteTom != null) {
-                    søkersVilkårAvTypeMedSenesteTom.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
-                }
+        return if (behandling.type == BehandlingType.REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
+            hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering)
+        } else vilkårsvurdering
+    }
+
+    private fun hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
+        val søkersVilkårResultater =
+            vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater
+        Vilkår.values().forEach { vilkårType ->
+            val søkersVilkårAvTypeMedSenesteTom = søkersVilkårResultater.filter { it.vilkårType == vilkårType }
+                .maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
+            if (søkersVilkårAvTypeMedSenesteTom != null) {
+                søkersVilkårAvTypeMedSenesteTom.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
             }
         }
         return vilkårsvurdering
