@@ -86,6 +86,7 @@ object BehandlingsresultatUtils {
                 ytelsePersoner.filter { it.resultater != setOf(YtelsePersonResultat.AVSLÅTT) }
                     .groupBy { it.ytelseSlutt }.size == 1 || erAvslått
                 )
+        val kunFortsattOpphørt = ytelsePersoner.all { it.resultater == setOf(YtelsePersonResultat.FORTSATT_OPPHØRT) }
         val noeOpphørerPåTidligereBarn = ytelsePersoner.any {
             it.resultater.contains(YtelsePersonResultat.OPPHØRT) && !it.kravOpprinnelse.contains(KravOpprinnelse.INNEVÆRENDE)
         }
@@ -94,7 +95,7 @@ object BehandlingsresultatUtils {
             samledeResultater.add(YtelsePersonResultat.ENDRET_UTBETALING)
         }
 
-        val opphørSomFørerTilEndring = altOpphører && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling
+        val opphørSomFørerTilEndring = altOpphører && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling && !kunFortsattOpphørt
         if (opphørSomFørerTilEndring) {
             samledeResultater.add(YtelsePersonResultat.ENDRET_UTBETALING)
         }
