@@ -51,7 +51,7 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
             VedtakBegrunnelseType.ENDRET_UTBETALING
         )
     ),
-    OPPHØR(listOf(VedtakBegrunnelseType.OPPHØR)),
+    OPPHØR(listOf(VedtakBegrunnelseType.OPPHØR, VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING)),
     AVSLAG(listOf(VedtakBegrunnelseType.AVSLAG)),
     FORTSATT_INNVILGET(listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET)),
 

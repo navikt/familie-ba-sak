@@ -1,17 +1,17 @@
 {
-  "beskrivelse": "Innvilget EØS primærland",
+  "beskrivelse": "Opphør EØS primærland",
   "fom": "2021-09-01",
   "tom": "2021-12-31",
-  "vedtaksperiodetype": "UTBETALING",
+  "vedtaksperiodetype": "OPPHØR",
   "begrunnelser": [],
   "eøsBegrunnelser": [
-    "INNVILGET_PRIMÆRLAND_STANDARD"
+    "OPPHØR_EØS_STANDARD"
   ],
-  "kompetanser": [
+  "kompetanserSomStopperRettFørPeriode": [
     {
       "id": "1",
       "søkersAktivitet": "ARBEIDER_I_NORGE",
-      "annenForeldersAktivitet": "INAKTIV",
+      "annenForeldersAktivitet": "IKKE_AKTUELT",
       "annenForeldersAktivitetsland": "Sverige",
       "barnetsBostedsland": "Sverige",
       "resultat": "NORGE_ER_PRIMÆRLAND"
@@ -28,14 +28,7 @@
       "overstyrteVilkårresultater": [],
       "andreVurderinger": [],
       "endredeUtbetalinger": [],
-      "utbetalinger": [
-        {
-          "ytelseType": "ORDINÆR_BARNETRYGD",
-          "utbetaltPerMnd": 1054,
-          "erPåvirketAvEndring": false,
-          "prosent": 100
-        }
-      ],
+      "utbetalinger": [],
       "kompetanseIder": [
         "1"
       ]
@@ -52,13 +45,13 @@
   "forventetOutput": {
     "fom": "1. september 2021",
     "tom": "til 31. desember 2021 ",
-    "belop": 1054,
-    "antallBarn": 1,
-    "barnasFodselsdager": "20.01.20",
+    "belop": 0,
+    "antallBarn": 0,
+    "barnasFodselsdager": "",
     "begrunnelser": [
       {
-        "apiNavn": "innvilgetPrimarlandStandard",
-        "annenForeldersAktivitet": "INAKTIV",
+        "apiNavn": "opphorEosStandard",
+        "annenForeldersAktivitet": "IKKE_AKTUELT",
         "annenForeldersAktivitetsland": "Sverige",
         "barnetsBostedsland": "Sverige",
         "barnasFodselsdatoer": "20.01.20",
@@ -68,6 +61,6 @@
         "type": "eøsbegrunnelse"
       }
     ],
-    "type": "innvilgelse"
+    "type": "opphor"
   }
 }

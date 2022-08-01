@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.bisys
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -8,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -24,7 +26,10 @@ class BisysService(
 
         val samledeUtvidetBarnetrygdPerioder = mutableListOf<UtvidetBarnetrygdPeriode>()
         samledeUtvidetBarnetrygdPerioder.addAll(hentBisysPerioderFraInfotrygd(aktør, fraDato))
-        samledeUtvidetBarnetrygdPerioder.addAll(hentBisysPerioderFraBaSak(aktør, fraDato))
+
+        val perioderFraBasak = hentBisysPerioderFraBaSak(aktør, fraDato)
+        secureLogger.info("Bisysperioder for $personIdent i ba-sak: perioderFraBasak=$perioderFraBasak")
+        samledeUtvidetBarnetrygdPerioder.addAll(perioderFraBasak)
 
         val sammenslåttePerioder =
             samledeUtvidetBarnetrygdPerioder.filter { it.stønadstype == BisysStønadstype.UTVIDET }
@@ -64,7 +69,7 @@ class BisysService(
         if (fagsak == null || behandling == null) {
             return emptyList()
         }
-
+        logger.info("Henter bisysperioder for siste iverksette behandlong for fagsakId=${fagsak.id}, behandlingId=${behandling.id}")
         return tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)?.andelerTilkjentYtelse
             ?.filter { it.erSøkersAndel() }
             ?.filter {
@@ -72,7 +77,7 @@ class BisysService(
             }
             ?.map {
                 UtvidetBarnetrygdPeriode(
-                    stønadstype = BisysStønadstype.UTVIDET,
+                    stønadstype = if (it.erUtvidet()) BisysStønadstype.UTVIDET else BisysStønadstype.SMÅBARNSTILLEGG,
                     fomMåned = it.stønadFom,
                     tomMåned = it.stønadTom,
                     beløp = it.kalkulertUtbetalingsbeløp.toDouble(),
@@ -92,5 +97,9 @@ class BisysService(
                     sammenslåttePerioder.apply { add(removeLast().copy(tomMåned = nesteUtbetaling.tomMåned)) }
                 } else sammenslåttePerioder.apply { add(nesteUtbetaling) }
             }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(BisysService::class.java)
     }
 }

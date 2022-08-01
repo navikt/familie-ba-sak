@@ -78,7 +78,7 @@ class LoggServiceTest(
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, morsIdent, barnetsIdent)
 
-        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(
+        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(
             NyBehandlingHendelse(
                 morsIdent = morsIdent,
                 barnasIdenter = listOf(barnetsIdent)

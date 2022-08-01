@@ -23,10 +23,10 @@ import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
 
-    private val ikkeStøttetFeil =
+    private fun ikkeStøttetFeil(behandlingsresultater: MutableSet<YtelsePersonResultat>) =
         Feil(
             frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
-            message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet."
+            message = "Kombiansjonen av behandlingsresultatene $behandlingsresultater er ikke støttet i løsningen."
         )
 
     fun utledBehandlingsresultatDataForPerson(
@@ -86,6 +86,7 @@ object BehandlingsresultatUtils {
                 ytelsePersoner.filter { it.resultater != setOf(YtelsePersonResultat.AVSLÅTT) }
                     .groupBy { it.ytelseSlutt }.size == 1 || erAvslått
                 )
+        val kunFortsattOpphørt = ytelsePersoner.all { it.resultater == setOf(YtelsePersonResultat.FORTSATT_OPPHØRT) }
         val noeOpphørerPåTidligereBarn = ytelsePersoner.any {
             it.resultater.contains(YtelsePersonResultat.OPPHØRT) && !it.kravOpprinnelse.contains(KravOpprinnelse.INNEVÆRENDE)
         }
@@ -94,7 +95,7 @@ object BehandlingsresultatUtils {
             samledeResultater.add(YtelsePersonResultat.ENDRET_UTBETALING)
         }
 
-        val opphørSomFørerTilEndring = altOpphører && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling
+        val opphørSomFørerTilEndring = altOpphører && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling && !kunFortsattOpphørt
         if (opphørSomFørerTilEndring) {
             samledeResultater.add(YtelsePersonResultat.ENDRET_UTBETALING)
         }
@@ -154,7 +155,7 @@ object BehandlingsresultatUtils {
             samledeResultater.matcherAltOgHarBådeEndretOgOpphørtResultat(
                 setOf(YtelsePersonResultat.AVSLÅTT)
             ) -> Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
-            else -> throw ikkeStøttetFeil
+            else -> throw ikkeStøttetFeil(samledeResultater)
         }
     }
 

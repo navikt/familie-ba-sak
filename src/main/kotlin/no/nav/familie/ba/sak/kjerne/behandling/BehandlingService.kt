@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategori
+import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategoriVedOpprettelse
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -83,12 +83,11 @@ class BehandlingService(
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
 
-            val kategori = bestemKategori(
+            val kategori = bestemKategoriVedOpprettelse(
                 overstyrtKategori = nyBehandling.kategori,
+                behandlingType = nyBehandling.behandlingType,
+                behandlingÅrsak = nyBehandling.behandlingÅrsak,
                 kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id),
-                kategoriFraInneværendeBehandling = behandlingstemaService.hentKategoriFraInneværendeBehandling(
-                    fagsak.id
-                ),
             )
 
             val underkategori = bestemUnderkategori(

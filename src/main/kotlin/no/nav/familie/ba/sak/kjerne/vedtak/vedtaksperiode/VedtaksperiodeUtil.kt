@@ -163,9 +163,9 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
                     nåSegment.overlapper(gammeltSegment) && gammeltAndelerTyForSegment.any { gammelAndelTyForSegment ->
                         val fom = nåSegment.fom
                         nåAndelTilkjentYtelserForSegment.all { nåAndelTyForSegment ->
-                            // Når et av barna mister utbetaling på et segment i behandling
-                            nåAndelTyForSegment.aktør.aktørId != gammelAndelTyForSegment.aktør.aktørId &&
-                                // Når det barnet som mister utbetaling ikke har en utbetaling i forrige måned
+                            // Når en person mister utbetaling på et segment i behandling
+                            !(nåAndelTyForSegment.aktør.aktørId == gammelAndelTyForSegment.aktør.aktørId && nåAndelTyForSegment.type == gammelAndelTyForSegment.type) &&
+                                // Når den personen som mister utbetaling ikke har en utbetaling av samme type i forrige måned
                                 utbetalingsperioder.none { utbetalingsperiode ->
                                     utbetalingsperiode.tom == fom.minusDays(1) &&
                                         utbetalingsperiode.hentUtbetalingsperiodeDetaljer(
@@ -174,7 +174,7 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
                                         )
                                             .any {
                                                 it.person.personIdent ==
-                                                    gammelAndelTyForSegment.aktør.aktivFødselsnummer()
+                                                    gammelAndelTyForSegment.aktør.aktivFødselsnummer() && it.ytelseType == gammelAndelTyForSegment.type
                                             }
                                 }
                         }
@@ -216,7 +216,8 @@ fun hentGyldigeBegrunnelserForPeriode(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     kanBehandleEØS: Boolean,
     sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
-    kompetanserIPeriode: List<Kompetanse>
+    kompetanserIPeriode: List<Kompetanse>,
+    kompetanserSomStopperRettFørPeriode: List<Kompetanse>
 ): List<IVedtakBegrunnelse> {
     val standardbegrunnelser = hentGyldigeStandardbegrunnelserForVedtaksperiode(
         utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
@@ -229,7 +230,8 @@ fun hentGyldigeBegrunnelserForPeriode(
     )
     val eøsBegrunnelser = if (kanBehandleEØS) hentGyldigeEØSBegrunnelserForPeriode(
         sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-        kompetanserIPeriode = kompetanserIPeriode
+        kompetanserIPeriode = kompetanserIPeriode,
+        kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
     ) else emptyList()
 
     return standardbegrunnelser + eøsBegrunnelser
@@ -264,17 +266,29 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
 
 fun hentGyldigeEØSBegrunnelserForPeriode(
     sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
-    kompetanserIPeriode: List<Kompetanse>
+    kompetanserIPeriode: List<Kompetanse>,
+    kompetanserSomStopperRettFørPeriode: List<Kompetanse>
 ) = EØSStandardbegrunnelse.values()
     .mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }
     .filter { begrunnelse ->
-        kompetanserIPeriode.any { kompetanse ->
-            kompetanse.validerFelterErSatt()
-            begrunnelse.erGyldigForKompetanseMedData(
-                annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
-                barnetsBostedslandFraKompetanse = landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland!!),
-                resultatFraKompetanse = kompetanse.resultat!!
-            )
+        when (begrunnelse.eøsBegrunnelse.vedtakBegrunnelseType) {
+            VedtakBegrunnelseType.EØS_INNVILGET -> kompetanserIPeriode.any { kompetanse ->
+                kompetanse.validerFelterErSatt()
+                begrunnelse.erGyldigForKompetanseMedData(
+                    annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
+                    barnetsBostedslandFraKompetanse = landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland!!),
+                    resultatFraKompetanse = kompetanse.resultat!!
+                )
+            }
+            VedtakBegrunnelseType.EØS_OPPHØR -> kompetanserSomStopperRettFørPeriode.any { kompetanse ->
+                kompetanse.validerFelterErSatt()
+                begrunnelse.erGyldigForKompetanseMedData(
+                    annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
+                    barnetsBostedslandFraKompetanse = landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland!!),
+                    resultatFraKompetanse = kompetanse.resultat!!
+                )
+            }
+            else -> false
         }
     }.map { it.eøsBegrunnelse }
 
