@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.er11Siffer
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -168,11 +170,18 @@ class LoggService(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
                 ),
-                // TODO: Endre frå ident til fødselsdato her
-                tekst = "Gjelder ${Utils.slåSammen(behandling.barnasIdenter)}"
+                tekst = "Gjelder ${fødselsdatoer(behandling)}"
             )
         )
     }
+
+    private fun fødselsdatoer(behandling: BehandlingLoggRequest) = Utils.slåSammen(
+        behandling.barnasIdenter
+            .filter { er11Siffer(it) }
+            .map { FoedselsNr(it) }
+            .map { it.foedselsdato }
+            .map { it.tilKortString() }
+    )
 
     fun opprettBehandlingLogg(behandlingLogg: BehandlingLoggRequest) {
         val behandling = behandlingLogg.behandling

@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.common
 
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
+import no.nav.familie.ba.sak.common.Utils.er11Siffer
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -84,5 +86,15 @@ internal class UtilsTest {
             "${førsteBarn.fødselsdato.tilKortString()}, ${andreBarn.fødselsdato.tilKortString()} og ${tredjeBarn.fødselsdato.tilKortString()}",
             listOf(førsteBarn.fødselsdato, andreBarn.fødselsdato, tredjeBarn.fødselsdato).tilBrevTekst()
         )
+    }
+
+    @Test
+    fun `Sjekker om ident er 11 siffer`() {
+        assertFalse(er11Siffer("abc"))
+        assertFalse(er11Siffer(""))
+        assertFalse(er11Siffer("12345"))
+        assertFalse(er11Siffer("1234567890A"))
+        assertFalse(er11Siffer("1234567890123"))
+        assertTrue(er11Siffer("12345678901"))
     }
 }

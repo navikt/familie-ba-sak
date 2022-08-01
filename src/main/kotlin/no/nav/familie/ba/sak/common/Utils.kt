@@ -20,8 +20,10 @@ object Utils {
 
     fun formaterBeløp(beløp: Int): String = NumberFormat.getNumberInstance(nbLocale).format(beløp)
 
+    fun er11Siffer(ident: String): Boolean = ident.all { it.isDigit() } && ident.length == 11
+
     fun formaterIdent(ident: String): String =
-        if (ident.all { it.isDigit() } && ident.length == 11)
+        if (er11Siffer(ident))
             "${ident.substring(0, 6)} ${ident.substring(6)}"
         else ident
 

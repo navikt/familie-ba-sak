@@ -75,7 +75,7 @@ class LoggServiceTest(
     @Test
     fun `Skal lage logginnslag ved stegflyt for automatisk behandling`() {
         val morsIdent = randomFnr()
-        val barnetsIdent = randomFnr()
+        val barnetsIdent = "01082212345"
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, morsIdent, barnetsIdent)
 
@@ -88,7 +88,7 @@ class LoggServiceTest(
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
         assertEquals(2, loggForBehandling.size)
-        assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE && it.tekst == "Gjelder $barnetsIdent" })
+        assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE && it.tekst == "Gjelder 01.08.22" })
         assertTrue(loggForBehandling.any { it.type == LoggType.BEHANDLING_OPPRETTET })
         assertTrue(loggForBehandling.none { it.rolle != BehandlerRolle.SYSTEM })
     }
