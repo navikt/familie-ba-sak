@@ -16,7 +16,7 @@ data class SanityBegrunnelserRespons(
     val result: List<RestSanityBegrunnelse>
 )
 
-const val sanityBaseUrl = "https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query"
+const val sanityBaseUrl = "https://xsrv1mh6.api.sanity.io/v1/data/query"
 
 fun hentBegrunnelser(datasett: String = "ba-brev"): List<SanityBegrunnelse> {
     val sanityUrl = "$sanityBaseUrl/$datasett"

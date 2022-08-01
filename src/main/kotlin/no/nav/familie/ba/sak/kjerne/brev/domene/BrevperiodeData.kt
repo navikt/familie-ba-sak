@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeGenerator
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
@@ -15,7 +16,8 @@ data class BrevperiodeData(
     val minimertVedtaksperiode: MinimertVedtaksperiode,
     val barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
     val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
-    val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>
+    val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>,
+    val barnIBehandling: List<Person>
 ) : Comparable<BrevperiodeData> {
 
     fun tilBrevPeriodeGenerator() = BrevPeriodeGenerator(
@@ -26,7 +28,8 @@ data class BrevperiodeData(
         minimertVedtaksperiode = minimertVedtaksperiode,
         barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
         minimerteKompetanserForPeriode = minimerteKompetanserForPeriode,
-        minimerteKompetanserSomStopperRettFørPeriode = minimerteKompetanserSomStopperRettFørPeriode
+        minimerteKompetanserSomStopperRettFørPeriode = minimerteKompetanserSomStopperRettFørPeriode,
+        barnIBehandling = barnIBehandling
     )
 
     fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {

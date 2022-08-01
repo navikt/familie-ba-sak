@@ -12,6 +12,8 @@ class MinimertPerson(
     val fødselsdato: LocalDate,
     val aktørId: String,
     val aktivPersonIdent: String,
+    val erDød: Boolean,
+    val dødsfallsdato: LocalDate?
 ) {
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 
@@ -28,7 +30,9 @@ fun PersonopplysningGrunnlag.tilMinimertePersoner(): List<MinimertPerson> =
             it.type,
             it.fødselsdato,
             it.aktør.aktørId,
-            it.aktør.aktivFødselsnummer()
+            it.aktør.aktivFødselsnummer(),
+            it.erDød(),
+            it.dødsfall?.dødsfallDato
         )
     }
 

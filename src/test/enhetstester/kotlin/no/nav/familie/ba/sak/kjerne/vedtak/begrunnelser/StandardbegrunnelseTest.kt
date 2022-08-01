@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
@@ -10,11 +12,16 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertPerson
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -315,5 +322,30 @@ internal class StandardbegrunnelseTest {
 
     private fun String.startsWithUppercaseLetter(): Boolean {
         return this.matches(Regex("[A-Z]{1}.*"))
+    }
+
+    @Test
+    fun `Dersom dødsfalldato er før fom i vedtaksperiode skal begrunnelsen REDUKSJON_BARN_DØD trigges`() {
+        val dødtBarn = lagPerson(personIdent = PersonIdent("12345678910"), type = PersonType.BARN)
+        dødtBarn.dødsfall = lagDødsfall(dødtBarn, dødsfallDatoFraPdl = LocalDate.now().minusMonths(1).withDayOfMonth(15).toString(), dødsfallAdresseFraPdl = null)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
+
+        val reduksjonBarnDødBegrunnelse = listOf(SanityBegrunnelse(apiNavn = "reduksjonBarnDod", navnISystem = "barnDød", ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD)))
+
+        val ytelserForSøkerForrigePeriode = listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(LocalDate.now().minusMonths(1).year, LocalDate.now().minusMonths(1).month), tom = YearMonth.of(LocalDate.now().year, LocalDate.now().month)))
+
+        assertTrue(
+            Standardbegrunnelse.REDUKSJON_BARN_DØD
+                .triggesForPeriode(
+
+                    sanityBegrunnelser = reduksjonBarnDødBegrunnelse,
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = ytelserForSøkerForrigePeriode,
+                )
+        )
     }
 }

@@ -85,7 +85,8 @@ class BrevperiodeTest {
                         it.tilMinimertKompetanse(
                             behandlingsresultatPersonTestConfig.personerPåBehandling
                         )
-                    } ?: emptyList()
+                    } ?: emptyList(),
+                    barnIBehandling = emptyList()
                 ).genererBrevPeriode()
             } catch (e: Exception) {
                 testReporter.publishEntry(

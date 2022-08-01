@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -36,7 +37,8 @@ class BrevPeriodeGenerator(
     private val minimertVedtaksperiode: MinimertVedtaksperiode,
     private val barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
     private val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
-    private val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>
+    private val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>,
+    private val barnIBehandling: List<Person>
 ) {
 
     fun genererBrevPeriode(): BrevPeriode? {
@@ -113,6 +115,7 @@ class BrevPeriodeGenerator(
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
             erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
             barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
+            barnIBehandling = barnIBehandling
         )
     }
 
