@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonExcep
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
@@ -513,6 +514,7 @@ class ClientMocks {
                     )
                 ),
                 kjønn = Kjønn.MANN,
+                dødsfall = DødsfallData(true, "2022-06-25"),
                 navn = "Gutten Barnesen"
             ),
             barnFnr[1] to PersonInfo(
@@ -567,6 +569,7 @@ fun mockHentPersoninfoForMedIdenter(
         fødselsdato = LocalDate.of(2018, 5, 1),
         kjønn = Kjønn.KVINNE,
         navn = "Barn Barnesen",
+        dødsfall = DødsfallData(true, "25.06.2022"),
         sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)))
     )
 

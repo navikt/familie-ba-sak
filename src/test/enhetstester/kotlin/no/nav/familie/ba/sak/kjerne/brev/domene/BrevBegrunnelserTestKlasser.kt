@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -23,7 +24,7 @@ data class BrevBegrunnelserTestConfig(
     val vedtaksperiodetype: Vedtaksperiodetype,
 
     // Brukes for å se om det er en reduksjon i småbarnstillegg eller utvidet
-    val ytelserForSøkerForrigeMåned: List<YtelseType>,
+    val ytelserForSøkerForrigeMåned: List<AndelTilkjentYtelse>,
 
     val ytelserForBarnOgSøkerIPeriode: List<YtelseType>,
     val erFørsteVedtaksperiodePåFagsak: Boolean,
@@ -53,12 +54,16 @@ data class BrevbegrunnelserTestPerson(
     val overstyrteVilkårresultater: List<MinimertVilkårResultat>,
     val andreVurderinger: List<MinimertAnnenVurdering>,
     val endredeUtbetalinger: List<EndretUtbetalingAndelPåPerson>,
+    val erDød: Boolean = false,
+    val dødsfalldato: LocalDate? = null
 ) {
     fun tilMinimertPerson() = MinimertPerson(
         aktivPersonIdent = this.personIdent,
         aktørId = this.aktørId,
         type = this.type,
         fødselsdato = this.fødselsdato,
+        erDød = this.erDød,
+        dødsfallsdato = this.dødsfalldato
     )
 
     fun tilMinimerteEndredeUtbetalingAndeler() =

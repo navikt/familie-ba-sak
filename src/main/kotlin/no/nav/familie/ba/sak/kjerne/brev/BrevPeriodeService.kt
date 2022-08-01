@@ -151,8 +151,8 @@ class BrevPeriodeService(
                 tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 landkoderISO2 = landkoderISO2,
-            )
-
+            ),
+            barnIBehandling = personopplysningGrunnlag.barna
         )
 
         if (skalLogge) {

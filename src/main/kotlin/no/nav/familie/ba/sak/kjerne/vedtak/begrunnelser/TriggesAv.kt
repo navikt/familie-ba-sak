@@ -28,6 +28,7 @@ data class TriggesAv(
     val småbarnstillegg: Boolean = false,
     val gjelderFørstePeriode: Boolean = false,
     val gjelderFraInnvilgelsestidspunkt: Boolean = false,
+    val barnDød: Boolean = false
 ) {
     fun erEndret() = endringsaarsaker.isNotEmpty()
 
