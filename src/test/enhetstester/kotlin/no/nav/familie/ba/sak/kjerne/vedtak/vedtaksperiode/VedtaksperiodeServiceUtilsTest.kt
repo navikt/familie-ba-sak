@@ -53,7 +53,8 @@ class VedtaksperiodeServiceUtilsTest {
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
-            minimerteUtbetalingsperiodeDetaljer = listOf()
+            minimerteUtbetalingsperiodeDetaljer = listOf(),
+            barnIBehandling = emptyList()
         )
 
         Assertions.assertEquals(
@@ -105,7 +106,8 @@ class VedtaksperiodeServiceUtilsTest {
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
-            minimerteUtbetalingsperiodeDetaljer = listOf()
+            minimerteUtbetalingsperiodeDetaljer = listOf(),
+            barnIBehandling = emptyList()
         )
 
         Assertions.assertEquals(

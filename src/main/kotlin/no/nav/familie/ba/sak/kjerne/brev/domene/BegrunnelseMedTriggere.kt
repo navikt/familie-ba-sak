@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.delOpp
@@ -22,6 +23,7 @@ data class BegrunnelseMedTriggere(
         erUregistrerteBarnPåbehandling: Boolean,
         barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
         minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
+        barnIBehandling: List<Person>
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
 
         return if (this.standardbegrunnelse.kanDelesOpp) {
@@ -41,6 +43,7 @@ data class BegrunnelseMedTriggere(
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent,
                 minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+                barnIBehandling = barnIBehandling
             )
 
             if (

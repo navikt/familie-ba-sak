@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
@@ -35,7 +37,7 @@ fun Standardbegrunnelse.triggesForPeriode(
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel> = emptyList(),
     sanityBegrunnelser: List<SanityBegrunnelse>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    ytelserForSøkerForrigeMåned: List<YtelseType>,
+    ytelserForSøkerForrigeMåned: List<AndelTilkjentYtelse>,
 ): Boolean {
 
     val triggesAv = this.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
@@ -92,8 +94,15 @@ fun Standardbegrunnelse.triggesForPeriode(
             minimertVedtaksperiode = minimertVedtaksperiode,
         )
         triggesAv.gjelderFraInnvilgelsestidspunkt -> false
+        triggesAv.barnDød -> barnDødeForrigePeriode(ytelserForSøkerForrigeMåned, minimertePersoner)
         else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
     }
+}
+
+private fun barnDødeForrigePeriode(tilkjenteYtelserForrigePeriode: List<AndelTilkjentYtelse>, minimertePersoner: List<MinimertPerson>) : Boolean {
+    val fom = tilkjenteYtelserForrigePeriode.minOf { andelTilkjentYtelse: AndelTilkjentYtelse ->  andelTilkjentYtelse.stønadFom }
+    val tom = tilkjenteYtelserForrigePeriode.maxOf { andelTilkjentYtelse: AndelTilkjentYtelse ->  andelTilkjentYtelse.stønadTom }
+    return minimertePersoner.any { minimertPerson -> minimertPerson.erDød && fom <= minimertPerson.dødsfallsdato!!.toYearMonth() && tom >= minimertPerson.dødsfallsdato.toYearMonth()}
 }
 
 private fun erEndretTriggerErOppfylt(
@@ -172,7 +181,7 @@ fun Standardbegrunnelse.tilVedtaksbegrunnelse(
 fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(
     ytelseType: YtelseType,
     ytelseTyperForPeriode: Set<YtelseType>,
-    ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>
+    ytelserGjeldeneForSøkerForrigeMåned: List<AndelTilkjentYtelse>
 ): Boolean {
     return when (this) {
         VedtakBegrunnelseType.INNVILGET -> ytelseTyperForPeriode.contains(ytelseType)
@@ -184,6 +193,6 @@ fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(
 
 private fun ytelseOppfyltForrigeMåned(
     ytelseType: YtelseType,
-    ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>,
+    ytelserGjeldeneForSøkerForrigeMåned: List<AndelTilkjentYtelse>,
 ) = ytelserGjeldeneForSøkerForrigeMåned
-    .any { it == ytelseType }
+    .any { it.type == ytelseType }
