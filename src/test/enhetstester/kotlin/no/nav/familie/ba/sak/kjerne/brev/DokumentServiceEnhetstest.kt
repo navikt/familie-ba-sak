@@ -35,7 +35,7 @@ internal class DokumentServiceEnhetstest {
     )
 
     @Test
-    fun `Skal kalle "loggBrevIkkeDistribuertUkjentAdresse" ved 400 kode og "Mottaker har ukjent adresse" melding`() {
+    fun `Skal kalle 'loggBrevIkkeDistribuertUkjentAdresse' ved 400 kode og 'Mottaker har ukjent adresse' melding`() {
         every { dokumentService.håndterMottakerDødIngenAdressePåBehandling(any(), any(), any()) } returns Unit
         every {
             integrasjonClient.distribuerBrev(any(), any())
@@ -57,7 +57,7 @@ internal class DokumentServiceEnhetstest {
     }
 
     @Test
-    fun `Skal kalle "håndterMottakerDødIngenAdressePåBehandling" ved 410 Gone svar under distribuering"`() {
+    fun `Skal kalle 'håndterMottakerDødIngenAdressePåBehandling' ved 410 Gone svar under distribuering`() {
         every { dokumentService.håndterMottakerDødIngenAdressePåBehandling(any(), any(), any()) } returns Unit
         every {
             integrasjonClient.distribuerBrev(any(), any())
