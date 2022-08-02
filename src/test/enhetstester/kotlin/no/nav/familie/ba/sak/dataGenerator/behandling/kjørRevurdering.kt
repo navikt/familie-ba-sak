@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedta
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentGyldigeBegrunnelserForVedtaksperiodeMinimert
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentYtelserForSøkerForrigeMåned
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.ytelseErFraForrigeMåned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -377,7 +378,8 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
         ytelserForSøkerForrigeMåned = hentYtelserForSøkerForrigeMåned(
             andelerTilkjentYtelse,
             utvidetVedtaksperiodeMedBegrunnelser
-        )
+        ),
+        ytelserForrigeMåned = andelerTilkjentYtelse.filter { ytelseErFraForrigeMåned(it, utvidetVedtaksperiodeMedBegrunnelser) }
     )
 
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
