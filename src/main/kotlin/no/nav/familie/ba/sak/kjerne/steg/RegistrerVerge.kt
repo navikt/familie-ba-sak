@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.logg.RegistrerVergeLoggType
 import org.springframework.stereotype.Service
 
-//TODO: Kan vi registre beger verge og institusjon på en fagsak? Kan vi endre verge og institusjon sinere?
+// TODO: Kan vi registre beger verge og institusjon på en fagsak? Kan vi endre verge og institusjon sinere?
 @Service
 class RegistrerVerge(
     val institusjonService: InstitusjonService,

@@ -75,7 +75,7 @@ class LoggService(
     }
 
     fun opprettRegistrerVergeLogg(behandling: Behandling, type: RegistrerVergeLoggType) {
-        val tittel = when(type) {
+        val tittel = when (type) {
             RegistrerVergeLoggType.VERGE_REGISTRERT -> "verge ble registrert"
             RegistrerVergeLoggType.INSTITUSJON_REGISTRERT -> "institusjon ble registrert"
         }
