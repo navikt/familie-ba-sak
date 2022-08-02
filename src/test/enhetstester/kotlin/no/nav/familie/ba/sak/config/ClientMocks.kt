@@ -569,7 +569,7 @@ fun mockHentPersoninfoForMedIdenter(
         fødselsdato = LocalDate.of(2018, 5, 1),
         kjønn = Kjønn.KVINNE,
         navn = "Barn Barnesen",
-        dødsfall = DødsfallData(true, "25.06.2022"),
+        dødsfall = DødsfallData(true, "2022-06-25"),
         sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)))
     )
 
