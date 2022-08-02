@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.Utils.er11Siffer
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -16,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
@@ -177,7 +177,7 @@ class LoggService(
 
     private fun fødselsdatoer(behandling: BehandlingLoggRequest) = Utils.slåSammen(
         behandling.barnasIdenter
-            .filter { er11Siffer(it) }
+            .filter { Identkonverterer.er11Siffer(it) }
             .map { FoedselsNr(it) }
             .map { it.foedselsdato }
             .map { it.tilKortString() }
@@ -293,7 +293,7 @@ class LoggService(
 
     fun opprettBarnLagtTilLogg(behandling: Behandling, barn: Person) {
         val beskrivelse =
-            "${barn.navn.uppercase()} (${barn.hentAlder()} år) | ${Utils.formaterIdent(barn.aktør.aktivFødselsnummer())} lagt til"
+            "${barn.navn.uppercase()} (${barn.hentAlder()} år) | ${Identkonverterer.formaterIdent(barn.aktør.aktivFødselsnummer())} lagt til"
         lagre(
             Logg(
                 behandlingId = behandling.id,
