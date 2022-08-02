@@ -101,27 +101,20 @@ fun Standardbegrunnelse.triggesForPeriode(
 }
 
 private fun barnDødeForrigePeriode(tilkjenteYtelserForrigePeriode: List<AndelTilkjentYtelse>, minimertePersoner: List<MinimertPerson>): Boolean {
-    try {
-        if (tilkjenteYtelserForrigePeriode.isNotEmpty()) {
-            val fom =
-                tilkjenteYtelserForrigePeriode.minOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadFom }
-            val tom =
-                tilkjenteYtelserForrigePeriode.maxOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadTom }
-            return minimertePersoner.any { minimertPerson ->
-                val erDød = minimertPerson.erDød
-                if (erDød) {
-                    val fomFørDødsfall = fom <= minimertPerson.dødsfallsdato!!.toYearMonth()
-                    val tomEtterDødsfall = tom >= minimertPerson.dødsfallsdato.toYearMonth()
-                    return erDød && fomFørDødsfall && tomEtterDødsfall
-                }
-                return false
-            }
+    if (tilkjenteYtelserForrigePeriode.isNotEmpty()) {
+        val fom =
+            tilkjenteYtelserForrigePeriode.minOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadFom }
+        val tom =
+            tilkjenteYtelserForrigePeriode.maxOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadTom }
+        return minimertePersoner.filter { minimertPerson ->
+            minimertPerson.erDød
+        }.any { minimertPerson ->
+            val fomFørDødsfall = fom <= minimertPerson.dødsfallsdato!!.toYearMonth()
+            val tomEtterDødsfall = tom >= minimertPerson.dødsfallsdato.toYearMonth()
+            fomFørDødsfall && tomEtterDødsfall
         }
-        return false
-    } catch (e: NoSuchElementException) {
-        logger.info(e.message)
-        return false
     }
+    return false
 }
 
 private fun erEndretTriggerErOppfylt(
