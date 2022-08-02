@@ -36,13 +36,13 @@ class BehandlingstemaService(
         manueltOppdatert: Boolean = false
     ): Behandling {
         if (behandling.skalBehandlesAutomatisk) return behandling
-        else if (manueltOppdatert && (overstyrtKategori == null || overstyrtUnderkategori == null)) throw FunksjonellFeil(
-            "Du må velge behandlingstema."
-        )
+        if (manueltOppdatert && (overstyrtKategori == null || overstyrtUnderkategori == null)) {
+            throw FunksjonellFeil("Du må velge behandlingstema.")
+        }
 
         val utledetKategori = bestemKategori(
             overstyrtKategori = overstyrtKategori,
-            kategoriFraLøpendeBehandling = hentLøpendeKategori(behandling.fagsak.id),
+            kategoriFraSisteIverksattBehandling = hentLøpendeKategori(behandling.fagsak.id),
             kategoriFraInneværendeBehandling = hentKategoriFraInneværendeBehandling(behandling.fagsak.id),
         )
 
@@ -107,14 +107,15 @@ class BehandlingstemaService(
             val aktivBehandling =
                 behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsakId)
                     ?: return BehandlingKategori.NASJONAL
-            val erVilkårMedEØSRegelverkBehandlet =
+            val vilkårsvurdering =
                 vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
-                    ?.personResultater
-                    ?.flatMap { it.vilkårResultater }
-                    ?.filter { it.behandlingId == aktivBehandling.id }
-                    ?.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
+                    ?: return aktivBehandling.kategori
+            val erVilkårMedEØSRegelverkBehandlet = vilkårsvurdering.personResultater
+                .flatMap { it.vilkårResultater }
+                .filter { it.behandlingId == aktivBehandling.id }
+                .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
 
-            return if (erVilkårMedEØSRegelverkBehandlet == true) {
+            return if (erVilkårMedEØSRegelverkBehandlet) {
                 BehandlingKategori.EØS
             } else {
                 BehandlingKategori.NASJONAL

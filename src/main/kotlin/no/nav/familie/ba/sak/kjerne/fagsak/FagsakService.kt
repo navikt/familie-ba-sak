@@ -97,13 +97,14 @@ class FagsakService(
     fun hentEllerOpprettFagsak(
         personIdent: String,
         fraAutomatiskBehandling: Boolean = false,
-        eier: FagsakEier = OMSORGSPERSON
+        eier: FagsakEier = OMSORGSPERSON,
+        type: FagsakType = FagsakType.NORMAL,
     ): Fagsak {
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
         var fagsak = fagsakRepository.finnFagsakForAktør(aktør, eier)
         if (fagsak == null) {
 
-            fagsak = lagre(Fagsak(aktør = aktør, eier = eier))
+            fagsak = lagre(Fagsak(aktør = aktør, eier = eier, type = type))
             if (fraAutomatiskBehandling) {
                 antallFagsakerOpprettetFraAutomatisk.increment()
             } else {

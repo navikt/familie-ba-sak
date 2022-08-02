@@ -88,7 +88,6 @@ class TilgangService(
 
     fun validerTilgangTilFagsak(fagsakId: Long, event: AuditLoggerEvent) {
         val aktør = fagsakService.hentAktør(fagsakId)
-        val personIdent = aktør.aktivFødselsnummer()
         aktør.personidenter.forEach {
             Sporingsdata(
                 event = event,
@@ -96,8 +95,16 @@ class TilgangService(
                 custom1 = CustomKeyValue("fagsak", fagsakId.toString())
             )
         }
-        val personIdenter = listOf(personIdent)
-        if (!harTilgangTilPersoner(personIdenter)) {
+        val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
+        val personIdenterIFagsak = behandlinger.flatMap { behandling ->
+            val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
+            when {
+                personopplysningGrunnlag != null -> personopplysningGrunnlag.søkerOgBarn.map { person -> person.aktør.aktivFødselsnummer() }
+                else -> emptyList()
+            }
+        }.distinct().ifEmpty { listOf(aktør.aktivFødselsnummer()) }
+        val harTilgang = harTilgangTilPersoner(personIdenterIFagsak)
+        if (!harTilgang) {
             throw RolleTilgangskontrollFeil(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                     "har ikke tilgang til fagsak=$fagsakId.",

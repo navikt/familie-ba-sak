@@ -16,7 +16,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
@@ -130,7 +132,7 @@ class StegService(
     }
 
     @Transactional
-    fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
+    fun opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
         val fagsak = try {
             fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true)
         } catch (exception: Exception) {
@@ -152,7 +154,9 @@ class StegService(
                 else BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 skalBehandlesAutomatisk = true,
-                barnasIdenter = nyBehandlingHendelse.barnasIdenter
+                barnasIdenter = nyBehandlingHendelse.barnasIdenter,
+                kategori = BehandlingKategori.NASJONAL, // alltid NASJONAL for fødselshendelse
+                underkategori = BehandlingUnderkategori.ORDINÆR // alltid ORDINÆR for fødselshendelse
             )
         )
     }

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
+import no.nav.familie.ba.sak.kjerne.beregning.domene.splitFramtidigePerioderFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilInternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -12,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsst
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.tilPeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -38,7 +40,22 @@ class SmåbarnstilleggService(
             }
         )
 
-        return periodeOvergangsstønad.map { it.tilInternPeriodeOvergangsstønad() }.slåSammenTidligerePerioder()
+        return periodeOvergangsstønad
+            .map { it.tilInternPeriodeOvergangsstønad() }
+            .slåSammenTidligerePerioder()
+            .splitFramtidigePerioderFraForrigeBehandling(
+                gamleOvergangsstønadPerioder = hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId)
+            )
+    }
+
+    private fun hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId: Long): List<InternPeriodeOvergangsstønad> {
+        val forrigeIverksatteBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId)
+
+        return if (forrigeIverksatteBehandling != null) periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
+            behandlingId = forrigeIverksatteBehandling.id
+        ).map { it.tilInternPeriodeOvergangsstønad() }
+        else emptyList()
     }
 
     fun vedtakOmOvergangsstønadPåvirkerFagsak(fagsak: Fagsak): Boolean {
@@ -55,6 +72,8 @@ class SmåbarnstilleggService(
         val nyePerioderMedFullOvergangsstønad =
             hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør).map { it.tilInternPeriodeOvergangsstønad() }
                 .slåSammenTidligerePerioder()
+
+        secureLogger.info("Perioder med overgangsstønad fra EF: ${nyePerioderMedFullOvergangsstønad.map { "Periode(fom=${it.fomDato}, tom=${it.tomDato})" }}")
 
         return vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
@@ -76,5 +95,9 @@ class SmåbarnstilleggService(
         return efSakRestClient.hentPerioderMedFullOvergangsstønad(
             aktør.aktivFødselsnummer()
         ).perioder
+    }
+
+    companion object {
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

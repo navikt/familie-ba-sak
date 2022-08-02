@@ -1,13 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_ENDRING
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_VEDLIKEHOLD_HENLEGGELSE
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -173,10 +176,24 @@ class BehandlingStegController(
             behandlingId = behandling.id,
         )
 
+        validerTilgangTilHenleggelseAvBehandling(
+            behandling = behandling,
+            tekniskEndringToggle = featureToggleService.isEnabled(TEKNISK_ENDRING)
+        )
+
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
 
         stegService.håndterHenleggBehandling(behandling, henleggInfo)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+    }
+
+    private fun validerTilgangTilHenleggelseAvBehandling(
+        behandling: Behandling,
+        tekniskEndringToggle: Boolean
+    ) {
+        if (behandling.erTekniskBehandling() && !tekniskEndringToggle) {
+            throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer.")
+        }
     }
 
     @PostMapping(path = ["register-verge"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -185,7 +202,7 @@ class BehandlingStegController(
         @RequestBody vergeInfo: RestRegistrerVerge
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        if(vergeInfo.tilVerge() == null && vergeInfo.tilInstitusjon() == null){
+        if (vergeInfo.tilVerge() == null && vergeInfo.tilInstitusjon() == null) {
             return ResponseEntity.ok(Ressurs.failure("Ugydig verge info"))
         }
 

@@ -4,15 +4,23 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -23,6 +31,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class BehandlingstemaServiceTest {
@@ -162,5 +171,76 @@ class BehandlingstemaServiceTest {
         val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(defaultFagsak.id)
 
         assertEquals(BehandlingUnderkategori.ORDINÆR, underkategori)
+    }
+
+    @Test
+    fun `skal hente løpende kategori til NASJONAL når toggelen er av`() {
+        every { featureToggleService.isEnabled(any()) } returns false
+        assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
+    }
+
+    @Test
+    fun `skal hente løpende kategori til NASJONAL når siste behandling er NASJONAL og har løpende utbetaling`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = listOf(randomFnr())
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(defaultFagsak.id) } returns defaultBehandling
+        every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
+            VilkårsvurderingTidslinjer(
+                vilkårsvurdering = lagVilkårsvurdering(tilAktør(søkerFnr), defaultBehandling, Resultat.OPPFYLT),
+                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, randomFnr(), barnFnr)
+            )
+        assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
+    }
+
+    @Test
+    fun `skal hente løpende kategori til EØS når siste behandling er EØS og har løpende utbetaling`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+        val barn2Fnr = randomFnr()
+        val barnaFnr = listOf(barnFnr, barn2Fnr)
+        val behandlingMedEøsRegelverk = defaultBehandling.copy(kategori = BehandlingKategori.EØS)
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(defaultFagsak.id) } returns
+            behandlingMedEøsRegelverk
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandlingMedEøsRegelverk)
+        vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(
+            vilkårsvurdering,
+            tilAktør(søkerFnr),
+            tilAktør(barnFnr),
+            tilAktør(barn2Fnr),
+            LocalDate.now().minusMonths(1),
+            LocalDate.now().plusYears(2)
+        )
+        every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
+            VilkårsvurderingTidslinjer(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+            )
+        assertEquals(BehandlingKategori.EØS, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
+    }
+
+    @Test
+    fun `skal hente løpende kategori til NASJONAL når siste behandling er EØS opphørt`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+        val barn2Fnr = randomFnr()
+        val barnaFnr = listOf(barnFnr, barn2Fnr)
+        val behandlingMedEøsRegelverk = defaultBehandling.copy(kategori = BehandlingKategori.EØS)
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(defaultFagsak.id) } returns
+            behandlingMedEøsRegelverk
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandlingMedEøsRegelverk)
+        vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(
+            vilkårsvurdering,
+            tilAktør(søkerFnr),
+            tilAktør(barnFnr),
+            tilAktør(barn2Fnr),
+            LocalDate.now().minusMonths(3),
+            LocalDate.now().minusMonths(2)
+        )
+        every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
+            VilkårsvurderingTidslinjer(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+            )
+        assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }
 }

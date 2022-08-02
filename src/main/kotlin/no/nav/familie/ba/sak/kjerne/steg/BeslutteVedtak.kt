@@ -51,11 +51,16 @@ class BeslutteVedtak(
             throw FunksjonellFeil("Behandlingen er allerede avsluttet")
         } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV &&
             !featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV)
-        )
+        ) {
             throw FunksjonellFeil(
                 melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV} false",
                 frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer."
             )
+        } else if (behandling.erTekniskBehandling() && !featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING)) {
+            throw FunksjonellFeil(
+                "Du har ikke tilgang til å beslutte en behandling med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer."
+            )
+        }
         val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(
             behandling = behandling,
             beslutter = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_NAVN else

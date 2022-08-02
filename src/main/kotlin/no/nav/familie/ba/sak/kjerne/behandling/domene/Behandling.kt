@@ -254,6 +254,8 @@ data class Behandling(
 
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
+    fun erTekniskBehandling() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR || erTekniskEndring()
+
     fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
 
     fun kanLeggeTilOgFjerneUtvidetVilkår() =
@@ -366,6 +368,8 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
 
     fun erManuellMigreringsårsak(): Boolean = this == HELMANUELL_MIGRERING || this == ENDRE_MIGRERINGSDATO
 
+    fun erFørstegangMigreringsårsak(): Boolean = this == HELMANUELL_MIGRERING || this == MIGRERING
+
     fun årsakSomKanEndreBehandlingKategori(): Boolean =
         this == SØKNAD || this == ÅRLIG_KONTROLL || this == NYE_OPPLYSNINGER ||
             this == KLAGE || this == ENDRE_MIGRERINGSDATO || this == MIGRERING || this == HELMANUELL_MIGRERING
@@ -392,7 +396,7 @@ enum class BehandlingKategori(val visningsnavn: String, val nivå: Int) {
     }
 }
 
-fun List<BehandlingKategori?>.finnHøyesteKategori(): BehandlingKategori? = this.filterNotNull().maxByOrNull { it.nivå }
+fun List<BehandlingKategori>.finnHøyesteKategori(): BehandlingKategori? = this.maxByOrNull { it.nivå }
 
 enum class BehandlingUnderkategori(val visningsnavn: String, val nivå: Int) {
     UTVIDET("Utvidet", 2),

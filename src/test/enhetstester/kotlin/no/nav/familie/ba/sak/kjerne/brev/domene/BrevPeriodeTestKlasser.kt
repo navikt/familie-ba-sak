@@ -52,6 +52,7 @@ data class BrevPeriodeTestConfig(
     val brevMålform: Målform,
 
     val kompetanser: List<BrevPeriodeTestKompetanse>? = null,
+    val kompetanserSomStopperRettFørPeriode: List<BrevPeriodeTestKompetanse>? = null,
 
     val forventetOutput: BrevPeriodeOutput?,
 ) {
@@ -214,7 +215,7 @@ data class BegrunnelseDataTestConfig(
 
 data class EØSBegrunnelseTestConfig(
     val apiNavn: String,
-    val annenForeldersAktivitet: String,
+    val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String,
     val barnetsBostedsland: String,
     val barnasFodselsdatoer: String,

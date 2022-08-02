@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
-import no.nav.familie.ba.sak.kjerne.verge.Verge
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.verge.Verge
 import java.util.Objects
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -39,7 +39,7 @@ data class Fagsak(
         nullable = true,
         updatable = false
     )
-    var institusjon: Institusjon? = null,
+    val institusjon: Institusjon? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(
