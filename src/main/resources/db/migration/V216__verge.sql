@@ -1,3 +1,5 @@
+ALTER TABLE FAGSAK ADD COLUMN fk_verge_id BIGINT;
+
 CREATE TABLE verge (
     id               BIGINT PRIMARY KEY,
     navn             VARCHAR                             NOT NULL,
