@@ -39,7 +39,7 @@ data class Fagsak(
         nullable = true,
         updatable = false
     )
-    val institusjon: Institusjon? = null,
+    var institusjon: Institusjon? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(

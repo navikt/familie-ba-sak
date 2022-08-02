@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.verge.Verge
 import java.math.BigInteger
@@ -10,11 +11,12 @@ data class InstitusjonInfo(val orgNummer: String, val TSR: String)
 
 data class RestRegistrerVerge(val ensligMindreårligInfo: EnsligMindreårligInfo?, val institusjonInfo: InstitusjonInfo?) {
 
-    fun tilVerge(): Verge? = if (ensligMindreårligInfo != null) Verge(
+    fun tilVerge(behandling: Behandling): Verge? = if (ensligMindreårligInfo != null) Verge(
         BigInteger.ZERO,
         ensligMindreårligInfo.Navn,
         ensligMindreårligInfo.Adresse,
-        ensligMindreårligInfo.Ident
+        ensligMindreårligInfo.Ident,
+        behandling
     ) else null
 
     fun tilInstitusjon(): Institusjon? = if (institusjonInfo != null) Institusjon(

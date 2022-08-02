@@ -22,7 +22,7 @@ class RegistrerVerge(
         data: RestRegistrerVerge
     ): StegType {
         val fagsakId = behandling.fagsak.id
-        var verge = data.tilVerge()
+        var verge = data.tilVerge(behandling)
         var institusjon = data.tilInstitusjon()
         if (verge != null) {
             institusjonService.RegistrerVergeForFagsak(fagsakId, verge)
