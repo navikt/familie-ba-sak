@@ -24,7 +24,7 @@ data class BrevBegrunnelserTestConfig(
     val vedtaksperiodetype: Vedtaksperiodetype,
 
     // Brukes for å se om det er en reduksjon i småbarnstillegg eller utvidet
-    val ytelserForSøkerForrigeMåned: List<AndelTilkjentYtelse>,
+    val ytelserForSøkerForrigeMåned: List<YtelseType>,
 
     val ytelserForBarnOgSøkerIPeriode: List<YtelseType>,
     val erFørsteVedtaksperiodePåFagsak: Boolean,

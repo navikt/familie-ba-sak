@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
@@ -260,7 +261,8 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
     ytelserForSøkerForrigeMåned = hentYtelserForSøkerForrigeMåned(
         andelerTilkjentYtelse,
         utvidetVedtaksperiodeMedBegrunnelser
-    )
+    ),
+    ytelserForrigeMåned = andelerTilkjentYtelse.filter { ytelseErFraForrigeMåned(it, utvidetVedtaksperiodeMedBegrunnelser) }
 )
 
 fun hentGyldigeEØSBegrunnelserForPeriode(
@@ -299,7 +301,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     aktørIderMedUtbetaling: List<String>,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    ytelserForSøkerForrigeMåned: List<AndelTilkjentYtelse>
+    ytelserForSøkerForrigeMåned: List<YtelseType>,
+    ytelserForrigeMåned: List<AndelTilkjentYtelse>
 ): List<Standardbegrunnelse> {
     val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.values()
         .filter {
@@ -326,6 +329,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
             minimerteEndredeUtbetalingAndeler,
             erFørsteVedtaksperiodePåFagsak,
             ytelserForSøkerForrigeMåned,
+            ytelserForrigeMåned
         )
         else -> {
             velgUtbetalingsbegrunnelser(
@@ -338,6 +342,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
                 minimerteEndredeUtbetalingAndeler,
                 erFørsteVedtaksperiodePåFagsak,
                 ytelserForSøkerForrigeMåned,
+                ytelserForrigeMåned
             )
         }
     }
@@ -352,7 +357,8 @@ private fun velgRedusertBegrunnelser(
     aktørIderMedUtbetaling: List<String>,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    ytelserForSøkerForrigeMåned: List<AndelTilkjentYtelse>,
+    ytelserForSøkerForrigeMåned: List<YtelseType>,
+    ytelserForrigeMåned: List<AndelTilkjentYtelse>
 ): List<Standardbegrunnelse> {
     val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
         it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
@@ -368,6 +374,7 @@ private fun velgRedusertBegrunnelser(
             minimerteEndredeUtbetalingAndeler,
             erFørsteVedtaksperiodePåFagsak,
             ytelserForSøkerForrigeMåned,
+            ytelserForrigeMåned
         )
         return redusertBegrunnelser + utbetalingsbegrunnelser
     }
@@ -383,7 +390,8 @@ private fun velgUtbetalingsbegrunnelser(
     aktørIderMedUtbetaling: List<String>,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    ytelserForSøkerForrigeMåned: List<AndelTilkjentYtelse>,
+    ytelserForSøkerForrigeMåned: List<YtelseType>,
+    ytelserForrigeMåned: List<AndelTilkjentYtelse>
 ): List<Standardbegrunnelse> {
     val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype
@@ -399,6 +407,7 @@ private fun velgUtbetalingsbegrunnelser(
                         sanityBegrunnelser = sanityBegrunnelser,
                         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                         ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
+                        ytelserForrigeMåned = ytelserForrigeMåned
                     )
                 ) {
                     acc.add(standardBegrunnelse)
@@ -424,6 +433,7 @@ fun hentYtelserForSøkerForrigeMåned(
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser
 ) = andelerTilkjentYtelse.filter {
     it.type.erKnyttetTilSøker() &&
-        it.stønadTom.sisteDagIInneværendeMåned()
-            .erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)
-}
+        ytelseErFraForrigeMåned(it, utvidetVedtaksperiodeMedBegrunnelser)
+}.map { it.type }
+
+fun ytelseErFraForrigeMåned(ytelse: AndelTilkjentYtelse, utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser) = ytelse.stønadTom.sisteDagIInneværendeMåned().erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)
