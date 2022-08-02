@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertPerson
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
@@ -65,6 +66,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = emptyList()
                 )
         )
     }
@@ -82,6 +84,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = emptyList()
                 )
         )
     }
@@ -99,6 +102,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = emptyList()
                 )
         )
     }
@@ -122,6 +126,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = emptyList()
                 )
         )
     }
@@ -145,6 +150,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = emptyList()
                 )
         )
     }
@@ -168,6 +174,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = emptyList()
                 )
         )
     }
@@ -187,6 +194,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = emptyList()
                 )
         )
     }
@@ -206,6 +214,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = emptyList()
                 )
         )
     }
@@ -239,6 +248,7 @@ internal class StandardbegrunnelseTest {
                     ).map { it.tilMinimertEndretUtbetalingAndel() },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = emptyList()
                 )
         )
     }
@@ -272,6 +282,7 @@ internal class StandardbegrunnelseTest {
                     ).map { it.tilMinimertEndretUtbetalingAndel() },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = emptyList()
                 )
         )
     }
@@ -332,7 +343,7 @@ internal class StandardbegrunnelseTest {
 
         val reduksjonBarnDødBegrunnelse = listOf(SanityBegrunnelse(apiNavn = "reduksjonBarnDod", navnISystem = "barnDød", ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD)))
 
-        val ytelserForSøkerForrigePeriode = listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(LocalDate.now().minusMonths(1).year, LocalDate.now().minusMonths(1).month), tom = YearMonth.of(LocalDate.now().year, LocalDate.now().month)))
+        val ytelserForrigeMåned = listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(LocalDate.now().minusMonths(1).year, LocalDate.now().minusMonths(1).month), tom = YearMonth.of(LocalDate.now().year, LocalDate.now().month)))
 
         assertTrue(
             Standardbegrunnelse.REDUKSJON_BARN_DØD
@@ -344,7 +355,8 @@ internal class StandardbegrunnelseTest {
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
-                    ytelserForSøkerForrigeMåned = ytelserForSøkerForrigePeriode,
+                    ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = ytelserForrigeMåned
                 )
         )
     }

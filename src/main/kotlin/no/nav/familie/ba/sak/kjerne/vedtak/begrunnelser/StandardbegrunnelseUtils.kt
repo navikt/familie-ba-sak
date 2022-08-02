@@ -37,7 +37,8 @@ fun Standardbegrunnelse.triggesForPeriode(
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel> = emptyList(),
     sanityBegrunnelser: List<SanityBegrunnelse>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    ytelserForSøkerForrigeMåned: List<AndelTilkjentYtelse>,
+    ytelserForSøkerForrigeMåned: List<YtelseType>,
+    ytelserForrigeMåned: List<AndelTilkjentYtelse>
 ): Boolean {
 
     val triggesAv = this.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
@@ -94,15 +95,33 @@ fun Standardbegrunnelse.triggesForPeriode(
             minimertVedtaksperiode = minimertVedtaksperiode,
         )
         triggesAv.gjelderFraInnvilgelsestidspunkt -> false
-        triggesAv.barnDød -> barnDødeForrigePeriode(ytelserForSøkerForrigeMåned, minimertePersoner)
+        triggesAv.barnDød -> barnDødeForrigePeriode(ytelserForrigeMåned, minimertePersoner)
         else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
     }
 }
 
-private fun barnDødeForrigePeriode(tilkjenteYtelserForrigePeriode: List<AndelTilkjentYtelse>, minimertePersoner: List<MinimertPerson>) : Boolean {
-    val fom = tilkjenteYtelserForrigePeriode.minOf { andelTilkjentYtelse: AndelTilkjentYtelse ->  andelTilkjentYtelse.stønadFom }
-    val tom = tilkjenteYtelserForrigePeriode.maxOf { andelTilkjentYtelse: AndelTilkjentYtelse ->  andelTilkjentYtelse.stønadTom }
-    return minimertePersoner.any { minimertPerson -> minimertPerson.erDød && fom <= minimertPerson.dødsfallsdato!!.toYearMonth() && tom >= minimertPerson.dødsfallsdato.toYearMonth()}
+private fun barnDødeForrigePeriode(tilkjenteYtelserForrigePeriode: List<AndelTilkjentYtelse>, minimertePersoner: List<MinimertPerson>): Boolean {
+    try {
+        if (tilkjenteYtelserForrigePeriode.isNotEmpty()) {
+            val fom =
+                tilkjenteYtelserForrigePeriode.minOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadFom }
+            val tom =
+                tilkjenteYtelserForrigePeriode.maxOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadTom }
+            return minimertePersoner.any { minimertPerson ->
+                val erDød = minimertPerson.erDød
+                if (erDød) {
+                    val fomFørDødsfall = fom <= minimertPerson.dødsfallsdato!!.toYearMonth()
+                    val tomEtterDødsfall = tom >= minimertPerson.dødsfallsdato.toYearMonth()
+                    return erDød && fomFørDødsfall && tomEtterDødsfall
+                }
+                return false
+            }
+        }
+        return false
+    } catch (e: NoSuchElementException) {
+        logger.info(e.message)
+        return false
+    }
 }
 
 private fun erEndretTriggerErOppfylt(
@@ -181,7 +200,7 @@ fun Standardbegrunnelse.tilVedtaksbegrunnelse(
 fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(
     ytelseType: YtelseType,
     ytelseTyperForPeriode: Set<YtelseType>,
-    ytelserGjeldeneForSøkerForrigeMåned: List<AndelTilkjentYtelse>
+    ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>
 ): Boolean {
     return when (this) {
         VedtakBegrunnelseType.INNVILGET -> ytelseTyperForPeriode.contains(ytelseType)
@@ -193,6 +212,6 @@ fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(
 
 private fun ytelseOppfyltForrigeMåned(
     ytelseType: YtelseType,
-    ytelserGjeldeneForSøkerForrigeMåned: List<AndelTilkjentYtelse>,
+    ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>,
 ) = ytelserGjeldeneForSøkerForrigeMåned
-    .any { it.type == ytelseType }
+    .any { it == ytelseType }
