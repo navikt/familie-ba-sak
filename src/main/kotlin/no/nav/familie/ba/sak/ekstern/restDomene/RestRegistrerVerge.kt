@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
-import no.nav.familie.ba.sak.kjerne.institusjon.Verge
+import no.nav.familie.ba.sak.kjerne.verge.Verge
 import java.math.BigInteger
 
 data class EnsligMindreårligInfo(val Navn: String, val Adresse: String, val Ident: String?)

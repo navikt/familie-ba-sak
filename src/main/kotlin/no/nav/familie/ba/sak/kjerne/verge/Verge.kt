@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.institusjon
+package no.nav.familie.ba.sak.kjerne.verge
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.institusjon
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.verge.Verge
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
