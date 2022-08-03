@@ -334,7 +334,7 @@ internal class StandardbegrunnelseTest {
     }
 
     @Test
-    fun `Dersom dødsfalldato er før fom i vedtaksperiode skal begrunnelsen REDUKSJON_BARN_DØD trigges`() {
+    fun `Dersom dødsfalldato ligger i forrige ytelse-periode skal begrunnelsen begrunnelser med trigger BARN_DØD trigges`() {
         val dødtBarn = lagPerson(personIdent = PersonIdent("12345678910"), type = PersonType.BARN)
         dødtBarn.dødsfall = lagDødsfall(dødtBarn, dødsfallDatoFraPdl = LocalDate.now().minusMonths(1).withDayOfMonth(15).toString(), dødsfallAdresseFraPdl = null)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
@@ -346,7 +346,58 @@ internal class StandardbegrunnelseTest {
         assertTrue(
             Standardbegrunnelse.REDUKSJON_BARN_DØD
                 .triggesForPeriode(
+                    sanityBegrunnelser = reduksjonBarnDødBegrunnelse,
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = ytelserForrigeMåned
+                )
+        )
+    }
 
+    @Test
+    fun `Dersom dødsfalldato ligger etter en ytelse-periode skal ikke begrunnelser med trigger BARN_DØD trigges`() {
+        val dødtBarn = lagPerson(personIdent = PersonIdent("12345678910"), type = PersonType.BARN)
+        val dødsfallDato = LocalDate.now().minusMonths(1).withDayOfMonth(15)
+        dødtBarn.dødsfall = lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
+
+        val reduksjonBarnDødBegrunnelse = listOf(SanityBegrunnelse(apiNavn = "reduksjonBarnDod", navnISystem = "barnDød", ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD)))
+
+        val ytelserForrigeMåned = listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDato.minusMonths(5).year, dødsfallDato.minusMonths(5).month), tom = YearMonth.of(dødsfallDato.minusMonths(1).year, dødsfallDato.minusMonths(1).month)))
+
+        assertFalse(
+            Standardbegrunnelse.REDUKSJON_BARN_DØD
+                .triggesForPeriode(
+                    sanityBegrunnelser = reduksjonBarnDødBegrunnelse,
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
+                    ytelserForrigeMåned = ytelserForrigeMåned
+                )
+        )
+    }
+
+    @Test
+    fun `Dersom dødsfalldato ligger før en ytelse-periode skal ikke begrunnelser med trigger BARN_DØD trigges`() {
+        val dødtBarn = lagPerson(personIdent = PersonIdent("12345678910"), type = PersonType.BARN)
+        val dødsfallDato = LocalDate.now().minusMonths(1).withDayOfMonth(15)
+        dødtBarn.dødsfall = lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
+
+        val reduksjonBarnDødBegrunnelse = listOf(SanityBegrunnelse(apiNavn = "reduksjonBarnDod", navnISystem = "barnDød", ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD)))
+
+        val ytelserForrigeMåned = listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDato.plusMonths(5).year, dødsfallDato.plusMonths(5).month), tom = YearMonth.of(dødsfallDato.plusMonths(6).year, dødsfallDato.plusMonths(6).month)))
+
+        assertFalse(
+            Standardbegrunnelse.REDUKSJON_BARN_DØD
+                .triggesForPeriode(
                     sanityBegrunnelser = reduksjonBarnDødBegrunnelse,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
