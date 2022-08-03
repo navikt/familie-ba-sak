@@ -34,8 +34,6 @@ data class SanityBegrunnelse(
 )
 
 data class RestSanityBegrunnelse(
-    val _id: String? = "",
-    val _updatedAt: String? = "",
     val apiNavn: String?,
     val navnISystem: String,
     val vilkaar: List<String>? = emptyList(),
