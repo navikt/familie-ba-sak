@@ -7,12 +7,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.logg.RegistrerVergeLoggType
+import no.nav.familie.ba.sak.kjerne.verge.VergeService
 import org.springframework.stereotype.Service
 
 // TODO: Kan vi registre beger verge og institusjon på en fagsak? Kan vi endre verge og institusjon sinere?
 @Service
-class RegistrerVerge(
+class RegistrerInstitusjonOgVerge(
     val institusjonService: InstitusjonService,
+    val vergeService: VergeService,
     val loggService: LoggService,
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) : BehandlingSteg<RestRegistrerVerge> {
@@ -25,7 +27,7 @@ class RegistrerVerge(
         var verge = data.tilVerge(behandling)
         var institusjon = data.tilInstitusjon()
         if (verge != null) {
-            institusjonService.RegistrerVergeForFagsak(fagsakId, verge)
+            vergeService.RegistrerVergeForBehandling(behandling, verge)
         }
         if (institusjon != null) {
             institusjonService.RegistrerInstitusjonForFagsak(fagsakId, institusjon)
@@ -44,6 +46,6 @@ class RegistrerVerge(
     }
 
     override fun stegType(): StegType {
-        return StegType.REGISTRERE_VERGE
+        return StegType.REGISTRERE_INSTITUSJON_OG_VERGE
     }
 }

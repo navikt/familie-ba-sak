@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_OPPDRAG
 import no.nav.familie.ba.sak.kjerne.steg.StegType.JOURNALFØR_VEDTAKSBREV
 import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_PERSONGRUNNLAG
 import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_SØKNAD
-import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_VERGE
+import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_INSTITUSJON_OG_VERGE
 import no.nav.familie.ba.sak.kjerne.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ba.sak.kjerne.steg.StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
 import no.nav.familie.ba.sak.kjerne.steg.StegType.VILKÅRSVURDERING
@@ -63,7 +63,7 @@ enum class StegType(
             BehandlingStatus.IVERKSETTER_VEDTAK
         )
     ),
-    REGISTRERE_VERGE(
+    REGISTRERE_INSTITUSJON_OG_VERGE(
         rekkefølge = 0,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
@@ -171,7 +171,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
 
     if (behandlingÅrsak.erOmregningsårsak()) {
         return when (utførendeStegType) {
-            REGISTRERE_VERGE -> REGISTRERE_PERSONGRUNNLAG
+            REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_PERSONGRUNNLAG
             REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
             VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
             BEHANDLINGSRESULTAT -> JOURNALFØR_VEDTAKSBREV
@@ -187,7 +187,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         BehandlingÅrsak.TEKNISK_OPPHØR -> throw Feil("Teknisk opphør er ikke mulig å behandle lenger")
         BehandlingÅrsak.MIGRERING -> {
             when (utførendeStegType) {
-                REGISTRERE_VERGE -> REGISTRERE_PERSONGRUNNLAG
+                REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_PERSONGRUNNLAG
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> IVERKSETT_MOT_OPPDRAG
@@ -200,7 +200,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.ENDRE_MIGRERINGSDATO, BehandlingÅrsak.HELMANUELL_MIGRERING -> {
             when (utførendeStegType) {
-                REGISTRERE_VERGE -> REGISTRERE_PERSONGRUNNLAG
+                REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_PERSONGRUNNLAG
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
@@ -219,7 +219,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.TEKNISK_ENDRING -> {
             when (utførendeStegType) {
-                REGISTRERE_VERGE -> REGISTRERE_PERSONGRUNNLAG
+                REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_PERSONGRUNNLAG
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
@@ -235,7 +235,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.FØDSELSHENDELSE -> {
             when (utførendeStegType) {
-                REGISTRERE_VERGE -> REGISTRERE_PERSONGRUNNLAG
+                REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_PERSONGRUNNLAG
                 REGISTRERE_PERSONGRUNNLAG -> FILTRERING_FØDSELSHENDELSER
                 FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
@@ -251,7 +251,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.SØKNAD -> {
             when (utførendeStegType) {
-                REGISTRERE_VERGE -> REGISTRERE_PERSONGRUNNLAG
+                REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_PERSONGRUNNLAG
                 REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
                 REGISTRERE_SØKNAD -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
@@ -271,7 +271,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.SMÅBARNSTILLEGG -> {
             when (utførendeStegType) {
-                REGISTRERE_VERGE -> REGISTRERE_PERSONGRUNNLAG
+                REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_PERSONGRUNNLAG
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> {
@@ -293,7 +293,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.SATSENDRING -> {
             when (utførendeStegType) {
-                REGISTRERE_VERGE -> REGISTRERE_PERSONGRUNNLAG
+                REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_PERSONGRUNNLAG
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING)
@@ -308,7 +308,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         else -> {
             when (utførendeStegType) {
-                REGISTRERE_VERGE -> REGISTRERE_PERSONGRUNNLAG
+                REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_PERSONGRUNNLAG
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING

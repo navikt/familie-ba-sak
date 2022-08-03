@@ -41,14 +41,6 @@ data class Fagsak(
     )
     var institusjon: Institusjon? = null,
 
-    @OneToOne(optional = true)
-    @JoinColumn(
-        name = "fk_verge_id",
-        nullable = true,
-        updatable = false
-    )
-    var verge: Verge? = null,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     var status: FagsakStatus = FagsakStatus.OPPRETTET,

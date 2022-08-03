@@ -375,8 +375,8 @@ class StegService(
 
     @Transactional
     fun håndterRegistrerVerge(behandling: Behandling, vergeInfo: RestRegistrerVerge): Behandling {
-        val behandlingSteg: RegistrerVerge =
-            hentBehandlingSteg(StegType.REGISTRERE_VERGE) as RegistrerVerge
+        val behandlingSteg: RegistrerInstitusjonOgVerge =
+            hentBehandlingSteg(StegType.REGISTRERE_INSTITUSJON_OG_VERGE) as RegistrerInstitusjonOgVerge
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, vergeInfo)
