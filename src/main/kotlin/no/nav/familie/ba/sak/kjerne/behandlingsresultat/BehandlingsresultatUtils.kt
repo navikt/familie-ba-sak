@@ -36,7 +36,6 @@ object BehandlingsresultatUtils {
         tilkjentYtelse: TilkjentYtelse,
         erEksplisittAvslag: Boolean
     ): BehandlingsresultatPerson {
-
         val aktør = person.aktør
 
         return BehandlingsresultatPerson(
@@ -68,7 +67,7 @@ object BehandlingsresultatUtils {
                         )
                     }
             },
-            eksplisittAvslag = erEksplisittAvslag,
+            eksplisittAvslag = erEksplisittAvslag
         )
     }
 
@@ -110,7 +109,8 @@ object BehandlingsresultatUtils {
             samledeResultater == setOf(YtelsePersonResultat.ENDRET_UTBETALING) -> Behandlingsresultat.ENDRET_UTBETALING
             samledeResultater == setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING) -> Behandlingsresultat.ENDRET_UTEN_UTBETALING
             samledeResultater.matcherAltOgHarBådeEndretOgOpphørtResultat(emptySet()) -> Behandlingsresultat.ENDRET_OG_OPPHØRT
-            samledeResultater == setOf(YtelsePersonResultat.OPPHØRT) -> Behandlingsresultat.OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.OPPHØRT, YtelsePersonResultat.FORTSATT_OPPHØRT) ||
+                samledeResultater == setOf(YtelsePersonResultat.OPPHØRT) -> Behandlingsresultat.OPPHØRT
             samledeResultater == setOf(YtelsePersonResultat.INNVILGET) -> Behandlingsresultat.INNVILGET
             samledeResultater.matcherAltOgHarOpphørtResultat(setOf(YtelsePersonResultat.INNVILGET)) -> Behandlingsresultat.INNVILGET_OG_OPPHØRT
             samledeResultater.matcherAltOgHarEndretResultat(setOf(YtelsePersonResultat.INNVILGET)) -> Behandlingsresultat.INNVILGET_OG_ENDRET
@@ -134,7 +134,7 @@ object BehandlingsresultatUtils {
             samledeResultater.matcherAltOgHarBådeEndretOgOpphørtResultat(
                 setOf(
                     YtelsePersonResultat.INNVILGET,
-                    YtelsePersonResultat.AVSLÅTT,
+                    YtelsePersonResultat.AVSLÅTT
                 )
             ) -> Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
             samledeResultater == setOf(YtelsePersonResultat.AVSLÅTT) -> Behandlingsresultat.AVSLÅTT
@@ -173,7 +173,6 @@ object BehandlingsresultatUtils {
             ) ||
             (behandling.type == BehandlingType.REVURDERING && resultat == Behandlingsresultat.IKKE_VURDERT)
         ) {
-
             val feilmelding = "Behandlingsresultatet ${resultat.displayName.lowercase()} " +
                 "er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
@@ -193,19 +192,22 @@ object BehandlingsresultatUtils {
 }
 
 private fun validerYtelsePersoner(ytelsePersoner: List<YtelsePerson>) {
-    if (ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.IKKE_VURDERT })
+    if (ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.IKKE_VURDERT }) {
         throw Feil(message = "Minst én ytelseperson er ikke vurdert")
+    }
 
-    if (ytelsePersoner.any { it.ytelseSlutt == null })
+    if (ytelsePersoner.any { it.ytelseSlutt == null }) {
         throw Feil(message = "YtelseSlutt ikke satt ved utledning av behandlingsresultat")
+    }
 
     if (ytelsePersoner.any {
         it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(
                 inneværendeMåned()
             ) == true
     }
-    )
+    ) {
         throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter inneværende måned")
+    }
 }
 
 private fun kombinerOverlappendeAndelerForSøker(andeler: List<AndelTilkjentYtelse>): List<BehandlingsresultatAndelTilkjentYtelse> {
