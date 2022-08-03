@@ -5,8 +5,8 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
@@ -374,7 +374,7 @@ class StegService(
     }
 
     @Transactional
-    fun håndterRegistrerVerge(behandling: Behandling, vergeInfo: RestRegistrerVerge): Behandling {
+    fun håndterRegistrerVerge(behandling: Behandling, vergeInfo: RestRegistrerInstitusjonOgVerge): Behandling {
         val behandlingSteg: RegistrerInstitusjonOgVerge =
             hentBehandlingSteg(StegType.REGISTRERE_INSTITUSJON_OG_VERGE) as RegistrerInstitusjonOgVerge
 

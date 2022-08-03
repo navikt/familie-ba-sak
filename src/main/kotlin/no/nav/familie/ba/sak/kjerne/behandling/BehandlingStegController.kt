@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_ENDRING
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_VEDLIKEHOLD_HENLEGGELSE
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
@@ -199,7 +199,7 @@ class BehandlingStegController(
     @PostMapping(path = ["register-verge"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registerVerge(
         @PathVariable behandlingId: Long,
-        @RequestBody vergeInfo: RestRegistrerVerge
+        @RequestBody vergeInfo: RestRegistrerInstitusjonOgVerge
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         if (vergeInfo.tilVerge(behandling) == null && vergeInfo.tilInstitusjon() == null) {

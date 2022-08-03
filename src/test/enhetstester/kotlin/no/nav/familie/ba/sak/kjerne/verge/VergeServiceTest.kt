@@ -27,9 +27,9 @@ class VergeServiceTest {
         val behandlingCaptured = behandlingSlot.captured
         val vergeCaptured = behandlingCaptured.verge
         assertThat(vergeCaptured!!.id).isEqualTo(verge.id)
-        assertThat(vergeCaptured!!.Navn).isEqualTo(verge.Navn)
-        assertThat(vergeCaptured!!.Adresse).isEqualTo(verge.Adresse)
-        assertThat(vergeCaptured!!.Ident).isEqualTo(verge.Ident)
+        assertThat(vergeCaptured!!.navn).isEqualTo(verge.navn)
+        assertThat(vergeCaptured!!.adresse).isEqualTo(verge.adresse)
+        assertThat(vergeCaptured!!.ident).isEqualTo(verge.ident)
         assertThat(vergeCaptured!!.behandling.id).isEqualTo(behandling.id)
     }
 }

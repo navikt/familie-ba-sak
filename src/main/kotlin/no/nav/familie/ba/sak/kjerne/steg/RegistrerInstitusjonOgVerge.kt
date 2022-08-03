@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerVerge
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
@@ -17,11 +17,11 @@ class RegistrerInstitusjonOgVerge(
     val vergeService: VergeService,
     val loggService: LoggService,
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
-) : BehandlingSteg<RestRegistrerVerge> {
+) : BehandlingSteg<RestRegistrerInstitusjonOgVerge> {
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: RestRegistrerVerge
+        data: RestRegistrerInstitusjonOgVerge
     ): StegType {
         val fagsakId = behandling.fagsak.id
         var verge = data.tilVerge(behandling)
