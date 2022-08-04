@@ -98,6 +98,10 @@ class UtvidetBehandlingService(
         val utenlandskePeriodebeløp =
             if (kanBehandleEøs) utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
+        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+            .also { andelerTilkjentYtelse.forEach { it.synkroniserMedEndretUtbetalingAndeler() } }
+            .map { it.tilRestEndretUtbetalingAndel() }
+
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
             steg = behandling.steg,
@@ -122,8 +126,7 @@ class UtvidetBehandlingService(
             utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
-            endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
-                .map { it.tilRestEndretUtbetalingAndel() },
+            endretUtbetalingAndeler = endretUtbetalingAndeler,
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             endringstidspunkt = utledEndringstidpunkt(endringstidspunkt, behandling),
             vedtak = vedtak?.tilRestVedtak(

@@ -229,6 +229,12 @@ data class AndelTilkjentYtelse(
                 regelverkavhenigeVilkår().any { it == vilkårResultat.vilkårType }
             }
 
+    fun synkroniserMedEndretUtbetalingAndeler() {
+        endretUtbetalingAndeler
+            .filter { endretUtbetalingAndel -> !endretUtbetalingAndel.andelTilkjentYtelser.contains(this) }
+            .forEach { endretUtbetalingAndel -> endretUtbetalingAndel.andelTilkjentYtelser.add(this) }
+    }
+
     companion object {
 
         /**

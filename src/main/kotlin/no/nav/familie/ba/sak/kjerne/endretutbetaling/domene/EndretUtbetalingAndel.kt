@@ -76,7 +76,7 @@ data class EndretUtbetalingAndel(
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
 
-    @ManyToMany(mappedBy = "endretUtbetalingAndeler", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "endretUtbetalingAndeler", fetch = FetchType.EAGER)
     val andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf(),
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
