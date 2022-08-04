@@ -50,6 +50,7 @@ data class Logg(
     @Column(name = "tekst")
     val tekst: String
 ) {
+
     constructor(behandlingId: Long, type: LoggType, rolle: BehandlerRolle, tekst: String = "") : this(
         behandlingId = behandlingId,
         type = type,
@@ -61,6 +62,8 @@ data class Logg(
 
 enum class LoggType(val visningsnavn: String, val tittel: String = visningsnavn) {
     AUTOVEDTAK_TIL_MANUELL_BEHANDLING("Autovedtak til manuell behandling", "Automatisk behandling stoppet"),
+    VERGE_REGISTRERT("Verge ble registrert"),
+    INSTITUSJON_REGISTRERT("Institusjon ble registrert"),
     FØDSELSHENDELSE("Fødselshendelse"), // Deprecated, bruk livshendelse
     LIVSHENDELSE("Livshendelse"),
     BEHANDLENDE_ENHET_ENDRET("Behandlende enhet endret", "Endret enhet på behandling"),
