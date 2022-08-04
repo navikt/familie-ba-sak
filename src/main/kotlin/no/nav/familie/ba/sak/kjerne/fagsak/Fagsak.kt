@@ -89,6 +89,6 @@ enum class FagsakEier {
 
 enum class FagsakType {
     NORMAL,
-    BARN_ENSLIG_MINDREÅRLIG,
+    BARN_ENSLIG_MINDREÅRIG,
     INSTITUSJON,
 }
