@@ -54,6 +54,7 @@ class VedtaksperiodeServiceUtilsTest {
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
             minimerteUtbetalingsperiodeDetaljer = listOf(),
+            ytelserForrigePeriode = emptyList(),
             barnIBehandling = emptyList()
         )
 
@@ -107,6 +108,7 @@ class VedtaksperiodeServiceUtilsTest {
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
             minimerteUtbetalingsperiodeDetaljer = listOf(),
+            ytelserForrigePeriode = emptyList(),
             barnIBehandling = emptyList()
         )
 

@@ -64,7 +64,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = emptyList()
+                    ytelserForrigePeriode = emptyList()
                 )
         )
     }
@@ -82,7 +82,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = emptyList()
+                    ytelserForrigePeriode = emptyList()
                 )
         )
     }
@@ -100,7 +100,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = emptyList()
+                    ytelserForrigePeriode = emptyList()
                 )
         )
     }
@@ -124,7 +124,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = emptyList()
+                    ytelserForrigePeriode = emptyList()
                 )
         )
     }
@@ -148,7 +148,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = emptyList()
+                    ytelserForrigePeriode = emptyList()
                 )
         )
     }
@@ -172,7 +172,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = emptyList()
+                    ytelserForrigePeriode = emptyList()
                 )
         )
     }
@@ -192,7 +192,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = emptyList()
+                    ytelserForrigePeriode = emptyList()
                 )
         )
     }
@@ -212,7 +212,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = emptyList()
+                    ytelserForrigePeriode = emptyList()
                 )
         )
     }
@@ -246,7 +246,7 @@ internal class StandardbegrunnelseTest {
                     ).map { it.tilMinimertEndretUtbetalingAndel() },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = emptyList()
+                    ytelserForrigePeriode = emptyList()
                 )
         )
     }
@@ -280,7 +280,7 @@ internal class StandardbegrunnelseTest {
                     ).map { it.tilMinimertEndretUtbetalingAndel() },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = emptyList()
+                    ytelserForrigePeriode = emptyList()
                 )
         )
     }
@@ -353,7 +353,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = ytelserForrigeMåned
+                    ytelserForrigePeriode = ytelserForrigeMåned
                 )
         )
     }
@@ -379,7 +379,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = ytelserForrigeMåned
+                    ytelserForrigePeriode = ytelserForrigeMåned
                 )
         )
     }
@@ -405,7 +405,7 @@ internal class StandardbegrunnelseTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
-                    ytelserForrigeMåned = ytelserForrigeMåned
+                    ytelserForrigePeriode = ytelserForrigeMåned
                 )
         )
     }

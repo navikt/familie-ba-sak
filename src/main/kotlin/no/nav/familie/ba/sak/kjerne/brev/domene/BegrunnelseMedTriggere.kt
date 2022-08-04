@@ -2,11 +2,12 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.delOpp
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
@@ -23,7 +24,8 @@ data class BegrunnelseMedTriggere(
         erUregistrerteBarnPåbehandling: Boolean,
         barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
         minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
-        barnIBehandling: List<Person>
+        ytelserForrigePeriode: List<AndelTilkjentYtelse>,
+        barnIBehandling: List<MinimertPerson>
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
 
         return if (this.standardbegrunnelse.kanDelesOpp) {
@@ -43,6 +45,7 @@ data class BegrunnelseMedTriggere(
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent,
                 minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+                ytelserForrigePeriode = ytelserForrigePeriode,
                 barnIBehandling = barnIBehandling
             )
 

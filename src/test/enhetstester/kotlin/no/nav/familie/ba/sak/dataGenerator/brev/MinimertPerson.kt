@@ -11,13 +11,11 @@ fun lagMinimertPerson(
     fødselsdato: LocalDate = LocalDate.now().minusYears(if (type == PersonType.BARN) 2 else 30),
     aktivPersonIdent: String = randomFnr(),
     aktørId: String = randomAktørId(aktivPersonIdent).aktørId,
-    erDød: Boolean = false,
     dødsfallsdato: LocalDate? = null
 ) = MinimertPerson(
     type = type,
     fødselsdato = fødselsdato,
     aktivPersonIdent = aktivPersonIdent,
     aktørId = aktørId,
-    erDød = erDød,
     dødsfallsdato = dødsfallsdato
 )

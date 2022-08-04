@@ -86,6 +86,7 @@ class BrevperiodeTest {
                             behandlingsresultatPersonTestConfig.personerPåBehandling
                         )
                     } ?: emptyList(),
+                    ytelserForrigePeriode = emptyList(),
                     barnIBehandling = emptyList()
                 ).genererBrevPeriode()
             } catch (e: Exception) {
