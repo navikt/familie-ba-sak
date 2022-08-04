@@ -104,25 +104,22 @@ fun dødeBarnForrigePeriode(
     ytelserForrigePeriode: List<AndelTilkjentYtelse>,
     barnIBehandling: List<MinimertPerson>
 ): List<MinimertPerson> {
-    if (ytelserForrigePeriode.isNotEmpty()) {
-        return barnIBehandling.filter { barn ->
-            val ytelserForrigePeriodeForBarn = ytelserForrigePeriode.filter {
-                it.aktør.aktivFødselsnummer() == barn.aktivPersonIdent
-            }
-            var barnDødeForrigePeriode = false
-            if (barn.erDød() && ytelserForrigePeriodeForBarn.isNotEmpty()) {
-                val fom =
-                    ytelserForrigePeriodeForBarn.minOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadFom }
-                val tom =
-                    ytelserForrigePeriodeForBarn.maxOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadTom }
-                val fomFørDødsfall = fom <= barn.dødsfallsdato!!.toYearMonth()
-                val tomEtterDødsfall = tom >= barn.dødsfallsdato.toYearMonth()
-                barnDødeForrigePeriode = fomFørDødsfall && tomEtterDødsfall
-            }
-            barnDødeForrigePeriode
+    return barnIBehandling.filter { barn ->
+        val ytelserForrigePeriodeForBarn = ytelserForrigePeriode.filter {
+            it.aktør.aktivFødselsnummer() == barn.aktivPersonIdent
         }
+        var barnDødeForrigePeriode = false
+        if (barn.erDød() && ytelserForrigePeriodeForBarn.isNotEmpty()) {
+            val fom =
+                ytelserForrigePeriodeForBarn.minOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadFom }
+            val tom =
+                ytelserForrigePeriodeForBarn.maxOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadTom }
+            val fomFørDødsfall = fom <= barn.dødsfallsdato!!.toYearMonth()
+            val tomEtterDødsfall = tom >= barn.dødsfallsdato.toYearMonth()
+            barnDødeForrigePeriode = fomFørDødsfall && tomEtterDødsfall
+        }
+        barnDødeForrigePeriode
     }
-    return emptyList()
 }
 
 private fun erEndretTriggerErOppfylt(
