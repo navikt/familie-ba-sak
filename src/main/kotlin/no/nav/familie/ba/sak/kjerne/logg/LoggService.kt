@@ -75,11 +75,24 @@ class LoggService(
         )
     }
 
-    fun opprettRegistrerVergeLogg(behandling: Behandling, type: RegistrerVergeLoggType) {
-        val tittel = when (type) {
-            RegistrerVergeLoggType.VERGE_REGISTRERT -> "verge ble registrert"
-            RegistrerVergeLoggType.INSTITUSJON_REGISTRERT -> "institusjon ble registrert"
-        }
+    fun opprettRegistrerInstitusjonLogg(behandling: Behandling) {
+        val tittel = "institusjon ble registrert"
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.INSTITUSJON_REGISTRERT,
+                tittel = tittel,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tekst = ""
+            )
+        )
+    }
+
+    fun opprettRegistrerVergeLogg(behandling: Behandling) {
+        val tittel = "verge ble registrert"
         lagre(
             Logg(
                 behandlingId = behandling.id,

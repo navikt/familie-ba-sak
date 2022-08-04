@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.logg.RegistrerVergeLoggType
 import no.nav.familie.ba.sak.kjerne.verge.VergeService
 import org.springframework.stereotype.Service
 
@@ -28,19 +27,20 @@ class RegistrerInstitusjonOgVerge(
         var institusjon = data.tilInstitusjon()
         if (verge != null) {
             vergeService.RegistrerVergeForBehandling(behandling, verge)
+            loggService.opprettRegistrerVergeLogg(
+                behandling
+            )
         }
         if (institusjon != null) {
             institusjonService.RegistrerInstitusjonForFagsak(fagsakId, institusjon)
+            loggService.opprettRegistrerInstitusjonLogg(
+                behandling
+            )
         }
 
         if (verge == null && institusjon == null) {
             throw Feil("Ugyldig DTO for registrer verge")
         }
-
-        loggService.opprettRegistrerVergeLogg(
-            behandling,
-            if (verge != null) RegistrerVergeLoggType.VERGE_REGISTRERT else RegistrerVergeLoggType.INSTITUSJON_REGISTRERT
-        )
 
         return hentNesteStegForNormalFlyt(behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id))
     }
