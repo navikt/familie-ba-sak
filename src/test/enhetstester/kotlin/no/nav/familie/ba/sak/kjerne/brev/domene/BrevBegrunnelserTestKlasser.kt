@@ -61,7 +61,6 @@ data class BrevbegrunnelserTestPerson(
         aktørId = this.aktørId,
         type = this.type,
         fødselsdato = this.fødselsdato,
-        erDød = this.erDød,
         dødsfallsdato = this.dødsfalldato
     )
 

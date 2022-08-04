@@ -38,7 +38,7 @@ fun Standardbegrunnelse.triggesForPeriode(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
-    ytelserForrigeMåned: List<AndelTilkjentYtelse>
+    ytelserForrigePeriode: List<AndelTilkjentYtelse>
 ): Boolean {
 
     val triggesAv = this.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
@@ -95,26 +95,34 @@ fun Standardbegrunnelse.triggesForPeriode(
             minimertVedtaksperiode = minimertVedtaksperiode,
         )
         triggesAv.gjelderFraInnvilgelsestidspunkt -> false
-        triggesAv.barnDød -> barnDødeForrigePeriode(ytelserForrigeMåned, minimertePersoner)
+        triggesAv.barnDød -> dødeBarnForrigePeriode(ytelserForrigePeriode, minimertePersoner.filter { it.type === PersonType.BARN }).any()
         else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
     }
 }
 
-private fun barnDødeForrigePeriode(tilkjenteYtelserForrigePeriode: List<AndelTilkjentYtelse>, minimertePersoner: List<MinimertPerson>): Boolean {
-    if (tilkjenteYtelserForrigePeriode.isNotEmpty()) {
-        val fom =
-            tilkjenteYtelserForrigePeriode.minOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadFom }
-        val tom =
-            tilkjenteYtelserForrigePeriode.maxOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadTom }
-        return minimertePersoner.filter { minimertPerson ->
-            minimertPerson.erDød
-        }.any { minimertPerson ->
-            val fomFørDødsfall = fom <= minimertPerson.dødsfallsdato!!.toYearMonth()
-            val tomEtterDødsfall = tom >= minimertPerson.dødsfallsdato.toYearMonth()
-            fomFørDødsfall && tomEtterDødsfall
+fun dødeBarnForrigePeriode(
+    ytelserForrigePeriode: List<AndelTilkjentYtelse>,
+    barnIBehandling: List<MinimertPerson>
+): List<MinimertPerson> {
+    if (ytelserForrigePeriode.isNotEmpty()) {
+        return barnIBehandling.filter { barn ->
+            val ytelserForrigePeriodeForBarn = ytelserForrigePeriode.filter {
+                it.aktør.aktivFødselsnummer() == barn.aktivPersonIdent
+            }
+            var barnDødeForrigePeriode = false
+            if (barn.erDød() && ytelserForrigePeriodeForBarn.isNotEmpty()) {
+                val fom =
+                    ytelserForrigePeriodeForBarn.minOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadFom }
+                val tom =
+                    ytelserForrigePeriodeForBarn.maxOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadTom }
+                val fomFørDødsfall = fom <= barn.dødsfallsdato!!.toYearMonth()
+                val tomEtterDødsfall = tom >= barn.dødsfallsdato.toYearMonth()
+                barnDødeForrigePeriode = fomFørDødsfall && tomEtterDødsfall
+            }
+            barnDødeForrigePeriode
         }
     }
-    return false
+    return emptyList()
 }
 
 private fun erEndretTriggerErOppfylt(
