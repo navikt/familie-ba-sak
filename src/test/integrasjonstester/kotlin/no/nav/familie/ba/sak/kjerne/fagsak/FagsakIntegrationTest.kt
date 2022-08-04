@@ -15,28 +15,35 @@ class FagsakIntegrationTest(
     fun `hentMinimalFagsakerForPerson() skal return begge fagsaker for en person`() {
         val personFnr = randomFnr()
         val fagsakOmsorgperson = fagsakService.hentEllerOpprettFagsak(personFnr)
-        val fagsakBarn = fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakEier.BARN, FagsakType.INSTITUSJON)
+        val fagsakInstitusjon = fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakType.INSTITUSJON)
+        val fagsakEnsligMindreÅrig = fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakType.BARN_ENSLIG_MINDREÅRIG)
 
         val minimalFagsakList = fagsakService.hentMinimalFagsakerForPerson(fagsakOmsorgperson.aktør)
 
-        assertThat(minimalFagsakList.data).hasSize(2).extracting("id").contains(fagsakBarn.id, fagsakOmsorgperson.id)
+        assertThat(minimalFagsakList.data).hasSize(3).extracting("id")
+            .contains(fagsakInstitusjon.id, fagsakOmsorgperson.id, fagsakEnsligMindreÅrig.id)
     }
 
     @Test
     fun `hentMinimalFagsakForPerson() skal return riktig fagsak for en person`() {
         val personFnr = randomFnr()
         val fagsakOmsorgperson = fagsakService.hentEllerOpprettFagsak(personFnr)
-        val fagsakBarn = fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakEier.BARN, FagsakType.INSTITUSJON)
+        val fagsakInstitusjon = fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakType.INSTITUSJON)
+        val fagsakEnsligMindreÅrig = fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakType.BARN_ENSLIG_MINDREÅRIG)
 
         val defaultMinimalFagsak = fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør)
         assertThat(defaultMinimalFagsak.data!!.id).isEqualTo(fagsakOmsorgperson.id)
 
         val omsorgpersonMinimalFagsak =
-            fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør, FagsakEier.OMSORGSPERSON)
+            fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør, FagsakType.NORMAL)
         assertThat(omsorgpersonMinimalFagsak.data!!.id).isEqualTo(fagsakOmsorgperson.id)
 
-        val barnMinimalFagsak =
-            fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør, FagsakEier.BARN)
-        assertThat(barnMinimalFagsak.data!!.id).isEqualTo(fagsakBarn.id)
+        val institusjonMinimalFagsak =
+            fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør, FagsakType.INSTITUSJON)
+        assertThat(institusjonMinimalFagsak.data!!.id).isEqualTo(fagsakInstitusjon.id)
+
+        val ensligMindreÅrigMinimalFagsak =
+            fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør, FagsakType.BARN_ENSLIG_MINDREÅRIG)
+        assertThat(ensligMindreÅrigMinimalFagsak.data!!.id).isEqualTo(fagsakEnsligMindreÅrig.id)
     }
 }
