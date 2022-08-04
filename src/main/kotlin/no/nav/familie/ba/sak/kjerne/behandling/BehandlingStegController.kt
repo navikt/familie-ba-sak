@@ -199,14 +199,14 @@ class BehandlingStegController(
     @PostMapping(path = ["registrer-institusjon-og-verge"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registerInstitusjonOgVerge(
         @PathVariable behandlingId: Long,
-        @RequestBody vergeInfo: RestRegistrerInstitusjonOgVerge
+        @RequestBody institusjonOgVergeInfo: RestRegistrerInstitusjonOgVerge
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        if (vergeInfo.tilVerge(behandling) == null && vergeInfo.tilInstitusjon() == null) {
+        if (institusjonOgVergeInfo.tilVerge(behandling) == null && institusjonOgVergeInfo.tilInstitusjon() == null) {
             return ResponseEntity.ok(Ressurs.failure("Ugydig verge info"))
         }
 
-        stegService.håndterRegistrerVerge(behandling, vergeInfo)
+        stegService.håndterRegistrerVerge(behandling, institusjonOgVergeInfo)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 }
