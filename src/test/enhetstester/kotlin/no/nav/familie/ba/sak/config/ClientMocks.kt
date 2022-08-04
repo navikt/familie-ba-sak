@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonExcep
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
@@ -28,7 +27,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutoma
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -515,7 +513,6 @@ class ClientMocks {
                     )
                 ),
                 kjønn = Kjønn.MANN,
-                dødsfall = DødsfallData(true, "2022-06-25"),
                 navn = "Gutten Barnesen"
             ),
             barnFnr[1] to PersonInfo(
@@ -528,7 +525,6 @@ class ClientMocks {
                     )
                 ),
                 kjønn = Kjønn.KVINNE,
-                dødsfall = DødsfallData(true, "2022-04-25"),
                 navn = "Jenta Barnesen",
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG
             ),
