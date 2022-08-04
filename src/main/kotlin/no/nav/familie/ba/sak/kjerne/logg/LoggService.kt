@@ -14,8 +14,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.foedselsnummer.FoedselsNr
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -47,7 +49,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLENDE_ENHET_ENDRET,
-                tittel = "Endret enhet på behandling",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -120,7 +121,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLINGSTYPE_ENDRET,
-                tittel = "Endret behandlingstema",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -170,7 +170,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.AUTOVEDTAK_TIL_MANUELL_BEHANDLING,
-                tittel = "Automatisk behandling stoppet",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -180,26 +179,35 @@ class LoggService(
         )
     }
 
-    private fun opprettLivshendelseLogg(behandling: Behandling, tittel: String) {
+    private fun opprettLivshendelseLogg(behandling: BehandlingLoggRequest, tittel: String) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandling.id,
                 type = LoggType.LIVSHENDELSE,
                 tittel = tittel,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
                 ),
-                tekst = ""
+                tekst = "Gjelder ${fødselsdatoer(behandling)}"
             )
         )
     }
 
-    fun opprettBehandlingLogg(behandling: Behandling) {
+    private fun fødselsdatoer(behandling: BehandlingLoggRequest) = Utils.slåSammen(
+        behandling.barnasIdenter
+            .filter { Identkonverterer.er11Siffer(it) }
+            .map { FoedselsNr(it) }
+            .map { it.foedselsdato }
+            .map { it.tilKortString() }
+    )
+
+    fun opprettBehandlingLogg(behandlingLogg: BehandlingLoggRequest) {
+        val behandling = behandlingLogg.behandling
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-            opprettLivshendelseLogg(behandling = behandling, tittel = "Mottok fødselshendelse")
+            opprettLivshendelseLogg(behandling = behandlingLogg, tittel = "Mottok fødselshendelse")
         } else if (behandling.skalBehandlesAutomatisk && behandling.erSmåbarnstillegg()) {
-            opprettLivshendelseLogg(behandling = behandling, tittel = "Mottok overgansstønadshendelse")
+            opprettLivshendelseLogg(behandling = behandlingLogg, tittel = "Mottok overgansstønadshendelse")
         }
 
         lagre(
@@ -221,12 +229,10 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = if (behandling.erManuellMigrering()) LoggType.SEND_TIL_SYSTEM else LoggType.SEND_TIL_BESLUTTER,
-                tittel = if (behandling.erManuellMigrering()) "Sendt til system" else "Sendt til beslutter",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
-                ),
-                tekst = ""
+                )
             )
         )
     }
@@ -252,7 +258,6 @@ class LoggService(
             Logg(
                 behandlingId = behandlingId,
                 type = LoggType.DISTRIBUERE_BREV,
-                tittel = "Brev sendt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, rolle),
                 tekst = tekst
             )
@@ -264,7 +269,6 @@ class LoggService(
             Logg(
                 behandlingId = behandlingId,
                 type = LoggType.BREV_IKKE_DISTRIBUERT,
-                tittel = "Brevet ble ikke distribuert fordi mottaker har ukjent adresse",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
                 tekst = brevnavn
             )
@@ -276,7 +280,6 @@ class LoggService(
             Logg(
                 behandlingId = behandlingId,
                 type = LoggType.BREV_IKKE_DISTRIBUERT_UKJENT_DØDSBO,
-                tittel = "Mottaker har ukjent dødsboadresse, og brevet blir ikke sendt før adressen er satt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
                 tekst = brevnavn
             )
@@ -288,9 +291,7 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.FERDIGSTILLE_BEHANDLING,
-                tittel = "Ferdigstilt behandling",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
-                tekst = ""
             )
         )
     }
@@ -300,7 +301,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.HENLEGG_BEHANDLING,
-                tittel = "Behandlingen er henlagt",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -312,12 +312,11 @@ class LoggService(
 
     fun opprettBarnLagtTilLogg(behandling: Behandling, barn: Person) {
         val beskrivelse =
-            "${barn.navn.uppercase()} (${barn.hentAlder()} år) | ${Utils.formaterIdent(barn.aktør.aktivFødselsnummer())} lagt til"
+            "${barn.navn.uppercase()} (${barn.hentAlder()} år) | ${Identkonverterer.formaterIdent(barn.aktør.aktivFødselsnummer())} lagt til"
         lagre(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BARN_LAGT_TIL,
-                tittel = LoggType.BARN_LAGT_TIL.visningsnavn,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -332,7 +331,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLIG_SATT_PÅ_VENT,
-                tittel = LoggType.BEHANDLIG_SATT_PÅ_VENT.visningsnavn,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -357,7 +355,6 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.VENTENDE_BEHANDLING_ENDRET,
-                tittel = LoggType.VENTENDE_BEHANDLING_ENDRET.visningsnavn,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -372,12 +369,10 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLIG_GJENOPPTATT,
-                tittel = LoggType.BEHANDLIG_GJENOPPTATT.visningsnavn,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
-                ),
-                tekst = ""
+                )
             )
         )
     }
