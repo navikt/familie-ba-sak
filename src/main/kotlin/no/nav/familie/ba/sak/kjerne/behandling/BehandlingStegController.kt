@@ -196,8 +196,8 @@ class BehandlingStegController(
         }
     }
 
-    @PostMapping(path = ["register-verge"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun registerVerge(
+    @PostMapping(path = ["registrer-institusjon-og-verge"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun registerInstitusjonOgVerge(
         @PathVariable behandlingId: Long,
         @RequestBody vergeInfo: RestRegistrerInstitusjonOgVerge
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
