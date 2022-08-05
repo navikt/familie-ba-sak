@@ -179,7 +179,10 @@ class LoggServiceTest(
 
     @Test
     fun `Om to logginnslag blir oppretta i samme sekund skal vi sortere med den første først`() {
-        val behandlingId = 1L
+        val behandlingId = lagBehandling(
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            årsak = BehandlingÅrsak.SØKNAD
+        ).id
         val tidspunkt = LocalDateTime.now()
         val logg1 = loggService.lagre(
             Logg(
@@ -204,5 +207,43 @@ class LoggServiceTest(
 
         val logginnslag = loggService.hentLoggForBehandling(behandlingId)
         assertEquals(listOf(logg2.id, logg1.id), logginnslag.map { it.id })
+    }
+
+    @Test
+    fun `eldste logginnslag skal komme sist og nyaste først`() {
+        val behandlingId = lagBehandling(
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            årsak = BehandlingÅrsak.SØKNAD
+        ).id
+        val eldst = loggService.lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "Førstegangbehandling opprettet",
+                rolle = BehandlerRolle.SAKSBEHANDLER,
+                tekst = ""
+            )
+        )
+        val mellomst = loggService.lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.LIVSHENDELSE,
+                tittel = "Søknaden ble registrert",
+                rolle = BehandlerRolle.SAKSBEHANDLER,
+                tekst = ""
+            )
+        )
+        val nyast = loggService.lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.LIVSHENDELSE,
+                tittel = "Vilkårsvurdering gjennomført",
+                rolle = BehandlerRolle.SAKSBEHANDLER,
+                tekst = ""
+            )
+        )
+
+        val logginnslag = loggService.hentLoggForBehandling(behandlingId)
+        assertEquals(listOf(nyast.id, mellomst.id, eldst.id), logginnslag.map { it.id })
     }
 }
