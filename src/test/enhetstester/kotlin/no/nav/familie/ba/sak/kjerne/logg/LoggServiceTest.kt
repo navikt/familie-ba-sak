@@ -88,7 +88,7 @@ class LoggServiceTest(
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
         assertEquals(2, loggForBehandling.size)
-        assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE && it.tekst == "Gjelder 01.08.22" })
+        assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE && it.tekst == "Gjelder barn 01.08.22" })
         assertTrue(loggForBehandling.any { it.type == LoggType.BEHANDLING_OPPRETTET })
         assertTrue(loggForBehandling.none { it.rolle != BehandlerRolle.SYSTEM })
     }
