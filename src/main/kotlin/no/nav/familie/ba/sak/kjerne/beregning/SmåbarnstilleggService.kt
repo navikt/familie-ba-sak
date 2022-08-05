@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
+import no.nav.familie.ba.sak.kjerne.beregning.domene.splitFramtidigePerioderFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilInternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -38,7 +39,22 @@ class SmåbarnstilleggService(
             }
         )
 
-        return periodeOvergangsstønad.map { it.tilInternPeriodeOvergangsstønad() }.slåSammenTidligerePerioder()
+        return periodeOvergangsstønad
+            .map { it.tilInternPeriodeOvergangsstønad() }
+            .slåSammenTidligerePerioder()
+            .splitFramtidigePerioderFraForrigeBehandling(
+                gamleOvergangsstønadPerioder = hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId)
+            )
+    }
+
+    private fun hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId: Long): List<InternPeriodeOvergangsstønad> {
+        val forrigeIverksatteBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId)
+
+        return if (forrigeIverksatteBehandling != null) periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
+            behandlingId = forrigeIverksatteBehandling.id
+        ).map { it.tilInternPeriodeOvergangsstønad() }
+        else emptyList()
     }
 
     fun vedtakOmOvergangsstønadPåvirkerFagsak(fagsak: Fagsak): Boolean {

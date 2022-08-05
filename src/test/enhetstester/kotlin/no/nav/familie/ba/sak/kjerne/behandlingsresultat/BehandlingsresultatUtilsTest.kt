@@ -126,6 +126,25 @@ class BehandlingsresultatUtilsTest {
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }
+
+    @Test
+    fun `Skal returnere FORTSATT_OPPHØRT behandlingsresultat hvis ytelsen opphører på forskjellig tidspunkt`() {
+        val personer = listOf(
+            lagYtelsePerson(
+                resultat = YtelsePersonResultat.FORTSATT_OPPHØRT,
+                ytelseSlutt = YearMonth.now().minusMonths(1)
+            ),
+            lagYtelsePerson(
+                resultat = YtelsePersonResultat.FORTSATT_OPPHØRT,
+                ytelseSlutt = YearMonth.now()
+            )
+        )
+
+        assertEquals(
+            Behandlingsresultat.FORTSATT_OPPHØRT,
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
+        )
+    }
 }
 
 private fun lagYtelsePerson(
