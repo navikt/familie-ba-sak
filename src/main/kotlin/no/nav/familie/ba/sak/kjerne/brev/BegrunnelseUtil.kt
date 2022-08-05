@@ -29,6 +29,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     identerMedReduksjonPåPeriode: List<String> = emptyList(),
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
+    dødeBarnForrigePeriode: List<String>
 ): Set<String> {
 
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
@@ -92,6 +93,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 fom = periode.fom,
                 endringsaarsaker = triggesAv.endringsaarsaker
             )
+
+        triggesAv.barnDød -> dødeBarnForrigePeriode
 
         else -> hentPersonerForUtgjørendeVilkår()
     }.toSet()

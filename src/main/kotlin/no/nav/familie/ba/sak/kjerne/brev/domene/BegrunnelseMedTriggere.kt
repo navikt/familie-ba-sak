@@ -22,6 +22,7 @@ data class BegrunnelseMedTriggere(
         erUregistrerteBarnPåbehandling: Boolean,
         barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
         minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
+        dødeBarnForrigePeriode: List<String>
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
 
         return if (this.standardbegrunnelse.kanDelesOpp) {
@@ -41,6 +42,7 @@ data class BegrunnelseMedTriggere(
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent,
                 minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+                dødeBarnForrigePeriode = dødeBarnForrigePeriode
             )
 
             if (

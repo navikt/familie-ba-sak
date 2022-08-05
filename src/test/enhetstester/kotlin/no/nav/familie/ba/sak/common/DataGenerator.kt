@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -993,14 +994,16 @@ fun lagPerson(
     type: PersonType = PersonType.SØKER,
     personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
     fødselsdato: LocalDate = LocalDate.now().minusYears(19),
-    kjønn: Kjønn = Kjønn.KVINNE
+    kjønn: Kjønn = Kjønn.KVINNE,
+    dødsfall: Dødsfall? = null
 ) = Person(
     aktør = aktør,
     type = type,
     personopplysningGrunnlag = personopplysningGrunnlag,
     fødselsdato = fødselsdato,
     navn = type.name,
-    kjønn = kjønn
+    kjønn = kjønn,
+    dødsfall = dødsfall
 )
 
 fun lagRestSanityBegrunnelse(
