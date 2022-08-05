@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
@@ -15,8 +14,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtter
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.dødeBarnForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -32,8 +29,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     identerMedReduksjonPåPeriode: List<String> = emptyList(),
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
-    ytelserForrigePeriode: List<AndelTilkjentYtelse>,
-    barnIBehandling: List<MinimertPerson>
+    dødeBarnForrigePeriode: List<String>
 ): Set<String> {
 
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
@@ -98,7 +94,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 endringsaarsaker = triggesAv.endringsaarsaker
             )
 
-        triggesAv.barnDød -> dødeBarnForrigePeriode(ytelserForrigePeriode, barnIBehandling).map { barn -> barn.aktivPersonIdent }
+        triggesAv.barnDød -> dødeBarnForrigePeriode
 
         else -> hentPersonerForUtgjørendeVilkår()
     }.toSet()

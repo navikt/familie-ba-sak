@@ -103,7 +103,7 @@ fun Standardbegrunnelse.triggesForPeriode(
 fun dødeBarnForrigePeriode(
     ytelserForrigePeriode: List<AndelTilkjentYtelse>,
     barnIBehandling: List<MinimertPerson>
-): List<MinimertPerson> {
+): List<String> {
     return barnIBehandling.filter { barn ->
         val ytelserForrigePeriodeForBarn = ytelserForrigePeriode.filter {
             it.aktør.aktivFødselsnummer() == barn.aktivPersonIdent
@@ -119,7 +119,7 @@ fun dødeBarnForrigePeriode(
             barnDødeForrigePeriode = fomFørDødsfall && tomEtterDødsfall
         }
         barnDødeForrigePeriode
-    }
+    }.map { it.aktivPersonIdent }
 }
 
 private fun erEndretTriggerErOppfylt(

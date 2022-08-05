@@ -435,7 +435,7 @@ internal class StandardbegrunnelseTest {
         )
         assertEquals(
             barn1Fnr,
-            dødeBarnForrigePeriode[0].aktivPersonIdent
+            dødeBarnForrigePeriode[0]
         )
 
         ytelserForrigePeriode = listOf(
@@ -449,7 +449,7 @@ internal class StandardbegrunnelseTest {
         )
         assertEquals(
             barn2Fnr,
-            dødeBarnForrigePeriode[0].aktivPersonIdent
+            dødeBarnForrigePeriode[0]
         )
 
         // Barn1 og Barn2 dør i samme måned
@@ -471,7 +471,7 @@ internal class StandardbegrunnelseTest {
             dødeBarnForrigePeriode.size
         )
         assertTrue(
-            dødeBarnForrigePeriode.containsAll(barnIBehandling)
+            dødeBarnForrigePeriode.containsAll(barnIBehandling.map { it.aktivPersonIdent })
         )
     }
 }

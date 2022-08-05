@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.dødeBarnForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
@@ -129,6 +130,8 @@ class BrevPeriodeService(
 
         val ytelserForrigePeriode = andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelse) }
 
+        val dødeBarnForrigePeriode = dødeBarnForrigePeriode(ytelserForrigePeriode, personopplysningGrunnlag.barna.tilMinimertePersoner())
+
         val minimertVedtaksperiode =
             utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -166,8 +169,7 @@ class BrevPeriodeService(
                     landkoderISO2 = landkoderISO2
                 )
             },
-            ytelserForrigePeriode = ytelserForrigePeriode,
-            barnIBehandling = personopplysningGrunnlag.barna.tilMinimertePersoner()
+            dødeBarnForrigePeriode = dødeBarnForrigePeriode
         )
 
         if (skalLogge) {
