@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.dødeBarnForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -110,6 +111,7 @@ private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtakspe
         ),
         uregistrerteBarn = emptyList(),
         minimerteKompetanserForPeriode = emptyList(),
-        minimerteKompetanserSomStopperRettFørPeriode = emptyList()
+        minimerteKompetanserSomStopperRettFørPeriode = emptyList(),
+        dødeBarnForrigePeriode = emptyList()
     )
 }
