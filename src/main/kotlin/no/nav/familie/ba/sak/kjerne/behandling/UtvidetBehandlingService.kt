@@ -23,7 +23,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
@@ -99,7 +101,7 @@ class UtvidetBehandlingService(
             if (kanBehandleEøs) utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
-            .also { andelerTilkjentYtelse.forEach { it.synkroniserMedEndretUtbetalingAndeler() } }
+            .map { it.copy(andelTilkjentYtelser = (it.andelTilkjentYtelser + andelerTilkjentYtelse.finnManglendeRelasjoner(it)).toMutableList()) }
             .map { it.tilRestEndretUtbetalingAndel() }
 
         return RestUtvidetBehandling(
@@ -144,6 +146,10 @@ class UtvidetBehandlingService(
             utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() }
         )
     }
+
+    fun List<AndelTilkjentYtelse>.finnManglendeRelasjoner(eua: EndretUtbetalingAndel) = this
+        .filter { !eua.andelTilkjentYtelser.contains(it) }
+        .filter { it.endretUtbetalingAndeler.contains(eua) }
 
     private fun utledEndringstidpunkt(
         endringstidspunkt: LocalDate,
