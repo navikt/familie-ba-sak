@@ -78,7 +78,7 @@ class BehandlingsresultatSteg(
                 )
             }
 
-        if (behandlingMedOppdatertBehandlingsresultat.erMigrering() &&
+        if (behandlingMedOppdatertBehandlingsresultat.erManuellMigrering() &&
             (
                 behandlingMedOppdatertBehandlingsresultat.resultat.erAvslått() ||
                     behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.DELVIS_INNVILGET
