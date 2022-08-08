@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
@@ -590,7 +591,7 @@ class VilkårServiceTest(
         assertTrue {
             barnVilkårResultat.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }.all {
                 it.periodeFom == barnetsFødselsdato &&
-                    it.periodeTom == barnetsFødselsdato.plusYears(18).minusDays(1)
+                    it.periodeTom == barnetsFødselsdato.til18ÅrsVilkårsdato()
             }
         }
         assertTrue {

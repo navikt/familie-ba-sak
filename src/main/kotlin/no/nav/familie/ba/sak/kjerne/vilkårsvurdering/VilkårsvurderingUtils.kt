@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.kanErstatte
 import no.nav.familie.ba.sak.common.kanFlytteFom
 import no.nav.familie.ba.sak.common.kanFlytteTom
 import no.nav.familie.ba.sak.common.kanSplitte
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
@@ -102,6 +103,7 @@ object VilkårsvurderingUtils {
                     "Finnes løpende oppfylt ved forsøk på å legge til avslag uten periode ",
                     "Du kan ikke legge til avslag uten datoer fordi det finnes oppfylt løpende periode på vilkåret."
                 )
+
             vilkårSomEndres.harFremtidigTom() && resultaterPåVilkår.any { it.erAvslagUtenPeriode() } ->
                 throw FunksjonellFeil(
                     "Finnes avslag uten periode ved forsøk på å legge til løpende oppfylt",
@@ -145,6 +147,7 @@ object VilkårsvurderingUtils {
                 periodePåNyttVilkår.kanErstatte(periode) -> {
                     personResultat.removeVilkårResultat(vilkårResultatId = vilkårResultat.id)
                 }
+
                 periodePåNyttVilkår.kanSplitte(periode) -> {
                     personResultat.removeVilkårResultat(vilkårResultatId = vilkårResultat.id)
                     personResultat.addVilkårResultat(
@@ -162,11 +165,13 @@ object VilkårsvurderingUtils {
                         )
                     )
                 }
+
                 periodePåNyttVilkår.kanFlytteFom(periode) -> {
                     vilkårResultat.periodeFom = nyFom
                     vilkårResultat.erAutomatiskVurdert = false
                     vilkårResultat.oppdaterPekerTilBehandling()
                 }
+
                 periodePåNyttVilkår.kanFlytteTom(periode) -> {
                     vilkårResultat.periodeTom = nyTom
                     vilkårResultat.erAutomatiskVurdert = false
@@ -195,7 +200,6 @@ object VilkårsvurderingUtils {
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
         løpendeUnderkategori: BehandlingUnderkategori? = null
     ): Pair<Vilkårsvurdering, Vilkårsvurdering> {
-
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
         val initiellVilkårsvurderingKopi = initiellVilkårsvurdering.kopier()
@@ -422,9 +426,11 @@ fun genererPersonResultatForPerson(
         val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
 
         val tom: LocalDate? =
-            if (vilkår == Vilkår.UNDER_18_ÅR) {
-                person.fødselsdato.plusYears(18).minusDays(1)
-            } else null
+            when {
+                person.erDød() -> person.dødsfall!!.dødsfallDato
+                vilkår == Vilkår.UNDER_18_ÅR -> person.fødselsdato.til18ÅrsVilkårsdato()
+                else -> null
+            }
 
         VilkårResultat(
             personResultat = personResultat,
@@ -467,6 +473,7 @@ private fun utledBegrunnelse(
     Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
         "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
             "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
+
     else -> ""
 }
 

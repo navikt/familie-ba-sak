@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -39,7 +40,7 @@ object VilkårsvurderingMigreringUtils {
             forrigeBehandlingsvilkårsvurdering, vilkår, person
         ).minWithOrNull(VilkårResultat.VilkårResultatComparator)?.periodeTom
         return when {
-            vilkår == Vilkår.UNDER_18_ÅR -> periodeFom.plusYears(18).minusDays(1)
+            vilkår == Vilkår.UNDER_18_ÅR -> periodeFom.til18ÅrsVilkårsdato()
             vilkår == Vilkår.GIFT_PARTNERSKAP -> null
             forrigeVilkårsPeriodeTom != null -> forrigeVilkårsPeriodeTom
             else -> null
