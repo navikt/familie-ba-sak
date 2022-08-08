@@ -468,11 +468,13 @@ private fun utledResultatForGiftPartnerskap(person: Person) =
 private fun utledBegrunnelse(
     vilkår: Vilkår,
     person: Person
-) = when (vilkår) {
-    Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
-    Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
+) = when {
+    person.erDød() -> "Dødsfall"
+    vilkår == Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
+    vilkår == Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false) {
         "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
-            "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
+            "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen"
+    } else ""
 
     else -> ""
 }
