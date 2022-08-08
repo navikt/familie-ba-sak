@@ -202,7 +202,7 @@ class LoggService(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
                 ),
-                tekst = "Gjelder ${fødselsdatoer(behandling)}"
+                tekst = "Gjelder barn ${fødselsdatoer(behandling)}"
             )
         )
     }
@@ -210,6 +210,7 @@ class LoggService(
     private fun fødselsdatoer(behandling: BehandlingLoggRequest) = Utils.slåSammen(
         behandling.barnasIdenter
             .filter { Identkonverterer.er11Siffer(it) }
+            .distinct()
             .map { FoedselsNr(it) }
             .map { it.foedselsdato }
             .map { it.tilKortString() }

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.micrometer.core.annotation.Timed
 import no.nav.familie.ba.sak.ekstern.skatteetaten.UtvidetSkatt
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakEier.OMSORGSPERSON
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
@@ -29,8 +28,8 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnFagsak(fagsakId: Long): Fagsak?
 
     @Lock(LockModeType.NONE)
-    @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :aktør and f.eier = :eier and f.arkivert = false")
-    fun finnFagsakForAktør(aktør: Aktør, eier: FagsakEier = OMSORGSPERSON): Fagsak?
+    @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :aktør and f.type = :type and f.arkivert = false")
+    fun finnFagsakForAktør(aktør: Aktør, type: FagsakType = FagsakType.NORMAL): Fagsak?
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :aktør and f.arkivert = false")
@@ -42,23 +41,23 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Modifying
     @Query(
-        value = """select id from fagsak
-                        where fagsak.id in (
-                            with sisteIverksatte as (
-                                select b.fk_fagsak_id as fagsakId, max(b.opprettet_tid) as opprettet_tid
-                                from behandling b
-                                         inner join tilkjent_ytelse ty on b.id = ty.fk_behandling_id
-                                         inner join fagsak f on f.id = b.fk_fagsak_id
-                                where ty.utbetalingsoppdrag IS NOT NULL
-                                  and f.status = 'LØPENDE'
-                                  and f.arkivert = false
-                                group by b.id)
+        value = """SELECT id FROM fagsak
+                        WHERE fagsak.id IN (
+                            WITH sisteiverksatte AS (
+                                SELECT b.fk_fagsak_id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
+                                FROM behandling b
+                                         INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                                         INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                                WHERE ty.utbetalingsoppdrag IS NOT NULL
+                                  AND f.status = 'LØPENDE'
+                                  AND f.arkivert = FALSE
+                                GROUP BY b.id)
                                 
-                            select silp.fagsakId
-                            from sisteIverksatte silp
-                                     inner join behandling b on b.fk_fagsak_id = silp.fagsakId
-                                     inner join tilkjent_ytelse ty on b.id = ty.fk_behandling_id
-                            where b.opprettet_tid = silp.opprettet_tid and ty.stonad_tom < date_trunc('month', now()))""",
+                            SELECT silp.fagsakid
+                            FROM sisteiverksatte silp
+                                     INNER JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid
+                                     INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                            WHERE b.opprettet_tid = silp.opprettet_tid AND ty.stonad_tom < DATE_TRUNC('month', NOW()))""",
         nativeQuery = true
     )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
@@ -97,18 +96,18 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Query(
         value = """
-        SELECT p.foedselsnummer as fnr,
-               MAX(ty.endret_dato) as sisteVedtaksdato
+        SELECT p.foedselsnummer AS fnr,
+               MAX(ty.endret_dato) AS sistevedtaksdato
         FROM andel_tilkjent_ytelse aty
                  INNER JOIN
              tilkjent_ytelse ty ON aty.tilkjent_ytelse_id = ty.id
-                 INNER JOIN personident p on aty.fk_aktoer_id = p.fk_aktoer_id
-        WHERE ty.utbetalingsoppdrag is not null
+                 INNER JOIN personident p ON aty.fk_aktoer_id = p.fk_aktoer_id
+        WHERE ty.utbetalingsoppdrag IS NOT NULL
           AND aty.type = 'UTVIDET_BARNETRYGD'
           AND aty.stonad_fom <= :tom
           AND aty.stonad_tom >= :fom
-          AND p.aktiv = true
-        group by p.foedselsnummer
+          AND p.aktiv = TRUE
+        GROUP BY p.foedselsnummer
     """,
         nativeQuery = true
     )

@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringR
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakEier
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.lagMockRestJournalføring
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -101,7 +101,7 @@ class InnkomendeJournalføringServiceTest(
         val behandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId.toLong())
 
         assertNotNull(behandling)
-        assertEquals(FagsakEier.BARN, behandling!!.fagsak.eier)
+        assertEquals(FagsakType.BARN_ENSLIG_MINDREÅRIG, behandling!!.fagsak.type)
 
         val request2 = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
             .copy(erPåInstitusjon = true)
@@ -109,7 +109,7 @@ class InnkomendeJournalføringServiceTest(
         val behandling2 = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId2.toLong())
 
         assertNotNull(behandling2)
-        assertEquals(FagsakEier.BARN, behandling2!!.fagsak.eier)
+        assertEquals(FagsakType.INSTITUSJON, behandling2!!.fagsak.type)
     }
 
     @Test
