@@ -282,7 +282,7 @@ object TilkjentYtelseUtils {
             it.vilkårType == Vilkår.UNDER_18_ÅR
         }?.periodeTom
 
-        val skalAvslutteMånedenFør =
+        val skalAvsluttesMånedenFør =
             if (person.dødsfall != null) {
                 person.dødsfall!!.dødsfallDato.withDayOfMonth(1) >= person.fødselsdato.til18ÅrsVilkårsdato()
                     .withDayOfMonth(1)
@@ -312,7 +312,7 @@ object TilkjentYtelseUtils {
                 fraOgMed = periodeOver6år.fom
             ),
             stønadTilOgMed = settRiktigStønadTom(
-                skalAvsluttesMånedenFør = skalAvslutteMånedenFør,
+                skalAvsluttesMånedenFør = skalAvsluttesMånedenFør,
                 tilOgMed = periodeOver6år.tom
             ),
             maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,

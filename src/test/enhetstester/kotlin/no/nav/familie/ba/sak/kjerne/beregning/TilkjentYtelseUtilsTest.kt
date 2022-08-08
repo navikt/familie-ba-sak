@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -10,7 +9,6 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -34,33 +32,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 internal class TilkjentYtelseUtilsTest {
-
-    @Test
-    fun `Barn som er under 6 år hele perioden får tillegg hele perioden`() {
-        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
-        val seksårsdag = LocalDate.of(2023, 1, 1)
-
-        assertEquals(periode, SatsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom))
-    }
-
-    @Test
-    fun `Barn som fyller 6 år i løpet av perioden får tilleggsperiode før seksårsdag`() {
-        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
-        val seksårsdag = LocalDate.of(2021, 1, 1)
-
-        assertEquals(
-            Periode(periode.fom, seksårsdag.sisteDagIForrigeMåned()),
-            SatsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom)
-        )
-    }
-
-    @Test
-    fun `Barn som er over 6 år hele perioden får ingen tillegsperiode`() {
-        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
-        val seksårsdag = LocalDate.of(2018, 1, 1)
-
-        assertEquals(null, SatsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom))
-    }
 
     @Test
     fun `Barn som fyller 6 år i det vilkårene er oppfylt får andel måneden etter`() {
@@ -577,8 +548,8 @@ internal class TilkjentYtelseUtilsTest {
 
         vilkårsvurdering.personResultater =
             vilkårsvurdering.personResultater.filter { it.aktør != personResultat.aktør }.toSet() + setOf(
-            personResultat
-        )
+                personResultat
+            )
 
         return vilkårsvurdering
     }
