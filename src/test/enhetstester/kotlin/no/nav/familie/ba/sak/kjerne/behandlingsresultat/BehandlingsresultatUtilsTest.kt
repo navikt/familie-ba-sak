@@ -145,6 +145,24 @@ class BehandlingsresultatUtilsTest {
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }
+    @Test
+    fun `både ENDRET_UTBETALING og ENDRET_UTEN_UTBETALING som samlede resultater gir behandilngsresultat ENDRET_UTBETALING`() {
+        val personer = listOf(
+            lagYtelsePerson(
+                resultat = YtelsePersonResultat.ENDRET_UTBETALING,
+                ytelseSlutt = YearMonth.now().minusMonths(1)
+            ),
+            lagYtelsePerson(
+                resultat = YtelsePersonResultat.ENDRET_UTEN_UTBETALING,
+                ytelseSlutt = YearMonth.now()
+            )
+        )
+
+        assertEquals(
+            Behandlingsresultat.ENDRET_UTBETALING,
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
+        )
+    }
 }
 
 private fun lagYtelsePerson(
