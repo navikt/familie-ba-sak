@@ -53,12 +53,15 @@ data class BrevbegrunnelserTestPerson(
     val overstyrteVilkårresultater: List<MinimertVilkårResultat>,
     val andreVurderinger: List<MinimertAnnenVurdering>,
     val endredeUtbetalinger: List<EndretUtbetalingAndelPåPerson>,
+    val erDød: Boolean = false,
+    val dødsfalldato: LocalDate? = null
 ) {
     fun tilMinimertPerson() = MinimertPerson(
         aktivPersonIdent = this.personIdent,
         aktørId = this.aktørId,
         type = this.type,
         fødselsdato = this.fødselsdato,
+        dødsfallsdato = this.dødsfalldato
     )
 
     fun tilMinimerteEndredeUtbetalingAndeler() =

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDateTime
 
 class LoggServiceTest(
     @Autowired
@@ -74,7 +75,7 @@ class LoggServiceTest(
     @Test
     fun `Skal lage logginnslag ved stegflyt for automatisk behandling`() {
         val morsIdent = randomFnr()
-        val barnetsIdent = randomFnr()
+        val barnetsIdent = "01082212345"
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, morsIdent, barnetsIdent)
 
@@ -87,7 +88,7 @@ class LoggServiceTest(
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
         assertEquals(2, loggForBehandling.size)
-        assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE })
+        assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE && it.tekst == "Gjelder barn 01.08.22" })
         assertTrue(loggForBehandling.any { it.type == LoggType.BEHANDLING_OPPRETTET })
         assertTrue(loggForBehandling.none { it.rolle != BehandlerRolle.SYSTEM })
     }
@@ -136,7 +137,7 @@ class LoggServiceTest(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
         )
-        loggService.opprettBehandlingLogg(behandling)
+        loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
         loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
         loggService.opprettSendTilBeslutterLogg(behandling)
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT, "begrunnelse")
@@ -174,5 +175,75 @@ class LoggServiceTest(
                     it.tittel == "Ferdigstilt behandling"
             }
         }
+    }
+
+    @Test
+    fun `Om to logginnslag blir oppretta i samme sekund skal vi sortere med den første først`() {
+        val behandlingId = lagBehandling(
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            årsak = BehandlingÅrsak.SØKNAD
+        ).id
+        val tidspunkt = LocalDateTime.now()
+        val logg1 = loggService.lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.LIVSHENDELSE,
+                tittel = "Mottok fødselshendelse",
+                rolle = BehandlerRolle.SAKSBEHANDLER,
+                tekst = "",
+                opprettetTidspunkt = tidspunkt
+            )
+        )
+        val logg2 = loggService.lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "Førstegangbehandling opprettet",
+                rolle = BehandlerRolle.SAKSBEHANDLER,
+                tekst = "",
+                opprettetTidspunkt = tidspunkt
+            )
+        )
+
+        val logginnslag = loggService.hentLoggForBehandling(behandlingId)
+        assertEquals(listOf(logg2.id, logg1.id), logginnslag.map { it.id })
+    }
+
+    @Test
+    fun `eldste logginnslag skal komme sist og nyaste først`() {
+        val behandlingId = lagBehandling(
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            årsak = BehandlingÅrsak.SØKNAD
+        ).id
+        val eldst = loggService.lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.BEHANDLING_OPPRETTET,
+                tittel = "Førstegangbehandling opprettet",
+                rolle = BehandlerRolle.SAKSBEHANDLER,
+                tekst = ""
+            )
+        )
+        val mellomst = loggService.lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.LIVSHENDELSE,
+                tittel = "Søknaden ble registrert",
+                rolle = BehandlerRolle.SAKSBEHANDLER,
+                tekst = ""
+            )
+        )
+        val nyast = loggService.lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.LIVSHENDELSE,
+                tittel = "Vilkårsvurdering gjennomført",
+                rolle = BehandlerRolle.SAKSBEHANDLER,
+                tekst = ""
+            )
+        )
+
+        val logginnslag = loggService.hentLoggForBehandling(behandlingId)
+        assertEquals(listOf(nyast.id, mellomst.id, eldst.id), logginnslag.map { it.id })
     }
 }

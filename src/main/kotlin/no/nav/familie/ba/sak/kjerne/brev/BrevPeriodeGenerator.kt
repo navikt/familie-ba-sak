@@ -36,7 +36,8 @@ class BrevPeriodeGenerator(
     private val minimertVedtaksperiode: MinimertVedtaksperiode,
     private val barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
     private val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
-    private val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>
+    private val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>,
+    private val dødeBarnForrigePeriode: List<String>
 ) {
 
     fun genererBrevPeriode(): BrevPeriode? {
@@ -113,6 +114,7 @@ class BrevPeriodeGenerator(
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
             erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
             barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
+            dødeBarnForrigePeriode = dødeBarnForrigePeriode
         )
     }
 
