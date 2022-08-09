@@ -7,7 +7,10 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
+
+val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
 data class InternPeriodeOvergangsstønad(
     val personIdent: String,
@@ -51,8 +54,7 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
  *
  ***/
 fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandling(
-    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>,
-    secureLogger: Logger
+    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>
 ): List<InternPeriodeOvergangsstønad> {
     val personerMedOvergangsstønadIForrigeOgInneværendeBehandling = (this + overgangsstønadPerioderFraForrigeBehandling).map { it.personIdent }
     val erOvergangsstønadForMerEnnEnPerson =
