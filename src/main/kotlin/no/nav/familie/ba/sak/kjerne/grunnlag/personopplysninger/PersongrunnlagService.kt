@@ -148,7 +148,7 @@ class PersongrunnlagService(
             søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }
                 .map { barn -> personidentService.hentOgLagreAktør(barn.ident, true) }
 
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
+        if ((behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) && forrigeBehandlingSomErVedtatt != null) {
             val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandlingSomErVedtatt.id)
             val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.aktør }
                 ?.filter {

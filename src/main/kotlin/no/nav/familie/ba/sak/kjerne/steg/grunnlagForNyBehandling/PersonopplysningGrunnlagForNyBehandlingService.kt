@@ -24,7 +24,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         val aktør = personidentService.hentOgLagreAktør(søkerIdent, true)
         val barnaAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
 
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
+        if ((behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) && forrigeBehandlingSomErVedtatt != null) {
             val barnMedTilkjentYtelseIForrigeBehandling =
                 beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandlingSomErVedtatt.id)
             val forrigeMålform =
