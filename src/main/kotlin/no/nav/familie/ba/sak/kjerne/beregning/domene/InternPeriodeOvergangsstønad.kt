@@ -50,10 +50,10 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
  *
  ***/
 fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandling(
-    gamleOvergangsstønadPerioder: List<InternPeriodeOvergangsstønad>
+    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>
 ): List<InternPeriodeOvergangsstønad> {
     val erOvergangsstønadForMerEnnEnPerson =
-        (this + gamleOvergangsstønadPerioder).map { it.personIdent }.toSet().size > 1
+        (this + overgangsstønadPerioderFraForrigeBehandling).map { it.personIdent }.toSet().size > 1
     if (erOvergangsstønadForMerEnnEnPerson)
         throw Feil("Antar overgangsstønad for kun søker, men fant overgangsstønad for mer enn en person.")
 
@@ -61,7 +61,7 @@ fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandl
     val framtidigePerioder = this.minus(tidligerePerioder)
     val nyeOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(framtidigePerioder)
 
-    val gammelOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(gamleOvergangsstønadPerioder)
+    val gammelOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(overgangsstønadPerioderFraForrigeBehandling)
 
     val oppsplittedeFramtigigePerioder = gammelOvergangsstønadTidslinje
         .kombinerMed(nyeOvergangsstønadTidslinje) { gammelOvergangsstønadPeriode, nyOvergangsstønadPeriode ->

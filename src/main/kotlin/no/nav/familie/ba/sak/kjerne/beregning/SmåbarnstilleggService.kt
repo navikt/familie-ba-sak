@@ -44,7 +44,7 @@ class SmåbarnstilleggService(
             .map { it.tilInternPeriodeOvergangsstønad() }
             .slåSammenTidligerePerioder()
             .splitFramtidigePerioderFraForrigeBehandling(
-                gamleOvergangsstønadPerioder = hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId)
+                overgangsstønadPerioderFraForrigeBehandling = hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId)
             )
     }
 
