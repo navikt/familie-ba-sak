@@ -61,9 +61,9 @@ fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandl
         personerMedOvergangsstønadIForrigeOgInneværendeBehandling.toSet().size > 1
     if (erOvergangsstønadForMerEnnEnPerson) {
         secureLogger.info(
-            "Fant overgangsstønad for mer enn 1 person." +
-                "Personer: $personerMedOvergangsstønadIForrigeOgInneværendeBehandling" +
-                "Perioder i inneværende behandling: $this" +
+            "Fant overgangsstønad for mer enn 1 person. \n" +
+                "Personer: $personerMedOvergangsstønadIForrigeOgInneværendeBehandling \n" +
+                "Perioder i inneværende behandling: $this \n" +
                 "Perioder fra forrige behandling: $overgangsstønadPerioderFraForrigeBehandling"
         )
         throw Feil("Antar overgangsstønad for kun søker, men fant overgangsstønad for mer enn en person.")
