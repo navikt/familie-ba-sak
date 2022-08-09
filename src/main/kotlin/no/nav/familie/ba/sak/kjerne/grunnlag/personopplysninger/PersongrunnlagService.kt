@@ -122,7 +122,8 @@ class PersongrunnlagService(
             målform = personopplysningGrunnlag.søker.målform
         )
 
-        oppdatertGrunnlag.barna.singleOrNull { nyttbarnAktør == it.aktør }?.also { loggService.opprettBarnLagtTilLogg(behandling, it) } ?: run {
+        oppdatertGrunnlag.barna.singleOrNull { nyttbarnAktør == it.aktør }
+            ?.also { loggService.opprettBarnLagtTilLogg(behandling, it) } ?: run {
             secureLogger.info("Klarte ikke legge til barn med aktør $nyttbarnAktør på personopplysningsgrunnlag ${personopplysningGrunnlag.id}")
             throw Feil("Nytt barn ikke lagt til i personopplysningsgrunnlag ${personopplysningGrunnlag.id}. Se securelog for mer informasjon.")
         }
