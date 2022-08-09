@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.skalTaMedBarnFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.springframework.stereotype.Service
 
@@ -29,9 +29,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
             ?: Målform.NB
 
         val barnMedTilkjentYtelseIForrigeBehandling =
-            if ((behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) &&
-                forrigeBehandlingSomErVedtatt != null
-            ) {
+            if (skalTaMedBarnFraForrigeBehandling(behandling) && forrigeBehandlingSomErVedtatt != null) {
                 beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandlingSomErVedtatt.id)
             } else emptyList()
 

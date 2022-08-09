@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
@@ -150,9 +149,7 @@ class PersongrunnlagService(
                 .map { barn -> personidentService.hentOgLagreAktør(barn.ident, true) }
 
         val barnMedTilkjentYtelseIForrigeBehandling =
-            if ((behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) &&
-                forrigeBehandlingSomErVedtatt != null
-            ) {
+            if (skalTaMedBarnFraForrigeBehandling(behandling) && forrigeBehandlingSomErVedtatt != null) {
                 finnBarnMedTilkjentYtelseIBehandling(forrigeBehandlingSomErVedtatt)
             } else emptyList()
 
