@@ -54,13 +54,13 @@ fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandl
     overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>,
     secureLogger: Logger
 ): List<InternPeriodeOvergangsstønad> {
-    val personerMedOvergangsstønad = (this + overgangsstønadPerioderFraForrigeBehandling).map { it.personIdent }
+    val personerMedOvergangsstønadIForrigeOgInneværendeBehandling = (this + overgangsstønadPerioderFraForrigeBehandling).map { it.personIdent }
     val erOvergangsstønadForMerEnnEnPerson =
-        personerMedOvergangsstønad.toSet().size > 1
+        personerMedOvergangsstønadIForrigeOgInneværendeBehandling.toSet().size > 1
     if (erOvergangsstønadForMerEnnEnPerson) {
         secureLogger.info(
             "Fant overgangsstønad for mer enn 1 person." +
-                "Personer: $personerMedOvergangsstønad" +
+                "Personer: $personerMedOvergangsstønadIForrigeOgInneværendeBehandling" +
                 "Perioder i inneværende behandling: $this" +
                 "Perioder fra forrige behandling: $overgangsstønadPerioderFraForrigeBehandling"
         )
