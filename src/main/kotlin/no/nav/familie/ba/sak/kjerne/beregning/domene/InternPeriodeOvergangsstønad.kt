@@ -6,7 +6,11 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
+
+val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
 data class InternPeriodeOvergangsstønad(
     val personIdent: String,
@@ -50,18 +54,26 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
  *
  ***/
 fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandling(
-    gamleOvergangsstønadPerioder: List<InternPeriodeOvergangsstønad>
+    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>
 ): List<InternPeriodeOvergangsstønad> {
+    val personerMedOvergangsstønadIForrigeOgInneværendeBehandling = (this + overgangsstønadPerioderFraForrigeBehandling).map { it.personIdent }
     val erOvergangsstønadForMerEnnEnPerson =
-        (this + gamleOvergangsstønadPerioder).map { it.personIdent }.toSet().size > 1
-    if (erOvergangsstønadForMerEnnEnPerson)
+        personerMedOvergangsstønadIForrigeOgInneværendeBehandling.toSet().size > 1
+    if (erOvergangsstønadForMerEnnEnPerson) {
+        secureLogger.info(
+            "Fant overgangsstønad for mer enn 1 person. \n" +
+                "Personer: $personerMedOvergangsstønadIForrigeOgInneværendeBehandling \n" +
+                "Perioder i inneværende behandling: $this \n" +
+                "Perioder fra forrige behandling: $overgangsstønadPerioderFraForrigeBehandling"
+        )
         throw Feil("Antar overgangsstønad for kun søker, men fant overgangsstønad for mer enn en person.")
+    }
 
     val tidligerePerioder = this.filter { it.tomDato.isSameOrBefore(LocalDate.now()) }
     val framtidigePerioder = this.minus(tidligerePerioder)
     val nyeOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(framtidigePerioder)
 
-    val gammelOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(gamleOvergangsstønadPerioder)
+    val gammelOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(overgangsstønadPerioderFraForrigeBehandling)
 
     val oppsplittedeFramtigigePerioder = gammelOvergangsstønadTidslinje
         .kombinerMed(nyeOvergangsstønadTidslinje) { gammelOvergangsstønadPeriode, nyOvergangsstønadPeriode ->
