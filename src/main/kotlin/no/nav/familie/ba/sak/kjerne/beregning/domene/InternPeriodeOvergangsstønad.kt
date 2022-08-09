@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import org.slf4j.Logger
 import java.time.LocalDate
 
 data class InternPeriodeOvergangsstønad(
@@ -50,12 +51,21 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
  *
  ***/
 fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandling(
-    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>
+    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>,
+    secureLogger: Logger
 ): List<InternPeriodeOvergangsstønad> {
+    val personerMedOvergangsstønad = (this + overgangsstønadPerioderFraForrigeBehandling).map { it.personIdent }
     val erOvergangsstønadForMerEnnEnPerson =
-        (this + overgangsstønadPerioderFraForrigeBehandling).map { it.personIdent }.toSet().size > 1
-    if (erOvergangsstønadForMerEnnEnPerson)
+        personerMedOvergangsstønad.toSet().size > 1
+    if (erOvergangsstønadForMerEnnEnPerson) {
+        secureLogger.info(
+            "Fant overgangsstønad for mer enn 1 person." +
+                "Personer: $personerMedOvergangsstønad" +
+                "Perioder i inneværende behandling: $this" +
+                "Perioder fra forrige behandling: $overgangsstønadPerioderFraForrigeBehandling"
+        )
         throw Feil("Antar overgangsstønad for kun søker, men fant overgangsstønad for mer enn en person.")
+    }
 
     val tidligerePerioder = this.filter { it.tomDato.isSameOrBefore(LocalDate.now()) }
     val framtidigePerioder = this.minus(tidligerePerioder)
