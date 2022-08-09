@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.skalTaMedBarnFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.springframework.stereotype.Service
 
@@ -24,26 +24,21 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         val aktør = personidentService.hentOgLagreAktør(søkerIdent, true)
         val barnaAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
 
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
-            val barnMedTilkjentYtelseIForrigeBehandling =
-                beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandlingSomErVedtatt.id)
-            val forrigeMålform =
-                persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErVedtatt.id)
+        val målform = forrigeBehandlingSomErVedtatt
+            ?.let { persongrunnlagService.hentSøkersMålform(behandlingId = it.id) }
+            ?: Målform.NB
 
-            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = aktør,
-                barnFraInneværendeBehandling = barnaAktør,
-                barnFraForrigeBehandling = barnMedTilkjentYtelseIForrigeBehandling,
-                behandling = behandling,
-                målform = forrigeMålform
-            )
-        } else {
-            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = aktør,
-                barnFraInneværendeBehandling = barnaAktør,
-                behandling = behandling,
-                målform = Målform.NB
-            )
-        }
+        val barnMedTilkjentYtelseIForrigeBehandling =
+            if (skalTaMedBarnFraForrigeBehandling(behandling) && forrigeBehandlingSomErVedtatt != null) {
+                beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandlingSomErVedtatt.id)
+            } else emptyList()
+
+        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+            aktør = aktør,
+            barnFraInneværendeBehandling = barnaAktør,
+            barnFraForrigeBehandling = barnMedTilkjentYtelseIForrigeBehandling,
+            behandling = behandling,
+            målform = målform
+        )
     }
 }
