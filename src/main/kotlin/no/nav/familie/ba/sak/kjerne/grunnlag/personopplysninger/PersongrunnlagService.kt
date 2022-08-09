@@ -149,32 +149,26 @@ class PersongrunnlagService(
             søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }
                 .map { barn -> personidentService.hentOgLagreAktør(barn.ident, true) }
 
-        if ((behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) && forrigeBehandlingSomErVedtatt != null) {
-            val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandlingSomErVedtatt.id)
-            val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.aktør }
-                ?.filter {
-                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                        forrigeBehandlingSomErVedtatt.id,
-                        it
-                    ).isNotEmpty()
-                } ?: emptyList()
+        val barnMedTilkjentYtelseIForrigeBehandling =
+            if ((behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) &&
+                forrigeBehandlingSomErVedtatt != null
+            ) {
+                finnBarnMedTilkjentYtelseIBehandling(forrigeBehandlingSomErVedtatt)
+            } else emptyList()
 
-            hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = søkerAktør,
-                barnFraInneværendeBehandling = valgteBarnsAktør,
-                barnFraForrigeBehandling = forrigePersongrunnlagBarna,
-                behandling = behandling,
-                målform = søknadDTO.søkerMedOpplysninger.målform,
-            )
-        } else {
-            hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = søkerAktør,
-                barnFraInneværendeBehandling = valgteBarnsAktør,
-                behandling = behandling,
-                målform = søknadDTO.søkerMedOpplysninger.målform
-            )
-        }
+        hentOgLagreSøkerOgBarnINyttGrunnlag(
+            aktør = søkerAktør,
+            barnFraInneværendeBehandling = valgteBarnsAktør,
+            barnFraForrigeBehandling = barnMedTilkjentYtelseIForrigeBehandling,
+            behandling = behandling,
+            målform = søknadDTO.søkerMedOpplysninger.målform
+        )
     }
+
+    private fun finnBarnMedTilkjentYtelseIBehandling(behandling: Behandling): List<Aktør> =
+        hentAktiv(behandlingId = behandling.id)?.barna?.map { it.aktør }?.filter {
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, it).isNotEmpty()
+        } ?: emptyList()
 
     /**
      * Henter oppdatert registerdata og lagrer i nytt aktivt personopplysningsgrunnlag

@@ -24,26 +24,23 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         val aktør = personidentService.hentOgLagreAktør(søkerIdent, true)
         val barnaAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
 
-        if ((behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) && forrigeBehandlingSomErVedtatt != null) {
-            val barnMedTilkjentYtelseIForrigeBehandling =
-                beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandlingSomErVedtatt.id)
-            val forrigeMålform =
-                persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErVedtatt.id)
+        val målform = forrigeBehandlingSomErVedtatt
+            ?.let { persongrunnlagService.hentSøkersMålform(behandlingId = it.id) }
+            ?: Målform.NB
 
-            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = aktør,
-                barnFraInneværendeBehandling = barnaAktør,
-                barnFraForrigeBehandling = barnMedTilkjentYtelseIForrigeBehandling,
-                behandling = behandling,
-                målform = forrigeMålform
-            )
-        } else {
-            persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = aktør,
-                barnFraInneværendeBehandling = barnaAktør,
-                behandling = behandling,
-                målform = Målform.NB
-            )
-        }
+        val barnMedTilkjentYtelseIForrigeBehandling =
+            if ((behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) &&
+                forrigeBehandlingSomErVedtatt != null
+            ) {
+                beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandlingSomErVedtatt.id)
+            } else emptyList()
+
+        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+            aktør = aktør,
+            barnFraInneværendeBehandling = barnaAktør,
+            barnFraForrigeBehandling = barnMedTilkjentYtelseIForrigeBehandling,
+            behandling = behandling,
+            målform = målform
+        )
     }
 }
