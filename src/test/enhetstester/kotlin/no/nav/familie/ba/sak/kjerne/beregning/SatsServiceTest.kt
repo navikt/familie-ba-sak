@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.every
 import io.mockk.spyk
+import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.dato
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -15,6 +17,33 @@ class SatsServiceTest {
     private val satsService = spyk(SatsService)
 
     private val MAX_GYLDIG_FRA_OG_MED = årMnd("2020-05")
+
+    @Test
+    fun `Barn som er under 6 år hele perioden får tillegg hele perioden`() {
+        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
+        val seksårsdag = LocalDate.of(2023, 1, 1)
+
+        Assertions.assertEquals(periode, satsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom))
+    }
+
+    @Test
+    fun `Barn som fyller 6 år i løpet av perioden får tilleggsperiode før seksårsdag`() {
+        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
+        val seksårsdag = LocalDate.of(2021, 1, 1)
+
+        Assertions.assertEquals(
+            Periode(periode.fom, seksårsdag.sisteDagIForrigeMåned()),
+            satsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom)
+        )
+    }
+
+    @Test
+    fun `Barn som er over 6 år hele perioden får ingen tillegsperiode`() {
+        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
+        val seksårsdag = LocalDate.of(2018, 1, 1)
+
+        Assertions.assertEquals(null, satsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom))
+    }
 
     @Test
     fun `Skal bruke sats for satstype som er løpende`() {
