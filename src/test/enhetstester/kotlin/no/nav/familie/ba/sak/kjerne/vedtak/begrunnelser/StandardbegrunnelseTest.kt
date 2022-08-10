@@ -293,7 +293,7 @@ internal class StandardbegrunnelseTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES),
+                    triggesAv = lagTriggesAv(EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES)
                 )
         )
 
@@ -301,7 +301,7 @@ internal class StandardbegrunnelseTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES),
+                    triggesAv = lagTriggesAv(endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES)
                 )
         )
     }
@@ -312,7 +312,7 @@ internal class StandardbegrunnelseTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES),
+                    triggesAv = lagTriggesAv(endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES)
                 )
         )
 
@@ -320,10 +320,30 @@ internal class StandardbegrunnelseTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES),
+                    triggesAv = lagTriggesAv(EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES)
                 )
         )
     }
+
+    private fun lagTriggesAv(endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere) =
+        TriggesAv(
+            vilkår = emptySet(),
+            medlemskap = false,
+            gjelderFørstePeriode = false,
+            gjelderFraInnvilgelsestidspunkt = false,
+            deltBostedSkalIkkeDeles = false,
+            barnDød = false,
+            barnMedSeksårsdag = false,
+            deltbosted = false,
+            personTyper = setOf(PersonType.BARN, PersonType.SØKER),
+            endretUtbetalingSkalUtbetales = endretUtbetalingSkalUtbetales,
+            endringsaarsaker = emptySet(),
+            personerManglerOpplysninger = false,
+            etterEndretUtbetaling = false,
+            satsendring = false, småbarnstillegg = false,
+            valgbar = false,
+            vurderingAnnetGrunnlag = false
+        )
 
     @Test
     fun `Alle begrunnelser er unike`() {

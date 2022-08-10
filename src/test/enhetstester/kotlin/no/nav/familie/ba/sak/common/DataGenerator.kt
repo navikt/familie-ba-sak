@@ -1122,6 +1122,10 @@ fun lagTriggesAv(
     etterEndretUtbetaling = etterEndretUtbetaling,
     endretUtbetalingSkalUtbetales = endretUtbetalingSkalUtbetales,
     småbarnstillegg = småbarnstillegg,
+    barnDød = false,
+    deltBostedSkalIkkeDeles = false,
+    gjelderFraInnvilgelsestidspunkt = false,
+    gjelderFørstePeriode = false
 )
 
 fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
