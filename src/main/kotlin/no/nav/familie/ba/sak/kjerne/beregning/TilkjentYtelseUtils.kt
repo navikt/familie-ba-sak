@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.erBack2BackIMånedsskifte
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -284,8 +285,9 @@ object TilkjentYtelseUtils {
 
         val skalAvsluttesMånedenFør =
             if (person.erDød()) {
-                person.dødsfall!!.dødsfallDato.førsteDagIInneværendeMåned() >= person.fødselsdato.til18ÅrsVilkårsdato()
-                    .førsteDagIInneværendeMåned()
+                person.dødsfall!!.dødsfallDato.førsteDagIInneværendeMåned().isSameOrAfter(
+                    person.fødselsdato.til18ÅrsVilkårsdato().førsteDagIInneværendeMåned()
+                )
             } else {
                 oppfyltTom == periodeTomFra18Årsvilkår
             }
