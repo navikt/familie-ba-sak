@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -282,6 +283,14 @@ object TilkjentYtelseUtils {
                 it.vilkårType == Vilkår.UNDER_18_ÅR
             }?.periodeTom
 
+        val skalAvsluttesMånedenFør =
+            if (person.erDød()) {
+                person.dødsfall!!.dødsfallDato.førsteDagIInneværendeMåned() >= person.fødselsdato.til18ÅrsVilkårsdato()
+                    .førsteDagIInneværendeMåned()
+            } else {
+                oppfyltTomKommerFra18ÅrsVilkår
+            }
+
         val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(
             person.hentSeksårsdag(),
             oppfyltFom,
@@ -304,7 +313,7 @@ object TilkjentYtelseUtils {
                 fraOgMed = periodeOver6år.fom
             ),
             stønadTilOgMed = settRiktigStønadTom(
-                skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
+                skalAvsluttesMånedenFør = skalAvsluttesMånedenFør,
                 tilOgMed = periodeOver6år.tom
             ),
             maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
