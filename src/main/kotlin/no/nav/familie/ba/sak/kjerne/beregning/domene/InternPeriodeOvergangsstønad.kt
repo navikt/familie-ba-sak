@@ -56,9 +56,9 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
 fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandling(
     overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>
 ): List<InternPeriodeOvergangsstønad> {
-    val personerMedOvergangsstønadIForrigeOgInneværendeBehandling = (this + overgangsstønadPerioderFraForrigeBehandling).map { it.personIdent }
+    val personerMedOvergangsstønadIForrigeOgInneværendeBehandling = (this + overgangsstønadPerioderFraForrigeBehandling).map { it.personIdent }.toSet()
     val erOvergangsstønadForMerEnnEnPerson =
-        personerMedOvergangsstønadIForrigeOgInneværendeBehandling.toSet().size > 1
+        personerMedOvergangsstønadIForrigeOgInneværendeBehandling.size > 1
     if (erOvergangsstønadForMerEnnEnPerson) {
         secureLogger.info(
             "Fant overgangsstønad for mer enn 1 person. \n" +
