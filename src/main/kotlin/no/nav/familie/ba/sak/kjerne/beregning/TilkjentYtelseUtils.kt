@@ -277,14 +277,17 @@ object TilkjentYtelseUtils {
             }
 
         val oppfyltTom = if (skalVidereføresEnMånedEkstra) minsteTom.plusMonths(1) else minsteTom
-        val oppfyltTomKommerFra18ÅrsVilkår = oppfyltTom == person.fødselsdato.til18ÅrsVilkårsdato()
+
+        val periodeTomFra18Årsvilkår = periodeResultatBarn.vilkårResultater.find {
+            it.vilkårType == Vilkår.UNDER_18_ÅR
+        }?.periodeTom
 
         val skalAvsluttesMånedenFør =
             if (person.erDød()) {
                 person.dødsfall!!.dødsfallDato.førsteDagIInneværendeMåned() >= person.fødselsdato.til18ÅrsVilkårsdato()
                     .førsteDagIInneværendeMåned()
             } else {
-                oppfyltTomKommerFra18ÅrsVilkår
+                oppfyltTom == periodeTomFra18Årsvilkår
             }
 
         val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(
