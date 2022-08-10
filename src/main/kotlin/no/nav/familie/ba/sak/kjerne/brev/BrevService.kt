@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -29,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
+import no.nav.familie.ba.sak.kjerne.etterbetalingkorrigering.EtterbetalingKorrigeringRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -51,8 +51,7 @@ class BrevService(
     private val brevPeriodeService: BrevPeriodeService,
     private val sanityService: SanityService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val featureToggleService: FeatureToggleService,
-
+    private val etterbetalingKorrigeringRepository: EtterbetalingKorrigeringRepository
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -91,14 +90,17 @@ class BrevService(
             Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG -> Autovedtak6og18årOgSmåbarnstillegg(
                 vedtakFellesfelter = vedtakFellesfelter,
             )
+
             Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> AutovedtakNyfødtFørsteBarn(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
             )
+
             Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> AutovedtakNyfødtBarnFraFør(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
             )
+
             else -> throw Feil("Forsøker å hente vedtaksbrevdata for brevmal ${brevmal.visningsTekst}")
         }
     }
@@ -224,10 +226,15 @@ class BrevService(
     private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? =
         hentEtterbetalingsbeløp(vedtak)?.let { Etterbetaling(it) }
 
-    private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? =
-        simuleringService.hentEtterbetaling(vedtak.behandling.id)
+    private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? {
+        val etterbetalingsBeløp =
+            etterbetalingKorrigeringRepository.finnAktivtKorrigeringPåBehandling(vedtak.behandling.id)?.beløp?.toBigDecimal()
+                ?: simuleringService.hentEtterbetaling(vedtak.behandling.id)
+
+        return etterbetalingsBeløp
             .takeIf { it > BigDecimal.ZERO }
             ?.run { Utils.formaterBeløp(this.toInt()) }
+    }
 
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
         simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO

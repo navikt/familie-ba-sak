@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestEtterbetalingKorrigering
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
@@ -26,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.etterbetalingkorrigering.EtterbetalingKorrigeringService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
@@ -62,6 +64,7 @@ class UtvidetBehandlingService(
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val featureToggleService: FeatureToggleService,
+    private val etterbetalingKorrigeringService: EtterbetalingKorrigeringService
 ) {
 
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
@@ -128,7 +131,8 @@ class UtvidetBehandlingService(
             endringstidspunkt = utledEndringstidpunkt(endringstidspunkt, behandling),
             vedtak = vedtak?.tilRestVedtak(
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
-                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak).map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }.sortedBy { it.fom }
+                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
+                        .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }.sortedBy { it.fom }
                 } else emptyList(),
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),
@@ -138,7 +142,9 @@ class UtvidetBehandlingService(
                 ?.tilRestSettPåVent(),
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
             valutakurser = valutakurser.map { it.tilRestValutakurs() },
-            utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() }
+            utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() },
+            etterbetalingKorrigering = etterbetalingKorrigeringService.finnAktivtKorrigeringPåBehandling(behandlingId = behandlingId)
+                ?.tilRestEtterbetalingKorrigering()
         )
     }
 
