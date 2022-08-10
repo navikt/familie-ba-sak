@@ -146,7 +146,7 @@ class BehandlingsresultatUtilsTest {
         )
     }
     @Test
-    fun `både ENDRET_UTBETALING og ENDRET_UTEN_UTBETALING som samlede resultater gir behandilngsresultat ENDRET_UTBETALING`() {
+    fun `både ENDRET_UTBETALING og ENDRET_UTEN_UTBETALING som samlede resultater gir behandlingsresultat ENDRET_UTBETALING`() {
         val personer = listOf(
             lagYtelsePerson(
                 resultat = YtelsePersonResultat.ENDRET_UTBETALING,
