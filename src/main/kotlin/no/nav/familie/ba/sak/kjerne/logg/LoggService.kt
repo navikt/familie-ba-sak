@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.foedselsnummer.FoedselsNr
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -211,8 +211,8 @@ class LoggService(
         behandling.barnasIdenter
             .filter { Identkonverterer.er11Siffer(it) }
             .distinct()
-            .map { FoedselsNr(it) }
-            .map { it.foedselsdato }
+            .map { Fødselsnummer(it) }
+            .map { it.fødselsdato }
             .map { it.tilKortString() }
     )
 
