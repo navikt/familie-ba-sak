@@ -65,19 +65,10 @@ object TilkjentYtelseUtils {
             endretUtbetalingAndeler = endretUtbetalingAndeler.filter { it.årsak == Årsak.ETTERBETALING_3ÅR }
         )
 
-        val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
-            behandlingId = vilkårsvurdering.behandling.id,
-            tilkjentYtelse = tilkjentYtelse
-        )
-            .lagUtvidetBarnetrygdAndeler(
-                utvidetVilkår = vilkårsvurdering.personResultater
-                    .flatMap { it.vilkårResultater }
-                    .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT },
-                andelerBarna = andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år
-            )
-
-        val andelerTilkjentYtelseUtvidetOppdatertMedAlleEndringsperioder = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            andelTilkjentYtelser = andelerTilkjentYtelseUtvidet,
+        val andelerTilkjentYtelseUtvidet = beregnTilkjentYtelseUtvidet(
+            vilkårsvurdering = vilkårsvurdering,
+            tilkjentYtelse = tilkjentYtelse,
+            andelertTilkjentYtelseBarna = andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år,
             endretUtbetalingAndeler = endretUtbetalingAndeler
         )
 
@@ -105,7 +96,7 @@ object TilkjentYtelseUtils {
                 )
         } else emptyList()
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaOppdatertMedAlleEndringsperioder + andelerTilkjentYtelseUtvidetOppdatertMedAlleEndringsperioder + andelerTilkjentYtelseSmåbarnstillegg)
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaOppdatertMedAlleEndringsperioder + andelerTilkjentYtelseUtvidet + andelerTilkjentYtelseSmåbarnstillegg)
 
         return tilkjentYtelse
     }
@@ -153,6 +144,24 @@ object TilkjentYtelseUtils {
                         }
                     }
             }
+    }
+
+    fun beregnTilkjentYtelseUtvidet(vilkårsvurdering: Vilkårsvurdering, andelertTilkjentYtelseBarna: List<AndelTilkjentYtelse>, tilkjentYtelse: TilkjentYtelse, endretUtbetalingAndeler: List<EndretUtbetalingAndel>): List<AndelTilkjentYtelse> {
+        val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
+            behandlingId = vilkårsvurdering.behandling.id,
+            tilkjentYtelse = tilkjentYtelse
+        )
+            .lagUtvidetBarnetrygdAndeler(
+                utvidetVilkår = vilkårsvurdering.personResultater
+                    .flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT },
+                andelerBarna = andelertTilkjentYtelseBarna
+            )
+
+        return oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            andelTilkjentYtelser = andelerTilkjentYtelseUtvidet,
+            endretUtbetalingAndeler = endretUtbetalingAndeler
+        )
     }
 
     @Deprecated("Utdatert - skal ikke brukes lenger")
