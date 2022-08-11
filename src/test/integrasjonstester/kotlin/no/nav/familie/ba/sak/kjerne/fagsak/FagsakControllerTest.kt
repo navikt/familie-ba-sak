@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
@@ -91,7 +91,7 @@ class FagsakControllerTest(
     @Test
     @Tag("integration")
     fun `Skal opprette fagsak med aktørid`() {
-        val aktørId = randomAktørId()
+        val aktørId = randomAktør()
 
         val response =
             fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = null, aktørId = aktørId.aktørId))
@@ -135,7 +135,7 @@ class FagsakControllerTest(
     fun `Skal returnere eksisterende fagsak på person som allerede finnes med gammel ident`() {
         val fnr = randomFnr()
         val nyttFnr = randomFnr()
-        val aktørId = randomAktørId().aktørId
+        val aktørId = randomAktør().aktørId
 
         // Får ikke mockPersonopplysningerService til å virke riktig derfor oppdateres db direkte.
         val aktør = aktørIdRepository.save(Aktør(aktørId))
@@ -163,7 +163,7 @@ class FagsakControllerTest(
     @Test
     @Tag("integration")
     fun `Skal returnere eksisterende fagsak på person som allerede finnes basert på aktørid`() {
-        val aktørId = randomAktørId()
+        val aktørId = randomAktør()
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(personIdent = aktørId.aktivFødselsnummer(), aktørId = aktørId.aktørId)

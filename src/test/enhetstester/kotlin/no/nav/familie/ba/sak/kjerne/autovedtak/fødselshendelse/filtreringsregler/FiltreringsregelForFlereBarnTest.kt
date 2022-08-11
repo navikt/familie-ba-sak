@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
@@ -41,9 +41,9 @@ import java.time.LocalDate
 
 class FiltreringsregelForFlereBarnTest {
 
-    val barnAktør0 = randomAktørId()
-    val barnAktør1 = randomAktørId()
-    val gyldigAktør = randomAktørId()
+    val barnAktør0 = randomAktør()
+    val barnAktør1 = randomAktør()
+    val gyldigAktør = randomAktør()
 
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()

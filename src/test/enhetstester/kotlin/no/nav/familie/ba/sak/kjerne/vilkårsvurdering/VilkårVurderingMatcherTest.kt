@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -13,7 +13,7 @@ class VilkårVurderingMatcherTest {
 
     private val randomBehandling = lagBehandling()
     private val søkerFnr = randomFnr()
-    private val søkerAktørId = randomAktørId()
+    private val søkerAktørId = randomAktør()
 
     private fun likeVilkårResultater(a: VilkårResultat?, b: VilkårResultat?): Boolean =
         a?.vilkårType == b?.vilkårType &&
