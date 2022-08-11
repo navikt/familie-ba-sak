@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
@@ -854,7 +854,7 @@ class MigreringServiceTest(
         every { mockkPersonidentService.hentOgLagreAktørIder(any(), false) } answers { callOriginal() }
 
         every { mockkPersonidentService.hentOgLagreAktør(any(), false) } returns
-            Aktør(randomAktørId().aktørId, personidenter = mutableSetOf())
+            Aktør(randomAktør().aktørId, personidenter = mutableSetOf())
 
         assertThatThrownBy {
             s.migrer(ident)
@@ -863,7 +863,7 @@ class MigreringServiceTest(
 
         // Verifiserer at feiltypen ikke er den samme når vi endrer til unike aktørId'er for barna
         every { mockkPersonidentService.hentOgLagreAktør(any(), false) } answers {
-            Aktør(randomAktørId().aktørId, personidenter = mutableSetOf())
+            Aktør(randomAktør().aktørId, personidenter = mutableSetOf())
         }
         assertThatThrownBy { s.migrer(ident) }
             .extracting("feiltype").isNotEqualTo(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
@@ -124,7 +124,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
     private fun andelPåTilkjentYtelse(
         tilkjentYtelse: TilkjentYtelse,
         periodeOffset: Long,
-        aktør: Aktør = randomAktørId()
+        aktør: Aktør = randomAktør()
     ) = AndelTilkjentYtelse(
         aktør = aktør,
         behandlingId = tilkjentYtelse.behandling.id,

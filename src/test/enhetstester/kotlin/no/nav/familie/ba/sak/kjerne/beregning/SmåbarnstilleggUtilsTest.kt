@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -31,7 +31,7 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal generere periode med rett til småbarnstillegg for 1 barn`() {
-        val aktør = randomAktørId()
+        val aktør = randomAktør()
 
         val småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
             behandlingId = 1L,
@@ -99,8 +99,8 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal generere periode med rett til småbarnstillegg for 2 barn hvor kun 1 får utbetalinger`() {
-        val barnUnder3År = randomAktørId()
-        val barnOver3År = randomAktørId()
+        val barnUnder3År = randomAktør()
+        val barnOver3År = randomAktør()
 
         val småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
             behandlingId = 1L,
@@ -178,8 +178,8 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal svare false om at nye perioder med full OS påvirker behandling`() {
-        val personIdent = randomAktørId()
-        val barnIdent = randomAktørId()
+        val personIdent = randomAktør()
+        val barnIdent = randomAktør()
 
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
@@ -224,8 +224,8 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal svare false om at nye perioder med full OS påvirker behandling ved flere perioder`() {
-        val personIdent = randomAktørId()
-        val barnIdent = randomAktørId()
+        val personIdent = randomAktør()
+        val barnIdent = randomAktør()
 
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
@@ -289,8 +289,8 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `skal ikke behandle vedtak om overgangsstønad når vedtaket ikke fører til endring i utbetaling`() {
-        val personIdent = randomAktørId()
-        val barnIdent = randomAktørId()
+        val personIdent = randomAktør()
+        val barnIdent = randomAktør()
 
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
@@ -340,8 +340,8 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `skal behandle vedtak om overgangsstønad når vedtaket fører til endring i utbetaling`() {
-        val personIdent = randomAktørId()
-        val barnIdent = randomAktørId()
+        val personIdent = randomAktør()
+        val barnIdent = randomAktør()
 
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
