@@ -44,12 +44,12 @@ class SmåbarnstilleggService(
             .map { it.tilInternPeriodeOvergangsstønad() }
             .slåSammenTidligerePerioder()
             .splitFramtidigePerioderFraForrigeBehandling(
-                overgangsstønadPerioderFraForrigeBehandling = hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId),
+                overgangsstønadPerioderFraForrigeBehandling = hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId),
                 søkerAktør = aktør
             )
     }
 
-    private fun hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId: Long): List<InternPeriodeOvergangsstønad> {
+    private fun hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId: Long): List<InternPeriodeOvergangsstønad> {
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId)
 
