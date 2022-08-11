@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagTriggesAv
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
@@ -293,7 +294,7 @@ internal class StandardbegrunnelseTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    triggesAv = lagTriggesAv(EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES)
+                    triggesAv = lagTriggesAv(endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES)
                 )
         )
 
@@ -320,30 +321,10 @@ internal class StandardbegrunnelseTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    triggesAv = lagTriggesAv(EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES)
+                    triggesAv = lagTriggesAv(endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES)
                 )
         )
     }
-
-    private fun lagTriggesAv(endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere) =
-        TriggesAv(
-            vilkår = emptySet(),
-            medlemskap = false,
-            gjelderFørstePeriode = false,
-            gjelderFraInnvilgelsestidspunkt = false,
-            deltBostedSkalIkkeDeles = false,
-            barnDød = false,
-            barnMedSeksårsdag = false,
-            deltbosted = false,
-            personTyper = setOf(PersonType.BARN, PersonType.SØKER),
-            endretUtbetalingSkalUtbetales = endretUtbetalingSkalUtbetales,
-            endringsaarsaker = emptySet(),
-            personerManglerOpplysninger = false,
-            etterEndretUtbetaling = false,
-            satsendring = false, småbarnstillegg = false,
-            valgbar = false,
-            vurderingAnnetGrunnlag = false
-        )
 
     @Test
     fun `Alle begrunnelser er unike`() {

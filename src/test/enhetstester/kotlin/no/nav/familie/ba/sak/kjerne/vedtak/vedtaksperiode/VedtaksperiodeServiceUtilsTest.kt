@@ -5,17 +5,16 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagTriggesAv
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
@@ -34,7 +33,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn))
-        val triggesAv = lagTriggesAv()
+        val triggesAv = lagTriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
             behandling = behandling,
@@ -78,7 +77,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn2))
-        val triggesAv = lagTriggesAv()
+        val triggesAv = lagTriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
             behandling = behandling,
@@ -116,26 +115,6 @@ class VedtaksperiodeServiceUtilsTest {
             personidenterForBegrunnelse.toSet()
         )
     }
-
-    private fun lagTriggesAv() =
-        TriggesAv(
-            vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD),
-            medlemskap = false,
-            gjelderFørstePeriode = false,
-            gjelderFraInnvilgelsestidspunkt = false,
-            deltBostedSkalIkkeDeles = false,
-            barnDød = false,
-            barnMedSeksårsdag = false,
-            deltbosted = false,
-            personTyper = setOf(PersonType.BARN, PersonType.SØKER),
-            endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
-            endringsaarsaker = emptySet(),
-            personerManglerOpplysninger = false,
-            etterEndretUtbetaling = false,
-            satsendring = false, småbarnstillegg = false,
-            valgbar = false,
-            vurderingAnnetGrunnlag = false
-        )
 
     val ytelseTyperSmåbarnstillegg =
         setOf(YtelseType.SMÅBARNSTILLEGG, YtelseType.UTVIDET_BARNETRYGD, YtelseType.ORDINÆR_BARNETRYGD)
