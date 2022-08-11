@@ -664,7 +664,7 @@ class BeregningServiceTest {
             søker = søker
         )
 
-        Assertions.assertEquals(6, andelerTilkjentYtelse.size)
+        Assertions.assertEquals(7, andelerTilkjentYtelse.size)
 
         val (andelerSøker, andelerBarn) = andelerTilkjentYtelse.partition { it.aktør.aktivFødselsnummer() == søker.aktør.aktivFødselsnummer() }
 
@@ -687,7 +687,7 @@ class BeregningServiceTest {
         Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerBarn[2].stønadFom)
         Assertions.assertEquals(tom.toYearMonth(), andelerBarn[2].stønadTom)
 
-        Assertions.assertEquals(3, andelerSøker.size)
+        Assertions.assertEquals(4, andelerSøker.size)
 
         val (andelerUtvidet, andelerSmåbarnstillegg) = andelerSøker.partition { it.erUtvidet() }
 
@@ -704,12 +704,18 @@ class BeregningServiceTest {
         Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerUtvidet[1].stønadFom)
         Assertions.assertEquals(utvidetTom.toYearMonth(), andelerUtvidet[1].stønadTom)
 
-        Assertions.assertEquals(1, andelerSmåbarnstillegg.size)
-        // Søker - småbarnstillegg
+        Assertions.assertEquals(2, andelerSmåbarnstillegg.size)
+        // Søker - småbarnstillegg under endringsperiode
         Assertions.assertEquals(søker.aktør, andelerSmåbarnstillegg[0].aktør)
-        Assertions.assertEquals(BigDecimal(100), andelerSmåbarnstillegg[0].prosent)
+        Assertions.assertEquals(BigDecimal.ZERO, andelerSmåbarnstillegg[0].prosent)
         Assertions.assertEquals(utvidetFom.plusMonths(1).toYearMonth(), andelerSmåbarnstillegg[0].stønadFom)
-        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerSmåbarnstillegg[0].stønadTom)
+        Assertions.assertEquals(endretUtbetalingAndelTom, andelerSmåbarnstillegg[0].stønadTom)
+
+        // Søker - småbarnstillegg etter endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerSmåbarnstillegg[1].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerSmåbarnstillegg[1].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerSmåbarnstillegg[1].stønadFom)
+        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerSmåbarnstillegg[1].stønadTom)
     }
 
     @Test
