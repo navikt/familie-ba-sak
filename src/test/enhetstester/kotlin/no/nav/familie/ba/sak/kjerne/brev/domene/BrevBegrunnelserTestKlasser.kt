@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -47,7 +47,7 @@ data class BrevBegrunnelserTestConfig(
 
 data class BrevbegrunnelserTestPerson(
     val personIdent: String = randomFnr(),
-    val aktørId: String = randomAktørId(personIdent).aktørId,
+    val aktørId: String = randomAktør(personIdent).aktørId,
     val type: PersonType,
     val fødselsdato: LocalDate,
     val overstyrteVilkårresultater: List<MinimertVilkårResultat>,

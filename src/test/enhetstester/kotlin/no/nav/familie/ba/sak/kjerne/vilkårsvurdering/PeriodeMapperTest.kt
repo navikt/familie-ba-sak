@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -54,13 +54,13 @@ class PeriodeMapperTest {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }
 
-        vilkårsvurdering = lagVilkårsvurdering(randomAktørId(), behandling, Resultat.IKKE_VURDERT)
+        vilkårsvurdering = lagVilkårsvurdering(randomAktør(), behandling, Resultat.IKKE_VURDERT)
     }
 
     @Test
     fun `Kombinert tidslinje returnerer rette rette vilkårsresultater for tidsintervaller`() {
         val personResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = randomAktørId())
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = randomAktør())
 
         val tidslinje1 = LocalDateTimeline(
             listOf(
@@ -225,7 +225,7 @@ class PeriodeMapperTest {
         // Periode med fom-dato medio mai og tom-dato medio juni skal bli hele mai og juni
 
         val personResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = randomAktørId())
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = randomAktør())
         personResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -252,7 +252,7 @@ class PeriodeMapperTest {
         val periodeTom18ÅrsVilkår = LocalDate.of(2038, 5, 15)
 
         val personResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = randomAktørId())
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = randomAktør())
         personResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(

@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
@@ -36,7 +36,7 @@ class AutobrevStegServiceTest {
 
     @Test
     fun `Skal stoppe autovedtak og opprette oppgave ved åpen behandling som utredes`() {
-        val aktør = randomAktørId()
+        val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
         val behandling = lagBehandling(fagsak).also {
             it.status = BehandlingStatus.UTREDES
@@ -57,7 +57,7 @@ class AutobrevStegServiceTest {
 
     @Test
     fun `Skal stoppe autovedtak og opprette oppgave ved åpen behandling med status Fatter vedtak`() {
-        val aktør = randomAktørId()
+        val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
         val behandling = lagBehandling(fagsak).also {
             it.status = BehandlingStatus.FATTER_VEDTAK
@@ -78,7 +78,7 @@ class AutobrevStegServiceTest {
 
     @Test
     fun `Skal stoppe autovedtak ved å kaste feil ved åpen behandling som iverksettes`() {
-        val aktør = randomAktørId()
+        val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
         val behandling = lagBehandling(fagsak).also {
             it.status = BehandlingStatus.IVERKSETTER_VEDTAK
