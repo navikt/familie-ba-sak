@@ -37,7 +37,6 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
-import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
@@ -203,8 +202,6 @@ class MigreringServiceTest(
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
 
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
@@ -248,8 +245,6 @@ class MigreringServiceTest(
             val now = LocalDate.now()
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
@@ -296,11 +291,6 @@ class MigreringServiceTest(
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
 
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
-            assertThat(vedtakDVH.utbetalingsperioder.first().utbetaltPerMnd.toDouble()).isEqualTo(
-                SAK_BELØP_2_BARN_1_UNDER_6 / 2
-            )
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
@@ -350,8 +340,6 @@ class MigreringServiceTest(
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
 
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
