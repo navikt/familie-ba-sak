@@ -29,9 +29,9 @@ class SmåbarnstilleggService(
         aktør: Aktør,
         behandlingId: Long
     ): List<InternPeriodeOvergangsstønad> {
-        val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(aktør)
+        val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(aktør = aktør)
 
-        periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId)
+        periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId = behandlingId)
         periodeOvergangsstønadGrunnlagRepository.saveAll(
             periodeOvergangsstønad.map {
                 it.tilPeriodeOvergangsstønadGrunnlag(
@@ -44,7 +44,8 @@ class SmåbarnstilleggService(
             .map { it.tilInternPeriodeOvergangsstønad() }
             .slåSammenTidligerePerioder()
             .splitFramtidigePerioderFraForrigeBehandling(
-                overgangsstønadPerioderFraForrigeBehandling = hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId)
+                overgangsstønadPerioderFraForrigeBehandling = hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId),
+                søkerAktør = aktør
             )
     }
 
