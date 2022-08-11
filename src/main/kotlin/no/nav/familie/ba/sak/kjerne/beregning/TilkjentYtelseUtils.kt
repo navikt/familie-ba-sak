@@ -42,6 +42,23 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
+        hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
+    ): TilkjentYtelse {
+        val tilkjentYtelse = TilkjentYtelse(
+            behandling = vilkårsvurdering.behandling,
+            opprettetDato = LocalDate.now(),
+            endretDato = LocalDate.now()
+        )
+
+        return tilkjentYtelse
+    }
+
+    @Deprecated("Utdatert - skal ikke brukes lenger")
+    fun beregnTilkjentYtelseGammel(
+        vilkårsvurdering: Vilkårsvurdering,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        behandling: Behandling,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }

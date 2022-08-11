@@ -72,7 +72,7 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
-        val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -134,7 +134,7 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
-        val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -209,7 +209,7 @@ class VilkårTilTilkjentYtelseTest {
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1, barn2)
 
-        val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
