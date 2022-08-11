@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -157,7 +157,7 @@ class VedtakServiceTest(
             vilkårsvurderingService,
         )
 
-        val personAktørId = randomAktørId()
+        val personAktørId = randomAktør()
 
         behandling = lagBehandling()
 

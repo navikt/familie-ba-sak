@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
@@ -24,9 +24,9 @@ class ValutakursRepositoryTest(
 
     @Test
     fun `Skal lagre flere valutakurser med gjenbruk av flere aktører`() {
-        val søker = aktørIdRepository.save(randomAktørId())
-        val barn1 = aktørIdRepository.save(randomAktørId())
-        val barn2 = aktørIdRepository.save(randomAktørId())
+        val søker = aktørIdRepository.save(randomAktør())
+        val barn1 = aktørIdRepository.save(randomAktør())
+        val barn2 = aktørIdRepository.save(randomAktør())
 
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandling(fagsak))
@@ -48,8 +48,8 @@ class ValutakursRepositoryTest(
 
     @Test
     fun `Skal lagre skjema-feltene`() {
-        val søker = aktørIdRepository.save(randomAktørId())
-        val barn1 = aktørIdRepository.save(randomAktørId())
+        val søker = aktørIdRepository.save(randomAktør())
+        val barn1 = aktørIdRepository.save(randomAktør())
 
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandling(fagsak))
