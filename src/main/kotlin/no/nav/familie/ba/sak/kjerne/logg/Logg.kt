@@ -89,5 +89,4 @@ enum class LoggType(val visningsnavn: String, val tittel: String = visningsnavn)
     BEHANDLIG_GJENOPPTATT("Behandling gjenopptatt"),
     VENTENDE_BEHANDLING_ENDRET("Behandlingen er oppdatert"),
     ETTERBETALING_KORRIGERT("Etterbetaling i brev er korrigert"),
-    ETTERBETALING_FJERNET("Etterbetaling i brev er fjernet")
 }

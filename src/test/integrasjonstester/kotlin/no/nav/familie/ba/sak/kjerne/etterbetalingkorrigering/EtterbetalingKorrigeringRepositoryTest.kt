@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.etterbetalingkorrigering
 
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -66,7 +66,7 @@ class EtterbetalingKorrigeringRepositoryTest(
     }
 
     @Test
-    fun `finnAlleKorrigeringPåBehandling skal returnere alle etterbetalingkorrigering på behandling`() {
+    fun `hentAlleKorrigeringPåBehandling skal returnere alle etterbetalingkorrigering på behandling`() {
         val behandling = opprettBehandling()
 
         val aktivEtterbetalingKorrigering = EtterbetalingKorrigering(
@@ -91,14 +91,14 @@ class EtterbetalingKorrigeringRepositoryTest(
         etterbetalingKorrigeringRepository.saveAndFlush(inaktivEtterbetalingKorrigering)
 
         val eksisterendeEtterbetalingKorrigering =
-            etterbetalingKorrigeringRepository.hentAlleKorrigeringPåBehandling(behandling.id)
+            etterbetalingKorrigeringRepository.finnAlleKorrigeringerPåBehandling(behandling.id)
 
         assertThat(eksisterendeEtterbetalingKorrigering.size, Is(2))
         assertThat(eksisterendeEtterbetalingKorrigering.map { it.begrunnelse }, containsInAnyOrder("1", "2"))
     }
 
     private fun opprettBehandling(): Behandling {
-        val søker = aktørIdRepository.save(randomAktørId())
+        val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
 
         return behandlingRepository.save(lagBehandling(fagsak))

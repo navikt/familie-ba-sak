@@ -143,7 +143,7 @@ class UtvidetBehandlingService(
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
             valutakurser = valutakurser.map { it.tilRestValutakurs() },
             utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() },
-            etterbetalingKorrigering = etterbetalingKorrigeringService.finnAktivtKorrigeringPåBehandling(behandlingId = behandlingId)
+            etterbetalingKorrigering = etterbetalingKorrigeringService.finnAktivtKorrigeringPåBehandling(behandlingId)
                 ?.tilRestEtterbetalingKorrigering()
         )
     }

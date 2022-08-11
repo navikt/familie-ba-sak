@@ -34,10 +34,10 @@ class EtterbetalingKorrigering(
     val årsak: EtterbetalingKorrigeringÅrsak,
 
     @Column(name = "begrunnelse")
-    var begrunnelse: String?,
+    val begrunnelse: String?,
 
     @Column(name = "belop")
-    var beløp: Int,
+    val beløp: Int,
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_behandling_id")
@@ -53,7 +53,7 @@ data class EtterbetalingKorrigeringRequest(
     val beløp: Int
 )
 
-fun EtterbetalingKorrigeringRequest.toEntity(behandling: Behandling) =
+fun EtterbetalingKorrigeringRequest.tilEtterbetalingKorrigering(behandling: Behandling) =
     EtterbetalingKorrigering(
         årsak = årsak,
         begrunnelse = begrunnelse,

@@ -8,5 +8,5 @@ interface EtterbetalingKorrigeringRepository : JpaRepository<EtterbetalingKorrig
     fun finnAktivtKorrigeringPåBehandling(behandlingId: Long): EtterbetalingKorrigering?
 
     @Query("SELECT ek FROM EtterbetalingKorrigering ek JOIN ek.behandling b WHERE b.id = :behandlingId")
-    fun hentAlleKorrigeringPåBehandling(behandlingId: Long): List<EtterbetalingKorrigering>
+    fun finnAlleKorrigeringerPåBehandling(behandlingId: Long): List<EtterbetalingKorrigering>
 }

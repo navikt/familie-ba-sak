@@ -158,9 +158,11 @@ class LoggService(
             forrigeBehandlingsresultat == Behandlingsresultat.IKKE_VURDERT -> {
                 "Resultat ble ${nyttBehandlingsresultat.displayName.lowercase()}"
             }
+
             forrigeBehandlingsresultat != nyttBehandlingsresultat -> {
                 "Resultat gikk fra ${forrigeBehandlingsresultat.displayName.lowercase()} til ${nyttBehandlingsresultat.displayName.lowercase()}"
             }
+
             else -> return null
         }
 
@@ -374,6 +376,21 @@ class LoggService(
                     BehandlerRolle.SAKSBEHANDLER
                 ),
                 tekst = tekst
+            )
+        )
+    }
+
+    fun opprettEtterbetalingKorrigeringLogg(behandling: Behandling, tittel: String) {
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.ETTERBETALING_KORRIGERT,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tittel = tittel,
+                tekst = ""
             )
         )
     }
