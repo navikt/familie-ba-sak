@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBaseFagsak
@@ -78,15 +79,16 @@ class BeregningServiceTest {
         val fagsakService = mockk<FagsakService>()
 
         beregningService = BeregningService(
-            andelTilkjentYtelseRepository,
-            fagsakService,
-            behandlingHentOgPersisterService,
-            tilkjentYtelseRepository,
-            vilkårsvurderingRepository,
-            behandlingRepository,
-            personopplysningGrunnlagRepository,
-            endretUtbetalingAndelRepository,
-            småbarnstilleggService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            behandlingRepository = behandlingRepository,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+            endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
+            småbarnstilleggService = småbarnstilleggService,
+            featureToggleService = featureToggleService
         )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
@@ -1077,6 +1079,7 @@ class BeregningServiceTest {
                 )
             )
         }
+        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_UTVIDET_ANDELER) } returns true
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
