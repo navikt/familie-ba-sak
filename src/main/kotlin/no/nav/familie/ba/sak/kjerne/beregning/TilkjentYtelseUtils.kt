@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -45,11 +46,104 @@ object TilkjentYtelseUtils {
         endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
+        val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
+
+        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
+            personopplysningGrunnlag
+        )
+
+        val relevanteSøkerPerioder = innvilgetPeriodeResultatSøker
+            .filter { søkerPeriode -> innvilgedePeriodeResultatBarna.any { søkerPeriode.overlapper(it) } }
+
         val tilkjentYtelse = TilkjentYtelse(
             behandling = vilkårsvurdering.behandling,
             opprettetDato = LocalDate.now(),
             endretDato = LocalDate.now()
         )
+
+        val andelerTilkjentYtelseBarna = innvilgedePeriodeResultatBarna
+            .flatMap { periodeResultatBarn: PeriodeResultat ->
+                relevanteSøkerPerioder
+                    .flatMap { overlappendePerioderesultatSøker ->
+                        val person = identBarnMap[periodeResultatBarn.aktør.aktørId]
+                            ?: error("Finner ikke barn på map over barna i behandlingen")
+                        val beløpsperioder =
+                            beregnBeløpsperioder(
+                                overlappendePerioderesultatSøker,
+                                periodeResultatBarn,
+                                innvilgedePeriodeResultatBarna,
+                                innvilgetPeriodeResultatSøker,
+                                person
+                            )
+                        beløpsperioder.map { beløpsperiode ->
+                            val prosent =
+                                if (periodeResultatBarn.erDeltBostedSomSkalDeles()) BigDecimal(50) else BigDecimal(100)
+                            val nasjonaltPeriodebeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent)
+                            AndelTilkjentYtelse(
+                                behandlingId = vilkårsvurdering.behandling.id,
+                                tilkjentYtelse = tilkjentYtelse,
+                                aktør = person.aktør,
+                                stønadFom = beløpsperiode.fraOgMed,
+                                stønadTom = beløpsperiode.tilOgMed,
+                                kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp,
+                                nasjonaltPeriodebeløp = nasjonaltPeriodebeløp,
+                                type = finnYtelseType(behandling.underkategori, person.type),
+                                sats = beløpsperiode.sats,
+                                prosent = prosent
+                            )
+                        }
+                    }
+            }
+
+        val andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            andelTilkjentYtelser = andelerTilkjentYtelseBarna.toMutableSet(),
+            endretUtbetalingAndeler = endretUtbetalingAndeler.filter { it.årsak == Årsak.ETTERBETALING_3ÅR }
+        ).toList()
+
+        val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
+            behandlingId = vilkårsvurdering.behandling.id,
+            tilkjentYtelse = tilkjentYtelse
+        )
+            .lagUtvidetBarnetrygdAndeler(
+                utvidetVilkår = vilkårsvurdering.personResultater
+                    .flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT },
+                andelerBarna = andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år
+            )
+
+        val andelerTilkjentYtelseUtvidetOppdatertMedAlleEndringsperioder = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            andelTilkjentYtelser = andelerTilkjentYtelseUtvidet.toMutableSet(),
+            endretUtbetalingAndeler = endretUtbetalingAndeler
+        ).toList()
+
+        val andelerTilkjentYtelseBarnaOppdatertMedAlleEndringsperioder = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            andelTilkjentYtelser = andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år.toMutableSet(),
+            endretUtbetalingAndeler = endretUtbetalingAndeler.filter { it.årsak != Årsak.ETTERBETALING_3ÅR }
+        )
+
+        val andelerTilkjentYtelseSmåbarnstillegg = if (andelerTilkjentYtelseUtvidet.isNotEmpty()) {
+            val perioderMedFullOvergangsstønad =
+                hentPerioderMedFullOvergangsstønad(
+                    personopplysningGrunnlag.søker.aktør
+                )
+
+            SmåbarnstilleggBarnetrygdGenerator(
+                behandlingId = vilkårsvurdering.behandling.id,
+                tilkjentYtelse = tilkjentYtelse
+            )
+                .lagSmåbarnstilleggAndeler(
+                    perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
+                    andelerTilkjentYtelse = andelerTilkjentYtelseUtvidet + andelerTilkjentYtelseBarna,
+                    barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
+                        Pair(
+                            it.aktør,
+                            it.fødselsdato
+                        )
+                    },
+                )
+        } else emptyList()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaOppdatertMedAlleEndringsperioder + andelerTilkjentYtelseUtvidetOppdatertMedAlleEndringsperioder + andelerTilkjentYtelseSmåbarnstillegg)
 
         return tilkjentYtelse
     }
