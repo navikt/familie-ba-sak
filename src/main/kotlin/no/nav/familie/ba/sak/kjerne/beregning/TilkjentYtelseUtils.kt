@@ -46,14 +46,6 @@ object TilkjentYtelseUtils {
         endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
-        val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
-
-        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
-            personopplysningGrunnlag
-        )
-
-        val relevanteSøkerPerioder = innvilgetPeriodeResultatSøker
-            .filter { søkerPeriode -> innvilgedePeriodeResultatBarna.any { søkerPeriode.overlapper(it) } }
 
         val tilkjentYtelse = TilkjentYtelse(
             behandling = vilkårsvurdering.behandling,
@@ -61,39 +53,12 @@ object TilkjentYtelseUtils {
             endretDato = LocalDate.now()
         )
 
-        val andelerTilkjentYtelseBarna = innvilgedePeriodeResultatBarna
-            .flatMap { periodeResultatBarn: PeriodeResultat ->
-                relevanteSøkerPerioder
-                    .flatMap { overlappendePerioderesultatSøker ->
-                        val person = identBarnMap[periodeResultatBarn.aktør.aktørId]
-                            ?: error("Finner ikke barn på map over barna i behandlingen")
-                        val beløpsperioder =
-                            beregnBeløpsperioder(
-                                overlappendePerioderesultatSøker,
-                                periodeResultatBarn,
-                                innvilgedePeriodeResultatBarna,
-                                innvilgetPeriodeResultatSøker,
-                                person
-                            )
-                        beløpsperioder.map { beløpsperiode ->
-                            val prosent =
-                                if (periodeResultatBarn.erDeltBostedSomSkalDeles()) BigDecimal(50) else BigDecimal(100)
-                            val nasjonaltPeriodebeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent)
-                            AndelTilkjentYtelse(
-                                behandlingId = vilkårsvurdering.behandling.id,
-                                tilkjentYtelse = tilkjentYtelse,
-                                aktør = person.aktør,
-                                stønadFom = beløpsperiode.fraOgMed,
-                                stønadTom = beløpsperiode.tilOgMed,
-                                kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp,
-                                nasjonaltPeriodebeløp = nasjonaltPeriodebeløp,
-                                type = finnYtelseType(behandling.underkategori, person.type),
-                                sats = beløpsperiode.sats,
-                                prosent = prosent
-                            )
-                        }
-                    }
-            }
+        val andelerTilkjentYtelseBarna = beregnAndelerTilkjentYtelseForBarna(
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            vilkårsvurdering = vilkårsvurdering,
+            tilkjentYtelse = tilkjentYtelse,
+            behandlingUnderkategori = behandling.underkategori
+        )
 
         val andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             andelTilkjentYtelser = andelerTilkjentYtelseBarna.toMutableSet(),
@@ -122,17 +87,14 @@ object TilkjentYtelseUtils {
         )
 
         val andelerTilkjentYtelseSmåbarnstillegg = if (andelerTilkjentYtelseUtvidet.isNotEmpty()) {
-            val perioderMedFullOvergangsstønad =
-                hentPerioderMedFullOvergangsstønad(
-                    personopplysningGrunnlag.søker.aktør
-                )
-
             SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = vilkårsvurdering.behandling.id,
                 tilkjentYtelse = tilkjentYtelse
             )
                 .lagSmåbarnstilleggAndeler(
-                    perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
+                    perioderMedFullOvergangsstønad = hentPerioderMedFullOvergangsstønad(
+                        personopplysningGrunnlag.søker.aktør
+                    ),
                     andelerTilkjentYtelse = andelerTilkjentYtelseUtvidet + andelerTilkjentYtelseBarna,
                     barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
                         Pair(
@@ -146,6 +108,51 @@ object TilkjentYtelseUtils {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaOppdatertMedAlleEndringsperioder + andelerTilkjentYtelseUtvidetOppdatertMedAlleEndringsperioder + andelerTilkjentYtelseSmåbarnstillegg)
 
         return tilkjentYtelse
+    }
+
+    fun beregnAndelerTilkjentYtelseForBarna(personopplysningGrunnlag: PersonopplysningGrunnlag, vilkårsvurdering: Vilkårsvurdering, tilkjentYtelse: TilkjentYtelse, behandlingUnderkategori: BehandlingUnderkategori): List<AndelTilkjentYtelse> {
+        val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
+
+        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
+            personopplysningGrunnlag
+        )
+
+        val relevanteSøkerPerioder = innvilgetPeriodeResultatSøker
+            .filter { søkerPeriode -> innvilgedePeriodeResultatBarna.any { søkerPeriode.overlapper(it) } }
+
+        return innvilgedePeriodeResultatBarna
+            .flatMap { periodeResultatBarn: PeriodeResultat ->
+                relevanteSøkerPerioder
+                    .flatMap { overlappendePerioderesultatSøker ->
+                        val person = identBarnMap[periodeResultatBarn.aktør.aktørId]
+                            ?: error("Finner ikke barn på map over barna i behandlingen")
+                        val beløpsperioder =
+                            beregnBeløpsperioder(
+                                overlappendePerioderesultatSøker,
+                                periodeResultatBarn,
+                                innvilgedePeriodeResultatBarna,
+                                innvilgetPeriodeResultatSøker,
+                                person
+                            )
+                        beløpsperioder.map { beløpsperiode ->
+                            val prosent =
+                                if (periodeResultatBarn.erDeltBostedSomSkalDeles()) BigDecimal(50) else BigDecimal(100)
+                            val nasjonaltPeriodebeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent)
+                            AndelTilkjentYtelse(
+                                behandlingId = vilkårsvurdering.behandling.id,
+                                tilkjentYtelse = tilkjentYtelse,
+                                aktør = person.aktør,
+                                stønadFom = beløpsperiode.fraOgMed,
+                                stønadTom = beløpsperiode.tilOgMed,
+                                kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp,
+                                nasjonaltPeriodebeløp = nasjonaltPeriodebeløp,
+                                type = finnYtelseType(behandlingUnderkategori, person.type),
+                                sats = beløpsperiode.sats,
+                                prosent = prosent
+                            )
+                        }
+                    }
+            }
     }
 
     @Deprecated("Utdatert - skal ikke brukes lenger")
