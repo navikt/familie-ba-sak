@@ -51,7 +51,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                 WHERE ty.utbetalingsoppdrag IS NOT NULL
                                   AND f.status = 'LØPENDE'
                                   AND f.arkivert = FALSE
-                                GROUP BY b.id)
+                                GROUP BY b.fk_fagsak_id)
                                 
                             SELECT silp.fagsakid
                             FROM sisteiverksatte silp
