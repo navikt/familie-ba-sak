@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -36,7 +36,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @BeforeEach
     fun init() {
-        val personAktørId = randomAktørId()
+        val personAktørId = randomAktør()
 
         behandling = lagBehandling()
 
@@ -312,7 +312,7 @@ class VilkårsvurderingStegUtilsTest {
     fun `Skal nullstille periode hvis det kun finnes en periode`() {
         val mockPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = randomAktørId(),
+            aktør = randomAktør(),
         )
 
         val mockVilkårResultat = VilkårResultat(
@@ -376,7 +376,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke bort ikke oppfylte perioder når det gjelder samme behandling`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
 
         val initiellVilkårvurdering =
@@ -405,7 +405,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke oppfylt om oppfylt finnes ved kopiering fra forrige behandling`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
         val behandling2 = lagBehandling()
 
@@ -432,7 +432,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke ikke oppfylt om oppfylt ikke finnes`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
 
         val initiellVilkårsvurdering =

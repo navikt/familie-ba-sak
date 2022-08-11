@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
@@ -63,7 +63,7 @@ class BehandlingstemaServiceTest {
 
     @Test
     fun `Skal utlede EØS dersom minst ett vilkår i har blitt behandlet i inneværende behandling`() {
-        val barn = randomAktørId()
+        val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
             behandling = defaultBehandling,
         )
@@ -93,7 +93,7 @@ class BehandlingstemaServiceTest {
 
     @Test
     fun `Skal utlede NASJONAL dersom EØS vilkåret ble behandlet i annen behandling`() {
-        val barn = randomAktørId()
+        val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
             behandling = defaultBehandling,
         )
@@ -150,7 +150,7 @@ class BehandlingstemaServiceTest {
 
     @Test
     fun `Skal utlede ORDINÆR dersom UTVIDET vilkåret ble behandlet i annen behandling`() {
-        val barn = randomAktørId()
+        val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
             behandling = defaultBehandling,
         )

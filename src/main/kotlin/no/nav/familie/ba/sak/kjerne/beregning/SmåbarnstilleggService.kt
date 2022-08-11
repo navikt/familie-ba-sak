@@ -26,16 +26,16 @@ class SmåbarnstilleggService(
 ) {
 
     fun hentOgLagrePerioderMedFullOvergangsstønad(
-        aktør: Aktør,
+        søkerAktør: Aktør,
         behandlingId: Long
     ): List<InternPeriodeOvergangsstønad> {
-        val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(aktør)
+        val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(aktør = søkerAktør)
 
-        periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId)
+        periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId = behandlingId)
         periodeOvergangsstønadGrunnlagRepository.saveAll(
             periodeOvergangsstønad.map {
                 it.tilPeriodeOvergangsstønadGrunnlag(
-                    behandlingId, aktør
+                    behandlingId = behandlingId, aktør = søkerAktør
                 )
             }
         )
@@ -44,11 +44,12 @@ class SmåbarnstilleggService(
             .map { it.tilInternPeriodeOvergangsstønad() }
             .slåSammenTidligerePerioder()
             .splitFramtidigePerioderFraForrigeBehandling(
-                gamleOvergangsstønadPerioder = hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId)
+                overgangsstønadPerioderFraForrigeBehandling = hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId),
+                søkerAktør = søkerAktør
             )
     }
 
-    private fun hentPerioderOvergangsønadFraForrigeIverksatteBehandling(behandlingId: Long): List<InternPeriodeOvergangsstønad> {
+    private fun hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId: Long): List<InternPeriodeOvergangsstønad> {
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId)
 
