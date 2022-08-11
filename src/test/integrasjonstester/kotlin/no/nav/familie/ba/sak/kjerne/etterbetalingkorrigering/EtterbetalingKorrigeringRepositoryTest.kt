@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.etterbetalingkorrigering
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -23,10 +24,7 @@ class EtterbetalingKorrigeringRepositoryTest(
 
     @Test
     fun `finnAktivtKorrigeringPåBehandling skal returnere null dersom det ikke eksisterer en aktiv etterbetaling korrigering på behandling`() {
-        val søker = aktørIdRepository.save(randomAktørId())
-        val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-
-        val behandling = behandlingRepository.save(lagBehandling(fagsak))
+        val behandling = opprettBehandling()
 
         val inaktivEtterbetalingKorrigering = EtterbetalingKorrigering(
             id = 10000001,
@@ -47,10 +45,7 @@ class EtterbetalingKorrigeringRepositoryTest(
 
     @Test
     fun `finnAktivtKorrigeringPåBehandling skal returnere aktiv etterbetaling korrigering på behandling dersom det finnes`() {
-        val søker = aktørIdRepository.save(randomAktørId())
-        val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-
-        val behandling = behandlingRepository.save(lagBehandling(fagsak))
+        val behandling = opprettBehandling()
 
         val aktivEtterbetalingKorrigering = EtterbetalingKorrigering(
             id = 10000002,
@@ -72,10 +67,7 @@ class EtterbetalingKorrigeringRepositoryTest(
 
     @Test
     fun `finnAlleKorrigeringPåBehandling skal returnere alle etterbetalingkorrigering på behandling`() {
-        val søker = aktørIdRepository.save(randomAktørId())
-        val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-
-        val behandling = behandlingRepository.save(lagBehandling(fagsak))
+        val behandling = opprettBehandling()
 
         val aktivEtterbetalingKorrigering = EtterbetalingKorrigering(
             id = 10000003,
@@ -103,5 +95,12 @@ class EtterbetalingKorrigeringRepositoryTest(
 
         assertThat(eksisterendeEtterbetalingKorrigering.size, Is(2))
         assertThat(eksisterendeEtterbetalingKorrigering.map { it.begrunnelse }, containsInAnyOrder("1", "2"))
+    }
+
+    private fun opprettBehandling(): Behandling {
+        val søker = aktørIdRepository.save(randomAktørId())
+        val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
+
+        return behandlingRepository.save(lagBehandling(fagsak))
     }
 }

@@ -4,10 +4,15 @@ CREATE TABLE ETTERBETALING_KORRIGERING
     AARSAK           VARCHAR                             NOT NULL,
     BEGRUNNELSE      VARCHAR,
     BELOP            BIGINT                              NOT NULL,
+    AKTIV            BOOLEAN                             NOT NULL,
     FK_BEHANDLING_ID BIGINT REFERENCES BEHANDLING (ID)   NOT NULL,
+
+    -- Base entitet felter
+    VERSJON          BIGINT       DEFAULT 0              NOT NULL,
     OPPRETTET_AV     VARCHAR      DEFAULT 'VL'           NOT NULL,
     OPPRETTET_TID    TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    AKTIV            BOOLEAN                             NOT NULL
+    ENDRET_AV        VARCHAR,
+    ENDRET_TID       TIMESTAMP(3)
 );
 
 CREATE SEQUENCE etterbetaling_korrigering_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;

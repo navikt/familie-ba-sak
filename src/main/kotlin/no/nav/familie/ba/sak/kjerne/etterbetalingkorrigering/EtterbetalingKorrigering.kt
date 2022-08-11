@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.etterbetalingkorrigering
 
+import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import java.time.LocalDateTime
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
@@ -44,15 +43,9 @@ class EtterbetalingKorrigering(
     @JoinColumn(name = "fk_behandling_id")
     val behandling: Behandling,
 
-    @Column(name = "opprettet_av")
-    val opprettetAv: String = SikkerhetContext.hentSaksbehandlerNavn(),
-
-    @Column(name = "opprettet_tid")
-    val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
-
     @Column(name = "aktiv")
     var aktiv: Boolean
-)
+) : BaseEntitet()
 
 data class EtterbetalingKorrigeringRequest(
     val årsak: EtterbetalingKorrigeringÅrsak,
@@ -69,9 +62,9 @@ fun EtterbetalingKorrigeringRequest.toEntity(behandling: Behandling) =
         aktiv = true
     )
 
-enum class EtterbetalingKorrigeringÅrsak(val visningsnavn: String) {
-    FEIL_TIDLIGERE_UTBETALT_BELØP("Feil i tidligere utbetalt beløp"),
-    REFUSJON_FRA_UDI("Refusjon fra UDI"),
-    REFUSJON_FRA_ANDRE_MYNDIGHETER("Refusjon fra andre myndigheter"),
-    MOTREGNING("Motregning")
+enum class EtterbetalingKorrigeringÅrsak {
+    FEIL_TIDLIGERE_UTBETALT_BELØP,
+    REFUSJON_FRA_UDI,
+    REFUSJON_FRA_ANDRE_MYNDIGHETER,
+    MOTREGNING
 }
