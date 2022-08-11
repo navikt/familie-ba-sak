@@ -1204,7 +1204,7 @@ class VilkårServiceTest(
             lagBarnVilkårResultat(
                 barnPersonResultat = barnPersonResultat,
                 barnetsFødselsdato = barnetsFødselsdato,
-                forrigeMigreringsdato = forrigeVilkårsdato,
+                periodeFom = forrigeVilkårsdato,
                 behandlingId = forrigeBehandling.id,
                 flytteSak = false
             )

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_ENDRING
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_VEDLIKEHOLD_HENLEGGELSE
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -191,8 +192,22 @@ class BehandlingStegController(
         tekniskEndringToggle: Boolean
     ) {
         if (behandling.erTekniskBehandling() && !tekniskEndringToggle) {
-            throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak}. Ta kontakt med teamet dersom dette ikke stemmer.")
+            throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer.")
         }
+    }
+
+    @PostMapping(path = ["registrer-institusjon-og-verge"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun registerInstitusjonOgVerge(
+        @PathVariable behandlingId: Long,
+        @RequestBody institusjonOgVergeInfo: RestRegistrerInstitusjonOgVerge
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        if (institusjonOgVergeInfo.tilVerge(behandling) == null && institusjonOgVergeInfo.tilInstitusjon() == null) {
+            return ResponseEntity.ok(Ressurs.failure("Ugydig verge info"))
+        }
+
+        stegService.håndterRegistrerVerge(behandling, institusjonOgVergeInfo)
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 }
 

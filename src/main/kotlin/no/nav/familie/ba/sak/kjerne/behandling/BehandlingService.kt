@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
@@ -71,7 +72,7 @@ class BehandlingService(
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
         val søkersAktør = personidentService.hentAktør(nyBehandling.søkersIdent)
 
-        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør, nyBehandling.fagsakEier)
+        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør, nyBehandling.fagsakType)
             ?: throw FunksjonellFeil(
                 melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
                 frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak"
@@ -121,7 +122,9 @@ class BehandlingService(
             }
             opprettOgInitierNyttVedtakForBehandling(behandling = lagretBehandling)
 
-            loggService.opprettBehandlingLogg(lagretBehandling)
+            loggService.opprettBehandlingLogg(
+                BehandlingLoggRequest(behandling = lagretBehandling, barnasIdenter = nyBehandling.barnasIdenter)
+            )
             if (lagretBehandling.opprettBehandleSakOppgave()) {
                 /**
                  * Oppretter oppgave via task slik at dersom noe feiler i forbindelse med opprettelse

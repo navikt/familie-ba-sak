@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnels
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.dødeBarnForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -53,7 +54,8 @@ class VedtaksperiodeServiceUtilsTest {
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
-            minimerteUtbetalingsperiodeDetaljer = listOf()
+            minimerteUtbetalingsperiodeDetaljer = listOf(),
+            dødeBarnForrigePeriode = emptyList()
         )
 
         Assertions.assertEquals(
@@ -105,7 +107,8 @@ class VedtaksperiodeServiceUtilsTest {
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
-            minimerteUtbetalingsperiodeDetaljer = listOf()
+            minimerteUtbetalingsperiodeDetaljer = listOf(),
+            dødeBarnForrigePeriode = emptyList()
         )
 
         Assertions.assertEquals(

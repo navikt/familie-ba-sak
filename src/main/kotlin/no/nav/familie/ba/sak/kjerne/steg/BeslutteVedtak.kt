@@ -58,7 +58,7 @@ class BeslutteVedtak(
             )
         } else if (behandling.erTekniskBehandling() && !featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING)) {
             throw FunksjonellFeil(
-                "Du har ikke tilgang til å beslutte en behandling med årsak=${behandling.opprettetÅrsak}. Ta kontakt med teamet dersom dette ikke stemmer."
+                "Du har ikke tilgang til å beslutte en behandling med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer."
             )
         }
         val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(

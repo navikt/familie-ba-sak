@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
@@ -36,6 +38,7 @@ fun Standardbegrunnelse.triggesForPeriode(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
+    ytelserForrigePeriode: List<AndelTilkjentYtelse>
 ): Boolean {
 
     val triggesAv = this.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
@@ -92,8 +95,31 @@ fun Standardbegrunnelse.triggesForPeriode(
             minimertVedtaksperiode = minimertVedtaksperiode,
         )
         triggesAv.gjelderFraInnvilgelsestidspunkt -> false
+        triggesAv.barnDød -> dødeBarnForrigePeriode(ytelserForrigePeriode, minimertePersoner.filter { it.type === PersonType.BARN }).any()
         else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
     }
+}
+
+fun dødeBarnForrigePeriode(
+    ytelserForrigePeriode: List<AndelTilkjentYtelse>,
+    barnIBehandling: List<MinimertPerson>
+): List<String> {
+    return barnIBehandling.filter { barn ->
+        val ytelserForrigePeriodeForBarn = ytelserForrigePeriode.filter {
+            it.aktør.aktivFødselsnummer() == barn.aktivPersonIdent
+        }
+        var barnDødeForrigePeriode = false
+        if (barn.erDød() && ytelserForrigePeriodeForBarn.isNotEmpty()) {
+            val fom =
+                ytelserForrigePeriodeForBarn.minOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadFom }
+            val tom =
+                ytelserForrigePeriodeForBarn.maxOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadTom }
+            val fomFørDødsfall = fom <= barn.dødsfallsdato!!.toYearMonth()
+            val tomEtterDødsfall = tom >= barn.dødsfallsdato.toYearMonth()
+            barnDødeForrigePeriode = fomFørDødsfall && tomEtterDødsfall
+        }
+        barnDødeForrigePeriode
+    }.map { it.aktivPersonIdent }
 }
 
 private fun erEndretTriggerErOppfylt(

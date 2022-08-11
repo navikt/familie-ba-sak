@@ -38,15 +38,11 @@ data class Fagsak(
         nullable = true,
         updatable = false
     )
-    val institusjon: Institusjon? = null,
+    var institusjon: Institusjon? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     var status: FagsakStatus = FagsakStatus.OPPRETTET,
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "eier", nullable = false)
-    val eier: FagsakEier = FagsakEier.OMSORGSPERSON,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
@@ -82,13 +78,8 @@ enum class FagsakStatus {
     AVSLUTTET
 }
 
-enum class FagsakEier {
-    OMSORGSPERSON,
-    BARN
-}
-
 enum class FagsakType {
     NORMAL,
-    BARN_ENSLIG_MINDREÅRLIG,
+    BARN_ENSLIG_MINDREÅRIG,
     INSTITUSJON,
 }

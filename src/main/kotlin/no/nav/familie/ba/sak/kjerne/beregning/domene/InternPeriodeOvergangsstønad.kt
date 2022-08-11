@@ -1,10 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
+
+val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
 data class InternPeriodeOvergangsstønad(
     val personIdent: String,
@@ -32,4 +38,49 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
                 sammenslåttePerioder.apply { add(removeLast().copy(tomDato = nestePeriode.tomDato)) }
             } else sammenslåttePerioder.apply { add(nestePeriode) }
         }
+}
+
+/***
+ * Dersom vi i en behandling har overgangsstønad i tre måneder:
+ * |OOO-----|
+ * som fører til småbarnstillegg.
+ * Og så utvides overgangsstønadsperioden til fem måneder:
+ * |OOOOO---|
+ * som fører til småbarnstillegg i alle månedene.
+ * Ønsker vi å kunne begrunne de to siste månedene med småbarnstillegg.
+ * Splitter derfor opp overgangsstønads-perioden slik at vi kan begrunne endringen for søker i riktig periode.
+ * |OOO-----|
+ * |---OO---|
+ *
+ ***/
+fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandling(
+    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>
+): List<InternPeriodeOvergangsstønad> {
+    val personerMedOvergangsstønadIForrigeOgInneværendeBehandling = (this + overgangsstønadPerioderFraForrigeBehandling).map { it.personIdent }.toSet()
+    val erOvergangsstønadForMerEnnEnPerson =
+        personerMedOvergangsstønadIForrigeOgInneværendeBehandling.size > 1
+    if (erOvergangsstønadForMerEnnEnPerson) {
+        secureLogger.info(
+            "Fant overgangsstønad for mer enn 1 person. \n" +
+                "Personer: $personerMedOvergangsstønadIForrigeOgInneværendeBehandling \n" +
+                "Perioder i inneværende behandling: $this \n" +
+                "Perioder fra forrige behandling: $overgangsstønadPerioderFraForrigeBehandling"
+        )
+        throw Feil("Antar overgangsstønad for kun søker, men fant overgangsstønad for mer enn en person.")
+    }
+
+    val tidligerePerioder = this.filter { it.tomDato.isSameOrBefore(LocalDate.now()) }
+    val framtidigePerioder = this.minus(tidligerePerioder)
+    val nyeOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(framtidigePerioder)
+
+    val gammelOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(overgangsstønadPerioderFraForrigeBehandling)
+
+    val oppsplittedeFramtigigePerioder = gammelOvergangsstønadTidslinje
+        .kombinerMed(nyeOvergangsstønadTidslinje) { gammelOvergangsstønadPeriode, nyOvergangsstønadPeriode ->
+            if (nyOvergangsstønadPeriode == null) null
+            else gammelOvergangsstønadPeriode ?: nyOvergangsstønadPeriode
+        }
+        .lagInternePerioderOvergangsstønad()
+
+    return tidligerePerioder + oppsplittedeFramtigigePerioder
 }

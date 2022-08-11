@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
@@ -369,6 +370,16 @@ class StegService(
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
+        }
+    }
+
+    @Transactional
+    fun håndterRegistrerVerge(behandling: Behandling, vergeInfo: RestRegistrerInstitusjonOgVerge): Behandling {
+        val behandlingSteg: RegistrerInstitusjonOgVerge =
+            hentBehandlingSteg(StegType.REGISTRERE_INSTITUSJON_OG_VERGE) as RegistrerInstitusjonOgVerge
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, vergeInfo)
         }
     }
 

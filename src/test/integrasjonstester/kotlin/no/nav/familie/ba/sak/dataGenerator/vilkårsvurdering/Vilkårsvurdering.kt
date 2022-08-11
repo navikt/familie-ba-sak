@@ -111,7 +111,7 @@ fun lagBarnVilkårResultat(
     barnPersonResultat: PersonResultat,
     barnetsFødselsdato: LocalDate,
     behandlingId: Long,
-    forrigeMigreringsdato: LocalDate,
+    periodeFom: LocalDate,
     flytteSak: Boolean = false
 ): Set<VilkårResultat> {
     return setOf(
@@ -135,7 +135,7 @@ fun lagBarnVilkårResultat(
             personResultat = barnPersonResultat,
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
-            periodeFom = forrigeMigreringsdato,
+            periodeFom = periodeFom,
             periodeTom = null,
             behandlingId = behandlingId
         ),
@@ -143,7 +143,7 @@ fun lagBarnVilkårResultat(
             personResultat = barnPersonResultat,
             vilkårType = Vilkår.BOSATT_I_RIKET,
             resultat = Resultat.OPPFYLT,
-            periodeFom = if (flytteSak) barnetsFødselsdato else forrigeMigreringsdato,
+            periodeFom = if (flytteSak) barnetsFødselsdato else periodeFom,
             periodeTom = null,
             behandlingId = behandlingId
         ),
@@ -151,7 +151,7 @@ fun lagBarnVilkårResultat(
             personResultat = barnPersonResultat,
             vilkårType = Vilkår.LOVLIG_OPPHOLD,
             resultat = Resultat.OPPFYLT,
-            periodeFom = if (flytteSak) barnetsFødselsdato else forrigeMigreringsdato,
+            periodeFom = if (flytteSak) barnetsFødselsdato else periodeFom,
             periodeTom = null,
             behandlingId = behandlingId
         )

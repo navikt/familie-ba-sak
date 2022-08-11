@@ -86,7 +86,7 @@ class FagsakController(
 
         return Result.runCatching {
             val aktør = personidentService.hentAktør(request.personIdent)
-            fagsakService.hentMinimalFagsakForPerson(aktør, request.fagsakEier)
+            fagsakService.hentMinimalFagsakForPerson(aktør, request.fagsakType)
         }.fold(
             onSuccess = { return ResponseEntity.ok().body(it) },
             onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
@@ -94,7 +94,10 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/hent-fagsaker-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentMinimalFagsakerForPerson(@RequestBody request: RestHentFagsakerForPerson): ResponseEntity<Ressurs<List<RestMinimalFagsak>>> {
+    fun hentMinimalFagsakerForPerson(
+        @RequestBody
+        request: RestHentFagsakerForPerson
+    ): ResponseEntity<Ressurs<List<RestMinimalFagsak>>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(request.personIdent),
             event = AuditLoggerEvent.ACCESS
@@ -175,7 +178,7 @@ class FagsakController(
 data class FagsakRequest(
     val personIdent: String?,
     val aktørId: String? = null,
-    val fagsakEier: FagsakEier? = null
+    val fagsakType: FagsakType? = FagsakType.NORMAL,
 )
 
 data class RestBeslutningPåVedtak(

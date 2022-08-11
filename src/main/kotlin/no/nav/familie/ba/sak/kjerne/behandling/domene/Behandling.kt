@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.SISTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.verge.Verge
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
@@ -27,6 +28,7 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 import no.nav.familie.kontrakter.felles.Behandlingstema as OppgaveBehandlingTema
@@ -79,7 +81,10 @@ data class Behandling(
     @Column(name = "status", nullable = false)
     var status: BehandlingStatus = initStatus(),
 
-    var overstyrtEndringstidspunkt: LocalDate? = null
+    var overstyrtEndringstidspunkt: LocalDate? = null,
+
+    @OneToOne(mappedBy = "behandling", optional = true)
+    var verge: Verge? = null
 ) : BaseEntitet() {
 
     val steg: StegType
@@ -190,7 +195,8 @@ data class Behandling(
 
     fun skalRettFraBehandlingsresultatTilIverksetting(): Boolean {
         return when {
-            skalBehandlesAutomatisk && erOmregning() && resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
+            skalBehandlesAutomatisk && erOmregning() &&
+                resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
             skalBehandlesAutomatisk && erMigrering() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erSatsendring() && resultat == Behandlingsresultat.ENDRET_UTBETALING -> true
