@@ -49,19 +49,12 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 
         val søkersTidslinje = LocalDateTimeline(
             søkersAndeler.map {
-                DatoIntervallEntitet(
-                    fom = it.stønadFom.førsteDagIInneværendeMåned(),
-                    tom = it.stønadTom.sisteDagIInneværendeMåned()
+                LocalDateSegment(
+                    it.stønadFom.førsteDagIInneværendeMåned(),
+                    it.stønadTom.sisteDagIInneværendeMåned(),
+                    if (it.prosent == BigDecimal.ZERO) listOf(SmåbarnstilleggKombinator.UTVIDET_UTEN_UTBETALING) else listOf(SmåbarnstilleggKombinator.UTVIDET_MED_UTBETALING)
                 )
             }
-                .slåSammenSammenhengendePerioder()
-                .map { andel ->
-                    LocalDateSegment(
-                        andel.fom,
-                        andel.tom,
-                        listOf(SmåbarnstilleggKombinator.UTVIDET)
-                    )
-                }
         )
 
         val perioderMedBarnSomGirRettTilSmåbarnstillegg = LocalDateTimeline(
@@ -89,11 +82,10 @@ data class SmåbarnstilleggBarnetrygdGenerator(
             .filter { segement ->
                 segement.value.containsAll(
                     listOf(
-                        SmåbarnstilleggKombinator.UTVIDET,
                         SmåbarnstilleggKombinator.OVERGANGSSTØNAD,
                         SmåbarnstilleggKombinator.UNDER_3_ÅR
                     )
-                )
+                ) && (segement.value.contains(SmåbarnstilleggKombinator.UTVIDET_MED_UTBETALING) || segement.value.contains(SmåbarnstilleggKombinator.UTVIDET_UTEN_UTBETALING))
             }
             .map {
                 val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(
@@ -114,7 +106,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                     nasjonaltPeriodebeløp = ordinærSatsForPeriode,
                     type = YtelseType.SMÅBARNSTILLEGG,
                     sats = ordinærSatsForPeriode,
-                    prosent = BigDecimal(100)
+                    prosent = if (it.value.contains(SmåbarnstilleggKombinator.UTVIDET_MED_UTBETALING)) BigDecimal(100) else BigDecimal.ZERO
                 )
             }
     }
@@ -201,7 +193,8 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 
     enum class SmåbarnstilleggKombinator {
         OVERGANGSSTØNAD,
-        UTVIDET,
+        UTVIDET_MED_UTBETALING,
+        UTVIDET_UTEN_UTBETALING,
         UNDER_3_ÅR
     }
 
