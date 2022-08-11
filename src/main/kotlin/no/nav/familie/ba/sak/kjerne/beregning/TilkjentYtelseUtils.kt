@@ -61,9 +61,9 @@ object TilkjentYtelseUtils {
         )
 
         val andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            andelTilkjentYtelser = andelerTilkjentYtelseBarna.toMutableSet(),
+            andelTilkjentYtelser = andelerTilkjentYtelseBarna,
             endretUtbetalingAndeler = endretUtbetalingAndeler.filter { it.årsak == Årsak.ETTERBETALING_3ÅR }
-        ).toList()
+        )
 
         val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
             behandlingId = vilkårsvurdering.behandling.id,
@@ -77,12 +77,12 @@ object TilkjentYtelseUtils {
             )
 
         val andelerTilkjentYtelseUtvidetOppdatertMedAlleEndringsperioder = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            andelTilkjentYtelser = andelerTilkjentYtelseUtvidet.toMutableSet(),
+            andelTilkjentYtelser = andelerTilkjentYtelseUtvidet,
             endretUtbetalingAndeler = endretUtbetalingAndeler
-        ).toList()
+        )
 
         val andelerTilkjentYtelseBarnaOppdatertMedAlleEndringsperioder = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            andelTilkjentYtelser = andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år.toMutableSet(),
+            andelTilkjentYtelser = andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år,
             endretUtbetalingAndeler = endretUtbetalingAndeler.filter { it.årsak != Årsak.ETTERBETALING_3ÅR }
         )
 
@@ -250,11 +250,11 @@ object TilkjentYtelseUtils {
     }
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-        andelTilkjentYtelser: MutableSet<AndelTilkjentYtelse>,
+        andelTilkjentYtelser: List<AndelTilkjentYtelse>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
-    ): MutableSet<AndelTilkjentYtelse> {
+    ): List<AndelTilkjentYtelse> {
 
-        if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
+        if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }
 
         val (andelerUtenSmåbarnstillegg, andelerMedSmåbarnstillegg) = andelTilkjentYtelser.partition { !it.erSmåbarnstillegg() }
 
@@ -316,7 +316,7 @@ object TilkjentYtelseUtils {
                 { it.stønadFom }
             )
         )
-        return nyeAndelTilkjentYtelse.toMutableSet()
+        return nyeAndelTilkjentYtelse
     }
 
     fun slåSammenPerioderSomIkkeSkulleHaVærtSplittet(

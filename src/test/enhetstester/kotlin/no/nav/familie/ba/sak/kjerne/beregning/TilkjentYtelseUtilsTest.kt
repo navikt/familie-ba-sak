@@ -692,7 +692,7 @@ internal class TilkjentYtelseUtilsTest {
         )
 
         val andelerTIlkjentYtelse = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            utbetalinsandeler.toMutableSet(),
+            utbetalinsandeler,
             endretUtbetalingAndeler
         )
 
@@ -747,7 +747,7 @@ internal class TilkjentYtelseUtilsTest {
         )
 
         val andelerTIlkjentYtelse = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            utbetalinsandeler.toMutableSet(),
+            utbetalinsandeler,
             endretUtbetalingAndeler
         )
 

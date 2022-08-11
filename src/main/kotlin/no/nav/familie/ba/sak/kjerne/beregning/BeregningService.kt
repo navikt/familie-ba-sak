@@ -190,7 +190,7 @@ class BeregningService(
                 }
 
             val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-                tilkjentYtelse.andelerTilkjentYtelse,
+                tilkjentYtelse.andelerTilkjentYtelse.toList(),
                 endretUtbetalingAndeler
             )
             tilkjentYtelse.andelerTilkjentYtelse.clear()
