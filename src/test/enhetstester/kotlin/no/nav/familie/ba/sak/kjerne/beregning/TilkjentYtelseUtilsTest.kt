@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -10,7 +9,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.tilyyyyMMdd
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -19,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -35,33 +35,6 @@ import java.time.YearMonth
 internal class TilkjentYtelseUtilsTest {
 
     @Test
-    fun `Barn som er under 6 år hele perioden får tillegg hele perioden`() {
-        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
-        val seksårsdag = LocalDate.of(2023, 1, 1)
-
-        assertEquals(periode, SatsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom))
-    }
-
-    @Test
-    fun `Barn som fyller 6 år i løpet av perioden får tilleggsperiode før seksårsdag`() {
-        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
-        val seksårsdag = LocalDate.of(2021, 1, 1)
-
-        assertEquals(
-            Periode(periode.fom, seksårsdag.sisteDagIForrigeMåned()),
-            SatsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom)
-        )
-    }
-
-    @Test
-    fun `Barn som er over 6 år hele perioden får ingen tillegsperiode`() {
-        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
-        val seksårsdag = LocalDate.of(2018, 1, 1)
-
-        assertEquals(null, SatsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom))
-    }
-
-    @Test
     fun `Barn som fyller 6 år i det vilkårene er oppfylt får andel måneden etter`() {
         val barnFødselsdato = LocalDate.of(2016, 2, 2)
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
@@ -69,7 +42,8 @@ internal class TilkjentYtelseUtilsTest {
         val (vilkårsvurdering, personopplysningGrunnlag) =
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
-                vilkårOppfyltFom = barnSeksårsdag
+                vilkårOppfyltFom = barnSeksårsdag,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
@@ -101,7 +75,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = vilkårOppfyltFom,
-                vilkårOppfyltTom = vilkårOppfyltTom
+                vilkårOppfyltTom = vilkårOppfyltTom,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
@@ -128,15 +103,79 @@ internal class TilkjentYtelseUtilsTest {
     }
 
     @Test
+    fun `Det skal utbetales for inneværende måned hvis barn dør minst 1 måned før 18 års datoen`() {
+        val barnFødselsDato = LocalDate.of(2012, 2, 2)
+        val barnDødsfallsDato = LocalDate.of(2030, 1, 1)
+
+        val (vilkårsvurdering, personopplysningGrunnlag) =
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
+                barnFødselsdato = barnFødselsDato,
+                vilkårOppfyltFom = barnFødselsDato,
+                vilkårOppfyltTom = barnDødsfallsDato,
+                barnDødsfallDato = barnDødsfallsDato,
+                under18ÅrVilkårOppfyltTom = barnDødsfallsDato
+            )
+
+        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            behandling = lagBehandling()
+        )
+
+        assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
+
+        val andelFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
+        val andelEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
+
+        assertEquals(YearMonth.of(2014, 2), andelFør6År.stønadFom)
+        assertEquals(YearMonth.of(2019, 2), andelFør6År.stønadTom)
+
+        assertEquals(YearMonth.of(2019, 3), andelEtter6År.stønadFom)
+        assertEquals(YearMonth.of(2030, 1), andelEtter6År.stønadTom)
+    }
+
+    @Test
+    fun `Det skal ikke utbetales for inneværende måned hvis barn dør samme måned som 18 års datoen`() {
+        val barnFødselsDato = LocalDate.of(2012, 2, 20)
+        val barnDødsfallsDato = LocalDate.of(2030, 2, 2)
+
+        val (vilkårsvurdering, personopplysningGrunnlag) =
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
+                barnFødselsdato = barnFødselsDato,
+                vilkårOppfyltFom = barnFødselsDato,
+                vilkårOppfyltTom = barnDødsfallsDato,
+                barnDødsfallDato = barnDødsfallsDato,
+                under18ÅrVilkårOppfyltTom = barnDødsfallsDato
+            )
+
+        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            behandling = lagBehandling()
+        )
+
+        assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
+
+        val andelFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
+        val andelEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
+
+        assertEquals(YearMonth.of(2014, 2), andelFør6År.stønadFom)
+        assertEquals(YearMonth.of(2019, 2), andelFør6År.stønadTom)
+
+        assertEquals(YearMonth.of(2019, 3), andelEtter6År.stønadFom)
+        assertEquals(YearMonth.of(2030, 1), andelEtter6År.stønadTom)
+    }
+
+    @Test
     fun `1 barn får normal utbetaling med satsendring fra september 2020, september 2021 og januar 2022`() {
         val barnFødselsdato = LocalDate.of(2021, 2, 2)
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
 
-        val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererVilkårsvurderingOgPersonopplysningGrunnlag(
-                barnFødselsdato = barnFødselsdato,
-                vilkårOppfyltFom = barnFødselsdato
-            )
+        val (vilkårsvurdering, personopplysningGrunnlag) = genererVilkårsvurderingOgPersonopplysningGrunnlag(
+            barnFødselsdato = barnFødselsdato,
+            vilkårOppfyltFom = barnFødselsdato,
+            under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
+        )
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
@@ -195,7 +234,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
@@ -227,7 +267,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -258,7 +299,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -289,7 +331,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -320,7 +363,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -351,7 +395,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -382,7 +427,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -413,7 +459,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -444,7 +491,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -474,7 +522,6 @@ internal class TilkjentYtelseUtilsTest {
         backToBackTom: LocalDate? = null,
         backToBackFom: LocalDate? = null
     ): Vilkårsvurdering {
-
         personResultat.setSortedVilkårResultater(
             personResultat.vilkårResultater.filter { it.vilkårType != Vilkår.BOSATT_I_RIKET }
                 .toSet() +
@@ -512,7 +559,9 @@ internal class TilkjentYtelseUtilsTest {
         barnFødselsdato: LocalDate,
         vilkårOppfyltFom: LocalDate,
         vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18),
-        erDeltBosted: Boolean = false
+        barnDødsfallDato: LocalDate? = null,
+        erDeltBosted: Boolean = false,
+        under18ÅrVilkårOppfyltTom: LocalDate?
     ): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
@@ -547,7 +596,7 @@ internal class TilkjentYtelseUtilsTest {
                     vilkårType = Vilkår.UNDER_18_ÅR,
                     resultat = Resultat.OPPFYLT,
                     periodeFom = barnFødselsdato,
-                    periodeTom = barnFødselsdato.plusYears(18),
+                    periodeTom = under18ÅrVilkårOppfyltTom,
                     begrunnelse = "",
                     behandlingId = behandling.id
                 ),
@@ -596,7 +645,10 @@ internal class TilkjentYtelseUtilsTest {
             navn = "Barn",
             kjønn = Kjønn.MANN
         )
-            .apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+            .apply {
+                sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
+                barnDødsfallDato?.let { dødsfall = lagDødsfall(this, it.tilyyyyMMdd(), null) }
+            }
         val søker = Person(
             aktør = tilAktør(søkerFnr),
             type = PersonType.SØKER,
@@ -636,7 +688,7 @@ internal class TilkjentYtelseUtilsTest {
                 tom = tom,
                 prosent = endretProsent,
                 behandlingId = behandling.id
-            ),
+            )
         )
 
         val andelerTIlkjentYtelse = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
@@ -671,7 +723,7 @@ internal class TilkjentYtelseUtilsTest {
                 tom = tom2,
                 person = person,
                 behandling = behandling
-            ),
+            )
         )
 
         val endretProsent = BigDecimal.ZERO
@@ -691,7 +743,7 @@ internal class TilkjentYtelseUtilsTest {
                 fom = tom2.nesteMåned(),
                 prosent = endretProsent,
                 behandlingId = behandling.id
-            ),
+            )
         )
 
         val andelerTIlkjentYtelse = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(

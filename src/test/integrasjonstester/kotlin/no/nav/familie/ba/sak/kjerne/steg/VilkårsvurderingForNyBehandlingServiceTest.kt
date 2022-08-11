@@ -100,7 +100,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 barnPersonResultat = barnPersonResultat,
                 barnetsFødselsdato = barnetsFødselsdato,
                 behandlingId = forrigeBehandling.id,
-                forrigeMigreringsdato = LocalDate.now().minusMonths(1),
+                periodeFom = LocalDate.now().minusMonths(1),
                 flytteSak = true
             )
         )
