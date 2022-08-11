@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategoriVedOpprettelse
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
@@ -126,7 +126,7 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal returnere utvidet hvis det eksisterer en løpende utvidet-sak`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
 
         val behandling = lagBehandling()
 
@@ -158,7 +158,7 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal returnere ordinær hvis det eksisterer en utvidet-sak som er avsluttet`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
 
         val behandling = lagBehandling()
 
@@ -190,7 +190,7 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal returnere ordinær hvis det eksisterer en løpende ordinær-sak`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
 
         val behandling = lagBehandling()
 

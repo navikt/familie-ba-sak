@@ -18,7 +18,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -449,7 +449,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
     @Test
     @Tag("integration")
     fun `skal opprette skyggesak for Sak`() {
-        val aktørId = randomAktørId()
+        val aktørId = randomAktør()
 
         wireMockServer.stubFor(post("/api/skyggesak/v1").willReturn(okJson(objectMapper.writeValueAsString(success(null)))))
 
@@ -475,7 +475,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
     @Test
     @Tag("integration")
     fun `skal kaste integrasjonsfeil ved oppretting av skyggesak`() {
-        val aktørId = randomAktørId()
+        val aktørId = randomAktør()
 
         wireMockServer.stubFor(post("/api/skyggesak/v1").willReturn(status(500)))
 
