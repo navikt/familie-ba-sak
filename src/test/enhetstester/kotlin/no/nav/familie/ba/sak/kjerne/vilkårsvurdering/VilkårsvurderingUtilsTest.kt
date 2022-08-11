@@ -2,13 +2,22 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -170,5 +179,74 @@ class VilkårsvurderingUtilsTest {
                 vilkårSomEndres = løpendeOppfylt
             )
         }
+    }
+
+    @Test
+    fun `skal liste opp begrunnelser uten vilkår`() {
+        val sanityBegrunnelser =
+            listOf(SanityBegrunnelse(vilkaar = null, apiNavn = "innvilgetBosattIRiket", navnISystem = ""))
+        val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
+
+        val restVedtakBegrunnelserTilknyttetVilkår =
+            vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(sanityBegrunnelser, vedtakBegrunnelse)
+
+        Assertions.assertEquals(1, restVedtakBegrunnelserTilknyttetVilkår.size)
+    }
+
+    @Test
+    fun `skal liste opp begrunnelsene en gang per vilkår`() {
+        val sanityBegrunnelser =
+            listOf(
+                SanityBegrunnelse(
+                    vilkaar = listOf(SanityVilkår.BOSATT_I_RIKET, SanityVilkår.LOVLIG_OPPHOLD),
+                    apiNavn = "innvilgetBosattIRiket",
+                    navnISystem = ""
+                )
+            )
+        val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
+
+        val restVedtakBegrunnelserTilknyttetVilkår =
+            vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(sanityBegrunnelser, vedtakBegrunnelse)
+
+        Assertions.assertEquals(2, restVedtakBegrunnelserTilknyttetVilkår.size)
+    }
+
+    @Test
+    fun `genererPersonResultatForPerson skal sette til-og-med dato på alle vilkår til dødsfallsdato og begrunnelse til dødsfall hvis barn er død`() {
+        val nyBehandling = lagBehandling()
+
+        val vilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
+        val dødtBarn = lagPerson(type = PersonType.BARN).apply { dødsfall = lagDødsfall(this, "2012-12-12", null) }
+
+        val personResultatForDødtBarn = genererPersonResultatForPerson(
+            vilkårsvurdering = vilkårsvurdering,
+            person = dødtBarn
+        )
+
+        Assertions.assertTrue(personResultatForDødtBarn.vilkårResultater.all { it.begrunnelse == "Dødsfall" })
+        Assertions.assertTrue(
+            personResultatForDødtBarn.vilkårResultater.all {
+                it.periodeTom == LocalDate.of(2012, 12, 12)
+            }
+        )
+    }
+
+    @Test
+    fun `genererPersonResultatForPerson skal sette til-og-med dato på under-18-årsvilkår til 18 års datoen hvis barn ikke er død`() {
+        val nyBehandling = lagBehandling()
+
+        val vilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
+        val levendeBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 10, 10))
+
+        val personResultatForLevendeBarn = genererPersonResultatForPerson(
+            vilkårsvurdering = vilkårsvurdering,
+            person = levendeBarn
+        )
+
+        val under18ÅrVilkår =
+            personResultatForLevendeBarn.vilkårResultater.find { it.vilkårType == Vilkår.UNDER_18_ÅR }!!
+
+        Assertions.assertEquals(under18ÅrVilkår.begrunnelse, "Vurdert og satt automatisk")
+        Assertions.assertEquals(under18ÅrVilkår.periodeTom, levendeBarn.fødselsdato.til18ÅrsVilkårsdato())
     }
 }
