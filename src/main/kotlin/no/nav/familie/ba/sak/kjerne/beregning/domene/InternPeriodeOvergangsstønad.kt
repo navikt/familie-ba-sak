@@ -69,7 +69,7 @@ fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandl
                 "Perioder i inneværende behandling: $this \n" +
                 "Perioder fra forrige behandling: $overgangsstønadPerioderFraForrigeBehandling"
         )
-        throw Feil("Antar overgangsstønad for kun søker, men fant overgangsstønad for mer enn 1 person.")
+        throw Feil("Antar overgangsstønad for kun søker, men fant overgangsstønad for andre personer enn søker.")
     }
 
     val tidligerePerioder = this.filter { it.tomDato.isSameOrBefore(LocalDate.now()) }
