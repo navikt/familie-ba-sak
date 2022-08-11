@@ -11,7 +11,6 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.Test
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.hamcrest.CoreMatchers.`is` as Is
 
@@ -106,4 +105,3 @@ class EtterbetalingKorrigeringRepositoryTest(
         assertThat(eksisterendeEtterbetalingKorrigering.map { it.begrunnelse }, containsInAnyOrder("1", "2"))
     }
 }
-
