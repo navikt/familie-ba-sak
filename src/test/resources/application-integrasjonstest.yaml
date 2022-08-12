@@ -1,3 +1,7 @@
 spring:
+  jmx:
+    enabled: false
+  main:
+    lazy-initialization: true
   flyway:
     locations: filesystem:./src/test/resources/db/migration
