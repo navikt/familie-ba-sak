@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -373,7 +373,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktørId(),
+                aktør = randomAktør(),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fom.minusMonths(3),
@@ -451,7 +451,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktørId(),
+                aktør = randomAktør(),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fom1.minusMonths(3),
@@ -536,7 +536,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktørId(),
+                aktør = randomAktør(),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fomBarn2,
@@ -615,7 +615,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktørId(),
+                aktør = randomAktør(),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fomBarn2,
@@ -649,7 +649,7 @@ class EndretUtbetalingAndelValideringTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktørId(),
+                aktør = randomAktør(),
                 periodeFom = LocalDate.now().minusMonths(4),
                 periodeTom = LocalDate.now(),
                 resultat = Resultat.OPPFYLT
