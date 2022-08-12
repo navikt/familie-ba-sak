@@ -23,18 +23,17 @@ class EtterbetalingKorrigeringService(
 
         finnAktivtKorrigeringPåBehandling(behandling.id)?.let {
             it.aktiv = false
-            etterbetalingKorrigeringRepository.save(it)
+            etterbetalingKorrigeringRepository.saveAndFlush(it)
         }
 
-        loggService.opprettEtterbetalingKorrigeringLogg(behandling, "Etterbetaling i brev er korrigert.")
+        loggService.opprettEtterbetalingKorrigeringLogg(behandling, etterbetalingKorrigering)
         return etterbetalingKorrigeringRepository.save(etterbetalingKorrigering)
     }
 
     @Transactional
     fun settKorrigeringPåBehandlingTilInaktiv(behandling: Behandling): EtterbetalingKorrigering? =
-        finnAktivtKorrigeringPåBehandling(behandling.id)?.let {
-            loggService.opprettEtterbetalingKorrigeringLogg(behandling, "Etterbetaling korrigering i brev er angret.")
-            it.aktiv = false
-            etterbetalingKorrigeringRepository.save(it)
+        finnAktivtKorrigeringPåBehandling(behandling.id)?.apply {
+            aktiv = false
+            loggService.opprettEtterbetalingKorrigeringLogg(behandling, this)
         }
 }

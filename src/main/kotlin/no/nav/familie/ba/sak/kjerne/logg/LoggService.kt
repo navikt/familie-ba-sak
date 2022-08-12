@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.etterbetalingkorrigering.EtterbetalingKorrigering
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
@@ -380,7 +381,25 @@ class LoggService(
         )
     }
 
-    fun opprettEtterbetalingKorrigeringLogg(behandling: Behandling, tittel: String) {
+    fun opprettEtterbetalingKorrigeringLogg(
+        behandling: Behandling,
+        etterbetalingKorrigering: EtterbetalingKorrigering
+    ) {
+        val (tekst, tittel) =
+            when (etterbetalingKorrigering.aktiv) {
+                true ->
+                    Pair(
+                        """
+                        Årsak: ${etterbetalingKorrigering.årsak.visningsnavn}
+                        Nytt beløp: ${etterbetalingKorrigering.beløp} kr
+                        Begrunnelse: ${etterbetalingKorrigering.begrunnelse ?: "Ingen begrunnelse"}
+                        """.trimIndent(),
+                        "Etterbetaling i brev er korrigert"
+                    )
+
+                false -> Pair("", "Etterbetaling i brev er fjernet")
+            }
+
         lagre(
             Logg(
                 behandlingId = behandling.id,
@@ -390,7 +409,7 @@ class LoggService(
                     BehandlerRolle.SAKSBEHANDLER
                 ),
                 tittel = tittel,
-                tekst = ""
+                tekst = tekst
             )
         )
     }

@@ -12,7 +12,9 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 import org.hamcrest.CoreMatchers.`is` as Is
 
 class EtterbetalingKorrigeringRepositoryTest(
@@ -63,6 +65,35 @@ class EtterbetalingKorrigeringRepositoryTest(
 
         assertThat(eksisterendeEtterbetalingKorrigering.begrunnelse, Is("Test på aktiv korrigering"))
         assertThat(eksisterendeEtterbetalingKorrigering.beløp, Is(1000))
+    }
+
+    @Test
+    fun `Det skal kastes DataIntegrityViolationException dersom det forsøkes å lagre aktivt korrigering når det allerede finnes en`() {
+        val behandling = opprettBehandling()
+
+        val aktivEtterbetalingKorrigering = EtterbetalingKorrigering(
+            id = 10000007,
+            årsak = EtterbetalingKorrigeringÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+            begrunnelse = "Test på aktiv korrigering",
+            beløp = 1000,
+            behandling = behandling,
+            aktiv = true
+        )
+
+        val aktivEtterbetalingKorrigering2 = EtterbetalingKorrigering(
+            id = 10000008,
+            årsak = EtterbetalingKorrigeringÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+            begrunnelse = "Test på aktiv korrigering",
+            beløp = 1000,
+            behandling = behandling,
+            aktiv = true
+        )
+
+        etterbetalingKorrigeringRepository.saveAndFlush(aktivEtterbetalingKorrigering)
+
+        assertThrows<DataIntegrityViolationException> {
+            etterbetalingKorrigeringRepository.saveAndFlush(aktivEtterbetalingKorrigering2)
+        }
     }
 
     @Test

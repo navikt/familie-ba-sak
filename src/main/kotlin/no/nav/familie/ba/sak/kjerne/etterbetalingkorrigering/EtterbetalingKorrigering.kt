@@ -62,9 +62,9 @@ fun EtterbetalingKorrigeringRequest.tilEtterbetalingKorrigering(behandling: Beha
         aktiv = true
     )
 
-enum class EtterbetalingKorrigeringÅrsak {
-    FEIL_TIDLIGERE_UTBETALT_BELØP,
-    REFUSJON_FRA_UDI,
-    REFUSJON_FRA_ANDRE_MYNDIGHETER,
-    MOTREGNING
+enum class EtterbetalingKorrigeringÅrsak(val visningsnavn: String) {
+    FEIL_TIDLIGERE_UTBETALT_BELØP("Feil i tidligere utbetalt beløp"),
+    REFUSJON_FRA_UDI("Refusjon fra UDI"),
+    REFUSJON_FRA_ANDRE_MYNDIGHETER("Refusjon fra andre myndigheter"),
+    MOTREGNING("Motregning")
 }

@@ -83,7 +83,7 @@ internal class EtterbetalingKorrigeringServiceTest {
         verify(exactly = 1) {
             loggService.opprettEtterbetalingKorrigeringLogg(
                 behandling,
-                "Etterbetaling i brev er korrigert."
+                etterbetalingKorrigering
             )
         }
     }
@@ -95,13 +95,15 @@ internal class EtterbetalingKorrigeringServiceTest {
         val etterbetalingKorrigering = lagEtterbetalingKorrigering(behandling)
 
         every { etterbetalingKorrigeringRepository.finnAktivtKorrigeringPåBehandling(any()) } returns forrigeKorrigering
-        every { etterbetalingKorrigeringRepository.save(any()) } returns etterbetalingKorrigering
+        every { etterbetalingKorrigeringRepository.saveAndFlush(forrigeKorrigering) } returns etterbetalingKorrigering
+        every { etterbetalingKorrigeringRepository.save(etterbetalingKorrigering) } returns etterbetalingKorrigering
         every { loggService.opprettEtterbetalingKorrigeringLogg(any(), any()) } returns Unit
 
         etterbetalingKorrigeringService.lagreEtterbetalingKorrigering(etterbetalingKorrigering)
 
+        verify(exactly = 1) { etterbetalingKorrigeringRepository.finnAktivtKorrigeringPåBehandling(any()) }
         verify(exactly = 1) { forrigeKorrigering setProperty "aktiv" value false }
-        verify(exactly = 1) { etterbetalingKorrigeringRepository.save(forrigeKorrigering) }
+        verify(exactly = 1) { etterbetalingKorrigeringRepository.saveAndFlush(forrigeKorrigering) }
         verify(exactly = 1) { etterbetalingKorrigeringRepository.save(etterbetalingKorrigering) }
     }
 
@@ -111,17 +113,15 @@ internal class EtterbetalingKorrigeringServiceTest {
         val etterbetalingKorrigering = mockk<EtterbetalingKorrigering>(relaxed = true)
 
         every { etterbetalingKorrigeringRepository.finnAktivtKorrigeringPåBehandling(any()) } returns etterbetalingKorrigering
-        every { etterbetalingKorrigeringRepository.save(any()) } returns etterbetalingKorrigering
         every { loggService.opprettEtterbetalingKorrigeringLogg(any(), any()) } returns Unit
 
         etterbetalingKorrigeringService.settKorrigeringPåBehandlingTilInaktiv(behandling)
 
         verify(exactly = 1) { etterbetalingKorrigering setProperty "aktiv" value false }
-        verify(exactly = 1) { etterbetalingKorrigeringRepository.save(etterbetalingKorrigering) }
         verify(exactly = 1) {
             loggService.opprettEtterbetalingKorrigeringLogg(
                 any(),
-                "Etterbetaling korrigering i brev er angret."
+                etterbetalingKorrigering
             )
         }
     }
