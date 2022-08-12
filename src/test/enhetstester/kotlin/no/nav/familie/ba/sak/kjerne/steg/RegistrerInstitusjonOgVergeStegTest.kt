@@ -90,7 +90,7 @@ class RegistrerInstitusjonOgVergeStegTest {
     }
 
     @Test
-    fun `utførStegOgAngiNeste() skal return REGISTRERE_PERSONGRUNNLAG som neste steg`() {
+    fun `utførStegOgAngiNeste() skal returnere REGISTRERE_SØKNAD som neste steg`() {
         val behandling = lagBehandling(fagsak = defaultFagsak().copy(type = FagsakType.INSTITUSJON))
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
         every { fagsakRepositoryMock.save(any()) } returns behandling.fagsak
@@ -119,6 +119,6 @@ class RegistrerInstitusjonOgVergeStegTest {
             restRegistrerInstitusjonOgVerge,
         )
 
-        assertThat(nesteSteg).isEqualTo(StegType.REGISTRERE_PERSONGRUNNLAG)
+        assertThat(nesteSteg).isEqualTo(StegType.REGISTRERE_SØKNAD)
     }
 }
