@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -250,7 +250,7 @@ internal class SaksstatistikkServiceTest(
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { persongrunnlagService.hentBarna(any<Behandling>()) } returns listOf(
             tilfeldigPerson()
-                .copy(aktør = randomAktørId("01010000001"))
+                .copy(aktør = randomAktør("01010000001"))
         )
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
@@ -375,7 +375,7 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Skal mappe til sakDVH, aktører har SØKER og BARN`() {
-        val randomAktørId = randomAktørId()
+        val randomAktørId = randomAktør()
         every { fagsakService.hentPåFagsakId(any()) } answers {
             Fagsak(status = FagsakStatus.OPPRETTET, aktør = randomAktørId)
         }
@@ -480,7 +480,7 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Enum-verdier brukt i sakDvh skal validere mot json schema`() {
-        val deltagere = PersonType.values().map { personType -> AktørDVH(randomAktørId().aktørId.toLong(), personType.name) }
+        val deltagere = PersonType.values().map { personType -> AktørDVH(randomAktør().aktørId.toLong(), personType.name) }
 
         FagsakStatus.values().forEach {
             val sakDvh = SakDVH(

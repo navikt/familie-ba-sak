@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -903,7 +903,7 @@ internal class UtvidetBarnetrygdTest {
     fun `Skal kaste feil hvis utvidet-andeler ikke overlapper med noen av barnas andeler`() {
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
-        val søkerAktør = randomAktørId()
+        val søkerAktør = randomAktør()
 
         val utvidetVilkår = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2018, 2, 1), periodeTom = LocalDate.of(2019, 2, 28), personResultat = PersonResultat(aktør = søkerAktør, vilkårsvurdering = lagVilkårsvurdering(søkerAktør = søkerAktør, behandling = behandling, resultat = Resultat.OPPFYLT)))
 
@@ -941,7 +941,7 @@ internal class UtvidetBarnetrygdTest {
     fun `Skal dele opp utvidet-segment ved endring i sats`() {
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
-        val søkerAktør = randomAktørId()
+        val søkerAktør = randomAktør()
 
         val utvidetVilkår = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2016, 2, 1), periodeTom = LocalDate.of(2022, 2, 28), personResultat = PersonResultat(aktør = søkerAktør, vilkårsvurdering = lagVilkårsvurdering(søkerAktør = søkerAktør, behandling = behandling, resultat = Resultat.OPPFYLT)))
 
