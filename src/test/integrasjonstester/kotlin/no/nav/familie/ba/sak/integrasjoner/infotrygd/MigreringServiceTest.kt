@@ -72,6 +72,7 @@ import java.time.format.DateTimeFormatter
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles(
     "postgres",
+    "integrasjonstest",
     "mock-økonomi",
     "mock-pdl",
     "mock-pdl-client",
