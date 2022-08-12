@@ -1,18 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
-import org.springframework.core.env.Environment
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
 class FagsakStatusScheduler(
     private val taskRepository: TaskRepositoryWrapper,
-    private val environment: Environment
+    private val envService: EnvService
 ) {
 
     /*
@@ -23,11 +23,7 @@ class FagsakStatusScheduler(
     @Scheduled(cron = "\${CRON_FAGSAKSTATUS_SCHEDULER}")
     fun oppdaterFagsakStatuser() {
 
-        when (
-            LeaderClient.isLeader() == true || environment.activeProfiles.any {
-                it.contains("dev") || it.contains("postgres")
-            }
-        ) {
+        when (LeaderClient.isLeader() == true || envService.erDev()) {
             true -> {
                 val oppdaterLøpendeFlaggTask = Task(type = OppdaterLøpendeFlagg.TASK_STEP_TYPE, payload = "")
                 taskRepository.save(oppdaterLøpendeFlaggTask)
