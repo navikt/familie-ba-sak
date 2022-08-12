@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.isMockKMock
 import io.mockk.unmockkAll
+import io.sentry.spring.boot.SentryAutoConfiguration
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -17,9 +18,33 @@ import org.junit.jupiter.api.BeforeEach
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.actuate.autoconfigure.metrics.JvmMetricsAutoConfiguration
+import org.springframework.boot.actuate.autoconfigure.metrics.LogbackMetricsAutoConfiguration
+import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration
+import org.springframework.boot.actuate.autoconfigure.metrics.MetricsEndpointAutoConfiguration
+import org.springframework.boot.actuate.autoconfigure.metrics.SystemMetricsAutoConfiguration
+import org.springframework.boot.actuate.autoconfigure.metrics.data.RepositoryMetricsAutoConfiguration
+import org.springframework.boot.actuate.autoconfigure.metrics.export.prometheus.PrometheusMetricsExportAutoConfiguration
+import org.springframework.boot.actuate.autoconfigure.metrics.startup.StartupTimeMetricsListenerAutoConfiguration
+import org.springframework.boot.actuate.autoconfigure.metrics.web.jetty.JettyMetricsAutoConfiguration
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.cache.CacheManager
 import org.springframework.context.ConfigurableApplicationContext
 
+@EnableAutoConfiguration(
+    exclude = arrayOf(
+        JettyMetricsAutoConfiguration::class,
+        JvmMetricsAutoConfiguration::class,
+        LogbackMetricsAutoConfiguration::class,
+        MetricsAutoConfiguration::class,
+        MetricsEndpointAutoConfiguration::class,
+        PrometheusMetricsExportAutoConfiguration::class,
+        RepositoryMetricsAutoConfiguration::class,
+        SentryAutoConfiguration::class,
+        StartupTimeMetricsListenerAutoConfiguration::class,
+        SystemMetricsAutoConfiguration::class
+    )
+)
 abstract class AbstractMockkSpringRunner {
     /**
      * Tjenester vi mocker ved bruk av every
