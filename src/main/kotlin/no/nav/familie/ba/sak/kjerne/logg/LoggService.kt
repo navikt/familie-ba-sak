@@ -140,10 +140,10 @@ class LoggService(
                     BehandlerRolle.SAKSBEHANDLER
                 ),
                 tekst = "Behandlingstema er manuelt endret fra ${
-                tilBehandlingstema(
-                    underkategori = forrigeUnderkategori,
-                    kategori = forrigeKategori
-                )
+                    tilBehandlingstema(
+                        underkategori = forrigeUnderkategori,
+                        kategori = forrigeKategori
+                    )
                 } til ${tilBehandlingstema(underkategori = nyUnderkategori, kategori = nyKategori)}"
             )
         )
@@ -385,20 +385,17 @@ class LoggService(
         behandling: Behandling,
         etterbetalingKorrigering: EtterbetalingKorrigering
     ) {
-        val (tekst, tittel) =
-            when (etterbetalingKorrigering.aktiv) {
-                true ->
-                    Pair(
-                        """
-                        Årsak: ${etterbetalingKorrigering.årsak.visningsnavn}
-                        Nytt beløp: ${etterbetalingKorrigering.beløp} kr
-                        Begrunnelse: ${etterbetalingKorrigering.begrunnelse ?: "Ingen begrunnelse"}
-                        """.trimIndent(),
-                        "Etterbetaling i brev er korrigert"
-                    )
+        val tekst = if (etterbetalingKorrigering.aktiv) {
+            """
+            Årsak: ${etterbetalingKorrigering.årsak.visningsnavn}
+            Nytt beløp: ${etterbetalingKorrigering.beløp} kr
+            Begrunnelse: ${etterbetalingKorrigering.begrunnelse ?: "Ingen begrunnelse"}
+            """.trimIndent()
+        } else ""
 
-                false -> Pair("", "Etterbetaling i brev er fjernet")
-            }
+        val tittel = if (etterbetalingKorrigering.aktiv) {
+            "Etterbetaling i brev er korrigert"
+        } else "Etterbetaling i brev er fjernet"
 
         lagre(
             Logg(
