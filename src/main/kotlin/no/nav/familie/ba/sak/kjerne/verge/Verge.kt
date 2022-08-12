@@ -7,9 +7,12 @@ import java.math.BigInteger
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.OneToOne
+import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -17,8 +20,9 @@ import javax.persistence.Table
 @Table(name = "VERGE")
 data class Verge(
     @Id
-    @Column(name = "id", updatable = false)
-    val id: BigInteger,
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "verge_seq_generator")
+    @SequenceGenerator(name = "verge_seq_generator", sequenceName = "verge_seq", allocationSize = 50)
+    val id: Long = 0,
 
     @Column(name = "navn", updatable = true, length = 100)
     var navn: String,

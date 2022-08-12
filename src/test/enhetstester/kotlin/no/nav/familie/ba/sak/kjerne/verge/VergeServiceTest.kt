@@ -22,7 +22,7 @@ class VergeServiceTest {
         val behandlingSlot = slot<Behandling>()
         every { behandlingServcieMock.lagre(capture(behandlingSlot)) } returns behandling
         val vergeService = VergeService(behandlingServcieMock)
-        val verge = Verge(BigInteger.ONE, "verge 1", "adresse 1", "12345678910", behandling)
+        val verge = Verge(1L, "verge 1", "adresse 1", "12345678910", behandling)
         vergeService.RegistrerVergeForBehandling(behandling, verge)
         val behandlingCaptured = behandlingSlot.captured
         val vergeCaptured = behandlingCaptured.verge

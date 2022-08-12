@@ -12,6 +12,8 @@ class VergeService(
 
     @Transactional
     fun RegistrerVergeForBehandling(behandling: Behandling, verge: Verge) {
+        behandling.verge = null
+        behandlingService.lagre(behandling)
         behandling.verge = verge
         behandlingService.lagre(behandling)
     }

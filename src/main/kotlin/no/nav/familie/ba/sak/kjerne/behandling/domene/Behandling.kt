@@ -83,7 +83,7 @@ data class Behandling(
 
     var overstyrtEndringstidspunkt: LocalDate? = null,
 
-    @OneToOne(mappedBy = "behandling", optional = true)
+    @OneToOne(mappedBy = "behandling", cascade = [CascadeType.ALL], optional = true)
     var verge: Verge? = null
 ) : BaseEntitet() {
 
