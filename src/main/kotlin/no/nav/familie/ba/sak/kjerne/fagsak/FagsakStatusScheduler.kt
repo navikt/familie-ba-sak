@@ -29,7 +29,7 @@ class FagsakStatusScheduler(
                 taskRepository.save(oppdaterLøpendeFlaggTask)
                 logger.info("Opprettet oppdaterLøpendeFlaggTask")
             }
-            false, null -> {
+            false -> {
                 logger.info("Ikke opprettet oppdaterLøpendeFlaggTask på denne poden")
             }
         }
