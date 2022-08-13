@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.etterbetalingkorrigering
+package no.nav.familie.ba.sak.kjerne.korrigertetterbetaling
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktør
@@ -17,115 +17,115 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.hamcrest.CoreMatchers.`is` as Is
 
-class EtterbetalingKorrigeringRepositoryTest(
+class KorrigertEtterbetalingRepositoryTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val etterbetalingKorrigeringRepository: EtterbetalingKorrigeringRepository
+    @Autowired private val korrigertEtterbetalingRepository: KorrigertEtterbetalingRepository
 ) : AbstractSpringIntegrationTest() {
 
     @Test
     fun `finnAktivtKorrigeringPåBehandling skal returnere null dersom det ikke eksisterer en aktiv etterbetaling korrigering på behandling`() {
         val behandling = opprettBehandling()
 
-        val inaktivEtterbetalingKorrigering = EtterbetalingKorrigering(
+        val inaktivKorrigertEtterbetaling = KorrigertEtterbetaling(
             id = 10000001,
-            årsak = EtterbetalingKorrigeringÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
             begrunnelse = "Test på inaktiv korrigering",
             beløp = 1000,
             behandling = behandling,
             aktiv = false
         )
 
-        etterbetalingKorrigeringRepository.saveAndFlush(inaktivEtterbetalingKorrigering)
+        korrigertEtterbetalingRepository.saveAndFlush(inaktivKorrigertEtterbetaling)
 
-        val ikkeEksisterendeEtterbetalingKorrigering =
-            etterbetalingKorrigeringRepository.finnAktivtKorrigeringPåBehandling(behandling.id)
+        val ikkeEksisterendeKorrigertEtterbetaling =
+            korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id)
 
-        assertThat(ikkeEksisterendeEtterbetalingKorrigering, Is(nullValue()))
+        assertThat(ikkeEksisterendeKorrigertEtterbetaling, Is(nullValue()))
     }
 
     @Test
-    fun `finnAktivtKorrigeringPåBehandling skal returnere aktiv etterbetaling korrigering på behandling dersom det finnes`() {
+    fun `finnAktivtKorrigeringPåBehandling skal returnere aktiv korrigering på behandling dersom det finnes`() {
         val behandling = opprettBehandling()
 
-        val aktivEtterbetalingKorrigering = EtterbetalingKorrigering(
+        val aktivKorrigertEtterbetaling = KorrigertEtterbetaling(
             id = 10000002,
-            årsak = EtterbetalingKorrigeringÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
             begrunnelse = "Test på aktiv korrigering",
             beløp = 1000,
             behandling = behandling,
             aktiv = true
         )
 
-        etterbetalingKorrigeringRepository.saveAndFlush(aktivEtterbetalingKorrigering)
+        korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
 
-        val eksisterendeEtterbetalingKorrigering =
-            etterbetalingKorrigeringRepository.finnAktivtKorrigeringPåBehandling(behandling.id)!!
+        val eksisterendeKorrigertEtterbetaling =
+            korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id)!!
 
-        assertThat(eksisterendeEtterbetalingKorrigering.begrunnelse, Is("Test på aktiv korrigering"))
-        assertThat(eksisterendeEtterbetalingKorrigering.beløp, Is(1000))
+        assertThat(eksisterendeKorrigertEtterbetaling.begrunnelse, Is("Test på aktiv korrigering"))
+        assertThat(eksisterendeKorrigertEtterbetaling.beløp, Is(1000))
     }
 
     @Test
     fun `Det skal kastes DataIntegrityViolationException dersom det forsøkes å lagre aktivt korrigering når det allerede finnes en`() {
         val behandling = opprettBehandling()
 
-        val aktivEtterbetalingKorrigering = EtterbetalingKorrigering(
+        val aktivKorrigertEtterbetaling = KorrigertEtterbetaling(
             id = 10000007,
-            årsak = EtterbetalingKorrigeringÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
             begrunnelse = "Test på aktiv korrigering",
             beløp = 1000,
             behandling = behandling,
             aktiv = true
         )
 
-        val aktivEtterbetalingKorrigering2 = EtterbetalingKorrigering(
+        val aktivKorrigertEtterbetaling2 = KorrigertEtterbetaling(
             id = 10000008,
-            årsak = EtterbetalingKorrigeringÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
             begrunnelse = "Test på aktiv korrigering",
             beløp = 1000,
             behandling = behandling,
             aktiv = true
         )
 
-        etterbetalingKorrigeringRepository.saveAndFlush(aktivEtterbetalingKorrigering)
+        korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
 
         assertThrows<DataIntegrityViolationException> {
-            etterbetalingKorrigeringRepository.saveAndFlush(aktivEtterbetalingKorrigering2)
+            korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling2)
         }
     }
 
     @Test
-    fun `hentAlleKorrigeringPåBehandling skal returnere alle etterbetalingkorrigering på behandling`() {
+    fun `hentAlleKorrigeringPåBehandling skal returnere alle KorrigertEtterbetaling på behandling`() {
         val behandling = opprettBehandling()
 
-        val aktivEtterbetalingKorrigering = EtterbetalingKorrigering(
+        val aktivKorrigertEtterbetaling = KorrigertEtterbetaling(
             id = 10000003,
-            årsak = EtterbetalingKorrigeringÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
             begrunnelse = "1",
             beløp = 1000,
             behandling = behandling,
             aktiv = true
         )
 
-        val inaktivEtterbetalingKorrigering = EtterbetalingKorrigering(
+        val inaktivKorrigertEtterbetaling = KorrigertEtterbetaling(
             id = 10000004,
-            årsak = EtterbetalingKorrigeringÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
+            årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
             begrunnelse = "2",
             beløp = 1000,
             behandling = behandling,
             aktiv = false
         )
 
-        etterbetalingKorrigeringRepository.saveAndFlush(aktivEtterbetalingKorrigering)
-        etterbetalingKorrigeringRepository.saveAndFlush(inaktivEtterbetalingKorrigering)
+        korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
+        korrigertEtterbetalingRepository.saveAndFlush(inaktivKorrigertEtterbetaling)
 
-        val eksisterendeEtterbetalingKorrigering =
-            etterbetalingKorrigeringRepository.finnAlleKorrigeringerPåBehandling(behandling.id)
+        val eksisterendeKorrigertEtterbetaling =
+            korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id)
 
-        assertThat(eksisterendeEtterbetalingKorrigering.size, Is(2))
-        assertThat(eksisterendeEtterbetalingKorrigering.map { it.begrunnelse }, containsInAnyOrder("1", "2"))
+        assertThat(eksisterendeKorrigertEtterbetaling.size, Is(2))
+        assertThat(eksisterendeKorrigertEtterbetaling.map { it.begrunnelse }, containsInAnyOrder("1", "2"))
     }
 
     private fun opprettBehandling(): Behandling {

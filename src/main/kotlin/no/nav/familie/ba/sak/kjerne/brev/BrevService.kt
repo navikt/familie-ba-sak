@@ -28,11 +28,11 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
-import no.nav.familie.ba.sak.kjerne.etterbetalingkorrigering.EtterbetalingKorrigeringService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -51,7 +51,7 @@ class BrevService(
     private val brevPeriodeService: BrevPeriodeService,
     private val sanityService: SanityService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val etterbetalingKorrigeringService: EtterbetalingKorrigeringService
+    private val korrigertEtterbetalingService: KorrigertEtterbetalingService
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -228,7 +228,7 @@ class BrevService(
 
     private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? {
         val etterbetalingsBeløp =
-            etterbetalingKorrigeringService.finnAktivtKorrigeringPåBehandling(vedtak.behandling.id)?.beløp?.toBigDecimal()
+            korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(vedtak.behandling.id)?.beløp?.toBigDecimal()
                 ?: simuleringService.hentEtterbetaling(vedtak.behandling.id)
 
         return etterbetalingsBeløp

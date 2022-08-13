@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.etterbetalingkorrigering
+package no.nav.familie.ba.sak.kjerne.korrigertetterbetaling
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -17,21 +17,21 @@ import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "EtterbetalingKorrigering")
-@Table(name = "ETTERBETALING_KORRIGERING")
-class EtterbetalingKorrigering(
+@Entity(name = "KorrigertEtterbetaling")
+@Table(name = "KORRIGERT_ETTERBETALING")
+class KorrigertEtterbetaling(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "etterbetaling_korrigering_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "korrigert_etterbetaling_seq_generator")
     @SequenceGenerator(
-        name = "etterbetaling_korrigering_seq_generator",
-        sequenceName = "etterbetaling_korrigering_seq",
+        name = "korrigert_etterbetaling_seq_generator",
+        sequenceName = "korrigert_etterbetaling_seq",
         allocationSize = 50
     )
     val id: Long = 0,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "aarsak")
-    val årsak: EtterbetalingKorrigeringÅrsak,
+    val årsak: KorrigertEtterbetalingÅrsak,
 
     @Column(name = "begrunnelse")
     val begrunnelse: String?,
@@ -47,14 +47,14 @@ class EtterbetalingKorrigering(
     var aktiv: Boolean
 ) : BaseEntitet()
 
-data class EtterbetalingKorrigeringRequest(
-    val årsak: EtterbetalingKorrigeringÅrsak,
+data class KorrigertEtterbetalingRequest(
+    val årsak: KorrigertEtterbetalingÅrsak,
     val begrunnelse: String?,
     val beløp: Int
 )
 
-fun EtterbetalingKorrigeringRequest.tilEtterbetalingKorrigering(behandling: Behandling) =
-    EtterbetalingKorrigering(
+fun KorrigertEtterbetalingRequest.tilKorrigertEtterbetaling(behandling: Behandling) =
+    KorrigertEtterbetaling(
         årsak = årsak,
         begrunnelse = begrunnelse,
         behandling = behandling,
@@ -62,7 +62,7 @@ fun EtterbetalingKorrigeringRequest.tilEtterbetalingKorrigering(behandling: Beha
         aktiv = true
     )
 
-enum class EtterbetalingKorrigeringÅrsak(val visningsnavn: String) {
+enum class KorrigertEtterbetalingÅrsak(val visningsnavn: String) {
     FEIL_TIDLIGERE_UTBETALT_BELØP("Feil i tidligere utbetalt beløp"),
     REFUSJON_FRA_UDI("Refusjon fra UDI"),
     REFUSJON_FRA_ANDRE_MYNDIGHETER("Refusjon fra andre myndigheter"),

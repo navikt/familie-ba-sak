@@ -41,5 +41,5 @@ data class RestUtvidetBehandling(
     val endringstidspunkt: LocalDate?,
     val valutakurser: List<RestValutakurs>,
     val utenlandskePeriodebeløp: List<RestUtenlandskPeriodebeløp>,
-    val etterbetalingKorrigering: RestEtterbetalingKorrigering?
+    val korrigertEtterbetaling: RestKorrigertEtterbetaling?
 )

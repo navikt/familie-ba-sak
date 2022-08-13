@@ -1,8 +1,8 @@
-package no.nav.familie.ba.sak.kjerne.etterbetalingkorrigering
+package no.nav.familie.ba.sak.kjerne.korrigertetterbetaling
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestEtterbetalingKorrigering
+import no.nav.familie.ba.sak.ekstern.restDomene.RestKorrigertEtterbetaling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestEtterbetalingKorrigering
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertEtterbetaling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -19,43 +19,43 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/etterbetalingkorrigering")
+@RequestMapping("/api/korrigertetterbetaling")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class EtterbetalingKorrigeringController(
+class KorrigertEtterbetalingController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val etterbetalingKorrigeringService: EtterbetalingKorrigeringService,
+    private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
     @PostMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun opprettEtterbetalingKorrigering(
+    fun opprettKorrigertEtterbetalingPåBehandling(
         @PathVariable behandlingId: Long,
-        @RequestBody etterbetalingKorrigeringRequest: EtterbetalingKorrigeringRequest
+        @RequestBody korrigertEtterbetalingRequest: KorrigertEtterbetalingRequest
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val etterbetalingKorrigering = etterbetalingKorrigeringRequest.tilEtterbetalingKorrigering(behandling)
+        val korrigertEtterbetaling = korrigertEtterbetalingRequest.tilKorrigertEtterbetaling(behandling)
 
-        etterbetalingKorrigeringService.lagreEtterbetalingKorrigering(etterbetalingKorrigering)
+        korrigertEtterbetalingService.lagreKorrigertEtterbetaling(korrigertEtterbetaling)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId)))
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentAlleEtterbetalingKorrigeringerPåBehandling(
+    fun hentAlleKorrigerteEtterbetalingPåBehandling(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<List<RestEtterbetalingKorrigering>>> {
-        val etterbetalingKorrigeringer = etterbetalingKorrigeringService.finnAlleKorrigeringerPåBehandling(behandlingId)
-            .map { it.tilRestEtterbetalingKorrigering() }
+    ): ResponseEntity<Ressurs<List<RestKorrigertEtterbetaling>>> {
+        val korrigerteEtterbetalinger = korrigertEtterbetalingService.finnAlleKorrigeringerPåBehandling(behandlingId)
+            .map { it.tilRestKorrigertEtterbetaling() }
 
-        return ResponseEntity.ok(Ressurs.success(etterbetalingKorrigeringer))
+        return ResponseEntity.ok(Ressurs.success(korrigerteEtterbetalinger))
     }
 
     @PatchMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun settEtterbetalingKorrigeringPåBehandlingTilInaktiv(
+    fun settKorrigertEtterbetalingTilInaktivPåBehandling(
         @PathVariable behandlingId: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        etterbetalingKorrigeringService.settKorrigeringPåBehandlingTilInaktiv(behandling)
+        korrigertEtterbetalingService.settKorrigeringPåBehandlingTilInaktiv(behandling)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

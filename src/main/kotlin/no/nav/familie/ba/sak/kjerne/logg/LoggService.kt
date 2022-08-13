@@ -12,9 +12,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.etterbetalingkorrigering.EtterbetalingKorrigering
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetaling
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -140,10 +140,10 @@ class LoggService(
                     BehandlerRolle.SAKSBEHANDLER
                 ),
                 tekst = "Behandlingstema er manuelt endret fra ${
-                tilBehandlingstema(
-                    underkategori = forrigeUnderkategori,
-                    kategori = forrigeKategori
-                )
+                    tilBehandlingstema(
+                        underkategori = forrigeUnderkategori,
+                        kategori = forrigeKategori
+                    )
                 } til ${tilBehandlingstema(underkategori = nyUnderkategori, kategori = nyKategori)}"
             )
         )
@@ -381,26 +381,26 @@ class LoggService(
         )
     }
 
-    fun opprettEtterbetalingKorrigeringLogg(
+    fun opprettKorrigertEtterbetalingLogg(
         behandling: Behandling,
-        etterbetalingKorrigering: EtterbetalingKorrigering
+        korrigertEtterbetaling: KorrigertEtterbetaling
     ) {
-        val tekst = if (etterbetalingKorrigering.aktiv) {
+        val tekst = if (korrigertEtterbetaling.aktiv) {
             """
-            Årsak: ${etterbetalingKorrigering.årsak.visningsnavn}
-            Nytt beløp: ${etterbetalingKorrigering.beløp} kr
-            Begrunnelse: ${etterbetalingKorrigering.begrunnelse ?: "Ingen begrunnelse"}
+            Årsak: ${korrigertEtterbetaling.årsak.visningsnavn}
+            Nytt beløp: ${korrigertEtterbetaling.beløp} kr
+            Begrunnelse: ${korrigertEtterbetaling.begrunnelse ?: "Ingen begrunnelse"}
             """.trimIndent()
         } else ""
 
-        val tittel = if (etterbetalingKorrigering.aktiv) {
+        val tittel = if (korrigertEtterbetaling.aktiv) {
             "Etterbetaling i brev er korrigert"
         } else "Etterbetaling i brev er fjernet"
 
         lagre(
             Logg(
                 behandlingId = behandling.id,
-                type = LoggType.ETTERBETALING_KORRIGERT,
+                type = LoggType.KORRIGERT_ETTERBETALING,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
