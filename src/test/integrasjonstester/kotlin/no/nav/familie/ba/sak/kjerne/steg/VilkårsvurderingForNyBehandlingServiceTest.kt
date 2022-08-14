@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering.lagBarnVilkårResultat
@@ -159,7 +160,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         Assertions.assertTrue {
             barnVilkårResultat.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }.all {
                 it.periodeFom == barnetsFødselsdato &&
-                    it.periodeTom == barnetsFødselsdato.plusYears(18).minusDays(1)
+                    it.periodeTom == barnetsFødselsdato.til18ÅrsVilkårsdato()
             }
         }
 
@@ -323,7 +324,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         Assertions.assertTrue {
             barnVilkårResultat.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }.all {
                 it.periodeFom == barnetsFødselsdato &&
-                    it.periodeTom == barnetsFødselsdato.plusYears(18).minusDays(1)
+                    it.periodeTom == barnetsFødselsdato.til18ÅrsVilkårsdato()
             }
         }
         Assertions.assertTrue {
@@ -381,7 +382,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         Assertions.assertTrue {
             barnPersonResultat.vilkårResultater.any {
                 it.vilkårType == Vilkår.UNDER_18_ÅR &&
-                    it.periodeTom == barnetsFødselsdato.plusYears(18).minusDays(1) &&
+                    it.periodeTom == barnetsFødselsdato.til18ÅrsVilkårsdato() &&
                     it.periodeFom == barnetsFødselsdato
             }
         }
@@ -447,7 +448,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         Assertions.assertTrue {
             barnPersonResultat.vilkårResultater.any {
                 it.vilkårType == Vilkår.UNDER_18_ÅR &&
-                    it.periodeTom == barnetsFødselsdato.plusYears(18).minusDays(1) &&
+                    it.periodeTom == barnetsFødselsdato.til18ÅrsVilkårsdato() &&
                     it.periodeFom == barnetsFødselsdato
             }
         }
