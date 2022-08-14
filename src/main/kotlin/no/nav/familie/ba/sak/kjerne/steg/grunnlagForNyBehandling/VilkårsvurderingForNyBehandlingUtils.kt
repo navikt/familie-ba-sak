@@ -62,7 +62,6 @@ data class VilkårsvurderingForNyBehandlingUtils(
     fun genererVilkårsvurderingFraForrigeVedtattBehandling(
         initiellVilkårsvurdering: Vilkårsvurdering,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
-        behandling: Behandling,
         løpendeUnderkategori: BehandlingUnderkategori?
     ): Vilkårsvurdering {
         val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
@@ -72,26 +71,34 @@ data class VilkårsvurderingForNyBehandlingUtils(
             forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
         )
 
-        return if (behandling.type == BehandlingType.REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
-            hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering)
-        } else vilkårsvurdering
+        return hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering)
     }
 
     fun hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
-        val søkersVilkårResultater =
-            vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater
 
-        val dødsdato = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato ?: return vilkårsvurdering
+        vilkårsvurdering.personResultater.forEach { personResultat ->
+            val person = personopplysningGrunnlag.søkerOgBarn.single { it.aktør == personResultat.aktør }
+            val dødsDato = person.dødsfall?.dødsfallDato
 
-        Vilkår.values().forEach { vilkårType ->
-            val søkersVilkårAvTypeMedSenesteTom = søkersVilkårResultater.filter { it.vilkårType == vilkårType }
-                .maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
-            if (søkersVilkårAvTypeMedSenesteTom != null && dødsdato.isBefore(
-                    søkersVilkårAvTypeMedSenesteTom.periodeTom ?: TIDENES_ENDE
-                ) && dødsdato.isAfter(søkersVilkårAvTypeMedSenesteTom.periodeFom)
-            ) {
-                søkersVilkårAvTypeMedSenesteTom.periodeTom = dødsdato
+            if (dødsDato != null) {
+                Vilkår.values().forEach { vilkårType ->
+                    val personVilkårAvTypeMedSenesteTom =
+                        personResultat.vilkårResultater.filter { it.vilkårType == vilkårType }
+                            .maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
+                    if (personVilkårAvTypeMedSenesteTom != null && dødsDato.isBefore(
+                            personVilkårAvTypeMedSenesteTom.periodeTom ?: TIDENES_ENDE
+                        ) && dødsDato.isAfter(personVilkårAvTypeMedSenesteTom.periodeFom)
+                    ) {
+
+                        if (personVilkårAvTypeMedSenesteTom.periodeTom == null || vilkårType == Vilkår.UNDER_18_ÅR) {
+                            personVilkårAvTypeMedSenesteTom.periodeTom = dødsDato
+                            personVilkårAvTypeMedSenesteTom.begrunnelse = "Dødsfall"
+                        }
+                    }
+
+                }
             }
+
         }
         return vilkårsvurdering
     }

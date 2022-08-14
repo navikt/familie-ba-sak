@@ -46,6 +46,7 @@ class VilkårsvurderingForNyBehandlingService(
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
+
             BehandlingÅrsak.HELMANUELL_MIGRERING -> {
                 genererVilkårsvurderingForHelmanuellMigrering(
                     behandling = behandling,
@@ -55,6 +56,7 @@ class VilkårsvurderingForNyBehandlingService(
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
+
             !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
                 initierVilkårsvurderingForBehandling(
                     behandling = behandling,
@@ -62,6 +64,7 @@ class VilkårsvurderingForNyBehandlingService(
                     forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt
                 )
             }
+
             else -> logger.info(
                 "Perioder i vilkårsvurdering generer ikke automatisk for " +
                     behandling.opprettetÅrsak.visningsnavn
@@ -218,7 +221,6 @@ class VilkårsvurderingForNyBehandlingService(
         ).genererVilkårsvurderingFraForrigeVedtattBehandling(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
-            behandling = behandling,
             løpendeUnderkategori = løpendeUnderkategori
         )
         endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
