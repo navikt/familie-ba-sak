@@ -638,7 +638,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Skal oppdatere utvidet andeler med riktig periode og sats ved endringsperiode med årsak=etterbetaling 3år, men småbarnstillegg skal ikke endres`() {
+    fun `Skal oppdatere utvidet andeler og småbarnstillegg med riktig periode og sats ved endringsperiode med årsak=etterbetaling 3år`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(2))
         val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.now().minusYears(31))
 
