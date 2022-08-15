@@ -1,3 +1,3 @@
 spring:
   flyway:
-    locations: filesystem:./src/test/resources/db/migration
+    locations: filesystem:./src/test/resources/db/migration-tests,filesystem:./src/main/resources/db/migration
