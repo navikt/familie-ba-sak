@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
@@ -95,6 +96,9 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 )
                     .singleOrNull()?.sats
                     ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
+
+                val prosentForPeriode = if (it.value.contains(SmåbarnstilleggKombinator.UTVIDET_MED_UTBETALING)) BigDecimal(100) else BigDecimal.ZERO
+                val nasjonaltPeriodebeløp = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosentForPeriode)
                 AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
@@ -102,11 +106,11 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                         ?: error("Genererer andeler for småbarnstillegg uten noen perioder med full overgangsstønad"),
                     stønadFom = it.fom.toYearMonth(),
                     stønadTom = it.tom.toYearMonth(),
-                    kalkulertUtbetalingsbeløp = ordinærSatsForPeriode,
-                    nasjonaltPeriodebeløp = ordinærSatsForPeriode,
+                    kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp,
+                    nasjonaltPeriodebeløp = nasjonaltPeriodebeløp,
                     type = YtelseType.SMÅBARNSTILLEGG,
                     sats = ordinærSatsForPeriode,
-                    prosent = if (it.value.contains(SmåbarnstilleggKombinator.UTVIDET_MED_UTBETALING)) BigDecimal(100) else BigDecimal.ZERO
+                    prosent = prosentForPeriode
                 )
             }
     }
@@ -120,6 +124,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 val barnetsMånedPeriodeAndeler = LocalDateTimeline(
                     barnasAndeler
                         .filter { andel -> andel.aktør == aktør }
+                        .filter { it.prosent > BigDecimal.ZERO }
                         .map { andel ->
                             LocalDateSegment(
                                 andel.stønadFom.førsteDagIInneværendeMåned(),
