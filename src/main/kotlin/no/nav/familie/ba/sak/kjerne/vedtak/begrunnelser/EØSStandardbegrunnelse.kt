@@ -108,10 +108,6 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorIkkeStatsborgerIEosLand"
     },
-    OPPHØR_SEPARASJONSAVTALE_GJELDER_IKKE {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
-        override val sanityApiNavn = "opphorSeparasjonsavtaleGjelderIkke"
-    },
     OPPHØR_SENTRUM_FOR_LIVSINTERESSE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorSentrumForLivsinteresse"
