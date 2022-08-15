@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.settVilkårsvurderingTomTilDødsDato
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -78,12 +79,12 @@ class VilkårsvurderingForNyBehandlingService(
         nyMigreringsdato: LocalDate
     ): Vilkårsvurdering {
 
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
+
             personResultater =
                 VilkårsvurderingForNyBehandlingUtils(
-                    personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(
-                        behandling.id
-                    )
+                    personopplysningGrunnlag = personopplysningGrunnlag
                 ).lagPersonResultaterForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                     vilkårsvurdering = this,
                     nyMigreringsdato = nyMigreringsdato,
@@ -95,6 +96,8 @@ class VilkårsvurderingForNyBehandlingService(
                     )
                 )
         }
+
+        settVilkårsvurderingTomTilDødsDato(vilkårsvurdering, personopplysningGrunnlag)
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
 
@@ -102,14 +105,17 @@ class VilkårsvurderingForNyBehandlingService(
         behandling: Behandling,
         nyMigreringsdato: LocalDate
     ): Vilkårsvurdering {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
             personResultater = VilkårsvurderingForNyBehandlingUtils(
-                personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+                personopplysningGrunnlag = personopplysningGrunnlag
             ).lagPersonResultaterForHelmanuellMigrering(
                 vilkårsvurdering = this,
                 nyMigreringsdato = nyMigreringsdato
             )
         }
+
+        settVilkårsvurderingTomTilDødsDato(vilkårsvurdering, personopplysningGrunnlag)
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
 
@@ -187,6 +193,7 @@ class VilkårsvurderingForNyBehandlingService(
                 frontendFeilmelding = VilkårsvurderingUtils.lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
             )
         }
+
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
     }
 
@@ -227,6 +234,9 @@ class VilkårsvurderingForNyBehandlingService(
             behandling,
             forrigeBehandlingSomErVedtatt
         )
+
+        settVilkårsvurderingTomTilDødsDato(vilkårsvurdering, personopplysningGrunnlag)
+
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
 

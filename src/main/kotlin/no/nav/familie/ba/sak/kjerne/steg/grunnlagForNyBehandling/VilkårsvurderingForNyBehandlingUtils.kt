@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -21,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.genererPersonResultatForPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.settVilkårsvurderingTomTilDødsDato
 import java.time.LocalDate
 
 data class VilkårsvurderingForNyBehandlingUtils(
@@ -71,36 +71,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
             forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
         )
 
-        return hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering)
-    }
-
-    fun hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
-
-        vilkårsvurdering.personResultater.forEach { personResultat ->
-            val person = personopplysningGrunnlag.søkerOgBarn.single { it.aktør == personResultat.aktør }
-            val dødsDato = person.dødsfall?.dødsfallDato
-
-            if (dødsDato != null) {
-                Vilkår.values().forEach { vilkårType ->
-                    val personVilkårAvTypeMedSenesteTom =
-                        personResultat.vilkårResultater.filter { it.vilkårType == vilkårType }
-                            .maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
-                    if (personVilkårAvTypeMedSenesteTom != null && dødsDato.isBefore(
-                            personVilkårAvTypeMedSenesteTom.periodeTom ?: TIDENES_ENDE
-                        ) && dødsDato.isAfter(personVilkårAvTypeMedSenesteTom.periodeFom)
-                    ) {
-
-                        if (personVilkårAvTypeMedSenesteTom.periodeTom == null || vilkårType == Vilkår.UNDER_18_ÅR) {
-                            personVilkårAvTypeMedSenesteTom.periodeTom = dødsDato
-                            personVilkårAvTypeMedSenesteTom.begrunnelse = "Dødsfall"
-                        }
-                    }
-
-                }
-            }
-
-        }
-        return vilkårsvurdering
+        return settVilkårsvurderingTomTilDødsDato(vilkårsvurdering, personopplysningGrunnlag)
     }
 
     private fun lagPersonResultaterForMigreringsbehandling(

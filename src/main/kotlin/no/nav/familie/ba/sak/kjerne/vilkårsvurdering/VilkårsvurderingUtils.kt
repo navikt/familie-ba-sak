@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
@@ -498,4 +499,34 @@ fun validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(
                 "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling."
         )
     }
+}
+
+fun settVilkårsvurderingTomTilDødsDato(
+    vilkårsvurdering: Vilkårsvurdering,
+    personopplysningGrunnlag: PersonopplysningGrunnlag
+): Vilkårsvurdering {
+    vilkårsvurdering.personResultater.forEach { personResultat ->
+        val person = personopplysningGrunnlag.søkerOgBarn.single { it.aktør == personResultat.aktør }
+        val dødsDato = person.dødsfall?.dødsfallDato
+
+        if (person.erDød()) {
+            Vilkår.values().forEach { vilkårType ->
+                val vilkårAvTypeMedSenesteTom =
+                    personResultat.vilkårResultater.filter { it.vilkårType == vilkårType }
+                        .maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
+
+                if (vilkårAvTypeMedSenesteTom != null && dødsDato!!.isBefore(
+                        vilkårAvTypeMedSenesteTom.periodeTom ?: TIDENES_ENDE
+                    ) && dødsDato.isAfter(vilkårAvTypeMedSenesteTom.periodeFom)
+                ) {
+
+                    if (vilkårAvTypeMedSenesteTom.periodeTom == null || vilkårType == Vilkår.UNDER_18_ÅR) {
+                        vilkårAvTypeMedSenesteTom.periodeTom = dødsDato
+                        vilkårAvTypeMedSenesteTom.begrunnelse = "Dødsfall"
+                    }
+                }
+            }
+        }
+    }
+    return vilkårsvurdering
 }
