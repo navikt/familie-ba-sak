@@ -12,23 +12,23 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 
 data class TriggesAv(
-    val vilkår: Set<Vilkår> = emptySet(),
-    val personTyper: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
-    val personerManglerOpplysninger: Boolean = false,
-    val satsendring: Boolean = false,
-    val barnMedSeksårsdag: Boolean = false,
-    val vurderingAnnetGrunnlag: Boolean = false,
-    val medlemskap: Boolean = false,
-    val deltbosted: Boolean = false,
-    val deltBostedSkalIkkeDeles: Boolean = false,
-    val valgbar: Boolean = true,
-    val endringsaarsaker: Set<Årsak> = emptySet(),
-    val etterEndretUtbetaling: Boolean = false,
-    val endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere = EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
-    val småbarnstillegg: Boolean = false,
-    val gjelderFørstePeriode: Boolean = false,
-    val gjelderFraInnvilgelsestidspunkt: Boolean = false,
-    val barnDød: Boolean = false
+    val vilkår: Set<Vilkår>,
+    val personTyper: Set<PersonType>,
+    val personerManglerOpplysninger: Boolean,
+    val satsendring: Boolean,
+    val barnMedSeksårsdag: Boolean,
+    val vurderingAnnetGrunnlag: Boolean,
+    val medlemskap: Boolean,
+    val deltbosted: Boolean,
+    val deltBostedSkalIkkeDeles: Boolean,
+    val valgbar: Boolean,
+    val endringsaarsaker: Set<Årsak>,
+    val etterEndretUtbetaling: Boolean,
+    val endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere,
+    val småbarnstillegg: Boolean,
+    val gjelderFørstePeriode: Boolean,
+    val gjelderFraInnvilgelsestidspunkt: Boolean,
+    val barnDød: Boolean
 ) {
     fun erEndret() = endringsaarsaker.isNotEmpty()
 
