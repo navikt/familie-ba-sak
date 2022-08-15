@@ -91,6 +91,7 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSekundaerlandHardKodet"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
@@ -98,6 +99,26 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_EØS_SØKER_BER_OM_OPPHØR {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosSokerBerOmOpphor"
+    },
+    OPPHØR_BOR_IKKE_I_ET_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorBorIkkeIEtEOSland"
+    },
+    OPPHØR_IKKE_STATSBORGER_I_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorIkkeStatsborgerIEosLand"
+    },
+    OPPHØR_SENTRUM_FOR_LIVSINTERESSE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSentrumForLivsinteresse"
+    },
+    OPPHØR_IKKE_ANSVAR_FOR_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorIkkeAnsvarForBarn"
+    },
+    OPPHØR_IKKE_OPPHOLDSRETT_SOM_FAMILIEMEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorIkkeOppholdsrettSomFamiliemedlem"
     };
 
     override val kanDelesOpp: Boolean = false
