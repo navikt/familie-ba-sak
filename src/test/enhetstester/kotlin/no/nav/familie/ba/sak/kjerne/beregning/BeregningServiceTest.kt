@@ -587,11 +587,12 @@ class BeregningServiceTest {
             endretUtbetalingProsent = BigDecimal.ZERO,
             endretUtbetalingFom = endretUtbetalingAndelFom,
             endretUtbetalingTom = endretUtbetalingAndelTom,
+            endretUtbetalingPerson = barn,
             generellFom = fom,
             generellTom = tom,
             utvidetFom = utvidetFom,
             utvidetTom = utvidetTom,
-            barn = barn,
+            barna = listOf(barn),
             søker = søker
         )
 
@@ -656,11 +657,12 @@ class BeregningServiceTest {
             endretUtbetalingProsent = BigDecimal.ZERO,
             endretUtbetalingFom = endretUtbetalingAndelFom,
             endretUtbetalingTom = endretUtbetalingAndelTom,
+            endretUtbetalingPerson = barn,
             generellFom = fom,
             generellTom = tom,
             utvidetFom = utvidetFom,
             utvidetTom = utvidetTom,
-            barn = barn,
+            barna = listOf(barn),
             søker = søker
         )
 
@@ -703,6 +705,85 @@ class BeregningServiceTest {
         Assertions.assertEquals(BigDecimal(100), andelerUtvidet[1].prosent)
         Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerUtvidet[1].stønadFom)
         Assertions.assertEquals(utvidetTom.toYearMonth(), andelerUtvidet[1].stønadTom)
+
+        Assertions.assertEquals(2, andelerSmåbarnstillegg.size)
+        // Søker - småbarnstillegg under endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerSmåbarnstillegg[0].aktør)
+        Assertions.assertEquals(BigDecimal.ZERO, andelerSmåbarnstillegg[0].prosent)
+        Assertions.assertEquals(utvidetFom.plusMonths(1).toYearMonth(), andelerSmåbarnstillegg[0].stønadFom)
+        Assertions.assertEquals(endretUtbetalingAndelTom, andelerSmåbarnstillegg[0].stønadTom)
+
+        // Søker - småbarnstillegg etter endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerSmåbarnstillegg[1].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerSmåbarnstillegg[1].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerSmåbarnstillegg[1].stønadFom)
+        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerSmåbarnstillegg[1].stønadTom)
+    }
+
+    @Test
+    fun `Skal få utvidet, men ikke småbarnstillegg hvis to barn, men barn under 3 år har endringsperiode med årsak=etterbetaling 3 år`() {
+        val barnUnder3År = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(2))
+        val barnOver3År = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(7))
+        val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.now().minusYears(31))
+
+        val fom = LocalDate.now().minusMonths(8)
+        val tom = LocalDate.now().plusYears(3)
+
+        val utvidetFom = LocalDate.now().minusMonths(3)
+        val utvidetTom = LocalDate.now().plusMonths(5)
+
+        val endretUtbetalingAndelFom = fom.plusMonths(1).toYearMonth()
+        val endretUtbetalingAndelTom = utvidetTom.minusMonths(2).toYearMonth()
+
+        val andelerTilkjentYtelse = genererAndelerTilkjentYtelseForScenario(
+            endretUtbetalingÅrsak = Årsak.ETTERBETALING_3ÅR,
+            endretUtbetalingProsent = BigDecimal.ZERO,
+            endretUtbetalingFom = endretUtbetalingAndelFom,
+            endretUtbetalingTom = endretUtbetalingAndelTom,
+            endretUtbetalingPerson = barnUnder3År,
+            generellFom = fom,
+            generellTom = tom,
+            utvidetFom = utvidetFom,
+            utvidetTom = utvidetTom,
+            barna = listOf(barnUnder3År, barnOver3År),
+            søker = søker
+        )
+
+        val (andelerSøker, andelerBarn) = andelerTilkjentYtelse.partition { it.aktør.aktivFødselsnummer() == søker.aktør.aktivFødselsnummer() }
+
+        // BARNA
+        val (andelerBarnUnder3År, andelerBarnOver3År) = andelerBarn.partition { it.aktør.aktivFødselsnummer() == barnUnder3År.aktør.aktivFødselsnummer() }
+
+        Assertions.assertEquals(2, andelerBarnUnder3År.size)
+        // Barn (under 3 år) under endringsperiode
+        Assertions.assertEquals(barnUnder3År.aktør, andelerBarnUnder3År[0].aktør)
+        Assertions.assertEquals(BigDecimal.ZERO, andelerBarnUnder3År[0].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelFom, andelerBarnUnder3År[0].stønadFom)
+        Assertions.assertEquals(endretUtbetalingAndelTom, andelerBarnUnder3År[0].stønadTom)
+
+        // Barn (under 3 år) etter endringsperiode
+        Assertions.assertEquals(barnUnder3År.aktør, andelerBarnUnder3År[1].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerBarnUnder3År[1].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerBarnUnder3År[1].stønadFom)
+        Assertions.assertEquals(tom.toYearMonth(), andelerBarnUnder3År[1].stønadTom)
+
+        val andelerBarnOver3ÅrEtterIRelevantPeriode = andelerBarnOver3År.filter { it.stønadTom.isAfter(fom.toYearMonth()) }
+
+        // Barn over 3 år har ingen endringer og derfor bare 1 andel i perioden vi ser på
+        Assertions.assertEquals(1, andelerBarnOver3ÅrEtterIRelevantPeriode.size)
+
+        // SØKER
+        Assertions.assertEquals(3, andelerSøker.size)
+
+        val (andelerUtvidet, andelerSmåbarnstillegg) = andelerSøker.partition { it.erUtvidet() }
+
+        Assertions.assertEquals(1, andelerUtvidet.size)
+
+        // Søker får utvidet hele perioden pga barn over 3 år
+        Assertions.assertEquals(søker.aktør, andelerUtvidet.single().aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerUtvidet.single().prosent)
+        Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerUtvidet.single().stønadFom)
+        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerUtvidet.single().stønadTom)
 
         Assertions.assertEquals(2, andelerSmåbarnstillegg.size)
         // Søker - småbarnstillegg under endringsperiode
@@ -954,7 +1035,7 @@ class BeregningServiceTest {
         )
     }
 
-    private fun genererAndelerTilkjentYtelseForScenario(endretUtbetalingÅrsak: Årsak, endretUtbetalingProsent: BigDecimal, endretUtbetalingFom: YearMonth, endretUtbetalingTom: YearMonth, generellFom: LocalDate, generellTom: LocalDate, utvidetFom: LocalDate, utvidetTom: LocalDate, barn: Person, søker: Person): List<AndelTilkjentYtelse> {
+    private fun genererAndelerTilkjentYtelseForScenario(endretUtbetalingÅrsak: Årsak, endretUtbetalingProsent: BigDecimal, endretUtbetalingFom: YearMonth, endretUtbetalingTom: YearMonth, endretUtbetalingPerson: Person, generellFom: LocalDate, generellTom: LocalDate, utvidetFom: LocalDate, utvidetTom: LocalDate, barna: List<Person>, søker: Person): List<AndelTilkjentYtelse> {
         val behandling = lagBehandling()
         val vilkårsvurdering = lagVilkårsvurdering(søkerAktør = søker.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
 
@@ -995,68 +1076,72 @@ class BeregningServiceTest {
             )
         )
 
-        val barnPersonResultat = PersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
-            aktør = barn.aktør
-        )
-
-        barnPersonResultat.setSortedVilkårResultater(
-            setOf(
-                VilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = generellFom,
-                    periodeTom = generellTom,
-                    begrunnelse = "",
-                    behandlingId = behandling.id
-                ),
-                VilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = generellFom,
-                    periodeTom = generellTom,
-                    begrunnelse = "",
-                    behandlingId = behandling.id
-                ),
-                VilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.BOR_MED_SØKER,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = generellFom,
-                    periodeTom = generellTom,
-                    begrunnelse = "",
-                    behandlingId = behandling.id,
-                    utdypendeVilkårsvurderinger = if (endretUtbetalingÅrsak == Årsak.DELT_BOSTED) listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) else emptyList()
-                ),
-                VilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = generellFom,
-                    periodeTom = generellTom,
-                    begrunnelse = "",
-                    behandlingId = behandling.id
-                ),
-                VilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.UNDER_18_ÅR,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = barn.fødselsdato,
-                    periodeTom = barn.fødselsdato.plusYears(18),
-                    begrunnelse = "",
-                    behandlingId = behandling.id
-                ),
+        val personResultatBarna = barna.map {
+            barn ->
+            val barnPersonResultat = PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = barn.aktør
             )
-        )
 
-        vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
+            barnPersonResultat.setSortedVilkårResultater(
+                setOf(
+                    VilkårResultat(
+                        personResultat = barnPersonResultat,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = generellFom,
+                        periodeTom = generellTom,
+                        begrunnelse = "",
+                        behandlingId = behandling.id
+                    ),
+                    VilkårResultat(
+                        personResultat = barnPersonResultat,
+                        vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = generellFom,
+                        periodeTom = generellTom,
+                        begrunnelse = "",
+                        behandlingId = behandling.id
+                    ),
+                    VilkårResultat(
+                        personResultat = barnPersonResultat,
+                        vilkårType = Vilkår.BOR_MED_SØKER,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = generellFom,
+                        periodeTom = generellTom,
+                        begrunnelse = "",
+                        behandlingId = behandling.id,
+                        utdypendeVilkårsvurderinger = if (endretUtbetalingÅrsak == Årsak.DELT_BOSTED) listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) else emptyList()
+                    ),
+                    VilkårResultat(
+                        personResultat = barnPersonResultat,
+                        vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = generellFom,
+                        periodeTom = generellTom,
+                        begrunnelse = "",
+                        behandlingId = behandling.id
+                    ),
+                    VilkårResultat(
+                        personResultat = barnPersonResultat,
+                        vilkårType = Vilkår.UNDER_18_ÅR,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = barn.fødselsdato,
+                        periodeTom = barn.fødselsdato.plusYears(18),
+                        begrunnelse = "",
+                        behandlingId = behandling.id
+                    ),
+                )
+            )
+            barnPersonResultat
+        }
+
+        vilkårsvurdering.personResultater = personResultatBarna.toSet() + setOf(søkerPersonResultat)
 
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                person = barn,
+                person = endretUtbetalingPerson,
                 fom = endretUtbetalingFom,
                 tom = endretUtbetalingTom,
                 årsak = endretUtbetalingÅrsak,
@@ -1068,7 +1153,7 @@ class BeregningServiceTest {
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(
             behandlingId = behandling.id,
-            personer = mutableSetOf(barn, søker)
+            personer = (barna + søker).toMutableSet()
         )
 
         val slot = slot<TilkjentYtelse>()
