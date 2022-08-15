@@ -86,7 +86,7 @@ object TilkjentYtelseUtils {
                     perioderMedFullOvergangsstønad = hentPerioderMedFullOvergangsstønad(
                         personopplysningGrunnlag.søker.aktør
                     ),
-                    andelerTilkjentYtelse = andelerTilkjentYtelseUtvidet + andelerTilkjentYtelseBarna,
+                    andelerTilkjentYtelse = andelerTilkjentYtelseUtvidet + andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år,
                     barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
                         Pair(
                             it.aktør,
