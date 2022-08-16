@@ -48,7 +48,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse = utvidetAndeler.filter { it.erUtvidet() })
 
         val barnSomGirRettTilSmåbarnstilleggTidslinje = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
-            barnasAndeler = barnasAndeler,
+            barnasAndeler = barnasAndeler.filter { !it.erSøkersAndel() },
             barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer
         )
 
@@ -59,7 +59,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         )
 
         return kombinertProsentTidslinje.lagSmåbarnstilleggAndeler(
-            søkerAktør = utvidetAndeler.first().aktør
+            søkerAktør = utvidetAndeler.first { it.erUtvidet() }.aktør
         )
     }
 
