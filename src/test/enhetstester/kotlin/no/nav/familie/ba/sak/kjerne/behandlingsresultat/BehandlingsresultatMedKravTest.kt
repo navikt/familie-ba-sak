@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -18,8 +18,8 @@ class BehandlingsresultatMedKravTest {
 
     val søker = tilfeldigPerson()
 
-    private val barn1Aktør = randomAktørId()
-    private val barn2Aktør = randomAktørId()
+    private val barn1Aktør = randomAktør()
+    private val barn2Aktør = randomAktør()
     private val defaultYtelseSluttForLøpende = inneværendeMåned().plusMonths(1)
     private val defaultYtelseSluttForAvslått = TIDENES_MORGEN.toYearMonth()
 

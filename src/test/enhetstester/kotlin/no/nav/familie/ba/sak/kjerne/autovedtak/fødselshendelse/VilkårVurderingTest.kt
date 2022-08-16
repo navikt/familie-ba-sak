@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -147,7 +147,7 @@ class VilkårVurderingTest(
     ): Person {
         val fnr = randomFnr()
         return Person(
-            aktør = randomAktørId(fnr),
+            aktør = randomAktør(fnr),
             type = type,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = LocalDate.of(1991, 1, 1),
