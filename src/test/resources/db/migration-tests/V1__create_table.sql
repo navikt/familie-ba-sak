@@ -25,12 +25,12 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE public.aktoer (
-                               aktoer_id character varying NOT NULL,
-                               versjon bigint DEFAULT 0 NOT NULL,
-                               opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                               opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                               endret_av character varying,
-                               endret_tid timestamp(3) without time zone
+    aktoer_id character varying NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -39,8 +39,8 @@ CREATE TABLE public.aktoer (
 --
 
 CREATE TABLE public.aktoer_til_kompetanse (
-                                              fk_kompetanse_id bigint NOT NULL,
-                                              fk_aktoer_id character varying NOT NULL
+    fk_kompetanse_id bigint NOT NULL,
+    fk_aktoer_id character varying NOT NULL
 );
 
 
@@ -49,8 +49,8 @@ CREATE TABLE public.aktoer_til_kompetanse (
 --
 
 CREATE TABLE public.aktoer_til_utenlandsk_periodebeloep (
-                                                            fk_utenlandsk_periodebeloep_id bigint NOT NULL,
-                                                            fk_aktoer_id character varying NOT NULL
+    fk_utenlandsk_periodebeloep_id bigint NOT NULL,
+    fk_aktoer_id character varying NOT NULL
 );
 
 
@@ -59,8 +59,8 @@ CREATE TABLE public.aktoer_til_utenlandsk_periodebeloep (
 --
 
 CREATE TABLE public.aktoer_til_valutakurs (
-                                              fk_valutakurs_id bigint NOT NULL,
-                                              fk_aktoer_id character varying NOT NULL
+    fk_valutakurs_id bigint NOT NULL,
+    fk_aktoer_id character varying NOT NULL
 );
 
 
@@ -69,8 +69,8 @@ CREATE TABLE public.aktoer_til_valutakurs (
 --
 
 CREATE TABLE public.andel_til_endret_andel (
-                                               fk_andel_tilkjent_ytelse_id bigint NOT NULL,
-                                               fk_endret_utbetaling_andel_id bigint NOT NULL
+    fk_andel_tilkjent_ytelse_id bigint NOT NULL,
+    fk_endret_utbetaling_andel_id bigint NOT NULL
 );
 
 
@@ -79,26 +79,26 @@ CREATE TABLE public.andel_til_endret_andel (
 --
 
 CREATE TABLE public.andel_tilkjent_ytelse (
-                                              id bigint NOT NULL,
-                                              fk_behandling_id bigint NOT NULL,
-                                              versjon bigint DEFAULT 0 NOT NULL,
-                                              opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-                                              opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                              stonad_fom timestamp(3) without time zone NOT NULL,
-                                              stonad_tom timestamp(3) without time zone NOT NULL,
-                                              type character varying(50) NOT NULL,
-                                              kalkulert_utbetalingsbelop numeric,
-                                              endret_av character varying(512),
-                                              endret_tid timestamp(3) without time zone,
-                                              tilkjent_ytelse_id bigint,
-                                              periode_offset bigint,
-                                              forrige_periode_offset bigint,
-                                              kilde_behandling_id bigint,
-                                              prosent numeric NOT NULL,
-                                              sats bigint NOT NULL,
-                                              fk_aktoer_id character varying,
-                                              nasjonalt_periodebelop numeric,
-                                              differanseberegnet_periodebelop numeric
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    stonad_fom timestamp(3) without time zone NOT NULL,
+    stonad_tom timestamp(3) without time zone NOT NULL,
+    type character varying(50) NOT NULL,
+    kalkulert_utbetalingsbelop numeric,
+    endret_av character varying(512),
+    endret_tid timestamp(3) without time zone,
+    tilkjent_ytelse_id bigint,
+    periode_offset bigint,
+    forrige_periode_offset bigint,
+    kilde_behandling_id bigint,
+    prosent numeric NOT NULL,
+    sats bigint NOT NULL,
+    fk_aktoer_id character varying,
+    nasjonalt_periodebelop numeric,
+    differanseberegnet_periodebelop numeric
 );
 
 
@@ -119,16 +119,16 @@ CREATE SEQUENCE public.andel_tilkjent_ytelse_seq
 --
 
 CREATE TABLE public.annen_vurdering (
-                                        id bigint NOT NULL,
-                                        fk_person_resultat_id bigint NOT NULL,
-                                        resultat character varying NOT NULL,
-                                        type character varying NOT NULL,
-                                        begrunnelse text,
-                                        versjon bigint DEFAULT 0 NOT NULL,
-                                        opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                        opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                        endret_av character varying,
-                                        endret_tid timestamp(3) without time zone
+    id bigint NOT NULL,
+    fk_person_resultat_id bigint NOT NULL,
+    resultat character varying NOT NULL,
+    type character varying NOT NULL,
+    begrunnelse text,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -149,11 +149,11 @@ CREATE SEQUENCE public.annen_vurdering_seq
 --
 
 CREATE TABLE public.arbeidsfordeling_pa_behandling (
-                                                       id bigint NOT NULL,
-                                                       fk_behandling_id bigint NOT NULL,
-                                                       behandlende_enhet_id character varying NOT NULL,
-                                                       behandlende_enhet_navn character varying NOT NULL,
-                                                       manuelt_overstyrt boolean NOT NULL
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    behandlende_enhet_id character varying NOT NULL,
+    behandlende_enhet_navn character varying NOT NULL,
+    manuelt_overstyrt boolean NOT NULL
 );
 
 
@@ -174,9 +174,9 @@ CREATE SEQUENCE public.arbeidsfordeling_pa_behandling_seq
 --
 
 CREATE TABLE public.batch (
-                              id bigint NOT NULL,
-                              kjoredato timestamp(3) without time zone NOT NULL,
-                              status character varying(50) DEFAULT 'LEDIG'::character varying NOT NULL
+    id bigint NOT NULL,
+    kjoredato timestamp(3) without time zone NOT NULL,
+    status character varying(50) DEFAULT 'LEDIG'::character varying NOT NULL
 );
 
 
@@ -197,22 +197,22 @@ CREATE SEQUENCE public.batch_seq
 --
 
 CREATE TABLE public.behandling (
-                                   id bigint NOT NULL,
-                                   fk_fagsak_id bigint,
-                                   versjon bigint DEFAULT 0,
-                                   opprettet_av character varying(512) DEFAULT 'VL'::character varying,
-                                   opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-                                   endret_av character varying(512),
-                                   endret_tid timestamp(3) without time zone,
-                                   behandling_type character varying(50),
-                                   aktiv boolean DEFAULT true,
-                                   status character varying(50) DEFAULT 'OPPRETTET'::character varying,
-                                   kategori character varying(50) DEFAULT 'NATIONAL'::character varying,
-                                   underkategori character varying(50) DEFAULT 'ORDINÆR'::character varying,
-                                   opprettet_aarsak character varying DEFAULT 'MANUELL'::character varying,
-                                   skal_behandles_automatisk boolean DEFAULT false,
-                                   resultat character varying DEFAULT 'IKKE_VURDERT'::character varying NOT NULL,
-                                   overstyrt_endringstidspunkt timestamp(3) without time zone
+    id bigint NOT NULL,
+    fk_fagsak_id bigint,
+    versjon bigint DEFAULT 0,
+    opprettet_av character varying(512) DEFAULT 'VL'::character varying,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    endret_av character varying(512),
+    endret_tid timestamp(3) without time zone,
+    behandling_type character varying(50),
+    aktiv boolean DEFAULT true,
+    status character varying(50) DEFAULT 'OPPRETTET'::character varying,
+    kategori character varying(50) DEFAULT 'NATIONAL'::character varying,
+    underkategori character varying(50) DEFAULT 'ORDINÆR'::character varying,
+    opprettet_aarsak character varying DEFAULT 'MANUELL'::character varying,
+    skal_behandles_automatisk boolean DEFAULT false,
+    resultat character varying DEFAULT 'IKKE_VURDERT'::character varying NOT NULL,
+    overstyrt_endringstidspunkt timestamp(3) without time zone
 );
 
 
@@ -221,14 +221,14 @@ CREATE TABLE public.behandling (
 --
 
 CREATE TABLE public.behandling_migreringsinfo (
-                                                  id bigint NOT NULL,
-                                                  fk_behandling_id bigint NOT NULL,
-                                                  migreringsdato date NOT NULL,
-                                                  versjon bigint DEFAULT 0 NOT NULL,
-                                                  opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                                  opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                                  endret_av character varying,
-                                                  endret_tid timestamp(3) without time zone
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    migreringsdato date NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -261,14 +261,14 @@ CREATE SEQUENCE public.behandling_seq
 --
 
 CREATE TABLE public.behandling_soknadsinfo (
-                                               id bigint NOT NULL,
-                                               fk_behandling_id bigint NOT NULL,
-                                               mottatt_dato timestamp(3) without time zone NOT NULL,
-                                               versjon bigint DEFAULT 0 NOT NULL,
-                                               opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                               opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                               endret_av character varying,
-                                               endret_tid timestamp(3) without time zone
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    mottatt_dato timestamp(3) without time zone NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -289,15 +289,15 @@ CREATE SEQUENCE public.behandling_soknadsinfo_seq
 --
 
 CREATE TABLE public.behandling_steg_tilstand (
-                                                 id bigint NOT NULL,
-                                                 fk_behandling_id bigint NOT NULL,
-                                                 behandling_steg character varying NOT NULL,
-                                                 behandling_steg_status character varying DEFAULT 'IKKE_UTFØRT'::character varying NOT NULL,
-                                                 versjon bigint DEFAULT 0 NOT NULL,
-                                                 opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                                 opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                                 endret_av character varying,
-                                                 endret_tid timestamp(3) without time zone
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    behandling_steg character varying NOT NULL,
+    behandling_steg_status character varying DEFAULT 'IKKE_UTFØRT'::character varying NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -318,16 +318,16 @@ CREATE SEQUENCE public.behandling_steg_tilstand_seq
 --
 
 CREATE TABLE public.data_chunk (
-                                   id bigint NOT NULL,
-                                   fk_batch_id bigint NOT NULL,
-                                   transaksjons_id uuid NOT NULL,
-                                   chunk_nr bigint NOT NULL,
-                                   er_sendt boolean NOT NULL,
-                                   versjon bigint DEFAULT 0 NOT NULL,
-                                   opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                   opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                   endret_av character varying,
-                                   endret_tid timestamp(3) without time zone
+    id bigint NOT NULL,
+    fk_batch_id bigint NOT NULL,
+    transaksjons_id uuid NOT NULL,
+    chunk_nr bigint NOT NULL,
+    er_sendt boolean NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -348,22 +348,22 @@ CREATE SEQUENCE public.data_chunk_seq
 --
 
 CREATE TABLE public.endret_utbetaling_andel (
-                                                id bigint NOT NULL,
-                                                fk_behandling_id bigint NOT NULL,
-                                                fk_po_person_id bigint,
-                                                fom timestamp(3) without time zone,
-                                                tom timestamp(3) without time zone,
-                                                prosent numeric,
-                                                aarsak character varying,
-                                                begrunnelse text,
-                                                versjon bigint DEFAULT 0 NOT NULL,
-                                                opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                                opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                                endret_av character varying,
-                                                endret_tid timestamp(3) without time zone,
-                                                vedtak_begrunnelse_spesifikasjoner text DEFAULT ''::text,
-                                                avtaletidspunkt_delt_bosted timestamp(3) without time zone,
-                                                soknadstidspunkt timestamp(3) without time zone
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    fk_po_person_id bigint,
+    fom timestamp(3) without time zone,
+    tom timestamp(3) without time zone,
+    prosent numeric,
+    aarsak character varying,
+    begrunnelse text,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    vedtak_begrunnelse_spesifikasjoner text DEFAULT ''::text,
+    avtaletidspunkt_delt_bosted timestamp(3) without time zone,
+    soknadstidspunkt timestamp(3) without time zone
 );
 
 
@@ -384,9 +384,9 @@ CREATE SEQUENCE public.endret_utbetaling_andel_seq
 --
 
 CREATE TABLE public.eos_begrunnelse (
-                                        id bigint NOT NULL,
-                                        fk_vedtaksperiode_id bigint,
-                                        begrunnelse character varying NOT NULL
+    id bigint NOT NULL,
+    fk_vedtaksperiode_id bigint,
+    begrunnelse character varying NOT NULL
 );
 
 
@@ -407,17 +407,17 @@ CREATE SEQUENCE public.eos_begrunnelse_seq
 --
 
 CREATE TABLE public.fagsak (
-                               id bigint NOT NULL,
-                               versjon bigint DEFAULT 0,
-                               opprettet_av character varying(512) DEFAULT 'VL'::character varying,
-                               opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-                               endret_av character varying(512),
-                               endret_tid timestamp(3) without time zone,
-                               status character varying(50) DEFAULT 'OPPRETTET'::character varying,
-                               arkivert boolean DEFAULT false NOT NULL,
-                               fk_aktoer_id character varying,
-                               type character varying(50) DEFAULT 'NORMAL'::character varying NOT NULL,
-                               fk_institusjon_id bigint
+    id bigint NOT NULL,
+    versjon bigint DEFAULT 0,
+    opprettet_av character varying(512) DEFAULT 'VL'::character varying,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    endret_av character varying(512),
+    endret_tid timestamp(3) without time zone,
+    status character varying(50) DEFAULT 'OPPRETTET'::character varying,
+    arkivert boolean DEFAULT false NOT NULL,
+    fk_aktoer_id character varying,
+    type character varying(50) DEFAULT 'NORMAL'::character varying NOT NULL,
+    fk_institusjon_id bigint
 );
 
 
@@ -450,18 +450,18 @@ CREATE SEQUENCE public.fagsak_seq
 --
 
 CREATE TABLE public.foedselshendelse_pre_lansering (
-                                                       id bigint NOT NULL,
-                                                       fk_behandling_id bigint NOT NULL,
-                                                       ny_behandling_hendelse text NOT NULL,
-                                                       filtreringsregler_input text,
-                                                       filtreringsregler_output text,
-                                                       vilkaarsvurderinger_for_foedselshendelse text,
-                                                       opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                                       opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                                       endret_av character varying,
-                                                       endret_tid timestamp(3) without time zone,
-                                                       versjon bigint DEFAULT 0 NOT NULL,
-                                                       fk_aktoer_id character varying
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    ny_behandling_hendelse text NOT NULL,
+    filtreringsregler_input text,
+    filtreringsregler_output text,
+    vilkaarsvurderinger_for_foedselshendelse text,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0 NOT NULL,
+    fk_aktoer_id character varying
 );
 
 
@@ -482,18 +482,18 @@ CREATE SEQUENCE public.foedselshendelse_pre_lansering_seq
 --
 
 CREATE TABLE public.foedselshendelsefiltrering_resultat (
-                                                            id bigint NOT NULL,
-                                                            fk_behandling_id bigint NOT NULL,
-                                                            filtreringsregel character varying NOT NULL,
-                                                            resultat character varying NOT NULL,
-                                                            begrunnelse text NOT NULL,
-                                                            evalueringsaarsaker text NOT NULL,
-                                                            regel_input text,
-                                                            versjon bigint DEFAULT 0 NOT NULL,
-                                                            opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                                            opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                                            endret_av character varying,
-                                                            endret_tid timestamp(3) without time zone
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    filtreringsregel character varying NOT NULL,
+    resultat character varying NOT NULL,
+    begrunnelse text NOT NULL,
+    evalueringsaarsaker text NOT NULL,
+    regel_input text,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -514,17 +514,17 @@ CREATE SEQUENCE public.foedselshendelsefiltrering_resultat_seq
 --
 
 CREATE TABLE public.gr_periode_overgangsstonad (
-                                                   id bigint NOT NULL,
-                                                   fk_behandling_id bigint NOT NULL,
-                                                   fom timestamp(3) without time zone NOT NULL,
-                                                   tom timestamp(3) without time zone NOT NULL,
-                                                   datakilde character varying NOT NULL,
-                                                   versjon bigint DEFAULT 0 NOT NULL,
-                                                   opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                                   opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                                   endret_av character varying,
-                                                   endret_tid timestamp(3) without time zone,
-                                                   fk_aktoer_id character varying
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    fom timestamp(3) without time zone NOT NULL,
+    tom timestamp(3) without time zone NOT NULL,
+    datakilde character varying NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    fk_aktoer_id character varying
 );
 
 
@@ -545,14 +545,14 @@ CREATE SEQUENCE public.gr_periode_overgangsstonad_seq
 --
 
 CREATE TABLE public.gr_personopplysninger (
-                                              id bigint NOT NULL,
-                                              fk_behandling_id bigint NOT NULL,
-                                              versjon bigint DEFAULT 0 NOT NULL,
-                                              opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-                                              opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                              endret_av character varying(512),
-                                              endret_tid timestamp(3) without time zone,
-                                              aktiv boolean DEFAULT true NOT NULL
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying(512),
+    endret_tid timestamp(3) without time zone,
+    aktiv boolean DEFAULT true NOT NULL
 );
 
 
@@ -573,12 +573,12 @@ CREATE SEQUENCE public.gr_personopplysninger_seq
 --
 
 CREATE TABLE public.gr_soknad (
-                                  id bigint NOT NULL,
-                                  opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                  opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                  fk_behandling_id bigint NOT NULL,
-                                  soknad text NOT NULL,
-                                  aktiv boolean DEFAULT true NOT NULL
+    id bigint NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    soknad text NOT NULL,
+    aktiv boolean DEFAULT true NOT NULL
 );
 
 
@@ -599,14 +599,14 @@ CREATE SEQUENCE public.gr_soknad_seq
 --
 
 CREATE TABLE public.institusjon (
-                                    id bigint NOT NULL,
-                                    org_nummer character varying,
-                                    tss_ekstern_id character varying NOT NULL,
-                                    versjon bigint DEFAULT 0 NOT NULL,
-                                    opprettet_av character varying(20) DEFAULT 'VL'::character varying NOT NULL,
-                                    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                    endret_av character varying(20),
-                                    endret_tid timestamp(3) without time zone
+    id bigint NOT NULL,
+    org_nummer character varying,
+    tss_ekstern_id character varying NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying(20) DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying(20),
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -627,12 +627,12 @@ CREATE SEQUENCE public.institusjon_seq
 --
 
 CREATE TABLE public.journalpost (
-                                    id bigint NOT NULL,
-                                    fk_behandling_id bigint NOT NULL,
-                                    journalpost_id character varying NOT NULL,
-                                    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                    type character varying
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    journalpost_id character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    type character varying
 );
 
 
@@ -653,20 +653,20 @@ CREATE SEQUENCE public.journalpost_seq
 --
 
 CREATE TABLE public.kompetanse (
-                                   id bigint NOT NULL,
-                                   fk_behandling_id bigint NOT NULL,
-                                   fom timestamp(3) without time zone,
-                                   tom timestamp(3) without time zone,
-                                   versjon bigint DEFAULT 0 NOT NULL,
-                                   opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                   opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                   endret_av character varying,
-                                   endret_tid timestamp(3) without time zone,
-                                   soekers_aktivitet character varying,
-                                   annen_forelderes_aktivitet character varying,
-                                   annen_forelderes_aktivitetsland character varying,
-                                   barnets_bostedsland character varying,
-                                   resultat character varying
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    fom timestamp(3) without time zone,
+    tom timestamp(3) without time zone,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    soekers_aktivitet character varying,
+    annen_forelderes_aktivitet character varying,
+    annen_forelderes_aktivitetsland character varying,
+    barnets_bostedsland character varying,
+    resultat character varying
 );
 
 
@@ -687,14 +687,14 @@ CREATE SEQUENCE public.kompetanse_seq
 --
 
 CREATE TABLE public.logg (
-                             id bigint NOT NULL,
-                             opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                             opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                             fk_behandling_id bigint NOT NULL,
-                             type character varying NOT NULL,
-                             tittel character varying NOT NULL,
-                             rolle character varying NOT NULL,
-                             tekst text NOT NULL
+    id bigint NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    type character varying NOT NULL,
+    tittel character varying NOT NULL,
+    rolle character varying NOT NULL,
+    tekst text NOT NULL
 );
 
 
@@ -715,15 +715,15 @@ CREATE SEQUENCE public.logg_seq
 --
 
 CREATE TABLE public.okonomi_simulering_mottaker (
-                                                    id bigint NOT NULL,
-                                                    mottaker_nummer character varying(50),
-                                                    mottaker_type character varying(50),
-                                                    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-                                                    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                                    endret_av character varying(512),
-                                                    endret_tid timestamp(3) without time zone,
-                                                    versjon bigint DEFAULT 0,
-                                                    fk_behandling_id bigint
+    id bigint NOT NULL,
+    mottaker_nummer character varying(50),
+    mottaker_type character varying(50),
+    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying(512),
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0,
+    fk_behandling_id bigint
 );
 
 
@@ -744,21 +744,21 @@ CREATE SEQUENCE public.okonomi_simulering_mottaker_seq
 --
 
 CREATE TABLE public.okonomi_simulering_postering (
-                                                     id bigint NOT NULL,
-                                                     fk_okonomi_simulering_mottaker_id bigint,
-                                                     fag_omraade_kode character varying(50),
-                                                     fom timestamp(3) without time zone,
-                                                     tom timestamp(3) without time zone,
-                                                     betaling_type character varying(50),
-                                                     belop bigint,
-                                                     postering_type character varying(50),
-                                                     forfallsdato timestamp(3) without time zone,
-                                                     uten_inntrekk boolean,
-                                                     opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-                                                     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                                     endret_av character varying(512),
-                                                     endret_tid timestamp(3) without time zone,
-                                                     versjon bigint DEFAULT 0
+    id bigint NOT NULL,
+    fk_okonomi_simulering_mottaker_id bigint,
+    fag_omraade_kode character varying(50),
+    fom timestamp(3) without time zone,
+    tom timestamp(3) without time zone,
+    betaling_type character varying(50),
+    belop bigint,
+    postering_type character varying(50),
+    forfallsdato timestamp(3) without time zone,
+    uten_inntrekk boolean,
+    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying(512),
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0
 );
 
 
@@ -779,12 +779,12 @@ CREATE SEQUENCE public.okonomi_simulering_postering_seq
 --
 
 CREATE TABLE public.oppgave (
-                                id bigint NOT NULL,
-                                fk_behandling_id bigint NOT NULL,
-                                gsak_id character varying NOT NULL,
-                                type character varying NOT NULL,
-                                ferdigstilt boolean NOT NULL,
-                                opprettet_tid timestamp without time zone NOT NULL
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    gsak_id character varying NOT NULL,
+    type character varying NOT NULL,
+    ferdigstilt boolean NOT NULL,
+    opprettet_tid timestamp without time zone NOT NULL
 );
 
 
@@ -817,14 +817,14 @@ CREATE SEQUENCE public.periode_resultat_seq
 --
 
 CREATE TABLE public.person_resultat (
-                                        id bigint NOT NULL,
-                                        fk_vilkaarsvurdering_id bigint NOT NULL,
-                                        versjon bigint DEFAULT 0 NOT NULL,
-                                        opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                        opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                        endret_av character varying,
-                                        endret_tid timestamp(3) without time zone,
-                                        fk_aktoer_id character varying
+    id bigint NOT NULL,
+    fk_vilkaarsvurdering_id bigint NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    fk_aktoer_id character varying
 );
 
 
@@ -833,15 +833,15 @@ CREATE TABLE public.person_resultat (
 --
 
 CREATE TABLE public.personident (
-                                    fk_aktoer_id character varying NOT NULL,
-                                    foedselsnummer character varying NOT NULL,
-                                    aktiv boolean DEFAULT false NOT NULL,
-                                    gjelder_til timestamp(3) without time zone,
-                                    versjon bigint DEFAULT 0 NOT NULL,
-                                    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                    endret_av character varying,
-                                    endret_tid timestamp(3) without time zone
+    fk_aktoer_id character varying NOT NULL,
+    foedselsnummer character varying NOT NULL,
+    aktiv boolean DEFAULT false NOT NULL,
+    gjelder_til timestamp(3) without time zone,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -850,17 +850,17 @@ CREATE TABLE public.personident (
 --
 
 CREATE TABLE public.po_arbeidsforhold (
-                                          id bigint NOT NULL,
-                                          fk_po_person_id bigint NOT NULL,
-                                          arbeidsgiver_id character varying,
-                                          arbeidsgiver_type character varying,
-                                          fom date,
-                                          tom date,
-                                          opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                          opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                          endret_av character varying,
-                                          endret_tid timestamp(3) without time zone,
-                                          versjon bigint DEFAULT 0 NOT NULL
+    id bigint NOT NULL,
+    fk_po_person_id bigint NOT NULL,
+    arbeidsgiver_id character varying,
+    arbeidsgiver_type character varying,
+    fom date,
+    tom date,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0 NOT NULL
 );
 
 
@@ -881,25 +881,25 @@ CREATE SEQUENCE public.po_arbeidsforhold_seq
 --
 
 CREATE TABLE public.po_bostedsadresse (
-                                          id bigint NOT NULL,
-                                          type character varying(20) NOT NULL,
-                                          bostedskommune character varying,
-                                          husnummer character varying,
-                                          husbokstav character varying,
-                                          bruksenhetsnummer character varying,
-                                          adressenavn character varying,
-                                          kommunenummer character varying,
-                                          tilleggsnavn character varying,
-                                          postnummer character varying,
-                                          opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                          opprettet_tid timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                                          endret_av character varying,
-                                          versjon bigint DEFAULT 0 NOT NULL,
-                                          endret_tid timestamp(3) without time zone,
-                                          matrikkel_id bigint,
-                                          fom date,
-                                          tom date,
-                                          fk_po_person_id bigint
+    id bigint NOT NULL,
+    type character varying(20) NOT NULL,
+    bostedskommune character varying,
+    husnummer character varying,
+    husbokstav character varying,
+    bruksenhetsnummer character varying,
+    adressenavn character varying,
+    kommunenummer character varying,
+    tilleggsnavn character varying,
+    postnummer character varying,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    endret_av character varying,
+    versjon bigint DEFAULT 0 NOT NULL,
+    endret_tid timestamp(3) without time zone,
+    matrikkel_id bigint,
+    fom date,
+    tom date,
+    fk_po_person_id bigint
 );
 
 
@@ -920,15 +920,15 @@ CREATE SEQUENCE public.po_bostedsadresse_seq
 --
 
 CREATE TABLE public.po_bostedsadresseperiode (
-                                                 id bigint NOT NULL,
-                                                 fk_po_person_id bigint NOT NULL,
-                                                 fom date,
-                                                 tom date,
-                                                 opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                                 opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                                 endret_av character varying,
-                                                 endret_tid timestamp(3) without time zone,
-                                                 versjon bigint DEFAULT 0 NOT NULL
+    id bigint NOT NULL,
+    fk_po_person_id bigint NOT NULL,
+    fom date,
+    tom date,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0 NOT NULL
 );
 
 
@@ -949,17 +949,17 @@ CREATE SEQUENCE public.po_bostedsadresseperiode_seq
 --
 
 CREATE TABLE public.po_doedsfall (
-                                     id bigint NOT NULL,
-                                     fk_po_person_id bigint NOT NULL,
-                                     versjon bigint DEFAULT 0 NOT NULL,
-                                     doedsfall_dato timestamp(3) without time zone NOT NULL,
-                                     doedsfall_adresse character varying,
-                                     doedsfall_postnummer character varying,
-                                     doedsfall_poststed character varying,
-                                     opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                     endret_av character varying,
-                                     endret_tid timestamp(3) without time zone
+    id bigint NOT NULL,
+    fk_po_person_id bigint NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    doedsfall_dato timestamp(3) without time zone NOT NULL,
+    doedsfall_adresse character varying,
+    doedsfall_postnummer character varying,
+    doedsfall_poststed character varying,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -980,16 +980,16 @@ CREATE SEQUENCE public.po_doedsfall_seq
 --
 
 CREATE TABLE public.po_opphold (
-                                   id bigint NOT NULL,
-                                   fk_po_person_id bigint NOT NULL,
-                                   type character varying NOT NULL,
-                                   fom date,
-                                   tom date,
-                                   opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                   opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                   endret_av character varying,
-                                   endret_tid timestamp(3) without time zone,
-                                   versjon bigint DEFAULT 0 NOT NULL
+    id bigint NOT NULL,
+    fk_po_person_id bigint NOT NULL,
+    type character varying NOT NULL,
+    fom date,
+    tom date,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0 NOT NULL
 );
 
 
@@ -1010,19 +1010,19 @@ CREATE SEQUENCE public.po_opphold_seq
 --
 
 CREATE TABLE public.po_person (
-                                  id bigint NOT NULL,
-                                  fk_gr_personopplysninger_id bigint NOT NULL,
-                                  type character varying(10) NOT NULL,
-                                  opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-                                  opprettet_tid timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                                  endret_av character varying(512),
-                                  versjon bigint DEFAULT 0 NOT NULL,
-                                  endret_tid timestamp(3) without time zone,
-                                  foedselsdato timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP,
-                                  fk_aktoer_id character varying(50),
-                                  navn character varying DEFAULT ''::character varying,
-                                  kjoenn character varying DEFAULT 'UKJENT'::character varying,
-                                  maalform character varying(2) DEFAULT 'NB'::character varying NOT NULL
+    id bigint NOT NULL,
+    fk_gr_personopplysninger_id bigint NOT NULL,
+    type character varying(10) NOT NULL,
+    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    endret_av character varying(512),
+    versjon bigint DEFAULT 0 NOT NULL,
+    endret_tid timestamp(3) without time zone,
+    foedselsdato timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP,
+    fk_aktoer_id character varying(50),
+    navn character varying DEFAULT ''::character varying,
+    kjoenn character varying DEFAULT 'UKJENT'::character varying,
+    maalform character varying(2) DEFAULT 'NB'::character varying NOT NULL
 );
 
 
@@ -1043,15 +1043,15 @@ CREATE SEQUENCE public.po_person_seq
 --
 
 CREATE TABLE public.po_sivilstand (
-                                      id bigint NOT NULL,
-                                      fk_po_person_id bigint NOT NULL,
-                                      fom date,
-                                      type character varying NOT NULL,
-                                      opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                      opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                      endret_av character varying,
-                                      endret_tid timestamp(3) without time zone,
-                                      versjon bigint DEFAULT 0 NOT NULL
+    id bigint NOT NULL,
+    fk_po_person_id bigint NOT NULL,
+    fom date,
+    type character varying NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0 NOT NULL
 );
 
 
@@ -1072,17 +1072,17 @@ CREATE SEQUENCE public.po_sivilstand_seq
 --
 
 CREATE TABLE public.po_statsborgerskap (
-                                           id bigint NOT NULL,
-                                           fk_po_person_id bigint NOT NULL,
-                                           landkode character varying(3) DEFAULT 'XUK'::character varying NOT NULL,
-                                           fom date,
-                                           tom date,
-                                           opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                           opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                           endret_av character varying,
-                                           endret_tid timestamp(3) without time zone,
-                                           versjon bigint DEFAULT 0 NOT NULL,
-                                           medlemskap character varying DEFAULT 'UKJENT'::character varying NOT NULL
+    id bigint NOT NULL,
+    fk_po_person_id bigint NOT NULL,
+    landkode character varying(3) DEFAULT 'XUK'::character varying NOT NULL,
+    fom date,
+    tom date,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0 NOT NULL,
+    medlemskap character varying DEFAULT 'UKJENT'::character varying NOT NULL
 );
 
 
@@ -1103,16 +1103,16 @@ CREATE SEQUENCE public.po_statsborgerskap_seq
 --
 
 CREATE TABLE public.saksstatistikk_mellomlagring (
-                                                     id bigint NOT NULL,
-                                                     offset_verdi bigint,
-                                                     funksjonell_id character varying NOT NULL,
-                                                     type character varying NOT NULL,
-                                                     kontrakt_versjon character varying NOT NULL,
-                                                     json text NOT NULL,
-                                                     konvertert_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-                                                     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                                     sendt_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-                                                     type_id bigint
+    id bigint NOT NULL,
+    offset_verdi bigint,
+    funksjonell_id character varying NOT NULL,
+    type character varying NOT NULL,
+    kontrakt_versjon character varying NOT NULL,
+    json text NOT NULL,
+    konvertert_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    sendt_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    type_id bigint
 );
 
 
@@ -1145,18 +1145,18 @@ CREATE SEQUENCE public.sats_seq
 --
 
 CREATE TABLE public.sett_paa_vent (
-                                      id bigint NOT NULL,
-                                      fk_behandling_id bigint NOT NULL,
-                                      versjon bigint DEFAULT 0 NOT NULL,
-                                      opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                      opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                      frist timestamp(3) without time zone NOT NULL,
-                                      aktiv boolean DEFAULT false NOT NULL,
-                                      aarsak character varying NOT NULL,
-                                      endret_av character varying,
-                                      endret_tid timestamp(3) without time zone,
-                                      tid_tatt_av_vent timestamp(3) without time zone,
-                                      tid_satt_paa_vent timestamp(3) without time zone DEFAULT now() NOT NULL
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    frist timestamp(3) without time zone NOT NULL,
+    aktiv boolean DEFAULT false NOT NULL,
+    aarsak character varying NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    tid_tatt_av_vent timestamp(3) without time zone,
+    tid_satt_paa_vent timestamp(3) without time zone DEFAULT now() NOT NULL
 );
 
 
@@ -1177,9 +1177,9 @@ CREATE SEQUENCE public.sett_paa_vent_seq
 --
 
 CREATE TABLE public.skyggesak (
-                                  id bigint NOT NULL,
-                                  fk_fagsak_id bigint NOT NULL,
-                                  sendt_tid timestamp(3) without time zone
+    id bigint NOT NULL,
+    fk_fagsak_id bigint NOT NULL,
+    sendt_tid timestamp(3) without time zone
 );
 
 
@@ -1200,15 +1200,15 @@ CREATE SEQUENCE public.skyggesak_seq
 --
 
 CREATE TABLE public.task (
-                             id bigint NOT NULL,
-                             payload text NOT NULL,
-                             status character varying(50) DEFAULT 'UBEHANDLET'::character varying NOT NULL,
-                             versjon bigint DEFAULT 0,
-                             opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-                             type character varying(100) NOT NULL,
-                             metadata character varying(4000),
-                             trigger_tid timestamp without time zone DEFAULT LOCALTIMESTAMP,
-                             avvikstype character varying(50)
+    id bigint NOT NULL,
+    payload text NOT NULL,
+    status character varying(50) DEFAULT 'UBEHANDLET'::character varying NOT NULL,
+    versjon bigint DEFAULT 0,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    type character varying(100) NOT NULL,
+    metadata character varying(4000),
+    trigger_tid timestamp without time zone DEFAULT LOCALTIMESTAMP,
+    avvikstype character varying(50)
 );
 
 
@@ -1217,13 +1217,13 @@ CREATE TABLE public.task (
 --
 
 CREATE TABLE public.task_logg (
-                                  id bigint NOT NULL,
-                                  task_id bigint NOT NULL,
-                                  type character varying(50) NOT NULL,
-                                  node character varying(100) NOT NULL,
-                                  opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-                                  melding text,
-                                  endret_av character varying(100) DEFAULT 'VL'::character varying
+    id bigint NOT NULL,
+    task_id bigint NOT NULL,
+    type character varying(50) NOT NULL,
+    node character varying(100) NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    melding text,
+    endret_av character varying(100) DEFAULT 'VL'::character varying
 );
 
 
@@ -1270,17 +1270,17 @@ ALTER SEQUENCE public.task_seq OWNED BY public.task.id;
 --
 
 CREATE TABLE public.tilbakekreving (
-                                       id bigint NOT NULL,
-                                       valg character varying NOT NULL,
-                                       varsel text,
-                                       begrunnelse text NOT NULL,
-                                       tilbakekrevingsbehandling_id text,
-                                       opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                       opprettet_tid timestamp without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                       endret_av character varying,
-                                       endret_tid timestamp(3) without time zone,
-                                       versjon bigint DEFAULT 0,
-                                       fk_behandling_id bigint
+    id bigint NOT NULL,
+    valg character varying NOT NULL,
+    varsel text,
+    begrunnelse text NOT NULL,
+    tilbakekrevingsbehandling_id text,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0,
+    fk_behandling_id bigint
 );
 
 
@@ -1301,14 +1301,14 @@ CREATE SEQUENCE public.tilbakekreving_seq
 --
 
 CREATE TABLE public.tilkjent_ytelse (
-                                        id bigint NOT NULL,
-                                        fk_behandling_id bigint,
-                                        stonad_fom timestamp without time zone,
-                                        stonad_tom timestamp without time zone,
-                                        opprettet_dato timestamp without time zone NOT NULL,
-                                        opphor_fom timestamp without time zone,
-                                        utbetalingsoppdrag text,
-                                        endret_dato timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    id bigint NOT NULL,
+    fk_behandling_id bigint,
+    stonad_fom timestamp without time zone,
+    stonad_tom timestamp without time zone,
+    opprettet_dato timestamp without time zone NOT NULL,
+    opphor_fom timestamp without time zone,
+    utbetalingsoppdrag text,
+    endret_dato timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -1329,20 +1329,20 @@ CREATE SEQUENCE public.tilkjent_ytelse_seq
 --
 
 CREATE TABLE public.totrinnskontroll (
-                                         id bigint NOT NULL,
-                                         fk_behandling_id bigint NOT NULL,
-                                         versjon bigint DEFAULT 0 NOT NULL,
-                                         opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                         opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                         endret_av character varying,
-                                         endret_tid timestamp(3) without time zone,
-                                         aktiv boolean DEFAULT true NOT NULL,
-                                         saksbehandler character varying NOT NULL,
-                                         beslutter character varying,
-                                         godkjent boolean DEFAULT true,
-                                         saksbehandler_id character varying DEFAULT 'ukjent'::character varying NOT NULL,
-                                         beslutter_id character varying,
-                                         kontrollerte_sider text DEFAULT ''::text
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    aktiv boolean DEFAULT true NOT NULL,
+    saksbehandler character varying NOT NULL,
+    beslutter character varying,
+    godkjent boolean DEFAULT true,
+    saksbehandler_id character varying DEFAULT 'ukjent'::character varying NOT NULL,
+    beslutter_id character varying,
+    kontrollerte_sider text DEFAULT ''::text
 );
 
 
@@ -1363,20 +1363,20 @@ CREATE SEQUENCE public.totrinnskontroll_seq
 --
 
 CREATE TABLE public.utenlandsk_periodebeloep (
-                                                 id bigint NOT NULL,
-                                                 fk_behandling_id bigint NOT NULL,
-                                                 fom timestamp(3) without time zone,
-                                                 tom timestamp(3) without time zone,
-                                                 intervall character varying,
-                                                 valutakode character varying,
-                                                 beloep numeric,
-                                                 versjon bigint DEFAULT 0 NOT NULL,
-                                                 opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                                 opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                                 endret_av character varying,
-                                                 endret_tid timestamp(3) without time zone,
-                                                 utbetalingsland character varying,
-                                                 kalkulert_maanedlig_beloep numeric
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    fom timestamp(3) without time zone,
+    tom timestamp(3) without time zone,
+    intervall character varying,
+    valutakode character varying,
+    beloep numeric,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    utbetalingsland character varying,
+    kalkulert_maanedlig_beloep numeric
 );
 
 
@@ -1397,18 +1397,18 @@ CREATE SEQUENCE public.utenlandsk_periodebeloep_seq
 --
 
 CREATE TABLE public.valutakurs (
-                                   id bigint NOT NULL,
-                                   fk_behandling_id bigint NOT NULL,
-                                   fom timestamp(3) without time zone,
-                                   tom timestamp(3) without time zone,
-                                   valutakursdato timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
-                                   valutakode character varying,
-                                   kurs numeric,
-                                   versjon bigint DEFAULT 0 NOT NULL,
-                                   opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                   opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                   endret_av character varying,
-                                   endret_tid timestamp(3) without time zone
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    fom timestamp(3) without time zone,
+    tom timestamp(3) without time zone,
+    valutakursdato timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
+    valutakode character varying,
+    kurs numeric,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -1429,16 +1429,16 @@ CREATE SEQUENCE public.valutakurs_seq
 --
 
 CREATE TABLE public.vedtak (
-                               id bigint NOT NULL,
-                               fk_behandling_id bigint NOT NULL,
-                               versjon bigint DEFAULT 0 NOT NULL,
-                               opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-                               opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                               vedtaksdato timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-                               endret_av character varying(512),
-                               endret_tid timestamp(3) without time zone,
-                               aktiv boolean DEFAULT true,
-                               stonad_brev_pdf bytea
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    vedtaksdato timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    endret_av character varying(512),
+    endret_tid timestamp(3) without time zone,
+    aktiv boolean DEFAULT true,
+    stonad_brev_pdf bytea
 );
 
 
@@ -1471,9 +1471,9 @@ CREATE SEQUENCE public.vedtak_seq
 --
 
 CREATE TABLE public.vedtaksbegrunnelse (
-                                           id bigint NOT NULL,
-                                           fk_vedtaksperiode_id bigint,
-                                           vedtak_begrunnelse_spesifikasjon character varying NOT NULL
+    id bigint NOT NULL,
+    fk_vedtaksperiode_id bigint,
+    vedtak_begrunnelse_spesifikasjon character varying NOT NULL
 );
 
 
@@ -1482,9 +1482,9 @@ CREATE TABLE public.vedtaksbegrunnelse (
 --
 
 CREATE TABLE public.vedtaksbegrunnelse_fritekst (
-                                                    id bigint NOT NULL,
-                                                    fk_vedtaksperiode_id bigint,
-                                                    fritekst text DEFAULT ''::text NOT NULL
+    id bigint NOT NULL,
+    fk_vedtaksperiode_id bigint,
+    fritekst text DEFAULT ''::text NOT NULL
 );
 
 
@@ -1517,16 +1517,16 @@ CREATE SEQUENCE public.vedtaksbegrunnelse_seq
 --
 
 CREATE TABLE public.vedtaksperiode (
-                                       id bigint NOT NULL,
-                                       fk_vedtak_id bigint,
-                                       fom timestamp without time zone,
-                                       tom timestamp without time zone,
-                                       type character varying NOT NULL,
-                                       opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                       opprettet_tid timestamp without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                       endret_av character varying,
-                                       endret_tid timestamp(3) without time zone,
-                                       versjon bigint DEFAULT 0
+    id bigint NOT NULL,
+    fk_vedtak_id bigint,
+    fom timestamp without time zone,
+    tom timestamp without time zone,
+    type character varying NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    versjon bigint DEFAULT 0
 );
 
 
@@ -1547,16 +1547,16 @@ CREATE SEQUENCE public.vedtaksperiode_seq
 --
 
 CREATE TABLE public.verge (
-                              id bigint NOT NULL,
-                              navn character varying NOT NULL,
-                              adresse character varying NOT NULL,
-                              ident character varying,
-                              fk_behandling_id bigint NOT NULL,
-                              versjon bigint DEFAULT 0 NOT NULL,
-                              opprettet_av character varying(20) DEFAULT 'VL'::character varying NOT NULL,
-                              opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                              endret_av character varying(20),
-                              endret_tid timestamp(3) without time zone
+    id bigint NOT NULL,
+    navn character varying NOT NULL,
+    adresse character varying NOT NULL,
+    ident character varying,
+    fk_behandling_id bigint NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying(20) DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying(20),
+    endret_tid timestamp(3) without time zone
 );
 
 
@@ -1577,16 +1577,16 @@ CREATE SEQUENCE public.verge_seq
 --
 
 CREATE TABLE public.vilkaarsvurdering (
-                                          id bigint NOT NULL,
-                                          fk_behandling_id bigint NOT NULL,
-                                          aktiv boolean DEFAULT true NOT NULL,
-                                          versjon bigint DEFAULT 0 NOT NULL,
-                                          opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-                                          opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                          endret_av character varying,
-                                          endret_tid timestamp(3) without time zone,
-                                          samlet_resultat character varying,
-                                          ytelse_personer text DEFAULT ''::text
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    aktiv boolean DEFAULT true NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    samlet_resultat character varying,
+    ytelse_personer text DEFAULT ''::text
 );
 
 
@@ -1607,27 +1607,27 @@ CREATE SEQUENCE public.vilkaarsvurdering_seq
 --
 
 CREATE TABLE public.vilkar_resultat (
-                                        id bigint NOT NULL,
-                                        vilkar character varying(50) NOT NULL,
-                                        resultat character varying(50) NOT NULL,
-                                        regel_input text,
-                                        regel_output text,
-                                        versjon bigint DEFAULT 0 NOT NULL,
-                                        opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-                                        opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-                                        endret_av character varying(512),
-                                        endret_tid timestamp(3) without time zone,
-                                        fk_person_resultat_id bigint,
-                                        begrunnelse text,
-                                        periode_fom timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
-                                        periode_tom timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
-                                        fk_behandling_id bigint NOT NULL,
-                                        evaluering_aarsak text DEFAULT ''::text,
-                                        er_automatisk_vurdert boolean DEFAULT false NOT NULL,
-                                        er_eksplisitt_avslag_paa_soknad boolean,
-                                        vedtak_begrunnelse_spesifikasjoner text DEFAULT ''::text,
-                                        vurderes_etter character varying,
-                                        utdypende_vilkarsvurderinger character varying
+    id bigint NOT NULL,
+    vilkar character varying(50) NOT NULL,
+    resultat character varying(50) NOT NULL,
+    regel_input text,
+    regel_output text,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying(512),
+    endret_tid timestamp(3) without time zone,
+    fk_person_resultat_id bigint,
+    begrunnelse text,
+    periode_fom timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
+    periode_tom timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
+    fk_behandling_id bigint NOT NULL,
+    evaluering_aarsak text DEFAULT ''::text,
+    er_automatisk_vurdert boolean DEFAULT false NOT NULL,
+    er_eksplisitt_avslag_paa_soknad boolean,
+    vedtak_begrunnelse_spesifikasjoner text DEFAULT ''::text,
+    vurderes_etter character varying,
+    utdypende_vilkarsvurderinger character varying
 );
 
 
@@ -2022,8 +2022,8 @@ COPY public.skyggesak (id, fk_fagsak_id, sendt_tid) FROM stdin;
 --
 
 COPY public.task (id, payload, status, versjon, opprettet_tid, type, metadata, trigger_tid, avvikstype) FROM stdin;
-1	1654	FERDIG	4	2022-08-12 12:10:19.907	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-06.01.2022\n	2022-08-12 12:10:19.907421	\N
-51	1654	FERDIG	4	2022-08-12 12:10:19.926	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-07.01.2022\n	2022-08-12 12:10:19.925951	\N
+51	1654	FERDIG	4	2022-08-14 22:33:00.552	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-07.01.2022\n	2022-08-14 22:33:00.552228	\N
+1	1654	FERDIG	4	2022-08-14 22:33:00.523	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-06.01.2022\n	2022-08-14 22:33:00.52278	\N
 \.
 
 
@@ -2032,12 +2032,12 @@ COPY public.task (id, payload, status, versjon, opprettet_tid, type, metadata, t
 --
 
 COPY public.task_logg (id, task_id, type, node, opprettet_tid, melding, endret_av) FROM stdin;
-1	51	PLUKKET	node1	2022-08-12 12:10:42.497	\N	VL
-201	51	BEHANDLER	node1	2022-08-12 12:10:42.689	\N	VL
-351	51	FERDIG	node1	2022-08-12 12:10:42.942	\N	VL
-51	1	PLUKKET	node1	2022-08-12 12:10:42.497	\N	VL
-251	1	BEHANDLER	node1	2022-08-12 12:10:42.689	\N	VL
-301	1	FERDIG	node1	2022-08-12 12:10:42.942	\N	VL
+51	1	PLUKKET	node1	2022-08-14 22:33:34.01	\N	VL
+251	1	BEHANDLER	node1	2022-08-14 22:33:34.255	\N	VL
+301	1	FERDIG	node1	2022-08-14 22:33:34.429	\N	VL
+1	51	PLUKKET	node1	2022-08-14 22:33:34.01	\N	VL
+201	51	BEHANDLER	node1	2022-08-14 22:33:34.257	\N	VL
+351	51	FERDIG	node1	2022-08-14 22:33:34.429	\N	VL
 \.
 
 
@@ -3335,14 +3335,14 @@ CREATE INDEX totrinnskontroll_fk_behandling_id_idx ON public.totrinnskontroll US
 --
 
 CREATE UNIQUE INDEX uidx_behandling_01 ON public.behandling USING btree ((
-    CASE
+CASE
     WHEN (aktiv = true) THEN fk_fagsak_id
     ELSE NULL::bigint
-    END), (
-    CASE
+END), (
+CASE
     WHEN (aktiv = true) THEN aktiv
     ELSE NULL::boolean
-    END));
+END));
 
 
 --
@@ -3350,14 +3350,14 @@ CREATE UNIQUE INDEX uidx_behandling_01 ON public.behandling USING btree ((
 --
 
 CREATE UNIQUE INDEX uidx_behandling_vedtak_01 ON public.vedtak USING btree ((
-    CASE
+CASE
     WHEN (aktiv = true) THEN fk_behandling_id
     ELSE NULL::bigint
-    END), (
-    CASE
+END), (
+CASE
     WHEN (aktiv = true) THEN aktiv
     ELSE NULL::boolean
-    END));
+END));
 
 
 --
@@ -3379,14 +3379,14 @@ CREATE UNIQUE INDEX uidx_fagsak_type_aktoer_institusjon_ikke_arkivert ON public.
 --
 
 CREATE UNIQUE INDEX uidx_gr_personopplysninger_01 ON public.gr_personopplysninger USING btree ((
-    CASE
+CASE
     WHEN (aktiv = true) THEN fk_behandling_id
     ELSE NULL::bigint
-    END), (
-    CASE
+END), (
+CASE
     WHEN (aktiv = true) THEN aktiv
     ELSE NULL::boolean
-    END));
+END));
 
 
 --
@@ -3394,14 +3394,14 @@ CREATE UNIQUE INDEX uidx_gr_personopplysninger_01 ON public.gr_personopplysninge
 --
 
 CREATE UNIQUE INDEX uidx_gr_soknad_01 ON public.gr_soknad USING btree ((
-    CASE
+CASE
     WHEN (aktiv = true) THEN fk_behandling_id
     ELSE NULL::bigint
-    END), (
-    CASE
+END), (
+CASE
     WHEN (aktiv = true) THEN aktiv
     ELSE NULL::boolean
-    END));
+END));
 
 
 --
@@ -3444,14 +3444,14 @@ CREATE UNIQUE INDEX uidx_sett_paa_vent_aktiv ON public.sett_paa_vent USING btree
 --
 
 CREATE UNIQUE INDEX uidx_totrinnskontroll_01 ON public.totrinnskontroll USING btree ((
-    CASE
+CASE
     WHEN (aktiv = true) THEN fk_behandling_id
     ELSE NULL::bigint
-    END), (
-    CASE
+END), (
+CASE
     WHEN (aktiv = true) THEN aktiv
     ELSE NULL::boolean
-    END));
+END));
 
 
 --
