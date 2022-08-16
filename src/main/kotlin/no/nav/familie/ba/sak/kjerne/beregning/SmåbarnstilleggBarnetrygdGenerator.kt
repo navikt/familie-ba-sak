@@ -57,11 +57,12 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         val kombinertProsentTidslinje = perioderMedFullOvergangsstønadTidslinje.kombinerMed(utvidetBarnetrygdTidslinje) {
             overgangsstønadTidslinje, utvidetTidslinje ->
             if (overgangsstønadTidslinje == null || utvidetTidslinje == null) null
-            else true
+            else if (utvidetTidslinje.prosent > BigDecimal.ZERO) UtvidetAndelStatus.UTBETALING
+            else UtvidetAndelStatus.NULLUTBETALING
         }.kombinerMed(barnSomGirRettTilSmåbarnstilleggTidslinje) {
             overgangsstønadOgUtvidetTidslinje, under3ÅrTidslinje ->
             if (overgangsstønadOgUtvidetTidslinje == null || under3ÅrTidslinje == null) null
-            else if (under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING) BigDecimal(100)
+            else if (under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING && overgangsstønadOgUtvidetTidslinje == UtvidetAndelStatus.UTBETALING) BigDecimal(100)
             else BigDecimal.ZERO
         }
 
@@ -309,5 +310,10 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     enum class BarnSinRettTilSmåbarnstillegg {
         UNDER_3_ÅR_UTBETALING,
         UNDER_3_ÅR_NULLUTBETALING
+    }
+
+    enum class UtvidetAndelStatus {
+        UTBETALING,
+        NULLUTBETALING
     }
 }
