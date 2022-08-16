@@ -114,7 +114,7 @@ object TilkjentYtelseUtils {
                 behandlingId = vilkårsvurdering.behandling.id,
                 tilkjentYtelse = tilkjentYtelse
             )
-                .lagSmåbarnstilleggAndeler(
+                .lagSmåbarnstilleggAndelerGammel(
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
                     andelerTilkjentYtelse = andelerTilkjentYtelseSøker + andelerTilkjentYtelseBarna,
                     barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {

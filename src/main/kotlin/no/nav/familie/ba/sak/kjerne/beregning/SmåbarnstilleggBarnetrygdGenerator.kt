@@ -25,7 +25,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     val tilkjentYtelse: TilkjentYtelse,
 ) {
 
-    fun lagSmåbarnstilleggAndeler(
+    fun lagSmåbarnstilleggAndelerGammel(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
