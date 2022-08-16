@@ -173,5 +173,6 @@ FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.dev-fss-pub
 
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.dev-fss-pub.nais.io/api
 FAMILIE_STATISTIKK_URL: https://familie-ba-statistikk.dev-fss-pub.nais.io/api
+CRON_FAGSAKSTATUS_SCHEDULER: "0 0/30 * ? * *"
 
 ENVIRONMENT_NAME: q2
