@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -24,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.verge.VergeService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
@@ -40,11 +42,16 @@ class RegistrerInstitusjonOgVergeStegTest {
     private lateinit var registrerInstitusjonOgVerge: RegistrerInstitusjonOgVerge
 
     @BeforeAll
-    fun SetUp() {
+    fun setUp() {
         institusjonService = InstitusjonService(fagsakRepository = fagsakRepositoryMock)
         vergeService = VergeService(behandlingServiceMock)
         registrerInstitusjonOgVerge =
             RegistrerInstitusjonOgVerge(institusjonService, vergeService, loggServiceMock, behandlingHentOgPersisterServiceMock)
+    }
+
+    @BeforeEach
+    fun init() {
+        clearMocks(loggServiceMock)
     }
 
     @Test
