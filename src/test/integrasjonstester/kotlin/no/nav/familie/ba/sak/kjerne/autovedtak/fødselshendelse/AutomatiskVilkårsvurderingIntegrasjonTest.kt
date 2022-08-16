@@ -22,12 +22,10 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 
 // Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
 // TODO kan kanskje fjerne dirties
-@DirtiesContext
 class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val stegService: StegService,
     @Autowired val mockPersonopplysningerService: PersonopplysningerService,
@@ -51,7 +49,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns mockBarnAutomatiskBehandling
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
-        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
+        val behandlingFørVilkår =
+            stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
@@ -67,7 +66,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns mockBarnGift
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
-        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
+        val behandlingFørVilkår =
+            stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
@@ -92,7 +92,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns søker
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
-        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
+        val behandlingFørVilkår =
+            stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)
@@ -136,7 +137,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns søker
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
-        val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
+        val behandlingFørVilkår =
+            stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandling)
         val behandlingEtterVilkår =
             stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(Behandlingsresultat.AVSLÅTT, behandlingEtterVilkår.resultat)

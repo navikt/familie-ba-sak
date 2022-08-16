@@ -25,12 +25,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 import java.time.YearMonth
 
 // Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
-@DirtiesContext
 class BehandlingSatsendringTest(
     @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
@@ -44,6 +42,7 @@ class BehandlingSatsendringTest(
 
     @Test
     fun `Skal kjøre satsendring på løpende fagsak`() {
+
         mockkObject(SatsService)
         // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
         // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve
