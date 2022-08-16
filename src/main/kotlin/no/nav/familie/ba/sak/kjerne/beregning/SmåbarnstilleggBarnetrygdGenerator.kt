@@ -54,22 +54,34 @@ data class SmåbarnstilleggBarnetrygdGenerator(
             barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer
         )
 
-        val kombinertProsentTidslinje = perioderMedFullOvergangsstønadTidslinje.kombinerMed(utvidetBarnetrygdTidslinje) {
-            overgangsstønadTidslinje, utvidetTidslinje ->
-            if (overgangsstønadTidslinje == null || utvidetTidslinje == null) null
-            else if (utvidetTidslinje.prosent > BigDecimal.ZERO) UtvidetAndelStatus.UTBETALING
-            else UtvidetAndelStatus.NULLUTBETALING
-        }.kombinerMed(barnSomGirRettTilSmåbarnstilleggTidslinje) {
-            overgangsstønadOgUtvidetTidslinje, under3ÅrTidslinje ->
-            if (overgangsstønadOgUtvidetTidslinje == null || under3ÅrTidslinje == null) null
-            else if (under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING && overgangsstønadOgUtvidetTidslinje == UtvidetAndelStatus.UTBETALING) BigDecimal(100)
-            else BigDecimal.ZERO
-        }
+        val kombinertProsentTidslinje = kombinerAlleTidslinjerTilProsentTidslinje(
+            perioderMedFullOvergangsstønadTidslinje,
+            utvidetBarnetrygdTidslinje,
+            barnSomGirRettTilSmåbarnstilleggTidslinje
+        )
 
         return kombinertProsentTidslinje.lagSmåbarnstilleggAndeler(
             søkerAktør = utvidetAndeler.first().aktør
         )
     }
+
+    private fun kombinerAlleTidslinjerTilProsentTidslinje(
+        perioderMedFullOvergangsstønadTidslinje: Tidslinje<Boolean, Måned>,
+        utvidetBarnetrygdTidslinje: AndelTilkjentYtelseTidslinje,
+        barnSomGirRettTilSmåbarnstilleggTidslinje: Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned>
+    ) =
+        perioderMedFullOvergangsstønadTidslinje.kombinerMed(utvidetBarnetrygdTidslinje) { overgangsstønadTidslinje, utvidetTidslinje ->
+            if (overgangsstønadTidslinje == null || utvidetTidslinje == null) null
+            else if (utvidetTidslinje.prosent > BigDecimal.ZERO) UtvidetAndelStatus.UTBETALING
+            else UtvidetAndelStatus.NULLUTBETALING
+        }
+            .kombinerMed(barnSomGirRettTilSmåbarnstilleggTidslinje) { overgangsstønadOgUtvidetTidslinje, under3ÅrTidslinje ->
+                if (overgangsstønadOgUtvidetTidslinje == null || under3ÅrTidslinje == null) null
+                else if (under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING && overgangsstønadOgUtvidetTidslinje == UtvidetAndelStatus.UTBETALING) BigDecimal(
+                    100
+                )
+                else BigDecimal.ZERO
+            }
 
     fun lagSmåbarnstilleggAndelerGammel(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
