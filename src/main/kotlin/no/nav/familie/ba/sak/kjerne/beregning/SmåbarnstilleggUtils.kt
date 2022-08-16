@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.erUnder3ÅrTidslinje
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -11,6 +12,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -19,6 +25,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -153,3 +160,51 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
 
     return vedtaksperiodeSomSkalOppdateres
 }
+
+fun kombinerBarnasTidslinjerTilUnder3ÅrResultat(
+    alleAndelerForBarnUnder3År: Iterable<AndelTilkjentYtelse>
+): SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg? {
+    val høyesteProsentIPeriode = alleAndelerForBarnUnder3År.maxOfOrNull { it.prosent }
+
+    return when (høyesteProsentIPeriode) {
+        null -> null
+        BigDecimal.ZERO -> SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING
+        else -> SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING
+    }
+}
+
+fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+    barnasAndeler: List<AndelTilkjentYtelse>,
+    barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
+): Tidslinje<SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg, Måned> {
+    val barnasAndelerTidslinjer = barnasAndeler.groupBy { it.aktør }.mapValues { AndelTilkjentYtelseTidslinje(it.value) }
+
+    val barnasAndelerUnder3ÅrTidslinje = barnasAndelerTidslinjer.map { (barnAktør, barnTidslinje) ->
+        val barnetsFødselsdato = barnasAktørerOgFødselsdatoer.find { it.first == barnAktør }?.second ?: throw Feil("Kan ikke beregne småbarnstillegg for et barn som ikke har fødselsdato.")
+
+        val under3ÅrTidslinje = erUnder3ÅrTidslinje(barnetsFødselsdato)
+
+        barnTidslinje.beskjærEtter(under3ÅrTidslinje)
+    }
+
+    return barnasAndelerUnder3ÅrTidslinje.kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }
+}
+
+fun kombinerAlleTidslinjerTilProsentTidslinje(
+    perioderMedFullOvergangsstønadTidslinje: Tidslinje<Boolean, Måned>,
+    utvidetBarnetrygdTidslinje: AndelTilkjentYtelseTidslinje,
+    barnSomGirRettTilSmåbarnstilleggTidslinje: Tidslinje<SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg, Måned>
+) =
+    perioderMedFullOvergangsstønadTidslinje
+        .kombinerMed(utvidetBarnetrygdTidslinje) { overgangsstønadTidslinje, utvidetTidslinje ->
+            if (overgangsstønadTidslinje == null || utvidetTidslinje == null) null
+            else if (utvidetTidslinje.prosent > BigDecimal.ZERO) SmåbarnstilleggBarnetrygdGenerator.UtvidetAndelStatus.UTBETALING
+            else SmåbarnstilleggBarnetrygdGenerator.UtvidetAndelStatus.NULLUTBETALING
+        }
+        .kombinerMed(barnSomGirRettTilSmåbarnstilleggTidslinje) { overgangsstønadOgUtvidetTidslinje, under3ÅrTidslinje ->
+            if (overgangsstønadOgUtvidetTidslinje == null || under3ÅrTidslinje == null) null
+            else if (under3ÅrTidslinje == SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING && overgangsstønadOgUtvidetTidslinje == SmåbarnstilleggBarnetrygdGenerator.UtvidetAndelStatus.UTBETALING) BigDecimal(
+                100
+            )
+            else BigDecimal.ZERO
+        }
