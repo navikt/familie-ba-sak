@@ -49,7 +49,7 @@ class SmåbarnstilleggUtilsTest {
         assertEquals(1, generertePerioder.size)
         assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder.single().fraOgMed.tilYearMonth())
         assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), generertePerioder.single().tilOgMed.tilYearMonth())
-        assertEquals(SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING, generertePerioder.single().innhold)
+        assertEquals(BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING, generertePerioder.single().innhold)
     }
 
     @Test
@@ -79,11 +79,11 @@ class SmåbarnstilleggUtilsTest {
         assertEquals(2, generertePerioder.size)
         assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder.first().fraOgMed.tilYearMonth())
         assertEquals(brytningstidspunkt.toYearMonth(), generertePerioder.first().tilOgMed.tilYearMonth())
-        assertEquals(SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING, generertePerioder.first().innhold)
+        assertEquals(BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING, generertePerioder.first().innhold)
 
         assertEquals(brytningstidspunkt.plusMonths(1).toYearMonth(), generertePerioder.last().fraOgMed.tilYearMonth())
         assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), generertePerioder.last().tilOgMed.tilYearMonth())
-        assertEquals(SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING, generertePerioder.last().innhold)
+        assertEquals(BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING, generertePerioder.last().innhold)
     }
 
     @Test
@@ -135,15 +135,15 @@ class SmåbarnstilleggUtilsTest {
         assertEquals(3, generertePerioder.size)
         assertEquals(barn2.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder.first().fraOgMed.tilYearMonth())
         assertEquals(brytningstidspunkt2.toYearMonth(), generertePerioder.first().tilOgMed.tilYearMonth())
-        assertEquals(SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING, generertePerioder.first().innhold)
+        assertEquals(BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING, generertePerioder.first().innhold)
 
         assertEquals(brytningstidspunkt2.plusMonths(1).toYearMonth(), generertePerioder[1].fraOgMed.tilYearMonth())
         assertEquals(barn3.fødselsdato.toYearMonth(), generertePerioder[1].tilOgMed.tilYearMonth())
-        assertEquals(SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING, generertePerioder[1].innhold)
+        assertEquals(BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING, generertePerioder[1].innhold)
 
         assertEquals(barn3.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder[2].fraOgMed.tilYearMonth())
         assertEquals(LocalDate.now().toYearMonth(), generertePerioder[2].tilOgMed.tilYearMonth())
-        assertEquals(SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING, generertePerioder[2].innhold)
+        assertEquals(BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING, generertePerioder[2].innhold)
     }
 
     @Test
