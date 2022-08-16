@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import java.time.LocalDate
 
 fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> = tidslinje {
-
     listOf(
         Periode(
             fødselsdato.toYearMonth().tilTidspunkt().neste(),
@@ -24,6 +23,16 @@ fun erUnder6ÅrTidslinje(person: Person) = tidslinje {
         Periode(
             person.fødselsdato.toYearMonth().tilTidspunkt(),
             person.fødselsdato.toYearMonth().plusYears(6).tilTidspunkt().forrige(),
+            true
+        )
+    )
+}
+
+fun erUnder3ÅrTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> = tidslinje {
+    listOf(
+        Periode(
+            fødselsdato.toYearMonth().tilTidspunkt().neste(),
+            fødselsdato.plusYears(3).toYearMonth().tilTidspunkt(),
             true
         )
     )

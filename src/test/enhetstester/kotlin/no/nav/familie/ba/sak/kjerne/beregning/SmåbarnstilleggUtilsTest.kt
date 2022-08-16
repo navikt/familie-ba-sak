@@ -53,7 +53,7 @@ class SmåbarnstilleggUtilsTest {
         )
 
         val perioderHvorBarnPåvirkerRettenTilSmåbarnstillegg =
-            småbarnstilleggBarnetrygdGenerator.lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+            småbarnstilleggBarnetrygdGenerator.lagPerioderMedBarnSomGirRettTilSmåbarnstilleggGammel(
                 barnasAktørOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
                 barnasAndeler = barnasAndeler
             )
@@ -89,7 +89,7 @@ class SmåbarnstilleggUtilsTest {
         )
 
         val perioderHvorBarnPåvirkerRettenTilSmåbarnstillegg =
-            småbarnstilleggBarnetrygdGenerator.lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+            småbarnstilleggBarnetrygdGenerator.lagPerioderMedBarnSomGirRettTilSmåbarnstilleggGammel(
                 barnasAktørOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
                 barnasAndeler = barnasAndeler
             )
@@ -123,7 +123,7 @@ class SmåbarnstilleggUtilsTest {
         )
 
         val perioderHvorBarnPåvirkerRettenTilSmåbarnstillegg =
-            småbarnstilleggBarnetrygdGenerator.lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+            småbarnstilleggBarnetrygdGenerator.lagPerioderMedBarnSomGirRettTilSmåbarnstilleggGammel(
                 barnasAktørOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
                 barnasAndeler = barnasAndeler
             )

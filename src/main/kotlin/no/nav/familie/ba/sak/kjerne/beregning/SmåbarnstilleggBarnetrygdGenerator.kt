@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
+import no.nav.familie.ba.sak.common.erUnder3ÅrTidslinje
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
@@ -10,10 +13,17 @@ import no.nav.familie.ba.sak.common.slåSammenSammenhengendePerioder
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -24,6 +34,41 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     val behandlingId: Long,
     val tilkjentYtelse: TilkjentYtelse,
 ) {
+
+    fun lagSmåbarnstilleggAndeler(
+        perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
+        utvidetAndeler: List<AndelTilkjentYtelse>,
+        barnasAndeler: List<AndelTilkjentYtelse>,
+        barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
+    ): List<AndelTilkjentYtelse> {
+        if (perioderMedFullOvergangsstønad.isEmpty() || utvidetAndeler.isEmpty() || barnasAndeler.isEmpty()) return emptyList()
+
+        if (utvidetAndeler.any { !it.erUtvidet() }) throw Feil("Kan ikke sende med andel som ikke er utvidet") // Ha med noe validering ala dette?
+
+        val perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad).tilMåned { true }
+
+        val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(utvidetAndeler)
+
+        val barnSomGirRettTilSmåbarnstilleggTidslinje = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+            barnasAndeler = barnasAndeler,
+            barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer
+        )
+
+        val kombinertProsentTidslinje = perioderMedFullOvergangsstønadTidslinje.kombinerMed(utvidetBarnetrygdTidslinje) {
+            overgangsstønadTidslinje, utvidetTidslinje ->
+            if (overgangsstønadTidslinje == null || utvidetTidslinje == null) null
+            else true
+        }.kombinerMed(barnSomGirRettTilSmåbarnstilleggTidslinje) {
+            overgangsstønadOgUtvidetTidslinje, under3ÅrTidslinje ->
+            if (overgangsstønadOgUtvidetTidslinje == null || under3ÅrTidslinje == null) null
+            else if (under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING) BigDecimal(100)
+            else BigDecimal.ZERO
+        }
+
+        return kombinertProsentTidslinje.lagSmåbarnstilleggAndeler(
+            søkerAktør = utvidetAndeler.first().aktør
+        )
+    }
 
     fun lagSmåbarnstilleggAndelerGammel(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
@@ -58,7 +103,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         )
 
         val perioderMedBarnSomGirRettTilSmåbarnstillegg = LocalDateTimeline(
-            lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+            lagPerioderMedBarnSomGirRettTilSmåbarnstilleggGammel(
                 barnasAktørOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
                 barnasAndeler = barnasAndeler
             ).map {
@@ -112,7 +157,65 @@ data class SmåbarnstilleggBarnetrygdGenerator(
             }
     }
 
-    fun lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+    private fun Tidslinje<BigDecimal, Måned>.lagSmåbarnstilleggAndeler(
+        søkerAktør: Aktør
+    ): List<AndelTilkjentYtelse> {
+        return this.perioder().map {
+            val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(
+                satstype = SatsType.SMA,
+                stønadFraOgMed = it.fraOgMed.tilYearMonth(),
+                stønadTilOgMed = it.tilOgMed.tilYearMonth()
+            ).singleOrNull()?.sats ?: throw Feil("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
+
+            val prosentIPeriode = it.innhold ?: throw Feil("Skal finnes prosent for gitt periode")
+
+            val beløpIPeriode = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosent = prosentIPeriode)
+
+            AndelTilkjentYtelse(
+                behandlingId = behandlingId,
+                tilkjentYtelse = tilkjentYtelse,
+                aktør = søkerAktør,
+                stønadFom = it.fraOgMed.tilYearMonth(),
+                stønadTom = it.tilOgMed.tilYearMonth(),
+                kalkulertUtbetalingsbeløp = beløpIPeriode,
+                nasjonaltPeriodebeløp = beløpIPeriode,
+                type = YtelseType.SMÅBARNSTILLEGG,
+                sats = ordinærSatsForPeriode,
+                prosent = prosentIPeriode
+            )
+        }
+    }
+
+    private fun kombinerBarnasTidslinjerTilUnder3ÅrResultat(
+        alleAndelerForBarnUnder3År: Iterable<AndelTilkjentYtelse>
+    ): BarnSinRettTilSmåbarnstillegg? {
+        val høyesteProsentIPeriode = alleAndelerForBarnUnder3År.maxOfOrNull { it.prosent }
+
+        return when (høyesteProsentIPeriode) {
+            null -> null
+            BigDecimal.ZERO -> BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING
+            else -> BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING
+        }
+    }
+
+    fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+        barnasAndeler: List<AndelTilkjentYtelse>,
+        barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
+    ): Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned> {
+        val barnasAndelerTidslinjer = barnasAndeler.groupBy { it.aktør }.mapValues { AndelTilkjentYtelseTidslinje(it.value) }
+
+        val barnasAndelerUnder3ÅrTidslinje = barnasAndelerTidslinjer.map { (barnAktør, barnTidslinje) ->
+            val barnetsFødselsdato = barnasAktørerOgFødselsdatoer.find { it.first == barnAktør }?.second ?: throw Feil("Kan ikke beregne småbarnstillegg for et barn som ikke har fødselsdato.")
+
+            val under3ÅrTidslinje = erUnder3ÅrTidslinje(barnetsFødselsdato)
+
+            barnTidslinje.beskjærEtter(under3ÅrTidslinje)
+        }
+
+        return barnasAndelerUnder3ÅrTidslinje.kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }
+    }
+
+    fun lagPerioderMedBarnSomGirRettTilSmåbarnstilleggGammel(
         barnasAktørOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
         barnasAndeler: List<AndelTilkjentYtelse>
     ): List<MånedPeriode> {
@@ -125,7 +228,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                             LocalDateSegment(
                                 andel.stønadFom.førsteDagIInneværendeMåned(),
                                 andel.stønadTom.sisteDagIInneværendeMåned(),
-                                listOf(BarnSinRettTilSmåbarnstilleggKombinator.UTBETALING)
+                                listOf(BarnSinRettTilSmåbarnstilleggKombinatorGammel.UTBETALING)
                             )
                         }
                 )
@@ -135,7 +238,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                         LocalDateSegment(
                             fødselsdato.førsteDagIInneværendeMåned(),
                             fødselsdato.plusYears(3).sisteDagIMåned(),
-                            listOf(BarnSinRettTilSmåbarnstilleggKombinator.UNDER_3_ÅR)
+                            listOf(BarnSinRettTilSmåbarnstilleggKombinatorGammel.UNDER_3_ÅR)
                         )
                     )
                 )
@@ -147,8 +250,8 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                     .filter { segement ->
                         segement.value.containsAll(
                             listOf(
-                                BarnSinRettTilSmåbarnstilleggKombinator.UTBETALING,
-                                BarnSinRettTilSmåbarnstilleggKombinator.UNDER_3_ÅR,
+                                BarnSinRettTilSmåbarnstilleggKombinatorGammel.UTBETALING,
+                                BarnSinRettTilSmåbarnstilleggKombinatorGammel.UNDER_3_ÅR,
                             )
                         )
                     }.map { segement -> DatoIntervallEntitet(fom = segement.fom, tom = segement.tom) }
@@ -157,15 +260,15 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     }
 
     private fun kombinerTidslinjerForÅLageBarnasPerioderMedRettPåSmåbarnstillegg(
-        sammenlagtTidslinje: LocalDateTimeline<List<BarnSinRettTilSmåbarnstilleggKombinator>>,
-        tidslinje: LocalDateTimeline<List<BarnSinRettTilSmåbarnstilleggKombinator>>
-    ): LocalDateTimeline<List<BarnSinRettTilSmåbarnstilleggKombinator>> {
+        sammenlagtTidslinje: LocalDateTimeline<List<BarnSinRettTilSmåbarnstilleggKombinatorGammel>>,
+        tidslinje: LocalDateTimeline<List<BarnSinRettTilSmåbarnstilleggKombinatorGammel>>
+    ): LocalDateTimeline<List<BarnSinRettTilSmåbarnstilleggKombinatorGammel>> {
         val sammenlagt =
             sammenlagtTidslinje.combine(
                 tidslinje,
                 StandardCombinators::bothValues,
                 LocalDateTimeline.JoinStyle.CROSS_JOIN
-            ) as LocalDateTimeline<List<List<BarnSinRettTilSmåbarnstilleggKombinator>>>
+            ) as LocalDateTimeline<List<List<BarnSinRettTilSmåbarnstilleggKombinatorGammel>>>
 
         return LocalDateTimeline(
             sammenlagt.toSegments().map {
@@ -198,8 +301,13 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         UNDER_3_ÅR
     }
 
-    enum class BarnSinRettTilSmåbarnstilleggKombinator {
+    enum class BarnSinRettTilSmåbarnstilleggKombinatorGammel {
         UTBETALING,
         UNDER_3_ÅR
+    }
+
+    enum class BarnSinRettTilSmåbarnstillegg {
+        UNDER_3_ÅR_UTBETALING,
+        UNDER_3_ÅR_NULLUTBETALING
     }
 }
