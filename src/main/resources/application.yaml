@@ -31,6 +31,7 @@ spring:
           use_jdbc_metadata_defaults: false
   flyway:
     enabled: true
+    locations: classpath:db/migration,classpath:db/init
   kafka:
     client-id: familie-ba-sak
     properties:
