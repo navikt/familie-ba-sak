@@ -164,20 +164,20 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
 
 fun kombinerBarnasTidslinjerTilUnder3ÅrResultat(
     alleAndelerForBarnUnder3År: Iterable<AndelTilkjentYtelse>
-): SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg? {
+): BarnSinRettTilSmåbarnstillegg? {
     val høyesteProsentIPeriode = alleAndelerForBarnUnder3År.maxOfOrNull { it.prosent }
 
     return when (høyesteProsentIPeriode) {
         null -> null
-        BigDecimal.ZERO -> SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING
-        else -> SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING
+        BigDecimal.ZERO -> BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING
+        else -> BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING
     }
 }
 
 fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
     barnasAndeler: List<AndelTilkjentYtelse>,
     barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
-): Tidslinje<SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg, Måned> {
+): Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned> {
     val barnasAndelerTidslinjer = barnasAndeler.groupBy { it.aktør }.mapValues { AndelTilkjentYtelseTidslinje(it.value) }
 
     val barnasAndelerUnder3ÅrTidslinje = barnasAndelerTidslinjer.map { (barnAktør, barnTidslinje) ->
@@ -194,17 +194,17 @@ fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
 fun kombinerAlleTidslinjerTilProsentTidslinje(
     perioderMedFullOvergangsstønadTidslinje: Tidslinje<Boolean, Måned>,
     utvidetBarnetrygdTidslinje: AndelTilkjentYtelseTidslinje,
-    barnSomGirRettTilSmåbarnstilleggTidslinje: Tidslinje<SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg, Måned>
+    barnSomGirRettTilSmåbarnstilleggTidslinje: Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned>
 ) =
     perioderMedFullOvergangsstønadTidslinje
         .kombinerMed(utvidetBarnetrygdTidslinje) { overgangsstønadTidslinje, utvidetTidslinje ->
             if (overgangsstønadTidslinje == null || utvidetTidslinje == null) null
-            else if (utvidetTidslinje.prosent > BigDecimal.ZERO) SmåbarnstilleggBarnetrygdGenerator.UtvidetAndelStatus.UTBETALING
-            else SmåbarnstilleggBarnetrygdGenerator.UtvidetAndelStatus.NULLUTBETALING
+            else if (utvidetTidslinje.prosent > BigDecimal.ZERO) UtvidetAndelStatus.UTBETALING
+            else UtvidetAndelStatus.NULLUTBETALING
         }
         .kombinerMed(barnSomGirRettTilSmåbarnstilleggTidslinje) { overgangsstønadOgUtvidetTidslinje, under3ÅrTidslinje ->
             if (overgangsstønadOgUtvidetTidslinje == null || under3ÅrTidslinje == null) null
-            else if (under3ÅrTidslinje == SmåbarnstilleggBarnetrygdGenerator.BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING && overgangsstønadOgUtvidetTidslinje == SmåbarnstilleggBarnetrygdGenerator.UtvidetAndelStatus.UTBETALING) BigDecimal(
+            else if (under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING && overgangsstønadOgUtvidetTidslinje == UtvidetAndelStatus.UTBETALING) BigDecimal(
                 100
             )
             else BigDecimal.ZERO

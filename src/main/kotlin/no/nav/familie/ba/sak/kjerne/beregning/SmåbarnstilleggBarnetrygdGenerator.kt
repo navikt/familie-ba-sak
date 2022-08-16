@@ -26,6 +26,16 @@ import no.nav.fpsak.tidsserie.StandardCombinators
 import java.math.BigDecimal
 import java.time.LocalDate
 
+enum class BarnSinRettTilSmåbarnstillegg {
+    UNDER_3_ÅR_UTBETALING,
+    UNDER_3_ÅR_NULLUTBETALING
+}
+
+enum class UtvidetAndelStatus {
+    UTBETALING,
+    NULLUTBETALING
+}
+
 data class SmåbarnstilleggBarnetrygdGenerator(
     val behandlingId: Long,
     val tilkjentYtelse: TilkjentYtelse,
@@ -264,15 +274,5 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     enum class BarnSinRettTilSmåbarnstilleggKombinatorGammel {
         UTBETALING,
         UNDER_3_ÅR
-    }
-
-    enum class BarnSinRettTilSmåbarnstillegg {
-        UNDER_3_ÅR_UTBETALING,
-        UNDER_3_ÅR_NULLUTBETALING
-    }
-
-    enum class UtvidetAndelStatus {
-        UTBETALING,
-        NULLUTBETALING
     }
 }
