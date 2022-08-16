@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
@@ -168,7 +169,7 @@ class BeregningService(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling,
-                featureToggleService = featureToggleService
+                skalBrukeNyMåteÅGenerereAndeler = featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE)
             ) { søkerAktør ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     søkerAktør = søkerAktør,

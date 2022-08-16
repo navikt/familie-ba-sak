@@ -14,8 +14,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -44,7 +42,7 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
-        featureToggleService: FeatureToggleService,
+        skalBrukeNyMåteÅGenerereAndeler: Boolean = true,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
@@ -118,7 +116,7 @@ object TilkjentYtelseUtils {
                 tilkjentYtelse = tilkjentYtelse
             )
 
-            if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE)) {
+            if (skalBrukeNyMåteÅGenerereAndeler) {
                 småbarnstilleggGenerator.lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
                     utvidetAndeler = andelerTilkjentYtelseSøker,
