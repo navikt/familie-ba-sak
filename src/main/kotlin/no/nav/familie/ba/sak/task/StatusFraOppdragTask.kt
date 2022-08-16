@@ -51,8 +51,6 @@ class StatusFraOppdragTask(
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
         val personIdent = personidentService.hentAktør(statusFraOppdragDTO.aktørId).aktivFødselsnummer()
 
-        val nyTask = PubliserVedtakTask.opprettTask(personIdent, statusFraOppdragDTO.behandlingsId)
-        taskRepository.save(nyTask)
         val nyTaskV2 = PubliserVedtakV2Task.opprettTask(personIdent, statusFraOppdragDTO.behandlingsId)
         taskRepository.save(nyTaskV2)
     }
