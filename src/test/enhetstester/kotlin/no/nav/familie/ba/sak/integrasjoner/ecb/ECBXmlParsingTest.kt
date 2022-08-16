@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 
-import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRatesResult
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRatesData
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.exchangeRatesForCurrency
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.simpleframework.xml.Serializer
@@ -99,7 +100,17 @@ class ECBXmlParsingTest {
     @Test
     fun testXMLParse() {
         val serializer: Serializer = Persister()
-        val ecbExchangeRatesResult = serializer.read(ECBExchangeRatesResult::class.java, ecbXml)
-        assertEquals(ecbExchangeRatesResult.data?.exchangeRatesForContries?.size, 2)
+        val ecbExchangeRatesData = serializer.read(ECBExchangeRatesData::class.java, ecbXml)
+        assertEquals(ecbExchangeRatesData.exchangeRatesForCountries.size, 2)
+        val nokExchangeRates = ecbExchangeRatesData.exchangeRatesForCurrency("NOK")
+        val sekExchangeRates = ecbExchangeRatesData.exchangeRatesForCurrency("SEK")
+        assertEquals(2, nokExchangeRates.size)
+        assertEquals(2, sekExchangeRates.size)
+
+        assertEquals("10.337", nokExchangeRates.filter { it.date.equals("2022-06-28") }[0].value)
+        assertEquals("10.3065", nokExchangeRates.filter { it.date.equals("2022-06-29") }[0].value)
+
+        assertEquals("10.6543", sekExchangeRates.filter { it.date.equals("2022-06-28") }[0].value)
+        assertEquals("10.6848", sekExchangeRates.filter { it.date.equals("2022-06-29") }[0].value)
     }
 }

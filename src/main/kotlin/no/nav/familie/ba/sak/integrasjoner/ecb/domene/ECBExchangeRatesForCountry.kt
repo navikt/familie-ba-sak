@@ -7,12 +7,9 @@ import org.simpleframework.xml.Root
 @Root(name = "Series", strict = false)
 class ECBExchangeRatesForCountry {
 
-    @field:Element(name = "SeriesKey", required = false)
-    var exchangeRateKey: ECBExchangeRateKey? = null
+    @field:Element(name = "SeriesKey")
+    lateinit var ecbExchangeRateKey: ECBExchangeRateKey
 
-    @field:Element(name = "Attributes", required = false)
-    var exchangeRateAttributes: ECBExchangeRateAttributes? = null
-
-    @field:ElementList(name = "Obs", required = false, inline = true)
+    @field:ElementList(name = "Obs", inline = true)
     lateinit var exchangeRates: List<ECBExchangeRate>
 }
