@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 
 enum class BarnetsBostedsland {
     NORGE,
@@ -19,6 +20,7 @@ data class RestSanityEØSBegrunnelse(
     val annenForeldersAktivitet: List<String>?,
     val barnetsBostedsland: List<String>?,
     val kompetanseResultat: List<String>?,
+    val utdypendeVilkaarsvurdering: List<String>?,
     val hjemler: List<String>?,
     val hjemlerFolketrygdloven: List<String>?,
     val hjemlerEOSForordningen883: List<String>?,
@@ -30,15 +32,10 @@ data class RestSanityEØSBegrunnelse(
         return SanityEØSBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
-            annenForeldersAktivitet = annenForeldersAktivitet?.mapNotNull {
-                konverterTilEnumverdi<AnnenForeldersAktivitet>(it)
-            } ?: emptyList(),
-            barnetsBostedsland = barnetsBostedsland?.mapNotNull {
-                konverterTilEnumverdi<BarnetsBostedsland>(it)
-            } ?: emptyList(),
-            kompetanseResultat = kompetanseResultat?.mapNotNull {
-                konverterTilEnumverdi<KompetanseResultat>(it)
-            } ?: emptyList(),
+            annenForeldersAktivitet = annenForeldersAktivitet?.tilEnumListe() ?: emptyList(),
+            barnetsBostedsland = barnetsBostedsland?.tilEnumListe() ?: emptyList(),
+            kompetanseResultat = kompetanseResultat?.tilEnumListe() ?: emptyList(),
+            utdypendeVilkårsvurdering = utdypendeVilkaarsvurdering?.tilEnumListe() ?: emptyList(),
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             hjemlerEØSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
@@ -46,6 +43,9 @@ data class RestSanityEØSBegrunnelse(
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
         )
     }
+
+    private inline fun <reified T> List<String>.tilEnumListe(): List<T> where T : Enum<T> =
+        this.mapNotNull { konverterTilEnumverdi<T>(it) }
 
     private inline fun <reified T> konverterTilEnumverdi(it: String): T? where T : Enum<T> =
         enumValues<T>().find { enum -> enum.name == it }
@@ -57,6 +57,7 @@ data class SanityEØSBegrunnelse(
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
+    val utdypendeVilkårsvurdering: List<UtdypendeVilkårsvurdering>,
     val hjemler: List<String>,
     val hjemlerFolketrygdloven: List<String>,
     val hjemlerEØSForordningen883: List<String>,
