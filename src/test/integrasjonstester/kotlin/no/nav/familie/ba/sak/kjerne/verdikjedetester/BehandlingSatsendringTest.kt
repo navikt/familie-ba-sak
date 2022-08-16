@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.YearMonth
 
-// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
 class BehandlingSatsendringTest(
     @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,

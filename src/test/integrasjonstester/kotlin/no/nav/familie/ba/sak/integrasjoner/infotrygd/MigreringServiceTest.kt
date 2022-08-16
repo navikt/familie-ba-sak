@@ -125,7 +125,7 @@ class MigreringServiceTest(
     @Autowired
     private val envService: EnvService,
 
-    ) : AbstractMockkSpringRunner() {
+) : AbstractMockkSpringRunner() {
 
     lateinit var migreringServiceMock: MigreringService
 
