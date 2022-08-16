@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -42,6 +44,7 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
+        featureToggleService: FeatureToggleService,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
@@ -110,11 +113,25 @@ object TilkjentYtelseUtils {
                     personopplysningGrunnlag.søker.aktør
                 )
 
-            SmåbarnstilleggBarnetrygdGenerator(
+            val småbarnstilleggGenerator = SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = vilkårsvurdering.behandling.id,
                 tilkjentYtelse = tilkjentYtelse
             )
-                .lagSmåbarnstilleggAndelerGammel(
+
+            if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE)) {
+                småbarnstilleggGenerator.lagSmåbarnstilleggAndeler(
+                    perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
+                    utvidetAndeler = andelerTilkjentYtelseSøker,
+                    barnasAndeler = andelerTilkjentYtelseBarna,
+                    barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
+                        Pair(
+                            it.aktør,
+                            it.fødselsdato
+                        )
+                    }
+                )
+            } else {
+                småbarnstilleggGenerator.lagSmåbarnstilleggAndelerGammel(
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
                     andelerTilkjentYtelse = andelerTilkjentYtelseSøker + andelerTilkjentYtelseBarna,
                     barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
@@ -124,6 +141,7 @@ object TilkjentYtelseUtils {
                         )
                     },
                 )
+            }
         } else emptyList()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker + andelerTilkjentYtelseSmåbarnstillegg)
