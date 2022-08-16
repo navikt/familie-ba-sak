@@ -13,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration
 @SpringBootTest
 @ActiveProfiles(
     "postgres",
+    "integrasjonstest",
     "mock-økonomi",
     "mock-pdl",
     "mock-ident-client",
