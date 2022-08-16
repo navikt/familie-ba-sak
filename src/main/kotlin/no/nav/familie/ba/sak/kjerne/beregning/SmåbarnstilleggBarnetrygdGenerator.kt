@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -64,7 +65,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
             barnSomGirRettTilSmåbarnstilleggTidslinje
         )
 
-        return kombinertProsentTidslinje.lagSmåbarnstilleggAndeler(
+        return kombinertProsentTidslinje.filtrerIkkeNull().lagSmåbarnstilleggAndeler(
             søkerAktør = utvidetAndeler.first { it.erUtvidet() }.aktør
         )
     }
