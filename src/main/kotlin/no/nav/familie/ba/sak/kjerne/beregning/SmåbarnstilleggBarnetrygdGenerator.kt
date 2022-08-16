@@ -14,7 +14,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -59,14 +62,14 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         )
 
         val perioderMedBarnSomGirRettTilSmåbarnstillegg = LocalDateTimeline(
-            lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+            lagPerioderMedBarnSomGirRettTilSmåbarnstilleggGammel(
                 barnasAktørOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
                 barnasAndeler = barnasAndeler
             ).map {
                 LocalDateSegment(
                     it.fom.førsteDagIInneværendeMåned(),
                     it.tom.sisteDagIInneværendeMåned(),
-                    listOf(SmåbarnstilleggKombinator.UNDER_3_ÅR)
+                    listOf(SmåbarnstilleggKombinator.UNDER_3_ÅR_UTBETALING)
                 )
             }
         )
@@ -84,7 +87,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 segement.value.containsAll(
                     listOf(
                         SmåbarnstilleggKombinator.OVERGANGSSTØNAD,
-                        SmåbarnstilleggKombinator.UNDER_3_ÅR
+                        SmåbarnstilleggKombinator.UNDER_3_ÅR_UTBETALING
                     )
                 ) && (segement.value.contains(SmåbarnstilleggKombinator.UTVIDET_MED_UTBETALING) || segement.value.contains(SmåbarnstilleggKombinator.UTVIDET_UTEN_UTBETALING))
             }
@@ -115,7 +118,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
             }
     }
 
-    fun lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+    fun lagPerioderMedBarnSomGirRettTilSmåbarnstilleggGammel(
         barnasAktørOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
         barnasAndeler: List<AndelTilkjentYtelse>
     ): List<MånedPeriode> {
@@ -124,12 +127,11 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 val barnetsMånedPeriodeAndeler = LocalDateTimeline(
                     barnasAndeler
                         .filter { andel -> andel.aktør == aktør }
-                        .filter { it.prosent > BigDecimal.ZERO }
                         .map { andel ->
                             LocalDateSegment(
                                 andel.stønadFom.førsteDagIInneværendeMåned(),
                                 andel.stønadTom.sisteDagIInneværendeMåned(),
-                                listOf(BarnSinRettTilSmåbarnstilleggKombinator.UTBETALING)
+                                if (andel.prosent == BigDecimal.ZERO) listOf(BarnSinRettTilSmåbarnstilleggKombinator.UTBETALING_OVERSTYRT_TIL_NULL) else listOf(BarnSinRettTilSmåbarnstilleggKombinator.UTBETALING)
                             )
                         }
                 )
@@ -158,6 +160,40 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                     }.map { segement -> DatoIntervallEntitet(fom = segement.fom, tom = segement.tom) }
             }.flatten().slåSammenSammenhengendePerioder()
         ).map { MånedPeriode(fom = it.fom!!.toYearMonth(), tom = it.tom!!.toYearMonth()) }
+    }
+
+    private fun kombinerBarnasTidslinjerTilUnder3ÅrResultat(
+        alleResultater: Iterable<BarnSinRettTilSmåbarnstilleggKombinator>
+    ): SmåbarnstilleggKombinator? {
+        val barnMedUtbetaling = alleResultater.filter { it == BarnSinRettTilSmåbarnstilleggKombinator.UTBETALING }
+        val barnMedNullutbetaling = alleResultater.filter { it == BarnSinRettTilSmåbarnstilleggKombinator.UTBETALING_OVERSTYRT_TIL_NULL }
+
+        return when {
+            barnMedUtbetaling.isNotEmpty() -> SmåbarnstilleggKombinator.UNDER_3_ÅR_UTBETALING
+            barnMedNullutbetaling.isNotEmpty() -> SmåbarnstilleggKombinator.UNDER_3_ÅR_NULLUTBETALING
+            else -> null
+        }
+    }
+
+    private fun lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(barnasAndeler: List<AndelTilkjentYtelse>, barnasAktørOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,) {
+        val barnasTidslinjer = barnasAndeler.tilSeparateTidslinjerForBarna() // Må kopiere denne funksjonen, ligger i eøs-mappen
+
+        val barnasKombinerteTidslinjer = barnasTidslinjer.map { (aktør, tidslinje) ->
+            val fødselsdato = barnasAktørOgFødselsdatoer.find { it.first == aktør }?.second
+
+            val under3ÅrTidslinje = Under3ÅrTidslinje(under3ÅrPerioder = listOf(Under3ÅrPeriode(fom = fødselsdato!!, tom = fødselsdato.plusYears(18))))
+
+            val kombinertTidslinje = tidslinje.kombinerMed(under3ÅrTidslinje) {
+                barnetsAndelerTidslinje, barnetsUnder3ÅrTidslinje ->
+                if (barnetsUnder3ÅrTidslinje == null || barnetsAndelerTidslinje == null) null
+                else if (barnetsAndelerTidslinje.prosent > BigDecimal.ZERO) BarnSinRettTilSmåbarnstilleggKombinator.UTBETALING
+                else BarnSinRettTilSmåbarnstilleggKombinator.UTBETALING_OVERSTYRT_TIL_NULL
+            }
+
+            kombinertTidslinje
+        }
+
+        barnasKombinerteTidslinjer.kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }
     }
 
     private fun kombinerTidslinjerForÅLageBarnasPerioderMedRettPåSmåbarnstillegg(
@@ -200,11 +236,13 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         OVERGANGSSTØNAD,
         UTVIDET_MED_UTBETALING,
         UTVIDET_UTEN_UTBETALING,
-        UNDER_3_ÅR
+        UNDER_3_ÅR_UTBETALING,
+        UNDER_3_ÅR_NULLUTBETALING
     }
 
     enum class BarnSinRettTilSmåbarnstilleggKombinator {
         UTBETALING,
+        UTBETALING_OVERSTYRT_TIL_NULL,
         UNDER_3_ÅR
     }
 }
