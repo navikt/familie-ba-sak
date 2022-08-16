@@ -43,11 +43,9 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     ): List<AndelTilkjentYtelse> {
         if (perioderMedFullOvergangsstønad.isEmpty() || utvidetAndeler.isEmpty() || barnasAndeler.isEmpty()) return emptyList()
 
-        if (utvidetAndeler.any { !it.erUtvidet() }) throw Feil("Kan ikke sende med andel som ikke er utvidet") // Ha med noe validering ala dette?
-
         val perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad).tilMåned { true }
 
-        val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(utvidetAndeler)
+        val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse = utvidetAndeler.filter { it.erUtvidet() })
 
         val barnSomGirRettTilSmåbarnstilleggTidslinje = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
             barnasAndeler = barnasAndeler,
