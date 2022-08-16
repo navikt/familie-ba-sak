@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
@@ -187,7 +188,7 @@ fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
         barnTidslinje.beskjærEtter(under3ÅrTidslinje)
     }
 
-    return barnasAndelerUnder3ÅrTidslinje.kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }
+    return barnasAndelerUnder3ÅrTidslinje.kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }.filtrerIkkeNull()
 }
 
 fun kombinerAlleTidslinjerTilProsentTidslinje(
