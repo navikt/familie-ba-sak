@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
@@ -34,11 +34,9 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMell
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.sakstatistikkObjectMapper
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.PubliserVedtakTask
 import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
-import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
@@ -106,9 +104,6 @@ class MigreringServiceTest(
 
     @Autowired
     private val sendVedtakTilInfotrygdTask: SendVedtakTilInfotrygdTask,
-
-    @Autowired
-    private val publiserVedtakTask: PubliserVedtakTask,
 
     @Autowired
     private val publiserVedtakV2Task: PubliserVedtakV2Task,
@@ -203,16 +198,10 @@ class MigreringServiceTest(
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)
 
-            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
-            publiserVedtakTask.doTask(task)
-            publiserVedtakTask.onCompletion(task)
-
             val now = LocalDate.now()
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
 
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
@@ -253,17 +242,9 @@ class MigreringServiceTest(
             var task = tasks.find { it.type == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)
-
-            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
-            publiserVedtakTask.doTask(task)
-            publiserVedtakTask.onCompletion(task)
-
             val now = LocalDate.now()
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
-
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
@@ -306,19 +287,10 @@ class MigreringServiceTest(
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)
 
-            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
-            publiserVedtakTask.doTask(task)
-            publiserVedtakTask.onCompletion(task)
-
             val now = LocalDate.now()
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
 
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
-            assertThat(vedtakDVH.utbetalingsperioder.first().utbetaltPerMnd.toDouble()).isEqualTo(
-                SAK_BELØP_2_BARN_1_UNDER_6 / 2
-            )
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
@@ -364,16 +336,10 @@ class MigreringServiceTest(
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)
 
-            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
-            publiserVedtakTask.doTask(task)
-            publiserVedtakTask.onCompletion(task)
-
             val now = LocalDate.now()
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
 
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
@@ -854,7 +820,7 @@ class MigreringServiceTest(
         every { mockkPersonidentService.hentOgLagreAktørIder(any(), false) } answers { callOriginal() }
 
         every { mockkPersonidentService.hentOgLagreAktør(any(), false) } returns
-            Aktør(randomAktørId().aktørId, personidenter = mutableSetOf())
+            Aktør(randomAktør().aktørId, personidenter = mutableSetOf())
 
         assertThatThrownBy {
             s.migrer(ident)
@@ -863,7 +829,7 @@ class MigreringServiceTest(
 
         // Verifiserer at feiltypen ikke er den samme når vi endrer til unike aktørId'er for barna
         every { mockkPersonidentService.hentOgLagreAktør(any(), false) } answers {
-            Aktør(randomAktørId().aktørId, personidenter = mutableSetOf())
+            Aktør(randomAktør().aktørId, personidenter = mutableSetOf())
         }
         assertThatThrownBy { s.migrer(ident) }
             .extracting("feiltype").isNotEqualTo(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)

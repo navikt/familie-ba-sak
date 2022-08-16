@@ -7,10 +7,12 @@ import no.nav.familie.ba.sak.common.erBack2BackIMånedsskifte
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -277,10 +279,18 @@ object TilkjentYtelseUtils {
 
         val oppfyltTom = if (skalVidereføresEnMånedEkstra) minsteTom.plusMonths(1) else minsteTom
 
-        val oppfyltTomKommerFra18ÅrsVilkår =
-            oppfyltTom == periodeResultatBarn.vilkårResultater.find {
-                it.vilkårType == Vilkår.UNDER_18_ÅR
-            }?.periodeTom
+        val periodeTomFra18Årsvilkår = periodeResultatBarn.vilkårResultater.find {
+            it.vilkårType == Vilkår.UNDER_18_ÅR
+        }?.periodeTom
+
+        val skalAvsluttesMånedenFør =
+            if (person.erDød()) {
+                person.dødsfall!!.dødsfallDato.førsteDagIInneværendeMåned().isSameOrAfter(
+                    person.fødselsdato.til18ÅrsVilkårsdato().førsteDagIInneværendeMåned()
+                )
+            } else {
+                oppfyltTom == periodeTomFra18Årsvilkår
+            }
 
         val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(
             person.hentSeksårsdag(),
@@ -304,7 +314,7 @@ object TilkjentYtelseUtils {
                 fraOgMed = periodeOver6år.fom
             ),
             stønadTilOgMed = settRiktigStønadTom(
-                skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
+                skalAvsluttesMånedenFør = skalAvsluttesMånedenFør,
                 tilOgMed = periodeOver6år.tom
             ),
             maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,

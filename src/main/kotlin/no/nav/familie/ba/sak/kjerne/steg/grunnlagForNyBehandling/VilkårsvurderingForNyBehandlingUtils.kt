@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -36,17 +38,20 @@ data class VilkårsvurderingForNyBehandlingUtils(
                         vilkårsvurdering = this
                     )
                 }
+
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
                     personResultater = lagPersonResultaterForFødselshendelse(
                         vilkårsvurdering = this,
                         barnaAktørSomAlleredeErVurdert = barnaAktørSomAlleredeErVurdert
                     )
                 }
+
                 !behandling.skalBehandlesAutomatisk -> {
                     personResultater = lagPersonResultaterForManuellVilkårsvurdering(
                         vilkårsvurdering = this
                     )
                 }
+
                 else -> personResultater = lagPersonResultaterForTomVilkårsvurdering(
                     vilkårsvurdering = this
                 )
@@ -67,9 +72,25 @@ data class VilkårsvurderingForNyBehandlingUtils(
             forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
         )
 
-        if (behandling.type == BehandlingType.REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
-            vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater.forEach { vilkårResultat ->
-                vilkårResultat.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
+        return if (behandling.type == BehandlingType.REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
+            hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering)
+        } else vilkårsvurdering
+    }
+
+    fun hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
+        val søkersVilkårResultater =
+            vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater
+
+        val dødsdato = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato ?: return vilkårsvurdering
+
+        Vilkår.values().forEach { vilkårType ->
+            val søkersVilkårAvTypeMedSenesteTom = søkersVilkårResultater.filter { it.vilkårType == vilkårType }
+                .maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
+            if (søkersVilkårAvTypeMedSenesteTom != null && dødsdato.isBefore(
+                    søkersVilkårAvTypeMedSenesteTom.periodeTom ?: TIDENES_ENDE
+                ) && dødsdato.isAfter(søkersVilkårAvTypeMedSenesteTom.periodeFom)
+            ) {
+                søkersVilkårAvTypeMedSenesteTom.periodeTom = dødsdato
             }
         }
         return vilkårsvurdering
@@ -93,7 +114,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                 val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
 
                 val tom: LocalDate? =
-                    if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18).minusDays(1) else null
+                    if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.til18ÅrsVilkårsdato() else null
 
                 val begrunnelse = "Migrering"
 
@@ -251,6 +272,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                 val tom: LocalDate? = when (vilkår) {
                     Vilkår.UNDER_18_ÅR -> person.fødselsdato.plusYears(18)
                         .minusDays(1)
+
                     else -> null
                 }
 

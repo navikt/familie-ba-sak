@@ -195,7 +195,8 @@ data class Behandling(
 
     fun skalRettFraBehandlingsresultatTilIverksetting(): Boolean {
         return when {
-            skalBehandlesAutomatisk && erOmregning() && resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
+            skalBehandlesAutomatisk && erOmregning() &&
+                resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
             skalBehandlesAutomatisk && erMigrering() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erSatsendring() && resultat == Behandlingsresultat.ENDRET_UTBETALING -> true
@@ -334,6 +335,8 @@ enum class Behandlingsresultat(val displayName: String) {
 
     fun kanIkkeSendesTilOppdrag(): Boolean =
         this in listOf(FORTSATT_INNVILGET, AVSLÅTT, FORTSATT_OPPHØRT, ENDRET_UTEN_UTBETALING)
+
+    fun erAvslått(): Boolean = this in listOf(AVSLÅTT, AVSLÅTT_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT_ENDRET_OG_OPPHØRT)
 }
 
 /**

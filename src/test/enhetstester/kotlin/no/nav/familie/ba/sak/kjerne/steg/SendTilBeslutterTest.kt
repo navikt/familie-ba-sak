@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -70,7 +70,7 @@ class SendTilBeslutterTest {
     @Test
     fun `Sjekk validering som inneholder annen vurdering som ikke er vurdert`() {
         val vilkårsvurdering =
-            lagVilkårsvurdering(randomAktørId(), lagBehandling(), Resultat.IKKE_VURDERT)
+            lagVilkårsvurdering(randomAktør(), lagBehandling(), Resultat.IKKE_VURDERT)
 
         assertThrows<FunksjonellFeil> {
             vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert()
@@ -80,7 +80,7 @@ class SendTilBeslutterTest {
     @Test
     fun `Sjekk validering som inneholder annen vurdering hvor alle er vurdert`() {
         val vilkårsvurdering =
-            lagVilkårsvurdering(randomAktørId(), lagBehandling(), Resultat.IKKE_OPPFYLT)
+            lagVilkårsvurdering(randomAktør(), lagBehandling(), Resultat.IKKE_OPPFYLT)
 
         vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert()
     }

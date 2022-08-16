@@ -109,7 +109,7 @@ fun randomFnr(): String = fødselsnummerGenerator.foedselsnummer().asString
 fun randomPersonident(aktør: Aktør, fnr: String = randomFnr()): Personident =
     Personident(fødselsnummer = fnr, aktør = aktør)
 
-fun randomAktørId(fnr: String = randomFnr()): Aktør =
+fun randomAktør(fnr: String = randomFnr()): Aktør =
     Aktør(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString()).also {
         it.personidenter.add(
             randomPersonident(it, fnr)
@@ -179,7 +179,7 @@ fun tilfeldigPerson(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
-    aktør: Aktør = randomAktørId(),
+    aktør: Aktør = randomAktør(),
 ) =
     Person(
         id = nestePersonId(),
@@ -196,7 +196,7 @@ fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
-    aktør: Aktør = randomAktørId(),
+    aktør: Aktør = randomAktør(),
 ) =
     Person(
         id = nestePersonId(),
@@ -1122,6 +1122,10 @@ fun lagTriggesAv(
     etterEndretUtbetaling = etterEndretUtbetaling,
     endretUtbetalingSkalUtbetales = endretUtbetalingSkalUtbetales,
     småbarnstillegg = småbarnstillegg,
+    barnDød = false,
+    deltBostedSkalIkkeDeles = false,
+    gjelderFraInnvilgelsestidspunkt = false,
+    gjelderFørstePeriode = false
 )
 
 fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
