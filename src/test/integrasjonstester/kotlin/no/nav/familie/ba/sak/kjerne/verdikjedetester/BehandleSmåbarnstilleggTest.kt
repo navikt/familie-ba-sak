@@ -67,12 +67,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 import java.time.YearMonth
 
-// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
-@DirtiesContext
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class BehandleSmåbarnstilleggTest(
     @Autowired private val fagsakService: FagsakService,
