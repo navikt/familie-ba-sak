@@ -136,10 +136,12 @@ object VilkårsvurderingResultatFlytter {
             }
         }
 
-        // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
-        // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
-        if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
-            (eksistererUtvidetVilkårPåForrigeBehandling(personResultaterFraForrigeBehandling, personFraInit) || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
+        if (forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet(
+                personsVilkårOppdatert,
+                personResultaterFraForrigeBehandling,
+                personFraInit,
+                løpendeUnderkategori
+            )
         ) {
             val utvidetVilkår =
                 personenSomFinnesVilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
@@ -153,6 +155,21 @@ object VilkårsvurderingResultatFlytter {
         personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
         return personsVilkårAktivt
     }
+
+    // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
+    // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
+    private fun forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet(
+        personsVilkårOppdatert: MutableSet<VilkårResultat>,
+        personResultaterFraForrigeBehandling: Set<PersonResultat>?,
+        personFraInit: PersonFraInitRequest,
+        løpendeUnderkategori: BehandlingUnderkategori?
+    ) = personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
+        (
+            eksistererUtvidetVilkårPåForrigeBehandling(
+                personResultaterFraForrigeBehandling,
+                personFraInit
+            ) || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET
+            )
 
     private fun eksistererUtvidetVilkårPåForrigeBehandling(
         personResultaterFraForrigeBehandling: Set<PersonResultat>?,
@@ -174,5 +191,6 @@ object VilkårsvurderingResultatFlytter {
             this
         }
     }
+
     private data class PersonFraInitRequest(val aktør: Aktør, val vilkårResultater: Set<VilkårResultat>)
 }
