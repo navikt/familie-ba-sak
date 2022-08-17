@@ -203,8 +203,7 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
         .kombinerMed(
             tidslinjeB = utvidetBarnetrygdTidslinje,
             tidslinjeC = barnSomGirRettTilSmåbarnstilleggTidslinje
-        ) {
-            overgangsstønadTidslinje, utvidetTidslinje, under3ÅrTidslinje ->
+        ) { overgangsstønadTidslinje, utvidetTidslinje, under3ÅrTidslinje ->
             if (overgangsstønadTidslinje == null || utvidetTidslinje == null || under3ÅrTidslinje == null) null
             else if (utvidetTidslinje.prosent > BigDecimal.ZERO && under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING) BigDecimal(100)
             else if (utvidetTidslinje.prosent == BigDecimal.ZERO || under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING) BigDecimal.ZERO
