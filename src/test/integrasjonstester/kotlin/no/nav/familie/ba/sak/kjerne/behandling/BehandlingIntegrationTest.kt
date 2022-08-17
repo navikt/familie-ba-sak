@@ -66,12 +66,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 import java.time.YearMonth
 
-// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
-@DirtiesContext
 class BehandlingIntegrationTest(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
@@ -659,10 +656,12 @@ class BehandlingIntegrationTest(
                     assertEquals(barn1Postnummer, matrikkeladresse.postnummer)
                     assertEquals(barn1Tilleggsnavn, matrikkeladresse.tilleggsnavn)
                 }
+
                 barn2Fnr -> {
                     val ukjentBosted = it.bostedsadresser.sisteAdresse() as GrUkjentBosted
                     assertEquals(barn2BostedKommune, ukjentBosted.bostedskommune)
                 }
+
                 else -> {
                     throw RuntimeException("Ujent barn fnr")
                 }

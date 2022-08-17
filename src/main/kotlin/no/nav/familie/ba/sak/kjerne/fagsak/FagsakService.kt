@@ -69,12 +69,13 @@ class FagsakService(
         Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "automatisk")
 
     @Transactional
-    fun oppdaterLøpendeStatusPåFagsaker() {
+    fun oppdaterLøpendeStatusPåFagsaker(): Int {
         val fagsaker = fagsakRepository.finnFagsakerSomSkalAvsluttes()
         for (fagsakId in fagsaker) {
             val fagsak = fagsakRepository.getById(fagsakId)
             oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
         }
+        return fagsaker.size
     }
 
     @Transactional
@@ -138,7 +139,10 @@ class FagsakService(
         lagre(fagsak)
     }
 
-    fun hentMinimalFagsakForPerson(aktør: Aktør, fagsakType: FagsakType = FagsakType.NORMAL): Ressurs<RestMinimalFagsak> {
+    fun hentMinimalFagsakForPerson(
+        aktør: Aktør,
+        fagsakType: FagsakType = FagsakType.NORMAL
+    ): Ressurs<RestMinimalFagsak> {
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør, fagsakType)
         return if (fagsak != null) Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id)) else Ressurs.failure(
             errorMessage = "Fant ikke fagsak på person"
@@ -378,7 +382,10 @@ class FagsakService(
                             hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.aktør)
                         if (maskertForelder != null) {
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] =
-                                maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER, fagsakType = behandling.fagsak.type)
+                                maskertForelder.copy(
+                                    rolle = FagsakDeltagerRolle.FORELDER,
+                                    fagsakType = behandling.fagsak.type
+                                )
                         } else {
                             val personinfo =
                                 runCatching {

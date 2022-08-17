@@ -32,7 +32,7 @@ class RegistrerInstitusjonOgVerge(
             )
         }
         if (institusjon != null) {
-            institusjonService.RegistrerInstitusjonForFagsak(fagsakId, institusjon)
+            institusjonService.registrerInstitusjonForFagsak(fagsakId, institusjon)
             loggService.opprettRegistrerInstitusjonLogg(
                 behandling
             )
