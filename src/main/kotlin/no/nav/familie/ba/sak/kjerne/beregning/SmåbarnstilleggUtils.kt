@@ -211,7 +211,7 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
                 100
             )
             else BigDecimal.ZERO
-        }
+        }.filtrerIkkeNull()
 }
 
 fun kombinatorInternPeriodeOvergangsstønadDagTilMåned(dagverdier: List<InternPeriodeOvergangsstønad?>): Boolean {
