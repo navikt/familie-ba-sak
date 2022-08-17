@@ -39,39 +39,38 @@ object VilkårsvurderingResultatFlytter {
         val personResultaterAktivt = aktivVilkårsvurderingKopi.personResultater.toMutableSet()
         val personResultaterOppdatert = mutableSetOf<PersonResultat>()
         initiellVilkårsvurderingKopi.personResultater.forEach { personFraInit ->
-            val personTilOppdatert = PersonResultat(
-                vilkårsvurdering = initiellVilkårsvurderingKopi,
-                aktør = personFraInit.aktør
-            )
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør }
 
+            val vilkårResultatet: Set<VilkårResultat>
+
             if (personenSomFinnes == null) {
-                // Legg til ny person
-                personTilOppdatert.setSortedVilkårResultater(
-                    personFraInit.vilkårResultater.map { it.kopierMedParent(personTilOppdatert) }
-                        .toSet()
-                )
+                vilkårResultatet = personFraInit.vilkårResultater
             } else {
                 // Fyll inn den initierte med person fra aktiv
-                val kopieringSkjerFraForrigeBehandling =
-                    initiellVilkårsvurderingKopi.behandling.id != aktivVilkårsvurderingKopi.behandling.id
                 val vilkårSomSkalOppdateresPåEksisterendePerson = oppdaterEksisterendePerson(
                     personenSomFinnes = personenSomFinnes,
                     personFraInit = personFraInit,
-                    kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
+                    kopieringSkjerFraForrigeBehandling = initiellVilkårsvurderingKopi.behandling.id != aktivVilkårsvurderingKopi.behandling.id,
                     forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
                     løpendeUnderkategori = løpendeUnderkategori,
                     personResultaterAktivt = personResultaterAktivt
                 )
-                personTilOppdatert.setSortedVilkårResultater(
-                    vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert.map {
-                        it.kopierMedParent(
-                            personTilOppdatert
-                        )
-                    }.toSet()
-                )
+                vilkårResultatet = vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
             }
-            personResultaterOppdatert.add(personTilOppdatert)
+            personResultaterOppdatert.add(
+                PersonResultat(
+                    vilkårsvurdering = initiellVilkårsvurderingKopi,
+                    aktør = personFraInit.aktør
+                ).also {
+                    it.setSortedVilkårResultater(
+                        vilkårResultatet.map { vilkårResultat ->
+                            vilkårResultat.kopierMedParent(
+                                it
+                            )
+                        }.toSet()
+                    )
+                }
+            )
         }
 
         aktivVilkårsvurderingKopi.personResultater = personResultaterAktivt
