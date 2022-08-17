@@ -82,12 +82,12 @@ object VilkårsvurderingResultatFlytter {
     ) {
         // Fyll inn den initierte med person fra aktiv
         val personsVilkårAktivt = oppdaterEksisterendePerson(
-            personenSomFinnes = personenSomFinnes,
             personFraInit = personFraInit,
             kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
             personTilOppdatert = personTilOppdatert,
             forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
-            løpendeUnderkategori = løpendeUnderkategori
+            løpendeUnderkategori = løpendeUnderkategori,
+            personenSomFinnesVilkårResultater = personenSomFinnes.vilkårResultater
         )
         // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
         if (personsVilkårAktivt.isEmpty()) {
@@ -98,14 +98,13 @@ object VilkårsvurderingResultatFlytter {
     }
 
     private fun oppdaterEksisterendePerson(
-        personenSomFinnes: PersonResultat,
         personFraInit: PersonResultat,
         kopieringSkjerFraForrigeBehandling: Boolean,
         personTilOppdatert: PersonResultat,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering?,
-        løpendeUnderkategori: BehandlingUnderkategori?
+        løpendeUnderkategori: BehandlingUnderkategori?,
+        personenSomFinnesVilkårResultater: Set<VilkårResultat>
     ): Set<VilkårResultat> {
-        val personenSomFinnesVilkårResultater = personenSomFinnes.vilkårResultater
         val personsVilkårAktivt = personenSomFinnesVilkårResultater.toMutableSet()
         val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
         personFraInit.vilkårResultater.forEach { vilkårFraInit ->
