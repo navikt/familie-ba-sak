@@ -200,18 +200,17 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
 ): Tidslinje<BigDecimal, Måned> {
     return perioderMedFullOvergangsstønadTidslinje
         .tilMåned { kombinatorInternPeriodeOvergangsstønadDagTilMåned(it) }
-        .kombinerMed(utvidetBarnetrygdTidslinje) { overgangsstønadTidslinje, utvidetTidslinje ->
-            if (overgangsstønadTidslinje == null || utvidetTidslinje == null) null
-            else if (utvidetTidslinje.prosent > BigDecimal.ZERO) UtvidetAndelStatus.UTBETALING
-            else UtvidetAndelStatus.NULLUTBETALING
+        .kombinerMed(
+            tidslinjeB = utvidetBarnetrygdTidslinje,
+            tidslinjeC = barnSomGirRettTilSmåbarnstilleggTidslinje
+        ) {
+            overgangsstønadTidslinje, utvidetTidslinje, under3ÅrTidslinje ->
+            if (overgangsstønadTidslinje == null || utvidetTidslinje == null || under3ÅrTidslinje == null) null
+            else if (utvidetTidslinje.prosent > BigDecimal.ZERO && under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING) BigDecimal(100)
+            else if (utvidetTidslinje.prosent == BigDecimal.ZERO || under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING) BigDecimal.ZERO
+            else null
         }
-        .kombinerMed(barnSomGirRettTilSmåbarnstilleggTidslinje) { overgangsstønadOgUtvidetTidslinje, under3ÅrTidslinje ->
-            if (overgangsstønadOgUtvidetTidslinje == null || under3ÅrTidslinje == null) null
-            else if (under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING && overgangsstønadOgUtvidetTidslinje == UtvidetAndelStatus.UTBETALING) BigDecimal(
-                100
-            )
-            else BigDecimal.ZERO
-        }.filtrerIkkeNull()
+        .filtrerIkkeNull()
 }
 
 fun kombinatorInternPeriodeOvergangsstønadDagTilMåned(dagverdier: List<InternPeriodeOvergangsstønad?>): Boolean {
@@ -221,9 +220,4 @@ fun kombinatorInternPeriodeOvergangsstønadDagTilMåned(dagverdier: List<InternP
 enum class BarnSinRettTilSmåbarnstillegg {
     UNDER_3_ÅR_UTBETALING,
     UNDER_3_ÅR_NULLUTBETALING
-}
-
-enum class UtvidetAndelStatus {
-    UTBETALING,
-    NULLUTBETALING
 }
