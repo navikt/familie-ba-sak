@@ -50,7 +50,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     ): List<AndelTilkjentYtelse> {
         if (perioderMedFullOvergangsstønad.isEmpty() || utvidetAndeler.isEmpty() || barnasAndeler.isEmpty()) return emptyList()
 
-        val perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad).tilMåned { true }
+        val perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad).tilMåned { kombinatorInternPeriodeOvergangsstønadDagTilMåned(it) }
 
         val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse = utvidetAndeler.filter { it.erUtvidet() })
 

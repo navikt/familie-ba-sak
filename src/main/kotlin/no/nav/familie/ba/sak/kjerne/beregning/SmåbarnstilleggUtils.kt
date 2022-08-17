@@ -209,3 +209,7 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
             )
             else BigDecimal.ZERO
         }
+
+fun kombinatorInternPeriodeOvergangsstønadDagTilMåned(dagverdier: List<InternPeriodeOvergangsstønad?>): Boolean {
+    return dagverdier.filterNotNull().isNotEmpty()
+}
