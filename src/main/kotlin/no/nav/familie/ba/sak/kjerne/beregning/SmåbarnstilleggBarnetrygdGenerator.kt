@@ -82,9 +82,9 @@ data class SmåbarnstilleggBarnetrygdGenerator(
             .filter { segement ->
                 segement.value.containsAll(
                     listOf(
+                        SmåbarnstilleggKombinator.UTVIDET,
                         SmåbarnstilleggKombinator.OVERGANGSSTØNAD,
-                        SmåbarnstilleggKombinator.UNDER_3_ÅR,
-                        SmåbarnstilleggKombinator.UTVIDET
+                        SmåbarnstilleggKombinator.UNDER_3_ÅR
                     )
                 )
             }
@@ -96,7 +96,6 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 )
                     .singleOrNull()?.sats
                     ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
-
                 AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
