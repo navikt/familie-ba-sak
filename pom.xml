@@ -488,7 +488,10 @@
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
                     <excludedGroups>${excludedGroups}</excludedGroups>
-                    <threadCount>1</threadCount>
+                    <threadCount>4</threadCount>
+                    <forkCount>4</forkCount>
+                    <parallel>classesAndMethods</parallel>
+                    <reuseForks>true</reuseForks>
                 </configuration>
             </plugin>
             <plugin>
