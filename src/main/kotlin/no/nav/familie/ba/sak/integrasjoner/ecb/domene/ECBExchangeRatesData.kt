@@ -8,7 +8,7 @@ import org.simpleframework.xml.Root
 class ECBExchangeRatesData {
     @field:Path("DataSet")
     @field:ElementList(name = "Series", inline = true)
-    lateinit var exchangeRatesForCountries: List<ECBExchangeRatesForCountry>
+    lateinit var exchangeRatesForCountries: List<ECBExchangeRatesForCurrency>
 }
 
 fun ECBExchangeRatesData.exchangeRatesForCurrency(valuta: String): List<ECBExchangeRate> {

@@ -107,10 +107,10 @@ class ECBXmlParsingTest {
         assertEquals(2, nokExchangeRates.size)
         assertEquals(2, sekExchangeRates.size)
 
-        assertEquals("10.337", nokExchangeRates.filter { it.date.equals("2022-06-28") }[0].value)
-        assertEquals("10.3065", nokExchangeRates.filter { it.date.equals("2022-06-29") }[0].value)
+        assertEquals("10.337", nokExchangeRates.filter { it.date == "2022-06-28" }[0].value)
+        assertEquals("10.3065", nokExchangeRates.filter { it.date == "2022-06-29" }[0].value)
 
-        assertEquals("10.6543", sekExchangeRates.filter { it.date.equals("2022-06-28") }[0].value)
-        assertEquals("10.6848", sekExchangeRates.filter { it.date.equals("2022-06-29") }[0].value)
+        assertEquals("10.6543", sekExchangeRates.filter { it.date == "2022-06-28" }[0].value)
+        assertEquals("10.6848", sekExchangeRates.filter { it.date == "2022-06-29" }[0].value)
     }
 }

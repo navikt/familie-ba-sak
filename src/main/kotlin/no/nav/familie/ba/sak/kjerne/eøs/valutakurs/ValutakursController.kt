@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
+import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -29,7 +30,8 @@ class ValutakursController(
     private val featureToggleService: FeatureToggleService,
     private val valutakursService: ValutakursService,
     private val personidentService: PersonidentService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val ecbService: ECBService,
 ) {
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterValutakurs(
@@ -40,7 +42,7 @@ class ValutakursController(
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
 
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
-        val valutakurs = restValutakurs.tilValutakurs(barnAktører = barnAktører)
+        val valutakurs = oppdaterValutakursMedKursFraECB(restValutakurs, restValutakurs.tilValutakurs(barnAktører = barnAktører))
 
         valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutakurs)
 
@@ -58,5 +60,13 @@ class ValutakursController(
         valutakursService.slettValutakurs(valutakursId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+    }
+
+    private fun oppdaterValutakursMedKursFraECB(restValutakurs: RestValutakurs, valutakurs: Valutakurs): Valutakurs {
+        val eksisterendeValutakurs = valutakursService.hentValutakurs(restValutakurs.id)
+        if (restValutakurs.valutakode != null && restValutakurs.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != restValutakurs.valutakursdato || eksisterendeValutakurs.valutakode != restValutakurs.valutakode)) {
+            return valutakurs.copy(kurs = ecbService.hentValutakurs(restValutakurs.valutakode, restValutakurs.valutakursdato))
+        }
+        return valutakurs
     }
 }

@@ -17,6 +17,8 @@ class ValutakursService(
         endringsabonnenter
     )
 
+    fun hentValutakurs(valutakursId: Long): Valutakurs = skjemaService.hentMedId(valutakursId)
+
     fun hentValutakurser(behandlingId: BehandlingId) =
         skjemaService.hentMedBehandlingId(behandlingId)
 

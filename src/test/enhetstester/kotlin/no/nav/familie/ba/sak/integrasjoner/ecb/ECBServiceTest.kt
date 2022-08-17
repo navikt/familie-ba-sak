@@ -13,6 +13,6 @@ class ECBServiceTest {
         val ecbService = ECBService(ECBClient(restTemplate, "https://sdw-wsrest.ecb.europa.eu/service/data/EXR/"))
         val valutakursDato = LocalDate.of(2022, 6, 28)
         val SEKtilNOKValutakurs = ecbService.hentValutakurs("SEK", valutakursDato)
-        assertEquals(BigDecimal.valueOf(0.9702), SEKtilNOKValutakurs)
+        assertEquals(BigDecimal.valueOf(0.9702185972), SEKtilNOKValutakurs)
     }
 }

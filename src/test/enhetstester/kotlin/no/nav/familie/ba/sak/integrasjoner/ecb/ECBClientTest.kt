@@ -13,7 +13,7 @@ class ECBClientTest {
     fun testHentValutakurs() {
         val ecbClient = ECBClient(restTemplate, "https://sdw-wsrest.ecb.europa.eu/service/data/EXR/")
         val valutakursDato = LocalDate.of(2022, 7, 22)
-        val ecbValutakursData = ecbClient.hentValutakurs("SEK", valutakursDato)
+        val ecbValutakursData = ecbClient.getECBExchangeRatesData("SEK", valutakursDato)
         assertNotNull(ecbValutakursData)
         assertEquals(2, ecbValutakursData.exchangeRatesForCountries.size)
         val sekValutakurs = ecbValutakursData.exchangeRatesForCurrency("SEK")

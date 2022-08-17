@@ -5,7 +5,7 @@ import org.simpleframework.xml.ElementList
 import org.simpleframework.xml.Root
 
 @Root(name = "Series", strict = false)
-class ECBExchangeRatesForCountry {
+class ECBExchangeRatesForCurrency {
 
     @field:Element(name = "SeriesKey")
     lateinit var ecbExchangeRateKey: ECBExchangeRateKey

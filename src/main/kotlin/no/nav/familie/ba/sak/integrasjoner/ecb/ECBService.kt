@@ -11,16 +11,24 @@ import kotlin.jvm.Throws
 @Service
 class ECBService(val ecbClient: ECBClient) {
 
+    /**
+     * @param utenlandskValuta valutaen vi skal konvertere til NOK
+     * @param kursDato datoen vi skal hente valutakurser for
+     * @return Henter valutakurs for *utenlandskValuta* -> EUR og NOK -> EUR på *kursDato*, og returnerer en beregnet kurs for *utenlandskValuta* -> NOK.
+     */
     @Throws(ECBClientException::class)
-    fun hentValutakurs(fraValuta: String, valutaDato: LocalDate): BigDecimal {
-        val ecbExchangeRatesData = ecbClient.hentValutakurs(fraValuta, valutaDato)
-        val utenlandskValutakursTilEuro = ecbExchangeRatesData.valutakursForValuta(fraValuta)
-        val norskValutakursTilEuro = ecbExchangeRatesData.valutakursForValuta("NOK")
-        return beregnValutakurs(utenlandskValutakursTilEuro, norskValutakursTilEuro)
+    fun hentValutakurs(utenlandskValuta: String, kursDato: LocalDate): BigDecimal {
+        val ecbExchangeRatesData = ecbClient.getECBExchangeRatesData(utenlandskValuta, kursDato)
+        val valutakursNOK = ecbExchangeRatesData.valutakursForValuta(ECBConstants.NOK)
+        if (utenlandskValuta == ECBConstants.EUR) {
+            return valutakursNOK
+        }
+        val valutakursUtenlandskValuta = ecbExchangeRatesData.valutakursForValuta(utenlandskValuta)
+        return beregnValutakurs(valutakursUtenlandskValuta, valutakursNOK)
     }
 
-    private fun beregnValutakurs(utenlandskValutakursTilEuro: BigDecimal, norskValutakursTilEuro: BigDecimal): BigDecimal {
-        return norskValutakursTilEuro.divide(utenlandskValutakursTilEuro, 10, RoundingMode.HALF_UP).setScale(4, RoundingMode.HALF_UP)
+    private fun beregnValutakurs(valutakursUtenlandskValuta: BigDecimal, valutakursNOK: BigDecimal): BigDecimal {
+        return valutakursNOK.divide(valutakursUtenlandskValuta, 10, RoundingMode.HALF_UP)
     }
 
     private fun ECBExchangeRatesData.valutakursForValuta(valuta: String): BigDecimal {
