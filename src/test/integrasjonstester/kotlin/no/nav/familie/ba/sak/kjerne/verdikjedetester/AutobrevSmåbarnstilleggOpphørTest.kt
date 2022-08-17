@@ -36,11 +36,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 import java.time.YearMonth
 
-@DirtiesContext
 class AutobrevSmåbarnstilleggOpphørTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val fagsakRepository: FagsakRepository,
