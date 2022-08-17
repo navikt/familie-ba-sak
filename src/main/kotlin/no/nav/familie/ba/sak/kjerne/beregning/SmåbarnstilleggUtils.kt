@@ -217,3 +217,13 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
 fun kombinatorInternPeriodeOvergangsstønadDagTilMåned(dagverdier: List<InternPeriodeOvergangsstønad?>): Boolean {
     return dagverdier.filterNotNull().isNotEmpty()
 }
+
+enum class BarnSinRettTilSmåbarnstillegg {
+    UNDER_3_ÅR_UTBETALING,
+    UNDER_3_ÅR_NULLUTBETALING
+}
+
+enum class UtvidetAndelStatus {
+    UTBETALING,
+    NULLUTBETALING
+}
