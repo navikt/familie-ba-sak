@@ -89,9 +89,9 @@ object VilkårsvurderingResultatFlytter {
             ),
             kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
             personTilOppdatert = personTilOppdatert,
-            forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            personenSomFinnesVilkårResultater = personenSomFinnes.vilkårResultater
+            personenSomFinnesVilkårResultater = personenSomFinnes.vilkårResultater,
+            personResultaterFraForrigeBehandling = forrigeBehandlingVilkårsvurdering?.personResultater
         )
         // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
         if (personsVilkårAktivt.isEmpty()) {
@@ -105,9 +105,9 @@ object VilkårsvurderingResultatFlytter {
         personFraInit: PersonFraInitRequest,
         kopieringSkjerFraForrigeBehandling: Boolean,
         personTilOppdatert: PersonResultat,
-        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering?,
         løpendeUnderkategori: BehandlingUnderkategori?,
-        personenSomFinnesVilkårResultater: Set<VilkårResultat>
+        personenSomFinnesVilkårResultater: Set<VilkårResultat>,
+        personResultaterFraForrigeBehandling: Set<PersonResultat>?
     ): Set<VilkårResultat> {
         val personsVilkårAktivt = personenSomFinnesVilkårResultater.toMutableSet()
         val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
@@ -135,21 +135,11 @@ object VilkårsvurderingResultatFlytter {
                 personsVilkårAktivt.removeAll(vilkårSomSkalKopieresOver)
             }
         }
-        val eksistererUtvidetVilkårPåForrigeBehandling =
-            forrigeBehandlingVilkårsvurdering?.personResultater
-                ?.firstOrNull { it.aktør == personFraInit.aktør }
-                ?.vilkårResultater
-                ?.any {
-                    it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
-                        it.resultat == Resultat.OPPFYLT &&
-                        // forrige behandling har minst et måned ubetalt utvidet barnetrygd
-                        it.differanseIPeriode().toTotalMonths() >= Period.ofMonths(1).months
-                } ?: false
 
         // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
         // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
         if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
-            (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
+            (eksistererUtvidetVilkårPåForrigeBehandling(personResultaterFraForrigeBehandling, personFraInit) || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
         ) {
             val utvidetVilkår =
                 personenSomFinnesVilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
@@ -165,6 +155,19 @@ object VilkårsvurderingResultatFlytter {
         personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
         return personsVilkårAktivt
     }
+
+    private fun eksistererUtvidetVilkårPåForrigeBehandling(
+        personResultaterFraForrigeBehandling: Set<PersonResultat>?,
+        personFraInit: PersonFraInitRequest
+    ): Boolean = personResultaterFraForrigeBehandling
+        ?.firstOrNull { it.aktør == personFraInit.aktør }
+        ?.vilkårResultater
+        ?.any {
+            it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
+                it.resultat == Resultat.OPPFYLT &&
+                // forrige behandling har minst et måned ubetalt utvidet barnetrygd
+                it.differanseIPeriode().toTotalMonths() >= Period.ofMonths(1).months
+        } ?: false
 
     private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {
         return if (kopieringSkjerFraForrigeBehandling) {
