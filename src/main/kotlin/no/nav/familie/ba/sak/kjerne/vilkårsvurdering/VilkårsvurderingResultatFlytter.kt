@@ -59,13 +59,15 @@ object VilkårsvurderingResultatFlytter {
                     personenSomFinnesVilkårResultater = personenSomFinnes.vilkårResultater,
                     personResultaterFraForrigeBehandling = forrigeBehandlingVilkårsvurdering?.personResultater
                 )
+                vilkårResultatet = vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
+
                 // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
                 if (vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.isEmpty()) {
                     personResultaterAktivt.remove(personenSomFinnes)
                 } else {
+                    // Mutering skjer herifrå og ut
                     personenSomFinnes.setSortedVilkårResultater(vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.toSet())
                 }
-                vilkårResultatet = vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
             }
             personResultaterOppdatert.add(
                 PersonResultat(
