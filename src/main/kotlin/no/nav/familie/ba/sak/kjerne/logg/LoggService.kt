@@ -395,7 +395,7 @@ class LoggService(
 
         val tittel = if (korrigertEtterbetaling.aktiv) {
             "Etterbetaling i brev er korrigert"
-        } else "Etterbetaling i brev er fjernet"
+        } else "Korrigert etterbetaling er angret"
 
         lagre(
             Logg(
