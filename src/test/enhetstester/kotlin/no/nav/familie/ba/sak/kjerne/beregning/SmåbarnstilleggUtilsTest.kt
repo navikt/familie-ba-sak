@@ -15,8 +15,14 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -144,6 +150,118 @@ class SmåbarnstilleggUtilsTest {
         assertEquals(barn3.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder[2].fraOgMed.tilYearMonth())
         assertEquals(LocalDate.now().toYearMonth(), generertePerioder[2].tilOgMed.tilYearMonth())
         assertEquals(BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING, generertePerioder[2].innhold)
+    }
+
+    @Test
+    fun `Skal kun få småbarnstillegg når alle tre tidslinjene har oppfylt kravene`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val overgangsstønadPerioder = listOf(
+            InternPeriodeOvergangsstønad(
+                personIdent = søker.aktør.aktivFødselsnummer(),
+                fomDato = LocalDate.now().minusYears(2),
+                tomDato = LocalDate.now().plusYears(1)
+            )
+        )
+
+        val utvidetAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusYears(3),
+                tom = YearMonth.now().plusYears(1),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                person = søker
+            )
+        )
+
+        val barnsSomGirRettTilSmåbarnstilleggTidslinje = lagBarnSomGirRettTilSmåbarnstilleggTidslinje(
+            listOf(
+                Periode(
+                    fraOgMed = YearMonth.now().minusYears(4).tilTidspunkt(),
+                    tilOgMed = YearMonth.now().minusYears(1).tilTidspunkt(),
+                    innhold = BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING
+                )
+            )
+        )
+
+        val kombinertTidslinje = kombinerAlleTidslinjerTilProsentTidslinje(
+            perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(overgangsstønadPerioder),
+            utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(utvidetAndeler),
+            barnSomGirRettTilSmåbarnstilleggTidslinje = barnsSomGirRettTilSmåbarnstilleggTidslinje
+        )
+
+        val perioderMedSmåbarnstillegg = kombinertTidslinje.perioder()
+
+        assertEquals(1, perioderMedSmåbarnstillegg.size)
+        assertEquals(YearMonth.now().minusYears(2), perioderMedSmåbarnstillegg.single().fraOgMed.tilYearMonth())
+        assertEquals(YearMonth.now().minusYears(1), perioderMedSmåbarnstillegg.single().tilOgMed.tilYearMonth())
+        assertEquals(BigDecimal(100), perioderMedSmåbarnstillegg.single().innhold)
+    }
+
+    @Test
+    fun `Skal få småbarnstillegg med nullutbetaling når utvidet eller barn er overstyrt til 0kr`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val brytningstidspunkt1 = YearMonth.now().minusYears(3)
+        val brytningstidspunkt2 = YearMonth.now().minusYears(2)
+
+        val overgangsstønadPerioder = listOf(
+            InternPeriodeOvergangsstønad(
+                personIdent = søker.aktør.aktivFødselsnummer(),
+                fomDato = LocalDate.now().minusYears(5),
+                tomDato = LocalDate.now().plusYears(1)
+            )
+        )
+
+        val utvidetAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusYears(4),
+                tom = brytningstidspunkt1,
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                person = søker,
+                prosent = BigDecimal.ZERO
+            ),
+            lagAndelTilkjentYtelse(
+                fom = brytningstidspunkt1.plusMonths(1),
+                tom = YearMonth.now(),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                person = søker
+            )
+        )
+
+        val barnsSomGirRettTilSmåbarnstilleggTidslinje = lagBarnSomGirRettTilSmåbarnstilleggTidslinje(
+            listOf(
+                Periode(
+                    fraOgMed = YearMonth.now().minusYears(5).tilTidspunkt(),
+                    tilOgMed = brytningstidspunkt2.tilTidspunkt(),
+                    innhold = BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING
+                ),
+                Periode(
+                    fraOgMed = brytningstidspunkt2.plusMonths(1).tilTidspunkt(),
+                    tilOgMed = YearMonth.now().minusYears(1).tilTidspunkt(),
+                    innhold = BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING
+                )
+            )
+        )
+
+        val kombinertTidslinje = kombinerAlleTidslinjerTilProsentTidslinje(
+            perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(overgangsstønadPerioder),
+            utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(utvidetAndeler),
+            barnSomGirRettTilSmåbarnstilleggTidslinje = barnsSomGirRettTilSmåbarnstilleggTidslinje
+        )
+
+        val perioderMedSmåbarnstillegg = kombinertTidslinje.perioder().toList()
+
+        assertEquals(3, perioderMedSmåbarnstillegg.size)
+
+        assertEquals(YearMonth.now().minusYears(4), perioderMedSmåbarnstillegg[0].fraOgMed.tilYearMonth())
+        assertEquals(brytningstidspunkt1, perioderMedSmåbarnstillegg[0].tilOgMed.tilYearMonth())
+        assertEquals(BigDecimal.ZERO, perioderMedSmåbarnstillegg[0].innhold)
+
+        assertEquals(brytningstidspunkt1.plusMonths(1), perioderMedSmåbarnstillegg[1].fraOgMed.tilYearMonth())
+        assertEquals(brytningstidspunkt2, perioderMedSmåbarnstillegg[1].tilOgMed.tilYearMonth())
+        assertEquals(BigDecimal(100), perioderMedSmåbarnstillegg[1].innhold)
+
+        assertEquals(brytningstidspunkt2.plusMonths(1), perioderMedSmåbarnstillegg[2].fraOgMed.tilYearMonth())
+        assertEquals(YearMonth.now().minusYears(1), perioderMedSmåbarnstillegg[2].tilOgMed.tilYearMonth())
+        assertEquals(BigDecimal.ZERO, perioderMedSmåbarnstillegg[2].innhold)
     }
 
     @Test
@@ -715,4 +833,7 @@ class SmåbarnstilleggUtilsTest {
             )
         )
     }
+
+    private fun lagBarnSomGirRettTilSmåbarnstilleggTidslinje(perioder: List<Periode<BarnSinRettTilSmåbarnstillegg, Måned>>): Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned> =
+        tidslinje { perioder }
 }
