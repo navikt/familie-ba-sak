@@ -347,7 +347,7 @@ private fun utledResultat(
 private fun utledResultatForGiftPartnerskap(person: Person) =
     if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true) {
         Resultat.OPPFYLT
-    }else Resultat.IKKE_VURDERT
+    } else Resultat.IKKE_VURDERT
 
 private fun utledBegrunnelse(
     vilkår: Vilkår,
@@ -358,7 +358,7 @@ private fun utledBegrunnelse(
     vilkår == Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false) {
         "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
             "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen"
-    }else ""
+    } else ""
 
     else -> ""
 }
