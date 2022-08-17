@@ -18,12 +18,10 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.annotation.DirtiesContext
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-@DirtiesContext
 class EndretUtbetalingAndelTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,

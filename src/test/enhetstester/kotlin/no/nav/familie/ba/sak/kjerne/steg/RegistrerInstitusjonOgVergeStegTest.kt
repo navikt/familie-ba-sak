@@ -43,10 +43,16 @@ class RegistrerInstitusjonOgVergeStegTest {
 
     @BeforeAll
     fun setUp() {
-        institusjonService = InstitusjonService(fagsakRepository = fagsakRepositoryMock)
+        institusjonService =
+            InstitusjonService(fagsakRepository = fagsakRepositoryMock, samhandlerKlient = mockk(relaxed = true))
         vergeService = VergeService(behandlingServiceMock)
         registrerInstitusjonOgVerge =
-            RegistrerInstitusjonOgVerge(institusjonService, vergeService, loggServiceMock, behandlingHentOgPersisterServiceMock)
+            RegistrerInstitusjonOgVerge(
+                institusjonService,
+                vergeService,
+                loggServiceMock,
+                behandlingHentOgPersisterServiceMock
+            )
     }
 
     @BeforeEach
@@ -83,7 +89,7 @@ class RegistrerInstitusjonOgVergeStegTest {
 
         registrerInstitusjonOgVerge.utførStegOgAngiNeste(
             behandling,
-            restRegistrerInstitusjonOgVerge,
+            restRegistrerInstitusjonOgVerge
         )
 
         assertThat(fagsakSlot.captured.institusjon!!.orgNummer).isEqualTo(restRegistrerInstitusjonOgVerge.institusjonInfo!!.orgNummer)
@@ -123,7 +129,7 @@ class RegistrerInstitusjonOgVergeStegTest {
 
         val nesteSteg = registrerInstitusjonOgVerge.utførStegOgAngiNeste(
             behandling,
-            restRegistrerInstitusjonOgVerge,
+            restRegistrerInstitusjonOgVerge
         )
 
         assertThat(nesteSteg).isEqualTo(StegType.REGISTRERE_SØKNAD)
