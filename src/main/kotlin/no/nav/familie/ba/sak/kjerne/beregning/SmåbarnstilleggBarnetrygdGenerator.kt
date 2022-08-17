@@ -146,7 +146,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
             }
     }
 
-    private fun Tidslinje<BigDecimal, Måned>.lagSmåbarnstilleggAndeler(
+    private fun Tidslinje<SmåbarnstilleggPeriode, Måned>.lagSmåbarnstilleggAndeler(
         søkerAktør: Aktør
     ): List<AndelTilkjentYtelse> {
         return this.perioder().map {
@@ -156,7 +156,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 stønadTilOgMed = it.tilOgMed.tilYearMonth()
             ).singleOrNull()?.sats ?: throw Feil("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
 
-            val prosentIPeriode = it.innhold ?: throw Feil("Skal finnes prosent for gitt periode")
+            val prosentIPeriode = it.innhold?.prosent ?: throw Feil("Skal finnes prosent for gitt periode")
 
             val beløpIPeriode = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosent = prosentIPeriode)
 

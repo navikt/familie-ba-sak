@@ -193,11 +193,16 @@ fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
     return barnasAndelerUnder3ÅrTidslinje.kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }.filtrerIkkeNull()
 }
 
+data class SmåbarnstilleggPeriode(
+    val overgangsstønadPeriode: InternPeriodeOvergangsstønad,
+    val prosent: BigDecimal
+)
+
 fun kombinerAlleTidslinjerTilProsentTidslinje(
     perioderMedFullOvergangsstønadTidslinje: InternPeriodeOvergangsstønadTidslinje,
     utvidetBarnetrygdTidslinje: AndelTilkjentYtelseTidslinje,
     barnSomGirRettTilSmåbarnstilleggTidslinje: Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned>
-): Tidslinje<BigDecimal, Måned> {
+): Tidslinje<SmåbarnstilleggPeriode, Måned> {
     return perioderMedFullOvergangsstønadTidslinje
         .tilMåned { kombinatorInternPeriodeOvergangsstønadDagTilMåned(it) }
         .kombinerMed(
@@ -205,8 +210,8 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
             tidslinjeC = barnSomGirRettTilSmåbarnstilleggTidslinje
         ) { overgangsstønadTidslinje, utvidetTidslinje, under3ÅrTidslinje ->
             if (overgangsstønadTidslinje == null || utvidetTidslinje == null || under3ÅrTidslinje == null) null
-            else if (utvidetTidslinje.prosent > BigDecimal.ZERO && under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING) BigDecimal(100)
-            else if (utvidetTidslinje.prosent == BigDecimal.ZERO || under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING) BigDecimal.ZERO
+            else if (utvidetTidslinje.prosent > BigDecimal.ZERO && under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING) SmåbarnstilleggPeriode(overgangsstønadTidslinje, BigDecimal(100))
+            else if (utvidetTidslinje.prosent == BigDecimal.ZERO || under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING) SmåbarnstilleggPeriode(overgangsstønadTidslinje, BigDecimal.ZERO)
             else null
         }
         .filtrerIkkeNull()
@@ -218,7 +223,11 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
  * True - Det finnes minst 1 dag i måneden hvor søker får overgangsstønad
  * False - Søker får ikke overgangsstønad noen dager den måneden
  */
-fun kombinatorInternPeriodeOvergangsstønadDagTilMåned(dagverdier: List<InternPeriodeOvergangsstønad?>): Boolean = dagverdier.filterNotNull().isNotEmpty()
+fun kombinatorInternPeriodeOvergangsstønadDagTilMåned(dagverdier: List<InternPeriodeOvergangsstønad?>): InternPeriodeOvergangsstønad? {
+    val x = dagverdier.filterNotNull()
+    return if (x.isEmpty()) null
+    else x.first()
+}
 
 enum class BarnSinRettTilSmåbarnstillegg {
     UNDER_3_ÅR_UTBETALING,
