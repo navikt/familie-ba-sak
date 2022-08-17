@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -192,11 +194,12 @@ fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
 }
 
 fun kombinerAlleTidslinjerTilProsentTidslinje(
-    perioderMedFullOvergangsstønadTidslinje: Tidslinje<Boolean, Måned>,
+    perioderMedFullOvergangsstønadTidslinje: InternPeriodeOvergangsstønadTidslinje,
     utvidetBarnetrygdTidslinje: AndelTilkjentYtelseTidslinje,
     barnSomGirRettTilSmåbarnstilleggTidslinje: Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned>
-) =
-    perioderMedFullOvergangsstønadTidslinje
+): Tidslinje<BigDecimal, Måned> {
+    return perioderMedFullOvergangsstønadTidslinje
+        .tilMåned { kombinatorInternPeriodeOvergangsstønadDagTilMåned(it) }
         .kombinerMed(utvidetBarnetrygdTidslinje) { overgangsstønadTidslinje, utvidetTidslinje ->
             if (overgangsstønadTidslinje == null || utvidetTidslinje == null) null
             else if (utvidetTidslinje.prosent > BigDecimal.ZERO) UtvidetAndelStatus.UTBETALING
@@ -209,6 +212,7 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
             )
             else BigDecimal.ZERO
         }
+}
 
 fun kombinatorInternPeriodeOvergangsstønadDagTilMåned(dagverdier: List<InternPeriodeOvergangsstønad?>): Boolean {
     return dagverdier.filterNotNull().isNotEmpty()

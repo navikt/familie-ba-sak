@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -50,7 +49,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     ): List<AndelTilkjentYtelse> {
         if (perioderMedFullOvergangsstønad.isEmpty() || utvidetAndeler.isEmpty() || barnasAndeler.isEmpty()) return emptyList()
 
-        val perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad).tilMåned { kombinatorInternPeriodeOvergangsstønadDagTilMåned(it) }
+        val perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad)
 
         val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse = utvidetAndeler.filter { it.erUtvidet() })
 
