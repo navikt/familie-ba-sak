@@ -38,7 +38,7 @@ import java.time.YearMonth
 class SmåbarnstilleggUtilsTest {
 
     @Test
-    fun `Skal generere periode med rett til småbarnstillegg kun hvor barn er under 3 år`() {
+    fun `Skal generere tidslinje for barn med rett til småbarnstillegg kun hvor barn er under 3 år`() {
         val barn = lagPerson(fødselsdato = LocalDate.now().minusYears(4), type = PersonType.BARN)
 
         val barnasAndeler = listOf(
@@ -59,7 +59,7 @@ class SmåbarnstilleggUtilsTest {
     }
 
     @Test
-    fun `Skal generere periode med rett til småbarnstillegg med riktig utbetalings-info for ett barn`() {
+    fun `Skal generere tidslinje for barn med rett til småbarnstillegg med riktig utbetalings-info for ett barn`() {
         val barn = lagPerson(fødselsdato = LocalDate.now().minusYears(4), type = PersonType.BARN)
 
         val brytningstidspunkt = LocalDate.now().minusYears(3)
@@ -93,7 +93,7 @@ class SmåbarnstilleggUtilsTest {
     }
 
     @Test
-    fun `Skal generere periode med rett til småbarnstillegg med riktig utbetalings-info når det er flere barn`() {
+    fun `Skal generere tidslinje for barn med rett til småbarnstillegg med riktig utbetalings-info når det er flere barn`() {
         val barn1 = lagPerson(fødselsdato = LocalDate.now().minusYears(4), type = PersonType.BARN)
         val barn2 = lagPerson(fødselsdato = LocalDate.now().minusYears(6), type = PersonType.BARN)
         val barn3 = lagPerson(fødselsdato = LocalDate.now().minusYears(1), type = PersonType.BARN)
