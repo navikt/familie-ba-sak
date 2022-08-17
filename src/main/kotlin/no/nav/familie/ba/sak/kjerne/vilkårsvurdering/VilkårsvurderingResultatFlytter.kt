@@ -80,11 +80,37 @@ object VilkårsvurderingResultatFlytter {
         løpendeUnderkategori: BehandlingUnderkategori?,
         personResultaterAktivt: MutableSet<PersonResultat>
     ) {
-        val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
+        // Fyll inn den initierte med person fra aktiv
+        val personsVilkårAktivt = oppdaterEksisterendePerson(
+            personenSomFinnes = personenSomFinnes,
+            personFraInit = personFraInit,
+            kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
+            personTilOppdatert = personTilOppdatert,
+            forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
+            løpendeUnderkategori = løpendeUnderkategori
+        )
+        // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
+        if (personsVilkårAktivt.isEmpty()) {
+            personResultaterAktivt.remove(personenSomFinnes)
+        } else {
+            personenSomFinnes.setSortedVilkårResultater(personsVilkårAktivt.toSet())
+        }
+    }
+
+    private fun oppdaterEksisterendePerson(
+        personenSomFinnes: PersonResultat,
+        personFraInit: PersonResultat,
+        kopieringSkjerFraForrigeBehandling: Boolean,
+        personTilOppdatert: PersonResultat,
+        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering?,
+        løpendeUnderkategori: BehandlingUnderkategori?
+    ): Set<VilkårResultat> {
+        val personenSomFinnesVilkårResultater = personenSomFinnes.vilkårResultater
+        val personsVilkårAktivt = personenSomFinnesVilkårResultater.toMutableSet()
         val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
         personFraInit.vilkårResultater.forEach { vilkårFraInit ->
             val vilkårSomFinnes =
-                personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
+                personenSomFinnesVilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
 
             val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
                 kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling
@@ -123,7 +149,7 @@ object VilkårsvurderingResultatFlytter {
             (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
         ) {
             val utvidetVilkår =
-                personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                personenSomFinnesVilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
             if (utvidetVilkår.isNotEmpty()) {
                 personsVilkårOppdatert.addAll(
                     utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling)
@@ -134,13 +160,7 @@ object VilkårsvurderingResultatFlytter {
         }
 
         personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
-
-        // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
-        if (personsVilkårAktivt.isEmpty()) {
-            personResultaterAktivt.remove(personenSomFinnes)
-        } else {
-            personenSomFinnes.setSortedVilkårResultater(personsVilkårAktivt.toSet())
-        }
+        return personsVilkårAktivt
     }
 
     private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {
