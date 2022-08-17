@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -82,7 +83,10 @@ object VilkårsvurderingResultatFlytter {
     ) {
         // Fyll inn den initierte med person fra aktiv
         val personsVilkårAktivt = oppdaterEksisterendePerson(
-            personFraInit = personFraInit,
+            personFraInit = PersonFraInitRequest(
+                aktør = personFraInit.aktør,
+                vilkårResultater = personFraInit.vilkårResultater
+            ),
             kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
             personTilOppdatert = personTilOppdatert,
             forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
@@ -98,7 +102,7 @@ object VilkårsvurderingResultatFlytter {
     }
 
     private fun oppdaterEksisterendePerson(
-        personFraInit: PersonResultat,
+        personFraInit: PersonFraInitRequest,
         kopieringSkjerFraForrigeBehandling: Boolean,
         personTilOppdatert: PersonResultat,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering?,
@@ -169,4 +173,5 @@ object VilkårsvurderingResultatFlytter {
             this
         }
     }
+    private data class PersonFraInitRequest(val aktør: Aktør, val vilkårResultater: Set<VilkårResultat>)
 }
