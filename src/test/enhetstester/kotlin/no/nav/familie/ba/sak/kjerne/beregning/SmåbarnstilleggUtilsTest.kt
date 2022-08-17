@@ -193,7 +193,7 @@ class SmåbarnstilleggUtilsTest {
         assertEquals(1, perioderMedSmåbarnstillegg.size)
         assertEquals(YearMonth.now().minusYears(2), perioderMedSmåbarnstillegg.single().fraOgMed.tilYearMonth())
         assertEquals(YearMonth.now().minusYears(1), perioderMedSmåbarnstillegg.single().tilOgMed.tilYearMonth())
-        assertEquals(BigDecimal(100), perioderMedSmåbarnstillegg.single().innhold)
+        assertEquals(BigDecimal(100), perioderMedSmåbarnstillegg.single().innhold!!.prosent)
     }
 
     @Test
@@ -253,15 +253,15 @@ class SmåbarnstilleggUtilsTest {
 
         assertEquals(YearMonth.now().minusYears(4), perioderMedSmåbarnstillegg[0].fraOgMed.tilYearMonth())
         assertEquals(brytningstidspunkt1, perioderMedSmåbarnstillegg[0].tilOgMed.tilYearMonth())
-        assertEquals(BigDecimal.ZERO, perioderMedSmåbarnstillegg[0].innhold)
+        assertEquals(BigDecimal.ZERO, perioderMedSmåbarnstillegg[0].innhold!!.prosent)
 
         assertEquals(brytningstidspunkt1.plusMonths(1), perioderMedSmåbarnstillegg[1].fraOgMed.tilYearMonth())
         assertEquals(brytningstidspunkt2, perioderMedSmåbarnstillegg[1].tilOgMed.tilYearMonth())
-        assertEquals(BigDecimal(100), perioderMedSmåbarnstillegg[1].innhold)
+        assertEquals(BigDecimal(100), perioderMedSmåbarnstillegg[1].innhold!!.prosent)
 
         assertEquals(brytningstidspunkt2.plusMonths(1), perioderMedSmåbarnstillegg[2].fraOgMed.tilYearMonth())
         assertEquals(YearMonth.now().minusYears(1), perioderMedSmåbarnstillegg[2].tilOgMed.tilYearMonth())
-        assertEquals(BigDecimal.ZERO, perioderMedSmåbarnstillegg[2].innhold)
+        assertEquals(BigDecimal.ZERO, perioderMedSmåbarnstillegg[2].innhold!!.prosent)
     }
 
     @Test
