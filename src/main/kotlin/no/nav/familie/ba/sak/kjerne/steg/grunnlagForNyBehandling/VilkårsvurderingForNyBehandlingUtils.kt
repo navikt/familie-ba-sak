@@ -72,25 +72,31 @@ data class VilkårsvurderingForNyBehandlingUtils(
             forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
         )
 
-        return if (behandling.type == BehandlingType.REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
+        return if (behandling.type == BehandlingType.REVURDERING) {
             hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering)
         } else vilkårsvurdering
     }
 
     fun hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
-        val søkersVilkårResultater =
-            vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater
+        vilkårsvurdering.personResultater.forEach { personResultat ->
+            val person = personopplysningGrunnlag.søkerOgBarn.single { it.aktør == personResultat.aktør }
 
-        val dødsdato = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato ?: return vilkårsvurdering
+            if (person.erDød()) {
+                val dødsDato = person.dødsfall!!.dødsfallDato
 
-        Vilkår.values().forEach { vilkårType ->
-            val søkersVilkårAvTypeMedSenesteTom = søkersVilkårResultater.filter { it.vilkårType == vilkårType }
-                .maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
-            if (søkersVilkårAvTypeMedSenesteTom != null && dødsdato.isBefore(
-                    søkersVilkårAvTypeMedSenesteTom.periodeTom ?: TIDENES_ENDE
-                ) && dødsdato.isAfter(søkersVilkårAvTypeMedSenesteTom.periodeFom)
-            ) {
-                søkersVilkårAvTypeMedSenesteTom.periodeTom = dødsdato
+                Vilkår.values().forEach { vilkårType ->
+                    val vilkårAvTypeMedSenesteTom =
+                        personResultat.vilkårResultater.filter { it.vilkårType == vilkårType }
+                            .maxByOrNull { it.periodeTom ?: TIDENES_ENDE }
+
+                    if (vilkårAvTypeMedSenesteTom != null && dødsDato.isBefore(
+                            vilkårAvTypeMedSenesteTom.periodeTom ?: TIDENES_ENDE
+                        ) && dødsDato.isAfter(vilkårAvTypeMedSenesteTom.periodeFom)
+                    ) {
+                        vilkårAvTypeMedSenesteTom.periodeTom = dødsDato
+                        vilkårAvTypeMedSenesteTom.begrunnelse = "Dødsfall"
+                    }
+                }
             }
         }
         return vilkårsvurdering
