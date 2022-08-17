@@ -47,14 +47,24 @@ object VilkårsvurderingResultatFlytter {
                 vilkårResultatet = personFraInit.vilkårResultater
             } else {
                 // Fyll inn den initierte med person fra aktiv
-                val vilkårSomSkalOppdateresPåEksisterendePerson = oppdaterEksisterendePerson(
-                    personenSomFinnes = personenSomFinnes,
-                    personFraInit = personFraInit,
-                    kopieringSkjerFraForrigeBehandling = initiellVilkårsvurderingKopi.behandling.id != aktivVilkårsvurderingKopi.behandling.id,
-                    forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
+                val kopieringSkjerFraForrigeBehandling =
+                    initiellVilkårsvurderingKopi.behandling.id != aktivVilkårsvurderingKopi.behandling.id
+                val vilkårSomSkalOppdateresPåEksisterendePerson = finnVilkårSomSkalOppdateresPåEksisterendePerson(
+                    personFraInit = PersonFraInitRequest(
+                        aktør = personFraInit.aktør,
+                        vilkårResultater = personFraInit.vilkårResultater
+                    ),
+                    kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
                     løpendeUnderkategori = løpendeUnderkategori,
-                    personResultaterAktivt = personResultaterAktivt
+                    personenSomFinnesVilkårResultater = personenSomFinnes.vilkårResultater,
+                    personResultaterFraForrigeBehandling = forrigeBehandlingVilkårsvurdering?.personResultater
                 )
+                // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
+                if (vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.isEmpty()) {
+                    personResultaterAktivt.remove(personenSomFinnes)
+                } else {
+                    personenSomFinnes.setSortedVilkårResultater(vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.toSet())
+                }
                 vilkårResultatet = vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
             }
             personResultaterOppdatert.add(
@@ -77,35 +87,6 @@ object VilkårsvurderingResultatFlytter {
         initiellVilkårsvurderingKopi.personResultater = personResultaterOppdatert
 
         return Pair(initiellVilkårsvurderingKopi, aktivVilkårsvurderingKopi)
-    }
-
-    private fun oppdaterEksisterendePerson(
-        personenSomFinnes: PersonResultat,
-        personFraInit: PersonResultat,
-        kopieringSkjerFraForrigeBehandling: Boolean,
-        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering?,
-        løpendeUnderkategori: BehandlingUnderkategori?,
-        personResultaterAktivt: MutableSet<PersonResultat>
-    ): OppdaterEksisterendePersonResponse {
-        // Fyll inn den initierte med person fra aktiv
-        val vilkårSomSkalOppdateresPåEksisterendePerson = finnVilkårSomSkalOppdateresPåEksisterendePerson(
-            personFraInit = PersonFraInitRequest(
-                aktør = personFraInit.aktør,
-                vilkårResultater = personFraInit.vilkårResultater
-            ),
-            kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
-            løpendeUnderkategori = løpendeUnderkategori,
-            personenSomFinnesVilkårResultater = personenSomFinnes.vilkårResultater,
-            personResultaterFraForrigeBehandling = forrigeBehandlingVilkårsvurdering?.personResultater
-        )
-
-        // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
-        if (vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.isEmpty()) {
-            personResultaterAktivt.remove(personenSomFinnes)
-        } else {
-            personenSomFinnes.setSortedVilkårResultater(vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.toSet())
-        }
-        return vilkårSomSkalOppdateresPåEksisterendePerson
     }
 
     private fun finnVilkårSomSkalOppdateresPåEksisterendePerson(
