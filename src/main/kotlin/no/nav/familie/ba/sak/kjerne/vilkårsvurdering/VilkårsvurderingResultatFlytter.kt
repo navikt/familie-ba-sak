@@ -143,13 +143,11 @@ object VilkårsvurderingResultatFlytter {
         ) {
             val utvidetVilkår =
                 personenSomFinnesVilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-            if (utvidetVilkår.isNotEmpty()) {
-                personsVilkårOppdatert.addAll(
-                    utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling)
-                        .map { it.kopierMedParent(personTilOppdatert) }
-                )
-                personsVilkårAktivt.removeAll(utvidetVilkår)
-            }
+            personsVilkårOppdatert.addAll(
+                utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling)
+                    .map { it.kopierMedParent(personTilOppdatert) }
+            )
+            personsVilkårAktivt.removeAll(utvidetVilkår)
         }
 
         personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
