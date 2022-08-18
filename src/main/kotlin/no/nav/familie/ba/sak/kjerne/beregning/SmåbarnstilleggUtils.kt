@@ -208,10 +208,10 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
         .kombinerMed(
             tidslinjeB = utvidetBarnetrygdTidslinje,
             tidslinjeC = barnSomGirRettTilSmåbarnstilleggTidslinje
-        ) { overgangsstønadTidslinje, utvidetTidslinje, under3ÅrTidslinje ->
-            if (overgangsstønadTidslinje == null || utvidetTidslinje == null || under3ÅrTidslinje == null) null
-            else if (utvidetTidslinje.prosent > BigDecimal.ZERO && under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING) SmåbarnstilleggPeriode(overgangsstønadTidslinje, BigDecimal(100))
-            else if (utvidetTidslinje.prosent == BigDecimal.ZERO || under3ÅrTidslinje == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING) SmåbarnstilleggPeriode(overgangsstønadTidslinje, BigDecimal.ZERO)
+        ) { overgangsstønad, utvidet, under3År ->
+            if (overgangsstønad == null || utvidet == null || under3År == null) null
+            else if (utvidet.prosent > BigDecimal.ZERO && under3År == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING) SmåbarnstilleggPeriode(overgangsstønad, BigDecimal(100))
+            else if (utvidet.prosent == BigDecimal.ZERO || under3År == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING) SmåbarnstilleggPeriode(overgangsstønad, BigDecimal.ZERO)
             else null
         }
         .filtrerIkkeNull()
