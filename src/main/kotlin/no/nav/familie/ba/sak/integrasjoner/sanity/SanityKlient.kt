@@ -55,7 +55,9 @@ fun hentEØSBegrunnelser(datasett: String = "ba-brev"): List<SanityEØSBegrunnel
         formål = "Henter EØS-begrunnelser fra sanity"
     ) {
         restTemplate.getForEntity<SanityEØSBegrunnelserRespons>(uri).body?.result
-            ?.mapNotNull { it.tilSanityEØSBegrunnelse() }
+            ?.mapNotNull {
+                it.tilSanityEØSBegrunnelse()
+            }
             ?: throw Feil("Klarer ikke å hente begrunnelser fra sanity")
     }
 }

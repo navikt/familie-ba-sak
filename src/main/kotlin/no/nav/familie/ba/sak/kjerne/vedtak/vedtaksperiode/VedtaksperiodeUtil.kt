@@ -12,10 +12,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.erGyldigForKompetanseMedData
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.hentBarnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.hentKompetanserGyldigeForEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -29,14 +33,13 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.endretUtbetalingsperiodeBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -228,10 +231,17 @@ fun hentGyldigeBegrunnelserForPeriode(
         endretUtbetalingAndeler = endretUtbetalingAndeler,
         andelerTilkjentYtelse = andelerTilkjentYtelse
     )
+
     val eøsBegrunnelser = if (kanBehandleEØS) hentGyldigeEØSBegrunnelserForPeriode(
         sanityEØSBegrunnelser = sanityEØSBegrunnelser,
         kompetanserIPeriode = kompetanserIPeriode,
-        kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
+        kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
+        minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+        minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+            sanityBegrunnelser = sanityBegrunnelser,
+            sanityEØSBegrunnelser = sanityEØSBegrunnelser
+        ),
+        personerPåBehandling = persongrunnlag.søkerOgBarn.map { it.tilMinimertPerson() },
     ) else emptyList()
 
     return standardbegrunnelser + eøsBegrunnelser
@@ -246,7 +256,10 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
-    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+        sanityBegrunnelser = sanityBegrunnelser,
+        sanityEØSBegrunnelser = emptyList()
+    ),
     sanityBegrunnelser = sanityBegrunnelser,
     minimertePersoner = persongrunnlag.tilMinimertePersoner(),
     minimertePersonresultater = vilkårsvurdering.personResultater
@@ -262,36 +275,63 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
         andelerTilkjentYtelse,
         utvidetVedtaksperiodeMedBegrunnelser
     ),
-    ytelserForrigePerioder = andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelser) }
+    ytelserForrigePerioder = andelerTilkjentYtelse.filter {
+        ytelseErFraForrigePeriode(
+            it,
+            utvidetVedtaksperiodeMedBegrunnelser
+        )
+    }
 )
 
 fun hentGyldigeEØSBegrunnelserForPeriode(
     sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
     kompetanserIPeriode: List<Kompetanse>,
-    kompetanserSomStopperRettFørPeriode: List<Kompetanse>
+    kompetanserSomStopperRettFørPeriode: List<Kompetanse>,
+    minimertePersonResultater: List<MinimertRestPersonResultat>,
+    minimertVedtaksperiode: MinimertVedtaksperiode,
+    personerPåBehandling: List<MinimertRestPerson>,
 ) = EØSStandardbegrunnelse.values()
     .mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }
     .filter { begrunnelse ->
-        when (begrunnelse.eøsBegrunnelse.vedtakBegrunnelseType) {
-            VedtakBegrunnelseType.EØS_INNVILGET -> kompetanserIPeriode.any { kompetanse ->
-                kompetanse.validerFelterErSatt()
-                begrunnelse.erGyldigForKompetanseMedData(
-                    annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
-                    barnetsBostedslandFraKompetanse = landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland!!),
-                    resultatFraKompetanse = kompetanse.resultat!!
-                )
-            }
-            VedtakBegrunnelseType.EØS_OPPHØR -> kompetanserSomStopperRettFørPeriode.any { kompetanse ->
-                kompetanse.validerFelterErSatt()
-                begrunnelse.erGyldigForKompetanseMedData(
-                    annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
-                    barnetsBostedslandFraKompetanse = landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland!!),
-                    resultatFraKompetanse = kompetanse.resultat!!
-                )
-            }
+        val erKompetanserSomPasserMedBegrunnelseOgPeriode = erKompetanserSomPasserMedBegrunnelseOgPeriode(
+            begrunnelse = begrunnelse,
+            kompetanserIPeriode = kompetanserIPeriode,
+            kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
+        )
+
+        val erVilkårResulaterSomPasserMedBegrunnelseOgPeriode =
+            hentBarnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode(
+                begrunnelse,
+                minimertePersonResultater,
+                personerPåBehandling,
+                minimertVedtaksperiode,
+            ).isNotEmpty()
+
+        val skalBrukeKompetanseData = begrunnelse.sanityEØSBegrunnelse.skalBrukeKompetanseData()
+        val skalBrukeVilkårData = begrunnelse.sanityEØSBegrunnelse.skalBrukeVilkårData()
+
+        when {
+            skalBrukeKompetanseData && skalBrukeVilkårData ->
+                erKompetanserSomPasserMedBegrunnelseOgPeriode || erVilkårResulaterSomPasserMedBegrunnelseOgPeriode
+            skalBrukeKompetanseData -> erKompetanserSomPasserMedBegrunnelseOgPeriode
+            skalBrukeVilkårData -> erVilkårResulaterSomPasserMedBegrunnelseOgPeriode
             else -> false
         }
     }.map { it.eøsBegrunnelse }
+
+private fun erKompetanserSomPasserMedBegrunnelseOgPeriode(
+    begrunnelse: EØSBegrunnelseMedTriggere,
+    kompetanserIPeriode: List<Kompetanse>,
+    kompetanserSomStopperRettFørPeriode: List<Kompetanse>
+): Boolean {
+    val relevanteKompetanser = when (begrunnelse.eøsBegrunnelse.vedtakBegrunnelseType) {
+        VedtakBegrunnelseType.EØS_INNVILGET -> kompetanserIPeriode
+        VedtakBegrunnelseType.EØS_OPPHØR -> kompetanserSomStopperRettFørPeriode
+        else -> emptyList()
+    }
+
+    return hentKompetanserGyldigeForEØSBegrunnelse(begrunnelse, relevanteKompetanser).isNotEmpty()
+}
 
 fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode: MinimertVedtaksperiode,
@@ -363,7 +403,7 @@ private fun velgRedusertBegrunnelser(
     val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
         it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
     }
-    if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
+    if (minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer.any { it.utbetaltPerMnd > 0 }) {
         val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
             Standardbegrunnelse.values().toList(),
             sanityBegrunnelser,

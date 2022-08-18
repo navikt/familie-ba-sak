@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseMedKompetanseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -111,7 +111,7 @@ class VedtaksperiodeMedBegrunnelserController(
             when (it) {
                 is FritekstBegrunnelse -> it.fritekst
                 is BegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
-                is EØSBegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
+                is EØSBegrunnelseMedKompetanseData -> brevKlient.hentBegrunnelsestekst(it)
                 else -> throw Feil("Ukjent begrunnelsestype")
             }
         }

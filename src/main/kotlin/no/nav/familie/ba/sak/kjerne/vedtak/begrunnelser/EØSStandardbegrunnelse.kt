@@ -119,6 +119,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_IKKE_OPPHOLDSRETT_SOM_FAMILIEMEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorIkkeOppholdsrettSomFamiliemedlem"
+    },
+    OPPHØR_SEPARASJONSAVTALE_GJELDER_IKKE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSeparasjonsavtaleGjelderIkke"
     };
 
     override val kanDelesOpp: Boolean = false

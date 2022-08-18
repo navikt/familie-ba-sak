@@ -35,7 +35,7 @@ data class BrevperiodeData(
         val brevPeriodeGenereator = this.tilBrevPeriodeGenerator()
         return brevPeriodeGenereator.byggBegrunnelserOgFritekster(
             begrunnelserGrunnlagMedPersoner = brevPeriodeGenereator.hentBegrunnelsegrunnlagMedPersoner(),
-            eøsBegrunnelserMedKompetanser = brevPeriodeGenereator.hentEøsBegrunnelserMedKompetanser()
+            eøsBegrunnelser = brevPeriodeGenereator.hentEøsBegrunnelser()
         )
     }
 

@@ -65,6 +65,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSTriggerType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
@@ -1081,6 +1082,9 @@ fun lagSanityEøsBegrunnelse(
     hjemlerEØSForordningen883: List<String> = emptyList(),
     hjemlerEØSForordningen987: List<String> = emptyList(),
     hjemlerSeperasjonsavtalenStorbritannina: List<String> = emptyList(),
+    triggereIBruk: List<EØSTriggerType> = listOf(EØSTriggerType.KOMPETANSE),
+    vilkår: List<Vilkår> = emptyList(),
+    utdypendeVilkårsvurdering: List<UtdypendeVilkårsvurdering> = emptyList(),
 ): SanityEØSBegrunnelse = SanityEØSBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1091,7 +1095,10 @@ fun lagSanityEøsBegrunnelse(
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     hjemlerEØSForordningen883 = hjemlerEØSForordningen883,
     hjemlerEØSForordningen987 = hjemlerEØSForordningen987,
-    hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina
+    hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina,
+    triggereIBruk = triggereIBruk,
+    vilkår = vilkår,
+    utdypendeVilkårsvurderinger = utdypendeVilkårsvurdering
 )
 
 fun lagTriggesAv(
