@@ -63,14 +63,12 @@ object VilkårsvurderingResultatFlytter {
             } else {
                 // Fyll inn den initierte med person fra aktiv
                 val vilkårSomSkalOppdateresPåEksisterendePerson = finnVilkårSomSkalOppdateresPåEksisterendePerson(
-                    personFraInit = PersonFraInitRequest(
-                        aktør = personFraInit.aktør,
-                        vilkårResultater = personFraInit.vilkårResultater
-                    ),
                     kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
                     løpendeUnderkategori = løpendeUnderkategori,
                     personenSomFinnesVilkårResultater = personenSomFinnes.vilkårResultater,
-                    personResultaterFraForrigeBehandling = personResultaterFraForrigeBehandling
+                    personResultaterFraForrigeBehandling = personResultaterFraForrigeBehandling,
+                    personFraInitVilkårResultater = personFraInit.vilkårResultater,
+                    personFraInitAktør = personFraInit.aktør
                 )
                 vilkårResultatet = vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
 
@@ -102,15 +100,16 @@ object VilkårsvurderingResultatFlytter {
     }
 
     private fun finnVilkårSomSkalOppdateresPåEksisterendePerson(
-        personFraInit: PersonFraInitRequest,
         kopieringSkjerFraForrigeBehandling: Boolean,
         løpendeUnderkategori: BehandlingUnderkategori?,
         personenSomFinnesVilkårResultater: Set<VilkårResultat>,
-        personResultaterFraForrigeBehandling: Set<PersonResultat>?
-    ): OppdaterEksisterendePersonResponse {
+        personResultaterFraForrigeBehandling: Set<PersonResultat>?,
+        personFraInitVilkårResultater: Set<VilkårResultat>,
+        personFraInitAktør: Aktør
+    ): AktivtOgOppdatertVilkårResultat {
         val personsVilkårAktivt = personenSomFinnesVilkårResultater.toMutableSet()
         val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
-        personFraInit.vilkårResultater.forEach { vilkårFraInit ->
+        personFraInitVilkårResultater.forEach { vilkårFraInit ->
             val vilkårSomFinnes = personenSomFinnesVilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
 
             val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
@@ -135,8 +134,8 @@ object VilkårsvurderingResultatFlytter {
         if (forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet(
                 personsVilkårOppdatert,
                 personResultaterFraForrigeBehandling,
-                personFraInit,
-                løpendeUnderkategori
+                løpendeUnderkategori,
+                personFraInitAktør
             )
         ) {
             val utvidetVilkår =
@@ -145,7 +144,7 @@ object VilkårsvurderingResultatFlytter {
             personsVilkårAktivt.removeAll(utvidetVilkår)
         }
 
-        return OppdaterEksisterendePersonResponse(
+        return AktivtOgOppdatertVilkårResultat(
             personsVilkårAktivt = personsVilkårAktivt,
             personsVilkårOppdatert = personsVilkårOppdatert
         )
@@ -156,21 +155,21 @@ object VilkårsvurderingResultatFlytter {
     private fun forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet(
         personsVilkårOppdatert: MutableSet<VilkårResultat>,
         personResultaterFraForrigeBehandling: Set<PersonResultat>?,
-        personFraInit: PersonFraInitRequest,
-        løpendeUnderkategori: BehandlingUnderkategori?
+        løpendeUnderkategori: BehandlingUnderkategori?,
+        personFraInitAktør: Aktør
     ) = personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
         (
             eksistererUtvidetVilkårPåForrigeBehandling(
                 personResultaterFraForrigeBehandling,
-                personFraInit
+                personFraInitAktør
             ) || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET
             )
 
     private fun eksistererUtvidetVilkårPåForrigeBehandling(
         personResultaterFraForrigeBehandling: Set<PersonResultat>?,
-        personFraInit: PersonFraInitRequest
+        personFraInitAktør: Aktør
     ): Boolean = personResultaterFraForrigeBehandling
-        ?.firstOrNull { it.aktør == personFraInit.aktør }
+        ?.firstOrNull { it.aktør == personFraInitAktør }
         ?.vilkårResultater
         ?.any {
             it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
@@ -187,9 +186,7 @@ object VilkårsvurderingResultatFlytter {
         }
     }
 
-    private data class PersonFraInitRequest(val aktør: Aktør, val vilkårResultater: Set<VilkårResultat>)
-
-    private data class OppdaterEksisterendePersonResponse(
+    private data class AktivtOgOppdatertVilkårResultat(
         val personsVilkårAktivt: Set<VilkårResultat>,
         val personsVilkårOppdatert: Set<VilkårResultat>
     )
