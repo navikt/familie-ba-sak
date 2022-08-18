@@ -77,16 +77,17 @@ object TilkjentYtelseUtils {
             endretUtbetalingAndeler = endretUtbetalingAndeler.filter { it.årsak != Årsak.ETTERBETALING_3ÅR }
         )
 
-        val andelerTilkjentYtelseSmåbarnstillegg = if (andelerTilkjentYtelseUtvidet.isNotEmpty()) {
+        val andelerTilkjentYtelseSmåbarnstillegg =
             SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = vilkårsvurdering.behandling.id,
                 tilkjentYtelse = tilkjentYtelse
             )
-                .lagSmåbarnstilleggAndelerGammel(
+                .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = hentPerioderMedFullOvergangsstønad(
                         personopplysningGrunnlag.søker.aktør
                     ),
-                    andelerTilkjentYtelse = andelerTilkjentYtelseUtvidet + andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år,
+                    utvidetAndeler = andelerTilkjentYtelseUtvidet,
+                    barnasAndeler = andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år,
                     barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
                         Pair(
                             it.aktør,
@@ -94,7 +95,6 @@ object TilkjentYtelseUtils {
                         )
                     },
                 )
-        } else emptyList()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaOppdatertMedAlleEndringsperioder + andelerTilkjentYtelseUtvidet + andelerTilkjentYtelseSmåbarnstillegg)
 
