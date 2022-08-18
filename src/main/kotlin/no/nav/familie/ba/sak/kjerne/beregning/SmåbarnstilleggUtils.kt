@@ -169,10 +169,11 @@ fun kombinerBarnasTidslinjerTilUnder3ÅrResultat(
 ): BarnSinRettTilSmåbarnstillegg? {
     val høyesteProsentIPeriode = alleAndelerForBarnUnder3År.maxOfOrNull { it.prosent }
 
-    return when (høyesteProsentIPeriode) {
-        null -> null
-        BigDecimal.ZERO -> BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING
-        else -> BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING
+    return when {
+        høyesteProsentIPeriode == null -> null
+        høyesteProsentIPeriode > BigDecimal.ZERO -> BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING
+        høyesteProsentIPeriode == BigDecimal.ZERO -> BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING
+        else -> throw Feil("Høyeste prosent for barna i perioden er et negativt tall.")
     }
 }
 
@@ -212,7 +213,7 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
             if (overgangsstønad == null || utvidet == null || under3År == null) null
             else if (utvidet.prosent > BigDecimal.ZERO && under3År == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING) SmåbarnstilleggPeriode(overgangsstønad, BigDecimal(100))
             else if (utvidet.prosent == BigDecimal.ZERO || under3År == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING) SmåbarnstilleggPeriode(overgangsstønad, BigDecimal.ZERO)
-            else null
+            else throw Feil("Ugyldig kombinasjon av overgangsstønad, utvidet og barn under 3 år ved generering av småbarnstillegg.")
         }
         .filtrerIkkeNull()
 }
