@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
@@ -9,17 +11,24 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.tilyyyyMMdd
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -760,5 +769,166 @@ internal class TilkjentYtelseUtilsTest {
                 it.endretUtbetalingAndeler.single().id
             )
         }
+    }
+
+    @Test
+    fun `Delt bosted - case 1`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(3))
+
+        val startTidspunkt = YearMonth.now().minusMonths(7)
+
+        val tidsrom = MånedPeriode(startTidspunkt, YearMonth.now().plusMonths(4))
+
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søker = søker,
+            barn = listOf(barn),
+            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = LocalDate.now().minusMonths(5),
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED,
+                    aktør = barn.aktør
+                )
+            )
+        )
+
+        val overgangsstønadPerioder = lagOvergangsstønadPerioder(perioder = listOf(tidsrom), søkerIdent = søker.aktør.aktivFødselsnummer())
+
+        val endringsperioder = listOf(
+            lagEndretUtbetalingAndel(
+                behandlingId = vilkårsvurdering.behandling.id,
+                person = søker,
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.DELT_BOSTED,
+                fom = YearMonth.now().minusMonths(4),
+                tom = YearMonth.now().minusMonths(1)
+            ),
+            lagEndretUtbetalingAndel(
+                behandlingId = vilkårsvurdering.behandling.id,
+                person = barn,
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.DELT_BOSTED,
+                fom = YearMonth.now().minusMonths(4),
+                tom = YearMonth.now().minusMonths(1)
+            )
+        )
+
+        val tilkjentYtelse = beregnTilkjentYtelse(
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = lagPersonopplysningsgrunnlag(personer = listOf(søker, barn), behandlingId = vilkårsvurdering.behandling.id),
+            behandling = vilkårsvurdering.behandling,
+            endretUtbetalingAndeler = endringsperioder,
+        ) {
+            (_) ->
+            overgangsstønadPerioder
+        }
+
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(tidsrom.tom) }
+
+        assertEquals(6, andelerTilkjentYtelseITidsrom.size)
+    }
+
+    private fun lagPersonopplysningsgrunnlag(personer: List<Person>, behandlingId: Long): PersonopplysningGrunnlag {
+        return PersonopplysningGrunnlag(
+            personer = personer.toMutableSet(),
+            behandlingId = behandlingId
+        )
+    }
+
+    private fun lagOvergangsstønadPerioder(perioder: List<MånedPeriode>, søkerIdent: String): List<InternPeriodeOvergangsstønad> {
+        return perioder.map {
+            InternPeriodeOvergangsstønad(
+                søkerIdent,
+                it.fom.førsteDagIInneværendeMåned(),
+                it.tom.sisteDagIInneværendeMåned()
+            )
+        }
+    }
+
+    private data class AtypiskVilkår(
+        val aktør: Aktør,
+        val fom: LocalDate,
+        val tom: LocalDate? = null,
+        val resultat: Resultat = Resultat.OPPFYLT,
+        val vilkårType: Vilkår,
+        val utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering?
+    )
+
+    private fun lagVilkårResultat(personResultat: PersonResultat, fom: LocalDate, tom: LocalDate? = null, resultat: Resultat = Resultat.OPPFYLT, vilkårType: Vilkår, utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()): VilkårResultat {
+        return VilkårResultat(
+            personResultat = personResultat,
+            vilkårType = vilkårType,
+            resultat = resultat,
+            periodeFom = fom,
+            periodeTom = tom,
+            begrunnelse = "",
+            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
+        )
+    }
+
+    private fun lagVilkårsvurdering(
+        søker: Person,
+        barn: List<Person>,
+        ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+        atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList(),
+        atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList()
+    ): Vilkårsvurdering {
+        val behandling = lagBehandling()
+
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+
+        val eldsteBarn = barn.minBy { it.fødselsdato }
+
+        val søkerPersonResultat = lagPersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            person = søker,
+            ytelseType = ytelseType,
+            standardFom = eldsteBarn.fødselsdato,
+            atypiskeVilkår = atypiskeVilkårSøker
+        )
+
+        val barnasPersonResultater = barn.map { barnet ->
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                person = barnet,
+                ytelseType = ytelseType,
+                standardFom = barnet.fødselsdato,
+                atypiskeVilkår = atypiskeVilkårBarna.filter { it.aktør == barnet.aktør }
+            )
+        }
+
+        vilkårsvurdering.personResultater = barnasPersonResultater.toSet().plus(søkerPersonResultat)
+        return vilkårsvurdering
+    }
+
+    private fun lagPersonResultat(
+        vilkårsvurdering: Vilkårsvurdering,
+        person: Person,
+        ytelseType: YtelseType,
+        standardFom: LocalDate,
+        atypiskeVilkår: List<AtypiskVilkår>
+    ): PersonResultat {
+        val personResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = person.aktør
+        )
+
+        val vilkårForPersonType = Vilkår.hentVilkårFor(personType = person.type, ytelseType = ytelseType)
+
+        val ordinæreVilkårResultater = vilkårForPersonType.map { vilkår ->
+            lagVilkårResultat(personResultat = personResultat, vilkårType = vilkår, resultat = Resultat.OPPFYLT, fom = standardFom, tom = if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.til18ÅrsVilkårsdato() else null)
+        }
+
+        val atypiskeVilkårTyper = atypiskeVilkår.map { it.vilkårType }
+
+        val oppdaterteVilkårResultater = ordinæreVilkårResultater
+            .filter { it.vilkårType !in atypiskeVilkårTyper }
+            .plus(atypiskeVilkår.map { lagVilkårResultat(personResultat = personResultat, fom = it.fom, tom = it.tom, vilkårType = it.vilkårType, resultat = it.resultat, utdypendeVilkårsvurderinger = if (it.utdypendeVilkårsvurdering != null) listOf(it.utdypendeVilkårsvurdering) else emptyList()) })
+
+        personResultat.setSortedVilkårResultater(oppdaterteVilkårResultater.toSet())
+        return personResultat
     }
 }
