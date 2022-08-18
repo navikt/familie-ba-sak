@@ -82,7 +82,7 @@ object TilkjentYtelseUtils {
                 behandlingId = vilkårsvurdering.behandling.id,
                 tilkjentYtelse = tilkjentYtelse
             )
-                .lagSmåbarnstilleggAndeler(
+                .lagSmåbarnstilleggAndelerGammel(
                     perioderMedFullOvergangsstønad = hentPerioderMedFullOvergangsstønad(
                         personopplysningGrunnlag.søker.aktør
                     ),
@@ -237,20 +237,21 @@ object TilkjentYtelseUtils {
                     personopplysningGrunnlag.søker.aktør
                 )
 
-            SmåbarnstilleggBarnetrygdGenerator(
+            val småbarnstilleggGenerator = SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = vilkårsvurdering.behandling.id,
                 tilkjentYtelse = tilkjentYtelse
             )
-                .lagSmåbarnstilleggAndeler(
-                    perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
-                    andelerTilkjentYtelse = andelerTilkjentYtelseSøker + andelerTilkjentYtelseBarna,
-                    barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
-                        Pair(
-                            it.aktør,
-                            it.fødselsdato
-                        )
-                    },
-                )
+
+            småbarnstilleggGenerator.lagSmåbarnstilleggAndelerGammel(
+                perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
+                andelerTilkjentYtelse = andelerTilkjentYtelseSøker + andelerTilkjentYtelseBarna,
+                barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
+                    Pair(
+                        it.aktør,
+                        it.fødselsdato
+                    )
+                },
+            )
         } else emptyList()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker + andelerTilkjentYtelseSmåbarnstillegg)
