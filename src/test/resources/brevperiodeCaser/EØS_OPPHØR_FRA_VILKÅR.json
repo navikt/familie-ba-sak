@@ -1,0 +1,83 @@
+{
+  "beskrivelse": "Barnetrygd opphører på barn fordi barnet ikke lenger bor i Storbritannia.",
+  "fom": "2021-10-01",
+  "tom": null,
+  "vedtaksperiodetype": "OPPHØR",
+  "begrunnelser": [],
+  "eøsBegrunnelser": [
+    "OPPHØR_SEPARASJONSAVTALE_GJELDER_IKKE"
+  ],
+  "fritekster": [],
+  "personerPåBehandling": [
+    {
+      "fødselsdato": "2011-09-23",
+      "type": "BARN",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "periodeFom": "2011-09-23",
+          "periodeTom": "2021-09-22",
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [
+            "BARN_BOR_I_STORBRITANNIA_MED_SØKER"
+          ],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": [],
+      "harReduksjonFraForrigeBehandling": false
+    },
+    {
+      "fødselsdato": "2011-09-23",
+      "type": "BARN",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "periodeFom": "2011-09-23",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [
+            "BARN_BOR_I_STORBRITANNIA_MED_SØKER"
+          ],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": [],
+      "harReduksjonFraForrigeBehandling": false
+    },
+    {
+      "fødselsdato": "1987-03-28",
+      "type": "SØKER",
+      "overstyrteVilkårresultater": [],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": [],
+      "harReduksjonFraForrigeBehandling": false
+    }
+  ],
+  "uregistrerteBarn": [],
+  "erFørsteVedtaksperiodePåFagsak": false,
+  "brevMålform": "NB",
+  "forventetOutput": {
+    "fom": "1. oktober 2021",
+    "tom": "",
+    "belop": 0,
+    "antallBarn": 0,
+    "barnasFodselsdager": "",
+    "begrunnelser": [
+      {
+        "apiNavn": "opphorSeparasjonsavtaleGjelderIkke",
+        "barnasFodselsdatoer": "23.09.11",
+        "antallBarn": 1,
+        "maalform": "bokmaal",
+        "type": "eøsbegrunnelse",
+        "gjelderSoker": true
+      }
+    ],
+    "type": "opphor"
+  }
+}

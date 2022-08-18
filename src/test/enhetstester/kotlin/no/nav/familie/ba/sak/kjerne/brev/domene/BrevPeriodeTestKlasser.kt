@@ -28,6 +28,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseMedKompetanseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.IEØSBegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.SøkersRettTilUtvidet
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -215,27 +217,43 @@ data class BegrunnelseDataTestConfig(
 
 data class EØSBegrunnelseTestConfig(
     val apiNavn: String,
-    val annenForeldersAktivitet: AnnenForeldersAktivitet,
-    val annenForeldersAktivitetsland: String,
-    val barnetsBostedsland: String,
-    val barnasFodselsdatoer: String,
     val antallBarn: Int,
     val maalform: String,
-    val sokersAktivitet: SøkersAktivitet,
+    val gjelderSoker: Boolean,
+    val annenForeldersAktivitet: AnnenForeldersAktivitet?,
+    val annenForeldersAktivitetsland: String?,
+    val barnetsBostedsland: String?,
+    val barnasFodselsdatoer: String,
+    val sokersAktivitet: SøkersAktivitet?,
 ) : TestBegrunnelse {
-    fun tilEØSBegrunnelseData(): EØSBegrunnelseData = EØSBegrunnelseData(
-        apiNavn = this.apiNavn,
-        annenForeldersAktivitet = this.annenForeldersAktivitet,
-        annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
-        barnetsBostedsland = this.barnetsBostedsland,
-        barnasFodselsdatoer = this.barnasFodselsdatoer,
-        antallBarn = this.antallBarn,
-        maalform = this.maalform,
-        vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
-            .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
-            ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
-        sokersAktivitet = this.sokersAktivitet,
-    )
+    fun tilEØSBegrunnelseData(): IEØSBegrunnelseData =
+        if (this.annenForeldersAktivitet != null &&
+            this.barnetsBostedsland != null &&
+            this.annenForeldersAktivitetsland != null &&
+            this.sokersAktivitet != null
+        ) EØSBegrunnelseMedKompetanseData(
+            apiNavn = this.apiNavn,
+            annenForeldersAktivitet = this.annenForeldersAktivitet,
+            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
+            barnetsBostedsland = this.barnetsBostedsland,
+            barnasFodselsdatoer = this.barnasFodselsdatoer,
+            antallBarn = this.antallBarn,
+            maalform = this.maalform,
+            vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
+                .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
+                ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
+            sokersAktivitet = this.sokersAktivitet,
+            gjelderSøker = this.gjelderSoker
+        ) else EØSBegrunnelseData(
+            apiNavn = this.apiNavn,
+            barnasFodselsdatoer = this.barnasFodselsdatoer,
+            antallBarn = this.antallBarn,
+            maalform = this.maalform,
+            vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
+                .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
+                ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
+            gjelderSøker = this.gjelderSoker
+        )
 }
 
 data class BrevPeriodeOutput(
