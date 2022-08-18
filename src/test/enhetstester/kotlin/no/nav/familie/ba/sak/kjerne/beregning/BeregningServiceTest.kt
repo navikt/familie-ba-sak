@@ -1076,8 +1076,7 @@ class BeregningServiceTest {
             )
         )
 
-        val personResultatBarna = barna.map {
-            barn ->
+        val personResultatBarna = barna.map { barn ->
             val barnPersonResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = barn.aktør
