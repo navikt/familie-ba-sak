@@ -23,7 +23,7 @@ import java.util.Properties
 @Service
 @TaskStepBeskrivelse(
     taskStepType = SendMeldingTilBisysTask.TASK_STEP_TYPE,
-    beskrivelse = "Iverksett vedtak mot oppdrag",
+    beskrivelse = "Send melding til Bisys om opphør eller reduksjon",
     maxAntallFeil = 3
 )
 class SendMeldingTilBisysTask(
@@ -53,6 +53,7 @@ class SendMeldingTilBisysTask(
                 return
             }
 
+            logger.info("Sender melding til bisys om opphør eller reduksjon av barnetrygd.")
             kafkaProducer.sendBarnetrygdBisysMelding(
                 behandling.id.toString(),
                 barnetrygdBisysMelding
