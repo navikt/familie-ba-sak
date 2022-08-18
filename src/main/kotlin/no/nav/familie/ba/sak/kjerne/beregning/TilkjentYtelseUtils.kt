@@ -42,6 +42,7 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
+        skalBrukeNyMåteÅGenerereAndeler: Boolean = true,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
@@ -110,11 +111,25 @@ object TilkjentYtelseUtils {
                     personopplysningGrunnlag.søker.aktør
                 )
 
-            SmåbarnstilleggBarnetrygdGenerator(
+            val småbarnstilleggGenerator = SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = vilkårsvurdering.behandling.id,
                 tilkjentYtelse = tilkjentYtelse
             )
-                .lagSmåbarnstilleggAndeler(
+
+            if (skalBrukeNyMåteÅGenerereAndeler) {
+                småbarnstilleggGenerator.lagSmåbarnstilleggAndeler(
+                    perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
+                    utvidetAndeler = andelerTilkjentYtelseSøker,
+                    barnasAndeler = andelerTilkjentYtelseBarna,
+                    barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
+                        Pair(
+                            it.aktør,
+                            it.fødselsdato
+                        )
+                    }
+                )
+            } else {
+                småbarnstilleggGenerator.lagSmåbarnstilleggAndelerGammel(
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
                     andelerTilkjentYtelse = andelerTilkjentYtelseSøker + andelerTilkjentYtelseBarna,
                     barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
@@ -124,6 +139,7 @@ object TilkjentYtelseUtils {
                         )
                     },
                 )
+            }
         } else emptyList()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker + andelerTilkjentYtelseSmåbarnstillegg)
