@@ -133,18 +133,40 @@ data class FritekstBegrunnelse(
     override val type: Begrunnelsetype = Begrunnelsetype.FRITEKST
 }
 
-data class EØSBegrunnelseData(
+interface IEØSBegrunnelseData : BegrunnelseMedData {
+
+    val barnasFodselsdatoer: String
+    val antallBarn: Int
+    val maalform: String
+    val gjelderSøker: Boolean
+}
+
+data class EØSBegrunnelseMedKompetanseData(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
     override val apiNavn: String,
+
+    override val barnasFodselsdatoer: String,
+    override val antallBarn: Int,
+    override val maalform: String,
+    override val gjelderSøker: Boolean,
 
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String?,
     val barnetsBostedsland: String,
-    val barnasFodselsdatoer: String,
-    val antallBarn: Int,
-    val maalform: String,
     val sokersAktivitet: SøkersAktivitet,
-) : BegrunnelseMedData {
+) : IEØSBegrunnelseData {
+    override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
+}
+
+data class EØSBegrunnelseData(
+    override val vedtakBegrunnelseType: VedtakBegrunnelseType,
+    override val apiNavn: String,
+
+    override val barnasFodselsdatoer: String,
+    override val antallBarn: Int,
+    override val maalform: String,
+    override val gjelderSøker: Boolean,
+) : IEØSBegrunnelseData {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
 }
 
