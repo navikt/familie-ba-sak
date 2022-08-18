@@ -20,9 +20,9 @@ object VilkårsvurderingResultatFlytter {
      * @param forrigeBehandlingVilkårsvurdering - Vilkårsvurdering fra forrige behandling (om den eksisterer).
      *                                            Brukes for å sjekke om utvidet-vilkåret skal kopieres med videre.
      * @param løpendeUnderkategori - Den løpende underkategorien for fagsaken. Brukes for å sjekke om utvidet-vilkåret skal kopieres med videre.
-     * @return oppdaterte versjoner av initieltResultat og aktivtResultat:
-     * initieltResultat (neste aktivt) med vilkår som skal benyttes videre
-     * aktivtResultat med hvilke vilkår som ikke skal benyttes videre
+     * @return oppdaterte mengder med personResultat for initieltResultat og aktivtResultat
+     * mengden for initieltResultat (neste aktivt) med vilkår som skal benyttes videre
+     * mengden for aktivtResultat med hvilke vilkår som ikke skal benyttes videre
      */
     fun flyttResultaterTilInitielt(
         initiellVilkårsvurdering: Vilkårsvurdering,

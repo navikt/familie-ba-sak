@@ -180,19 +180,7 @@ object VilkårsvurderingUtils {
         }
     }
 
-    /**
-     * Dersom personer i initieltResultat har vurderte vilkår i aktivtResultat vil disse flyttes til initieltResultat
-     * (altså vil tilsvarende vilkår overskrives i initieltResultat og slettes fra aktivtResultat).
-     *
-     * @param initiellVilkårsvurdering - Vilkårsvurdering med vilkår basert på siste behandlignsgrunnlag. Skal bli neste aktive.
-     * @param aktivVilkårsvurdering -  Vilkårsvurdering med vilkår basert på forrige behandlingsgrunnlag
-     * @param forrigeBehandlingVilkårsvurdering - Vilkårsvurdering fra forrige behandling (om den eksisterer).
-     *                                            Brukes for å sjekke om utvidet-vilkåret skal kopieres med videre.
-     * @param løpendeUnderkategori - Den løpende underkategorien for fagsaken. Brukes for å sjekke om utvidet-vilkåret skal kopieres med videre.
-     * @return oppdaterte versjoner av initieltResultat og aktivtResultat:
-     * initieltResultat (neste aktivt) med vilkår som skal benyttes videre
-     * aktivtResultat med hvilke vilkår som ikke skal benyttes videre
-     */
+    @Deprecated(message = "Kall heller VilkårsvurderingResultatFlytter direkte")
     fun flyttResultaterTilInitielt(
         initiellVilkårsvurdering: Vilkårsvurdering,
         aktivVilkårsvurdering: Vilkårsvurdering,

@@ -169,7 +169,7 @@ class VilkårsvurderingForNyBehandlingService(
         forrigeBehandlingSomErVedtatt: Behandling?,
         bekreftEndringerViaFrontend: Boolean
     ): Vilkårsvurdering {
-        val (initieltSomErOppdatert, aktivtSomErRedusert) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
+        val (initieltVilkårsVurderingSomErOppdatert, aktivtPersonResultatSomErRedusert) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
@@ -178,13 +178,13 @@ class VilkårsvurderingForNyBehandlingService(
             ) else null
         )
 
-        if (aktivtSomErRedusert.isNotEmpty() && !bekreftEndringerViaFrontend) {
+        if (aktivtPersonResultatSomErRedusert.isNotEmpty() && !bekreftEndringerViaFrontend) {
             throw FunksjonellFeil(
                 melding = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
-                frontendFeilmelding = VilkårsvurderingUtils.lagFjernAdvarsel(aktivtSomErRedusert)
+                frontendFeilmelding = VilkårsvurderingUtils.lagFjernAdvarsel(aktivtPersonResultatSomErRedusert)
             )
         }
-        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltVilkårsVurderingSomErOppdatert)
     }
 
     private fun tellMetrikkerForFødselshendelse(
