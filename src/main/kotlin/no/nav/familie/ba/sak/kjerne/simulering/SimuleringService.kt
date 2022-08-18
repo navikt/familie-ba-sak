@@ -56,9 +56,8 @@ class SimuleringService(
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             erSimulering = true
         )
-        secureLogger.info("Generert utbetalingsoppdrag på gamle måte=$utbetalingsoppdrag")
-
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
+            secureLogger.info("Generert utbetalingsoppdrag på gamle måte=$utbetalingsoppdrag")
             val generertUtbetalingsoppdrag = utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 vedtak = vedtak,
                 saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),

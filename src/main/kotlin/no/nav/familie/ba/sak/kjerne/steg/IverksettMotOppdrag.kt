@@ -62,8 +62,8 @@ class IverksettMotOppdrag(
             vedtak = vedtakService.hent(data.vedtaksId),
             saksbehandlerId = data.saksbehandlerId
         )
-        secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på gamle måte=$utbetalingsoppdrag")
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
+            secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på gamle måte=$utbetalingsoppdrag")
             val generertUtbetalingsoppdrag = utbetalingsoppdragService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
                 vedtak = vedtakService.hent(data.vedtaksId),
                 saksbehandlerId = data.saksbehandlerId
