@@ -58,7 +58,8 @@
         "antallBarn": 1,
         "maalform": "bokmaal",
         "sokersAktivitet": "ARBEIDER_I_NORGE",
-        "type": "eøsbegrunnelse"
+        "type": "eøsbegrunnelse",
+        "gjelderSoker": false
       }
     ],
     "type": "opphor"
