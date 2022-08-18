@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingResultatFlytter.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -32,14 +32,14 @@ class OppdaterVilkårsvurderingTest {
         val resA = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
         val resB = lagVilkårsvurderingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
-        val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
+        val (oppdatert, gamlePersonResultat) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(3, oppdatert.personResultater.first().vilkårResultater.size)
         Assertions.assertEquals(
             Resultat.OPPFYLT,
             oppdatert.personResultater.first()
                 .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat
         )
-        Assertions.assertTrue(gammelt.isEmpty())
+        Assertions.assertTrue(gamlePersonResultat.isEmpty())
     }
 
     @Test
@@ -50,15 +50,15 @@ class OppdaterVilkårsvurderingTest {
         val resA = lagVilkårsvurderingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
         val resB = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
-        val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
+        val (oppdatert, gamlePersonResultat) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(2, oppdatert.personResultater.first().vilkårResultater.size)
         Assertions.assertEquals(
             Resultat.OPPFYLT,
             oppdatert.personResultater.first()
                 .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat
         )
-        Assertions.assertEquals(1, gammelt.size)
-        Assertions.assertEquals(1, gammelt.first().vilkårResultater.size)
+        Assertions.assertEquals(1, gamlePersonResultat.size)
+        Assertions.assertEquals(1, gamlePersonResultat.first().vilkårResultater.size)
     }
 
     @Test
@@ -74,9 +74,9 @@ class OppdaterVilkårsvurderingTest {
             fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2))
         )
 
-        val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
+        val (oppdatert, gamlePersonResultat) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(2, oppdatert.personResultater.size)
-        Assertions.assertEquals(0, gammelt.size)
+        Assertions.assertEquals(0, gamlePersonResultat.size)
     }
 
     @Test
@@ -92,9 +92,9 @@ class OppdaterVilkårsvurderingTest {
         )
         val resB = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
-        val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
+        val (oppdatert, gamlePersonResultat) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(1, oppdatert.personResultater.size)
-        Assertions.assertEquals(1, gammelt.size)
+        Assertions.assertEquals(1, gamlePersonResultat.size)
     }
 
     @Test
@@ -241,7 +241,7 @@ class OppdaterVilkårsvurderingTest {
         val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivMedUtvidetVilkår,
-            forrigeBehandlingVilkårsvurdering = aktivMedUtvidetVilkår,
+            personResultaterFraForrigeBehandling = aktivMedUtvidetVilkår.personResultater,
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET
         )
 
@@ -297,7 +297,7 @@ class OppdaterVilkårsvurderingTest {
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivMedUtvidetVilkår,
             løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR,
-            forrigeBehandlingVilkårsvurdering = initUtenUtvidetVilkår
+            personResultaterFraForrigeBehandling = initUtenUtvidetVilkår.personResultater
         )
 
         val nyInitInnholderIkkeUtvidetVilkår =
@@ -349,7 +349,7 @@ class OppdaterVilkårsvurderingTest {
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            forrigeBehandlingVilkårsvurdering = aktivVilkårsvurderingMedUtvidet
+            personResultaterFraForrigeBehandling = aktivVilkårsvurderingMedUtvidet.personResultater
         )
 
         val nyInitUtvidetVilkår =
@@ -397,7 +397,7 @@ class OppdaterVilkårsvurderingTest {
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            forrigeBehandlingVilkårsvurdering = aktivVilkårsvurderingMedUtvidet
+            personResultaterFraForrigeBehandling = aktivVilkårsvurderingMedUtvidet.personResultater
         )
 
         val nyInitUtvidetVilkår =
@@ -446,7 +446,7 @@ class OppdaterVilkårsvurderingTest {
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt,
             løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
-            forrigeBehandlingVilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt
+            personResultaterFraForrigeBehandling = aktivVilkårsvurderingMedUtvidetIkkeOppfylt.personResultater
         )
 
         val nyInitInneholderIkkeUtvidetVilkår =

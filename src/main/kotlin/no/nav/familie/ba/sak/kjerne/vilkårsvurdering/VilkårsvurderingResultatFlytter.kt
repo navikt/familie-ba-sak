@@ -28,7 +28,7 @@ object VilkårsvurderingResultatFlytter {
         initiellVilkårsvurdering: Vilkårsvurdering,
         aktivVilkårsvurdering: Vilkårsvurdering,
         løpendeUnderkategori: BehandlingUnderkategori? = null,
-        personResultaterFraForrigeBehandling: Set<PersonResultat>?
+        personResultaterFraForrigeBehandling: Set<PersonResultat>? = null
     ): Pair<Vilkårsvurdering, Set<PersonResultat>> {
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
