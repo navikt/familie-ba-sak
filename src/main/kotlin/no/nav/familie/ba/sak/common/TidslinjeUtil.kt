@@ -28,7 +28,7 @@ fun erUnder6ÅrTidslinje(person: Person) = tidslinje {
     )
 }
 
-fun erUnder3ÅrTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> = tidslinje {
+fun erTilogMed3ÅrTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> = tidslinje {
     listOf(
         Periode(
             fødselsdato.toYearMonth().tilTidspunkt().neste(),

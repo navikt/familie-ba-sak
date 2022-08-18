@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.erUnder3ÅrTidslinje
+import no.nav.familie.ba.sak.common.erTilogMed3ÅrTidslinje
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -186,9 +186,9 @@ fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
     val barnasAndelerUnder3ÅrTidslinje = barnasAndelerTidslinjer.map { (barnAktør, barnTidslinje) ->
         val barnetsFødselsdato = barnasAktørerOgFødselsdatoer.find { it.first == barnAktør }?.second ?: throw Feil("Kan ikke beregne småbarnstillegg for et barn som ikke har fødselsdato.")
 
-        val under3ÅrTidslinje = erUnder3ÅrTidslinje(barnetsFødselsdato)
+        val erTilOgMed3ÅrTidslinje = erTilogMed3ÅrTidslinje(barnetsFødselsdato)
 
-        barnTidslinje.beskjærEtter(under3ÅrTidslinje)
+        barnTidslinje.beskjærEtter(erTilOgMed3ÅrTidslinje)
     }
 
     return barnasAndelerUnder3ÅrTidslinje.kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }.filtrerIkkeNull()
