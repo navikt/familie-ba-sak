@@ -29,9 +29,9 @@ class FeatureToggleConfig(
 
     @Bean
     fun featureToggle(): FeatureToggleService =
-        if (enabled)
+        if (enabled) {
             lagUnleashFeatureToggleService()
-        else {
+        } else {
             logger.warn(
                 "Funksjonsbryter-funksjonalitet er skrudd AV. " +
                     "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'"
@@ -113,6 +113,8 @@ class FeatureToggleConfig(
         const val KAN_BEHANDLE_EØS_SEKUNDERLAND = "familie-ba-sak.behandling.eos-sekunderland"
         const val KAN_BEHANDLE_EØS_TO_PRIMERLAND = "familie-ba-sak.behandling.eos-to-primerland"
         const val KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND = "familie-ba-sak.behandling.utvidet-eos-sekunderland"
+
+        const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

@@ -1,6 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -27,15 +31,16 @@ import javax.transaction.Transactional
 class SimuleringService(
     private val økonomiKlient: ØkonomiKlient,
     private val økonomiService: ØkonomiService,
+    private val utbetalingsoppdragService: UtbetalingsoppdragService,
     private val beregningService: BeregningService,
     private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
+    private val featureToggleService: FeatureToggleService,
     private val vedtakRepository: VedtakRepository,
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingRepository: BehandlingRepository
 ) {
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
-
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
             beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = vedtak.behandling)
         ) return null
@@ -45,11 +50,22 @@ class SimuleringService(
          * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
          * Denne verdien brukes ikke til noe i simulering.
          */
+
         val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-            erSimulering = true,
+            erSimulering = true
         )
+        secureLogger.info("Generert utbetalingsoppdrag på gamle måte=$utbetalingsoppdrag")
+
+        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
+            val generertUtbetalingsoppdrag = utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                vedtak = vedtak,
+                saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                erSimulering = true
+            )
+            secureLogger.info("Generert utbetalingsoppdrag på ny måte=$generertUtbetalingsoppdrag")
+        }
 
         return økonomiKlient.hentSimulering(utbetalingsoppdrag)
     }

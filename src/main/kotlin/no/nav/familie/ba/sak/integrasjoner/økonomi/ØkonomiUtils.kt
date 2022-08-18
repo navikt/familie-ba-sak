@@ -123,9 +123,9 @@ object ØkonomiUtils {
         sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>
     ): List<List<AndelTilkjentYtelse>> =
         oppdaterteKjeder.map { (kjedeIdentifikator, oppdatertKjedeTilstand) ->
-            if (sisteBeståendeAndelIHverKjede[kjedeIdentifikator] != null)
+            if (sisteBeståendeAndelIHverKjede[kjedeIdentifikator] != null) {
                 oppdatertKjedeTilstand.filter { it.stønadFom.isAfter(sisteBeståendeAndelIHverKjede[kjedeIdentifikator]!!.stønadTom) }
-            else oppdatertKjedeTilstand
+            } else oppdatertKjedeTilstand
         }.filter { it.isNotEmpty() }
 
     /**
