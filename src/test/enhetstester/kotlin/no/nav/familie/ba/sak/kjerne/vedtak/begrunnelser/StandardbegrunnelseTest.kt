@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBost
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -24,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIde
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -61,7 +61,10 @@ internal class StandardbegrunnelseTest {
                 .triggesForPeriode(
 
                     sanityBegrunnelser = sanityBegrunnelser,
-                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
@@ -79,7 +82,10 @@ internal class StandardbegrunnelseTest {
                 .triggesForPeriode(
 
                     sanityBegrunnelser = sanityBegrunnelser,
-                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
@@ -97,7 +103,10 @@ internal class StandardbegrunnelseTest {
                 .triggesForPeriode(
 
                     sanityBegrunnelser = sanityBegrunnelser,
-                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
@@ -121,7 +130,10 @@ internal class StandardbegrunnelseTest {
                 .triggesForPeriode(
 
                     sanityBegrunnelser = sanityBegrunnelser,
-                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     minimertePersoner = minimertePersoner,
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
@@ -145,7 +157,10 @@ internal class StandardbegrunnelseTest {
                 .triggesForPeriode(
 
                     sanityBegrunnelser = sanityBegrunnelser,
-                    minimertVedtaksperiode = vedtaksperiodeMedBegrunnelserSatsEndring.tilMinimertVedtaksperiode(),
+                    minimertVedtaksperiode = vedtaksperiodeMedBegrunnelserSatsEndring.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
@@ -169,7 +184,10 @@ internal class StandardbegrunnelseTest {
                 .triggesForPeriode(
 
                     sanityBegrunnelser = sanityBegrunnelser,
-                    minimertVedtaksperiode = vedtaksperiodeMedBegrunnelserSatsEndring.tilMinimertVedtaksperiode(),
+                    minimertVedtaksperiode = vedtaksperiodeMedBegrunnelserSatsEndring.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
@@ -189,7 +207,10 @@ internal class StandardbegrunnelseTest {
                 .triggesForPeriode(
 
                     sanityBegrunnelser = sanityBegrunnelser,
-                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
@@ -209,7 +230,10 @@ internal class StandardbegrunnelseTest {
                 .triggesForPeriode(
 
                     sanityBegrunnelser = sanityBegrunnelser,
-                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
@@ -236,7 +260,10 @@ internal class StandardbegrunnelseTest {
                         type = Vedtaksperiodetype.UTBETALING,
                         fom = LocalDate.of(2021, 10, 1),
                         tom = LocalDate.of(2021, 10, 31)
-                    ).tilMinimertVedtaksperiode(),
+                    ).tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimerteEndredeUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
                             prosent = BigDecimal.ZERO,
@@ -270,7 +297,10 @@ internal class StandardbegrunnelseTest {
                         type = Vedtaksperiodetype.UTBETALING,
                         fom = LocalDate.of(2021, 10, 1),
                         tom = LocalDate.of(2021, 10, 31)
-                    ).tilMinimertVedtaksperiode(),
+                    ).tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimerteEndredeUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
                             prosent = BigDecimal.ZERO,
@@ -351,7 +381,10 @@ internal class StandardbegrunnelseTest {
             Standardbegrunnelse.REDUKSJON_BARN_DØD
                 .triggesForPeriode(
                     sanityBegrunnelser = reduksjonBarnDødBegrunnelse,
-                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
@@ -378,7 +411,10 @@ internal class StandardbegrunnelseTest {
             Standardbegrunnelse.REDUKSJON_BARN_DØD
                 .triggesForPeriode(
                     sanityBegrunnelser = reduksjonBarnDødBegrunnelse,
-                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
@@ -405,7 +441,10 @@ internal class StandardbegrunnelseTest {
             Standardbegrunnelse.REDUKSJON_BARN_DØD
                 .triggesForPeriode(
                     sanityBegrunnelser = reduksjonBarnDødBegrunnelse,
-                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        sanityEØSBegrunnelser = emptyList()
+                    ),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
