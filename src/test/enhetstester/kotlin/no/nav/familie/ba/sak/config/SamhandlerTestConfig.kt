@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.samhandler.SamhandlerKlient
-import no.nav.familie.kontrakter.ba.tss.SamhandlerAddresse
+import no.nav.familie.kontrakter.ba.tss.SamhandlerAdresse
 import no.nav.familie.kontrakter.ba.tss.SamhandlerInfo
 import no.nav.familie.kontrakter.ba.tss.SøkSamhandlerInfo
 import org.springframework.boot.test.context.TestConfiguration
@@ -43,13 +43,13 @@ val samhandlereInfoMock = listOf(
         "80000999999",
         "INSTUTISJON 1",
         listOf(
-            SamhandlerAddresse(listOf("Instutisjonsnsveien 1"), "0110", "Oslo", "Arbeidsadresse"),
-            SamhandlerAddresse(listOf("Postboks 123"), "0110", "Oslo", "Postadresse")
+            SamhandlerAdresse(listOf("Instutisjonsnsveien 1"), "0110", "Oslo", "Arbeidsadresse"),
+            SamhandlerAdresse(listOf("Postboks 123"), "0110", "Oslo", "Postadresse")
         )
     ),
     SamhandlerInfo(
         "80000888888",
         "INSTUTISJON 2",
-        listOf(SamhandlerAddresse(listOf("Instutisjonsnsveien 2"), "1892", "Degernes", "Arbeidsadresse"))
+        listOf(SamhandlerAdresse(listOf("Instutisjonsnsveien 2"), "1892", "Degernes", "Arbeidsadresse"))
     )
 )
