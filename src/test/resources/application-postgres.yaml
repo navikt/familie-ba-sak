@@ -181,3 +181,4 @@ KAFKA_BROKERS: http://localhost:9092
 
 retry.backoff.delay: 5
 NAIS_APP_NAME: familie-ba-sak
+CRON_FAGSAKSTATUS_SCHEDULER: "0 0/10 * ? * *"
