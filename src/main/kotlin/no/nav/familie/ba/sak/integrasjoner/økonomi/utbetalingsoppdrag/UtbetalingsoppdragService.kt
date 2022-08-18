@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.valider
@@ -38,7 +39,10 @@ class UtbetalingsoppdragService(
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
-    fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak: Vedtak, saksbehandlerId: String): Utbetalingsoppdrag {
+    fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+        vedtak: Vedtak,
+        saksbehandlerId: String
+    ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         return genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
         // beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
@@ -82,13 +86,23 @@ class UtbetalingsoppdragService(
                 .isEmpty()
 
         val utbetalingsoppdrag = if (erFørsteIverksatteBehandlingPåFagsak) {
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                saksbehandlerId = saksbehandlerId,
-                vedtak = vedtak,
-                erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
-                oppdaterteKjeder = oppdaterteKjeder,
-                erSimulering = erSimulering
-            )
+            val utbetalingsoppdrag =
+                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                    saksbehandlerId = saksbehandlerId,
+                    vedtak = vedtak,
+                    erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
+                    oppdaterteKjeder = oppdaterteKjeder,
+                    erSimulering = erSimulering
+                )
+            // TODO Vi bør se om vi kan flytte ut denne side effecten
+            if (!erSimulering) {
+                val oppdatertTilkjentYtelse =
+                    utbetalingsoppdrag.tilkjentYtelse ?: throw Feil(
+                        "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
+                    )
+                // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
+            }
+            utbetalingsoppdrag.utbetalingsoppdrag
         } else {
             val forrigeBehandling =
                 behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
@@ -122,6 +136,14 @@ class UtbetalingsoppdragService(
                     forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom
                 )
             )
+            // TODO Vi bør se om vi kan flytte ut denne side effecten
+            if (!erSimulering) {
+                val oppdatertTilkjentYtelse =
+                    utbetalingsoppdrag.tilkjentYtelse ?: throw Feil(
+                        "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
+                    )
+                // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
+            }
 
             if (!erSimulering && (
                 oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
@@ -129,10 +151,10 @@ class UtbetalingsoppdragService(
                     ).resultat == Behandlingsresultat.OPPHØRT
                 )
             ) {
-                validerOpphørsoppdrag(utbetalingsoppdrag)
+                validerOpphørsoppdrag(utbetalingsoppdrag.utbetalingsoppdrag)
             }
 
-            utbetalingsoppdrag
+            utbetalingsoppdrag.utbetalingsoppdrag
         }
 
         return utbetalingsoppdrag.also {

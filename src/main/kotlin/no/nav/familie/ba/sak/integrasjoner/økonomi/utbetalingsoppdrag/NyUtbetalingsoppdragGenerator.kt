@@ -1,13 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteAndelPerKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -18,9 +16,7 @@ import org.springframework.stereotype.Component
 import java.time.YearMonth
 
 @Component
-class NyUtbetalingsoppdragGenerator(
-    private val beregningService: BeregningService
-) {
+class NyUtbetalingsoppdragGenerator {
 
     /**
      * Lager utbetalingsoppdrag med kjedede perioder av andeler.
@@ -51,7 +47,7 @@ class NyUtbetalingsoppdragGenerator(
         oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
         erSimulering: Boolean = false,
         endretMigreringsDato: YearMonth? = null
-    ): Utbetalingsoppdrag {
+    ): UtbetalingsoppdragDTO {
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
         // Da de har opplevd å motta
         // UEND på oppdrag som skulle vært ENDR anbefaler de at kun ENDR brukes når sak
@@ -88,13 +84,6 @@ class NyUtbetalingsoppdragGenerator(
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 skalOppdatereTilkjentYtelse = !erSimulering
             )
-            // TODO Vi bør se om vi kan flytte ut denne side effecten
-            if (!erSimulering) {
-                val oppdatertTilkjentYtelse = andelerTilOpprettelse.flatten().firstOrNull()?.tilkjentYtelse ?: throw Feil(
-                    "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
-                )
-                // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
-            }
             utbetalingsperioder
         } else emptyList()
 
@@ -105,13 +94,16 @@ class NyUtbetalingsoppdragGenerator(
             )
         } else emptyList()
 
-        return Utbetalingsoppdrag(
-            saksbehandlerId = saksbehandlerId,
-            kodeEndring = aksjonskodePåOppdragsnivå,
-            fagSystem = FAGSYSTEM,
-            saksnummer = vedtak.behandling.fagsak.id.toString(),
-            aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
-            utbetalingsperiode = listOf(opphøres, opprettes).flatten()
+        return UtbetalingsoppdragDTO(
+            utbetalingsoppdrag = Utbetalingsoppdrag(
+                saksbehandlerId = saksbehandlerId,
+                kodeEndring = aksjonskodePåOppdragsnivå,
+                fagSystem = FAGSYSTEM,
+                saksnummer = vedtak.behandling.fagsak.id.toString(),
+                aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
+                utbetalingsperiode = listOf(opphøres, opprettes).flatten()
+            ),
+            andelerTilOpprettelse.flatten().firstOrNull()?.tilkjentYtelse
         )
     }
 
