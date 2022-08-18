@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertVedtaksperiode
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -285,7 +286,10 @@ class VedtaksperiodeUtilTest {
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = kompetanserIPeriode,
-            kompetanserSomStopperRettFørPeriode = emptyList()
+            kompetanserSomStopperRettFørPeriode = emptyList(),
+            minimertePersonResultater = emptyList(),
+            minimertVedtaksperiode = lagMinimertVedtaksperiode(),
+            personerPåBehandling = emptyList()
         )
         Assertions.assertTrue(
             forventedeBegrunnelser.all {
@@ -320,7 +324,10 @@ class VedtaksperiodeUtilTest {
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = kompetanserIPeriode,
-            kompetanserSomStopperRettFørPeriode = emptyList()
+            kompetanserSomStopperRettFørPeriode = emptyList(),
+            minimertePersonResultater = emptyList(),
+            minimertVedtaksperiode = lagMinimertVedtaksperiode(),
+            personerPåBehandling = emptyList()
         )
 
         Assertions.assertTrue(

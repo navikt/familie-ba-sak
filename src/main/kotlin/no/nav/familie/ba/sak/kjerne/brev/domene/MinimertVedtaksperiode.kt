@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
+import no.nav.familie.ba.sak.common.NullableMånedPeriode
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -17,7 +19,20 @@ data class MinimertVedtaksperiode(
     val eøsBegrunnelser: List<EØSBegrunnelseMedTriggere>,
     val fritekster: List<String> = emptyList(),
     val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList(),
-)
+) {
+
+    val ytelseTyperForPeriode = minimerteUtbetalingsperiodeDetaljer.map { it.ytelseType }.toSet()
+    fun finnEndredeAndelerISammePeriode(
+        endretUtbetalingAndeler: List<MinimertEndretAndel>,
+    ) = endretUtbetalingAndeler.filter {
+        it.erOverlappendeMed(
+            NullableMånedPeriode(
+                this.fom?.toYearMonth(),
+                this.tom?.toYearMonth()
+            )
+        )
+    }
+}
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
     sanityBegrunnelser: List<SanityBegrunnelse>,
