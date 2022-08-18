@@ -388,7 +388,7 @@ class VilkårsvurderingStegUtilsTest {
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT)
             )
 
-        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
+        val (initiell, _) = VilkårsvurderingResultatFlytter.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering
         )
@@ -418,7 +418,7 @@ class VilkårsvurderingStegUtilsTest {
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT)
             )
 
-        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
+        val (initiell, _) = VilkårsvurderingResultatFlytter.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering
         )
@@ -444,7 +444,7 @@ class VilkårsvurderingStegUtilsTest {
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT)
             )
 
-        val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
+        val (initiell, _) = VilkårsvurderingResultatFlytter.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = activeVilkårvurdering
         )

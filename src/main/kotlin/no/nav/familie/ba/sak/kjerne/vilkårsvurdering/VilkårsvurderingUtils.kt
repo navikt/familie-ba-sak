@@ -180,20 +180,6 @@ object VilkårsvurderingUtils {
         }
     }
 
-    @Deprecated(message = "Kall heller VilkårsvurderingResultatFlytter direkte")
-    fun flyttResultaterTilInitielt(
-        initiellVilkårsvurdering: Vilkårsvurdering,
-        aktivVilkårsvurdering: Vilkårsvurdering,
-        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
-        løpendeUnderkategori: BehandlingUnderkategori? = null
-    ): Pair<Vilkårsvurdering, Set<PersonResultat>> =
-        VilkårsvurderingResultatFlytter.flyttResultaterTilInitielt(
-            initiellVilkårsvurdering = initiellVilkårsvurdering,
-            aktivVilkårsvurdering = aktivVilkårsvurdering,
-            løpendeUnderkategori = løpendeUnderkategori,
-            personResultaterFraForrigeBehandling = forrigeBehandlingVilkårsvurdering?.personResultater
-        )
-
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {
         var advarsel =
             "Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:"

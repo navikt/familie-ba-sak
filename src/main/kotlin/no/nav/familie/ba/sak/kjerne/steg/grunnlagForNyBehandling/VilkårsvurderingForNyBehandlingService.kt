@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingResultatFlytter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -169,13 +170,13 @@ class VilkårsvurderingForNyBehandlingService(
         forrigeBehandlingSomErVedtatt: Behandling?,
         bekreftEndringerViaFrontend: Boolean
     ): Vilkårsvurdering {
-        val (initieltVilkårsVurderingSomErOppdatert, aktivtPersonResultatSomErRedusert) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
+        val (initieltVilkårsVurderingSomErOppdatert, aktivtPersonResultatSomErRedusert) = VilkårsvurderingResultatFlytter.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) hentVilkårsvurdering(
+            personResultaterFraForrigeBehandling = if (forrigeBehandlingSomErVedtatt != null) hentVilkårsvurdering(
                 forrigeBehandlingSomErVedtatt.id
-            ) else null
+            )?.personResultater else null
         )
 
         if (aktivtPersonResultatSomErRedusert.isNotEmpty() && !bekreftEndringerViaFrontend) {
