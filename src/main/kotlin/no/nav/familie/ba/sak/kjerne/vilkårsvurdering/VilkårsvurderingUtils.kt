@@ -198,7 +198,7 @@ object VilkårsvurderingUtils {
         aktivVilkårsvurdering: Vilkårsvurdering,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
         løpendeUnderkategori: BehandlingUnderkategori? = null
-    ): Pair<Vilkårsvurdering, Vilkårsvurdering> =
+    ): Pair<Vilkårsvurdering, Set<PersonResultat>> =
         VilkårsvurderingResultatFlytter.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering,

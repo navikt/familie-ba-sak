@@ -29,7 +29,7 @@ object VilkårsvurderingResultatFlytter {
         aktivVilkårsvurdering: Vilkårsvurdering,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
         løpendeUnderkategori: BehandlingUnderkategori? = null
-    ): Pair<Vilkårsvurdering, Vilkårsvurdering> {
+    ): Pair<Vilkårsvurdering, Set<PersonResultat>> {
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
         val initiellVilkårsvurderingKopi = initiellVilkårsvurdering.kopier()
@@ -61,11 +61,11 @@ object VilkårsvurderingResultatFlytter {
                 )
                 vilkårResultatet = vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
 
+                // Mutering skjer herifrå og u
                 // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
                 if (vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.isEmpty()) {
                     personResultaterAktivt.remove(personenSomFinnes)
                 } else {
-                    // Mutering skjer herifrå og ut
                     personenSomFinnes.setSortedVilkårResultater(vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.toSet())
                 }
             }
@@ -85,10 +85,9 @@ object VilkårsvurderingResultatFlytter {
             )
         }
 
-        aktivVilkårsvurderingKopi.personResultater = personResultaterAktivt
         initiellVilkårsvurderingKopi.personResultater = personResultaterOppdatert
 
-        return Pair(initiellVilkårsvurderingKopi, aktivVilkårsvurderingKopi)
+        return Pair(initiellVilkårsvurderingKopi, personResultaterAktivt)
     }
 
     private fun finnVilkårSomSkalOppdateresPåEksisterendePerson(

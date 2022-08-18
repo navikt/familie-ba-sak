@@ -39,7 +39,7 @@ class OppdaterVilkårsvurderingTest {
             oppdatert.personResultater.first()
                 .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat
         )
-        Assertions.assertTrue(gammelt.personResultater.isEmpty())
+        Assertions.assertTrue(gammelt.isEmpty())
     }
 
     @Test
@@ -57,8 +57,8 @@ class OppdaterVilkårsvurderingTest {
             oppdatert.personResultater.first()
                 .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat
         )
-        Assertions.assertEquals(1, gammelt.personResultater.size)
-        Assertions.assertEquals(1, gammelt.personResultater.first().vilkårResultater.size)
+        Assertions.assertEquals(1, gammelt.size)
+        Assertions.assertEquals(1, gammelt.first().vilkårResultater.size)
     }
 
     @Test
@@ -76,7 +76,7 @@ class OppdaterVilkårsvurderingTest {
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(2, oppdatert.personResultater.size)
-        Assertions.assertEquals(0, gammelt.personResultater.size)
+        Assertions.assertEquals(0, gammelt.size)
     }
 
     @Test
@@ -94,7 +94,7 @@ class OppdaterVilkårsvurderingTest {
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(1, oppdatert.personResultater.size)
-        Assertions.assertEquals(1, gammelt.personResultater.size)
+        Assertions.assertEquals(1, gammelt.size)
     }
 
     @Test
@@ -112,7 +112,7 @@ class OppdaterVilkårsvurderingTest {
 
         val resterende = flyttResultaterTilInitielt(resultat2, resultat1).second
         val fjernedeVilkår = resultat1.personResultater.first().vilkårResultater.toList()
-        val generertAdvarsel = lagFjernAdvarsel(resterende.personResultater)
+        val generertAdvarsel = lagFjernAdvarsel(resterende)
 
         Assertions.assertEquals(
             "Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:\n" +
@@ -167,7 +167,7 @@ class OppdaterVilkårsvurderingTest {
 
         Assertions.assertTrue(nyInitBosattIRiketVilkår.isNotEmpty())
         Assertions.assertTrue(nyInitBosattIRiketVilkår.single().resultat == Resultat.IKKE_VURDERT)
-        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+        Assertions.assertTrue(nyAktiv.isEmpty())
     }
 
     @Test
@@ -204,7 +204,7 @@ class OppdaterVilkårsvurderingTest {
                     personResultat = personResultat,
                     resultat = Resultat.OPPFYLT,
                     periodeFom = LocalDate.now(),
-                    periodeTom = LocalDate.now().plusYears(1),
+                    periodeTom = LocalDate.now().plusYears(1)
                 )
             )
         personResultat.setSortedVilkårResultater(bosattIRiketVilkårResultater)
@@ -221,7 +221,7 @@ class OppdaterVilkårsvurderingTest {
 
         Assertions.assertTrue(nyInitBosattIRiketVilkår.isNotEmpty())
         Assertions.assertTrue(nyInitBosattIRiketVilkår.single().resultat == Resultat.OPPFYLT)
-        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+        Assertions.assertTrue(nyAktiv.isEmpty())
     }
 
     @Test
@@ -249,7 +249,7 @@ class OppdaterVilkårsvurderingTest {
             nyInit.personResultater.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitInnholderUtvidetVilkår)
-        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+        Assertions.assertTrue(nyAktiv.isEmpty())
     }
 
     @Test
@@ -276,7 +276,7 @@ class OppdaterVilkårsvurderingTest {
             nyInit.personResultater.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitInnholderUtvidetVilkår)
-        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+        Assertions.assertTrue(nyAktiv.isEmpty())
     }
 
     @Test
@@ -303,7 +303,7 @@ class OppdaterVilkårsvurderingTest {
         val nyInitInnholderIkkeUtvidetVilkår =
             nyInit.personResultater.first().vilkårResultater.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         val nyAktivInneholderUtvidetVilkår =
-            nyAktiv.personResultater.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            nyAktiv.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitInnholderIkkeUtvidetVilkår)
         Assertions.assertTrue(nyAktivInneholderUtvidetVilkår)
@@ -356,7 +356,7 @@ class OppdaterVilkårsvurderingTest {
             nyInit.personResultater.first().vilkårResultater.single { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitUtvidetVilkår.resultat == Resultat.OPPFYLT)
-        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+        Assertions.assertTrue(nyAktiv.isEmpty())
     }
 
     @Test
@@ -404,7 +404,7 @@ class OppdaterVilkårsvurderingTest {
             nyInit.personResultater.first().vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitUtvidetVilkår.size == 2)
-        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+        Assertions.assertTrue(nyAktiv.isEmpty())
     }
 
     @Test
@@ -453,7 +453,7 @@ class OppdaterVilkårsvurderingTest {
             nyInit.personResultater.first().vilkårResultater.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitInneholderIkkeUtvidetVilkår)
-        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+        Assertions.assertTrue(nyAktiv.isEmpty())
     }
 
     fun lagVilkårsvurderingMedForskjelligeTyperVilkår(

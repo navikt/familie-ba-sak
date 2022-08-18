@@ -178,10 +178,10 @@ class VilkårsvurderingForNyBehandlingService(
             ) else null
         )
 
-        if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
+        if (aktivtSomErRedusert.isNotEmpty() && !bekreftEndringerViaFrontend) {
             throw FunksjonellFeil(
                 melding = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
-                frontendFeilmelding = VilkårsvurderingUtils.lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
+                frontendFeilmelding = VilkårsvurderingUtils.lagFjernAdvarsel(aktivtSomErRedusert)
             )
         }
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
