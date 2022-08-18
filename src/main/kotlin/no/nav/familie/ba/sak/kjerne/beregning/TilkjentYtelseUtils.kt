@@ -77,7 +77,9 @@ object TilkjentYtelseUtils {
             endretUtbetalingAndeler = endretUtbetalingAndeler.filter { it.årsak != Årsak.ETTERBETALING_3ÅR }
         )
 
-        val andelerTilkjentYtelseSmåbarnstillegg =
+        val småbarnstilleggErMulig = erSmåbarnstilleggMulig(utvidetAndeler = andelerTilkjentYtelseUtvidet, barnasAndeler = andelerTilkjentYtelseBarnaOppdatertMedEtterbetaling3år)
+
+        val andelerTilkjentYtelseSmåbarnstillegg = if (småbarnstilleggErMulig) {
             SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = vilkårsvurdering.behandling.id,
                 tilkjentYtelse = tilkjentYtelse
@@ -95,11 +97,14 @@ object TilkjentYtelseUtils {
                         )
                     },
                 )
+        } else emptyList()
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaOppdatertMedAlleEndringsperioder + andelerTilkjentYtelseUtvidet + andelerTilkjentYtelseSmåbarnstillegg)
 
         return tilkjentYtelse
     }
+
+    fun erSmåbarnstilleggMulig(utvidetAndeler: List<AndelTilkjentYtelse>, barnasAndeler: List<AndelTilkjentYtelse>): Boolean = utvidetAndeler.isNotEmpty() && barnasAndeler.isNotEmpty()
 
     fun beregnAndelerTilkjentYtelseForBarna(personopplysningGrunnlag: PersonopplysningGrunnlag, vilkårsvurdering: Vilkårsvurdering, tilkjentYtelse: TilkjentYtelse, behandlingUnderkategori: BehandlingUnderkategori): List<AndelTilkjentYtelse> {
         val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
