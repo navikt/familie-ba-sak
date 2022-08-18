@@ -202,8 +202,8 @@ object VilkårsvurderingUtils {
         VilkårsvurderingResultatFlytter.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering,
-            forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
-            løpendeUnderkategori = løpendeUnderkategori
+            løpendeUnderkategori = løpendeUnderkategori,
+            personResultaterFraForrigeBehandling = forrigeBehandlingVilkårsvurdering?.personResultater
         )
 
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {

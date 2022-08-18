@@ -27,28 +27,30 @@ object VilkårsvurderingResultatFlytter {
     fun flyttResultaterTilInitielt(
         initiellVilkårsvurdering: Vilkårsvurdering,
         aktivVilkårsvurdering: Vilkårsvurdering,
-        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
-        løpendeUnderkategori: BehandlingUnderkategori? = null
+        løpendeUnderkategori: BehandlingUnderkategori? = null,
+        personResultaterFraForrigeBehandling: Set<PersonResultat>?
     ): Pair<Vilkårsvurdering, Set<PersonResultat>> {
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
         val (oppdatert, aktivt) = finnOppdatertePersonResultater(
             initiellVilkårsvurdering = initiellVilkårsvurdering.kopier(),
-            aktivVilkårsvurdering = aktivVilkårsvurdering.kopier(),
-            forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
-            løpendeUnderkategori = løpendeUnderkategori
+            personResultaterFraForrigeBehandling = personResultaterFraForrigeBehandling,
+            løpendeUnderkategori = løpendeUnderkategori,
+            kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id,
+            personResultatAktiv = aktivVilkårsvurdering.kopier().personResultater
         )
         return Pair(initiellVilkårsvurdering.also { it.personResultater = oppdatert }, aktivt)
     }
 
     private fun finnOppdatertePersonResultater(
         initiellVilkårsvurdering: Vilkårsvurdering,
-        aktivVilkårsvurdering: Vilkårsvurdering,
-        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
-        løpendeUnderkategori: BehandlingUnderkategori? = null
+        personResultaterFraForrigeBehandling: Set<PersonResultat>? = null,
+        løpendeUnderkategori: BehandlingUnderkategori? = null,
+        kopieringSkjerFraForrigeBehandling: Boolean,
+        personResultatAktiv: Set<PersonResultat>
     ): Pair<Set<PersonResultat>, Set<PersonResultat>> {
         // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
-        val personResultaterAktivt = aktivVilkårsvurdering.personResultater.toMutableSet()
+        val personResultaterAktivt = personResultatAktiv.toMutableSet()
         val personResultaterOppdatert = mutableSetOf<PersonResultat>()
         initiellVilkårsvurdering.personResultater.forEach { personFraInit ->
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør }
@@ -59,8 +61,6 @@ object VilkårsvurderingResultatFlytter {
                 vilkårResultatet = personFraInit.vilkårResultater
             } else {
                 // Fyll inn den initierte med person fra aktiv
-                val kopieringSkjerFraForrigeBehandling =
-                    initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
                 val vilkårSomSkalOppdateresPåEksisterendePerson = finnVilkårSomSkalOppdateresPåEksisterendePerson(
                     personFraInit = PersonFraInitRequest(
                         aktør = personFraInit.aktør,
@@ -69,7 +69,7 @@ object VilkårsvurderingResultatFlytter {
                     kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
                     løpendeUnderkategori = løpendeUnderkategori,
                     personenSomFinnesVilkårResultater = personenSomFinnes.vilkårResultater,
-                    personResultaterFraForrigeBehandling = forrigeBehandlingVilkårsvurdering?.personResultater
+                    personResultaterFraForrigeBehandling = personResultaterFraForrigeBehandling
                 )
                 vilkårResultatet = vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
 
