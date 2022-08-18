@@ -80,7 +80,7 @@ class NyUtbetalingsoppdragGenerator(
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
         val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
-            lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
+            val utbetalingsperioder = lagUtbetalingsperioderForOpprettelse(
                 andeler = andelerTilOpprettelse,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                 vedtak = vedtak,
@@ -88,6 +88,14 @@ class NyUtbetalingsoppdragGenerator(
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 skalOppdatereTilkjentYtelse = !erSimulering
             )
+            // TODO Vi bør se om vi kan flytte ut denne side effecten
+            if (!erSimulering) {
+                val oppdatertTilkjentYtelse = andelerTilOpprettelse.flatten().firstOrNull()?.tilkjentYtelse ?: throw Feil(
+                    "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
+                )
+                // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
+            }
+            utbetalingsperioder
         } else emptyList()
 
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty()) {
@@ -126,7 +134,7 @@ class NyUtbetalingsoppdragGenerator(
         }
     }
 
-    fun lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
+    fun lagUtbetalingsperioderForOpprettelse(
         andeler: List<List<AndelTilkjentYtelse>>,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
@@ -144,7 +152,7 @@ class NyUtbetalingsoppdragGenerator(
             vedtak = vedtak
         )
 
-        val utbetalingsperioder = andeler.filter { kjede -> kjede.isNotEmpty() }
+        return andeler.filter { kjede -> kjede.isNotEmpty() }
             .flatMap { kjede: List<AndelTilkjentYtelse> ->
                 val ident = kjede.first().aktør.aktivFødselsnummer()
                 val ytelseType = kjede.first().type
@@ -167,15 +175,5 @@ class NyUtbetalingsoppdragGenerator(
                     }
                 }
             }
-
-        // TODO Vi bør se om vi kan flytte ut denne side effecten
-        if (skalOppdatereTilkjentYtelse) {
-            val oppdatertTilkjentYtelse = andeler.flatten().firstOrNull()?.tilkjentYtelse ?: throw Feil(
-                "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
-            )
-            // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
-        }
-
-        return utbetalingsperioder
     }
 }
