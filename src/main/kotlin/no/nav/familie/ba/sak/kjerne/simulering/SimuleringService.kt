@@ -63,7 +63,7 @@ class SimuleringService(
                 saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
                 erSimulering = true
             )
-            secureLogger.info("Generert utbetalingsoppdrag på ny måte=$generertUtbetalingsoppdrag")
+            secureLogger.info("Generert utbetalingsoppdrag på ny måte=${generertUtbetalingsoppdrag.utbetalingsoppdrag}")
         }
 
         return økonomiKlient.hentSimulering(utbetalingsoppdrag)

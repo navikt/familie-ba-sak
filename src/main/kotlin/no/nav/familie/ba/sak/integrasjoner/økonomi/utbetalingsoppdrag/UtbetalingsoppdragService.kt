@@ -44,7 +44,16 @@ class UtbetalingsoppdragService(
         saksbehandlerId: String
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
-        return genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
+        val utbetalingsoppdragDTO =
+            genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
+
+        val oppdatertTilkjentYtelse = utbetalingsoppdragDTO.tilkjentYtelse ?: throw Feil(
+            "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
+        )
+        // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
+
+        return utbetalingsoppdragDTO.utbetalingsoppdrag
+
         // beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
         // iverksettOppdrag(utbetalingsoppdrag)
     }
@@ -74,7 +83,7 @@ class UtbetalingsoppdragService(
         saksbehandlerId: String,
         erSimulering: Boolean = false,
         skalValideres: Boolean = true
-    ): Utbetalingsoppdrag {
+    ): UtbetalingsoppdragDTO {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand =
             beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = oppdatertBehandling.id)
@@ -86,23 +95,13 @@ class UtbetalingsoppdragService(
                 .isEmpty()
 
         val utbetalingsoppdrag = if (erFørsteIverksatteBehandlingPåFagsak) {
-            val utbetalingsoppdrag =
-                utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                    saksbehandlerId = saksbehandlerId,
-                    vedtak = vedtak,
-                    erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
-                    oppdaterteKjeder = oppdaterteKjeder,
-                    erSimulering = erSimulering
-                )
-            // TODO Vi bør se om vi kan flytte ut denne side effecten
-            if (!erSimulering) {
-                val oppdatertTilkjentYtelse =
-                    utbetalingsoppdrag.tilkjentYtelse ?: throw Feil(
-                        "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
-                    )
-                // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
-            }
-            utbetalingsoppdrag.utbetalingsoppdrag
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                saksbehandlerId = saksbehandlerId,
+                vedtak = vedtak,
+                erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
+                oppdaterteKjeder = oppdaterteKjeder,
+                erSimulering = erSimulering
+            )
         } else {
             val forrigeBehandling =
                 behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
@@ -136,14 +135,6 @@ class UtbetalingsoppdragService(
                     forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom
                 )
             )
-            // TODO Vi bør se om vi kan flytte ut denne side effecten
-            if (!erSimulering) {
-                val oppdatertTilkjentYtelse =
-                    utbetalingsoppdrag.tilkjentYtelse ?: throw Feil(
-                        "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
-                    )
-                // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
-            }
 
             if (!erSimulering && (
                 oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
@@ -154,17 +145,20 @@ class UtbetalingsoppdragService(
                 validerOpphørsoppdrag(utbetalingsoppdrag.utbetalingsoppdrag)
             }
 
-            utbetalingsoppdrag.utbetalingsoppdrag
+            utbetalingsoppdrag
         }
 
-        return utbetalingsoppdrag.also {
-            if (skalValideres) {
-                it.valider(
-                    behandlingsresultat = vedtak.behandling.resultat,
-                    erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
-            }
-        }
+        return UtbetalingsoppdragDTO(
+            utbetalingsoppdrag.utbetalingsoppdrag.also {
+                if (skalValideres) {
+                    it.valider(
+                        behandlingsresultat = vedtak.behandling.resultat,
+                        erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                    )
+                }
+            },
+            utbetalingsoppdrag.tilkjentYtelse
+        )
     }
 
     private fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
