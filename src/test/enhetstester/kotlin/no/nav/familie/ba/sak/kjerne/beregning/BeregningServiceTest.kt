@@ -782,7 +782,7 @@ class BeregningServiceTest {
         // Søker får utvidet hele perioden pga barn over 3 år
         Assertions.assertEquals(søker.aktør, andelerUtvidet.single().aktør)
         Assertions.assertEquals(BigDecimal(100), andelerUtvidet.single().prosent)
-        Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerUtvidet.single().stønadFom)
+        Assertions.assertEquals(utvidetFom.toYearMonth().plusMonths(1), andelerUtvidet.single().stønadFom)
         Assertions.assertEquals(utvidetTom.toYearMonth(), andelerUtvidet.single().stønadTom)
 
         Assertions.assertEquals(2, andelerSmåbarnstillegg.size)
