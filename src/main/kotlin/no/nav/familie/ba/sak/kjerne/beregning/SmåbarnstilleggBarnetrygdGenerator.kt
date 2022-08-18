@@ -154,10 +154,13 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         søkerAktør: Aktør
     ): List<AndelTilkjentYtelse> {
         return this.perioder().map {
+            val stønadFom = it.fraOgMed.tilYearMonth()
+            val stønadTom = it.tilOgMed.tilYearMonth()
+
             val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(
                 satstype = SatsType.SMA,
-                stønadFraOgMed = it.fraOgMed.tilYearMonth(),
-                stønadTilOgMed = it.tilOgMed.tilYearMonth()
+                stønadFraOgMed = stønadFom,
+                stønadTilOgMed = stønadTom
             ).singleOrNull()?.sats ?: throw Feil("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
 
             val prosentIPeriode = it.innhold?.prosent ?: throw Feil("Skal finnes prosent for gitt periode")
@@ -168,8 +171,8 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = behandlingId,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = søkerAktør,
-                stønadFom = it.fraOgMed.tilYearMonth(),
-                stønadTom = it.tilOgMed.tilYearMonth(),
+                stønadFom = stønadFom,
+                stønadTom = stønadTom,
                 kalkulertUtbetalingsbeløp = beløpIPeriode,
                 nasjonaltPeriodebeløp = beløpIPeriode,
                 type = YtelseType.SMÅBARNSTILLEGG,
