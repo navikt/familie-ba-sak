@@ -1170,7 +1170,7 @@ class BeregningServiceTest {
                 )
             )
         }
-        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_UTVIDET_ANDELER) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE) } returns true
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,

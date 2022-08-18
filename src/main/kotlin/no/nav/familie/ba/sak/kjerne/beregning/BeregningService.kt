@@ -164,7 +164,7 @@ class BeregningService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
-        val tilkjentYtelse = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_UTVIDET_ANDELER)) {
+        val tilkjentYtelse = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE)) {
             TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
