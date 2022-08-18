@@ -220,13 +220,13 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
 /**
  * EF sender alltid overgangsstønad-perioder som gjelder hele måneder, men formatet vi får er på LocalDate
  * Returverdier:
- * True - Det finnes minst 1 dag i måneden hvor søker får overgangsstønad
- * False - Søker får ikke overgangsstønad noen dager den måneden
+ * Null - Søker får ikke overgangsstønad noen dager den måneden
+ * InternPeriodeOvergangsstønad - Det finnes minst 1 dag i måneden hvor søker får overgangsstønad, den første av disse blir returnert
  */
 fun kombinatorInternPeriodeOvergangsstønadDagTilMåned(dagverdier: List<InternPeriodeOvergangsstønad?>): InternPeriodeOvergangsstønad? {
-    val x = dagverdier.filterNotNull()
-    return if (x.isEmpty()) null
-    else x.first()
+    val dagverdierSomErSatt = dagverdier.filterNotNull()
+    return if (dagverdierSomErSatt.isEmpty()) null
+    else dagverdierSomErSatt.first()
 }
 
 enum class BarnSinRettTilSmåbarnstillegg {
