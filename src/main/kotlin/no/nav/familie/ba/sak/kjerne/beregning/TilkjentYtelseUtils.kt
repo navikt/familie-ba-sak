@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -68,7 +69,7 @@ object TilkjentYtelseUtils {
         )
 
         val andelerTilkjentYtelseUtvidetMedAlleEndringer = beregnTilkjentYtelseUtvidet(
-            vilkårsvurdering = vilkårsvurdering,
+            utvidetVilkår = finnUtvidetVilkår(vilkårsvurdering),
             tilkjentYtelse = tilkjentYtelse,
             andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
             endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker
@@ -159,20 +160,18 @@ object TilkjentYtelseUtils {
     }
 
     fun beregnTilkjentYtelseUtvidet(
-        vilkårsvurdering: Vilkårsvurdering,
+        utvidetVilkår: List<VilkårResultat>,
         andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer: List<AndelTilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
         endretUtbetalingAndelerSøker: List<EndretUtbetalingAndel>,
     ): List<AndelTilkjentYtelse> {
 
         val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
-            behandlingId = vilkårsvurdering.behandling.id,
+            behandlingId = tilkjentYtelse.behandling.id,
             tilkjentYtelse = tilkjentYtelse
         )
             .lagUtvidetBarnetrygdAndeler(
-                utvidetVilkår = vilkårsvurdering.personResultater
-                    .flatMap { it.vilkårResultater }
-                    .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT },
+                utvidetVilkår = utvidetVilkår,
                 andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer
             )
 
@@ -276,6 +275,11 @@ object TilkjentYtelseUtils {
 
         return tilkjentYtelse
     }
+
+    private fun finnUtvidetVilkår(vilkårsvurdering: Vilkårsvurdering) =
+        vilkårsvurdering.personResultater
+            .flatMap { it.vilkårResultater }
+            .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT }
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
         andelTilkjentYtelser: List<AndelTilkjentYtelse>,
