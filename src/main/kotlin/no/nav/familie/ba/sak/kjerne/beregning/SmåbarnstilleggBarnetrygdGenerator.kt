@@ -39,12 +39,16 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     ): List<AndelTilkjentYtelse> {
         if (perioderMedFullOvergangsstønad.isEmpty() || utvidetAndeler.isEmpty() || barnasAndeler.isEmpty()) return emptyList()
 
+        validerUtvidetOgBarnasAndeler(utvidetAndeler = utvidetAndeler, barnasAndeler = barnasAndeler)
+
+        val søkerAktør = utvidetAndeler.first().aktør
+
         val perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad)
 
-        val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse = utvidetAndeler.filter { it.erUtvidet() })
+        val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse = utvidetAndeler)
 
         val barnSomGirRettTilSmåbarnstilleggTidslinje = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
-            barnasAndeler = barnasAndeler.filter { !it.erSøkersAndel() },
+            barnasAndeler = barnasAndeler,
             barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer
         )
 
@@ -55,7 +59,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         )
 
         return kombinertProsentTidslinje.filtrerIkkeNull().lagSmåbarnstilleggAndeler(
-            søkerAktør = utvidetAndeler.first { it.erUtvidet() }.aktør
+            søkerAktør = søkerAktør
         )
     }
 

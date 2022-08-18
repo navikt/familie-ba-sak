@@ -233,3 +233,11 @@ enum class BarnSinRettTilSmåbarnstillegg {
     UNDER_3_ÅR_UTBETALING,
     UNDER_3_ÅR_NULLUTBETALING
 }
+
+fun validerUtvidetOgBarnasAndeler(
+    utvidetAndeler: List<AndelTilkjentYtelse>,
+    barnasAndeler: List<AndelTilkjentYtelse>
+) {
+    if (utvidetAndeler.any { !it.erUtvidet() }) throw Feil("Det finnes andre ytelser enn utvidet blandt utvidet-andelene")
+    if (barnasAndeler.any { it.erSøkersAndel() }) throw Feil("Finner andeler for søker blandt barnas andeler")
+}
