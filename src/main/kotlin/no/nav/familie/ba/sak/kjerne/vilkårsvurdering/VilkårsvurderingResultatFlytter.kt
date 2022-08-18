@@ -32,14 +32,15 @@ object VilkårsvurderingResultatFlytter {
     ): Pair<Vilkårsvurdering, Set<PersonResultat>> {
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
+        val initiellVilkårsvurderingKopi = initiellVilkårsvurdering.kopier()
         val (oppdatert, aktivt) = finnOppdatertePersonResultater(
-            initiellVilkårsvurdering = initiellVilkårsvurdering.kopier(),
+            initiellVilkårsvurdering = initiellVilkårsvurderingKopi,
             personResultaterFraForrigeBehandling = personResultaterFraForrigeBehandling,
             løpendeUnderkategori = løpendeUnderkategori,
             kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id,
             personResultatAktiv = aktivVilkårsvurdering.kopier().personResultater
         )
-        return Pair(initiellVilkårsvurdering.also { it.personResultater = oppdatert }, aktivt)
+        return Pair(initiellVilkårsvurderingKopi.also { it.personResultater = oppdatert }, aktivt)
     }
 
     private fun finnOppdatertePersonResultater(
