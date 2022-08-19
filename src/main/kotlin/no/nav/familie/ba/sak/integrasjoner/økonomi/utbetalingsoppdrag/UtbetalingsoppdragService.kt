@@ -173,7 +173,7 @@ class UtbetalingsoppdragService(
                     }
             }.maxByOrNull { it }
 
-    fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
+    internal fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         if (utbetalingsoppdrag.harLøpendeUtbetaling()) {
             error("Generert utbetalingsoppdrag for opphør inneholder oppdragsperioder med løpende utbetaling.")
         }
