@@ -44,7 +44,10 @@ class UtbetalingsoppdragService(
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
-        // BeregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag populerer TilkjentYtelse fra utbetalingsoppdrag før det lagres
+
+        // Midlertidig endring, skal fjernes når vi starter å lagre TY.
+        // Så kan vi bruke beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
+        val oppdatertTilkjentYtelse = beregningService.populerTilkjentYtelse(oppdatertBehandling, utbetalingsoppdrag)
         // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
 
         return utbetalingsoppdrag

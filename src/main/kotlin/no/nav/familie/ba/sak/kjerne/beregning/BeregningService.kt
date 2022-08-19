@@ -60,6 +60,9 @@ class BeregningService(
         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
+    fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
@@ -149,7 +152,6 @@ class BeregningService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         nyEndretUtbetalingAndel: EndretUtbetalingAndel? = null
     ): TilkjentYtelse {
-
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).filter {
             // Ved automatiske behandlinger ønsker vi alltid å ta vare på de gamle endrede andelene
             if (behandling.skalBehandlesAutomatisk) true
@@ -193,7 +195,6 @@ class BeregningService(
         behandling: Behandling,
         utbetalingsoppdrag: Utbetalingsoppdrag
     ): TilkjentYtelse {
-
         val nyTilkjentYtelse = populerTilkjentYtelse(behandling, utbetalingsoppdrag)
         return tilkjentYtelseRepository.save(nyTilkjentYtelse)
     }
@@ -218,7 +219,7 @@ class BeregningService(
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
             forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
+            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler
         )
 
         return kanAutomatiskIverksetteSmåbarnstillegg(
@@ -254,7 +255,7 @@ class BeregningService(
                 }.isNotEmpty()
             } ?: emptyList()
 
-    private fun populerTilkjentYtelse(
+    fun populerTilkjentYtelse(
         behandling: Behandling,
         utbetalingsoppdrag: Utbetalingsoppdrag
     ): TilkjentYtelse {
