@@ -1114,6 +1114,199 @@ internal class TilkjentYtelseUtilsTest {
         assertTrue(utbetalingSmåbarnstillegg.endretUtbetalingAndeler.isEmpty())
     }
 
+    @Test
+    fun `Etterbetaling 3 år - case 1`() {
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = barn,
+                    skalUtbetales = false,
+                    årsak = Årsak.ETTERBETALING_3ÅR,
+                    fom = langEndringsperiode.fom,
+                    tom = langEndringsperiode.tom
+                ),
+                EndretAndel(
+                    person = søker,
+                    skalUtbetales = false,
+                    årsak = Årsak.ETTERBETALING_3ÅR,
+                    fom = langEndringsperiode.fom,
+                    tom = langEndringsperiode.tom
+                )
+            ),
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = LocalDate.now().minusMonths(5),
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barn.aktør,
+                ),
+            ),
+        )
+
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantTidsperiode.tom) }
+
+        assertEquals(6, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+
+        // BARN
+        assertEquals(2, barnasAndeler.size)
+
+        val barnetsAndel1 = barnasAndeler[0]
+        val barnetsAndel2 = barnasAndeler[1]
+
+        assertEquals(langEndringsperiode.fom, barnetsAndel1.stønadFom)
+        assertEquals(langEndringsperiode.tom, barnetsAndel1.stønadTom)
+        assertEquals(BigDecimal.ZERO, barnetsAndel1.prosent)
+        assertTrue(barnetsAndel1.endretUtbetalingAndeler.isNotEmpty())
+
+        assertEquals(langEndringsperiode.tom.plusMonths(1), barnetsAndel2.stønadFom)
+        assertEquals(barn.fødselsdato.plusYears(6).minusMonths(1).toYearMonth(), barnetsAndel2.stønadTom)
+        assertEquals(BigDecimal(100), barnetsAndel2.prosent)
+        assertTrue(barnetsAndel2.endretUtbetalingAndeler.isEmpty())
+
+        // SØKER
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(2, utvidetAndeler.size)
+
+        val utvidetAndel1 = utvidetAndeler.first()
+        val utvidetAndel2 = utvidetAndeler.last()
+
+        assertEquals(langEndringsperiode.fom, utvidetAndel1.stønadFom)
+        assertEquals(langEndringsperiode.tom, utvidetAndel1.stønadTom)
+        assertEquals(BigDecimal.ZERO, utvidetAndel1.prosent)
+        assertTrue(utvidetAndel1.endretUtbetalingAndeler.isNotEmpty())
+
+        assertEquals(langEndringsperiode.tom.plusMonths(1), utvidetAndel2.stønadFom)
+        assertEquals(barn.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), utvidetAndel2.stønadTom)
+        assertEquals(BigDecimal(100), utvidetAndel2.prosent)
+        assertTrue(utvidetAndel2.endretUtbetalingAndeler.isEmpty())
+
+        assertEquals(2, småbarnstilleggAndeler.size)
+
+        val småbarnstilleggAndel1 = småbarnstilleggAndeler.first()
+        val småbarnstilleggAndel2 = småbarnstilleggAndeler.last()
+
+        assertEquals(langEndringsperiode.fom, småbarnstilleggAndel1.stønadFom)
+        assertEquals(langEndringsperiode.tom, småbarnstilleggAndel1.stønadTom)
+        assertEquals(BigDecimal.ZERO, småbarnstilleggAndel1.prosent)
+        assertTrue(småbarnstilleggAndel1.endretUtbetalingAndeler.isEmpty())
+
+        assertEquals(langEndringsperiode.tom.plusMonths(1), småbarnstilleggAndel2.stønadFom)
+        assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), småbarnstilleggAndel2.stønadTom)
+        assertEquals(BigDecimal(100), småbarnstilleggAndel2.prosent)
+        assertTrue(småbarnstilleggAndel2.endretUtbetalingAndeler.isEmpty())
+    }
+
+    @Test
+    fun `Etterbetaling 3 år - case 2`() {
+        val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(12))
+        val utvidetVilkårStart = LocalDate.now().minusMonths(6)
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            barna = listOf(barn, barn2),
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = barn,
+                    skalUtbetales = false,
+                    årsak = Årsak.ETTERBETALING_3ÅR,
+                    fom = langEndringsperiode.fom,
+                    tom = langEndringsperiode.tom
+                ),
+            ),
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = LocalDate.now().minusMonths(5),
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barn.aktør,
+                ),
+                AtypiskVilkår(
+                    fom = relevantTidsperiode.fom.førsteDagIInneværendeMåned(),
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barn2.aktør,
+                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED
+                ),
+            ),
+            atypiskeVilkårSøker = listOf(
+                AtypiskVilkår(
+                    fom = utvidetVilkårStart,
+                    tom = null,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    aktør = søker.aktør
+                )
+            )
+        )
+
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantTidsperiode.tom) }
+
+        assertEquals(7, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+
+        // BARN
+        val (barn1Andeler, barn2Andeler) = barnasAndeler.partition { it.aktør == barn.aktør }
+
+        assertEquals(2, barn1Andeler.size)
+
+        val barn1Andel1 = barn1Andeler[0]
+        val barn1Andel2 = barn1Andeler[1]
+
+        assertEquals(langEndringsperiode.fom, barn1Andel1.stønadFom)
+        assertEquals(langEndringsperiode.tom, barn1Andel1.stønadTom)
+        assertEquals(BigDecimal.ZERO, barn1Andel1.prosent)
+        assertTrue(barn1Andel1.endretUtbetalingAndeler.isNotEmpty())
+
+        assertEquals(langEndringsperiode.tom.plusMonths(1), barn1Andel2.stønadFom)
+        assertEquals(barn.fødselsdato.plusYears(6).minusMonths(1).toYearMonth(), barn1Andel2.stønadTom)
+        assertEquals(BigDecimal(100), barn1Andel2.prosent)
+        assertTrue(barn1Andel2.endretUtbetalingAndeler.isEmpty())
+
+        assertEquals(1, barn2Andeler.size)
+
+        val barn2andel = barn2Andeler.single()
+
+        assertEquals(relevantTidsperiode.fom.plusMonths(1), barn2andel.stønadFom)
+        assertEquals(barn2.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), barn2andel.stønadTom)
+        assertEquals(BigDecimal(50), barn2andel.prosent)
+        assertTrue(barn2andel.endretUtbetalingAndeler.isEmpty())
+
+        // SØKER
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(2, utvidetAndeler.size)
+
+        val utvidetAndel1 = utvidetAndeler.first()
+        val utvidetAndel2 = utvidetAndeler.last()
+
+        assertEquals(utvidetVilkårStart.plusMonths(1).toYearMonth(), utvidetAndel1.stønadFom)
+        assertEquals(langEndringsperiode.tom, utvidetAndel1.stønadTom)
+        assertEquals(BigDecimal(50), utvidetAndel1.prosent)
+        assertTrue(utvidetAndel1.endretUtbetalingAndeler.isEmpty())
+
+        assertEquals(langEndringsperiode.tom.plusMonths(1), utvidetAndel2.stønadFom)
+        assertEquals(barn.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), utvidetAndel2.stønadTom)
+        assertEquals(BigDecimal(100), utvidetAndel2.prosent)
+        assertTrue(utvidetAndel2.endretUtbetalingAndeler.isEmpty())
+
+        assertEquals(2, småbarnstilleggAndeler.size)
+
+        val småbarnstilleggAndel1 = småbarnstilleggAndeler.first()
+        val småbarnstilleggAndel2 = småbarnstilleggAndeler.last()
+
+        assertEquals(langEndringsperiode.fom, småbarnstilleggAndel1.stønadFom)
+        assertEquals(langEndringsperiode.tom, småbarnstilleggAndel1.stønadTom)
+        assertEquals(BigDecimal.ZERO, småbarnstilleggAndel1.prosent)
+        assertTrue(småbarnstilleggAndel1.endretUtbetalingAndeler.isEmpty())
+
+        assertEquals(langEndringsperiode.tom.plusMonths(1), småbarnstilleggAndel2.stønadFom)
+        assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), småbarnstilleggAndel2.stønadTom)
+        assertEquals(BigDecimal(100), småbarnstilleggAndel2.prosent)
+        assertTrue(småbarnstilleggAndel2.endretUtbetalingAndeler.isEmpty())
+    }
+
     private data class EndretAndel(
         val fom: YearMonth,
         val tom: YearMonth,
@@ -1122,10 +1315,10 @@ internal class TilkjentYtelseUtilsTest {
         val skalUtbetales: Boolean
     )
 
-    private fun settOppScenarioOgBeregnTilkjentYtelse(endretAndeler: List<EndretAndel>, atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList(), atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList()): TilkjentYtelse {
+    private fun settOppScenarioOgBeregnTilkjentYtelse(endretAndeler: List<EndretAndel>, atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList(), atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList(), barna: List<Person> = listOf(barn)): TilkjentYtelse {
         val vilkårsvurdering = lagVilkårsvurdering(
             søker = søker,
-            barn = listOf(barn),
+            barn = barna,
             ytelseType = YtelseType.UTVIDET_BARNETRYGD,
             atypiskeVilkårBarna = atypiskeVilkårBarna,
             atypiskeVilkårSøker = atypiskeVilkårSøker
@@ -1144,7 +1337,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag = lagPersonopplysningsgrunnlag(personer = listOf(søker, barn), behandlingId = vilkårsvurdering.behandling.id),
+            personopplysningGrunnlag = lagPersonopplysningsgrunnlag(personer = barna.plus(søker), behandlingId = vilkårsvurdering.behandling.id),
             behandling = vilkårsvurdering.behandling,
             endretUtbetalingAndeler = endretUtbetalingAndeler,
         ) { (_) ->
