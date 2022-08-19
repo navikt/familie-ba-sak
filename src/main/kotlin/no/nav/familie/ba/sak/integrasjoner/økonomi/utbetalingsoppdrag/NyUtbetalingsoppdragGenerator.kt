@@ -99,21 +99,18 @@ class NyUtbetalingsoppdragGenerator {
     private fun lagUtbetalingsperioderForOpphør(
         andeler: List<Pair<AndelTilkjentYtelse, YearMonth>>,
         vedtak: Vedtak
-    ): List<Utbetalingsperiode> {
-        val utbetalingsperiodeMal = UtbetalingsperiodeMal(
-            vedtak = vedtak,
-            erEndringPåEksisterendePeriode = true
-        )
-
-        return andeler.map { (sisteAndelIKjede, opphørKjedeFom) ->
-            utbetalingsperiodeMal.lagPeriodeFraAndel(
+    ): List<Utbetalingsperiode> =
+        andeler.map { (sisteAndelIKjede, opphørKjedeFom) ->
+            UtbetalingsperiodeMal(
+                vedtak = vedtak,
+                erEndringPåEksisterendePeriode = true
+            ).lagPeriodeFraAndel(
                 andel = sisteAndelIKjede,
                 periodeIdOffset = sisteAndelIKjede.periodeOffset!!.toInt(),
                 forrigePeriodeIdOffset = sisteAndelIKjede.forrigePeriodeOffset?.toInt(),
                 opphørKjedeFom = opphørKjedeFom
             )
         }
-    }
 
     private fun lagUtbetalingsperioderForOpprettelse(
         andeler: List<List<AndelTilkjentYtelse>>,
@@ -127,10 +124,6 @@ class NyUtbetalingsoppdragGenerator {
                 sisteOffsetPåFagsak?.plus(1)
                     ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
             } else 0
-
-        val utbetalingsperiodeMal = UtbetalingsperiodeMal(
-            vedtak = vedtak
-        )
 
         return andeler.filter { kjede -> kjede.isNotEmpty() }
             .flatMap { kjede: List<AndelTilkjentYtelse> ->
@@ -146,7 +139,9 @@ class NyUtbetalingsoppdragGenerator {
                 }
                 kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
                     val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1
-                    utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
+                    UtbetalingsperiodeMal(
+                        vedtak = vedtak
+                    ).lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
                         andel.periodeOffset = offset.toLong()
                         andel.forrigePeriodeOffset = forrigeOffset?.toLong()
                         andel.kildeBehandlingId =
