@@ -37,7 +37,7 @@ class NyUtbetalingsoppdragGenerator {
      * har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
      * @return Utbetalingsoppdrag for vedtak
      */
-    fun lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+    internal fun lagUtbetalingsoppdrag(
         saksbehandlerId: String,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
