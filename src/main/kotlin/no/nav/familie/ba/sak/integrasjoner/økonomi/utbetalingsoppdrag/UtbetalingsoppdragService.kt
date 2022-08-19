@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.integrasjoner.økonomi.valider
+import no.nav.familie.ba.sak.integrasjoner.økonomi.validerForNullutbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
@@ -137,8 +137,9 @@ class UtbetalingsoppdragService(
         }
 
         return utbetalingsoppdrag.also {
-            it.valider(
+            it.validerForNullutbetaling(
                 behandlingsresultat = vedtak.behandling.resultat,
+                behandlingskategori = vedtak.behandling.kategori,
                 erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             )
         }
