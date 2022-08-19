@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
@@ -29,6 +30,8 @@ class IverksettMotOppdrag(
     private val taskRepository: TaskRepositoryWrapper,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) : BehandlingSteg<IverksettingTaskDTO> {
+    private val iverksattOppdrag = Metrics.counter("familie.ba.sak.oppdrag.iverksatt")
+    private val iverksettingForskjellNyGammel = Metrics.counter("familie.ba.sak.oppdrag.iverksett.forskjell")
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         tilkjentYtelseValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling)
@@ -62,13 +65,18 @@ class IverksettMotOppdrag(
             vedtak = vedtakService.hent(data.vedtaksId),
             saksbehandlerId = data.saksbehandlerId
         )
+        iverksattOppdrag.increment()
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
-            secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på gamle måte=$utbetalingsoppdrag")
-            val generertUtbetalingsoppdrag = utbetalingsoppdragService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
-                vedtak = vedtakService.hent(data.vedtaksId),
-                saksbehandlerId = data.saksbehandlerId
-            )
-            secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på ny måte=$generertUtbetalingsoppdrag")
+            val generertUtbetalingsoppdrag =
+                utbetalingsoppdragService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+                    vedtak = vedtakService.hent(data.vedtaksId),
+                    saksbehandlerId = data.saksbehandlerId
+                )
+            if (utbetalingsoppdrag != generertUtbetalingsoppdrag) {
+                iverksettingForskjellNyGammel.increment()
+                secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på gamle måte=$utbetalingsoppdrag")
+                secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på ny måte=$generertUtbetalingsoppdrag")
+            }
         }
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)

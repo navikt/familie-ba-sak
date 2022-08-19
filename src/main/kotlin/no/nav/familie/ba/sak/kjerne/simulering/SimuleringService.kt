@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
@@ -39,6 +40,8 @@ class SimuleringService(
     private val vedtakRepository: VedtakRepository,
     private val behandlingRepository: BehandlingRepository
 ) {
+    private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
+    private val simulertForskjellNyGammel = Metrics.counter("familie.ba.sak.oppdrag.simulert.forskjell")
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
@@ -56,14 +59,18 @@ class SimuleringService(
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             erSimulering = true
         )
+        simulert.increment()
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
-            secureLogger.info("Generert utbetalingsoppdrag på gamle måte=$utbetalingsoppdrag")
             val generertUtbetalingsoppdrag = utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 vedtak = vedtak,
                 saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
                 erSimulering = true
             )
-            secureLogger.info("Generert utbetalingsoppdrag på ny måte=$generertUtbetalingsoppdrag")
+            if (utbetalingsoppdrag != generertUtbetalingsoppdrag) {
+                simulertForskjellNyGammel.increment()
+                secureLogger.info("Generert utbetalingsoppdrag på gamle måte=$utbetalingsoppdrag")
+                secureLogger.info("Generert utbetalingsoppdrag på ny måte=$generertUtbetalingsoppdrag")
+            }
         }
 
         return økonomiKlient.hentSimulering(utbetalingsoppdrag)
