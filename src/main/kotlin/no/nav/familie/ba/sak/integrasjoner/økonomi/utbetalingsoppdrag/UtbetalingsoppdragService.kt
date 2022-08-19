@@ -30,17 +30,17 @@ import java.time.YearMonth
 
 @Service
 class UtbetalingsoppdragService(
-        private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-        private val økonomiKlient: ØkonomiKlient,
-        private val beregningService: BeregningService,
-        private val utbetalingsoppdragGenerator: NyUtbetalingsoppdragGenerator,
-        private val behandlingService: BehandlingService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val økonomiKlient: ØkonomiKlient,
+    private val beregningService: BeregningService,
+    private val utbetalingsoppdragGenerator: NyUtbetalingsoppdragGenerator,
+    private val behandlingService: BehandlingService
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
-            vedtak: Vedtak,
-            saksbehandlerId: String
+        vedtak: Vedtak,
+        saksbehandlerId: String
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
@@ -58,7 +58,7 @@ class UtbetalingsoppdragService(
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
         } catch (exception: Exception) {
             if (exception is RessursException &&
-                    exception.httpStatus == HttpStatus.CONFLICT
+                exception.httpStatus == HttpStatus.CONFLICT
             ) {
                 sammeOppdragSendtKonflikt.increment()
                 logger.info("Bypasset feil med HttpKode 409 ved iverksetting mot økonomi for fagsak ${utbetalingsoppdrag.saksnummer}")
@@ -70,40 +70,40 @@ class UtbetalingsoppdragService(
     }
 
     fun hentStatus(oppdragId: OppdragId): OppdragStatus =
-            økonomiKlient.hentStatus(oppdragId)
+        økonomiKlient.hentStatus(oppdragId)
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-            vedtak: Vedtak,
-            saksbehandlerId: String,
-            erSimulering: Boolean = false,
-            skalValideres: Boolean = true
+        vedtak: Vedtak,
+        saksbehandlerId: String,
+        erSimulering: Boolean = false,
+        skalValideres: Boolean = true
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand =
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = oppdatertBehandling.id)
+            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = oppdatertBehandling.id)
 
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
         val erFørsteIverksatteBehandlingPåFagsak =
-                beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId = oppdatertBehandling.fagsak.id)
-                        .isEmpty()
+            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId = oppdatertBehandling.fagsak.id)
+                .isEmpty()
 
         val utbetalingsoppdrag = if (erFørsteIverksatteBehandlingPåFagsak) {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                    saksbehandlerId = saksbehandlerId,
-                    vedtak = vedtak,
-                    erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
-                    oppdaterteKjeder = oppdaterteKjeder,
-                    erSimulering = erSimulering
+                saksbehandlerId = saksbehandlerId,
+                vedtak = vedtak,
+                erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
+                oppdaterteKjeder = oppdaterteKjeder,
+                erSimulering = erSimulering
             )
         } else {
             val forrigeBehandling =
-                    behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
-                            ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
+                behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
+                    ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
 
             val forrigeTilstand =
-                    beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
             val sisteOffsetPerIdent = hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id)
@@ -117,25 +117,25 @@ class UtbetalingsoppdragService(
             }
 
             val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                    saksbehandlerId = saksbehandlerId,
-                    vedtak = vedtak,
-                    erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
-                    forrigeKjeder = forrigeKjeder,
-                    sisteOffsetPerIdent = sisteOffsetPerIdent,
-                    sisteOffsetPåFagsak = sisteOffsetPåFagsak,
-                    oppdaterteKjeder = oppdaterteKjeder,
-                    erSimulering = erSimulering,
-                    endretMigreringsDato = beregnOmMigreringsDatoErEndret(
-                            vedtak.behandling,
-                            forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom
-                    )
+                saksbehandlerId = saksbehandlerId,
+                vedtak = vedtak,
+                erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
+                forrigeKjeder = forrigeKjeder,
+                sisteOffsetPerIdent = sisteOffsetPerIdent,
+                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                oppdaterteKjeder = oppdaterteKjeder,
+                erSimulering = erSimulering,
+                endretMigreringsDato = beregnOmMigreringsDatoErEndret(
+                    vedtak.behandling,
+                    forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom
+                )
             )
 
             if (!erSimulering && (
-                            oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
-                                    oppdatertBehandling.id
-                            ).resultat == Behandlingsresultat.OPPHØRT
-                            )
+                oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
+                        oppdatertBehandling.id
+                    ).resultat == Behandlingsresultat.OPPHØRT
+                )
             ) {
                 validerOpphørsoppdrag(utbetalingsoppdrag)
             }
@@ -146,8 +146,8 @@ class UtbetalingsoppdragService(
         return utbetalingsoppdrag.also {
             if (skalValideres) {
                 it.valider(
-                        behandlingsresultat = vedtak.behandling.resultat,
-                        erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                    behandlingsresultat = vedtak.behandling.resultat,
+                    erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
                 )
             }
         }
@@ -155,24 +155,24 @@ class UtbetalingsoppdragService(
 
     private fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
         val alleAndelerTilkjentYtelserIverksattMotØkonomi =
-                beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
-                        .flatMap { it.andelerTilkjentYtelse }
+            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
+                .flatMap { it.andelerTilkjentYtelse }
         val alleTideligereKjederIverksattMotØkonomi =
-                kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
+            kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
 
         return gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
     }
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-            behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
-                    .mapNotNull { iverksattBehandling ->
+        behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
+            .mapNotNull { iverksattBehandling ->
 
-                        beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
-                                .takeIf { it.isNotEmpty() }
-                                ?.let { andelerTilkjentYtelse ->
-                                    andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                                }
-                    }.maxByOrNull { it }
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { andelerTilkjentYtelse ->
+                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
+                    }
+            }.maxByOrNull { it }
 
     fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         if (utbetalingsoppdrag.harLøpendeUtbetaling()) {
@@ -186,20 +186,20 @@ class UtbetalingsoppdragService(
 
     private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
         val erMigrertSak =
-                behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id)
-                        .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
+            behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id)
+                .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
 
         if (!erMigrertSak) {
             return null
         }
 
         val nyttTilstandFraDato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
-                ?.toYearMonth()
-                ?.plusMonths(1)
+            ?.toYearMonth()
+            ?.plusMonths(1)
 
         return if (forrigeTilstandFraDato != null &&
-                nyttTilstandFraDato != null &&
-                forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)
+            nyttTilstandFraDato != null &&
+            forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)
         ) {
             nyttTilstandFraDato
         } else {
@@ -214,8 +214,8 @@ class UtbetalingsoppdragService(
 }
 
 fun Utbetalingsoppdrag.harLøpendeUtbetaling() =
-        this.utbetalingsperiode.any {
-            it.opphør == null &&
-                    it.sats > BigDecimal.ZERO &&
-                    it.vedtakdatoTom > LocalDate.now().sisteDagIMåned()
-        }
+    this.utbetalingsperiode.any {
+        it.opphør == null &&
+            it.sats > BigDecimal.ZERO &&
+            it.vedtakdatoTom > LocalDate.now().sisteDagIMåned()
+    }
