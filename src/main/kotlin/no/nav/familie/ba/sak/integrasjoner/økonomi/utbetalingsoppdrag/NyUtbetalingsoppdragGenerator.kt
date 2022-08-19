@@ -70,8 +70,6 @@ class NyUtbetalingsoppdragGenerator {
             sisteBeståendeAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
         }
 
-        val andelerTilOpphør =
-            andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato)
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
@@ -84,7 +82,7 @@ class NyUtbetalingsoppdragGenerator {
         )
 
         val opphøres: List<Utbetalingsperiode> = lagUtbetalingsperioderForOpphør(
-            andeler = andelerTilOpphør,
+            andeler = andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato),
             vedtak = vedtak
         )
 
