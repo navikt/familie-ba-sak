@@ -47,10 +47,12 @@ class UtbetalingsoppdragService(
         val utbetalingsoppdragDTO =
             genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
 
-        val oppdatertTilkjentYtelse = utbetalingsoppdragDTO.tilkjentYtelse ?: throw Feil(
-            "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
-        )
-        // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
+        if (utbetalingsoppdragDTO.harAndelerTilOpprettelse) {
+            val oppdatertTilkjentYtelse = utbetalingsoppdragDTO.tilkjentYtelse ?: throw Feil(
+                "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
+            )
+            // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
+        }
 
         return utbetalingsoppdragDTO.utbetalingsoppdrag
 
@@ -157,6 +159,7 @@ class UtbetalingsoppdragService(
                     )
                 }
             },
+            utbetalingsoppdrag.harAndelerTilOpprettelse,
             utbetalingsoppdrag.tilkjentYtelse
         )
     }

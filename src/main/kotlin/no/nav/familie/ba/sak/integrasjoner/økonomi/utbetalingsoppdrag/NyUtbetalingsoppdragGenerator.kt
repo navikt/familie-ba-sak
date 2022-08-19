@@ -103,6 +103,7 @@ class NyUtbetalingsoppdragGenerator {
                 aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
                 utbetalingsperiode = listOf(opphøres, opprettes).flatten()
             ),
+            andelerTilOpprettelse.isNotEmpty(),
             andelerTilOpprettelse.flatten().firstOrNull()?.tilkjentYtelse
         )
     }
