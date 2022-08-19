@@ -79,8 +79,7 @@ class UtbetalingsoppdragService(
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
         vedtak: Vedtak,
         saksbehandlerId: String,
-        erSimulering: Boolean = false,
-        skalValideres: Boolean = true
+        erSimulering: Boolean = false
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand =
@@ -143,12 +142,10 @@ class UtbetalingsoppdragService(
         }
 
         return utbetalingsoppdrag.also {
-            if (skalValideres) {
-                it.valider(
-                    behandlingsresultat = vedtak.behandling.resultat,
-                    erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
-            }
+            it.valider(
+                behandlingsresultat = vedtak.behandling.resultat,
+                erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+            )
         }
     }
 
