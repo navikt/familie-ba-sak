@@ -1147,8 +1147,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = lagPersonopplysningsgrunnlag(personer = listOf(søker, barn), behandlingId = vilkårsvurdering.behandling.id),
             behandling = vilkårsvurdering.behandling,
             endretUtbetalingAndeler = endretUtbetalingAndeler,
-        ) {
-            (_) ->
+        ) { (_) ->
             lagOvergangsstønadPerioder(perioder = listOf(overgangsstønadPeriode), søkerIdent = søker.aktør.aktivFødselsnummer())
         }
 
