@@ -129,12 +129,7 @@ class UtbetalingsoppdragService(
                 )
             )
 
-            if (!erSimulering && (
-                oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
-                        oppdatertBehandling.id
-                    ).resultat == Behandlingsresultat.OPPHØRT
-                )
-            ) {
+            if (!erSimulering && erOpphørtBehandling(oppdatertBehandling)) {
                 validerOpphørsoppdrag(utbetalingsoppdrag)
             }
 
@@ -148,6 +143,10 @@ class UtbetalingsoppdragService(
             )
         }
     }
+
+    private fun erOpphørtBehandling(oppdatertBehandling: Behandling) =
+        oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT ||
+            behandlingHentOgPersisterService.hent(oppdatertBehandling.id).resultat == Behandlingsresultat.OPPHØRT
 
     private fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
         val alleAndelerTilkjentYtelserIverksattMotØkonomi =
