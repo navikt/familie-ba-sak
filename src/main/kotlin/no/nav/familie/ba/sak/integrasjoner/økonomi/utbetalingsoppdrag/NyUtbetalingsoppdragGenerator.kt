@@ -103,7 +103,7 @@ class NyUtbetalingsoppdragGenerator {
         )
     }
 
-    fun lagUtbetalingsperioderForOpphør(
+    private fun lagUtbetalingsperioderForOpphør(
         andeler: List<Pair<AndelTilkjentYtelse, YearMonth>>,
         vedtak: Vedtak
     ): List<Utbetalingsperiode> {
@@ -122,7 +122,7 @@ class NyUtbetalingsoppdragGenerator {
         }
     }
 
-    fun lagUtbetalingsperioderForOpprettelse(
+    private fun lagUtbetalingsperioderForOpprettelse(
         andeler: List<List<AndelTilkjentYtelse>>,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
