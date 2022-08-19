@@ -4,8 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -13,22 +11,22 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VergeServiceTest {
 
-    private val behandlingServcieMock: BehandlingService = mockk()
+    private val vergeRepositoryMock: VergeRepository = mockk()
 
     @Test
     fun `RegistrerVerge() skal lagre verge og oppdater behandling`() {
         val behandling = lagBehandling()
-        val behandlingSlot = slot<Behandling>()
-        every { behandlingServcieMock.lagre(capture(behandlingSlot)) } returns behandling
-        val vergeService = VergeService(behandlingServcieMock)
+        val vergeSlot = slot<Verge>()
+        every { vergeRepositoryMock.findByBehandling(any()) } returns null
+        every { vergeRepositoryMock.save(capture(vergeSlot)) } returns Verge(1L, "", "", "", behandling)
+        val vergeService = VergeService(vergeRepositoryMock)
         val verge = Verge(1L, "verge 1", "adresse 1", "12345678910", behandling)
-        vergeService.RegistrerVergeForBehandling(behandling, verge)
-        val behandlingCaptured = behandlingSlot.captured
-        val vergeCaptured = behandlingCaptured.verge
-        assertThat(vergeCaptured!!.id).isEqualTo(verge.id)
-        assertThat(vergeCaptured!!.navn).isEqualTo(verge.navn)
-        assertThat(vergeCaptured!!.adresse).isEqualTo(verge.adresse)
-        assertThat(vergeCaptured!!.ident).isEqualTo(verge.ident)
-        assertThat(vergeCaptured!!.behandling.id).isEqualTo(behandling.id)
+        vergeService.OppdaterVergeForBehandling(behandling, verge)
+        val vergeCaptured = vergeSlot.captured
+        assertThat(vergeCaptured.id).isEqualTo(verge.id)
+        assertThat(vergeCaptured.navn).isEqualTo(verge.navn)
+        assertThat(vergeCaptured.adresse).isEqualTo(verge.adresse)
+        assertThat(vergeCaptured.ident).isEqualTo(verge.ident)
+        assertThat(vergeCaptured.behandling.id).isEqualTo(behandling.id)
     }
 }

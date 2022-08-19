@@ -26,7 +26,7 @@ class RegistrerInstitusjonOgVerge(
         var verge = data.tilVerge(behandling)
         var institusjon = data.tilInstitusjon()
         if (verge != null) {
-            vergeService.RegistrerVergeForBehandling(behandling, verge)
+            vergeService.OppdaterVergeForBehandling(behandling, verge)
             loggService.opprettRegistrerVergeLogg(
                 behandling
             )
