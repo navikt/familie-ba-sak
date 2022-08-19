@@ -29,20 +29,20 @@ import javax.transaction.Transactional
 
 @Service
 class SimuleringService(
-    private val økonomiKlient: ØkonomiKlient,
-    private val økonomiService: ØkonomiService,
-    private val utbetalingsoppdragService: UtbetalingsoppdragService,
-    private val beregningService: BeregningService,
-    private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository,
-    private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService,
-    private val vedtakRepository: VedtakRepository,
-    private val behandlingRepository: BehandlingRepository
+        private val økonomiKlient: ØkonomiKlient,
+        private val økonomiService: ØkonomiService,
+        private val utbetalingsoppdragService: UtbetalingsoppdragService,
+        private val beregningService: BeregningService,
+        private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository,
+        private val tilgangService: TilgangService,
+        private val featureToggleService: FeatureToggleService,
+        private val vedtakRepository: VedtakRepository,
+        private val behandlingRepository: BehandlingRepository
 ) {
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
-            beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = vedtak.behandling)
+                beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = vedtak.behandling)
         ) return null
 
         /**
@@ -52,18 +52,18 @@ class SimuleringService(
          */
 
         val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-            vedtak = vedtak,
-            saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-            erSimulering = true
+                vedtak = vedtak,
+                saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                erSimulering = true
         )
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
             secureLogger.info("Generert utbetalingsoppdrag på gamle måte=$utbetalingsoppdrag")
             val generertUtbetalingsoppdrag = utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                vedtak = vedtak,
-                saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-                erSimulering = true
+                    vedtak = vedtak,
+                    saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                    erSimulering = true
             )
-            secureLogger.info("Generert utbetalingsoppdrag på ny måte=${generertUtbetalingsoppdrag.utbetalingsoppdrag}")
+            secureLogger.info("Generert utbetalingsoppdrag på ny måte=$generertUtbetalingsoppdrag")
         }
 
         return økonomiKlient.hentSimulering(utbetalingsoppdrag)
@@ -71,8 +71,8 @@ class SimuleringService(
 
     @Transactional
     fun lagreSimuleringPåBehandling(
-        simuleringMottakere: List<SimuleringMottaker>,
-        beahndling: Behandling
+            simuleringMottakere: List<SimuleringMottaker>,
+            beahndling: Behandling
     ): List<ØkonomiSimuleringMottaker> {
         val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilBehandlingSimuleringMottaker(beahndling) }
         return øknomiSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
@@ -80,7 +80,7 @@ class SimuleringService(
 
     @Transactional
     fun slettSimuleringPåBehandling(behandlingId: Long) =
-        øknomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
+            øknomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
 
     fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
         return øknomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
@@ -89,8 +89,8 @@ class SimuleringService(
     fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val behandlingErFerdigBesluttet =
-            behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
-                behandling.status == BehandlingStatus.AVSLUTTET
+                behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
+                        behandling.status == BehandlingStatus.AVSLUTTET
 
         val simulering = hentSimuleringPåBehandling(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)
@@ -101,24 +101,24 @@ class SimuleringService(
     }
 
     private fun simuleringErUtdatert(simulering: RestSimulering) =
-        simulering.tidSimuleringHentet == null ||
-            (
-                simulering.forfallsdatoNestePeriode != null &&
-                    simulering.tidSimuleringHentet < simulering.forfallsdatoNestePeriode &&
-                    LocalDate.now() > simulering.forfallsdatoNestePeriode
-                )
+            simulering.tidSimuleringHentet == null ||
+                    (
+                            simulering.forfallsdatoNestePeriode != null &&
+                                    simulering.tidSimuleringHentet < simulering.forfallsdatoNestePeriode &&
+                                    LocalDate.now() > simulering.forfallsdatoNestePeriode
+                            )
 
     @Transactional
     fun oppdaterSimuleringPåBehandling(behandling: Behandling): List<ØkonomiSimuleringMottaker> {
         val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
-            ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
+                ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "opprette simulering"
+                minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+                handling = "opprette simulering"
         )
 
         val simulering: List<SimuleringMottaker> =
-            hentSimuleringFraFamilieOppdrag(vedtak = aktivtVedtak)?.simuleringMottaker ?: emptyList()
+                hentSimuleringFraFamilieOppdrag(vedtak = aktivtVedtak)?.simuleringMottaker ?: emptyList()
 
         slettSimuleringPåBehandling(behandling.id)
         return lagreSimuleringPåBehandling(simulering, behandling)

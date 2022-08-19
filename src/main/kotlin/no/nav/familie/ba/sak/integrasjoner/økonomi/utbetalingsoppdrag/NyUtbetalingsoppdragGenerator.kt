@@ -38,22 +38,22 @@ class NyUtbetalingsoppdragGenerator {
      * @return Utbetalingsoppdrag for vedtak
      */
     fun lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-        saksbehandlerId: String,
-        vedtak: Vedtak,
-        erFørsteBehandlingPåFagsak: Boolean,
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
-        sisteOffsetPerIdent: Map<String, Int> = emptyMap(),
-        sisteOffsetPåFagsak: Int? = null,
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
-        erSimulering: Boolean = false,
-        endretMigreringsDato: YearMonth? = null
-    ): UtbetalingsoppdragDTO {
+            saksbehandlerId: String,
+            vedtak: Vedtak,
+            erFørsteBehandlingPåFagsak: Boolean,
+            forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
+            sisteOffsetPerIdent: Map<String, Int> = emptyMap(),
+            sisteOffsetPåFagsak: Int? = null,
+            oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
+            erSimulering: Boolean = false,
+            endretMigreringsDato: YearMonth? = null
+    ): Utbetalingsoppdrag {
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
         // Da de har opplevd å motta
         // UEND på oppdrag som skulle vært ENDR anbefaler de at kun ENDR brukes når sak
         // ikke er ny, så man slipper å forholde seg til om det er endring over 150-nivå eller ikke.
         val aksjonskodePåOppdragsnivå =
-            if (erFørsteBehandlingPåFagsak) Utbetalingsoppdrag.KodeEndring.NY else Utbetalingsoppdrag.KodeEndring.ENDR
+                if (erFørsteBehandlingPåFagsak) Utbetalingsoppdrag.KodeEndring.NY else Utbetalingsoppdrag.KodeEndring.ENDR
 
         // endretMigreringsDato satt betyr at endring skjedd for migreringsdato og som en
         // konsekvens så skal hele betalingsoppdraget opphøre.
@@ -71,102 +71,96 @@ class NyUtbetalingsoppdragGenerator {
         }
 
         val andelerTilOpphør =
-            andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato)
+                andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato)
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
-            andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
+                andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
         val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
             val utbetalingsperioder = lagUtbetalingsperioderForOpprettelse(
-                andeler = andelerTilOpprettelse,
-                erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
-                vedtak = vedtak,
-                sisteOffsetIKjedeOversikt = sisteOffsetPerIdent,
-                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
-                skalOppdatereTilkjentYtelse = !erSimulering
+                    andeler = andelerTilOpprettelse,
+                    erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
+                    vedtak = vedtak,
+                    sisteOffsetIKjedeOversikt = sisteOffsetPerIdent,
+                    sisteOffsetPåFagsak = sisteOffsetPåFagsak
             )
             utbetalingsperioder
         } else emptyList()
 
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty()) {
             lagUtbetalingsperioderForOpphør(
-                andeler = andelerTilOpphør,
-                vedtak = vedtak
+                    andeler = andelerTilOpphør,
+                    vedtak = vedtak
             )
         } else emptyList()
 
-        return UtbetalingsoppdragDTO(
-            utbetalingsoppdrag = Utbetalingsoppdrag(
+        return Utbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
                 kodeEndring = aksjonskodePåOppdragsnivå,
                 fagSystem = FAGSYSTEM,
                 saksnummer = vedtak.behandling.fagsak.id.toString(),
                 aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
                 utbetalingsperiode = listOf(opphøres, opprettes).flatten()
-            ),
-            andelerTilOpprettelse.isNotEmpty(),
-            andelerTilOpprettelse.flatten().firstOrNull()?.tilkjentYtelse
         )
     }
 
     fun lagUtbetalingsperioderForOpphør(
-        andeler: List<Pair<AndelTilkjentYtelse, YearMonth>>,
-        vedtak: Vedtak
+            andeler: List<Pair<AndelTilkjentYtelse, YearMonth>>,
+            vedtak: Vedtak
     ): List<Utbetalingsperiode> {
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(
-            vedtak = vedtak,
-            erEndringPåEksisterendePeriode = true
+                vedtak = vedtak,
+                erEndringPåEksisterendePeriode = true
         )
 
         return andeler.map { (sisteAndelIKjede, opphørKjedeFom) ->
             utbetalingsperiodeMal.lagPeriodeFraAndel(
-                andel = sisteAndelIKjede,
-                periodeIdOffset = sisteAndelIKjede.periodeOffset!!.toInt(),
-                forrigePeriodeIdOffset = sisteAndelIKjede.forrigePeriodeOffset?.toInt(),
-                opphørKjedeFom = opphørKjedeFom
+                    andel = sisteAndelIKjede,
+                    periodeIdOffset = sisteAndelIKjede.periodeOffset!!.toInt(),
+                    forrigePeriodeIdOffset = sisteAndelIKjede.forrigePeriodeOffset?.toInt(),
+                    opphørKjedeFom = opphørKjedeFom
             )
         }
     }
 
     fun lagUtbetalingsperioderForOpprettelse(
-        andeler: List<List<AndelTilkjentYtelse>>,
-        vedtak: Vedtak,
-        erFørsteBehandlingPåFagsak: Boolean,
-        sisteOffsetIKjedeOversikt: Map<String, Int>,
-        sisteOffsetPåFagsak: Int? = null,
-        skalOppdatereTilkjentYtelse: Boolean
+            andeler: List<List<AndelTilkjentYtelse>>,
+            vedtak: Vedtak,
+            erFørsteBehandlingPåFagsak: Boolean,
+            sisteOffsetIKjedeOversikt: Map<String, Int>,
+            sisteOffsetPåFagsak: Int? = null
     ): List<Utbetalingsperiode> {
         var offset =
-            if (!erFørsteBehandlingPåFagsak) {
-                sisteOffsetPåFagsak?.plus(1)
-                    ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
-            } else 0
+                if (!erFørsteBehandlingPåFagsak) {
+                    sisteOffsetPåFagsak?.plus(1)
+                            ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
+                } else 0
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(
-            vedtak = vedtak
+                vedtak = vedtak
         )
 
         return andeler.filter { kjede -> kjede.isNotEmpty() }
-            .flatMap { kjede: List<AndelTilkjentYtelse> ->
-                val ident = kjede.first().aktør.aktivFødselsnummer()
-                val ytelseType = kjede.first().type
-                var forrigeOffsetIKjede: Int? = null
-                if (!erFørsteBehandlingPåFagsak) {
-                    forrigeOffsetIKjede = if (ytelseType == YtelseType.SMÅBARNSTILLEGG) {
-                        sisteOffsetIKjedeOversikt[ident + SMÅBARNSTILLEGG_SUFFIX]
-                    } else {
-                        sisteOffsetIKjedeOversikt[ident]
+                .flatMap { kjede: List<AndelTilkjentYtelse> ->
+                    val ident = kjede.first().aktør.aktivFødselsnummer()
+                    val ytelseType = kjede.first().type
+                    var forrigeOffsetIKjede: Int? = null
+                    if (!erFørsteBehandlingPåFagsak) {
+                        forrigeOffsetIKjede = if (ytelseType == YtelseType.SMÅBARNSTILLEGG) {
+                            sisteOffsetIKjedeOversikt[ident + SMÅBARNSTILLEGG_SUFFIX]
+                        } else {
+                            sisteOffsetIKjedeOversikt[ident]
+                        }
+                    }
+                    kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
+                        val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1
+                        utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
+                            andel.periodeOffset = offset.toLong()
+                            andel.forrigePeriodeOffset = forrigeOffset?.toLong()
+                            andel.kildeBehandlingId =
+                                    andel.behandlingId // Trengs for å finne tilbake ved konsistensavstemming
+                            offset++
+                        }
                     }
                 }
-                kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
-                    val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1
-                    utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
-                        andel.periodeOffset = offset.toLong()
-                        andel.forrigePeriodeOffset = forrigeOffset?.toLong()
-                        andel.kildeBehandlingId =
-                            andel.behandlingId // Trengs for å finne tilbake ved konsistensavstemming
-                        offset++
-                    }
-                }
-            }
     }
 }
