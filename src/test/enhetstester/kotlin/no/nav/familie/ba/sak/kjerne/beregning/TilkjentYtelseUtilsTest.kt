@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -820,50 +821,42 @@ internal class TilkjentYtelseUtilsTest {
         // BARN
         assertEquals(2, barnasAndeler.size)
 
-        val nullperiodeBarn = barnasAndeler.first()
-        val deltBostedPeriode = barnasAndeler.last()
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = langEndringsperiode.fom, tom = langEndringsperiode.tom, prosent = BigDecimal.ZERO, knyttetTilEndringsperiode = true),
+            faktiskAndel = barnasAndeler.first()
+        )
 
-        assertEquals(langEndringsperiode.fom, nullperiodeBarn.stønadFom)
-        assertEquals(langEndringsperiode.tom, nullperiodeBarn.stønadTom)
-        assertEquals(BigDecimal.ZERO, nullperiodeBarn.prosent)
-        assertTrue(nullperiodeBarn.endretUtbetalingAndeler.isNotEmpty())
-
-        assertEquals(langEndringsperiode.tom.plusMonths(1), deltBostedPeriode.stønadFom)
-        assertEquals(BigDecimal(50), deltBostedPeriode.prosent)
-        assertTrue(deltBostedPeriode.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = langEndringsperiode.tom.plusMonths(1), tom = barn.fødselsdato.plusYears(6).minusMonths(1).toYearMonth(), prosent = BigDecimal(50)),
+            faktiskAndel = barnasAndeler.last()
+        )
 
         // SØKER
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
 
         assertEquals(2, utvidetAndeler.size)
 
-        val nullperiodeUtvidet = utvidetAndeler.first()
-        val utbetalingUtvidet = utvidetAndeler.last()
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = langEndringsperiode.fom, tom = langEndringsperiode.tom, prosent = BigDecimal.ZERO, knyttetTilEndringsperiode = true),
+            faktiskAndel = utvidetAndeler.first()
+        )
 
-        assertEquals(langEndringsperiode.fom, nullperiodeUtvidet.stønadFom)
-        assertEquals(langEndringsperiode.tom, nullperiodeUtvidet.stønadTom)
-        assertEquals(BigDecimal.ZERO, nullperiodeUtvidet.prosent)
-        assertTrue(nullperiodeUtvidet.endretUtbetalingAndeler.isNotEmpty())
-
-        assertEquals(langEndringsperiode.tom.plusMonths(1), utbetalingUtvidet.stønadFom)
-        assertEquals(barn.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), utbetalingUtvidet.stønadTom)
-        assertEquals(BigDecimal(50), utbetalingUtvidet.prosent)
-        assertTrue(utbetalingUtvidet.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = langEndringsperiode.tom.plusMonths(1), tom = barn.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), prosent = BigDecimal(50)),
+            faktiskAndel = utvidetAndeler.last()
+        )
 
         assertEquals(2, småbarnstilleggAndeler.size)
 
-        val nullperiodeSmåbarnstillegg = småbarnstilleggAndeler.first()
-        val utbetalingSmåbarnstillegg = småbarnstilleggAndeler.last()
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = langEndringsperiode.fom, tom = langEndringsperiode.tom, prosent = BigDecimal.ZERO),
+            faktiskAndel = småbarnstilleggAndeler.first()
+        )
 
-        assertEquals(langEndringsperiode.fom, nullperiodeSmåbarnstillegg.stønadFom)
-        assertEquals(langEndringsperiode.tom, nullperiodeSmåbarnstillegg.stønadTom)
-        assertEquals(BigDecimal.ZERO, nullperiodeSmåbarnstillegg.prosent)
-        assertTrue(nullperiodeSmåbarnstillegg.endretUtbetalingAndeler.isEmpty())
-
-        assertEquals(langEndringsperiode.tom.plusMonths(1), utbetalingSmåbarnstillegg.stønadFom)
-        assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), utbetalingSmåbarnstillegg.stønadTom)
-        assertEquals(BigDecimal(100), utbetalingSmåbarnstillegg.prosent)
-        assertTrue(utbetalingSmåbarnstillegg.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = langEndringsperiode.tom.plusMonths(1), tom = barn.fødselsdato.plusYears(3).toYearMonth(), prosent = BigDecimal(100)),
+            faktiskAndel = småbarnstilleggAndeler.last()
+        )
     }
 
     @Test
@@ -897,38 +890,32 @@ internal class TilkjentYtelseUtilsTest {
         // BARN
         assertEquals(2, barnasAndeler.size)
 
-        val nullperiodeBarn = barnasAndeler.first()
-        val deltBostedPeriode = barnasAndeler.last()
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = langEndringsperiode.fom, tom = langEndringsperiode.tom, prosent = BigDecimal.ZERO, knyttetTilEndringsperiode = true),
+            faktiskAndel = barnasAndeler.first()
+        )
 
-        assertEquals(langEndringsperiode.fom, nullperiodeBarn.stønadFom)
-        assertEquals(langEndringsperiode.tom, nullperiodeBarn.stønadTom)
-        assertEquals(BigDecimal.ZERO, nullperiodeBarn.prosent)
-        assertTrue(nullperiodeBarn.endretUtbetalingAndeler.isNotEmpty())
-
-        assertEquals(langEndringsperiode.tom.plusMonths(1), deltBostedPeriode.stønadFom)
-        assertEquals(BigDecimal(50), deltBostedPeriode.prosent)
-        assertTrue(deltBostedPeriode.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = langEndringsperiode.tom.plusMonths(1), tom = barn.fødselsdato.plusYears(6).minusMonths(1).toYearMonth(), prosent = BigDecimal(50)),
+            faktiskAndel = barnasAndeler.last()
+        )
 
         // SØKER
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
 
         assertEquals(1, utvidetAndeler.size)
 
-        val utbetalingUtvidet = utvidetAndeler.first()
-
-        assertEquals(langEndringsperiode.fom, utbetalingUtvidet.stønadFom)
-        assertEquals(barn.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), utbetalingUtvidet.stønadTom)
-        assertEquals(BigDecimal(50), utbetalingUtvidet.prosent)
-        assertTrue(utbetalingUtvidet.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = langEndringsperiode.fom, tom = barn.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), prosent = BigDecimal(50)),
+            faktiskAndel = utvidetAndeler.single()
+        )
 
         assertEquals(1, småbarnstilleggAndeler.size)
 
-        val utbetalingSmåbarnstillegg = småbarnstilleggAndeler.first()
-
-        assertEquals(langEndringsperiode.fom, utbetalingSmåbarnstillegg.stønadFom)
-        assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), utbetalingSmåbarnstillegg.stønadTom)
-        assertEquals(BigDecimal(100), utbetalingSmåbarnstillegg.prosent)
-        assertTrue(utbetalingSmåbarnstillegg.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = langEndringsperiode.fom, tom = barn.fødselsdato.plusYears(3).toYearMonth(), prosent = BigDecimal(100)),
+            faktiskAndel = småbarnstilleggAndeler.single()
+        )
     }
 
     @Test
@@ -975,45 +962,37 @@ internal class TilkjentYtelseUtilsTest {
         // BARN
         assertEquals(3, barnasAndeler.size)
 
-        val barnetsAndel1 = barnasAndeler[0]
-        val barnetsAndel2 = barnasAndeler[1]
-        val barnetsAndel3 = barnasAndeler[2]
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = YearMonth.now().minusMonths(4), tom = kortEndringsperiode.fom.minusMonths(1), prosent = BigDecimal(100)),
+            faktiskAndel = barnasAndeler[0]
+        )
 
-        assertEquals(YearMonth.now().minusMonths(4), barnetsAndel1.stønadFom)
-        assertEquals(kortEndringsperiode.fom.minusMonths(1), barnetsAndel1.stønadTom)
-        assertEquals(BigDecimal(100), barnetsAndel1.prosent)
-        assertTrue(barnetsAndel1.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = kortEndringsperiode.fom, tom = kortEndringsperiode.tom, prosent = BigDecimal(100), knyttetTilEndringsperiode = true),
+            faktiskAndel = barnasAndeler[1]
+        )
 
-        assertEquals(kortEndringsperiode.fom, barnetsAndel2.stønadFom)
-        assertEquals(kortEndringsperiode.tom, barnetsAndel2.stønadTom)
-        assertEquals(BigDecimal(100), barnetsAndel2.prosent)
-        assertTrue(barnetsAndel2.endretUtbetalingAndeler.isNotEmpty())
-
-        assertEquals(kortEndringsperiode.tom.plusMonths(1), barnetsAndel3.stønadFom)
-        assertEquals(barn.fødselsdato.plusYears(6).minusMonths(1).toYearMonth(), barnetsAndel3.stønadTom)
-        assertEquals(BigDecimal(50), barnetsAndel3.prosent)
-        assertTrue(barnetsAndel3.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = kortEndringsperiode.tom.plusMonths(1), tom = barn.fødselsdato.plusYears(6).minusMonths(1).toYearMonth(), prosent = BigDecimal(50)),
+            faktiskAndel = barnasAndeler[2]
+        )
 
         // SØKER
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
 
         assertEquals(1, utvidetAndeler.size)
 
-        val utbetalingUtvidet = utvidetAndeler.first()
-
-        assertEquals(kortEndringsperiode.fom, utbetalingUtvidet.stønadFom)
-        assertEquals(barn.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), utbetalingUtvidet.stønadTom)
-        assertEquals(BigDecimal(50), utbetalingUtvidet.prosent)
-        assertTrue(utbetalingUtvidet.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = kortEndringsperiode.fom, tom = barn.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), prosent = BigDecimal(50)),
+            faktiskAndel = utvidetAndeler.single()
+        )
 
         assertEquals(1, småbarnstilleggAndeler.size)
 
-        val utbetalingSmåbarnstillegg = småbarnstilleggAndeler.first()
-
-        assertEquals(kortEndringsperiode.fom, utbetalingSmåbarnstillegg.stønadFom)
-        assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), utbetalingSmåbarnstillegg.stønadTom)
-        assertEquals(BigDecimal(100), utbetalingSmåbarnstillegg.prosent)
-        assertTrue(utbetalingSmåbarnstillegg.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = kortEndringsperiode.fom, tom = barn.fødselsdato.plusYears(3).toYearMonth(), prosent = BigDecimal(100)),
+            faktiskAndel = småbarnstilleggAndeler.single()
+        )
     }
 
     @Test
@@ -1067,51 +1046,41 @@ internal class TilkjentYtelseUtilsTest {
         // BARN
         assertEquals(3, barnasAndeler.size)
 
-        val barnetsAndel1 = barnasAndeler[0]
-        val barnetsAndel2 = barnasAndeler[1]
-        val barnetsAndel3 = barnasAndeler[2]
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = YearMonth.now().minusMonths(4), tom = kortEndringsperiode.fom.minusMonths(1), prosent = BigDecimal(100)),
+            faktiskAndel = barnasAndeler[0]
+        )
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = kortEndringsperiode.fom, tom = kortEndringsperiode.tom, prosent = BigDecimal(100), knyttetTilEndringsperiode = true),
+            faktiskAndel = barnasAndeler[1]
+        )
 
-        assertEquals(YearMonth.now().minusMonths(4), barnetsAndel1.stønadFom)
-        assertEquals(kortEndringsperiode.fom.minusMonths(1), barnetsAndel1.stønadTom)
-        assertEquals(BigDecimal(100), barnetsAndel1.prosent)
-        assertTrue(barnetsAndel1.endretUtbetalingAndeler.isEmpty())
-
-        assertEquals(kortEndringsperiode.fom, barnetsAndel2.stønadFom)
-        assertEquals(kortEndringsperiode.tom, barnetsAndel2.stønadTom)
-        assertEquals(BigDecimal(100), barnetsAndel2.prosent)
-        assertTrue(barnetsAndel2.endretUtbetalingAndeler.isNotEmpty())
-
-        assertEquals(kortEndringsperiode.tom.plusMonths(1), barnetsAndel3.stønadFom)
-        assertEquals(barn.fødselsdato.plusYears(6).minusMonths(1).toYearMonth(), barnetsAndel3.stønadTom)
-        assertEquals(BigDecimal(50), barnetsAndel3.prosent)
-        assertTrue(barnetsAndel3.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = kortEndringsperiode.tom.plusMonths(1), tom = barn.fødselsdato.plusYears(6).minusMonths(1).toYearMonth(), prosent = BigDecimal(50)),
+            faktiskAndel = barnasAndeler[2]
+        )
 
         // SØKER
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
 
         assertEquals(2, utvidetAndeler.size)
 
-        val utvidetAndel1 = utvidetAndeler.first()
-        val utvidetAndel2 = utvidetAndeler.last()
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = kortEndringsperiode.fom, tom = kortEndringsperiode.tom, prosent = BigDecimal(100), knyttetTilEndringsperiode = true),
+            faktiskAndel = utvidetAndeler.first()
+        )
 
-        assertEquals(kortEndringsperiode.fom, utvidetAndel1.stønadFom)
-        assertEquals(kortEndringsperiode.tom, utvidetAndel1.stønadTom)
-        assertEquals(BigDecimal(100), utvidetAndel1.prosent)
-        assertTrue(utvidetAndel1.endretUtbetalingAndeler.isNotEmpty())
-
-        assertEquals(kortEndringsperiode.tom.plusMonths(1), utvidetAndel2.stønadFom)
-        assertEquals(barn.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), utvidetAndel2.stønadTom)
-        assertEquals(BigDecimal(50), utvidetAndel2.prosent)
-        assertTrue(utvidetAndel2.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = kortEndringsperiode.tom.plusMonths(1), tom = barn.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), prosent = BigDecimal(50)),
+            faktiskAndel = utvidetAndeler.last()
+        )
 
         assertEquals(1, småbarnstilleggAndeler.size)
 
-        val utbetalingSmåbarnstillegg = småbarnstilleggAndeler.first()
-
-        assertEquals(kortEndringsperiode.fom, utbetalingSmåbarnstillegg.stønadFom)
-        assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), utbetalingSmåbarnstillegg.stønadTom)
-        assertEquals(BigDecimal(100), utbetalingSmåbarnstillegg.prosent)
-        assertTrue(utbetalingSmåbarnstillegg.endretUtbetalingAndeler.isEmpty())
+        testPeriode(
+            forventetAndel = ForventetAndel(fom = kortEndringsperiode.fom, tom = barn.fødselsdato.plusYears(3).toYearMonth(), prosent = BigDecimal(100)),
+            faktiskAndel = småbarnstilleggAndeler.single()
+        )
     }
 
     @Test
@@ -1486,6 +1455,24 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), småbarnstilleggAndel.stønadTom)
         assertEquals(BigDecimal(100), småbarnstilleggAndel.prosent)
         assertTrue(småbarnstilleggAndel.endretUtbetalingAndeler.isEmpty())
+    }
+
+    private data class ForventetAndel(
+        val fom: YearMonth,
+        val tom: YearMonth,
+        val prosent: BigDecimal,
+        val knyttetTilEndringsperiode: Boolean = false
+    )
+
+    private fun testPeriode(forventetAndel: ForventetAndel, faktiskAndel: AndelTilkjentYtelse) {
+        assertEquals(forventetAndel.fom, faktiskAndel.stønadFom)
+        assertEquals(forventetAndel.tom, faktiskAndel.stønadTom)
+        assertEquals(forventetAndel.prosent, faktiskAndel.prosent)
+        if (forventetAndel.knyttetTilEndringsperiode) {
+            assertTrue(faktiskAndel.endretUtbetalingAndeler.isNotEmpty())
+        } else {
+            assertTrue(faktiskAndel.endretUtbetalingAndeler.isEmpty())
+        }
     }
 
     private data class EndretAndel(
