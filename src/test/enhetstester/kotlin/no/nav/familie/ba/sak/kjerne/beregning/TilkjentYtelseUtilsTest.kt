@@ -1307,6 +1307,187 @@ internal class TilkjentYtelseUtilsTest {
         assertTrue(småbarnstilleggAndel2.endretUtbetalingAndeler.isEmpty())
     }
 
+    @Test
+    fun `Småbarnstillegg - case 1`() {
+        val osPeriode = MånedPeriode(fom = YearMonth.now().minusMonths(4), tom = YearMonth.now().minusMonths(2))
+        val borMedSøkerStart = LocalDate.now().minusMonths(6)
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = borMedSøkerStart,
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barn.aktør,
+                ),
+            ),
+            atypiskeVilkårSøker = listOf(
+                AtypiskVilkår(
+                    fom = relevantTidsperiode.fom.førsteDagIInneværendeMåned(),
+                    tom = LocalDate.now(),
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    aktør = søker.aktør
+                )
+            ),
+            osPerioder = listOf(osPeriode)
+        )
+
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantTidsperiode.tom) }
+
+        assertEquals(3, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+
+        // BARN
+        assertEquals(1, barnasAndeler.size)
+
+        val barnetsAndel = barnasAndeler.single()
+
+        assertEquals(borMedSøkerStart.plusMonths(1).toYearMonth(), barnetsAndel.stønadFom)
+        assertEquals(barn.fødselsdato.plusYears(6).minusMonths(1).toYearMonth(), barnetsAndel.stønadTom)
+        assertEquals(BigDecimal(100), barnetsAndel.prosent)
+        assertTrue(barnetsAndel.endretUtbetalingAndeler.isEmpty())
+
+        // SØKER
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(1, utvidetAndeler.size)
+
+        val utvidetAndel = utvidetAndeler.single()
+
+        assertEquals(borMedSøkerStart.plusMonths(1).toYearMonth(), utvidetAndel.stønadFom)
+        assertEquals(YearMonth.now(), utvidetAndel.stønadTom)
+        assertEquals(BigDecimal(100), utvidetAndel.prosent)
+        assertTrue(utvidetAndel.endretUtbetalingAndeler.isEmpty())
+
+        assertEquals(1, småbarnstilleggAndeler.size)
+
+        val småbarnstilleggAndel = småbarnstilleggAndeler.first()
+
+        assertEquals(osPeriode.fom, småbarnstilleggAndel.stønadFom)
+        assertEquals(osPeriode.tom, småbarnstilleggAndel.stønadTom)
+        assertEquals(BigDecimal(100), småbarnstilleggAndel.prosent)
+        assertTrue(småbarnstilleggAndel.endretUtbetalingAndeler.isEmpty())
+    }
+
+    @Test
+    fun `Småbarnstillegg - case 2`() {
+        val osPeriode = MånedPeriode(fom = YearMonth.now().minusMonths(4), tom = YearMonth.now())
+        val borMedSøkerStart = LocalDate.now().minusMonths(6)
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = borMedSøkerStart,
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barn.aktør,
+                ),
+            ),
+            atypiskeVilkårSøker = listOf(
+                AtypiskVilkår(
+                    fom = relevantTidsperiode.fom.førsteDagIInneværendeMåned(),
+                    tom = LocalDate.now().minusMonths(1),
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    aktør = søker.aktør
+                )
+            ),
+            osPerioder = listOf(osPeriode)
+        )
+
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantTidsperiode.tom) }
+
+        assertEquals(3, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+
+        // BARN
+        assertEquals(1, barnasAndeler.size)
+
+        val barnetsAndel = barnasAndeler.single()
+
+        assertEquals(borMedSøkerStart.plusMonths(1).toYearMonth(), barnetsAndel.stønadFom)
+        assertEquals(barn.fødselsdato.plusYears(6).minusMonths(1).toYearMonth(), barnetsAndel.stønadTom)
+        assertEquals(BigDecimal(100), barnetsAndel.prosent)
+        assertTrue(barnetsAndel.endretUtbetalingAndeler.isEmpty())
+
+        // SØKER
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(1, utvidetAndeler.size)
+
+        val utvidetAndel = utvidetAndeler.single()
+
+        assertEquals(borMedSøkerStart.plusMonths(1).toYearMonth(), utvidetAndel.stønadFom)
+        assertEquals(YearMonth.now().minusMonths(1), utvidetAndel.stønadTom)
+        assertEquals(BigDecimal(100), utvidetAndel.prosent)
+        assertTrue(utvidetAndel.endretUtbetalingAndeler.isEmpty())
+
+        assertEquals(1, småbarnstilleggAndeler.size)
+
+        val småbarnstilleggAndel = småbarnstilleggAndeler.first()
+
+        assertEquals(osPeriode.fom, småbarnstilleggAndel.stønadFom)
+        assertEquals(YearMonth.now().minusMonths(1), småbarnstilleggAndel.stønadTom)
+        assertEquals(BigDecimal(100), småbarnstilleggAndel.prosent)
+        assertTrue(småbarnstilleggAndel.endretUtbetalingAndeler.isEmpty())
+    }
+
+    @Test
+    fun `Småbarnstillegg - case 3`() {
+        val osPeriode = MånedPeriode(fom = YearMonth.now().minusMonths(4), tom = YearMonth.now().plusMonths(4))
+        val borMedSøkerStart = LocalDate.now().minusMonths(6)
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = borMedSøkerStart,
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barn.aktør,
+                ),
+            ),
+            osPerioder = listOf(osPeriode)
+        )
+
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantTidsperiode.tom) }
+
+        assertEquals(3, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+
+        // BARN
+        assertEquals(1, barnasAndeler.size)
+
+        val barnetsAndel = barnasAndeler.single()
+
+        assertEquals(borMedSøkerStart.plusMonths(1).toYearMonth(), barnetsAndel.stønadFom)
+        assertEquals(barn.fødselsdato.plusYears(6).minusMonths(1).toYearMonth(), barnetsAndel.stønadTom)
+        assertEquals(BigDecimal(100), barnetsAndel.prosent)
+        assertTrue(barnetsAndel.endretUtbetalingAndeler.isEmpty())
+
+        // SØKER
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(1, utvidetAndeler.size)
+
+        val utvidetAndel = utvidetAndeler.single()
+
+        assertEquals(borMedSøkerStart.plusMonths(1).toYearMonth(), utvidetAndel.stønadFom)
+        assertEquals(barn.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(), utvidetAndel.stønadTom)
+        assertEquals(BigDecimal(100), utvidetAndel.prosent)
+        assertTrue(utvidetAndel.endretUtbetalingAndeler.isEmpty())
+
+        assertEquals(1, småbarnstilleggAndeler.size)
+
+        val småbarnstilleggAndel = småbarnstilleggAndeler.first()
+
+        assertEquals(osPeriode.fom, småbarnstilleggAndel.stønadFom)
+        assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), småbarnstilleggAndel.stønadTom)
+        assertEquals(BigDecimal(100), småbarnstilleggAndel.prosent)
+        assertTrue(småbarnstilleggAndel.endretUtbetalingAndeler.isEmpty())
+    }
+
     private data class EndretAndel(
         val fom: YearMonth,
         val tom: YearMonth,
@@ -1315,7 +1496,13 @@ internal class TilkjentYtelseUtilsTest {
         val skalUtbetales: Boolean
     )
 
-    private fun settOppScenarioOgBeregnTilkjentYtelse(endretAndeler: List<EndretAndel>, atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList(), atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList(), barna: List<Person> = listOf(barn)): TilkjentYtelse {
+    private fun settOppScenarioOgBeregnTilkjentYtelse(
+        endretAndeler: List<EndretAndel> = emptyList(),
+        atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList(),
+        atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList(),
+        barna: List<Person> = listOf(barn),
+        osPerioder: List<MånedPeriode> = listOf(overgangsstønadPeriode)
+    ): TilkjentYtelse {
         val vilkårsvurdering = lagVilkårsvurdering(
             søker = søker,
             barn = barna,
@@ -1341,7 +1528,7 @@ internal class TilkjentYtelseUtilsTest {
             behandling = vilkårsvurdering.behandling,
             endretUtbetalingAndeler = endretUtbetalingAndeler,
         ) { (_) ->
-            lagOvergangsstønadPerioder(perioder = listOf(overgangsstønadPeriode), søkerIdent = søker.aktør.aktivFødselsnummer())
+            lagOvergangsstønadPerioder(perioder = osPerioder, søkerIdent = søker.aktør.aktivFødselsnummer())
         }
 
         return tilkjentYtelse
