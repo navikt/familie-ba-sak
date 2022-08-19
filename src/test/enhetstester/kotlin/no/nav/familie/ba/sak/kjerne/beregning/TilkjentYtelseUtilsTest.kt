@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -783,10 +784,23 @@ internal class TilkjentYtelseUtilsTest {
 
     @Test
     fun `Delt bosted - case 1`() {
-        val vilkårsvurdering = lagVilkårsvurdering(
-            søker = søker,
-            barn = listOf(barn),
-            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = søker,
+                    skalUtbetales = false,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = langEndringsperiode.fom,
+                    tom = langEndringsperiode.tom
+                ),
+                EndretAndel(
+                    person = barn,
+                    skalUtbetales = false,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = langEndringsperiode.fom,
+                    tom = langEndringsperiode.tom
+                )
+            ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
                     fom = LocalDate.now().minusMonths(5),
@@ -796,35 +810,6 @@ internal class TilkjentYtelseUtilsTest {
                 )
             )
         )
-
-        val endretUtbetalingAndeler = listOf(
-            lagEndretUtbetalingAndel(
-                behandlingId = vilkårsvurdering.behandling.id,
-                person = søker,
-                prosent = BigDecimal.ZERO,
-                årsak = Årsak.DELT_BOSTED,
-                fom = langEndringsperiode.fom,
-                tom = langEndringsperiode.tom
-            ),
-            lagEndretUtbetalingAndel(
-                behandlingId = vilkårsvurdering.behandling.id,
-                person = barn,
-                prosent = BigDecimal.ZERO,
-                årsak = Årsak.DELT_BOSTED,
-                fom = langEndringsperiode.fom,
-                tom = langEndringsperiode.tom
-            )
-        )
-
-        val tilkjentYtelse = beregnTilkjentYtelse(
-            vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag = lagPersonopplysningsgrunnlag(personer = listOf(søker, barn), behandlingId = vilkårsvurdering.behandling.id),
-            behandling = vilkårsvurdering.behandling,
-            endretUtbetalingAndeler = endretUtbetalingAndeler,
-        ) {
-            (_) ->
-            lagOvergangsstønadPerioder(perioder = listOf(overgangsstønadPeriode), søkerIdent = søker.aktør.aktivFødselsnummer())
-        }
 
         val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantTidsperiode.tom) }
 
@@ -883,10 +868,16 @@ internal class TilkjentYtelseUtilsTest {
 
     @Test
     fun `Delt bosted - case 2`() {
-        val vilkårsvurdering = lagVilkårsvurdering(
-            søker = søker,
-            barn = listOf(barn),
-            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = barn,
+                    skalUtbetales = false,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = langEndringsperiode.fom,
+                    tom = langEndringsperiode.tom
+                )
+            ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
                     fom = LocalDate.now().minusMonths(5),
@@ -896,27 +887,6 @@ internal class TilkjentYtelseUtilsTest {
                 )
             )
         )
-
-        val endretUtbetalingAndeler = listOf(
-            lagEndretUtbetalingAndel(
-                behandlingId = vilkårsvurdering.behandling.id,
-                person = barn,
-                prosent = BigDecimal.ZERO,
-                årsak = Årsak.DELT_BOSTED,
-                fom = langEndringsperiode.fom,
-                tom = langEndringsperiode.tom
-            )
-        )
-
-        val tilkjentYtelse = beregnTilkjentYtelse(
-            vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag = lagPersonopplysningsgrunnlag(personer = listOf(søker, barn), behandlingId = vilkårsvurdering.behandling.id),
-            behandling = vilkårsvurdering.behandling,
-            endretUtbetalingAndeler = endretUtbetalingAndeler,
-        ) {
-            (_) ->
-            lagOvergangsstønadPerioder(perioder = listOf(overgangsstønadPeriode), søkerIdent = søker.aktør.aktivFødselsnummer())
-        }
 
         val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantTidsperiode.tom) }
 
@@ -963,10 +933,16 @@ internal class TilkjentYtelseUtilsTest {
 
     @Test
     fun `Delt bosted - case 3`() {
-        val vilkårsvurdering = lagVilkårsvurdering(
-            søker = søker,
-            barn = listOf(barn),
-            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = barn,
+                    skalUtbetales = true,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = kortEndringsperiode.fom,
+                    tom = kortEndringsperiode.tom
+                )
+            ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
                     fom = LocalDate.now().minusMonths(5),
@@ -989,27 +965,6 @@ internal class TilkjentYtelseUtilsTest {
                 )
             )
         )
-
-        val endretUtbetalingAndeler = listOf(
-            lagEndretUtbetalingAndel(
-                behandlingId = vilkårsvurdering.behandling.id,
-                person = barn,
-                prosent = BigDecimal(100),
-                årsak = Årsak.DELT_BOSTED,
-                fom = kortEndringsperiode.fom,
-                tom = kortEndringsperiode.tom
-            )
-        )
-
-        val tilkjentYtelse = beregnTilkjentYtelse(
-            vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag = lagPersonopplysningsgrunnlag(personer = listOf(søker, barn), behandlingId = vilkårsvurdering.behandling.id),
-            behandling = vilkårsvurdering.behandling,
-            endretUtbetalingAndeler = endretUtbetalingAndeler,
-        ) {
-            (_) ->
-            lagOvergangsstønadPerioder(perioder = listOf(overgangsstønadPeriode), søkerIdent = søker.aktør.aktivFødselsnummer())
-        }
 
         val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantTidsperiode.tom) }
 
@@ -1063,10 +1018,23 @@ internal class TilkjentYtelseUtilsTest {
 
     @Test
     fun `Delt bosted - case 4`() {
-        val vilkårsvurdering = lagVilkårsvurdering(
-            søker = søker,
-            barn = listOf(barn),
-            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = barn,
+                    skalUtbetales = true,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = kortEndringsperiode.fom,
+                    tom = kortEndringsperiode.tom
+                ),
+                EndretAndel(
+                    person = søker,
+                    skalUtbetales = true,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = kortEndringsperiode.fom,
+                    tom = kortEndringsperiode.tom
+                )
+            ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
                     fom = LocalDate.now().minusMonths(5),
@@ -1089,35 +1057,6 @@ internal class TilkjentYtelseUtilsTest {
                 )
             )
         )
-
-        val endretUtbetalingAndeler = listOf(
-            lagEndretUtbetalingAndel(
-                behandlingId = vilkårsvurdering.behandling.id,
-                person = barn,
-                prosent = BigDecimal(100),
-                årsak = Årsak.DELT_BOSTED,
-                fom = kortEndringsperiode.fom,
-                tom = kortEndringsperiode.tom
-            ),
-            lagEndretUtbetalingAndel(
-                behandlingId = vilkårsvurdering.behandling.id,
-                person = søker,
-                prosent = BigDecimal(100),
-                årsak = Årsak.DELT_BOSTED,
-                fom = kortEndringsperiode.fom,
-                tom = kortEndringsperiode.tom
-            )
-        )
-
-        val tilkjentYtelse = beregnTilkjentYtelse(
-            vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag = lagPersonopplysningsgrunnlag(personer = listOf(søker, barn), behandlingId = vilkårsvurdering.behandling.id),
-            behandling = vilkårsvurdering.behandling,
-            endretUtbetalingAndeler = endretUtbetalingAndeler,
-        ) {
-            (_) ->
-            lagOvergangsstønadPerioder(perioder = listOf(overgangsstønadPeriode), søkerIdent = søker.aktør.aktivFødselsnummer())
-        }
 
         val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantTidsperiode.tom) }
 
@@ -1173,6 +1112,47 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(barn.fødselsdato.plusYears(3).toYearMonth(), utbetalingSmåbarnstillegg.stønadTom)
         assertEquals(BigDecimal(100), utbetalingSmåbarnstillegg.prosent)
         assertTrue(utbetalingSmåbarnstillegg.endretUtbetalingAndeler.isEmpty())
+    }
+
+    private data class EndretAndel(
+        val fom: YearMonth,
+        val tom: YearMonth,
+        val person: Person,
+        val årsak: Årsak,
+        val skalUtbetales: Boolean
+    )
+
+    private fun settOppScenarioOgBeregnTilkjentYtelse(endretAndeler: List<EndretAndel>, atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList(), atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList()): TilkjentYtelse {
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søker = søker,
+            barn = listOf(barn),
+            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+            atypiskeVilkårBarna = atypiskeVilkårBarna,
+            atypiskeVilkårSøker = atypiskeVilkårSøker
+        )
+
+        val endretUtbetalingAndeler = endretAndeler.map {
+            lagEndretUtbetalingAndel(
+                behandlingId = vilkårsvurdering.behandling.id,
+                person = it.person,
+                prosent = if (it.skalUtbetales) BigDecimal(100) else BigDecimal.ZERO,
+                årsak = it.årsak,
+                fom = it.fom,
+                tom = it.tom
+            )
+        }
+
+        val tilkjentYtelse = beregnTilkjentYtelse(
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = lagPersonopplysningsgrunnlag(personer = listOf(søker, barn), behandlingId = vilkårsvurdering.behandling.id),
+            behandling = vilkårsvurdering.behandling,
+            endretUtbetalingAndeler = endretUtbetalingAndeler,
+        ) {
+            (_) ->
+            lagOvergangsstønadPerioder(perioder = listOf(overgangsstønadPeriode), søkerIdent = søker.aktør.aktivFødselsnummer())
+        }
+
+        return tilkjentYtelse
     }
 
     private fun lagPersonopplysningsgrunnlag(personer: List<Person>, behandlingId: Long): PersonopplysningGrunnlag {
