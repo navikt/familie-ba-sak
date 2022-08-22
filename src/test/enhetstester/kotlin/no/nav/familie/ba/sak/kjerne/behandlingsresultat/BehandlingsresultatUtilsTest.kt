@@ -145,6 +145,7 @@ class BehandlingsresultatUtilsTest {
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }
+
     @Test
     fun `både ENDRET_UTBETALING og ENDRET_UTEN_UTBETALING som samlede resultater gir behandlingsresultat ENDRET_UTBETALING`() {
         val personer = listOf(
