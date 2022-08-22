@@ -62,7 +62,7 @@ data class RestJournalføring(
                     dokumentvarianter = null,
                     logiskeVedlegg = null
                 )
-            },
+            }
         )
     }
 

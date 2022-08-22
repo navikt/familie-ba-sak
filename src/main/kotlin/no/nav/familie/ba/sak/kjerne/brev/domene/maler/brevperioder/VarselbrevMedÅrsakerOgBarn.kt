@@ -30,7 +30,7 @@ data class VarselbrevMedÅrsakerOgBarn(
                 fodselsnummer = fødselsnummer,
                 varselÅrsaker = varselÅrsaker,
                 barnasFødselsdager = barnasFødselsdager
-            ),
+            )
         )
     )
 }

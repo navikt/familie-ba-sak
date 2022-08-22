@@ -119,7 +119,7 @@ fun kjørStegprosessForBehandling(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             sanityBegrunnelser = hentBegrunnelser(),
-            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!,
+            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!
         )
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
@@ -270,7 +270,7 @@ private fun håndterIverksetteVedtakSteg(
             behandlingsId = behandlingEtterBeslutteVedtak.id,
             vedtaksId = vedtak!!.id,
             saksbehandlerId = "System",
-            personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer(),
+            personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer()
         )
     )
 }
@@ -357,7 +357,7 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
 
     val utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
         personopplysningGrunnlag = personopplysningGrunnlag,
-        andelerTilkjentYtelse = andelerTilkjentYtelse,
+        andelerTilkjentYtelse = andelerTilkjentYtelse
     )
 
     val aktørerMedUtbetaling =

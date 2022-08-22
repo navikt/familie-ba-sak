@@ -144,7 +144,7 @@ class VilkårTilTilkjentYtelseTest {
                     InternPeriodeOvergangsstønad(
                         personIdent = aktør.aktivFødselsnummer(),
                         fomDato = småbarnstilleggTestPeriode.fraOgMed,
-                        tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
+                        tomDato = småbarnstilleggTestPeriode.tilOgMed!!
                     )
                 )
             } else {

@@ -59,17 +59,17 @@ class AutobrevSmåbarnstilleggOpphørTest(
         fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
         val fagsak1behandling2: Behandling = fullførRevurderingMedOvergangstonad(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
         startEnRevurderingNyeOpplysningerMenIkkeFullfør(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
 
         val personScenario2: RestScenario = lagScenario(barnFødselsdato)
@@ -77,12 +77,12 @@ class AutobrevSmåbarnstilleggOpphørTest(
         fullførBehandling(
             fagsak = fagsak2,
             personScenario = personScenario2,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
         val fagsak2behandling2: Behandling = fullførRevurderingMedOvergangstonad(
             fagsak = fagsak2,
             personScenario = personScenario2,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
 
         val andelerForSmåbarnstilleggFagsak1Behandling2 =
@@ -97,7 +97,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
         val fagsaker: List<Long> =
             fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
-                iverksatteLøpendeBehandlinger = listOf(fagsak1behandling2.id, fagsak2behandling2.id),
+                iverksatteLøpendeBehandlinger = listOf(fagsak1behandling2.id, fagsak2behandling2.id)
             )
 
         assertTrue(fagsaker.containsAll(listOf(fagsak2.id)))

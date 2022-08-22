@@ -161,7 +161,7 @@ class VedtaksperiodeService(
         try {
             vedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
-                personopplysningGrunnlag = persongrunnlag,
+                personopplysningGrunnlag = persongrunnlag
             )
         } catch (e: Exception) {
             throw FunksjonellFeil(
@@ -206,7 +206,7 @@ class VedtaksperiodeService(
                         } else {
                             Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE
                         },
-                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser
                     )
                 )
             )
@@ -227,7 +227,7 @@ class VedtaksperiodeService(
                             listOf(
                                 Vedtaksbegrunnelse(
                                     standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
-                                    vedtaksperiodeMedBegrunnelser = satsendringsvedtaksperiode,
+                                    vedtaksperiodeMedBegrunnelser = satsendringsvedtaksperiode
                                 )
                             )
                         )
@@ -348,7 +348,7 @@ class VedtaksperiodeService(
                     vedtak = aktivtVedtak,
                     fom = vedtaksperiodeMedBegrunnelser.fom,
                     tom = vedtaksperiodeMedBegrunnelser.tom,
-                    type = vedtaksperiodeMedBegrunnelser.type,
+                    type = vedtaksperiodeMedBegrunnelser.type
                 )
             )
 
@@ -384,7 +384,7 @@ class VedtaksperiodeService(
         val utvidetVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
-                personopplysningGrunnlag = persongrunnlag,
+                personopplysningGrunnlag = persongrunnlag
             )
         }
 
@@ -474,7 +474,7 @@ class VedtaksperiodeService(
             listOf(
                 Vedtaksbegrunnelse(
                     vedtaksperiodeMedBegrunnelser = fortsattInnvilgetPeriode,
-                    standardbegrunnelse = standardbegrunnelse,
+                    standardbegrunnelse = standardbegrunnelse
                 )
             )
         )
@@ -499,7 +499,7 @@ class VedtaksperiodeService(
 
         return mapTilUtbetalingsperioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag,
+            personopplysningGrunnlag = personopplysningGrunnlag
         )
     }
 
@@ -539,7 +539,7 @@ class VedtaksperiodeService(
             forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            andelerTilkjentYtelse = andelerTilkjentYtelse
         )
     }
 
@@ -617,7 +617,7 @@ class VedtaksperiodeService(
                     begrunnelser.add(
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
+                            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
                         )
                     )
                 }

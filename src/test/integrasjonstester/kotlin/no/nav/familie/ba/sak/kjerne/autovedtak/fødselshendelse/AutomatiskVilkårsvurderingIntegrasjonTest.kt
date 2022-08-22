@@ -126,7 +126,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
                         postnummer = "9050"
                     ),
                     matrikkeladresse = null,
-                    ukjentBosted = null,
+                    ukjentBosted = null
                 )
             )
         )

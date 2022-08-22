@@ -65,7 +65,7 @@ class Vedtaksbegrunnelse(
 
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        standardbegrunnelse = this.standardbegrunnelse,
+        standardbegrunnelse = this.standardbegrunnelse
     )
 
     override fun toString(): String {
@@ -179,7 +179,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     val antallBarn = this.hentAntallBarnForBegrunnelse(
         uregistrerteBarn = uregistrerteBarn,
         gjelderSøker = gjelderSøker,
-        barnasFødselsdatoer = barnasFødselsdatoer,
+        barnasFødselsdatoer = barnasFødselsdatoer
     )
 
     val månedOgÅrBegrunnelsenGjelderFor =
@@ -209,7 +209,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
 
     this.validerBrevbegrunnelse(
         gjelderSøker = gjelderSøker,
-        barnasFødselsdatoer = barnasFødselsdatoer,
+        barnasFødselsdatoer = barnasFødselsdatoer
     )
 
     return BegrunnelseData(

@@ -21,7 +21,7 @@ data class VarselbrevMedÅrsaker(
                 navn = navn,
                 fodselsnummer = fødselsnummer,
                 varselÅrsaker = varselÅrsaker
-            ),
+            )
         )
     )
 }
@@ -45,7 +45,7 @@ data class VarselOmRevurderingData(
         ) : this(
             navn = flettefelt(navn),
             fodselsnummer = flettefelt(fodselsnummer),
-            varselAarsaker = flettefelt(varselÅrsaker),
+            varselAarsaker = flettefelt(varselÅrsaker)
         )
     }
 

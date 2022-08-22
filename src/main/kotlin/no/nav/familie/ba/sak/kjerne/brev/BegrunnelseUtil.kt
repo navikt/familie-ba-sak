@@ -50,7 +50,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             identerMedUtbetalingPåPeriode
         ),
         triggesAv = triggesAv,
-        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
     ).map { person -> person.personIdent }
 
     return when {
@@ -58,7 +58,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
                 identerMedUtbetaling = identerMedUtbetalingPåPeriode,
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                periode = periode,
+                periode = periode
             ) + when {
                 triggesAv.vilkår.any { it != Vilkår.UTVIDET_BARNETRYGD } -> hentPersonerForUtgjørendeVilkår()
                 else -> emptyList()
@@ -83,7 +83,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                     nullableMånedPeriode = periode.tilNullableMånedPeriode()
                 )
             },
-            minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+            minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer
         )
         erUtbetalingMedReduksjonFraSistIverksatteBehandling -> identerMedReduksjonPåPeriode
 

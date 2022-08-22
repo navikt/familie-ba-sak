@@ -137,7 +137,7 @@ object TilkjentYtelseUtils {
                             it.aktør,
                             it.fødselsdato
                         )
-                    },
+                    }
                 )
             }
         } else {
@@ -184,7 +184,7 @@ object TilkjentYtelseUtils {
                             stønadTom = månedPeriodeEndret.tom,
                             kalkulertUtbetalingsbeløp = nyttNasjonaltPeriodebeløp,
                             nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
-                            endretUtbetalingAndeler = (andelForPerson.endretUtbetalingAndeler + endretUtbetalingAndel).toMutableList(),
+                            endretUtbetalingAndeler = (andelForPerson.endretUtbetalingAndeler + endretUtbetalingAndel).toMutableList()
                         )
                     }
                 )
@@ -321,7 +321,7 @@ object TilkjentYtelseUtils {
                     fraOgMed = periodeUnder6År.fom
                 ),
                 stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
-                maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
+                maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022
             )
         } else {
             emptyList()
@@ -339,7 +339,7 @@ object TilkjentYtelseUtils {
                     skalAvsluttesMånedenFør = skalAvsluttesMånedenFør,
                     tilOgMed = periodeOver6år.tom
                 ),
-                maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
+                maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022
             )
         } else {
             emptyList()

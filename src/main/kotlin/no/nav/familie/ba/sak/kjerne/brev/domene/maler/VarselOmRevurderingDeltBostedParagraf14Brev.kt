@@ -27,7 +27,7 @@ data class VarselOmRevurderingDeltBostedParagraf14Data(
         ) : this(
             navn = flettefelt(navn),
             fodselsnummer = flettefelt(fodselsnummer),
-            barnMedDeltBostedAvtale = flettefelt(barnMedDeltBostedAvtale),
+            barnMedDeltBostedAvtale = flettefelt(barnMedDeltBostedAvtale)
         )
     }
 

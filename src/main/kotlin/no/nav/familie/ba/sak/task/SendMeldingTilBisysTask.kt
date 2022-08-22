@@ -99,7 +99,7 @@ class SendMeldingTilBisysTask(
                                 BarnEndretOpplysning(
                                     ident = barnIdent,
                                     fom = forblePeriode!!.fom,
-                                    årsakskode = BarnetrygdEndretType.RO,
+                                    årsakskode = BarnetrygdEndretType.RO
                                 )
                             )
                         }

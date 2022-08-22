@@ -83,7 +83,7 @@ class AndelTilkjentYtelseUtledRegelverkTest {
                 Regelverk.NASJONALE_REGLER,
                 YearMonth.now().minusYears(1),
                 YearMonth.now().plusYears(17)
-            ),
+            )
         )
         barnPersonResultat.vilkårResultater.addAll(vilkårResultat)
         return barnPersonResultat

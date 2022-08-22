@@ -47,7 +47,7 @@ internal class TidslinjeTest {
     fun `skal validere at uendelig i begge ender av tidslinjen er lov`() {
         assertDoesNotThrow {
             TestTidslinje(
-                Periode(1.jan(2020).somUendeligLengeSiden(), 1.jan(2020).somUendeligLengeTil(), 'A'),
+                Periode(1.jan(2020).somUendeligLengeSiden(), 1.jan(2020).somUendeligLengeTil(), 'A')
             ).perioder()
         }
 

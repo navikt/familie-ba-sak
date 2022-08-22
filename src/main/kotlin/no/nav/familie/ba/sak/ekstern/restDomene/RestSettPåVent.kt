@@ -11,5 +11,5 @@ data class RestSettPåVent(
 
 fun SettPåVent.tilRestSettPåVent(): RestSettPåVent = RestSettPåVent(
     frist = this.frist,
-    årsak = this.årsak,
+    årsak = this.årsak
 )

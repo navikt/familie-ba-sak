@@ -128,7 +128,7 @@ class AutovedtakFødselshendelseService(
             henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandlingEtterFiltrering,
                 begrunnelse = filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
-                    .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
+                    .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse
             )
         } else {
             vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = barnSomSkalBehandlesForMor)

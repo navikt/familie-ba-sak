@@ -32,7 +32,7 @@ data class BehandlingsresultatPerson(
         return YtelsePerson(
             aktør = aktør,
             ytelseType = utledYtelseType(),
-            kravOpprinnelse = utledKravOpprinnelser(),
+            kravOpprinnelse = utledKravOpprinnelser()
         )
     }
 

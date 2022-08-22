@@ -205,7 +205,7 @@ class TriggesAvTest {
         Assertions.assertFalse(
             triggesIkkeAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndel,
-                minimerteUtbetalingsperiodeDetaljer = emptyList(),
+                minimerteUtbetalingsperiodeDetaljer = emptyList()
             )
         )
 

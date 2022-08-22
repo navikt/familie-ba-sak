@@ -169,7 +169,7 @@ class BeslutteVedtakTest {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
                 any(),
                 any(),
-                any(),
+                any()
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
@@ -181,7 +181,7 @@ class BeslutteVedtakTest {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
                 personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
                 behandlingId = behandling.id,
-                vedtakId = vedtak.id,
+                vedtakId = vedtak.id
             )
         }
         Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, nesteSteg)

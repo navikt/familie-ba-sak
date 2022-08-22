@@ -78,7 +78,7 @@ data class BrevPeriodeTestKompetanse(
             annenForeldersAktivitetslandNavn = LandNavn(this.annenForeldersAktivitetsland),
             barnetsBostedslandNavn = LandNavn(this.barnetsBostedsland),
             resultat = this.resultat,
-            personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() },
+            personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() }
         )
     }
 }
@@ -106,7 +106,7 @@ data class BrevPeriodeTestPerson(
         return MinimertRestPersonResultat(
             personIdent = this.personIdent,
             minimerteVilkårResultater = hentVilkårForPerson(),
-            minimerteAndreVurderinger = this.andreVurderinger,
+            minimerteAndreVurderinger = this.andreVurderinger
         )
     }
 
@@ -121,7 +121,7 @@ data class BrevPeriodeTestPerson(
                         periodeTom = null,
                         resultat = Resultat.OPPFYLT,
                         utdypendeVilkårsvurderinger = emptyList(),
-                        erEksplisittAvslagPåSøknad = false,
+                        erEksplisittAvslagPåSøknad = false
                     )
                 }
 }
@@ -234,7 +234,7 @@ data class EØSBegrunnelseTestConfig(
         vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
             .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
             ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
-        sokersAktivitet = this.sokersAktivitet,
+        sokersAktivitet = this.sokersAktivitet
     )
 }
 

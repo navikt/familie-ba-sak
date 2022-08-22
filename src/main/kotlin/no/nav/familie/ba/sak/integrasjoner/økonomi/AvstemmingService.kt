@@ -90,7 +90,7 @@ class AvstemmingService(
                 KonsistensavstemmingAvsluttTaskDTO(
                     batchId = batchId,
                     transaksjonsId = transaksjonsId,
-                    avstemmingsdato = avstemmingsdato,
+                    avstemmingsdato = avstemmingsdato
                 )
             )
         )
@@ -125,7 +125,7 @@ class AvstemmingService(
                     transaksjonsId = transaksjonsId,
                     chunkNr = chunkNr,
                     avstemmingdato = avstemmingsdato,
-                    perioderForBehandling = perioderTilAvstemming,
+                    perioderForBehandling = perioderTilAvstemming
                 )
             )
         )

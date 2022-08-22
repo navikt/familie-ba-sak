@@ -58,7 +58,7 @@ class RestartAvSmåbarnstilleggTest(
         fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
 
         fullførRevurderingMedOvergangstonad(
@@ -83,7 +83,7 @@ class RestartAvSmåbarnstilleggTest(
         startEnRevurderingNyeOpplysningerMenIkkeFullfør(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
 
         // Fagsak 2 - har restart av småbarnstillegg som ikke er begrunnet og skal være med i listen
@@ -92,7 +92,7 @@ class RestartAvSmåbarnstilleggTest(
         fullførBehandling(
             fagsak = fagsak2,
             personScenario = personScenario2,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
         fullførRevurderingMedOvergangstonad(
             fagsak = fagsak2,
@@ -120,7 +120,7 @@ class RestartAvSmåbarnstilleggTest(
         fullførBehandling(
             fagsak = fagsak3,
             personScenario = personScenario3,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
         fullførRevurderingMedOvergangstonad(
             fagsak = fagsak3,

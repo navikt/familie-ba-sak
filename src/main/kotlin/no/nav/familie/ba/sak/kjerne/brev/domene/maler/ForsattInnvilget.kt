@@ -18,13 +18,13 @@ data class ForsattInnvilget(
                         saksbehandler = vedtakFellesfelter.saksbehandler,
                         beslutter = vedtakFellesfelter.beslutter
                     ),
-                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
                 ),
-                perioder = vedtakFellesfelter.perioder,
+                perioder = vedtakFellesfelter.perioder
             )
         )
 }

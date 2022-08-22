@@ -99,7 +99,7 @@ class SaksstatistikkService(
             behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
             beslutter = totrinnskontroll?.beslutterId,
             saksbehandler = totrinnskontroll?.saksbehandlerId,
-            settPaaVent = hentSettPåVentDVH(behandlingId),
+            settPaaVent = hentSettPåVentDVH(behandlingId)
         )
     }
 
@@ -145,7 +145,7 @@ class SaksstatistikkService(
             sakStatus = fagsak.status.name,
             avsender = "familie-ba-sak",
             versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
-            bostedsland = landkodeSøker,
+            bostedsland = landkodeSøker
         )
     }
 
@@ -190,7 +190,7 @@ class SaksstatistikkService(
                             fom = vedtaksperiode.fom,
                             tom = vedtaksperiode.tom,
                             type = it.standardbegrunnelse.vedtakBegrunnelseType.name,
-                            vedtakBegrunnelse = it.standardbegrunnelse.name,
+                            vedtakBegrunnelse = it.standardbegrunnelse.name
                         )
                     }
             }

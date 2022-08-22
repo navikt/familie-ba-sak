@@ -28,7 +28,7 @@ data class Etterbetaling(
 ) {
 
     constructor(etterbetalingsbeløp: String) : this(
-        flettefelt(etterbetalingsbeløp),
+        flettefelt(etterbetalingsbeløp)
     )
 }
 
@@ -37,7 +37,7 @@ data class Hjemmeltekst(
 ) {
 
     constructor(hjemler: String) : this(
-        flettefelt(hjemler),
+        flettefelt(hjemler)
     )
 }
 
@@ -46,6 +46,6 @@ data class AutoUnderskrift(
 ) {
 
     constructor(enhet: String) : this(
-        flettefelt(enhet),
+        flettefelt(enhet)
     )
 }

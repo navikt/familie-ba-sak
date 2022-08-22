@@ -312,7 +312,7 @@ class VedtaksperiodeUtilTest {
         val forventedeBegrunnelser =
             listOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_FLYTTET_TIL_NORGE,
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE,
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE
             )
 
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(

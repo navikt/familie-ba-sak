@@ -125,7 +125,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 AND NOT EXISTS (SELECT b2 from Behandling b2 where b2.fagsak.id = b.fagsak.id AND b2.status <> 'AVSLUTTET')
                 AND aty.type = 'SMÅBARNSTILLEGG'
                 AND aty.stønadTom = :stønadTom
-        """,
+        """
     )
     fun finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
         iverksatteLøpendeBehandlinger: List<Long>,

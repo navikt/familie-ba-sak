@@ -137,7 +137,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val barnasRegelverkResultatTidslinjer = mapOf(
             barn1.aktør to "EEEEEEEEE>".tilRegelverkResultatTidslinje(jan2020),
-            barn2.aktør to "  EEEEEEEEE>".tilRegelverkResultatTidslinje(jan2020),
+            barn2.aktør to "  EEEEEEEEE>".tilRegelverkResultatTidslinje(jan2020)
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)

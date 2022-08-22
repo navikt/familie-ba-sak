@@ -37,7 +37,7 @@ class TilkjentYtelseValideringService(
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
                 barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-                personopplysningGrunnlag = personopplysningGrunnlag,
+                personopplysningGrunnlag = personopplysningGrunnlag
             )
         }
     }

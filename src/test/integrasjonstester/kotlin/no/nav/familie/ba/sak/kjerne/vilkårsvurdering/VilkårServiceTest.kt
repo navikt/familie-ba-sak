@@ -672,7 +672,7 @@ class VilkårServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                årsak = BehandlingÅrsak.SØKNAD,
+                årsak = BehandlingÅrsak.SØKNAD
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
@@ -711,7 +711,7 @@ class VilkårServiceTest(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 underkategori = BehandlingUnderkategori.UTVIDET,
-                årsak = BehandlingÅrsak.SØKNAD,
+                årsak = BehandlingÅrsak.SØKNAD
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
@@ -836,7 +836,7 @@ class VilkårServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                årsak = BehandlingÅrsak.SØKNAD,
+                årsak = BehandlingÅrsak.SØKNAD
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
@@ -1200,7 +1200,7 @@ class VilkårServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
+                årsak = BehandlingÅrsak.MIGRERING
             )
         )
         val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
@@ -1250,7 +1250,7 @@ class VilkårServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(

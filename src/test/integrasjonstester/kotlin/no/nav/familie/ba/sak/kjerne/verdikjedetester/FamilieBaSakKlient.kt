@@ -51,7 +51,7 @@ class FamilieBaSakKlient(
 
         return getForEntity(
             uri,
-            headers,
+            headers
         )
     }
 
@@ -61,7 +61,7 @@ class FamilieBaSakKlient(
         return postForEntity(
             uri,
             RestHentFagsakForPerson(personIdent),
-            headers,
+            headers
         )
     }
 

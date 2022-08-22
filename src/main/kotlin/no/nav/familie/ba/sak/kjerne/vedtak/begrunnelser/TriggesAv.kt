@@ -112,7 +112,7 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
         this.endretUtbetalingSkalUtbetales == EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT ||
             oppfyllerUtvidetScenario(
                 vilkårBegrunnelsenGjelderFor = this.vilkår,
-                minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+                minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer
             )
 
     val erAvSammeÅrsak = this.endringsaarsaker.contains(minimertEndretAndel.årsak)

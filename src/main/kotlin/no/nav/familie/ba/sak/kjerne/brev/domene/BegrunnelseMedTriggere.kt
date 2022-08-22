@@ -66,7 +66,7 @@ data class BegrunnelseMedTriggere(
     }
 
     fun tilBrevBegrunnelseGrunnlagForLogging() = BrevBegrunnelseGrunnlagForLogging(
-        standardbegrunnelse = this.standardbegrunnelse,
+        standardbegrunnelse = this.standardbegrunnelse
     )
 }
 

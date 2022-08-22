@@ -18,7 +18,7 @@ data class Svartidsbrev(
         data = SvartidsbrevData(
             flettefelter = SvartidsbrevData.Flettefelter(
                 navn = navn,
-                fodselsnummer = fodselsnummer,
+                fodselsnummer = fodselsnummer
             ),
             delmalData = SvartidsbrevData.DelmalData(
                 signatur = SignaturDelmal(
@@ -47,7 +47,7 @@ data class SvartidsbrevData(
             fodselsnummer: String
         ) : this(
             navn = flettefelt(navn),
-            fodselsnummer = flettefelt(fodselsnummer),
+            fodselsnummer = flettefelt(fodselsnummer)
         )
     }
 

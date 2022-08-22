@@ -40,7 +40,7 @@ fun Kompetanse.tilMinimertKompetanse(
             MinimertRestPerson(
                 personIdent = aktør.aktivFødselsnummer(),
                 fødselsdato = fødselsdato,
-                type = PersonType.BARN,
+                type = PersonType.BARN
             )
         }
     )

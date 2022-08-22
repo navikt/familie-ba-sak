@@ -66,7 +66,7 @@ class AutovedtakSmåbarnstilleggService(
                 "aarsak",
                 it.name,
                 "beskrivelse",
-                it.beskrivelse,
+                it.beskrivelse
             )
         }
 
@@ -143,7 +143,7 @@ class AutovedtakSmåbarnstilleggService(
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
             forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
+            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler
         )
 
         vedtaksperiodeHentOgPersisterService.lagre(

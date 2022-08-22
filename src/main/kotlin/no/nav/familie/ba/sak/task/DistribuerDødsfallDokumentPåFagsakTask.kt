@@ -27,7 +27,7 @@ const val ANTALL_SEKUNDER_I_EN_UKE = 604800L
     // ~8 måneder dersom vi prøver én gang i uka.
     // Tasken skal stoppe etter 6 måneder, så om vi kommer hit har det skjedd noe galt.
     maxAntallFeil = 4 * 8,
-    settTilManuellOppfølgning = true,
+    settTilManuellOppfølgning = true
 )
 class DistribuerDødsfallDokumentPåFagsakTask(
     private val dokumentService: DokumentService

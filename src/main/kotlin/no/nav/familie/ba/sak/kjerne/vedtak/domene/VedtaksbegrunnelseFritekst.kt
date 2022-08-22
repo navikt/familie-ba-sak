@@ -38,7 +38,7 @@ class VedtaksbegrunnelseFritekst(
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksbegrunnelseFritekst =
         VedtaksbegrunnelseFritekst(
             vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-            fritekst = this.fritekst,
+            fritekst = this.fritekst
         )
 
     override fun toString(): String {

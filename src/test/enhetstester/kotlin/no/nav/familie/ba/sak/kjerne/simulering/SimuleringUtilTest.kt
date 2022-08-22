@@ -45,7 +45,7 @@ class SimuleringUtilTest {
         beløp = beløp.toBigDecimal(),
         posteringType = posteringType,
         forfallsdato = forfallsdato,
-        utenInntrekk = utenInntrekk,
+        utenInntrekk = utenInntrekk
     )
 
     fun mockVedtakSimuleringPosteringer(
@@ -75,7 +75,7 @@ class SimuleringUtilTest {
             mockVedtakSimuleringPostering(beløp = 100, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = 100, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
-            mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
+            mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE)
         )
 
         Assertions.assertEquals(BigDecimal.valueOf(200), hentNyttBeløpIPeriode(vedtaksimuleringPosteringer))
@@ -91,7 +91,7 @@ class SimuleringUtilTest {
             mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = 98, posteringType = PosteringType.FEILUTBETALING),
-            mockVedtakSimuleringPostering(beløp = 98, posteringType = PosteringType.FEILUTBETALING),
+            mockVedtakSimuleringPostering(beløp = 98, posteringType = PosteringType.FEILUTBETALING)
         )
 
         Assertions.assertEquals(BigDecimal.valueOf(4), hentNyttBeløpIPeriode(økonomiSimuleringPosteringer))
@@ -107,7 +107,7 @@ class SimuleringUtilTest {
             mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = 98, posteringType = PosteringType.FEILUTBETALING),
-            mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.FEILUTBETALING),
+            mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.FEILUTBETALING)
         )
 
         Assertions.assertEquals(BigDecimal.valueOf(200), hentNyttBeløpIPeriode(økonomiSimuleringPosteringer))
@@ -119,7 +119,7 @@ class SimuleringUtilTest {
         mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.FEILUTBETALING),
         mockVedtakSimuleringPostering(beløp = -2000, posteringType = PosteringType.YTELSE),
         mockVedtakSimuleringPostering(beløp = 3000, posteringType = PosteringType.YTELSE),
-        mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.YTELSE),
+        mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.YTELSE)
     )
 
     @Test
@@ -146,7 +146,7 @@ class SimuleringUtilTest {
             mockVedtakSimuleringPostering(beløp = 500, posteringType = PosteringType.FEILUTBETALING),
             mockVedtakSimuleringPostering(beløp = -2000, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = 3000, posteringType = PosteringType.YTELSE),
-            mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.YTELSE),
+            mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.YTELSE)
         )
 
         val økonomiSimuleringMottaker =
@@ -169,7 +169,7 @@ class SimuleringUtilTest {
                 beløp = 200,
                 posteringType = PosteringType.YTELSE,
                 forfallsdato = LocalDate.now().minusDays(1)
-            ),
+            )
         )
 
         Assertions.assertEquals(

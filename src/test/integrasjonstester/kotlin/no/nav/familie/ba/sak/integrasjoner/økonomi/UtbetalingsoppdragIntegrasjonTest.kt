@@ -105,7 +105,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 tilkjentYtelse = tilkjentYtelse,
                 person = tilfeldigPerson,
-                aktør = personidentService.hentOgLagreAktør(tilfeldigPerson.aktør.aktivFødselsnummer(), true),
+                aktør = personidentService.hentOgLagreAktør(tilfeldigPerson.aktør.aktivFødselsnummer(), true)
             )
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
@@ -117,7 +117,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 true,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                     andelerTilkjentYtelse
-                ),
+                )
             )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
@@ -204,7 +204,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                     ØkonomiUtils.kjedeinndelteAndeler(
                         andelerTilkjentYtelse
                     )
-                ),
+                )
             )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -289,7 +289,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                 andelerFørstegangsbehandling
-            ),
+            )
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -434,7 +434,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                 andelerFørstegangsbehandling
-            ),
+            )
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -511,7 +511,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 660,
                 behandling,
                 person = personMedFlerePerioder,
-                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true),
+                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true)
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2026-05"),
@@ -520,7 +520,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 660,
                 behandling,
                 person = personMedFlerePerioder,
-                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true),
+                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true)
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2019-03"),
@@ -529,7 +529,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 1054,
                 behandling,
                 person = personMedFlerePerioder,
-                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true),
+                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true)
             )
         )
 
@@ -539,7 +539,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                 andelerTilkjentYtelse
-            ),
+            )
         )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
@@ -588,7 +588,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 true,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                     andelerTilkjentYtelse
-                ),
+                )
             )
         }
     }
@@ -651,7 +651,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                 andelerFørstegangsbehandling
-            ),
+            )
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -816,7 +816,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                 andelerFørstegangsbehandling
-            ),
+            )
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -1007,7 +1007,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             ),
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                 andelerRevurderingsbehandling
-            ),
+            )
         )
 
         assertEquals(1, utbetalingsoppdrag.utbetalingsperiode.single() { it.opphør == null }.forrigePeriodeId)
@@ -1049,7 +1049,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                 andelerFørstegangsbehandling
-            ),
+            )
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(
@@ -1071,7 +1071,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             false,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
                 andelerRevurdering
-            ),
+            )
         )
 
         val behandling3 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))

@@ -132,7 +132,7 @@ data class VedtaksperiodeMedBegrunnelser(
                     hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse)
                 } else {
                     hentVertikaltSegmentForVedtaksperiode(
-                        andelerTilkjentYtelse = andelerTilkjentYtelse,
+                        andelerTilkjentYtelse = andelerTilkjentYtelse
                     )
                 }
 

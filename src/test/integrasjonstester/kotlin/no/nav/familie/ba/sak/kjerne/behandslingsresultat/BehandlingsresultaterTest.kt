@@ -42,7 +42,7 @@ class BehandlingsresultaterTest {
                 YtelsePersonUtils.utledYtelsePersonerMedResultat(
                     behandlingsresultatPersoner = behandlingsresultatPersonTestConfig.personer,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
-                    inneværendeMåned = YearMonth.parse(behandlingsresultatPersonTestConfig.inneværendeMåned),
+                    inneværendeMåned = YearMonth.parse(behandlingsresultatPersonTestConfig.inneværendeMåned)
                 )
 
             val behandlingsresultat =

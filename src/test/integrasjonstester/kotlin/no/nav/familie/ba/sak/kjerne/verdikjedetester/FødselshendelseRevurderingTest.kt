@@ -61,7 +61,7 @@ class FødselshendelseRevurderingTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService,
+            personidentService = personidentService
         )
 
         val søkerIdent = scenario.søker.ident

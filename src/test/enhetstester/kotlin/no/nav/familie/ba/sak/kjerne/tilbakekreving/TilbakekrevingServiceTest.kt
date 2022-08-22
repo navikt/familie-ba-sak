@@ -51,7 +51,7 @@ class TilbakekrevingServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()

@@ -23,7 +23,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         PersonopplysningGrunnlagForNyBehandlingService(
             personidentService = personidentService,
             beregningService = beregningService,
-            persongrunnlagService = persongrunnlagService,
+            persongrunnlagService = persongrunnlagService
         )
     )
 

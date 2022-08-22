@@ -55,7 +55,7 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     val nyeSmåbarnstilleggAndeler = småbarnstilleggBarnetrygdGenerator.lagSmåbarnstilleggAndelerGammel(
         perioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
         andelerTilkjentYtelse = forrigeSøkersAndreAndeler,
-        barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
+        barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer
     )
 
     return forrigeSøkersSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)

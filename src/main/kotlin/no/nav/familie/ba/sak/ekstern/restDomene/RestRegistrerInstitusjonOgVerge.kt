@@ -25,7 +25,7 @@ data class RestRegistrerInstitusjonOgVerge(
     fun tilInstitusjon(): Institusjon? = if (institusjonInfo != null) {
         Institusjon(
             orgNummer = institusjonInfo.orgNummer,
-            tssEksternId = institusjonInfo.eksternTssNummer,
+            tssEksternId = institusjonInfo.eksternTssNummer
         )
     } else {
         null

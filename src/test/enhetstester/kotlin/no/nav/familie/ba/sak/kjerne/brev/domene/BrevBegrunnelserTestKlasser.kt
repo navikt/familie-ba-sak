@@ -70,7 +70,7 @@ data class BrevbegrunnelserTestPerson(
     fun tilMinimertePersonResultater() = MinimertRestPersonResultat(
         personIdent = this.personIdent,
         minimerteVilkårResultater = hentVilkårForPerson(),
-        minimerteAndreVurderinger = this.andreVurderinger,
+        minimerteAndreVurderinger = this.andreVurderinger
     )
 
     private fun hentVilkårForPerson() =
@@ -84,7 +84,7 @@ data class BrevbegrunnelserTestPerson(
                         periodeTom = null,
                         resultat = Resultat.OPPFYLT,
                         utdypendeVilkårsvurderinger = emptyList(),
-                        erEksplisittAvslagPåSøknad = false,
+                        erEksplisittAvslagPåSøknad = false
                     )
                 }
 }

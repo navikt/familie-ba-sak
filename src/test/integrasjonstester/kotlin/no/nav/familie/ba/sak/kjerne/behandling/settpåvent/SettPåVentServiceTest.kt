@@ -53,7 +53,7 @@ class SettPåVentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         settPåVentRepository.save(
@@ -78,7 +78,7 @@ class SettPåVentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         settPåVentRepository.save(
@@ -115,7 +115,7 @@ class SettPåVentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         assertThrows<FunksjonellFeil> {
@@ -136,7 +136,7 @@ class SettPåVentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         val behandlingId = behandlingEtterVilkårsvurderingSteg.id
@@ -170,7 +170,7 @@ class SettPåVentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         val behandling2 = kjørStegprosessForFGB(
@@ -180,7 +180,7 @@ class SettPåVentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         settPåVentRepository.save(

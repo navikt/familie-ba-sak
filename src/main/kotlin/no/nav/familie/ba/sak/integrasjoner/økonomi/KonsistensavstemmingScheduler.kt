@@ -37,7 +37,7 @@ class KonsistensavstemmingScheduler(
                 payload = objectMapper.writeValueAsString(
                     KonsistensavstemmingStartTaskDTO(
                         batchId = plukketBatch.id,
-                        avstemmingdato = LocalDateTime.now(),
+                        avstemmingdato = LocalDateTime.now()
                     )
                 )
             )

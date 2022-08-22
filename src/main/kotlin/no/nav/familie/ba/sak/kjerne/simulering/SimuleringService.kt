@@ -49,7 +49,7 @@ class SimuleringService(
         val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-            erSimulering = true,
+            erSimulering = true
         )
 
         return økonomiKlient.hentSimulering(utbetalingsoppdrag)

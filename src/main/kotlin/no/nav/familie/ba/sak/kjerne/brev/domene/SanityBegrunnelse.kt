@@ -85,7 +85,7 @@ data class RestSanityBegrunnelse(
             },
             utvidetBarnetrygdTriggere = utvidetBarnetrygdTriggere?.mapNotNull {
                 finnEnumverdi(it, UtvidetBarnetrygdTrigger.values(), apiNavn)
-            },
+            }
         )
     }
 }

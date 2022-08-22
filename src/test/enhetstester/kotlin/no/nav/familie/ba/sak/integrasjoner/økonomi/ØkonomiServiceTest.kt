@@ -39,7 +39,7 @@ internal class ØkonomiServiceTest {
             lagEksternUtbetalingsperiode(
                 fom = fom.minusMonths(5),
                 tom = tom.minusMonths(4)
-            ),
+            )
         )
 
         // Test at validering ikke feiler.
@@ -67,7 +67,7 @@ internal class ØkonomiServiceTest {
             lagEksternUtbetalingsperiode(
                 fom = fom.minusMonths(5),
                 tom = tom.plusMonths(1)
-            ),
+            )
         )
         assertThrows<IllegalStateException> {
             økonomiService.validerOpphørsoppdrag(

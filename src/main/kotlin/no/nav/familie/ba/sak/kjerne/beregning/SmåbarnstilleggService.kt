@@ -92,7 +92,7 @@ class SmåbarnstilleggService(
                     it.aktør,
                     it.fødselsdato
                 )
-            },
+            }
         )
     }
 

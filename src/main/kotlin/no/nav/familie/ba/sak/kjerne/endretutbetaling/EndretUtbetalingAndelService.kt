@@ -105,7 +105,7 @@ class EndretUtbetalingAndelService(
     ) =
         endretUtbetalingAndelRepository.save(
             EndretUtbetalingAndel(
-                behandlingId = behandling.id,
+                behandlingId = behandling.id
             )
         )
 

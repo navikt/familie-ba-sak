@@ -110,7 +110,7 @@ data class EndretUtbetalingAndel(
         if (fom!! > tom!!) {
             throw FunksjonellFeil(
                 melding = "fom må være lik eller komme før tom",
-                frontendFeilmelding = "Du kan ikke sette en f.o.m. dato som er etter t.o.m. dato",
+                frontendFeilmelding = "Du kan ikke sette en f.o.m. dato som er etter t.o.m. dato"
             )
         }
 

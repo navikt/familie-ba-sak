@@ -20,7 +20,7 @@ data class Førstegangsvedtak(
                         beslutter = vedtakFellesfelter.beslutter
                     ),
                     etterbetaling = etterbetaling,
-                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,

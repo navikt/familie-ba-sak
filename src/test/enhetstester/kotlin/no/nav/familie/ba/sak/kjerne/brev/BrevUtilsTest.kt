@@ -109,7 +109,7 @@ internal class BrevUtilsTest {
         Behandlingsresultat.INNVILGET_OG_OPPHØRT,
         Behandlingsresultat.DELVIS_INNVILGET,
         Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
-        Behandlingsresultat.AVSLÅTT,
+        Behandlingsresultat.AVSLÅTT
     )
 
     @Test
@@ -120,7 +120,7 @@ internal class BrevUtilsTest {
                 hentManuellVedtaksbrevtype(
                     BehandlingType.FØRSTEGANGSBEHANDLING,
                     it
-                ),
+                )
             )
         }
     }
@@ -132,7 +132,7 @@ internal class BrevUtilsTest {
             hentManuellVedtaksbrevtype(
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 Behandlingsresultat.AVSLÅTT
-            ),
+            )
         )
     }
 
@@ -169,7 +169,7 @@ internal class BrevUtilsTest {
                 hentManuellVedtaksbrevtype(
                     BehandlingType.REVURDERING,
                     it
-                ),
+                )
             )
         }
     }
@@ -185,7 +185,7 @@ internal class BrevUtilsTest {
                 hentManuellVedtaksbrevtype(
                     BehandlingType.REVURDERING,
                     it
-                ),
+                )
             )
         }
     }
@@ -197,7 +197,7 @@ internal class BrevUtilsTest {
         Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
         Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
         Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-        Behandlingsresultat.ENDRET_OG_OPPHØRT,
+        Behandlingsresultat.ENDRET_OG_OPPHØRT
     )
 
     @Test
@@ -208,7 +208,7 @@ internal class BrevUtilsTest {
                 hentManuellVedtaksbrevtype(
                     BehandlingType.REVURDERING,
                     it
-                ),
+                )
             )
         }
     }
@@ -223,7 +223,7 @@ internal class BrevUtilsTest {
                 hentManuellVedtaksbrevtype(
                     BehandlingType.REVURDERING,
                     it
-                ),
+                )
             )
         }
     }
@@ -238,7 +238,7 @@ internal class BrevUtilsTest {
                 hentManuellVedtaksbrevtype(
                     BehandlingType.REVURDERING,
                     it
-                ),
+                )
             )
         }
     }
@@ -359,11 +359,11 @@ internal class BrevUtilsTest {
                 sanityBegrunnelser = listOf(
                     lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                        hjemler = listOf("11", "4", "2", "10"),
+                        hjemler = listOf("11", "4", "2", "10")
                     ),
                     lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                        hjemler = listOf("10"),
+                        hjemler = listOf("10")
                     )
                 )
             )
@@ -404,11 +404,11 @@ internal class BrevUtilsTest {
                 sanityBegrunnelser = listOf(
                     lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                        hjemler = listOf("11", "4", "2", "10"),
+                        hjemler = listOf("11", "4", "2", "10")
                     ),
                     lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                        hjemler = listOf("10"),
+                        hjemler = listOf("10")
                     )
                 ),
                 opplysningspliktHjemlerSkalMedIBrev = false
@@ -450,11 +450,11 @@ internal class BrevUtilsTest {
                 sanityBegrunnelser = listOf(
                     lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                        hjemler = listOf("11", "4", "2", "10"),
+                        hjemler = listOf("11", "4", "2", "10")
                     ),
                     lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                        hjemler = listOf("10"),
+                        hjemler = listOf("10")
                     )
                 ),
                 opplysningspliktHjemlerSkalMedIBrev = true
@@ -491,7 +491,7 @@ internal class BrevUtilsTest {
             ),
             lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10"),
+                hjemler = listOf("10")
             )
         )
 
@@ -547,11 +547,11 @@ internal class BrevUtilsTest {
         val sanityBegrunnelser = listOf(
             lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                hjemler = listOf("11", "4"),
+                hjemler = listOf("11", "4")
             ),
             lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10"),
+                hjemler = listOf("10")
             )
         )
 
@@ -620,11 +620,11 @@ internal class BrevUtilsTest {
         val sanityBegrunnelser = listOf(
             lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                hjemler = listOf("11", "4"),
+                hjemler = listOf("11", "4")
             ),
             lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10"),
+                hjemler = listOf("10")
             )
         )
 
@@ -694,11 +694,11 @@ internal class BrevUtilsTest {
         val sanityBegrunnelser = listOf(
             lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                hjemler = listOf("11", "4"),
+                hjemler = listOf("11", "4")
             ),
             lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10"),
+                hjemler = listOf("10")
             )
         )
 
@@ -768,11 +768,11 @@ internal class BrevUtilsTest {
         val sanityBegrunnelser = listOf(
             lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                hjemler = listOf("11", "4"),
+                hjemler = listOf("11", "4")
             ),
             lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10"),
+                hjemler = listOf("10")
             )
         )
 
@@ -785,7 +785,7 @@ internal class BrevUtilsTest {
             ),
             lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
-                hjemler = listOf("11"),
+                hjemler = listOf("11")
             )
         )
 
@@ -841,11 +841,11 @@ internal class BrevUtilsTest {
         val sanityBegrunnelser = listOf(
             lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                hjemler = listOf("11", "4"),
+                hjemler = listOf("11", "4")
             ),
             lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10"),
+                hjemler = listOf("10")
             )
         )
 
@@ -899,7 +899,7 @@ internal class BrevUtilsTest {
             Opphørsperiode(
                 periodeFom = sisteFom,
                 periodeTom = LocalDate.now()
-            ),
+            )
         )
 
         Assertions.assertEquals(sisteFom.tilMånedÅr(), hentVirkningstidspunkt(opphørsperioder, 0L))

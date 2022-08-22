@@ -59,7 +59,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         autovedtakService = autovedtakService,
         vedtakService = vedtakService,
         vedtaksperiodeService = vedtaksperiodeService,
-        taskRepository = taskRepository,
+        taskRepository = taskRepository
     )
 
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(

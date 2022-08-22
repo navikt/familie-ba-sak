@@ -18,7 +18,7 @@ import java.time.LocalDate
 @TaskStepBeskrivelse(
     taskStepType = AutobrevTask.TASK_STEP_TYPE,
     beskrivelse = "Opprett oppgaver for sending av autobrev",
-    maxAntallFeil = 1,
+    maxAntallFeil = 1
 )
 class AutobrevTask(
     private val fagsakRepository: FagsakRepository,
@@ -47,7 +47,7 @@ class AutobrevTask(
     private fun opprettTaskerForReduksjonSmåbarnstillegg() {
         val berørteFagsaker = behandlingHentOgPersisterService.partitionByIverksatteBehandlinger {
             fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
-                iverksatteLøpendeBehandlinger = it,
+                iverksatteLøpendeBehandlinger = it
             )
         }
         logger.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med opphør av småbarnstillegg.")

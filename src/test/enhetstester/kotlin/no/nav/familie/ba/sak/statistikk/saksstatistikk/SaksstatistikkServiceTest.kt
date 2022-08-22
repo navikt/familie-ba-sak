@@ -124,7 +124,7 @@ internal class SaksstatistikkServiceTest(
         personopplysningerService,
         persongrunnlagService,
         vedtaksperiodeService,
-        settPåVentService,
+        settPåVentService
     )
 
     @BeforeAll
@@ -463,7 +463,7 @@ internal class SaksstatistikkServiceTest(
                     frist = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
                     tidSattPaaVent = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
                     aarsak = settPåVentÅrsak
-                ),
+                )
             )
             try {
                 validerJsonMotSchema(
@@ -492,7 +492,7 @@ internal class SaksstatistikkServiceTest(
                 sakStatus = it.name,
                 avsender = "familie-ba-sak",
                 versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
-                bostedsland = "NO",
+                bostedsland = "NO"
             )
             try {
                 validerJsonMotSchema(

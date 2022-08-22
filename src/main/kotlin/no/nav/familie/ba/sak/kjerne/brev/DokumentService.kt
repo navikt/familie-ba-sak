@@ -162,7 +162,7 @@ class DokumentService(
                 ?: DEFAULT_JOURNALFØRENDE_ENHET,
             brev = generertBrev,
             førsteside = førsteside,
-            dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
+            dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType()
         )
 
         if (behandling != null) {
@@ -215,7 +215,7 @@ class DokumentService(
                     .plusDays(
                         manueltBrevRequest.brevmal.ventefristDager(
                             manuellFrist = manueltBrevRequest.antallUkerSvarfrist?.toLong(),
-                            behandlingKategori = behandling.kategori,
+                            behandlingKategori = behandling.kategori
                         )
                     ),
                 årsak = manueltBrevRequest.brevmal.venteårsak()
@@ -257,7 +257,7 @@ class DokumentService(
         logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent dødsboadresse.")
         loggService.opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(
             behandlingId = behandlingId,
-            brevnavn = brevmal.visningsTekst,
+            brevnavn = brevmal.visningsTekst
         )
     }
 
@@ -269,7 +269,7 @@ class DokumentService(
         logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent adresse.")
         loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(
             behandlingId = behandlingId,
-            brevnavn = brevMal.visningsTekst,
+            brevnavn = brevMal.visningsTekst
         )
         antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
     }

@@ -394,7 +394,7 @@ class VilkårVurderingTest(
             adressenavn = "St. Olavsvegen",
             kommunenummer = "1232",
             tilleggsnavn = "whatever",
-            postnummer = "4322",
+            postnummer = "4322"
         ).apply {
             periode = DatoIntervallEntitet(LocalDate.now().minusMonths(10))
         }
@@ -423,7 +423,7 @@ class VilkårVurderingTest(
                 adressenavn = "St. Olavsvegen",
                 kommunenummer = "1232",
                 tilleggsnavn = "whatever",
-                postnummer = "4322",
+                postnummer = "4322"
             ).apply {
                 periode = it
             }

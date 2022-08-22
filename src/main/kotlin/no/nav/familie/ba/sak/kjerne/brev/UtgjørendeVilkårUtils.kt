@@ -44,7 +44,7 @@ fun hentPersonerForAlleUtgjørendeVilkår(
             vilkårGjeldendeForBegrunnelse = vilkår,
             aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
             triggesAv = triggesAv,
-            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
         )
     }
 }
@@ -75,7 +75,7 @@ private fun hentPersonerMedUtgjørendeVilkår(
                             begrunnelseType = begrunnelseType,
                             triggesAv = triggesAv,
                             vedtaksperiode = vedtaksperiode,
-                            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
                         )
                     }
 
@@ -112,7 +112,7 @@ private fun erVilkårResultatUtgjørende(
             erInnvilgetVilkårResultatUtgjørende(
                 triggesAv,
                 minimertVilkårResultat,
-                vedtaksperiode,
+                vedtaksperiode
             )
 
         VedtakBegrunnelseType.OPPHØR -> if (triggesAv.gjelderFørstePeriode) {
@@ -120,13 +120,13 @@ private fun erVilkårResultatUtgjørende(
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv,
-                vilkårResultat = minimertVilkårResultat,
+                vilkårResultat = minimertVilkårResultat
             )
         } else {
             erOpphørResultatUtgjøreneForPeriode(
                 minimertVilkårResultat = minimertVilkårResultat,
                 triggesAv = triggesAv,
-                vedtaksperiode = vedtaksperiode,
+                vedtaksperiode = vedtaksperiode
             )
         }
 
@@ -135,7 +135,7 @@ private fun erVilkårResultatUtgjørende(
                 vilkårSomAvsluttesRettFørDennePerioden = minimertVilkårResultat,
                 triggesAv = triggesAv,
                 vedtaksperiode = vedtaksperiode,
-                vilkårSomStarterIDennePerioden = nesteMinimerteVilkårResultat,
+                vilkårSomStarterIDennePerioden = nesteMinimerteVilkårResultat
             )
         }
 

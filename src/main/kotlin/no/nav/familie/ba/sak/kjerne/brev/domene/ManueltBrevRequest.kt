@@ -85,7 +85,7 @@ fun ManueltBrevRequest.leggTilEnhet(arbeidsfordelingService: ArbeidsfordelingSer
         enhet = Enhet(
             enhetNavn = arbeidsfordelingsenhet.enhetNavn,
             enhetId = arbeidsfordelingsenhet.enhetId
-        ),
+        )
     )
 }
 
@@ -103,7 +103,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 flettefelter = InformasjonsbrevDeltBostedData.Flettefelter(
                     navn = this.mottakerNavn,
                     fodselsnummer = this.mottakerIdent,
-                    barnMedDeltBostedAvtale = this.multiselectVerdier,
+                    barnMedDeltBostedAvtale = this.multiselectVerdier
                 )
             )
         )
@@ -114,7 +114,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 flettefelter = InnhenteOpplysningerData.Flettefelter(
                     navn = this.mottakerNavn,
                     fodselsnummer = this.mottakerIdent,
-                    dokumentliste = this.multiselectVerdier,
+                    dokumentliste = this.multiselectVerdier
                 )
             )
         )
@@ -124,7 +124,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = this.mottakerNavn,
-                    fodselsnummer = this.mottakerIdent,
+                    fodselsnummer = this.mottakerIdent
                 )
             )
         )
@@ -134,7 +134,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             navn = this.mottakerNavn,
             fødselsnummer = this.mottakerIdent,
             varselÅrsaker = this.multiselectVerdier,
-            enhet = this.enhetNavn(),
+            enhet = this.enhetNavn()
         )
     Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 ->
         VarselOmRevurderingDeltBostedParagraf14Brev(
@@ -143,7 +143,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 flettefelter = VarselOmRevurderingDeltBostedParagraf14Data.Flettefelter(
                     navn = this.mottakerNavn,
                     fodselsnummer = this.mottakerIdent,
-                    barnMedDeltBostedAvtale = this.multiselectVerdier,
+                    barnMedDeltBostedAvtale = this.multiselectVerdier
                 )
             )
         )
@@ -228,7 +228,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             navn = this.mottakerNavn,
             fødselsnummer = this.mottakerIdent,
             varselÅrsaker = this.multiselectVerdier,
-            enhet = this.enhetNavn(),
+            enhet = this.enhetNavn()
         )
     Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED ->
         InnhenteOpplysningerOmBarn(

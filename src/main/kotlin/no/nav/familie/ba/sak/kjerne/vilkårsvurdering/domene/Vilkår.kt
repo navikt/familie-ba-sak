@@ -85,7 +85,7 @@ enum class Vilkår(
                 BOR_MED_SØKER,
                 GIFT_PARTNERSKAP,
                 BOSATT_I_RIKET,
-                LOVLIG_OPPHOLD,
+                LOVLIG_OPPHOLD
             )
         }
     }

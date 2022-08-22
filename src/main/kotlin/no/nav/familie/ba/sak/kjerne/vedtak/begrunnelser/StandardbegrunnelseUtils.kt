@@ -63,7 +63,7 @@ fun Standardbegrunnelse.triggesForPeriode(
         oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
         aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
         triggesAv = triggesAv,
-        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
     )
 
     return when {
@@ -93,7 +93,7 @@ fun Standardbegrunnelse.triggesForPeriode(
         triggesAv.erEndret() && !triggesAv.etterEndretUtbetaling -> erEndretTriggerErOppfylt(
             triggesAv = triggesAv,
             minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
-            minimertVedtaksperiode = minimertVedtaksperiode,
+            minimertVedtaksperiode = minimertVedtaksperiode
         )
         triggesAv.gjelderFraInnvilgelsestidspunkt -> false
         triggesAv.barnDød -> dødeBarnForrigePeriode(ytelserForrigePeriode, minimertePersoner.filter { it.type === PersonType.BARN }).any()
@@ -192,7 +192,7 @@ fun Standardbegrunnelse.tilVedtaksbegrunnelse(
 
     return Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        standardbegrunnelse = this,
+        standardbegrunnelse = this
     )
 }
 

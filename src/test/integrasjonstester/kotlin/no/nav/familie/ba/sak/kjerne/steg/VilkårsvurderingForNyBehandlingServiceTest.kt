@@ -68,7 +68,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
+                årsak = BehandlingÅrsak.MIGRERING
             )
         )
         val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
@@ -119,7 +119,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
@@ -186,7 +186,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
+                årsak = BehandlingÅrsak.MIGRERING
             )
         )
         val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
@@ -279,7 +279,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(

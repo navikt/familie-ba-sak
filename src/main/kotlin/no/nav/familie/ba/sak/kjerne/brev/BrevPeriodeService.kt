@@ -101,7 +101,7 @@ class BrevPeriodeService(
                 skalLogge = skalLogge,
                 kompetanser = kompetanser.toList(),
                 sanityBegrunnelser = sanityBegrunnelser,
-                sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+                sanityEØSBegrunnelser = sanityEØSBegrunnelser
             )
         }
     }
@@ -125,7 +125,7 @@ class BrevPeriodeService(
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            andelerTilkjentYtelse = andelerTilkjentYtelse
         )
 
         val ytelserForrigePeriode = andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelse) }
@@ -158,7 +158,7 @@ class BrevPeriodeService(
                 fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
                 tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                landkoderISO2 = landkoderISO2,
+                landkoderISO2 = landkoderISO2
             ),
             minimerteKompetanserSomStopperRettFørPeriode = hentKompetanserSomStopperRettFørPeriode(
                 kompetanser = kompetanser,

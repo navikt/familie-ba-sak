@@ -87,7 +87,7 @@ class VedtaksperiodeServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         revurdering = kjørStegprosessForRevurderingÅrligKontroll(
@@ -111,7 +111,7 @@ class VedtaksperiodeServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         val behandlingEtterNySøknadsregistrering = stegService.håndterSøknad(
@@ -158,7 +158,7 @@ class VedtaksperiodeServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
 
@@ -304,7 +304,7 @@ class VedtaksperiodeServiceTest(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = emptyList(),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(1, redusertePerioder.size)
@@ -377,7 +377,7 @@ class VedtaksperiodeServiceTest(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = emptyList(),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
         )
         assertTrue { redusertePerioder.isEmpty() }
     }
@@ -460,7 +460,7 @@ class VedtaksperiodeServiceTest(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = listOf(opphørsperiode),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(1, redusertePerioder.size)
@@ -543,7 +543,7 @@ class VedtaksperiodeServiceTest(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = listOf(opphørsperiode),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(2, redusertePerioder.size)

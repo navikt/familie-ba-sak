@@ -11,5 +11,5 @@ fun lagVedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = mockk()
 ) = Vedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-    standardbegrunnelse = standardbegrunnelse,
+    standardbegrunnelse = standardbegrunnelse
 )

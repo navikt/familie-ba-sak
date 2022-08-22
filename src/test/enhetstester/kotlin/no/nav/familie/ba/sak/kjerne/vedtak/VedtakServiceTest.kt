@@ -154,7 +154,7 @@ class VedtakServiceTest(
             personidentService,
             featureToggleService,
             taskRepository,
-            vilkårsvurderingService,
+            vilkårsvurderingService
         )
 
         val personAktørId = randomAktør()
@@ -189,7 +189,7 @@ class VedtakServiceTest(
             LocalDate.of(2010, 6, 2),
             LocalDate.of(2010, 8, 1),
             "",
-            vilkårsvurdering.behandling.id,
+            vilkårsvurdering.behandling.id
         )
         vilkårResultat3 = VilkårResultat(
             3,

@@ -102,6 +102,6 @@ internal fun List<AndelTilkjentYtelse>.lagUtbetalingsperiodeDetaljer(
             ytelseType = andel.type,
             utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
             erPåvirketAvEndring = andel.endretUtbetalingAndeler.isNotEmpty(),
-            prosent = andel.prosent,
+            prosent = andel.prosent
         )
     }

@@ -241,7 +241,7 @@ class ClientMocks {
                         identSlot2.captured.substring(0, min(11, identSlot2.captured.length)) + "00",
                         false,
                         "AKTORID"
-                    ),
+                    )
                 )
             }
         }
@@ -465,7 +465,7 @@ class ClientMocks {
 
         private val sivilstandHistorisk = listOf(
             Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
-            Sivilstand(type = SIVILSTAND.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
+            Sivilstand(type = SIVILSTAND.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4))
         )
 
         val personInfo = mapOf(
@@ -543,7 +543,7 @@ class ClientMocks {
                 bostedsadresser = mutableListOf(bostedsadresse),
                 kjønn = Kjønn.KVINNE,
                 navn = "Mor Integrasjon person",
-                sivilstander = sivilstandHistorisk,
+                sivilstander = sivilstandHistorisk
             ),
             BARN_DET_IKKE_GIS_TILGANG_TIL_FNR to PersonInfo(
                 fødselsdato = LocalDate.of(2019, 6, 22),

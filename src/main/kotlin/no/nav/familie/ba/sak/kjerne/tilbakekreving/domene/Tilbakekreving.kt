@@ -72,6 +72,6 @@ data class Tilbakekreving(
         valg = valg,
         varsel = varsel,
         begrunnelse = begrunnelse,
-        tilbakekrevingsbehandlingId = tilbakekrevingsbehandlingId,
+        tilbakekrevingsbehandlingId = tilbakekrevingsbehandlingId
     )
 }

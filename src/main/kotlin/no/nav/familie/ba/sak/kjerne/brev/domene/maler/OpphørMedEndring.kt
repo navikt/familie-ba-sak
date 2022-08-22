@@ -23,13 +23,13 @@ data class OpphørMedEndring(
                     ),
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                     feilutbetaling = erFeilutbetalingPåBehandling,
-                    etterbetaling = etterbetaling,
+                    etterbetaling = etterbetaling
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
                 ),
-                perioder = vedtakFellesfelter.perioder,
+                perioder = vedtakFellesfelter.perioder
             )
         )
 }

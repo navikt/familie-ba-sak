@@ -555,7 +555,7 @@ class BehandlingIntegrationTest(
                     )
                 )
             ),
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT))
         )
 
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barn1Fnr)) } returns PersonInfo(
@@ -575,7 +575,7 @@ class BehandlingIntegrationTest(
                     )
                 )
             ),
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT))
         )
 
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barn2Fnr)) } returns PersonInfo(
@@ -585,7 +585,7 @@ class BehandlingIntegrationTest(
             kjønn = Kjønn.KVINNE,
             forelderBarnRelasjon = emptySet(),
             bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT))
         )
 
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns PersonInfo(
@@ -603,7 +603,7 @@ class BehandlingIntegrationTest(
                         søkerPostnummer
                     )
                 )
-            ),
+            )
         )
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barn1Fnr)) } returns PersonInfo(
             fødselsdato = LocalDate.of(2009, 1, 1),

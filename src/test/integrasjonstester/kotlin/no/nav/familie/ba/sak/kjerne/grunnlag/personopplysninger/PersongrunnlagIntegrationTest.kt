@@ -74,7 +74,7 @@ class PersongrunnlagIntegrationTest(
                 adresse = PdlKontaktinformasjonForDødsboAdresse(
                     adresselinje1 = adresselinje1,
                     poststedsnavn = poststedsnavn,
-                    postnummer = postnummer,
+                    postnummer = postnummer
                 )
             )
         )
@@ -225,7 +225,7 @@ class PersongrunnlagIntegrationTest(
             kjønn = Kjønn.KVINNE,
             forelderBarnRelasjon = emptySet(),
             bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT))
         )
 
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns PersonInfo(
@@ -235,7 +235,7 @@ class PersongrunnlagIntegrationTest(
             kjønn = Kjønn.MANN,
             forelderBarnRelasjon = emptySet(),
             bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT))
         )
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))

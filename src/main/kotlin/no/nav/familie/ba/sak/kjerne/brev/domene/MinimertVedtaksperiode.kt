@@ -60,6 +60,6 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
         },
         uregistrerteBarn = uregistrerteBarn.map { it.copy(personIdent = "", navn = "") },
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-        brevMålform = brevMålform,
+        brevMålform = brevMålform
     )
 }

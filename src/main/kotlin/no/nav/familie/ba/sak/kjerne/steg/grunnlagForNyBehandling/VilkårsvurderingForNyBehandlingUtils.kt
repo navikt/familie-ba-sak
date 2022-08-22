@@ -202,7 +202,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     resultat = Resultat.IKKE_VURDERT,
                     vilkårType = vilkår,
                     begrunnelse = "",
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id,
+                    behandlingId = personResultat.vilkårsvurdering.behandling.id
                 )
             }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 

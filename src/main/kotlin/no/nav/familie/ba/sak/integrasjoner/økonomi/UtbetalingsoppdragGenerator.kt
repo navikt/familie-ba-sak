@@ -85,7 +85,7 @@ class UtbetalingsoppdragGenerator(
                 vedtak = vedtak,
                 sisteOffsetIKjedeOversikt = sisteOffsetPerIdent,
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
-                skalOppdatereTilkjentYtelse = !erSimulering,
+                skalOppdatereTilkjentYtelse = !erSimulering
             )
         } else {
             emptyList()
@@ -94,7 +94,7 @@ class UtbetalingsoppdragGenerator(
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty()) {
             lagUtbetalingsperioderForOpphør(
                 andeler = andelerTilOpphør,
-                vedtak = vedtak,
+                vedtak = vedtak
             )
         } else {
             emptyList()

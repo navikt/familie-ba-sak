@@ -46,7 +46,7 @@ fun vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere: List
         tomDatoNestePeriode = nestePeriode?.tom,
         forfallsdatoNestePeriode = nestePeriode?.forfallsdato,
         tidSimuleringHentet = tidSimuleringHentet,
-        tomSisteUtbetaling = tomSisteUtbetaling,
+        tomSisteUtbetaling = tomSisteUtbetaling
     )
 }
 
@@ -155,7 +155,7 @@ fun SimuleringMottaker.tilBehandlingSimuleringMottaker(behandling: Behandling): 
     val behandlingSimuleringMottaker = ØkonomiSimuleringMottaker(
         mottakerNummer = this.mottakerNummer,
         mottakerType = this.mottakerType,
-        behandling = behandling,
+        behandling = behandling
     )
 
     behandlingSimuleringMottaker.økonomiSimuleringPostering = this.simulertPostering.map {
@@ -175,5 +175,5 @@ fun SimulertPostering.tilVedtakSimuleringPostering(økonomiSimuleringMottaker: �
         posteringType = this.posteringType,
         forfallsdato = this.forfallsdato,
         utenInntrekk = this.utenInntrekk,
-        økonomiSimuleringMottaker = økonomiSimuleringMottaker,
+        økonomiSimuleringMottaker = økonomiSimuleringMottaker
     )

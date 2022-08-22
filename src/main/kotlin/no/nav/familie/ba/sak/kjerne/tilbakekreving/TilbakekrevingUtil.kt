@@ -71,5 +71,5 @@ fun hentFaktainfoForTilbakekreving(behandling: Behandling, tilbakekreving: Tilba
         revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
         revurderingsresultat = behandling.resultat.displayName,
         tilbakekrevingsvalg = tilbakekreving.valg,
-        konsekvensForYtelser = emptySet(),
+        konsekvensForYtelser = emptySet()
     )

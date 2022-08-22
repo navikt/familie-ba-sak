@@ -51,7 +51,7 @@ class DistribuerDokumentTask(
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
-                properties = properties,
+                properties = properties
             ).copy(
                 triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager()
             )

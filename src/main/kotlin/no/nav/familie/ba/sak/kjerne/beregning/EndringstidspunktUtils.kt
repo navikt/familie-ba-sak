@@ -145,7 +145,7 @@ private fun List<AndelTilkjentYtelse>.hentTidslinje(
                 aktørId = it.aktør.aktørId,
                 kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
                 endretUtbetalingÅrsaker = it.endretUtbetalingAndeler.mapNotNull { endretUtbetalingAndel -> endretUtbetalingAndel.årsak },
-                behandlingAlder = behandlingAlder,
+                behandlingAlder = behandlingAlder
             )
         )
     }

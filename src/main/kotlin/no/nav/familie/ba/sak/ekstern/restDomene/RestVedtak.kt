@@ -33,5 +33,5 @@ fun Vedtak.tilRestVedtak(
                 .map { it.copy(gyldigeBegrunnelser = emptyList()) }
         } else {
             vedtaksperioderMedBegrunnelser
-        },
+        }
     )

@@ -165,7 +165,7 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
-            mockk(relaxed = true),
+            mockk(relaxed = true)
         ) // => env.erDev() = env.erE2E() = false
     }
 
@@ -390,7 +390,7 @@ class MigreringServiceTest(
                                 tom = null,
                                 beløp = 2048.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J",
+                                typeUtbetaling = "J"
                             )
                         ),
                         opphørsgrunn = "0"
@@ -434,10 +434,10 @@ class MigreringServiceTest(
                                 tom = null,
                                 beløp = 2048.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J",
+                                typeUtbetaling = "J"
                             )
                         ),
-                        opphørsgrunn = "0",
+                        opphørsgrunn = "0"
                     ),
                     status = "FB",
                     valg = "OR",
@@ -473,7 +473,7 @@ class MigreringServiceTest(
                                 fødselsnrBarn,
                                 barnetrygdTom = "000000"
                             ),
-                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
+                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000")
                         ),
                         antallBarn = 1,
                         delytelse = listOf(
@@ -482,7 +482,7 @@ class MigreringServiceTest(
                                 tom = null,
                                 beløp = 1054.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J",
+                                typeUtbetaling = "J"
                             )
                         ),
                         opphørsgrunn = "0"
@@ -516,7 +516,7 @@ class MigreringServiceTest(
                                 fødselsnrBarn,
                                 barnetrygdTom = "000000"
                             ),
-                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
+                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000")
                         ),
                         antallBarn = 2,
                         delytelse = listOf(
@@ -525,7 +525,7 @@ class MigreringServiceTest(
                                 tom = null,
                                 beløp = 1054.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J",
+                                typeUtbetaling = "J"
                             )
                         ),
                         opphørsgrunn = "0"
@@ -805,7 +805,7 @@ class MigreringServiceTest(
             vedtakService = mockk(),
             vilkårService = mockk(),
             vilkårsvurderingService = mockk(),
-            migreringRestClient = mockk(relaxed = true),
+            migreringRestClient = mockk(relaxed = true)
         )
 
         val ident = randomFnr()
@@ -847,7 +847,7 @@ class MigreringServiceTest(
                     tom = null,
                     beløp = it,
                     typeDelytelse = "MS",
-                    typeUtbetaling = "J",
+                    typeUtbetaling = "J"
                 )
             },
             opphørsgrunn = "0"
@@ -870,7 +870,7 @@ class MigreringServiceTest(
                     tom = null,
                     beløp = it,
                     typeDelytelse = "MS",
-                    typeUtbetaling = "J",
+                    typeUtbetaling = "J"
                 )
             },
             opphørsgrunn = "0"

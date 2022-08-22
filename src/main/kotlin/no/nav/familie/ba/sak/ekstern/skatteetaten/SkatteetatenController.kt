@@ -172,7 +172,7 @@ class SkatteetatenController(
                     SkatteetatenPeriode("2019-02", Delingsprosent._0, tomMaaned = "2019-09")
 
                 )
-            ),
+            )
         )
     }
 

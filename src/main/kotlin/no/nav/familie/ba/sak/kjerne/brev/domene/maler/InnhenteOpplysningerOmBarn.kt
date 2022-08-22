@@ -23,7 +23,7 @@ data class InnhenteOpplysningerOmBarn(
                 fodselsnummer = fødselsnummer,
                 barnasFødselsdager = barnasFødselsdager,
                 dokumentliste = dokumentliste
-            ),
+            )
         )
     )
 }

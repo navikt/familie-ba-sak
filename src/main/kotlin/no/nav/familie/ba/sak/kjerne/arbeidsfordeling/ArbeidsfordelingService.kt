@@ -110,7 +110,7 @@ class ArbeidsfordelingService(
             behandling = behandling,
             forrigeArbeidsfordelingsenhet = forrigeArbeidsfordelingsenhet,
             oppdatertArbeidsfordelingPåBehandling = oppdatertArbeidsfordelingPåBehandling,
-            manuellOppdatering = false,
+            manuellOppdatering = false
         )
     }
 

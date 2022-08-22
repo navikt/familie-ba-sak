@@ -43,6 +43,6 @@ data class BrevPeriode(
         fodselsdagerBarnMedUtbetaling = flettefelt(fodselsdagerBarnMedUtbetaling),
         fodselsdagerBarnMedNullutbetaling = flettefelt(fodselsdagerBarnMedNullutbetaling),
         begrunnelser = begrunnelser,
-        type = flettefelt(brevPeriodeType.apiNavn),
+        type = flettefelt(brevPeriodeType.apiNavn)
     )
 }

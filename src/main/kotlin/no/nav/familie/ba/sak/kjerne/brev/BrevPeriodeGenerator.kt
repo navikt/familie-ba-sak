@@ -84,7 +84,7 @@ class BrevPeriodeGenerator(
                     barnasFodselsdatoer = Utils.slåSammen(kompetanse.personer.map { it.fødselsdato.tilKortString() }),
                     antallBarn = kompetanse.personer.size,
                     maalform = brevMålform.tilSanityFormat(),
-                    sokersAktivitet = kompetanse.søkersAktivitet,
+                    sokersAktivitet = kompetanse.søkersAktivitet
                 )
             }
         }
@@ -183,7 +183,7 @@ class BrevPeriodeGenerator(
             antallBarnMedUtbetaling = barnMedUtbetaling.size.toString(),
             antallBarnMedNullutbetaling = barnMedNullutbetaling.size.toString(),
             fodselsdagerBarnMedUtbetaling = barnMedUtbetaling.tilBarnasFødselsdatoer(),
-            fodselsdagerBarnMedNullutbetaling = barnMedNullutbetaling.tilBarnasFødselsdatoer(),
+            fodselsdagerBarnMedNullutbetaling = barnMedNullutbetaling.tilBarnasFødselsdatoer()
         )
     }
 

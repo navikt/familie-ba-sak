@@ -55,7 +55,7 @@ class OpphørsperiodeTest {
 
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1, andel2Barn1, andel3Barn1),
-            personopplysningGrunnlag = personopplysningGrunnlag,
+            personopplysningGrunnlag = personopplysningGrunnlag
         )
 
         assertEquals(2, opphørsperioder.size)
@@ -79,7 +79,7 @@ class OpphørsperiodeTest {
 
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1),
-            personopplysningGrunnlag = personopplysningGrunnlag,
+            personopplysningGrunnlag = personopplysningGrunnlag
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -100,7 +100,7 @@ class OpphørsperiodeTest {
 
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1),
-            personopplysningGrunnlag = personopplysningGrunnlag,
+            personopplysningGrunnlag = personopplysningGrunnlag
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -132,7 +132,7 @@ class OpphørsperiodeTest {
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -173,7 +173,7 @@ class OpphørsperiodeTest {
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndel1Barn1, forrigeAndel2Barn1),
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -204,7 +204,7 @@ class OpphørsperiodeTest {
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -219,11 +219,11 @@ class OpphørsperiodeTest {
         val toLikePerioder = listOf(
             Opphørsperiode(
                 periodeFom = periode12MånederFraInneværendeMåned,
-                periodeTom = inneværendeMåned().toLocalDate(),
+                periodeTom = inneværendeMåned().toLocalDate()
             ),
             Opphørsperiode(
                 periodeFom = periode12MånederFraInneværendeMåned,
-                periodeTom = inneværendeMåned().toLocalDate(),
+                periodeTom = inneværendeMåned().toLocalDate()
             )
         )
 
@@ -235,11 +235,11 @@ class OpphørsperiodeTest {
         val toPerioderMedUlikSluttdato = listOf(
             Opphørsperiode(
                 periodeFom = inneværendeMåned().minusMonths(12).toLocalDate(),
-                periodeTom = inneværendeMåned().toLocalDate(),
+                periodeTom = inneværendeMåned().toLocalDate()
             ),
             Opphørsperiode(
                 periodeFom = inneværendeMåned().minusMonths(12).toLocalDate(),
-                periodeTom = inneværendeMåned().nesteMåned().toLocalDate(),
+                periodeTom = inneværendeMåned().nesteMåned().toLocalDate()
             )
         )
         val enPeriodeMedSluttDatoNesteMåned = slåSammenOpphørsperioder(toPerioderMedUlikSluttdato)
@@ -253,11 +253,11 @@ class OpphørsperiodeTest {
         val toPerioderMedUlikStartdato = listOf(
             Opphørsperiode(
                 periodeFom = inneværendeMåned().minusMonths(12).toLocalDate(),
-                periodeTom = inneværendeMåned().toLocalDate(),
+                periodeTom = inneværendeMåned().toLocalDate()
             ),
             Opphørsperiode(
                 periodeFom = inneværendeMåned().minusMonths(13).toLocalDate(),
-                periodeTom = inneværendeMåned().toLocalDate(),
+                periodeTom = inneværendeMåned().toLocalDate()
             )
         )
         val enPeriodeMedStartDato13MånederTilbake = slåSammenOpphørsperioder(toPerioderMedUlikStartdato)
@@ -276,11 +276,11 @@ class OpphørsperiodeTest {
         val toPerioderMedUlikStartdato = listOf(
             Opphørsperiode(
                 periodeFom = førsteOpphørsperiodeFom,
-                periodeTom = inneværendeMåned().minusMonths(2).toLocalDate(),
+                periodeTom = inneværendeMåned().minusMonths(2).toLocalDate()
             ),
             Opphørsperiode(
                 periodeFom = inneværendeMåned().minusMonths(6).toLocalDate(),
-                periodeTom = sisteOpphørsperiodeTom,
+                periodeTom = sisteOpphørsperiodeTom
             )
         )
         val enOpphørsperiodeMedFørsteFomOgSisteTom = slåSammenOpphørsperioder(toPerioderMedUlikStartdato)

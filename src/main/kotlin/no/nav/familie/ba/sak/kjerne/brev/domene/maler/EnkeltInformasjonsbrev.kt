@@ -18,7 +18,7 @@ data class EnkeltInformasjonsbrev(
         data = EnkeltInformasjonsbrevData(
             flettefelter = EnkeltInformasjonsbrevData.Flettefelter(
                 navn = navn,
-                fodselsnummer = fodselsnummer,
+                fodselsnummer = fodselsnummer
             ),
             delmalData = EnkeltInformasjonsbrevData.DelmalData(
                 SignaturDelmal(
@@ -45,7 +45,7 @@ data class EnkeltInformasjonsbrevData(
             fodselsnummer: String
         ) : this(
             navn = flettefelt(navn),
-            fodselsnummer = flettefelt(fodselsnummer),
+            fodselsnummer = flettefelt(fodselsnummer)
         )
     }
 

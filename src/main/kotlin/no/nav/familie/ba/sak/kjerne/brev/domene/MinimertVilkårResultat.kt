@@ -31,5 +31,5 @@ fun VilkårResultat.tilMinimertVilkårResultat() =
         periodeTom = this.periodeTom,
         resultat = this.resultat,
         utdypendeVilkårsvurderinger = this.utdypendeVilkårsvurderinger,
-        erEksplisittAvslagPåSøknad = this.erEksplisittAvslagPåSøknad,
+        erEksplisittAvslagPåSøknad = this.erEksplisittAvslagPåSøknad
     )

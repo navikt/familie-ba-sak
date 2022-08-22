@@ -60,7 +60,7 @@ class TilbakekrevingService(
             valg = restTilbakekreving.valg,
             varsel = restTilbakekreving.varsel,
             tilbakekrevingsbehandlingId = tilbakekrevingRepository
-                .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId,
+                .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId
         )
 
         tilbakekrevingRepository.deleteByBehandlingId(behandlingId)
@@ -154,7 +154,7 @@ class TilbakekrevingService(
             revurderingsvedtaksdato = revurderingsvedtaksdato,
             // Verge er per nå ikke støttet i familie-ba-sak.
             verge = null,
-            faktainfo = hentFaktainfoForTilbakekreving(behandling, tilbakekreving),
+            faktainfo = hentFaktainfoForTilbakekreving(behandling, tilbakekreving)
         )
     }
 

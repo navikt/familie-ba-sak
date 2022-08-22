@@ -170,7 +170,7 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
                                     utbetalingsperiode.tom == fom.minusDays(1) &&
                                         utbetalingsperiode.hentUtbetalingsperiodeDetaljer(
                                             andelerTilkjentYtelse = andelerTilkjentYtelse,
-                                            personopplysningGrunnlag = personopplysningGrunnlag,
+                                            personopplysningGrunnlag = personopplysningGrunnlag
                                         )
                                             .any {
                                                 it.person.personIdent ==
@@ -186,7 +186,7 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
                         vedtak = vedtak,
                         fom = utledFom(gammeltSegment, overlappendePeriode),
                         tom = utledTom(gammeltSegment, overlappendePeriode),
-                        type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+                        type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
                     )
                 }
             }

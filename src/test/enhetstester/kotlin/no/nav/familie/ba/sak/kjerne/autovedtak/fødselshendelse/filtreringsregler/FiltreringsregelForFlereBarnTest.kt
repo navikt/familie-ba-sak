@@ -59,7 +59,7 @@ class FiltreringsregelForFlereBarnTest {
         localDateService = localDateServiceMock,
         fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
         behandlingService = behandlingServiceMock,
-        tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
+        tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock
     )
 
     init {
@@ -239,7 +239,7 @@ class FiltreringsregelForFlereBarnTest {
             fødselsdato = fødselsDato ?: LocalDate.of(1991, 1, 1),
             navn = "navn",
             kjønn = kjønn,
-            bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf(),
+            bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf()
         )
             .apply {
                 this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
@@ -298,7 +298,7 @@ class FiltreringsregelForFlereBarnTest {
             morHarVerge = false,
             dagensDato = LocalDate.now(),
             erFagsakenMigrertEtterBarnFødt = false,
-            løperBarnetrygdForBarnetPåAnnenForelder = false,
+            løperBarnetrygdForBarnetPåAnnenForelder = false
         )
     }
 }

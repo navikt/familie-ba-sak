@@ -27,7 +27,7 @@ fun mapTilOpphørsperioder(
     val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) {
         mapTilUtbetalingsperioder(
             personopplysningGrunnlag = forrigePersonopplysningGrunnlag,
-            andelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
+            andelerTilkjentYtelse = forrigeAndelerTilkjentYtelse
         )
     } else {
         emptyList()

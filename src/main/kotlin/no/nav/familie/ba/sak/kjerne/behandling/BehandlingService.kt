@@ -87,7 +87,7 @@ class BehandlingService(
                 overstyrtKategori = nyBehandling.kategori,
                 behandlingType = nyBehandling.behandlingType,
                 behandlingÅrsak = nyBehandling.behandlingÅrsak,
-                kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id),
+                kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id)
             )
 
             val underkategori = bestemUnderkategori(
@@ -95,7 +95,7 @@ class BehandlingService(
                 underkategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsak.id),
                 underkategoriFraInneværendeBehandling = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(
                     fagsak.id
-                ),
+                )
             )
 
             sjekkEøsToggleOgThrowHvisBrudd(kategori)
@@ -285,7 +285,7 @@ class BehandlingService(
         return Behandlingutils.harBehandlingsårsakAlleredeKjørt(
             behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId),
             behandlingÅrsak = behandlingÅrsak,
-            måned = måned,
+            måned = måned
         )
     }
 

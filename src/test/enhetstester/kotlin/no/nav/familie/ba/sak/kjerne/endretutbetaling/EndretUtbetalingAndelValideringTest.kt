@@ -131,7 +131,7 @@ class EndretUtbetalingAndelValideringTest {
                 fom = YearMonth.of(2018, 10),
                 tom = YearMonth.of(2021, 10),
                 person = barn2
-            ),
+            )
         )
 
         val endretUtbetalingAndel = EndretUtbetalingAndel(
@@ -708,7 +708,7 @@ class EndretUtbetalingAndelValideringTest {
                 YtelseType.ORDINÆR_BARNETRYGD,
                 BigDecimal.ZERO,
                 fomUtvidet = fom1,
-                tomUtvidet = tom2,
+                tomUtvidet = tom2
             )
 
         Assertions.assertThrows(FunksjonellFeil::class.java) {

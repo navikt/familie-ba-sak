@@ -70,7 +70,7 @@ class BehandleAnnullertFødselTask(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     behandleAnnullerFødselDto
-                ),
+                )
             )
         }
     }

@@ -757,7 +757,7 @@ class BeregningServiceTest {
             barnFødselsdato = LocalDate.of(
                 2002,
                 7,
-                1,
+                1
             )
         )
 
@@ -791,7 +791,7 @@ class BeregningServiceTest {
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
 
         return beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(
-            behandling = behandling,
+            behandling = behandling
         )
     }
 }

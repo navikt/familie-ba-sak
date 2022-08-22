@@ -58,7 +58,7 @@ class PersonopplysningerService(
         }.toSet()
         return personinfo.copy(
             forelderBarnRelasjon = forelderBarnRelasjon,
-            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
+            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert
         )
     }
 

@@ -312,7 +312,7 @@ private fun regelverkavhenigeVilkår(): List<Vilkår> {
     return listOf(
         Vilkår.BOR_MED_SØKER,
         Vilkår.BOSATT_I_RIKET,
-        Vilkår.LOVLIG_OPPHOLD,
+        Vilkår.LOVLIG_OPPHOLD
     )
 }
 

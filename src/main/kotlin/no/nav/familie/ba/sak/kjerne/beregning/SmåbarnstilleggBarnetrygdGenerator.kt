@@ -218,7 +218,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                         segement.value.containsAll(
                             listOf(
                                 BarnSinRettTilSmåbarnstilleggKombinatorGammel.UTBETALING,
-                                BarnSinRettTilSmåbarnstilleggKombinatorGammel.UNDER_3_ÅR,
+                                BarnSinRettTilSmåbarnstilleggKombinatorGammel.UNDER_3_ÅR
                             )
                         )
                     }.map { segement -> DatoIntervallEntitet(fom = segement.fom, tom = segement.tom) }

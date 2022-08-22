@@ -72,7 +72,7 @@ class BehandlingsresultatUtilsTest {
         val personer = listOf(
             lagYtelsePerson(YtelsePersonResultat.AVSLÅTT),
             lagYtelsePerson(YtelsePersonResultat.OPPHØRT),
-            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT),
+            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT)
         )
 
         assertEquals(
@@ -85,7 +85,7 @@ class BehandlingsresultatUtilsTest {
     fun `skal returnere AVSLÅTT_OG_OPPHØRT behandlingsresultat når et barn har fortsatt opphørt og søker har avslått`() {
         val personer = listOf(
             lagYtelsePerson(YtelsePersonResultat.AVSLÅTT),
-            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT),
+            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT)
         )
 
         assertEquals(
@@ -99,7 +99,7 @@ class BehandlingsresultatUtilsTest {
         val personer = listOf(
             lagYtelsePerson(YtelsePersonResultat.ENDRET_UTBETALING),
             lagYtelsePerson(YtelsePersonResultat.OPPHØRT),
-            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT),
+            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT)
         )
 
         assertEquals(
@@ -113,7 +113,7 @@ class BehandlingsresultatUtilsTest {
         val personer = listOf(
             lagYtelsePerson(YtelsePersonResultat.ENDRET_UTBETALING),
             lagYtelsePerson(YtelsePersonResultat.AVSLÅTT),
-            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT),
+            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT)
         )
 
         assertEquals(

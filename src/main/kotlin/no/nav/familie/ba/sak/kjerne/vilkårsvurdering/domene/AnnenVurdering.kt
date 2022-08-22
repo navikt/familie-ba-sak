@@ -51,7 +51,7 @@ data class AnnenVurdering(
             personResultat = nyPersonResultat ?: personResultat,
             type = type,
             resultat = resultat,
-            begrunnelse = begrunnelse,
+            begrunnelse = begrunnelse
         )
     }
 

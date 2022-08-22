@@ -47,7 +47,7 @@ internal class PersonopplysningerServiceTest(
                     restTemplate,
                     mockPersonidentService
                 ),
-                mockFamilieIntegrasjonerTilgangskontrollClient,
+                mockFamilieIntegrasjonerTilgangskontrollClient
             )
         lagMockForPersoner()
     }

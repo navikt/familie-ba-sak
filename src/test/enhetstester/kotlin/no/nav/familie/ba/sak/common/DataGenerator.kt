@@ -215,7 +215,7 @@ fun lagVedtak(behandling: Behandling = lagBehandling(), stønadBrevPdF: ByteArra
         id = nesteVedtakId(),
         behandling = behandling,
         vedtaksdato = LocalDateTime.now(),
-        stønadBrevPdF = stønadBrevPdF,
+        stønadBrevPdF = stønadBrevPdF
     )
 
 fun lagAndelTilkjentYtelse(
@@ -333,7 +333,7 @@ fun lagTestPersonopplysningGrunnlag(
         personopplysningGrunnlag = personopplysningGrunnlag,
         fødselsdato = LocalDate.of(2019, 1, 1),
         navn = "",
-        kjønn = Kjønn.KVINNE,
+        kjønn = Kjønn.KVINNE
     ).also { søker ->
         søker.statsborgerskap =
             mutableListOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = søker))
@@ -642,7 +642,7 @@ fun kjørStegprosessForFGB(
     leggTilBegrunnelsePåVedtaksperiodeIBehandling(
         behandling = behandlingEtterVurderTilbakekrevingSteg,
         vedtakService = vedtakService,
-        vedtaksperiodeService = vedtaksperiodeService,
+        vedtaksperiodeService = vedtaksperiodeService
     )
 
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterVurderTilbakekrevingSteg
@@ -738,7 +738,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
             behandlingType = BehandlingType.REVURDERING,
             behandlingÅrsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
             søkersIdent = søkerFnr,
-            barnasIdenter = barnasIdenter,
+            barnasIdenter = barnasIdenter
         )
     )
 
@@ -781,7 +781,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 behandlingsId = behandlingEtterBeslutteVedtak.id,
                 vedtaksId = vedtak!!.id,
                 saksbehandlerId = "System",
-                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer(),
+                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer()
             )
         )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
@@ -835,7 +835,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
     valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
     varsel = "Varsel",
-    begrunnelse = "Begrunnelse",
+    begrunnelse = "Begrunnelse"
 )
 
 fun lagUtbetalingsperiode(
@@ -853,7 +853,7 @@ fun lagUtbetalingsperiode(
     utbetalingsperiodeDetaljer,
     ytelseTyper,
     antallBarn,
-    utbetaltPerMnd,
+    utbetaltPerMnd
 )
 
 fun lagUtbetalingsperiodeDetalj(
@@ -876,7 +876,7 @@ fun lagVedtaksperiodeMedBegrunnelser(
     tom = tom,
     type = type,
     begrunnelser = begrunnelser,
-    fritekster = fritekster,
+    fritekster = fritekster
 )
 
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(
@@ -896,7 +896,7 @@ fun lagUtvidetVedtaksperiodeMedBegrunnelser(
     begrunnelser = begrunnelser,
     fritekster = fritekster.map { it.fritekst },
     utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer,
-    eøsBegrunnelser = eøsBegrunnelser,
+    eøsBegrunnelser = eøsBegrunnelser
 )
 
 fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
@@ -912,7 +912,7 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
         standardbegrunnelserFraFrontend = listOf(
-            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
         ),
         eøsStandardbegrunnelserFraFrontend = emptyList()
     )
@@ -1041,7 +1041,7 @@ fun lagRestSanityBegrunnelse(
     hjemler = hjemler,
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
-    endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+    endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere
 )
 
 fun lagSanityBegrunnelse(
@@ -1073,7 +1073,7 @@ fun lagSanityBegrunnelse(
     hjemler = hjemler,
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
-    endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+    endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere
 )
 
 fun lagSanityEøsBegrunnelse(

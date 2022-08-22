@@ -35,7 +35,7 @@ class DokumentControllerTest(
             tilgangService = tilgangService,
             persongrunnlagService = mockk(relaxed = true),
             arbeidsfordelingService = mockk(relaxed = true),
-            utvidetBehandlingService = mockk(relaxed = true),
+            utvidetBehandlingService = mockk(relaxed = true)
         )
 
     @Test

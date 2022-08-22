@@ -254,7 +254,7 @@ class PersongrunnlagService(
             aktør = aktør,
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-            målform = målform,
+            målform = målform
         ).also { person ->
             person.opphold =
                 personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) }?.toMutableList() ?: mutableListOf()

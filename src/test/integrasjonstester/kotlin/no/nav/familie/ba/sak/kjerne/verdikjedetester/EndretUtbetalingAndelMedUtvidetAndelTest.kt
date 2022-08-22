@@ -105,7 +105,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true,
+            erTilknyttetAndeler = true
         )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
@@ -123,7 +123,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true,
+            erTilknyttetAndeler = true
         )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(

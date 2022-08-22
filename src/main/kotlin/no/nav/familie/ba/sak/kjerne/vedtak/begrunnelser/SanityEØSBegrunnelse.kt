@@ -43,7 +43,7 @@ data class RestSanityEØSBegrunnelse(
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             hjemlerEØSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
-            hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
+            hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList()
         )
     }
 

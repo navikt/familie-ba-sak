@@ -80,7 +80,7 @@ data class Vilkårsvurdering(
     fun kopier(inkluderAndreVurderinger: Boolean = false): Vilkårsvurdering {
         val nyVilkårsvurdering = Vilkårsvurdering(
             behandling = behandling,
-            aktiv = aktiv,
+            aktiv = aktiv
         )
 
         nyVilkårsvurdering.personResultater = personResultater.map {

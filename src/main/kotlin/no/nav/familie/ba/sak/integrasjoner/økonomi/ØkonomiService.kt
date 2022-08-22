@@ -85,7 +85,7 @@ class ØkonomiService(
                 vedtak = vedtak,
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                 oppdaterteKjeder = oppdaterteKjeder,
-                erSimulering = erSimulering,
+                erSimulering = erSimulering
             )
         } else {
             val forrigeBehandling =
@@ -118,7 +118,7 @@ class ØkonomiService(
                 endretMigreringsDato = beregnOmMigreringsDatoErEndret(
                     vedtak.behandling,
                     forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom
-                ),
+                )
             )
 
             if (!erSimulering && (

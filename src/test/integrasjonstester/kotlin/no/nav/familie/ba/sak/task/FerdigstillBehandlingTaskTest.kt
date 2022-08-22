@@ -81,7 +81,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {

@@ -36,14 +36,14 @@ fun lagVilkårsvurderingMedOverstyrendeResultater(
     val søkerPersonResultater = lagPersonResultatAvOverstyrteResultater(
         person = søker,
         overstyrendeVilkårResultater = overstyrendeVilkårResultater[søker.aktør.aktørId] ?: emptyList(),
-        vilkårsvurdering = vilkårsvurdering,
+        vilkårsvurdering = vilkårsvurdering
     )
 
     val barnaPersonResultater = barna.map {
         lagPersonResultatAvOverstyrteResultater(
             person = it,
             overstyrendeVilkårResultater = overstyrendeVilkårResultater[it.aktør.aktørId] ?: emptyList(),
-            vilkårsvurdering = vilkårsvurdering,
+            vilkårsvurdering = vilkårsvurdering
         )
     }
 

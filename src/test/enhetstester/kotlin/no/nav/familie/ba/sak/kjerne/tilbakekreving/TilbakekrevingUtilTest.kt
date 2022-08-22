@@ -25,7 +25,7 @@ class TilbakekrevingUtilTest {
             validerVerdierPåRestTilbakekreving(
                 restTilbakekreving = RestTilbakekreving(
                     valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                    begrunnelse = "",
+                    begrunnelse = ""
                 ),
                 feilutbetaling = BigDecimal.ZERO
             )
@@ -64,7 +64,7 @@ class TilbakekrevingUtilTest {
                 fom = fom4,
                 tom = tom4,
                 feilUtbetaling = BigDecimal.ONE
-            ),
+            )
         )
 
         val sammenslåttePerioder = slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder)
@@ -98,7 +98,7 @@ class TilbakekrevingUtilTest {
                 fom = fom4,
                 tom = tom4,
                 feilUtbetaling = BigDecimal.ONE
-            ),
+            )
         )
 
         val sammenslåttePerioder = slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder)
