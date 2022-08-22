@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
@@ -32,7 +34,8 @@ class ØkonomiService(
     private val økonomiKlient: ØkonomiKlient,
     private val beregningService: BeregningService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
@@ -136,10 +139,18 @@ class ØkonomiService(
 
         return utbetalingsoppdrag.also {
             if (skalValideres) {
-                it.valider(
-                    behandlingsresultat = vedtak.behandling.resultat,
-                    erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
+                if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
+                    it.validerForNullutbetaling(
+                        behandlingsresultat = vedtak.behandling.resultat,
+                        behandlingskategori = vedtak.behandling.kategori,
+                        erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                    )
+                } else {
+                    it.valider(
+                        behandlingsresultat = vedtak.behandling.resultat,
+                        erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                    )
+                }
             }
         }
     }
