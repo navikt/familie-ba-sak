@@ -94,18 +94,19 @@ object ØkonomiUtils {
         forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>
     ): Map<String, List<AndelTilkjentYtelse>> {
         oppdaterteKjeder
+            .filter { forrigeKjeder.containsKey(it.key) }
             .forEach { (kjedeIdentifikator, oppdatertKjede) ->
-                if (forrigeKjeder.containsKey(kjedeIdentifikator)) {
-                    val forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator)
-                    val beståendeFraForrige =
-                        beståendeAndelerIKjede(forrigeKjede = forrigeKjede, oppdatertKjede = oppdatertKjede)
-                    beståendeFraForrige?.forEach { bestående ->
-                        val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
-                            ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
-                        beståendeIOppdatert.periodeOffset = bestående.periodeOffset
-                        beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
-                        beståendeIOppdatert.kildeBehandlingId = bestående.kildeBehandlingId
-                    }
+                val beståendeFraForrige =
+                    beståendeAndelerIKjede(
+                        forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator),
+                        oppdatertKjede = oppdatertKjede
+                    )
+                beståendeFraForrige?.forEach { bestående ->
+                    val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
+                        ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
+                    beståendeIOppdatert.periodeOffset = bestående.periodeOffset
+                    beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
+                    beståendeIOppdatert.kildeBehandlingId = bestående.kildeBehandlingId
                 }
             }
         return oppdaterteKjeder
