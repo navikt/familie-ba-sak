@@ -23,7 +23,7 @@ internal class UtbetalingsoppdragServiceTest {
     val beregningService = mockk<BeregningService> {
         every { populerTilkjentYtelse(any(), any()) } returns mockk()
     }
-    val service = spyk(UtbetalingsoppdragService(mockk(), økonomiKlient, beregningService, mockk(), mockk()))
+    val service = spyk(UtbetalingsoppdragService(mockk(), økonomiKlient, beregningService, mockk(), mockk(), mockk()))
 
     @Test
     fun `skal ikke sende til oppdrag hvis det ikke fins utbetalingsperioder`() {
