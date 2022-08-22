@@ -348,9 +348,9 @@ class FagsakServiceTest(
         assertEquals(2, fagsaker.size)
     }
 
-    @Test
     // Satte XX for at dette testet skal kjøre sist.
-    fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
+    @Test
+fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
         } answers {
