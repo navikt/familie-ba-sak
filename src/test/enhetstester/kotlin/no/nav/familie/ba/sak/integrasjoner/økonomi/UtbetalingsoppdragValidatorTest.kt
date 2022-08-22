@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class UtbetalingsoppdragUtilsKtTest {
+internal class UtbetalingsoppdragValidatorTest {
 
     @Test
     fun `nasjonalt utbetalingsoppdrag må ha utbetalingsperiode`() {
