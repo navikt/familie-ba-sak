@@ -24,13 +24,13 @@ data class Verge(
     val id: Long = 0,
 
     @Column(name = "navn", updatable = true, length = 100)
-    var navn: String,
+    var navn: String = "",
 
     @Column(name = "adresse", updatable = true, length = 500)
-    var adresse: String,
+    var adresse: String = "",
 
     @Column(name = "ident", updatable = true, length = 20)
-    var ident: String?,
+    var ident: String,
 
     @OneToOne(optional = false)
     @JoinColumn(
