@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -12,8 +13,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -21,16 +20,19 @@ import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
+import no.nav.familie.ba.sak.kjerne.verge.Verge
+import no.nav.familie.ba.sak.kjerne.verge.VergeRepository
 import no.nav.familie.ba.sak.kjerne.verge.VergeService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RegistrerInstitusjonOgVergeStegTest {
 
-    private val behandlingServiceMock: BehandlingService = mockk()
+    private val vergeRepositoryMock: VergeRepository = mockk()
     private val fagsakRepositoryMock: FagsakRepository = mockk()
     private val loggServiceMock: LoggService = mockk()
     private val behandlingHentOgPersisterServiceMock: BehandlingHentOgPersisterService = mockk()
@@ -40,10 +42,10 @@ class RegistrerInstitusjonOgVergeStegTest {
     private lateinit var registrerInstitusjonOgVerge: RegistrerInstitusjonOgVerge
 
     @BeforeAll
-    fun SetUp() {
+    fun setUp() {
         institusjonService =
             InstitusjonService(fagsakRepository = fagsakRepositoryMock, samhandlerKlient = mockk(relaxed = true))
-        vergeService = VergeService(behandlingServiceMock)
+        vergeService = VergeService(vergeRepositoryMock)
         registrerInstitusjonOgVerge =
             RegistrerInstitusjonOgVerge(
                 institusjonService,
@@ -53,14 +55,20 @@ class RegistrerInstitusjonOgVergeStegTest {
             )
     }
 
+    @BeforeEach
+    fun init() {
+        clearMocks(loggServiceMock)
+    }
+
     @Test
     fun `utførStegOgAngiNeste() skal lagre institusjon og verge`() {
         val behandling = lagBehandling(fagsak = defaultFagsak().copy(type = FagsakType.INSTITUSJON))
         val fagsakSlot = slot<Fagsak>()
-        val behandlingSlot = slot<Behandling>()
+        val vergeSlot = slot<Verge>()
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
         every { fagsakRepositoryMock.save(capture(fagsakSlot)) } returns behandling.fagsak
-        every { behandlingServiceMock.lagre(capture(behandlingSlot)) } returns behandling
+        every { vergeRepositoryMock.findByBehandling(any()) } returns null
+        every { vergeRepositoryMock.save(capture(vergeSlot)) } returns Verge(1L, "", "", "", behandling)
         every { loggServiceMock.opprettRegistrerVergeLogg(any()) } just runs
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
         every { loggServiceMock.lagre(any()) } returns Logg(
@@ -86,7 +94,7 @@ class RegistrerInstitusjonOgVergeStegTest {
         )
 
         assertThat(fagsakSlot.captured.institusjon!!.orgNummer).isEqualTo(restRegistrerInstitusjonOgVerge.institusjonInfo!!.orgNummer)
-        assertThat(behandlingSlot.captured.verge!!.ident).isEqualTo(restRegistrerInstitusjonOgVerge.vergeInfo!!.ident)
+        assertThat(vergeSlot.captured!!.ident).isEqualTo(restRegistrerInstitusjonOgVerge.vergeInfo!!.ident)
         verify(exactly = 1) {
             loggServiceMock.opprettRegistrerVergeLogg(any())
         }
@@ -96,11 +104,12 @@ class RegistrerInstitusjonOgVergeStegTest {
     }
 
     @Test
-    fun `utførStegOgAngiNeste() skal return REGISTRERE_PERSONGRUNNLAG som neste steg`() {
+    fun `utførStegOgAngiNeste() skal returnere REGISTRERE_SØKNAD som neste steg`() {
         val behandling = lagBehandling(fagsak = defaultFagsak().copy(type = FagsakType.INSTITUSJON))
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
         every { fagsakRepositoryMock.save(any()) } returns behandling.fagsak
-        every { behandlingServiceMock.lagre(any()) } returns behandling
+        every { vergeRepositoryMock.findByBehandling(any()) } returns null
+        every { vergeRepositoryMock.save(any()) } returns Verge(1L, "", "", "", behandling)
         every { loggServiceMock.opprettRegistrerVergeLogg(any()) } just runs
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
         every { loggServiceMock.lagre(any()) } returns Logg(
@@ -125,6 +134,6 @@ class RegistrerInstitusjonOgVergeStegTest {
             restRegistrerInstitusjonOgVerge
         )
 
-        assertThat(nesteSteg).isEqualTo(StegType.REGISTRERE_PERSONGRUNNLAG)
+        assertThat(nesteSteg).isEqualTo(StegType.REGISTRERE_SØKNAD)
     }
 }
