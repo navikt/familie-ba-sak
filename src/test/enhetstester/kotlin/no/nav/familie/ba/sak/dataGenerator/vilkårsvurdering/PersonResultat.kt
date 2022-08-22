@@ -12,7 +12,7 @@ import java.time.LocalDate
 fun lagPersonResultatAvOverstyrteResultater(
     person: Person,
     overstyrendeVilkårResultater: List<VilkårResultat>,
-    vilkårsvurdering: Vilkårsvurdering,
+    vilkårsvurdering: Vilkårsvurdering
 
 ): PersonResultat {
     val personResultat = PersonResultat(

@@ -16,7 +16,7 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     EØS_OPPHØR(4),
     FORTSATT_INNVILGET(5),
     ENDRET_UTBETALING(7),
-    ETTER_ENDRET_UTBETALING(6),
+    ETTER_ENDRET_UTBETALING(6)
 }
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {

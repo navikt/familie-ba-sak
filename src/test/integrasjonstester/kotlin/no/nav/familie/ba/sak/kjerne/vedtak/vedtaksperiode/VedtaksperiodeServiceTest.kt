@@ -66,7 +66,7 @@ class VedtaksperiodeServiceTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
+    private val databaseCleanupService: DatabaseCleanupService
 ) : AbstractSpringIntegrationTest() {
 
     val søkerFnr = randomFnr()

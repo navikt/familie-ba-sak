@@ -25,7 +25,7 @@ fun Person.tilRestRegisterhistorikk() = RestRegisterhistorikk(
 data class RestRegisteropplysning(
     val fom: LocalDate?,
     val tom: LocalDate?,
-    var verdi: String,
+    var verdi: String
 )
 
 fun List<RestRegisteropplysning>.fyllInnTomDatoer(): List<RestRegisteropplysning> =

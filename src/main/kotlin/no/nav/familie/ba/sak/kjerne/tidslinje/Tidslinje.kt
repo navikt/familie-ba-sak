@@ -72,14 +72,14 @@ abstract class Tidslinje<I, T : Tidsenhet> {
         data class TidslinjeFeil(
             val type: TidslinjeFeilType,
             val periode: Periode<*, *>,
-            val tidslinje: Tidslinje<*, *>,
+            val tidslinje: Tidslinje<*, *>
         )
 
         enum class TidslinjeFeilType {
             UENDELIG_FORTID_ETTER_FØRSTE_PERIODE,
             UENDELIG_FREMTID_FØR_SISTE_PERIODE,
             TOM_ER_FØR_FOM,
-            OVERLAPPER_ETTERFØLGENDE_PERIODE,
+            OVERLAPPER_ETTERFØLGENDE_PERIODE
         }
 
         data class TidslinjeFeilException(val tidslinjeFeil: Collection<TidslinjeFeil>) :

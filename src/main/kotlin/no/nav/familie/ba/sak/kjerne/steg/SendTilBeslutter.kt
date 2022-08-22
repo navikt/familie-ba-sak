@@ -31,12 +31,12 @@ class SendTilBeslutter(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vedtakService: VedtakService,
-    private val vedtaksperiodeService: VedtaksperiodeService,
+    private val vedtaksperiodeService: VedtaksperiodeService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(
         behandling: Behandling,
-        stegService: StegService?,
+        stegService: StegService?
     ) {
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
             ?.validerAtAlleAnndreVurderingerErVurdert()

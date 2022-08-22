@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
 data class SignaturDelmal(
     val enhet: Flettefelt,
-    val saksbehandler: Flettefelt = flettefelt(SikkerhetContext.hentSaksbehandlerNavn()),
+    val saksbehandler: Flettefelt = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
 ) {
 
     constructor(enhet: String) : this(flettefelt(enhet))
@@ -13,7 +13,7 @@ data class SignaturDelmal(
 data class SignaturVedtak(
     val enhet: Flettefelt,
     val saksbehandler: Flettefelt,
-    val beslutter: Flettefelt,
+    val beslutter: Flettefelt
 ) {
 
     constructor(enhet: String, saksbehandler: String, beslutter: String) : this(
@@ -24,7 +24,7 @@ data class SignaturVedtak(
 }
 
 data class Etterbetaling(
-    val etterbetalingsbelop: Flettefelt,
+    val etterbetalingsbelop: Flettefelt
 ) {
 
     constructor(etterbetalingsbeløp: String) : this(
@@ -33,7 +33,7 @@ data class Etterbetaling(
 }
 
 data class Hjemmeltekst(
-    val hjemler: Flettefelt,
+    val hjemler: Flettefelt
 ) {
 
     constructor(hjemler: String) : this(
@@ -42,7 +42,7 @@ data class Hjemmeltekst(
 }
 
 data class AutoUnderskrift(
-    val enhet: Flettefelt,
+    val enhet: Flettefelt
 ) {
 
     constructor(enhet: String) : this(

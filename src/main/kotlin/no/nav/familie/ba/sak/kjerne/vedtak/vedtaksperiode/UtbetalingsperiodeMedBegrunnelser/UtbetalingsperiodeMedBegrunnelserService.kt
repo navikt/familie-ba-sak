@@ -21,7 +21,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val kompetanseRepository: KompetanseRepository,
+    private val kompetanseRepository: KompetanseRepository
 ) {
 
     fun hentUtbetalingsperioder(

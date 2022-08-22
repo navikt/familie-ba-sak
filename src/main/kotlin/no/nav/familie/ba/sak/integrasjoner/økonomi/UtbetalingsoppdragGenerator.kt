@@ -18,7 +18,7 @@ import java.time.YearMonth
 
 @Component
 class UtbetalingsoppdragGenerator(
-    private val beregningService: BeregningService,
+    private val beregningService: BeregningService
 ) {
 
     /**
@@ -49,7 +49,7 @@ class UtbetalingsoppdragGenerator(
         sisteOffsetPåFagsak: Int? = null,
         oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
         erSimulering: Boolean = false,
-        endretMigreringsDato: YearMonth? = null,
+        endretMigreringsDato: YearMonth? = null
     ): Utbetalingsoppdrag {
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
         // Da de har opplevd å motta
@@ -135,7 +135,7 @@ class UtbetalingsoppdragGenerator(
         erFørsteBehandlingPåFagsak: Boolean,
         sisteOffsetIKjedeOversikt: Map<String, Int>,
         sisteOffsetPåFagsak: Int? = null,
-        skalOppdatereTilkjentYtelse: Boolean,
+        skalOppdatereTilkjentYtelse: Boolean
     ): List<Utbetalingsperiode> {
         var offset =
             if (!erFørsteBehandlingPåFagsak) {

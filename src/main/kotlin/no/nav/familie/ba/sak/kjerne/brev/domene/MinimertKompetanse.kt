@@ -21,7 +21,7 @@ data class MinimertKompetanse(
 
 fun Kompetanse.tilMinimertKompetanse(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    landkoderISO2: Map<String, String>,
+    landkoderISO2: Map<String, String>
 ): MinimertKompetanse {
     this.validerFelterErSatt()
 

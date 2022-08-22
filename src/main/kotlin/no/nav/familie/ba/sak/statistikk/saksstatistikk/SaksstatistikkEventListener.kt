@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 @Component
 class SaksstatistikkEventListener(
     private val saksstatistikkService: SaksstatistikkService,
-    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
 ) : ApplicationListener<SaksstatistikkEvent> {
 
     override fun onApplicationEvent(event: SaksstatistikkEvent) {

@@ -43,7 +43,7 @@ object TilkjentYtelseUtils {
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
         skalBrukeNyMåteÅGenerereAndeler: Boolean = true,
-        hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
+        hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() }
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
 

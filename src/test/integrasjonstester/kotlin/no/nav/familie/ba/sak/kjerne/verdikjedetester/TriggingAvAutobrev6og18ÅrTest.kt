@@ -34,7 +34,7 @@ class TriggingAvAutobrev6og18ÅrTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
+    @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService
 ) : AbstractVerdikjedetest() {
 
     @Test

@@ -38,7 +38,7 @@ class EØSBegrunnelse(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "begrunnelse", updatable = false)
-    val begrunnelse: EØSStandardbegrunnelse,
+    val begrunnelse: EØSStandardbegrunnelse
 ) {
 
     fun tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(

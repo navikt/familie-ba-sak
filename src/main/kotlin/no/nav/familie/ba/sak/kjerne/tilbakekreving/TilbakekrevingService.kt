@@ -37,7 +37,7 @@ class TilbakekrevingService(
     private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val tilbakekrevingKlient: TilbakekrevingKlient,
+    private val tilbakekrevingKlient: TilbakekrevingKlient
 ) {
 
     fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, behandlingId: Long) {
@@ -76,7 +76,7 @@ class TilbakekrevingService(
 
     fun hentForhåndsvisningVarselbrev(
         behandlingId: Long,
-        forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest,
+        forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest
     ): ByteArray {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,

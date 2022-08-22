@@ -1,2 +1,2 @@
 [*.{kt,kts}]
-ktlint_disabled_rules=import-ordering,filename,trailing-comma-on-call-site,trailing-comma-on-declaration-site,curly-spacing
+ktlint_disabled_rules=import-ordering,filename,trailing-comma-on-call-site

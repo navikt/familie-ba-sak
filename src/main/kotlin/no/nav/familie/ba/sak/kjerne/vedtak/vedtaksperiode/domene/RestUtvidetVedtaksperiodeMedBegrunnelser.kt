@@ -13,7 +13,7 @@ data class RestUtvidetVedtaksperiodeMedBegrunnelser(
     val begrunnelser: List<RestVedtaksbegrunnelse>,
     val fritekster: List<String> = emptyList(),
     val gyldigeBegrunnelser: List<String>,
-    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
+    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList()
 )
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilRestUtvidetVedtaksperiodeMedBegrunnelser(): RestUtvidetVedtaksperiodeMedBegrunnelser {

@@ -111,7 +111,7 @@ fun behandleFødselshendelse(
     behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     personidentService: PersonidentService,
     vedtakService: VedtakService,
-    stegService: StegService,
+    stegService: StegService
 ): Behandling? {
     val søkerFnr = nyBehandlingHendelse.morsIdent
     val søkerAktør = personidentService.hentAktør(søkerFnr)

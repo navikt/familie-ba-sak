@@ -20,7 +20,7 @@ import java.time.YearMonth
 
 enum class BehandlingAlder {
     NY,
-    GAMMEL,
+    GAMMEL
 }
 
 typealias Beløpsdifferanse = Int
@@ -30,17 +30,17 @@ data class AndelTilkjentYtelseDataForÅKalkulereEndring(
     val aktørId: AktørId,
     val kalkulertBeløp: Int,
     val endretUtbetalingÅrsaker: List<Årsak>,
-    val behandlingAlder: BehandlingAlder,
+    val behandlingAlder: BehandlingAlder
 )
 
 fun List<AndelTilkjentYtelse>.hentFørsteEndringstidspunkt(
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ): LocalDate? = this.hentPerioderMedEndringerFra(forrigeAndelerTilkjentYtelse)
     .mapNotNull { (_, tidslinjeMedDifferanserPåPerson) -> tidslinjeMedDifferanserPåPerson.minOfOrNull { it.fom } }
     .minOfOrNull { it }
 
 fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ): Map<AktørId, LocalDateTimeline<Beløpsdifferanse>> {
     val andelerTidslinje = this.hentTidslinjerForPersoner(BehandlingAlder.NY)
     val forrigeAndelerTidslinje =

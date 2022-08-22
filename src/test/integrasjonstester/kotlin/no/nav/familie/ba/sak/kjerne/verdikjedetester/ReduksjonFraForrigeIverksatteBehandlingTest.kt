@@ -43,7 +43,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val stegService: StegService,
-    @Autowired private val efSakRestClient: EfSakRestClient,
+    @Autowired private val efSakRestClient: EfSakRestClient
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
@@ -149,7 +149,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     fun fullførRevurderingUtenOvergangstonad(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
+        barnFødselsdato: LocalDate
     ): Behandling {
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG

@@ -66,7 +66,7 @@ fun kjørStegprosessForBehandling(
     endretUtbetalingAndelService: EndretUtbetalingAndelService,
     fagsakService: FagsakService,
     persongrunnlagService: PersongrunnlagService,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
 ): Behandling {
     fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
@@ -177,7 +177,7 @@ private fun håndterSendtTilBeslutterSteg(
     andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     endretUtbetalingAndelService: EndretUtbetalingAndelService,
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    vilkårsvurdering: Vilkårsvurdering,
+    vilkårsvurdering: Vilkårsvurdering
 ): Behandling {
     val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
         behandlingId = behandlingEtterSimuleringSteg.id
@@ -240,7 +240,7 @@ private fun håndterStatusFraOppdragSteg(
     stegService: StegService,
     behandlingEtterIverksetteVedtak: Behandling,
     søkerFnr: String,
-    vedtakService: VedtakService,
+    vedtakService: VedtakService
 ): Behandling {
     val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterIverksetteVedtak.id)
     return stegService.håndterStatusFraØkonomi(
@@ -261,7 +261,7 @@ private fun håndterStatusFraOppdragSteg(
 private fun håndterIverksetteVedtakSteg(
     stegService: StegService,
     behandlingEtterBeslutteVedtak: Behandling,
-    vedtakService: VedtakService,
+    vedtakService: VedtakService
 ): Behandling {
     val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterBeslutteVedtak.id)
     return stegService.håndterIverksettMotØkonomi(

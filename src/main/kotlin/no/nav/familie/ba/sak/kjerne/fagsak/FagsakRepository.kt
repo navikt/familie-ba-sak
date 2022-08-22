@@ -129,7 +129,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     fun finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
         iverksatteLøpendeBehandlinger: List<Long>,
-        stønadTom: YearMonth = YearMonth.now().minusMonths(1),
+        stønadTom: YearMonth = YearMonth.now().minusMonths(1)
     ): List<Long>
 
     @Query(

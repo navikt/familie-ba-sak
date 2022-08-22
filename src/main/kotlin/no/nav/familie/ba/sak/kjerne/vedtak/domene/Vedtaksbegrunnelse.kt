@@ -60,7 +60,7 @@ class Vedtaksbegrunnelse(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
-    val standardbegrunnelse: Standardbegrunnelse,
+    val standardbegrunnelse: Standardbegrunnelse
 ) {
 
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
@@ -82,7 +82,7 @@ fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
 enum class Begrunnelsetype {
     STANDARD_BEGRUNNELSE,
     EØS_BEGRUNNELSE,
-    FRITEKST,
+    FRITEKST
 }
 
 interface Begrunnelse : Comparable<Begrunnelse> {
@@ -127,7 +127,7 @@ data class BegrunnelseData(
 }
 
 data class FritekstBegrunnelse(
-    val fritekst: String,
+    val fritekst: String
 ) : Begrunnelse {
     override val vedtakBegrunnelseType: VedtakBegrunnelseType? = null
     override val type: Begrunnelsetype = Begrunnelsetype.FRITEKST
@@ -143,7 +143,7 @@ data class EØSBegrunnelseData(
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
     val maalform: String,
-    val sokersAktivitet: SøkersAktivitet,
+    val sokersAktivitet: SøkersAktivitet
 ) : BegrunnelseMedData {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
 }
@@ -275,7 +275,7 @@ fun Standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
 
 private fun BrevBegrunnelseGrunnlagMedPersoner.validerBrevbegrunnelse(
     gjelderSøker: Boolean,
-    barnasFødselsdatoer: List<LocalDate>,
+    barnasFødselsdatoer: List<LocalDate>
 ) {
     if (!gjelderSøker && barnasFødselsdatoer.isEmpty() &&
         !this.triggesAv.satsendring &&

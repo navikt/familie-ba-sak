@@ -172,7 +172,7 @@ class RestartAvSmåbarnstilleggTest(
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
+        barnFødselsdato: LocalDate
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(

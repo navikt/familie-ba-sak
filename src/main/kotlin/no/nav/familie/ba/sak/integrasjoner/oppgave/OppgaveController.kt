@@ -40,7 +40,7 @@ class OppgaveController(
     private val integrasjonClient: IntegrasjonClient,
     private val personopplysningerService: PersonopplysningerService,
     private val tilgangService: TilgangService,
-    private val innkomendeJournalføringService: InnkomendeJournalføringService,
+    private val innkomendeJournalføringService: InnkomendeJournalføringService
 ) {
 
     @PostMapping(
@@ -140,7 +140,7 @@ class OppgaveController(
     fun ferdigstillOppgaveOgKnyttJournalpostTilBehandling(
         @PathVariable oppgaveId: Long,
         @RequestBody @Valid
-        request: RestFerdigstillOppgaveKnyttJournalpost,
+        request: RestFerdigstillOppgaveKnyttJournalpost
     ): ResponseEntity<Ressurs<String?>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,

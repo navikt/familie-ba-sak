@@ -126,7 +126,7 @@ fun dødeBarnForrigePeriode(
 private fun erEndretTriggerErOppfylt(
     triggesAv: TriggesAv,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
-    minimertVedtaksperiode: MinimertVedtaksperiode,
+    minimertVedtaksperiode: MinimertVedtaksperiode
 ): Boolean {
     val endredeAndelerSomOverlapperVedtaksperiode = minimertVedtaksperiode
         .finnEndredeAndelerISammePeriode(minimerteEndredeUtbetalingAndeler)
@@ -177,7 +177,7 @@ fun EØSStandardbegrunnelse.tilSanityEØSBegrunnelse(
 fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
 
 fun Standardbegrunnelse.tilVedtaksbegrunnelse(
-    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser
 ): Vedtaksbegrunnelse {
     if (!vedtaksperiodeMedBegrunnelser
         .type
@@ -211,6 +211,6 @@ fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(
 
 private fun ytelseOppfyltForrigeMåned(
     ytelseType: YtelseType,
-    ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>,
+    ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>
 ) = ytelserGjeldeneForSøkerForrigeMåned
     .any { it == ytelseType }

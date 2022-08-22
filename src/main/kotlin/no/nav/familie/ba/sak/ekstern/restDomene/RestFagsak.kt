@@ -92,7 +92,7 @@ data class RestMinimalFagsak(
     val behandlinger: List<RestVisningBehandling>,
     val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>,
     val migreringsdato: LocalDate? = null,
-    override val fagsakType: FagsakType,
+    override val fagsakType: FagsakType
 ) : RestBaseFagsak(
     opprettetTidspunkt = opprettetTidspunkt,
     id = id,

@@ -15,7 +15,7 @@ class PersonidentService(
     private val personidentRepository: PersonidentRepository,
     private val aktørIdRepository: AktørIdRepository,
     private val pdlIdentRestClient: PdlIdentRestClient,
-    private val taskRepository: TaskRepositoryWrapper,
+    private val taskRepository: TaskRepositoryWrapper
 ) {
 
     fun hentIdenter(personIdent: String, historikk: Boolean): List<IdentInformasjon> {

@@ -266,7 +266,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         tilkjentYtelse: TilkjentYtelse,
         kildeBehandlingId: Long,
         periodeOffset: Long,
-        aktør: Aktør = randomAktør(),
+        aktør: Aktør = randomAktør()
     ) = AndelTilkjentYtelse(
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,

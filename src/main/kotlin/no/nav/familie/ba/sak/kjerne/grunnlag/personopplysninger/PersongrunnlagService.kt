@@ -180,7 +180,7 @@ class PersongrunnlagService(
         barnFraInneværendeBehandling: List<Aktør>,
         behandling: Behandling,
         målform: Målform,
-        barnFraForrigeBehandling: List<Aktør> = emptyList(),
+        barnFraForrigeBehandling: List<Aktør> = emptyList()
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 

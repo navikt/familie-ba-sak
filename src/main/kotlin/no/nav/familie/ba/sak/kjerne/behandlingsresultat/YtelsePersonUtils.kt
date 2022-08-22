@@ -25,7 +25,7 @@ object YtelsePersonUtils {
     fun utledYtelsePersonerMedResultat(
         behandlingsresultatPersoner: List<BehandlingsresultatPerson>,
         uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
-        inneværendeMåned: YearMonth = YearMonth.now(),
+        inneværendeMåned: YearMonth = YearMonth.now()
     ): List<YtelsePerson> {
         val altOpphørt = behandlingsresultatPersoner.all { erYtelsenOpphørt(it.andeler, inneværendeMåned) }
 

@@ -22,7 +22,7 @@ class SmåbarnstilleggService(
     private val efSakRestClient: EfSakRestClient,
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val persongrunnlagService: PersongrunnlagService,
+    private val persongrunnlagService: PersongrunnlagService
 ) {
 
     fun hentOgLagrePerioderMedFullOvergangsstønad(

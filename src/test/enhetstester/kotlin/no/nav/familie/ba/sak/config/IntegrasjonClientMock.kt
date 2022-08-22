@@ -215,7 +215,7 @@ class IntegrasjonClientMock {
 
         data class LandkodeISO2(
             val code: String,
-            val name: String,
+            val name: String
         )
 
         fun hentLandkoderISO2(): Map<String, String> {

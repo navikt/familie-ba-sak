@@ -19,7 +19,7 @@ class BisysService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val fagsakRepository: FagsakRepository,
     private val personidentService: PersonidentService,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) {
     fun hentUtvidetBarnetrygd(personIdent: String, fraDato: LocalDate): BisysUtvidetBarnetrygdResponse {
         val aktør = personidentService.hentAktør(personIdent)

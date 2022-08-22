@@ -74,7 +74,7 @@ class VedtaksperiodeService(
     private val endringstidspunktService: EndringstidspunktService,
     private val featureToggleService: FeatureToggleService,
     private val utbetalingsperiodeMedBegrunnelserService: UtbetalingsperiodeMedBegrunnelserService,
-    private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
+    private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>
 ) {
 
     fun oppdaterVedtaksperiodeMedFritekster(
@@ -489,7 +489,7 @@ class VedtaksperiodeService(
             ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
 
     fun hentUtbetalingsperioder(
-        behandling: Behandling,
+        behandling: Behandling
     ): List<Utbetalingsperiode> {
         val personopplysningGrunnlag =
             persongrunnlagService.hentAktiv(behandlingId = behandling.id)

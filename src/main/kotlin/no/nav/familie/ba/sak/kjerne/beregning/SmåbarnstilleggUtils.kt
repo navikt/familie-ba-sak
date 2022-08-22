@@ -48,7 +48,7 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     småbarnstilleggBarnetrygdGenerator: SmåbarnstilleggBarnetrygdGenerator,
     nyePerioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
+    barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
 ): Boolean {
     val (forrigeSøkersSmåbarnstilleggAndeler, forrigeSøkersAndreAndeler) = forrigeAndelerTilkjentYtelse.partition { it.erSmåbarnstillegg() }
 
@@ -63,7 +63,7 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
 
 fun hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
     forrigeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
-    nyeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
+    nyeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>
 ): Pair<List<MånedPeriode>, List<MånedPeriode>> {
     val forrigeAndelerTidslinje = LocalDateTimeline(
         forrigeSmåbarnstilleggAndeler.map {
@@ -121,7 +121,7 @@ fun kanAutomatiskIverksetteSmåbarnstillegg(
 fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
     innvilgetMånedPeriode: MånedPeriode?,
     redusertMånedPeriode: MånedPeriode?,
-    vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
+    vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>
 ): VedtaksperiodeMedBegrunnelser {
     val vedtaksperiodeSomSkalOppdateresOgBegrunnelse: Pair<VedtaksperiodeMedBegrunnelser?, Standardbegrunnelse>? =
         when {

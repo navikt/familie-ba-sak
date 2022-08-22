@@ -10,7 +10,7 @@ data class Opphørt(
     constructor(
         vedtakFellesfelter: VedtakFellesfelter,
 
-        erFeilutbetalingPåBehandling: Boolean,
+        erFeilutbetalingPåBehandling: Boolean
     ) :
         this(
             data = OpphørtData(
@@ -41,6 +41,6 @@ data class OpphørtData(
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val feilutbetaling: Boolean,
-        val hjemmeltekst: Hjemmeltekst,
+        val hjemmeltekst: Hjemmeltekst
     )
 }

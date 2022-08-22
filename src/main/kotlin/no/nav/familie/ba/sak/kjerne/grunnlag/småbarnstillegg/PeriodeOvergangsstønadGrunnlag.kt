@@ -51,7 +51,7 @@ class PeriodeOvergangsstønadGrunnlag(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "datakilde", nullable = false)
-    val datakilde: PeriodeOvergangsstønad.Datakilde,
+    val datakilde: PeriodeOvergangsstønad.Datakilde
 ) : BaseEntitet() {
     fun tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
         personIdent = this.aktør.aktivFødselsnummer(),

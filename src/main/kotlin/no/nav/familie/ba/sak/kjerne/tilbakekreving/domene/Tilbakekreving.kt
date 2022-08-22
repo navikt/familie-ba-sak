@@ -47,7 +47,7 @@ data class Tilbakekreving(
     var begrunnelse: String,
 
     @Column(name = "tilbakekrevingsbehandling_id")
-    var tilbakekrevingsbehandlingId: String?,
+    var tilbakekrevingsbehandlingId: String?
 ) : BaseEntitet() {
 
     override fun hashCode() = id.hashCode()

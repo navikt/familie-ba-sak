@@ -415,7 +415,7 @@ class MigreringService(
         førsteAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         infotrygdSak: Sak,
         fnr: String,
-        barnasIdenter: List<String>,
+        barnasIdenter: List<String>
     ) {
         val førsteUtbetalingsbeløp = førsteAndelerTilkjentYtelse.sumOf { it.kalkulertUtbetalingsbeløp }
         val delytelserInfotrygd = infotrygdSak.stønad!!.delytelse.filter { it.tom == null }
@@ -507,7 +507,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
     UKJENT("Ukjent migreringsfeil"),
     ÅPEN_SAK_INFOTRYGD("Bruker har åpen behandling i Infotrygd"),
-    DELYTELSE_OG_ANTALLBARN_NULL("Infotrygdsak mangler delytelse og antall barn er 0"), // Disse kan man nok la være å migrere
+    DELYTELSE_OG_ANTALLBARN_NULL("Infotrygdsak mangler delytelse og antall barn er 0") // Disse kan man nok la være å migrere
 }
 
 open class KanIkkeMigrereException(

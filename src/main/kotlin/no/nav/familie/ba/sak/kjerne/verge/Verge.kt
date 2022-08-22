@@ -38,5 +38,5 @@ data class Verge(
         nullable = false,
         updatable = false
     )
-    val behandling: Behandling,
+    val behandling: Behandling
 ) : BaseEntitet()

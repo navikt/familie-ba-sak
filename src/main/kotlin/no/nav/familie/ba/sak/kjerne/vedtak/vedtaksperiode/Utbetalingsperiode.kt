@@ -25,7 +25,7 @@ data class Utbetalingsperiode(
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
     val ytelseTyper: List<YtelseType>,
     val antallBarn: Int,
-    val utbetaltPerMnd: Int,
+    val utbetaltPerMnd: Int
 ) : Vedtaksperiode {
     fun tilTomtSegment() = LocalDateSegment(
         this.periodeFom,
@@ -39,7 +39,7 @@ data class UtbetalingsperiodeDetalj(
     val ytelseType: YtelseType,
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean,
-    val prosent: BigDecimal,
+    val prosent: BigDecimal
 )
 
 fun List<UtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
@@ -63,7 +63,7 @@ fun hentUtbetalingsperiodeForVedtaksperiode(
 
 fun mapTilUtbetalingsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ): List<Utbetalingsperiode> {
     return andelerTilkjentYtelse.lagVertikaleSegmenter().map { (segment, andelerForSegment) ->
         Utbetalingsperiode(

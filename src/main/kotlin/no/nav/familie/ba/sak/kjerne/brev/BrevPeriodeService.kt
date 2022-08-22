@@ -54,13 +54,13 @@ class BrevPeriodeService(
     private val personidentService: PersonidentService,
     private val kompetanseService: KompetanseService,
     private val featureToggleService: FeatureToggleService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonClient: IntegrasjonClient
 ) {
 
     fun hentBrevperioderData(
         vedtaksperioderId: List<Long>,
         behandlingId: BehandlingId,
-        skalLogge: Boolean = true,
+        skalLogge: Boolean = true
     ): List<BrevperiodeData> {
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId.id)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
@@ -116,7 +116,7 @@ class BrevPeriodeService(
         sanityBegrunnelser: List<SanityBegrunnelse>,
         sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
 
-        skalLogge: Boolean = true,
+        skalLogge: Boolean = true
     ): BrevperiodeData {
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)

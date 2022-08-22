@@ -55,7 +55,7 @@ class ØkonomiIntegrasjonTest(
     private val personidentService: PersonidentService,
 
     @Autowired
-    private val vedtakService: VedtakService,
+    private val vedtakService: VedtakService
 ) : AbstractSpringIntegrationTest() {
 
     @Test

@@ -92,7 +92,7 @@ data class RestTidslinjerForBarn(
 
 data class RestTidslinjerForSøker(
     val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>>,
-    val oppfyllerEgneVilkårTidslinje: List<RestTidslinjePeriode<Resultat>>,
+    val oppfyllerEgneVilkårTidslinje: List<RestTidslinjePeriode<Resultat>>
 )
 
 data class RestTidslinjePeriode<T>(
@@ -140,7 +140,7 @@ fun tilfeldigOppsummering(regelverkResultatTidslinje: Tidslinje<RegelverkResulta
 
 fun <T : Tidsenhet> tilfeldigIntTidslinje(
     fraOgMed: Tidspunkt<T>,
-    tilOgMed: Tidspunkt<T>,
+    tilOgMed: Tidspunkt<T>
 ): Tidslinje<Int, T> {
     val random = Random()
 

@@ -37,7 +37,7 @@ data class RestForelderBarnRelasjonnMaskert(
 
 data class RestBostedsadresse(
     val adresse: String?,
-    val postnummer: String,
+    val postnummer: String
 )
 
 private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() = RestForelderBarnRelasjonnMaskert(

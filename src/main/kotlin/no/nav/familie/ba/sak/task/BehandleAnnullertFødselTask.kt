@@ -29,7 +29,7 @@ class BehandleAnnullertFødselTask(
     val taskRepository: TaskRepository,
     val behandlingRepository: BehandlingRepository,
     val personRepository: PersonRepository,
-    val taskRepositoryForAnnullertFødsel: TaskRepositoryForAnnullertFødsel,
+    val taskRepositoryForAnnullertFødsel: TaskRepositoryForAnnullertFødsel
 ) :
     AsyncTaskStep {
 

@@ -35,7 +35,7 @@ class Vedtak(
     var stønadBrevPdF: ByteArray? = null,
 
     @Column(name = "aktiv", nullable = false)
-    var aktiv: Boolean = true,
+    var aktiv: Boolean = true
 
 ) : BaseEntitet() {
 

@@ -135,7 +135,7 @@ class ØkonomiKlient(
     fun konsistensavstemOppdragData(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>,
-        transaksjonsId: UUID,
+        transaksjonsId: UUID
     ): String {
         val uri = URI.create(
             "$familieOppdragUri/v2/konsistensavstemming" +

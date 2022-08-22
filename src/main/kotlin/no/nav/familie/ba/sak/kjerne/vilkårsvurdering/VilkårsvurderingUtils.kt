@@ -358,7 +358,7 @@ fun eøsStandardbegrunnelserTilNedtrekksmenytekster(
 
 fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    vedtakBegrunnelse: Standardbegrunnelse,
+    vedtakBegrunnelse: Standardbegrunnelse
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
     val sanityBegrunnelse = vedtakBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser) ?: return emptyList()
 

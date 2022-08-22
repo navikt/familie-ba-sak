@@ -56,7 +56,7 @@ class UtbetalingsoppdragIntegrasjonTest(
     private val økonomiService: ØkonomiService,
 
     @Autowired
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) : AbstractSpringIntegrationTest() {
 
     lateinit var utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator

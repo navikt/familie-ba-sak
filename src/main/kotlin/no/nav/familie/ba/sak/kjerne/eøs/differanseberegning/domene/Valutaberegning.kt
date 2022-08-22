@@ -6,7 +6,7 @@ import java.math.BigDecimal
 
 data class KronerPerValutaenhet(
     val kronerPerValutaenhet: BigDecimal,
-    val valutakode: String,
+    val valutakode: String
 )
 
 data class Valutabeløp(

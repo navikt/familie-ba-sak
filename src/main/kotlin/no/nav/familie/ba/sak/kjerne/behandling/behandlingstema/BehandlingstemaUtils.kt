@@ -42,7 +42,7 @@ fun bestemKategori(
     overstyrtKategori: BehandlingKategori?,
     // kategori fra siste iverksatt behandling eller NASJONAL når det ikke finnes noe
     kategoriFraSisteIverksattBehandling: BehandlingKategori,
-    kategoriFraInneværendeBehandling: BehandlingKategori,
+    kategoriFraInneværendeBehandling: BehandlingKategori
 ): BehandlingKategori {
     // når saksbehandler overstyrer behandlingstema manuelt
     if (overstyrtKategori != null) return overstyrtKategori
@@ -59,7 +59,7 @@ fun bestemKategori(
 fun bestemUnderkategori(
     overstyrtUnderkategori: BehandlingUnderkategori?,
     underkategoriFraLøpendeBehandling: BehandlingUnderkategori?,
-    underkategoriFraInneværendeBehandling: BehandlingUnderkategori? = null,
+    underkategoriFraInneværendeBehandling: BehandlingUnderkategori? = null
 ): BehandlingUnderkategori {
     if (underkategoriFraLøpendeBehandling == BehandlingUnderkategori.UTVIDET) return BehandlingUnderkategori.UTVIDET
 
@@ -73,7 +73,7 @@ fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUn
 }
 
 fun utledLøpendeKategori(
-    barnasTidslinjer: Map<Aktør, VilkårsvurderingTidslinjer.BarnetsTidslinjer>?,
+    barnasTidslinjer: Map<Aktør, VilkårsvurderingTidslinjer.BarnetsTidslinjer>?
 ): BehandlingKategori {
     if (barnasTidslinjer == null) return BehandlingKategori.NASJONAL
 

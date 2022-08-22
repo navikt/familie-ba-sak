@@ -134,7 +134,7 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
-    aktørerIForrigePersonopplysningGrunnlag: List<Aktør>,
+    aktørerIForrigePersonopplysningGrunnlag: List<Aktør>
 ): List<VedtaksperiodeMedBegrunnelser> {
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
 
@@ -248,7 +248,7 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
     vilkårsvurdering: Vilkårsvurdering,
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
     sanityBegrunnelser = sanityBegrunnelser,

@@ -17,7 +17,7 @@ import java.util.Properties
 )
 class VedtakOmOvergangsstønadTask(
     private val autovedtakStegService: AutovedtakStegService,
-    private val personidentService: PersonidentService,
+    private val personidentService: PersonidentService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

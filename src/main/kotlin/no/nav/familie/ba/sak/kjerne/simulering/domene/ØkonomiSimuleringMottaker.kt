@@ -50,7 +50,7 @@ data class ØkonomiSimuleringMottaker(
         fetch = FetchType.EAGER,
         orphanRemoval = true
     )
-    var økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = emptyList(),
+    var økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = emptyList()
 ) : BaseEntitet() {
 
     override fun hashCode() = id.hashCode()

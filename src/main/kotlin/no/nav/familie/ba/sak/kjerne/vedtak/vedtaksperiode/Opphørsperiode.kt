@@ -15,14 +15,14 @@ import java.time.LocalDate
 data class Opphørsperiode(
     override val periodeFom: LocalDate,
     override val periodeTom: LocalDate?,
-    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR,
+    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
 ) : Vedtaksperiode
 
 fun mapTilOpphørsperioder(
     forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? = null,
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ): List<Opphørsperiode> {
     val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) {
         mapTilUtbetalingsperioder(

@@ -30,7 +30,7 @@ class BehandlingsresultatService(
     private val personidentService: PersonidentService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val vilkårsvurderingService: VilkårsvurderingService
 ) {
 
     fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {

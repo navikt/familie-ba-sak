@@ -50,7 +50,7 @@ fun hentMinimerteKompetanserForPeriode(
     fom: YearMonth?,
     tom: YearMonth?,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    landkoderISO2: Map<String, String>,
+    landkoderISO2: Map<String, String>
 ): List<MinimertKompetanse> {
     val minimerteKompetanser = kompetanser.hentIPeriode(fom, tom)
         .map {

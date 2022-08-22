@@ -19,7 +19,7 @@ import java.time.YearMonth
  */
 data class UtbetalingsperiodeMal(
     val vedtak: Vedtak,
-    val erEndringPåEksisterendePeriode: Boolean = false,
+    val erEndringPåEksisterendePeriode: Boolean = false
 ) {
 
     /**

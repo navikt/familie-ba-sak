@@ -65,7 +65,7 @@ class BehandlingService(
     private val personidentService: PersonidentService,
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val vilkårsvurderingService: VilkårsvurderingService
 ) {
 
     @Transactional
@@ -160,7 +160,7 @@ class BehandlingService(
     }
 
     private fun sjekkEøsToggleOgThrowHvisBrudd(
-        kategori: BehandlingKategori,
+        kategori: BehandlingKategori
     ) {
         if (kategori == BehandlingKategori.EØS && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
             throw FunksjonellFeil(

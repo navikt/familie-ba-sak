@@ -32,7 +32,7 @@ class ØkonomiService(
     private val økonomiKlient: ØkonomiKlient,
     private val beregningService: BeregningService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
-    private val behandlingService: BehandlingService,
+    private val behandlingService: BehandlingService
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
@@ -67,7 +67,7 @@ class ØkonomiService(
         vedtak: Vedtak,
         saksbehandlerId: String,
         erSimulering: Boolean = false,
-        skalValideres: Boolean = true,
+        skalValideres: Boolean = true
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand =

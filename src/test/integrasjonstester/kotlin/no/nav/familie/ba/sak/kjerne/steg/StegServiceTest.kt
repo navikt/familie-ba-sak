@@ -83,7 +83,7 @@ class StegServiceTest(
     private val personidentService: PersonidentService,
 
     @Autowired
-    private val vedtaksperiodeService: VedtaksperiodeService,
+    private val vedtaksperiodeService: VedtaksperiodeService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach

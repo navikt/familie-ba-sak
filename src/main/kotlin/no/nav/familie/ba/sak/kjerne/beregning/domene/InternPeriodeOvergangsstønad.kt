@@ -16,7 +16,7 @@ val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 data class InternPeriodeOvergangsstønad(
     val personIdent: String,
     val fomDato: LocalDate,
-    val tomDato: LocalDate,
+    val tomDato: LocalDate
 )
 
 fun PeriodeOvergangsstønad.tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(

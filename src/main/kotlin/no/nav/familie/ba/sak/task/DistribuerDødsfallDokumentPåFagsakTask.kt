@@ -94,5 +94,5 @@ class DistribuerDødsfallDokumentPåFagsakTask(
 
 data class DistribuerDødsfallDokumentPåFagsakDTO(
     val journalpostId: String,
-    val brevmal: Brevmal,
+    val brevmal: Brevmal
 )

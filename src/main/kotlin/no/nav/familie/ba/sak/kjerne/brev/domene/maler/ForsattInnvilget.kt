@@ -8,7 +8,7 @@ data class ForsattInnvilget(
 ) : Vedtaksbrev {
 
     constructor(
-        vedtakFellesfelter: VedtakFellesfelter,
+        vedtakFellesfelter: VedtakFellesfelter
     ) :
         this(
             data = ForsattInnvilgetData(
@@ -37,6 +37,6 @@ data class ForsattInnvilgetData(
 
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
-        val hjemmeltekst: Hjemmeltekst,
+        val hjemmeltekst: Hjemmeltekst
     )
 }

@@ -213,7 +213,7 @@ class AutovedtakFødselshendelseService(
 
     private fun henleggBehandlingOgOpprettManuellOppgave(
         behandling: Behandling,
-        begrunnelse: String = "",
+        begrunnelse: String = ""
     ): String {
         val begrunnelseForManuellOppgave = if (begrunnelse == "") {
             hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)

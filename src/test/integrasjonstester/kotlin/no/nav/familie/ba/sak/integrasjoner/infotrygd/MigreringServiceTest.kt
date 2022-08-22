@@ -123,7 +123,7 @@ class MigreringServiceTest(
     private val pdlRestClient: PdlRestClient,
 
     @Autowired
-    private val envService: EnvService,
+    private val envService: EnvService
 
 ) : AbstractMockkSpringRunner() {
 

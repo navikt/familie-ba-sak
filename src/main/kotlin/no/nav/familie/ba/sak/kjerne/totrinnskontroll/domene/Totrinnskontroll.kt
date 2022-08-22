@@ -50,7 +50,7 @@ data class Totrinnskontroll(
 
     @Column(name = "kontrollerte_sider")
     @Convert(converter = StringListConverter::class)
-    var kontrollerteSider: List<String> = emptyList(),
+    var kontrollerteSider: List<String> = emptyList()
 ) : BaseEntitet() {
 
     fun erBesluttet(): Boolean {

@@ -452,5 +452,5 @@ class LoggService(
 
 enum class RegistrerVergeLoggType {
     VERGE_REGISTRERT,
-    INSTITUSJON_REGISTRERT,
+    INSTITUSJON_REGISTRERT
 }

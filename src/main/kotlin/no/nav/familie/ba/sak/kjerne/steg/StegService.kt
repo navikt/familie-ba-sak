@@ -50,7 +50,7 @@ class StegService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
-    private val settPåVentService: SettPåVentService,
+    private val settPåVentService: SettPåVentService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")

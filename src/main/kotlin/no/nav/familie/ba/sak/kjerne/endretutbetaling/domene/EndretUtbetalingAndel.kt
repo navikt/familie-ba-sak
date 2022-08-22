@@ -149,7 +149,7 @@ fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingA
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
-    person: Person,
+    person: Person
 ): EndretUtbetalingAndel {
     this.fom = restEndretUtbetalingAndel.fom
     this.tom = restEndretUtbetalingAndel.tom

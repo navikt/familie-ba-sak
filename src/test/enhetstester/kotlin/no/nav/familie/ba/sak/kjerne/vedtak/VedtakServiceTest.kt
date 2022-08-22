@@ -121,7 +121,7 @@ class VedtakServiceTest(
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
 
     @Autowired
-    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
+    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService
 
 ) : AbstractSpringIntegrationTest() {
 

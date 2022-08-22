@@ -37,7 +37,7 @@ object VilkårsvurderingMigreringUtils {
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår,
         person: Person,
-        periodeFom: LocalDate,
+        periodeFom: LocalDate
     ): LocalDate? {
         val forrigeVilkårsPeriodeTom: LocalDate? = hentForrigeVilkårsvurderingVilkårResultater(
             forrigeBehandlingsvilkårsvurdering,

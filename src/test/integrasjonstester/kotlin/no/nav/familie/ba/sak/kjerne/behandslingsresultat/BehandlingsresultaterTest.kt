@@ -18,7 +18,7 @@ data class BehandlingsresultatPersonTestConfig(
     val uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     val beskrivelse: String,
     val forventetResultat: Behandlingsresultat,
-    val inneværendeMåned: String,
+    val inneværendeMåned: String
 )
 
 class BehandlingsresultaterTest {

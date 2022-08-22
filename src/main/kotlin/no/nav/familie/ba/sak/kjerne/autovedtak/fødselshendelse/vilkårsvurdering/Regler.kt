@@ -163,7 +163,7 @@ data class VurderBarnHarLovligOpphold(
 data class LovligOppholdFaktaEØS(
     val arbeidsforhold: List<GrArbeidsforhold>,
     val bostedsadresser: List<GrBostedsadresse>,
-    val statsborgerskap: List<GrStatsborgerskap>,
+    val statsborgerskap: List<GrStatsborgerskap>
 )
 
 data class VurderPersonHarLovligOpphold(

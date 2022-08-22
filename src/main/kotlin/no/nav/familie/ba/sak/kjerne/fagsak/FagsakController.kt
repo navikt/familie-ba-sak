@@ -38,7 +38,7 @@ class FagsakController(
     private val fagsakService: FagsakService,
     private val personidentService: PersonidentService,
     private val tilgangService: TilgangService,
-    private val tilbakekrevingService: TilbakekrevingService,
+    private val tilbakekrevingService: TilbakekrevingService
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -180,7 +180,7 @@ class FagsakController(
 data class FagsakRequest(
     val personIdent: String?,
     val aktørId: String? = null,
-    val fagsakType: FagsakType? = FagsakType.NORMAL,
+    val fagsakType: FagsakType? = FagsakType.NORMAL
 )
 
 data class RestBeslutningPåVedtak(

@@ -39,7 +39,7 @@ class DokumentController(
     private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])

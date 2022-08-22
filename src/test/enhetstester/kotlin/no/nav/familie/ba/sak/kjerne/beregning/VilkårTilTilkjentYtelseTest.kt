@@ -101,7 +101,7 @@ class VilkårTilTilkjentYtelseTest {
         barn1Vilkår1: String?,
         barn1Andel1Beløp: Int?,
         barn1Andel1Periode: String?,
-        barn1Andel1Type: String?,
+        barn1Andel1Type: String?
     ) {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))

@@ -47,7 +47,7 @@ class InnkomendeJournalføringService(
     private val journalføringRepository: JournalføringRepository,
     private val loggService: LoggService,
     private val stegService: StegService,
-    private val journalføringMetrikk: JournalføringMetrikk,
+    private val journalføringMetrikk: JournalføringMetrikk
 ) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {

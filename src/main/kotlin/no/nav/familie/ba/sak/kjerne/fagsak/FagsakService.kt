@@ -60,7 +60,7 @@ class FagsakService(
     private val skyggesakService: SkyggesakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
-    private val taskRepository: TaskRepository,
+    private val taskRepository: TaskRepository
 ) {
 
     private val antallFagsakerOpprettetFraManuell =
@@ -97,7 +97,7 @@ class FagsakService(
     fun hentEllerOpprettFagsak(
         personIdent: String,
         fraAutomatiskBehandling: Boolean = false,
-        type: FagsakType = FagsakType.NORMAL,
+        type: FagsakType = FagsakType.NORMAL
     ): Fagsak {
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
         var fagsak = fagsakRepository.finnFagsakForAktør(aktør, type)

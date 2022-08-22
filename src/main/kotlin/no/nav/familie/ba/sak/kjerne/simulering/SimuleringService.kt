@@ -31,7 +31,7 @@ class SimuleringService(
     private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
     private val vedtakRepository: VedtakRepository,
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingRepository: BehandlingRepository
 ) {
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {

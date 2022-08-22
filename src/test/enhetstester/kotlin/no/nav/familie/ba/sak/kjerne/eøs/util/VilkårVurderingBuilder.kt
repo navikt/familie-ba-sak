@@ -42,7 +42,7 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
         val vilkårsvurderingBuilder: VilkårsvurderingBuilder<T>,
         val startTidspunkt: Tidspunkt<T>,
         private val person: Person = tilfeldigPerson(),
-        private val vilkårsresultatTidslinjer: MutableList<Tidslinje<VilkårRegelverkResultat, T>> = mutableListOf(),
+        private val vilkårsresultatTidslinjer: MutableList<Tidslinje<VilkårRegelverkResultat, T>> = mutableListOf()
     ) {
         fun medVilkår(v: String, vararg vilkår: Vilkår): PersonResultatBuilder<T> {
             vilkårsresultatTidslinjer.addAll(vilkår.map { v.tilVilkårRegelverkResultatTidslinje(it, startTidspunkt) })

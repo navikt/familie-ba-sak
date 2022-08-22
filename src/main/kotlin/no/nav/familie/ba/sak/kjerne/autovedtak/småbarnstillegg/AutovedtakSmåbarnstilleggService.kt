@@ -40,7 +40,7 @@ class AutovedtakSmåbarnstilleggService(
     private val beregningService: BeregningService,
     private val autovedtakService: AutovedtakService,
     private val oppgaveService: OppgaveService,
-    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
+    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService
 ) : AutovedtakBehandlingService<Aktør> {
 
     private val antallVedtakOmOvergangsstønad: Counter =

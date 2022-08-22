@@ -34,7 +34,7 @@ fun hentPersonerForAlleUtgjørendeVilkår(
     oppdatertBegrunnelseType: VedtakBegrunnelseType,
     aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
     triggesAv: TriggesAv,
-    erFørsteVedtaksperiodePåFagsak: Boolean,
+    erFørsteVedtaksperiodePåFagsak: Boolean
 ): Set<MinimertRestPerson> {
     return triggesAv.vilkår.fold(setOf()) { acc, vilkår ->
         acc + hentPersonerMedUtgjørendeVilkår(
@@ -56,7 +56,7 @@ private fun hentPersonerMedUtgjørendeVilkår(
     vilkårGjeldendeForBegrunnelse: Vilkår,
     aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
     triggesAv: TriggesAv,
-    erFørsteVedtaksperiodePåFagsak: Boolean,
+    erFørsteVedtaksperiodePåFagsak: Boolean
 ): List<MinimertRestPerson> {
     val aktuellePersonidenter = aktuellePersonerForVedtaksperiode.map { it.personIdent }
 
@@ -101,7 +101,7 @@ private fun erVilkårResultatUtgjørende(
     begrunnelseType: VedtakBegrunnelseType,
     triggesAv: TriggesAv,
     vedtaksperiode: Periode,
-    erFørsteVedtaksperiodePåFagsak: Boolean,
+    erFørsteVedtaksperiodePåFagsak: Boolean
 ): Boolean {
     if (minimertVilkårResultat.periodeFom == null && begrunnelseType != VedtakBegrunnelseType.AVSLAG) {
         return false
@@ -149,7 +149,7 @@ private fun erVilkårResultatUtgjørende(
 private fun erOpphørResultatUtgjøreneForPeriode(
     minimertVilkårResultat: MinimertVilkårResultat,
     triggesAv: TriggesAv,
-    vedtaksperiode: Periode,
+    vedtaksperiode: Periode
 ): Boolean {
     val erOppfyltTomMånedEtter = erOppfyltTomMånedEtter(minimertVilkårResultat)
 
@@ -166,7 +166,7 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
     vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
     triggesAv: TriggesAv,
     vedtaksperiode: Periode,
-    vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
+    vilkårSomStarterIDennePerioden: MinimertVilkårResultat?
 ): Boolean {
     if (vilkårSomAvsluttesRettFørDennePerioden.periodeTom == null) {
         return false
@@ -199,7 +199,7 @@ private fun erOppfyltTomMånedEtter(minimertVilkårResultat: MinimertVilkårResu
 private fun erInnvilgetVilkårResultatUtgjørende(
     triggesAv: TriggesAv,
     minimertVilkårResultat: MinimertVilkårResultat,
-    vedtaksperiode: Periode,
+    vedtaksperiode: Periode
 ): Boolean {
     val vilkårResultatFomMåned = minimertVilkårResultat.periodeFom!!.toYearMonth()
     val vedtaksperiodeFomMåned = vedtaksperiode.fom.toYearMonth()
@@ -211,7 +211,7 @@ private fun erInnvilgetVilkårResultatUtgjørende(
 
 private fun vilkårResultatPasserForAvslagsperiode(
     minimertVilkårResultat: MinimertVilkårResultat,
-    vedtaksperiode: Periode,
+    vedtaksperiode: Periode
 ): Boolean {
     val erAvslagUtenFomDato = minimertVilkårResultat.periodeFom == null
 
@@ -230,7 +230,7 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     vedtaksperiode: Periode,
     triggesAv: TriggesAv,
-    vilkårResultat: MinimertVilkårResultat,
+    vilkårResultat: MinimertVilkårResultat
 ): Boolean {
     val vilkårIkkeOppfyltForPeriode =
         vilkårResultat.resultat == Resultat.IKKE_OPPFYLT &&

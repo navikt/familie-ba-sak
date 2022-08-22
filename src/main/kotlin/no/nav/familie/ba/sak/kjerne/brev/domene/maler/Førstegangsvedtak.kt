@@ -9,7 +9,7 @@ data class Førstegangsvedtak(
 
     constructor(
         vedtakFellesfelter: VedtakFellesfelter,
-        etterbetaling: Etterbetaling?,
+        etterbetaling: Etterbetaling?
     ) :
         this(
             data = FørstegangsvedtakData(

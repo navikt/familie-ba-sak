@@ -194,7 +194,7 @@ data class UtvidetBarnetrygdGenerator(
 }
 
 fun VilkårResultat.tilDatoSegment(
-    utvidetVilkår: List<VilkårResultat>,
+    utvidetVilkår: List<VilkårResultat>
 ): LocalDateSegment<List<UtvidetBarnetrygdGenerator.PeriodeData>> {
     if (this.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvidet barnetrygd")
     val fraOgMedDato = this.periodeFom!!.førsteDagINesteMåned()

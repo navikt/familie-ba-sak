@@ -64,7 +64,7 @@ class EndretUtbetalingAndelController(
     @DeleteMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
     fun fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,
-        @PathVariable endretUtbetalingAndelId: Long,
+        @PathVariable endretUtbetalingAndelId: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -90,7 +90,7 @@ class EndretUtbetalingAndelController(
 
     @PostMapping(path = ["/{behandlingId}"])
     fun lagreEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-        @PathVariable behandlingId: Long,
+        @PathVariable behandlingId: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(

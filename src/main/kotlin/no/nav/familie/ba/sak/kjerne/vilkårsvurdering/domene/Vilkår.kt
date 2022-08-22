@@ -106,7 +106,7 @@ enum class Vilkår(
     fun vurderVilkår(
         person: Person,
         vurderFra: LocalDate = LocalDate.now(),
-        annenForelder: Person? = null,
+        annenForelder: Person? = null
     ): AutomatiskVurdering {
         val vilkårsregel = when (this) {
             UNDER_18_ÅR -> VurderBarnErUnder18(

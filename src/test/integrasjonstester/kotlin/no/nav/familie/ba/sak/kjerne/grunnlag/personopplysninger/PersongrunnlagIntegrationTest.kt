@@ -48,7 +48,7 @@ class PersongrunnlagIntegrationTest(
     private val fagsakService: FagsakService,
 
     @Autowired
-    private val behandlingService: BehandlingService,
+    private val behandlingService: BehandlingService
 ) : AbstractSpringIntegrationTest() {
 
     @Test

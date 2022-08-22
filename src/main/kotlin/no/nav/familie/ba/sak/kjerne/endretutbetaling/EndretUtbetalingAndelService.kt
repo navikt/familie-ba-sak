@@ -27,7 +27,7 @@ class EndretUtbetalingAndelService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val sanityService: SanityService,
-    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val vilkårsvurderingService: VilkårsvurderingService
 ) {
     fun hentEndredeUtbetalingAndeler(behandlingId: Long) =
         endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
@@ -86,7 +86,7 @@ class EndretUtbetalingAndelService(
     @Transactional
     fun fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         behandling: Behandling,
-        endretUtbetalingAndelId: Long,
+        endretUtbetalingAndelId: Long
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
         endretUtbetalingAndel.andelTilkjentYtelser.forEach { it.endretUtbetalingAndeler.clear() }

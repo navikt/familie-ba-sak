@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
 data class BegrunnelseMedTriggere(
     val standardbegrunnelse: Standardbegrunnelse,
-    val triggesAv: TriggesAv,
+    val triggesAv: TriggesAv
 ) {
     fun tilBrevBegrunnelseGrunnlagMedPersoner(
         periode: NullablePeriode,

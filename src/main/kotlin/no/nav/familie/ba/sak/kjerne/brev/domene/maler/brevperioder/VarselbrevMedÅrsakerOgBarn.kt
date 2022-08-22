@@ -20,7 +20,7 @@ data class VarselbrevMedÅrsakerOgBarn(
         fødselsnummer: String,
         enhet: String,
         varselÅrsaker: List<String>,
-        barnasFødselsdager: String,
+        barnasFødselsdager: String
     ) : this(
         mal = mal,
         data = VarselbrevMedÅrsakerOgBarnData(
@@ -37,7 +37,7 @@ data class VarselbrevMedÅrsakerOgBarn(
 
 data class VarselbrevMedÅrsakerOgBarnData(
     override val delmalData: DelmalData,
-    override val flettefelter: Flettefelter,
+    override val flettefelter: Flettefelter
 ) : BrevData {
 
     data class Flettefelter(
@@ -45,7 +45,7 @@ data class VarselbrevMedÅrsakerOgBarnData(
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
         val varselAarsaker: Flettefelt,
-        val barnasFodselsdatoer: Flettefelt,
+        val barnasFodselsdatoer: Flettefelt
     ) : FlettefelterForDokument {
 
         constructor(

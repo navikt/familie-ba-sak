@@ -180,7 +180,7 @@ fun tilfeldigPerson(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
-    aktør: Aktør = randomAktør(),
+    aktør: Aktør = randomAktør()
 ) =
     Person(
         id = nestePersonId(),
@@ -197,7 +197,7 @@ fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
-    aktør: Aktør = randomAktør(),
+    aktør: Aktør = randomAktør()
 ) =
     Person(
         id = nestePersonId(),
@@ -316,7 +316,7 @@ fun lagTestPersonopplysningGrunnlag(
                 )
             )
         }
-    },
+    }
 ): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
     val bostedsadresse = GrMatrikkeladresse(
@@ -845,7 +845,7 @@ fun lagUtbetalingsperiode(
     utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
     ytelseTyper: List<YtelseType> = listOf(YtelseType.ORDINÆR_BARNETRYGD),
     antallBarn: Int = 1,
-    utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
+    utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD)
 ) = Utbetalingsperiode(
     periodeFom,
     periodeTom,
@@ -869,7 +869,7 @@ fun lagVedtaksperiodeMedBegrunnelser(
     tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
     type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
     begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
-    fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
+    fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf()
 ) = VedtaksperiodeMedBegrunnelser(
     vedtak = vedtak,
     fom = fom,
@@ -887,7 +887,7 @@ fun lagUtvidetVedtaksperiodeMedBegrunnelser(
     begrunnelser: List<Vedtaksbegrunnelse> = listOf(lagVedtaksbegrunnelse()),
     fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
     utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
-    eøsBegrunnelser: List<EØSBegrunnelse> = emptyList(),
+    eøsBegrunnelser: List<EØSBegrunnelse> = emptyList()
 ) = UtvidetVedtaksperiodeMedBegrunnelser(
     id = id,
     fom = fom,
@@ -902,7 +902,7 @@ fun lagUtvidetVedtaksperiodeMedBegrunnelser(
 fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
     behandling: Behandling,
     vedtakService: VedtakService,
-    vedtaksperiodeService: VedtaksperiodeService,
+    vedtaksperiodeService: VedtaksperiodeService
 ) {
     val aktivtVedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
 
@@ -1026,7 +1026,7 @@ fun lagRestSanityBegrunnelse(
     hjemler: List<String> = emptyList(),
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: String = "",
-    endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
+    endretUtbetalingsperiodeTriggere: List<String>? = emptyList()
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1058,7 +1058,7 @@ fun lagSanityBegrunnelse(
     hjemler: List<String> = emptyList(),
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
-    endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
+    endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1086,7 +1086,7 @@ fun lagSanityEøsBegrunnelse(
     hjemlerFolketrygdloven: List<String> = emptyList(),
     hjemlerEØSForordningen883: List<String> = emptyList(),
     hjemlerEØSForordningen987: List<String> = emptyList(),
-    hjemlerSeperasjonsavtalenStorbritannina: List<String> = emptyList(),
+    hjemlerSeperasjonsavtalenStorbritannina: List<String> = emptyList()
 ): SanityEØSBegrunnelse = SanityEØSBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,

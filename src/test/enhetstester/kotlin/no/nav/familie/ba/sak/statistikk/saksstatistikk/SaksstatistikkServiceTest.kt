@@ -111,7 +111,7 @@ internal class SaksstatistikkServiceTest(
     private val featureToggleService: FeatureToggleService,
 
     @MockK
-    private val settPåVentService: SettPåVentService,
+    private val settPåVentService: SettPåVentService
 ) {
 
     private val sakstatistikkService = SaksstatistikkService(

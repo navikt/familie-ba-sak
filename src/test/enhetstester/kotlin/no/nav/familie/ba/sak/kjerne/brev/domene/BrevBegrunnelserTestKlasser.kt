@@ -93,7 +93,7 @@ data class EndretUtbetalingAndelPåPerson(
     val fom: YearMonth,
     val tom: YearMonth,
     val årsak: Årsak,
-    val prosent: BigDecimal,
+    val prosent: BigDecimal
 ) {
     fun tilMinimertEndretUtbetalingAndel(aktørId: String) =
         MinimertEndretAndel(

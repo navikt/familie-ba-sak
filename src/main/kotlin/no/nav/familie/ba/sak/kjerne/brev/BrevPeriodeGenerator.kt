@@ -203,7 +203,7 @@ class BrevPeriodeGenerator(
     private fun hentPeriodetype(
         fom: LocalDate?,
         barnMedUtbetaling: List<MinimertRestPerson>,
-        utbetalingsbeløp: Int,
+        utbetalingsbeløp: Int
     ) = when (minimertVedtaksperiode.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET
         Vedtaksperiodetype.UTBETALING -> when {
@@ -234,7 +234,7 @@ class BrevPeriodeGenerator(
     private fun hentFomtekstFortsattInnvilget(
         målform: Målform,
         fom: LocalDate?,
-        begrunnelser: List<Standardbegrunnelse>,
+        begrunnelser: List<Standardbegrunnelse>
     ): String? {
         val erAutobrev = begrunnelser.any {
             it == Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ||

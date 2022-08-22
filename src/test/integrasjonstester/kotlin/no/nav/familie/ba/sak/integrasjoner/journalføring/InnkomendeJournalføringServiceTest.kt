@@ -38,7 +38,7 @@ class InnkomendeJournalføringServiceTest(
     private val innkomendeJournalføringService: InnkomendeJournalføringService,
 
     @Autowired
-    private val journalføringRepository: JournalføringRepository,
+    private val journalføringRepository: JournalføringRepository
 ) : AbstractSpringIntegrationTest() {
 
     @Test

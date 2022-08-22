@@ -16,7 +16,7 @@ data class MinimertVedtaksperiode(
     val begrunnelser: List<BegrunnelseMedTriggere>,
     val eøsBegrunnelser: List<EØSBegrunnelseMedTriggere>,
     val fritekster: List<String> = emptyList(),
-    val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList(),
+    val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList()
 )
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
@@ -43,7 +43,7 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean = false,
     brevMålform: Målform,
-    barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
+    barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList()
 ): BrevPeriodeForLogging {
     return BrevPeriodeForLogging(
         fom = this.fom,

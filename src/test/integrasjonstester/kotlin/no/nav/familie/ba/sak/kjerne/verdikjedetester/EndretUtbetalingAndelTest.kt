@@ -24,7 +24,7 @@ import java.time.YearMonth
 
 class EndretUtbetalingAndelTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) : AbstractVerdikjedetest() {
 
     @Test

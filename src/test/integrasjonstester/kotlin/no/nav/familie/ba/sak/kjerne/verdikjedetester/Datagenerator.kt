@@ -70,7 +70,7 @@ fun lagInfotrygdSak(beløp: Double, identBarn: List<String>, valg: String? = "OR
 
 fun lagInfotrygdSakMedSmåbarnstillegg(
     beløp: Double,
-    identBarn: List<String>,
+    identBarn: List<String>
 ): Sak {
     return Sak(
         stønad = Stønad(

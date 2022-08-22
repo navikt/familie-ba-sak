@@ -30,7 +30,7 @@ data class SanityBegrunnelse(
     val hjemlerFolketrygdloven: List<String> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
-    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
+    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null
 )
 
 data class RestSanityBegrunnelse(
@@ -48,7 +48,7 @@ data class RestSanityBegrunnelse(
     val hjemlerFolketrygdloven: List<String>?,
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: String?,
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
-    val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
+    val utvidetBarnetrygdTriggere: List<String>? = emptyList()
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse {
         return SanityBegrunnelse(
@@ -128,7 +128,7 @@ fun VilkårRolle.tilPersonType() =
 
 enum class VilkårRolle {
     SOKER,
-    BARN,
+    BARN
 }
 
 enum class VilkårTrigger {
@@ -151,7 +151,7 @@ enum class ØvrigTrigger {
 }
 
 enum class EndretUtbetalingsperiodeTrigger {
-    ETTER_ENDRET_UTBETALINGSPERIODE,
+    ETTER_ENDRET_UTBETALINGSPERIODE
 }
 
 enum class EndretUtbetalingsperiodeDeltBostedTriggere {
@@ -161,7 +161,7 @@ enum class EndretUtbetalingsperiodeDeltBostedTriggere {
 }
 
 enum class UtvidetBarnetrygdTrigger {
-    SMÅBARNSTILLEGG,
+    SMÅBARNSTILLEGG
 }
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {

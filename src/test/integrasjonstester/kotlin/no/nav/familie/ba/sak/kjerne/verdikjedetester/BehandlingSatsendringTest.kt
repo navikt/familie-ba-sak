@@ -36,7 +36,7 @@ class BehandlingSatsendringTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService,
+    @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService
 ) : AbstractVerdikjedetest() {
 
     @Test

@@ -14,7 +14,7 @@ object VilkårResultatUtils {
         eldsteBarnSinFødselsdato: LocalDate,
         personResultat: PersonResultat,
         vilkår: Vilkår,
-        annenForelder: Person? = null,
+        annenForelder: Person? = null
     ): VilkårResultat {
         val automatiskVurderingResultat = vilkår.vurderVilkår(
             person = person,

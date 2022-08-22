@@ -53,7 +53,7 @@ class DokumentService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val rolleConfig: RolleConfig,
     private val settPåVentService: SettPåVentService,
-    private val utgåendeJournalføringService: UtgåendeJournalføringService,
+    private val utgåendeJournalføringService: UtgåendeJournalføringService
 ) {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -227,7 +227,7 @@ class DokumentService(
         journalpostId: String,
         behandlingId: Long?,
         loggBehandlerRolle: BehandlerRolle,
-        brevmal: Brevmal,
+        brevmal: Brevmal
     ) = try {
         distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
     } catch (ressursException: RessursException) {
@@ -278,7 +278,7 @@ class DokumentService(
         journalpostId: String,
         behandlingId: Long?,
         brevMal: Brevmal,
-        loggBehandlerRolle: BehandlerRolle,
+        loggBehandlerRolle: BehandlerRolle
     ) {
         integrasjonClient.distribuerBrev(journalpostId = journalpostId, distribusjonstype = brevMal.distribusjonstype)
 

@@ -42,7 +42,7 @@ class RevurderingDødsfall(
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService
 ) : AbstractVerdikjedetest() {
 
     @Test

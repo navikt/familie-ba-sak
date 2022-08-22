@@ -39,7 +39,7 @@ class BehandlingStegController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val stegService: StegService,
     private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @PostMapping(

@@ -36,7 +36,7 @@ class SettPåVentServiceTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val settPåVentRepository: SettPåVentRepository,
     @Autowired private val taskRepository: TaskRepository,
-    @Autowired private val taBehandlingerEtterVentefristAvVentTask: TaBehandlingerEtterVentefristAvVentTask,
+    @Autowired private val taBehandlingerEtterVentefristAvVentTask: TaBehandlingerEtterVentefristAvVentTask
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll

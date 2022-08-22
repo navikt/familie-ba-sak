@@ -25,7 +25,7 @@ data class FinnesBehandlingsresponsDto(val finnesÅpenBehandling: Boolean)
 @Component
 class TilbakekrevingKlient(
     @Value("\${FAMILIE_TILBAKE_API_URL}") private val familieTilbakeUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations,
+    @Qualifier("jwtBearer") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {

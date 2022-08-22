@@ -21,7 +21,7 @@ class KonsistensavstemmingScheduler(
     val behandlingService: BehandlingService,
     val fagsakService: FagsakService,
     val taskRepository: TaskRepositoryWrapper,
-    val featureToggleService: FeatureToggleService,
+    val featureToggleService: FeatureToggleService
 ) {
 
     @Scheduled(cron = "0 0 22 * * *")

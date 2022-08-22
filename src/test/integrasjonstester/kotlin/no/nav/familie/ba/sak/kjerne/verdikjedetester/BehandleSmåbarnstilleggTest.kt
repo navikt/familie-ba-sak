@@ -85,7 +85,7 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val opprettTaskService: OpprettTaskService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
-    @Autowired private val persongrunnlagService: PersongrunnlagService,
+    @Autowired private val persongrunnlagService: PersongrunnlagService
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato = LocalDate.now().minusYears(2)

@@ -48,7 +48,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
+    private val databaseCleanupService: DatabaseCleanupService
 
 ) : AbstractSpringIntegrationTest() {
     @BeforeAll

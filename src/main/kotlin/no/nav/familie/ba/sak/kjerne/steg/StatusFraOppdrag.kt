@@ -25,7 +25,7 @@ data class StatusFraOppdragMedTask(
 @Service
 class StatusFraOppdrag(
     private val økonomiService: ØkonomiService,
-    private val taskRepository: TaskRepositoryWrapper,
+    private val taskRepository: TaskRepositoryWrapper
 ) : BehandlingSteg<StatusFraOppdragMedTask> {
 
     override fun utførStegOgAngiNeste(

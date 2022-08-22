@@ -18,7 +18,7 @@ fun lagKompetanse(
     annenForeldersAktivitet: AnnenForeldersAktivitet? = null,
     annenForeldersAktivitetsland: String? = null,
     barnetsBostedsland: String? = null,
-    kompetanseResultat: KompetanseResultat? = null,
+    kompetanseResultat: KompetanseResultat? = null
 ) = Kompetanse(
     fom = fom,
     tom = tom,
@@ -37,7 +37,7 @@ fun lagValutakurs(
     barnAktører: Set<Aktør> = emptySet(),
     valutakursdato: LocalDate? = null,
     valutakode: String? = null,
-    kurs: BigDecimal? = null,
+    kurs: BigDecimal? = null
 ) = Valutakurs(
     fom = fom,
     tom = tom,

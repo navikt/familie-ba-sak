@@ -30,7 +30,7 @@ import java.util.Properties
 class SendMeldingTilBisysTask(
     private val kafkaProducer: KafkaProducer,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingRepository: BehandlingRepository
 ) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(SendMeldingTilBisysTask::class.java)

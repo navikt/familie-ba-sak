@@ -50,7 +50,7 @@ abstract class GrBostedsadresse(
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "fk_po_person_id")
-    open var person: Person? = null,
+    open var person: Person? = null
 ) : BaseEntitet() {
 
     abstract fun toSecureString(): String

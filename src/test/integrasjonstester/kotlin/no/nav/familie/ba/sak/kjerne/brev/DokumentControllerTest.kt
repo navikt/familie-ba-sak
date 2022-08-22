@@ -19,7 +19,7 @@ class DokumentControllerTest(
     @Autowired
     private val dokumentService: DokumentService,
     @Autowired
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) : AbstractSpringIntegrationTestDev() {
 
     private val mockDokumentService: DokumentService = mockk()

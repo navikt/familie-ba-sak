@@ -161,10 +161,10 @@ object EndretUtbetalingAndelValidering {
 
 fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ) {
     fun EndretUtbetalingAndel.finnKryssendeUtvidetYtelse(
-        andelTilkjentYtelser: List<AndelTilkjentYtelse>,
+        andelTilkjentYtelser: List<AndelTilkjentYtelse>
     ): AndelTilkjentYtelse? =
         andelTilkjentYtelser
             .filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
@@ -242,7 +242,7 @@ fun validerTomDato(tomDato: YearMonth?, gyldigTomEtterDagensDato: YearMonth?, å
 }
 
 private fun slåSammenDeltBostedPerioderSomHengerSammen(
-    perioder: MutableList<Periode>,
+    perioder: MutableList<Periode>
 ): MutableList<Periode> {
     if (perioder.isEmpty()) return mutableListOf()
     val sortertePerioder = perioder.sortedBy { it.fom }.toMutableList()

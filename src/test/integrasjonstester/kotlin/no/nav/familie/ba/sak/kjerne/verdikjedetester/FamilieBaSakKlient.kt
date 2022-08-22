@@ -172,7 +172,7 @@ class FamilieBaSakKlient(
 
     fun leggTilEndretUtbetalingAndel(
         behandlingId: Long,
-        restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
+        restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ): Ressurs<RestUtvidetBehandling> {
         val uriPost = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId")
         val restUtvidetBehandling = postForEntity<Ressurs<RestUtvidetBehandling>>(uriPost, "", headers)
@@ -186,7 +186,7 @@ class FamilieBaSakKlient(
 
     fun fjernEndretUtbetalingAndel(
         behandlingId: Long,
-        endretUtbetalingAndelId: Long,
+        endretUtbetalingAndelId: Long
     ): Ressurs<RestUtvidetBehandling> {
         val uri = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId/$endretUtbetalingAndelId")
 

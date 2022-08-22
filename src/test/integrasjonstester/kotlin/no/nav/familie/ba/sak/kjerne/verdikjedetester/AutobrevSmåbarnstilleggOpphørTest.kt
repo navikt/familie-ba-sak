@@ -125,7 +125,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
+        barnFødselsdato: LocalDate
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
@@ -164,7 +164,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
     fun fullførRevurderingMedOvergangstonad(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
+        barnFødselsdato: LocalDate
     ): Behandling {
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
