@@ -80,7 +80,6 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
         // Godkjenner alle vilkår på førstegangsbehandling.
         restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
             restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
-
                 familieBaSakKlient().putVilkår(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,

@@ -163,7 +163,6 @@ class BrevService(
         }
 
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
-
         val utvidetVedtaksperioderMedBegrunnelser =
             vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak).filter {
                 !(it.begrunnelser.isEmpty() && it.fritekster.isEmpty() && it.eøsBegrunnelser.isEmpty())

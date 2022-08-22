@@ -40,7 +40,6 @@ fun Standardbegrunnelse.triggesForPeriode(
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePeriode: List<AndelTilkjentYtelse>
 ): Boolean {
-
     val triggesAv = this.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
 
     val aktuellePersoner = minimertePersoner

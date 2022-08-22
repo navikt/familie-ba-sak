@@ -362,7 +362,6 @@ class FødselshendelseHenleggelseTest(
 
     @Test
     fun `Skal sende tredjelandsborgere fra Ukraina til manuel oppfølging (midlertidig regel for ukrainakonflikten)`() {
-
         val fødselsdato = "1993-01-12"
         val barnFødselsdato = LocalDate.now()
         val scenario = mockServerKlient().lagScenario(

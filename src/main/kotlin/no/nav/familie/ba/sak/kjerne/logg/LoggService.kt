@@ -154,7 +154,6 @@ class LoggService(
         forrigeBehandlingsresultat: Behandlingsresultat,
         nyttBehandlingsresultat: Behandlingsresultat
     ): Logg? {
-
         val tekst = when {
             forrigeBehandlingsresultat == Behandlingsresultat.IKKE_VURDERT -> {
                 "Resultat ble ${nyttBehandlingsresultat.displayName.lowercase()}"

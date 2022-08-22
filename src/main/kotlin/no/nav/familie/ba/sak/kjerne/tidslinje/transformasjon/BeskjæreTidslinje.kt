@@ -40,7 +40,6 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMedEtter(tidslinje: Tidslinj
  * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den mest ekstreme benyttes
  */
 fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjær(fraOgMed: Tidspunkt<T>, tilOgMed: Tidspunkt<T>): Tidslinje<I, T> {
-
     val tidslinje = this
 
     return if (tilOgMed < fraOgMed)

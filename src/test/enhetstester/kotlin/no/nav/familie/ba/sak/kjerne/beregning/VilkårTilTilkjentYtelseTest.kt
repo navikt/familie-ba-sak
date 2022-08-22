@@ -52,7 +52,6 @@ class VilkårTilTilkjentYtelseTest {
         barn1Andel3Type: String?,
         erDeltBosted: Boolean?
     ) {
-
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
 
@@ -104,7 +103,6 @@ class VilkårTilTilkjentYtelseTest {
         barn1Andel1Periode: String?,
         barn1Andel1Type: String?,
     ) {
-
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
 
@@ -186,7 +184,6 @@ class VilkårTilTilkjentYtelseTest {
         barn2Andel2Periode: String?,
         barn2Andel2Type: String?
     ) {
-
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2020, 2, 1))
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2022, 4, 1))
@@ -238,7 +235,6 @@ class TestVilkårsvurderingBuilder(sakType: String) {
         periode: String?,
         erDeltBosted: Boolean? = null
     ): TestVilkårsvurderingBuilder {
-
         if (vilkår.isNullOrEmpty() || periode.isNullOrEmpty())
             return this
 
@@ -368,7 +364,6 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
 object TestVilkårParser {
 
     fun parse(s: String): List<Vilkår> {
-
         return s.split(',')
             .map {
                 when (it.replace("""\s*""".toRegex(), "").lowercase()) {

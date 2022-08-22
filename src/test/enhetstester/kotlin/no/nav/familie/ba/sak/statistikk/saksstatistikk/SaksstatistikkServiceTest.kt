@@ -402,7 +402,6 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Enum-verdier brukt i behandlingDVH skal validere mot json schema`() {
-
         val enumVerdier = listOf(
             BehandlingType.values(),
             BehandlingStatus.values(),
@@ -418,7 +417,6 @@ internal class SaksstatistikkServiceTest(
         }
 
         for (i in 0..enumVerdier.maxOf { it.size }) {
-
             val enumI = enumVerdier.map { it.getOrElse(i) { _ -> it.first() } }
             val behandlingType = enumI[0] as BehandlingType
             val behandlingStatus = enumI[1].name

@@ -57,7 +57,6 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
         fun byggPersonopplysningGrunnlag(): PersonopplysningGrunnlag = byggPerson().byggPersonopplysningGrunnlag()
 
         fun byggPerson(): VilkårsvurderingBuilder<T> {
-
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurderingBuilder.vilkårsvurdering,
                 aktør = person.aktør

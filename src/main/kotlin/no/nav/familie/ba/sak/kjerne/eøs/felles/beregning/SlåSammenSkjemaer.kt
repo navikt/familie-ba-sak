@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 
 fun <T : PeriodeOgBarnSkjema<T>> Collection<T>.slåSammen(): Collection<T> {
-
     if (this.isEmpty())
         return this
 

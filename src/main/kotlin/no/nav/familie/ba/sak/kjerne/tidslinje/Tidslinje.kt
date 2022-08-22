@@ -17,7 +17,6 @@ abstract class Tidslinje<I, T : Tidsenhet> {
     protected abstract fun lagPerioder(): Collection<Periode<I, T>>
 
     protected open fun valider(perioder: List<Periode<I, T>>) {
-
         val feilInnenforPerioder = perioder.map {
             when {
                 it.fraOgMed > it.tilOgMed ->

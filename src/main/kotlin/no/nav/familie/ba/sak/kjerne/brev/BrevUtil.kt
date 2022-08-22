@@ -192,7 +192,6 @@ fun hentHjemmeltekst(
     opplysningspliktHjemlerSkalMedIBrev: Boolean = false,
     målform: Målform
 ): String {
-
     val sanityStandardbegrunnelser = minimerteVedtaksperioder.flatMap { vedtaksperiode ->
         vedtaksperiode.begrunnelser.mapNotNull { begrunnelse ->
             begrunnelse.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
@@ -311,7 +310,6 @@ private fun hentOrdinæreHjemler(
     opplysningspliktHjemlerSkalMedIBrev: Boolean,
     finnesVedtaksperiodeMedFritekst: Boolean
 ): List<String> {
-
     if (opplysningspliktHjemlerSkalMedIBrev) {
         val hjemlerNårOpplysningspliktIkkeOppfylt = listOf("17", "18")
         hjemler.addAll(hjemlerNårOpplysningspliktIkkeOppfylt)

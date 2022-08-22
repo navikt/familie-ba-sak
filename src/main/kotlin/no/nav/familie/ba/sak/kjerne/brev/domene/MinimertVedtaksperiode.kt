@@ -45,7 +45,6 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
     brevMålform: Målform,
     barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
 ): BrevPeriodeForLogging {
-
     return BrevPeriodeForLogging(
         fom = this.fom,
         tom = this.tom,

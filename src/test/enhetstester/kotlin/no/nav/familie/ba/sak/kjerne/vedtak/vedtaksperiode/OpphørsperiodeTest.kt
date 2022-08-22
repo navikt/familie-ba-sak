@@ -25,7 +25,6 @@ class OpphørsperiodeTest {
 
     @Test
     fun `Skal utlede opphørsperiode mellom oppfylte perioder`() {
-
         val periodeTomFørsteAndel = inneværendeMåned().minusYears(2)
         val periodeFomAndreAndel = inneværendeMåned().minusYears(1)
         val periodeTomAndreAndel = inneværendeMåned().minusMonths(10)
@@ -69,7 +68,6 @@ class OpphørsperiodeTest {
 
     @Test
     fun `Skal utlede opphørsperiode når siste utbetalingsperiode er før neste måned`() {
-
         val periodeTomFørsteAndel = inneværendeMåned().minusYears(1)
         val andelBarn1 = lagAndelTilkjentYtelse(
             inneværendeMåned().minusYears(4),
@@ -91,7 +89,6 @@ class OpphørsperiodeTest {
 
     @Test
     fun `Skal utlede opphørsperiode fra neste måned når siste utbetalingsperiode er inneværende måned`() {
-
         val periodeTomFørsteAndel = inneværendeMåned()
         val andelBarn1 = lagAndelTilkjentYtelse(
             inneværendeMåned().minusYears(4),
@@ -113,7 +110,6 @@ class OpphørsperiodeTest {
 
     @Test
     fun `Skal utlede opphørsperiode når ytelsen reduseres i revurdering`() {
-
         val reduksjonFom = inneværendeMåned().minusYears(5)
         val reduksjonTom = inneværendeMåned().minusYears(3)
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(
@@ -146,7 +142,6 @@ class OpphørsperiodeTest {
 
     @Test
     fun `Skal utlede opphørsperiode når ytelsen reduseres i revurdering og to inntilliggende perioder opphøres`() {
-
         val reduksjonFom = inneværendeMåned().minusMonths(2)
         val reduksjonTom = inneværendeMåned()
 
@@ -188,7 +183,6 @@ class OpphørsperiodeTest {
 
     @Test
     fun `Skal utlede opphørsperiode når ytelsen reduseres i revurdering og ytelsen ikke lenger er løpende`() {
-
         val reduksjonFom = inneværendeMåned()
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(
             inneværendeMåned().minusYears(5),

@@ -20,7 +20,6 @@ fun beregnDifferanse(
     utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
     valutakurser: Collection<Valutakurs>
 ): List<AndelTilkjentYtelse> {
-
     val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
     val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
     val andelTilkjentYtelseTidslinjer = andelerTilkjentYtelse.tilSeparateTidslinjerForBarna()

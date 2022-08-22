@@ -58,7 +58,6 @@ private fun hentPersonerMedUtgjørendeVilkår(
     triggesAv: TriggesAv,
     erFørsteVedtaksperiodePåFagsak: Boolean,
 ): List<MinimertRestPerson> {
-
     val aktuellePersonidenter = aktuellePersonerForVedtaksperiode.map { it.personIdent }
 
     return minimertRestPersonResultater

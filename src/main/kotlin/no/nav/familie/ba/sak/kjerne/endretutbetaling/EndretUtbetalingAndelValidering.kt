@@ -41,7 +41,6 @@ object EndretUtbetalingAndelValidering {
         endretUtbetalingAndel: EndretUtbetalingAndel,
         eksisterendeEndringerPåBehandling: List<EndretUtbetalingAndel>
     ) {
-
         endretUtbetalingAndel.validerUtfyltEndring()
         if (eksisterendeEndringerPåBehandling.any
             {
@@ -61,7 +60,6 @@ object EndretUtbetalingAndelValidering {
         endretUtbetalingAndel: EndretUtbetalingAndel,
         andelTilkjentYtelser: List<AndelTilkjentYtelse>
     ) {
-
         endretUtbetalingAndel.validerUtfyltEndring()
         val minsteDatoForTilkjentYtelse = andelTilkjentYtelser.filter {
             it.aktør == endretUtbetalingAndel.person!!.aktør

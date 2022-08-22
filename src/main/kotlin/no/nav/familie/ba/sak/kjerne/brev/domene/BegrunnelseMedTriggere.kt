@@ -24,7 +24,6 @@ data class BegrunnelseMedTriggere(
         minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
         dødeBarnForrigePeriode: List<String>
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
-
         return if (this.standardbegrunnelse.kanDelesOpp) {
             this.standardbegrunnelse.delOpp(
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,

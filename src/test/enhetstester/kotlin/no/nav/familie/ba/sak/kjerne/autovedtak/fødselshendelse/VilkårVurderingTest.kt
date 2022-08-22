@@ -91,7 +91,6 @@ class VilkårVurderingTest(
 
     @Test
     fun `Henting og evaluering av oppfylte vilkår gir rett antall samlede resultater`() {
-
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 

@@ -120,7 +120,6 @@ fun hentEtterbetalingIPeriode(
     periode: List<ØkonomiSimuleringPostering>,
     tidSimuleringHentet: LocalDate?
 ): BigDecimal {
-
     val periodeHarPositivFeilutbetaling =
         periode.any { it.posteringType == PosteringType.FEILUTBETALING && it.beløp > BigDecimal.ZERO }
     val sumYtelser =

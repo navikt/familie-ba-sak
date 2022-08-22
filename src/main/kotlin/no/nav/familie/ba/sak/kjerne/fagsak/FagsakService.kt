@@ -102,7 +102,6 @@ class FagsakService(
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
         var fagsak = fagsakRepository.finnFagsakForAktør(aktør, type)
         if (fagsak == null) {
-
             fagsak = lagre(Fagsak(aktør = aktør, type = type))
             if (fraAutomatiskBehandling) {
                 antallFagsakerOpprettetFraAutomatisk.increment()
@@ -312,7 +311,6 @@ class FagsakService(
                     if (maskertForelder != null) {
                         assosierteFagsakDeltagere.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
                     } else {
-
                         val forelderInfo = runCatching {
                             personopplysningerService.hentPersoninfoEnkel(relasjon.aktør)
                         }.fold(

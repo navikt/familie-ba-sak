@@ -114,7 +114,6 @@ internal class BrevUtilsTest {
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for innvilget førstegangsbehandling`() {
-
         støttedeBehandlingsersultaterFørstegangsbehandling.filterNot { it == Behandlingsresultat.AVSLÅTT }.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
@@ -268,7 +267,6 @@ internal class BrevUtilsTest {
 
     @Test
     fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for revurdering barn fra før`() {
-
         val fagsak = defaultFagsak().copy(status = FagsakStatus.LØPENDE)
         val behandling =
             lagBehandling(

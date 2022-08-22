@@ -16,7 +16,6 @@ internal class TidslinjeTest {
 
     @Test
     fun `skal validere at perioder ikke kan ha fra-og-med etter til-og-med`() {
-
         assertThrows<TidslinjeFeilException> {
             TestTidslinje(
                 Periode(15.jan(2020), 14.jan(2020), 'A')
@@ -36,7 +35,6 @@ internal class TidslinjeTest {
 
     @Test
     fun `skal validere at periode som ligger inni en annen ikke er lov`() {
-
         assertThrows<TidslinjeFeilException> {
             TestTidslinje(
                 Periode(1.jan(2020), 31.mai(2020), 'A'),
@@ -63,7 +61,6 @@ internal class TidslinjeTest {
 
     @Test
     fun `skal validere at uendelige perioder inni en tidslinje ikke er lov`() {
-
         assertThrows<TidslinjeFeilException> {
             TestTidslinje(
                 Periode(1.jan(2020), 31.jan(2020), 'A'),

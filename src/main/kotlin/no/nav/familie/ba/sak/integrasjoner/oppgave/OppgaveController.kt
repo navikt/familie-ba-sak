@@ -94,7 +94,6 @@ class OppgaveController(
 
     @GetMapping(path = ["/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<DataForManuellJournalføring>> {
-
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val aktør = oppgave.aktoerId?.let { personidentService.hentAktør(it) }
 

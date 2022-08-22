@@ -174,7 +174,6 @@ class RestartAvSmåbarnstilleggTest(
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
     ): Behandling {
-
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = emptyList()
@@ -223,7 +222,6 @@ class RestartAvSmåbarnstilleggTest(
         ),
         skalBegrunneSmåbarnstillegg: Boolean = false
     ): Behandling {
-
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 

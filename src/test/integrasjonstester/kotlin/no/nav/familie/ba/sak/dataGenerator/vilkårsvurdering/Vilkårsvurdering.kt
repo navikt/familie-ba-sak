@@ -31,7 +31,6 @@ fun lagVilkårsvurderingMedOverstyrendeResultater(
     behandling: Behandling? = null,
     overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>
 ): Vilkårsvurdering {
-
     val vilkårsvurdering = Vilkårsvurdering(behandling = behandling ?: mockk(relaxed = true))
 
     val søkerPersonResultater = lagPersonResultatAvOverstyrteResultater(

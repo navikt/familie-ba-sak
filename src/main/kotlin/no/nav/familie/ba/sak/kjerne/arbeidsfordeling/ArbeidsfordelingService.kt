@@ -91,7 +91,6 @@ class ArbeidsfordelingService(
                         if (!aktivArbeidsfordelingPåBehandling.manueltOverstyrt &&
                             (aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != arbeidsfordelingsenhet.enhetId)
                         ) {
-
                             aktivArbeidsfordelingPåBehandling.also {
                                 it.behandlendeEnhetId = arbeidsfordelingsenhet.enhetId
                                 it.behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn

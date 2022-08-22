@@ -103,7 +103,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
-
         val behandling = kjørSteg(Resultat.OPPFYLT)
 
         val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandling)
@@ -133,7 +132,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
-
         val behandling = kjørSteg(Resultat.IKKE_OPPFYLT)
 
         val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandling)

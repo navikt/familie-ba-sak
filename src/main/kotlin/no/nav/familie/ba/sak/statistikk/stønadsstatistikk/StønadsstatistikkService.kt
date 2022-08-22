@@ -49,7 +49,6 @@ class StønadsstatistikkService(
 ) {
 
     fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
-
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
@@ -104,7 +103,6 @@ class StønadsstatistikkService(
     }
 
     private fun hentUtbetalingsperioderV2(behandlingId: Long): List<UtbetalingsperiodeDVHV2> {
-
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
 
@@ -133,7 +131,6 @@ class StønadsstatistikkService(
     }
 
     private fun utledEnsligForsørger(behandlingId: Long): Boolean {
-
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
         if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return false
 
@@ -202,7 +199,6 @@ class StønadsstatistikkService(
 
     private fun hentLandkode(person: Person): String = if (person.bostedsadresser.isNotEmpty()) "NO"
     else if (personopplysningerService.hentPersoninfoEnkel(person.aktør).bostedsadresser.isNotEmpty()) "NO" else {
-
         val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(person.aktør)
 
         if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {

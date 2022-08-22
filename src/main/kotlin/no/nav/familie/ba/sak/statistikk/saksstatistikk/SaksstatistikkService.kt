@@ -130,7 +130,6 @@ class SaksstatistikkService(
                 )
             }
         } else {
-
             landkodeSøker = hentLandkode(fagsak.aktør)
             listOf(AktørDVH(fagsak.aktør.aktørId.toLong(), PersonType.SØKER.name))
         }

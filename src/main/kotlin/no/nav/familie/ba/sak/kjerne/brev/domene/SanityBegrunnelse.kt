@@ -165,7 +165,6 @@ enum class UtvidetBarnetrygdTrigger {
 }
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
-
     return TriggesAv(
         vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
         personTyper = if (this.rolle.isEmpty()) {

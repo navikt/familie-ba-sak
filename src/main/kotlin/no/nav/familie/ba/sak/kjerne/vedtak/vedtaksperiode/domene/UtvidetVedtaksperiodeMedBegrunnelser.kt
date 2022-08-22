@@ -40,7 +40,6 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ): UtvidetVedtaksperiodeMedBegrunnelser {
-
     val utbetalingsperiodeDetaljer = hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse = andelerTilkjentYtelse,
         personopplysningGrunnlag = personopplysningGrunnlag,

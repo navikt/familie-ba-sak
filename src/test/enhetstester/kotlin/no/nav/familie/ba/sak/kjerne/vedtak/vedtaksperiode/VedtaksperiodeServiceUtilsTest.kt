@@ -125,7 +125,6 @@ class VedtaksperiodeServiceUtilsTest {
 
     @Test
     fun `Skal gi riktig svar for småbarnstillegg-trigger ved innvilget VedtakBegrunnelseType`() {
-
         Assertions.assertEquals(
             true,
             VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
@@ -186,7 +185,6 @@ class VedtaksperiodeServiceUtilsTest {
 
     @Test
     fun `Skal gi false når VedtakBegrunnelseType ikke er innvilget eller reduksjon `() {
-
         Assertions.assertEquals(
             false,
             VedtakBegrunnelseType.AVSLAG.periodeErOppyltForYtelseType(

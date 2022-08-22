@@ -40,7 +40,6 @@ fun slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder: List<Simule
 
     sortedSimuleringsPerioder.forEach { periode ->
         if (aktuellTom.toYearMonth().plusMonths(1) < periode.fom.toYearMonth()) {
-
             perioder.add(Periode(fom = aktuellFom, tom = aktuellTom))
             aktuellFom = periode.fom
         }

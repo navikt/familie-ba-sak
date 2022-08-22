@@ -42,7 +42,6 @@ internal class PersonidentServiceTest {
 
     @BeforeAll
     fun init() {
-
         every { pdlIdentRestClient.hentIdenter(personidentAktiv, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdAktiv.aktørId, false, "AKTORID"),

@@ -231,7 +231,6 @@ fun lagAndelTilkjentYtelse(
     prosent: BigDecimal = BigDecimal(100),
     endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
 ): AndelTilkjentYtelse {
-
     return AndelTilkjentYtelse(
         aktør = aktør,
         behandlingId = behandling.id,
@@ -260,7 +259,6 @@ fun lagAndelTilkjentYtelseUtvidet(
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null
 ): AndelTilkjentYtelse {
-
     return AndelTilkjentYtelse(
         aktør = person.aktør,
         behandlingId = behandling.id,
@@ -285,7 +283,6 @@ fun lagTestPersonopplysningGrunnlag(
     behandlingId: Long,
     vararg personer: Person
 ): PersonopplysningGrunnlag {
-
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
 
     personopplysningGrunnlag.personer.addAll(

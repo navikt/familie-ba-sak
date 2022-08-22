@@ -43,7 +43,6 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal opprette oppgave og ferdigstille oppgave for behandling`() {
-
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(BARN_FNR), true)
@@ -87,7 +86,6 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal logge feil ved opprettelse av oppgave på type som ikke er ferdigstilt`() {
-
         val logger: Logger = LoggerFactory.getLogger(OppgaveService::class.java) as Logger
 
         val listAppender: ListAppender<ILoggingEvent> = initLoggingEventListAppender()

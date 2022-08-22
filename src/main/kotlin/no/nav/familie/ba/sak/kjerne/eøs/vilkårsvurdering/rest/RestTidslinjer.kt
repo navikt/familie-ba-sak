@@ -114,7 +114,6 @@ enum class BeregningOppsummeringStatus {
 
 fun tilfeldigOppsummering(regelverkResultatTidslinje: Tidslinje<RegelverkResultat, Måned>):
     List<RestTidslinjePeriode<BeregningOppsummering>> {
-
     val tilfeldigTidslinje = tilfeldigIntTidslinje(
         regelverkResultatTidslinje.fraOgMed(),
         regelverkResultatTidslinje.tilOgMed()
@@ -143,7 +142,6 @@ fun <T : Tidsenhet> tilfeldigIntTidslinje(
     fraOgMed: Tidspunkt<T>,
     tilOgMed: Tidspunkt<T>,
 ): Tidslinje<Int, T> {
-
     val random = Random()
 
     return object : Tidslinje<Int, T>() {

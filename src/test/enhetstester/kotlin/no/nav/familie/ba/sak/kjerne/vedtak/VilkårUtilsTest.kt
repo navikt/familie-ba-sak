@@ -17,7 +17,6 @@ class VilkårUtilsTest {
      */
     @Test
     fun `vedtaksperioder sorteres korrekt til brev`() {
-
         val avslagMedTomDatoInneværendeMåned = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.now().minusMonths(6),
             tom = LocalDate.now(),

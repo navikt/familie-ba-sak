@@ -54,7 +54,6 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
     @Test
     fun `Plukk riktige behandlinger - skal være nyeste, løpende med opphør i småbarnstillegg for valgt måned`() {
-
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
         val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
         fullførBehandling(
@@ -128,7 +127,6 @@ class AutobrevSmåbarnstilleggOpphørTest(
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
     ): Behandling {
-
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = emptyList()
@@ -168,7 +166,6 @@ class AutobrevSmåbarnstilleggOpphørTest(
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
     ): Behandling {
-
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 

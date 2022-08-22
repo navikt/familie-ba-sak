@@ -13,7 +13,6 @@ class SettPåVentScheduler(val taskRepository: TaskRepositoryWrapper) {
 
     @Scheduled(cron = "0 0 7 * * *")
     fun taBehandlingerEtterVentefristAvVent() {
-
         when (LeaderClient.isLeader()) {
             true -> {
                 val taBehandlingerEtterVentefristAvVentTask =

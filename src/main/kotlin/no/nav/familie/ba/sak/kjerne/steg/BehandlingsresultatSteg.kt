@@ -66,7 +66,6 @@ class BehandlingsresultatSteg(
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-
         val behandlingMedOppdatertBehandlingsresultat =
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)

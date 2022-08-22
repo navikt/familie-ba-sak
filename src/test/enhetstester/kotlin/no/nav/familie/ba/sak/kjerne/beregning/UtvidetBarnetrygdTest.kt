@@ -42,7 +42,6 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler får høyeste beløp når det utbetales til flere barn med ulike beløp`() {
-
         val søker =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val barnA =
@@ -138,7 +137,6 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler får høyeste ordinærsats når søker har tillegg for barn under 6 år`() {
-
         val søker =
             OppfyltPeriode(fom = fødselsdatoUnder6År, tom = LocalDate.of(2021, 6, 15))
         val oppfyltBarn =
@@ -375,7 +373,6 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler slutter siste dag i  måneden som vilkår ikke er innfridd lenger`() {
-
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val søkerUtvidet =

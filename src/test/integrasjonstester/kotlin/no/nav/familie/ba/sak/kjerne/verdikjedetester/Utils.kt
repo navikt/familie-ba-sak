@@ -159,7 +159,6 @@ fun håndterIverksettingAvBehandling(
     vedtakService: VedtakService,
     stegService: StegService
 ): Behandling {
-
     val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVurdering.id)
     val behandlingEtterIverksetteVedtak =
         stegService.håndterIverksettMotØkonomi(

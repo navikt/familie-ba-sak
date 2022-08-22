@@ -75,7 +75,6 @@ object TilkjentYtelseValidering {
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?
     ): Set<String> {
-
         val aktørIderFraAndeler = andelerTilkjentYtelse.map { it.aktør.aktørId }
         val aktøerIderFraForrigeAndeler = forrigeAndelerTilkjentYtelse?.map { it.aktør.aktørId } ?: emptyList()
         return (aktørIderFraAndeler + aktøerIderFraForrigeAndeler).toSet()

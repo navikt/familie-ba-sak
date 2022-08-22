@@ -48,7 +48,6 @@ class TriggingAvAutobrev6og18ÅrTest(
     }
 
     fun kjørFørstegangsbehandlingOgTriggAutobrev(årMedReduksjonsbegrunnelse: Int) {
-
         val reduksjonsbegrunnelse = if (årMedReduksjonsbegrunnelse == 6)
             Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR else
             Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR
@@ -102,7 +101,6 @@ class TriggingAvAutobrev6og18ÅrTest(
         // Godkjenner alle vilkår på førstegangsbehandling.
         restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
             restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
-
                 familieBaSakKlient().putVilkår(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,

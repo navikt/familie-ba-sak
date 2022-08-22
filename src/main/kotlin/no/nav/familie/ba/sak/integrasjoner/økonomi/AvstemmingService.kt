@@ -31,7 +31,6 @@ class AvstemmingService(
     private val dataChunkRepository: DataChunkRepository,
 ) {
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime) {
-
         økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato)
     }
 

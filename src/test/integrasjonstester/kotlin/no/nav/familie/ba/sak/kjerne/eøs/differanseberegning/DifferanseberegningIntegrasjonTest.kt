@@ -133,7 +133,6 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
 }
 
 fun Iterable<Utbetalingsperiode>.sumUtbetaling(): Int {
-
     val tidslinje = tidslinje {
         this.map {
             Periode(

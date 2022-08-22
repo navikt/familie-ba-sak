@@ -122,7 +122,6 @@ class BrevPeriodeGenerator(
         begrunnelserGrunnlagMedPersoner: List<BrevBegrunnelseGrunnlagMedPersoner>,
         eøsBegrunnelserMedKompetanser: List<EØSBegrunnelseMedKompetanser>
     ): List<Begrunnelse> {
-
         val brevBegrunnelser = begrunnelserGrunnlagMedPersoner
             .map {
                 it.tilBrevBegrunnelse(
@@ -217,7 +216,6 @@ class BrevPeriodeGenerator(
     }
 
     fun finnBarnIUtbetalingPeriode(identerIBegrunnelene: List<String>): List<MinimertRestPerson> {
-
         val identerMedUtbetaling =
             minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer.map { it.person.personIdent }
 

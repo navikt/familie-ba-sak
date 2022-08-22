@@ -115,7 +115,6 @@ fun lagBehandlingsresultatAndelTilkjentYtelse(
     tom: String,
     kalkulertUtbetalingsbeløp: Int
 ): BehandlingsresultatAndelTilkjentYtelse {
-
     return BehandlingsresultatAndelTilkjentYtelse(
         stønadFom = YearMonth.parse(fom),
         stønadTom = YearMonth.parse(tom),

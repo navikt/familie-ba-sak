@@ -92,7 +92,6 @@ class TriggesAvTest {
 
     @Test
     fun `Skal gi riktig resultat for om endring skal utbetaling`() {
-
         val skalUtbetalesMedUtbetaling =
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
@@ -144,7 +143,6 @@ class TriggesAvTest {
 
     @Test
     fun `Skal gi riktig resultat for utvidetScenario`() {
-
         val utvidetScenarioUtvidetVilkår =
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,

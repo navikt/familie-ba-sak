@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
  * En viktig forutsetning er at oppdatertKompetanse alltid er "mindre" enn kompetansen som reduseres
  */
 fun <T : PeriodeOgBarnSkjema<T>> T.trekkFra(skjema: T): Collection<T> {
-
     val gammeltSkjema = this
     val skjemaForRestBarn = gammeltSkjema
         .kopier(

@@ -36,7 +36,6 @@ class IverksettMotFamilieTilbake(
             tilbakekreving.valg != Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING &&
             !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
         ) {
-
             val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(behandling)
             tilbakekreving.tilbakekrevingsbehandlingId = tilbakekrevingId
 

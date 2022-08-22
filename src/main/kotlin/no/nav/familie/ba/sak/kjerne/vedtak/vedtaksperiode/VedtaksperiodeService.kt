@@ -114,7 +114,6 @@ class VedtaksperiodeService(
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
-
                 val triggesAv = it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()
                     ?: return@mapNotNull null
 
@@ -238,10 +237,8 @@ class VedtaksperiodeService(
 
     @Transactional
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak, skalOverstyreFortsattInnvilget: Boolean = false) {
-
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && !skalOverstyreFortsattInnvilget) {
-
             val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
                 vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
@@ -277,7 +274,6 @@ class VedtaksperiodeService(
         gjelderFortsattInnvilget: Boolean = false,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
     ): List<VedtaksperiodeMedBegrunnelser> {
-
         val opphørsperioder =
             hentOpphørsperioder(vedtak.behandling).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
 

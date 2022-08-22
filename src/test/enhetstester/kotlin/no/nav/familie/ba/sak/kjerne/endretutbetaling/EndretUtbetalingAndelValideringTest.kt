@@ -719,7 +719,6 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `skal kaste feil dersom det er en endring på utvidet ytelse uten en endring på delt bosted i samme periode`() {
-
         Assertions.assertThrows(FunksjonellFeil::class.java) {
             validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
                 listOf(endretUtbetalingAndelUtvidetNullutbetaling)
@@ -729,7 +728,6 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `skal kaste feil dersom delt bosted endring krysser utvidet tilkjent ytelse og ikke ellers`() {
-
         val fomUtvidet: YearMonth = inneværendeMåned().minusMonths(4)
         val tomUtvidet: YearMonth = inneværendeMåned().minusMonths(2)
 

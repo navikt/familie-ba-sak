@@ -52,7 +52,6 @@ class TilkjentYtelseValideringService(
     fun finnAktørerMedUgyldigEtterbetalingsperiode(
         behandlingId: Long
     ): List<Aktør> {
-
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
         val forrigeBehandling =

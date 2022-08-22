@@ -83,7 +83,6 @@ class BehandlingService(
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
-
             val kategori = bestemKategoriVedOpprettelse(
                 overstyrtKategori = nyBehandling.kategori,
                 behandlingType = nyBehandling.behandlingType,

@@ -99,7 +99,6 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal ferdigstille Godkjenne vedtak-oppgave ved Godkjent vedtak`() {
-
         val behandling = lagBehandling()
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
@@ -207,7 +206,6 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
-
         val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
@@ -225,7 +223,6 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
-
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))

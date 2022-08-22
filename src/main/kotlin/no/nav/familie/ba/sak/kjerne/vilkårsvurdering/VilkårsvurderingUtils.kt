@@ -200,7 +200,6 @@ object VilkårsvurderingUtils {
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
         løpendeUnderkategori: BehandlingUnderkategori? = null
     ): Pair<Vilkårsvurdering, Vilkårsvurdering> {
-
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
         val initiellVilkårsvurderingKopi = initiellVilkårsvurdering.kopier()
@@ -252,7 +251,6 @@ object VilkårsvurderingUtils {
         løpendeUnderkategori: BehandlingUnderkategori?,
         personResultaterAktivt: MutableSet<PersonResultat>
     ) {
-
         val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
         val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
         personFraInit.vilkårResultater.forEach { vilkårFraInit ->

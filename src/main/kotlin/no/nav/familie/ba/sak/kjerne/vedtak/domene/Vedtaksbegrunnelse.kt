@@ -89,7 +89,6 @@ interface Begrunnelse : Comparable<Begrunnelse> {
     val vedtakBegrunnelseType: VedtakBegrunnelseType?
 
     override fun compareTo(other: Begrunnelse): Int {
-
         return when {
             this.type == Begrunnelsetype.FRITEKST -> Int.MAX_VALUE
             other.type == Begrunnelsetype.FRITEKST -> -Int.MAX_VALUE

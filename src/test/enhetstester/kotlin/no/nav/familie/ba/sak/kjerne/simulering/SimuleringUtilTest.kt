@@ -190,7 +190,6 @@ class SimuleringUtilTest {
  */
     @Test
     fun `ytelse på 10000 korrigert til 2000`() {
-
         val redusertYtelseTil2_000 = listOf(
             mockVedtakSimuleringPostering(
                 beløp = -10_000,
@@ -234,7 +233,6 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse på 2000 korrigert til 3000`() {
-
         val øktYtelseFra2_000Til3_000 = listOf(
             mockVedtakSimuleringPostering(
                 beløp = -2_000,
@@ -278,7 +276,6 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse på 3000 korrigert til 12000`() {
-
         val øktYtelseFra3_000Til12_000 = listOf(
             mockVedtakSimuleringPostering(
                 beløp = -3_000,

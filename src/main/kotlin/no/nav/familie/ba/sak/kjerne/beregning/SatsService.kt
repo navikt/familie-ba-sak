@@ -66,7 +66,6 @@ object SatsService {
         stønadTilOgMed: YearMonth,
         maxSatsGyldigFraOgMed: YearMonth = YearMonth.now()
     ): List<SatsPeriode> {
-
         return finnAlleSatserFor(satstype)
             .map { SatsPeriode(it.beløp, it.gyldigFom.toYearMonth(), it.gyldigTom.toYearMonth()) }
             .filter { it.fraOgMed <= maxSatsGyldigFraOgMed }

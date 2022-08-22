@@ -42,7 +42,6 @@ class UtenlandskPeriodebeløpControllerTest {
 
     @Test
     fun `Skal ikke kaste feil dersom validering av input går bra`() {
-
         // Stopper videre prosessering etter at validering er gjennomført
         every { featureToggleService.isEnabled(any()) }.returns(false)
 

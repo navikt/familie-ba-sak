@@ -23,7 +23,6 @@ fun Kompetanse.tilMinimertKompetanse(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     landkoderISO2: Map<String, String>,
 ): MinimertKompetanse {
-
     this.validerFelterErSatt()
 
     val barnetsBostedslandNavn = this.barnetsBostedsland!!.tilLandNavn(landkoderISO2)

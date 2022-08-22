@@ -38,7 +38,6 @@ fun hentRestBehandlingsgrunnlagForBrev(
     vilkårsvurdering: Vilkårsvurdering,
     endredeUtbetalingAndeler: List<EndretUtbetalingAndel>
 ): RestBehandlingsgrunnlagForBrev {
-
     return RestBehandlingsgrunnlagForBrev(
         personerPåBehandling = persongrunnlag.søkerOgBarn.map { it.tilMinimertPerson() },
         minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },

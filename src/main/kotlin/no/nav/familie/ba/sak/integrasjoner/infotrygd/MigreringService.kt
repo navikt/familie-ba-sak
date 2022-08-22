@@ -275,7 +275,6 @@ class MigreringService(
     }
 
     private fun kastFeilEllerHentUnderkategori(sak: Sak): BehandlingUnderkategori {
-
         return when {
             (sak.valg == "OR" && sak.undervalg in listOf("OS", "MD")) -> {
                 BehandlingUnderkategori.ORDINÆR

@@ -54,7 +54,6 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
-
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
         } returns Tilgang(true, null)
@@ -94,7 +93,6 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
-
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
         } returns Tilgang(true, null)

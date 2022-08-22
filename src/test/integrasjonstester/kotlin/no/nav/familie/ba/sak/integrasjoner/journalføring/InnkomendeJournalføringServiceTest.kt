@@ -43,7 +43,6 @@ class InnkomendeJournalføringServiceTest(
 
     @Test
     fun `lagrer journalpostreferanse til behandling og fagsak til journalpost`() {
-
         val søkerFnr = randomFnr()
         val søkerAktør = personidentService.hentAktør(søkerFnr)
 

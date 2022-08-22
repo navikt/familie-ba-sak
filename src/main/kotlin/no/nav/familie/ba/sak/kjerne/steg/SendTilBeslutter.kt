@@ -38,7 +38,6 @@ class SendTilBeslutter(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
             ?.validerAtAlleAnndreVurderingerErVurdert()
 

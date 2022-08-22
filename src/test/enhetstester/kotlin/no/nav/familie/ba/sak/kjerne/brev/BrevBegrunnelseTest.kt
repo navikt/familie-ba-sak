@@ -78,7 +78,6 @@ class BrevBegrunnelseTest {
         forventetOutput: List<Standardbegrunnelse>,
         output: List<Standardbegrunnelse>
     ): List<String> {
-
         val feil = mutableListOf<String>()
 
         if (forventetOutput.size != output.size) {

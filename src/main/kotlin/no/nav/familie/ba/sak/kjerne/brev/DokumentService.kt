@@ -139,7 +139,6 @@ class DokumentService(
         behandling: Behandling? = null,
         fagsakId: Long
     ) {
-
         val generertBrev = genererManueltBrev(manueltBrevRequest)
 
         val førsteside = if (manueltBrevRequest.brevmal.skalGenerereForside()) {

@@ -61,7 +61,6 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig`() {
-
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),

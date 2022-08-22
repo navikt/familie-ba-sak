@@ -123,7 +123,6 @@ class BrevperiodeTest {
         forventetOutput: BrevPeriodeOutput?,
         output: BrevPeriode?
     ): List<String> {
-
         val feil = mutableListOf<String>()
 
         fun validerFelt(forventet: String?, faktisk: String?, variabelNavn: String) {

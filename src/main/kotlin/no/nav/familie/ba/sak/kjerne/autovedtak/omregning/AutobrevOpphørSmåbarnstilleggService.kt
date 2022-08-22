@@ -24,7 +24,6 @@ class AutobrevOpphørSmåbarnstilleggService(
 ) {
     @Transactional
     fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId: Long) {
-
         val behandling =
             behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsakId)
                 ?: error("Fant ikke aktiv behandling")

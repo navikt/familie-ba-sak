@@ -118,7 +118,6 @@ private fun List<AndelTilkjentYtelseDataForÅKalkulereEndring>.finnKalkulertBel�
 
 private fun List<AndelTilkjentYtelse>.hentTidslinjerForPersoner(behandlingAlder: BehandlingAlder):
     Map<String, LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring>> {
-
     return this.groupBy { it.aktør.aktørId }
         .map { (aktørId, andeler) ->
             if (andeler.any { it.erSøkersAndel() }) {

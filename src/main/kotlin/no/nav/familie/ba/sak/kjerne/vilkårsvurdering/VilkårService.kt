@@ -55,7 +55,6 @@ class VilkårService(
         vilkårId: Long,
         restPersonResultat: RestPersonResultat
     ): List<RestPersonResultat> {
-
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) &&
             restPersonResultat.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
         ) {

@@ -31,7 +31,6 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     dødeBarnForrigePeriode: List<String>
 ): Set<String> {
-
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
     val erUtbetalingMedReduksjonFraSistIverksatteBehandling =

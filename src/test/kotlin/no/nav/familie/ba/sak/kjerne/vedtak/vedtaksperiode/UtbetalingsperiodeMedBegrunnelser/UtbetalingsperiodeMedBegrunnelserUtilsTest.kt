@@ -18,7 +18,6 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
 
     @Test
     fun `skal splitte opp utbetalingsperioder når det er overlappende kompetanse`() {
-
         val periode1 = MånedPeriode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         val periode2 = MånedPeriode(YearMonth.of(2021, 2), YearMonth.of(2021, 3))
         val periode3 = MånedPeriode(YearMonth.of(2021, 5), YearMonth.of(2021, 5))
@@ -70,7 +69,6 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
 
     @Test
     fun `Skal splitte opp utbetalingsperioder riktig når kompetanse strekker seg over flere perioder`() {
-
         val utbetalingsperioder = listOf(
             MånedPeriode(YearMonth.of(2020, 5), YearMonth.of(2020, 8)),
             MånedPeriode(YearMonth.of(2020, 9), YearMonth.of(2021, 4)),
@@ -99,7 +97,6 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
 
     @Test
     fun `Skal splitte opp utbetalingsperiodene riktig når det er kompetanse på forskjellige personer`() {
-
         val periode1 = MånedPeriode(YearMonth.of(2021, 1), YearMonth.of(2021, 4))
         val periode2 = MånedPeriode(YearMonth.of(2021, 5), YearMonth.of(2021, 6))
         val periode3 = MånedPeriode(YearMonth.of(2021, 7), YearMonth.of(2022, 1))

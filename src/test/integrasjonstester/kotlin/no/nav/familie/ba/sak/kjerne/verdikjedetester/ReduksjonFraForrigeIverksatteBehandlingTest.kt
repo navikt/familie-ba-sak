@@ -110,7 +110,6 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         barnFødselsdato: LocalDate,
         overgangsstønadPerioder: List<PeriodeOvergangsstønad>
     ): Behandling {
-
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = overgangsstønadPerioder
@@ -150,7 +149,6 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
     ): Behandling {
-
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 

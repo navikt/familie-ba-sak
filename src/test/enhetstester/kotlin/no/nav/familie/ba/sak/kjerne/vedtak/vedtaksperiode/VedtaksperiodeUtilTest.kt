@@ -260,7 +260,6 @@ class VedtaksperiodeUtilTest {
 
     @Test
     fun `skal finne riktige begrunnelser for kompetanse når barn bor i utlandet`() {
-
         val kompetanserIPeriode: List<Kompetanse> =
             listOf(
                 lagKompetanse(
@@ -296,7 +295,6 @@ class VedtaksperiodeUtilTest {
 
     @Test
     fun `skal finne riktige begrunnelser for kompetanse når barn bor i Norge`() {
-
         val kompetanserIPeriode: List<Kompetanse> =
             listOf(
                 lagKompetanse(

@@ -300,7 +300,6 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Opprett barnas beregning på vedtak`() {
-
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -413,7 +412,6 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Endre barnas beregning på vedtak`() {
-
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()

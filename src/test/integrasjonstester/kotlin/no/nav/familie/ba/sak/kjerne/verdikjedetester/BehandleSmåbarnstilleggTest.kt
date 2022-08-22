@@ -111,7 +111,6 @@ class BehandleSmåbarnstilleggTest(
     }
 
     private fun settOppefSakMockForDeFørste2Testene(søkersIdent: String) {
-
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = listOf(
                 PeriodeOvergangsstønad(

@@ -75,7 +75,6 @@ class InnkomendeJournalføringService(
         behandlendeEnhet: String,
         oppgaveId: String
     ): String {
-
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(
             request.tilknyttedeBehandlingIder,
             journalpostId
@@ -147,7 +146,6 @@ class InnkomendeJournalføringService(
         behandlendeEnhet: String,
         oppgaveId: String
     ): String {
-
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
 
         if (request.opprettOgKnyttTilNyBehandling) {
@@ -216,7 +214,6 @@ class InnkomendeJournalføringService(
         tilknyttedeBehandlingIder: List<String>,
         journalpostId: String
     ): Pair<Sak, List<Behandling>> {
-
         val behandlinger = tilknyttedeBehandlingIder.map {
             behandlingHentOgPersisterService.hent(it.toLong())
         }
