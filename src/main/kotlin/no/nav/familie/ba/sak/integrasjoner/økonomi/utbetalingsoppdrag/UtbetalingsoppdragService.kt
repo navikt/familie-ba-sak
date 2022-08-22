@@ -53,10 +53,10 @@ class UtbetalingsoppdragService(
         val oppdatertTilkjentYtelse = beregningService.populerTilkjentYtelse(oppdatertBehandling, utbetalingsoppdrag)
         // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
 
-        return utbetalingsoppdrag
-
         // beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
         // iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
+
+        return utbetalingsoppdrag
     }
 
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, behandlingId: Long) {
