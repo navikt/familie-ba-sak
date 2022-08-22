@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erDagenFør
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -10,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPerson
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -22,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -44,12 +47,15 @@ import java.time.LocalDate
 
 fun hentPerioderMedUtbetaling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    vedtak: Vedtak
-): List<VedtaksperiodeMedBegrunnelser> = andelerTilkjentYtelse.lagVertikaleSegmenter()
-    .map { (segmenter, _) ->
+    vedtak: Vedtak,
+) = andelerTilkjentYtelse
+    .tilTidslinjerPerPerson().values
+    .kombinerUtenNull { it }
+    .perioder()
+    .map {
         VedtaksperiodeMedBegrunnelser(
-            fom = segmenter.fom,
-            tom = segmenter.tom,
+            fom = it.fraOgMed.tilYearMonth().førsteDagIInneværendeMåned(),
+            tom = it.tilOgMed.tilYearMonth().sisteDagIInneværendeMåned(),
             vedtak = vedtak,
             type = Vedtaksperiodetype.UTBETALING
         )
