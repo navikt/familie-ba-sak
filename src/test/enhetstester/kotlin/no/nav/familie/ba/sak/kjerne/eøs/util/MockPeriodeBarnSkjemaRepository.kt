@@ -55,8 +55,9 @@ private class MinnebasertSkjemaRepository<S> where S : PeriodeOgBarnSkjemaEntite
     fun save(skjemaer: Iterable<S>) = skjemaer.map { save(it) }
 
     private fun save(skjema: S): S {
-        if (skjema.id == 0L)
+        if (skjema.id == 0L) {
             skjema.id = løpenummer.neste()
+        }
 
         skjemaer[skjema.id] = skjema
         return skjema

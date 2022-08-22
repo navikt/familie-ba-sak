@@ -33,8 +33,9 @@ fun <T : PeriodeOgBarnSkjema<T>> T.trekkFra(skjema: T): Collection<T> {
 
 fun <T : PeriodeOgBarnSkjema<T>> Iterable<T>.trekkFra(skalFjernes: T) =
     this.flatMap { skjema ->
-        if (skjema.inneholder(skalFjernes))
+        if (skjema.inneholder(skalFjernes)) {
             skjema.trekkFra(skalFjernes)
-        else
+        } else {
             listOf(skjema)
+        }
     }

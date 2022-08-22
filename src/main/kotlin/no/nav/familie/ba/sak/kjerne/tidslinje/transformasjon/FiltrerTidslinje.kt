@@ -19,11 +19,13 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrer(filter: (I?) -> Boolean): Tidslin
 
     // fraOgMed og tilOgMed vil enten begge ha verdi eller begge være null
     // Sjekker begge for å få smart cast for begge i metodekallene under
-    return if (fraOgMed == null || tilOgMed == null)
+    return if (fraOgMed == null || tilOgMed == null) {
         TomTidslinje()
-    else object : Tidslinje<I, T>() {
+    } else {
+        object : Tidslinje<I, T>() {
         override fun lagPerioder(): Collection<Periode<I, T>> =
             tidslinje.perioder().filter { filter(it.innhold) }
+    }
     }
 }
 

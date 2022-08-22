@@ -124,16 +124,22 @@ class AutovedtakSmåbarnstilleggService(
         val sistIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id)
         val forrigeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) emptyList()
-            else beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+            if (sistIverksatteBehandling == null) {
+                emptyList()
+            } else {
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
                 behandlingId = sistIverksatteBehandling.id
             ).filter { it.erSmåbarnstillegg() }
+            }
 
         val nyeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) emptyList()
-            else beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+            if (sistIverksatteBehandling == null) {
+                emptyList()
+            } else {
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
                 behandlingId = behandlingEtterBehandlingsresultat.id
             ).filter { it.erSmåbarnstillegg() }
+            }
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
             forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,

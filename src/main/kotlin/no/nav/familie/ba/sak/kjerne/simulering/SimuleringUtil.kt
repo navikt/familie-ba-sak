@@ -57,9 +57,11 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
 
     filterBortUrelevanteVedtakSimuleringPosteringer(økonomiSimuleringMottakere).forEach {
         it.økonomiSimuleringPostering.forEach { postering ->
-            if (simuleringPerioder.containsKey(postering.fom))
+            if (simuleringPerioder.containsKey(postering.fom)) {
                 simuleringPerioder[postering.fom]?.add(postering)
-            else simuleringPerioder[postering.fom] = mutableListOf(postering)
+            } else {
+                simuleringPerioder[postering.fom] = mutableListOf(postering)
+            }
         }
     }
 
@@ -129,8 +131,11 @@ fun hentEtterbetalingIPeriode(
         periodeHarPositivFeilutbetaling ->
             BigDecimal.ZERO
         else ->
-            if (sumYtelser < BigDecimal.ZERO) BigDecimal.ZERO
-            else sumYtelser
+            if (sumYtelser < BigDecimal.ZERO) {
+                BigDecimal.ZERO
+            } else {
+                sumYtelser
+            }
     }
 }
 

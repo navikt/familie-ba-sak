@@ -150,7 +150,9 @@ class SaksstatistikkService(
     }
 
     private fun hentLandkode(person: Person): String {
-        return if (person.bostedsadresser.isNotEmpty()) "NO" else {
+        return if (person.bostedsadresser.isNotEmpty()) {
+            "NO"
+        } else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
                 person.aktør
             )
@@ -160,7 +162,9 @@ class SaksstatistikkService(
     private fun hentLandkode(aktør: Aktør): String {
         val personInfo = personopplysningerService.hentPersoninfoEnkel(aktør)
 
-        return if (personInfo.bostedsadresser.isNotEmpty()) "NO" else {
+        return if (personInfo.bostedsadresser.isNotEmpty()) {
+            "NO"
+        } else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(aktør)
         }
     }

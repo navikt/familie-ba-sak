@@ -47,7 +47,9 @@ fun Standardbegrunnelse.triggesForPeriode(
         .filter { person ->
             if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
                 aktørIderMedUtbetaling.contains(person.aktørId) || person.type == PersonType.SØKER
-            } else true
+            } else {
+                true
+            }
         }
 
     val ytelseTyperForPeriode = minimertVedtaksperiode.ytelseTyperForPeriode

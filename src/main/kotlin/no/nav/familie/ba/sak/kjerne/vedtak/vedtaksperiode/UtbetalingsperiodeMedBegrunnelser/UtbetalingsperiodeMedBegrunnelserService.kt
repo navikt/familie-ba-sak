@@ -56,7 +56,9 @@ class UtbetalingsperiodeMedBegrunnelserService(
                 utbetalingsperioder = utbetalingsperioderMedReduksjon,
                 kompetanser = kompetanser.toList()
             )
-        } else utbetalingsperioderMedReduksjon
+        } else {
+            utbetalingsperioderMedReduksjon
+        }
     }
 
     fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(

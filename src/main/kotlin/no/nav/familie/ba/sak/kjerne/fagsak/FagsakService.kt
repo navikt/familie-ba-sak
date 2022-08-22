@@ -143,16 +143,24 @@ class FagsakService(
         fagsakType: FagsakType = FagsakType.NORMAL
     ): Ressurs<RestMinimalFagsak> {
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør, fagsakType)
-        return if (fagsak != null) Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id)) else Ressurs.failure(
+        return if (fagsak != null) {
+            Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id))
+        } else {
+            Ressurs.failure(
             errorMessage = "Fant ikke fagsak på person"
         )
+        }
     }
 
     fun hentMinimalFagsakerForPerson(aktør: Aktør): Ressurs<List<RestMinimalFagsak>> {
         val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør)
-        return if (!fagsaker.isEmpty()) Ressurs.success(data = lagRestMinimalFagsaker(fagsaker)) else Ressurs.failure(
+        return if (!fagsaker.isEmpty()) {
+            Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
+        } else {
+            Ressurs.failure(
             errorMessage = "Fant ikke fagsaker på person"
         )
+        }
     }
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
@@ -214,10 +222,11 @@ class FagsakService(
             søkerFødselsnummer = fagsak.aktør.aktivFødselsnummer(),
             status = fagsak.status,
             underBehandling =
-            if (aktivBehandling == null)
+            if (aktivBehandling == null) {
                 false
-            else
-                aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET),
+            } else {
+                aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET)
+            },
             løpendeKategori = behandlingstemaService.hentLøpendeKategori(fagsakId = fagsakId),
             løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsakId),
             gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
@@ -371,10 +380,11 @@ class FagsakService(
                             navn = personInfoMedRelasjoner.navn,
                             ident = behandling.fagsak.aktør.aktivFødselsnummer(),
                             rolle =
-                            if (behandling.fagsak.type == FagsakType.NORMAL)
+                            if (behandling.fagsak.type == FagsakType.NORMAL) {
                                 FagsakDeltagerRolle.FORELDER
-                            else
-                                FagsakDeltagerRolle.UKJENT,
+                            } else {
+                                FagsakDeltagerRolle.UKJENT
+                            },
                             kjønn = personInfoMedRelasjoner.kjønn,
                             fagsakId = behandling.fagsak.id,
                             fagsakType = behandling.fagsak.type
@@ -427,7 +437,9 @@ class FagsakService(
                 adressebeskyttelseGradering = adressebeskyttelse,
                 harTilgang = false
             )
-        } else null
+        } else {
+            null
+        }
     }
 
     fun oppgiFagsakdeltagere(aktør: Aktør, barnasAktørId: List<Aktør>): List<RestFagsakDeltager> {

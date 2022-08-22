@@ -106,11 +106,12 @@ data class EndretUtbetalingAndel(
             throw FunksjonellFeil(melding = feilmelding, frontendFeilmelding = feilmelding)
         }
 
-        if (fom!! > tom!!)
+        if (fom!! > tom!!) {
             throw FunksjonellFeil(
                 melding = "fom må være lik eller komme før tom",
                 frontendFeilmelding = "Du kan ikke sette en f.o.m. dato som er etter t.o.m. dato",
             )
+        }
 
         if (årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null) {
             throw FunksjonellFeil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")

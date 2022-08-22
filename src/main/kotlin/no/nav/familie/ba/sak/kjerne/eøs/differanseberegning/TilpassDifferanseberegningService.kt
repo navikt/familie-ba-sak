@@ -34,8 +34,9 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
             tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
         )
 
-        if (featureToggleService.kanHåndtereEøsUtenomPrimærland())
+        if (featureToggleService.kanHåndtereEøsUtenomPrimærland()) {
             tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
+        }
     }
 }
 
@@ -57,8 +58,9 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
             tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
         )
 
-        if (featureToggleService.kanHåndtereEøsUtenomPrimærland())
+        if (featureToggleService.kanHåndtereEøsUtenomPrimærland()) {
             tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
+        }
     }
 }
 
@@ -78,8 +80,9 @@ class TilpassDifferanseberegningEtterValutakursService(
             tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
         )
 
-        if (featureToggleService.kanHåndtereEøsUtenomPrimærland())
+        if (featureToggleService.kanHåndtereEøsUtenomPrimærland()) {
             tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
+        }
     }
 }
 
@@ -91,8 +94,9 @@ fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
     tilkjentYtelse: TilkjentYtelse,
     oppdaterteAndeler: List<AndelTilkjentYtelse>
 ) {
-    if (tilkjentYtelse.andelerTilkjentYtelse.erIPraksisLik(oppdaterteAndeler))
+    if (tilkjentYtelse.andelerTilkjentYtelse.erIPraksisLik(oppdaterteAndeler)) {
         return
+    }
 
     // Her er det viktig å beholde de originale andelene, som styres av JPA og har alt av innhold
     val skalBeholdes = tilkjentYtelse.andelerTilkjentYtelse
@@ -102,8 +106,9 @@ fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
         .filter { !tilkjentYtelse.andelerTilkjentYtelse.inneholderIPraksis(it) }
 
     // Forsikring: Sjekk at det ikke oppstår eller forsvinner andeler når de sjekkes for likhet
-    if (oppdaterteAndeler.size != (skalBeholdes.size + skalLeggesTil.size))
+    if (oppdaterteAndeler.size != (skalBeholdes.size + skalLeggesTil.size)) {
         throw IllegalStateException("Avvik mellom antall innsendte andeler og kalkulerte endringer")
+    }
 
     tilkjentYtelse.andelerTilkjentYtelse.clear()
     tilkjentYtelse.andelerTilkjentYtelse.addAll(skalBeholdes + skalLeggesTil)

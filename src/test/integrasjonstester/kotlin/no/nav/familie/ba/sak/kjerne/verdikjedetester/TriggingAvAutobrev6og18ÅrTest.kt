@@ -48,9 +48,11 @@ class TriggingAvAutobrev6og18ÅrTest(
     }
 
     fun kjørFørstegangsbehandlingOgTriggAutobrev(årMedReduksjonsbegrunnelse: Int) {
-        val reduksjonsbegrunnelse = if (årMedReduksjonsbegrunnelse == 6)
-            Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR else
+        val reduksjonsbegrunnelse = if (årMedReduksjonsbegrunnelse == 6) {
+            Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR
+        } else {
             Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR
+        }
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(

@@ -54,10 +54,11 @@ private fun validarSøkersYtelserMotEventueltNegativeAndelerForBarna(
         .map { it.kalkulertUtbetalingsbeløp }
         .sum()
 
-    if (barnasSumNegativeDifferansebeløp < 0 && søkersSumUtbetalingsbeløp > 0)
+    if (barnasSumNegativeDifferansebeløp < 0 && søkersSumUtbetalingsbeløp > 0) {
         TODO(
             "Søker har småbarnstillegg og/elleer utvidet barnetrygd, " +
                 "samtidig som ett eller flere barn har endt med negative utbetalingsbeløp etter differanseberegning. " +
                 "Det er ikke støttet ennå"
         )
+    }
 }

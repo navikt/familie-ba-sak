@@ -30,10 +30,14 @@ fun lagPersonResultatAvOverstyrteResultater(
             .find { it.vilkårType == vilkårType }
             ?: VilkårResultat(
                 personResultat = personResultat,
-                periodeFom = if (vilkårType == Vilkår.UNDER_18_ÅR) person.fødselsdato else maxOf(
+                periodeFom = if (vilkårType == Vilkår.UNDER_18_ÅR) {
+                    person.fødselsdato
+                } else {
+                    maxOf(
                     person.fødselsdato,
                     LocalDate.now().minusYears(3)
-                ),
+                )
+                },
                 periodeTom = if (vilkårType == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null,
                 vilkårType = vilkårType,
                 resultat = Resultat.OPPFYLT,

@@ -42,8 +42,11 @@ class AutobrevOpphørSmåbarnstilleggService(
 
         val behandlingsårsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG
         val standardbegrunnelse =
-            if (yngsteBarnFylteTreÅrForrigeMåned) Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
-            else Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
+            if (yngsteBarnFylteTreÅrForrigeMåned) {
+                Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
+            } else {
+                Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
+            }
 
         if (!autovedtakBrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = fagsakId,

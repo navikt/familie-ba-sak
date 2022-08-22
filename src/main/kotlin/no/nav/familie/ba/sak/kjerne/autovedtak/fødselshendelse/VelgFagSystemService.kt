@@ -54,11 +54,15 @@ class VelgFagSystemService(
     }
 
     internal fun morHarLøpendeEllerTidligereUtbetalinger(fagsak: Fagsak?): Boolean {
-        return if (fagsak == null) false
-        else if (behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id)
+        return if (fagsak == null) {
+            false
+        } else if (behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id)
             .any { it.status == BehandlingStatus.UTREDES }
-        ) true
-        else behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
+        ) {
+            true
+        } else {
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
+        }
     }
 
     internal fun morHarSakerMenIkkeLøpendeIInfotrygd(morsIdent: String): Boolean {

@@ -9,10 +9,11 @@ data class MånedTidspunkt internal constructor(
     private val uendelighet: Uendelighet
 ) : Tidspunkt<Måned>(uendelighet) {
     init {
-        if (måned < PRAKTISK_TIDLIGSTE_DAG.toYearMonth())
+        if (måned < PRAKTISK_TIDLIGSTE_DAG.toYearMonth()) {
             throw IllegalArgumentException("Tidspunktet er for lenge siden. Bruk uendeligLengeSiden()")
-        else if (måned > PRAKTISK_SENESTE_DAG.toYearMonth())
+        } else if (måned > PRAKTISK_SENESTE_DAG.toYearMonth()) {
             throw IllegalArgumentException("Tidspunktet er for lenge til. Bruk uendeligLengeTil()")
+        }
     }
 
     override fun tilFørsteDagIMåneden(): DagTidspunkt =
@@ -29,16 +30,18 @@ data class MånedTidspunkt internal constructor(
     override fun tilLocalDate(): LocalDate = månedTilDagKonverterer(måned)
 
     override fun tilYearMonthEllerNull(): YearMonth? =
-        if (uendelighet != Uendelighet.INGEN)
+        if (uendelighet != Uendelighet.INGEN) {
             null
-        else
+        } else {
             måned
+        }
 
     override fun tilYearMonth(): YearMonth =
-        if (uendelighet != Uendelighet.INGEN)
+        if (uendelighet != Uendelighet.INGEN) {
             throw IllegalStateException("Tidspunktet er uendelig")
-        else
+        } else {
             måned
+        }
 
     override fun flytt(tidsenheter: Long) = copy(måned = måned.plusMonths(tidsenheter))
 
@@ -59,15 +62,17 @@ data class MånedTidspunkt internal constructor(
     override fun somFraOgMed(): MånedTidspunkt {
         return if (uendelighet == Uendelighet.FREMTID) {
             somEndelig()
-        } else
+        } else {
             this
+        }
     }
 
     override fun somTilOgMed(): MånedTidspunkt {
         return if (uendelighet == Uendelighet.FORTID) {
             somEndelig()
-        } else
+        } else {
             this
+        }
     }
 
     override fun sammenliknMed(tidspunkt: Tidspunkt<Måned>): Int {

@@ -120,17 +120,20 @@ data class VedtaksperiodeMedBegrunnelser(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ): List<UtbetalingsperiodeDetalj> =
-        if (andelerTilkjentYtelse.isEmpty()) emptyList()
-        else if (this.type == Vedtaksperiodetype.UTBETALING ||
+        if (andelerTilkjentYtelse.isEmpty()) {
+            emptyList()
+        } else if (this.type == Vedtaksperiodetype.UTBETALING ||
             this.type == Vedtaksperiodetype.FORTSATT_INNVILGET ||
             this.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
         ) {
             val vertikaltSegmentForVedtaksperiode =
-                if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
+                if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
                     hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse)
-                else hentVertikaltSegmentForVedtaksperiode(
+                } else {
+                    hentVertikaltSegmentForVedtaksperiode(
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
                 )
+                }
 
             val andelerForSegment =
                 andelerTilkjentYtelse.hentAndelerForSegment(vertikaltSegmentForVedtaksperiode)

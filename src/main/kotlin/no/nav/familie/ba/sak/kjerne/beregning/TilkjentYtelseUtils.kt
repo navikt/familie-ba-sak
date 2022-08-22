@@ -140,7 +140,9 @@ object TilkjentYtelseUtils {
                     },
                 )
             }
-        } else emptyList()
+        } else {
+            emptyList()
+        }
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker + andelerTilkjentYtelseSmåbarnstillegg)
 
@@ -312,16 +314,21 @@ object TilkjentYtelseUtils {
             oppfyltFom,
             oppfyltTom
         )
-        val satsperioderFørFylte6År = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
+        val satsperioderFørFylte6År = if (periodeUnder6År != null) {
+            SatsService.hentGyldigSatsFor(
             satstype = SatsType.TILLEGG_ORBA,
             stønadFraOgMed = settRiktigStønadFom(
                 fraOgMed = periodeUnder6År.fom
             ),
             stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
             maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
-        ) else emptyList()
+        )
+        } else {
+            emptyList()
+        }
 
-        val satsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
+        val satsperioderEtterFylte6År = if (periodeOver6år != null) {
+            SatsService.hentGyldigSatsFor(
             satstype = SatsType.ORBA,
             stønadFraOgMed = settRiktigStønadFom(
                 skalStarteSammeMåned =
@@ -333,7 +340,10 @@ object TilkjentYtelseUtils {
                 tilOgMed = periodeOver6år.tom
             ),
             maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
-        ) else emptyList()
+        )
+        } else {
+            emptyList()
+        }
 
         return listOf(satsperioderFørFylte6År, satsperioderEtterFylte6År).flatten()
             .sortedBy { it.fraOgMed }
@@ -364,16 +374,18 @@ object TilkjentYtelseUtils {
     }
 
     private fun settRiktigStønadFom(skalStarteSammeMåned: Boolean = false, fraOgMed: LocalDate): YearMonth =
-        if (skalStarteSammeMåned)
+        if (skalStarteSammeMåned) {
             YearMonth.from(fraOgMed.withDayOfMonth(1))
-        else
+        } else {
             YearMonth.from(fraOgMed.plusMonths(1).withDayOfMonth(1))
+        }
 
     private fun settRiktigStønadTom(skalAvsluttesMånedenFør: Boolean = false, tilOgMed: LocalDate): YearMonth =
-        if (skalAvsluttesMånedenFør)
+        if (skalAvsluttesMånedenFør) {
             YearMonth.from(tilOgMed.plusDays(1).minusMonths(1).sisteDagIMåned())
-        else
+        } else {
             YearMonth.from(tilOgMed.sisteDagIMåned())
+        }
 }
 
 fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair<List<MånedPeriode>, List<MånedPeriode>> {
@@ -409,9 +421,11 @@ fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair
             nesteMånedMedNyOverlappstatus
         }
 
-        if (periodeMedOverlapp)
+        if (periodeMedOverlapp) {
             perioderMedOverlapp.add(MånedPeriode(periodeStart, periodeSlutt))
-        else perioderUtenOverlapp.add(MånedPeriode(periodeStart, periodeSlutt))
+        } else {
+            perioderUtenOverlapp.add(MånedPeriode(periodeStart, periodeSlutt))
+        }
 
         periodeStart = alleMånederMedOverlappstatus
             .filter { it.key > periodeSlutt }

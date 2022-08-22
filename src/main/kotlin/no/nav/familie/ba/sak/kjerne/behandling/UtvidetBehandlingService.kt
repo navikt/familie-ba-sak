@@ -134,7 +134,9 @@ class UtvidetBehandlingService(
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
                     vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
                         .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }.sortedBy { it.fom }
-                } else emptyList(),
+                } else {
+                    emptyList()
+                },
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),
             kompetanser = kompetanser.map { it.tilRestKompetanse() }.sortedByDescending { it.fom },

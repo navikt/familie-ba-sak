@@ -207,9 +207,13 @@ class BrevPeriodeService(
                 val result: LocalDateTimeline<Beløpsdifferanse> = endringerITilkjentYtelsePerBarn.getValue(barn)
                 if (!result.filterValue { beløp -> beløp < 0 }.isEmpty) {
                     personidentService.hentAktør(barn).aktivFødselsnummer()
-                } else null
+                } else {
+                    null
+                }
             }
-        } else emptyList()
+        } else {
+            emptyList()
+        }
     }
 
     fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {

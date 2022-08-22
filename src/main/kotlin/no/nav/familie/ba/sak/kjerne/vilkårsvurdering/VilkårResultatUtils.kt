@@ -27,7 +27,9 @@ object VilkårResultatUtils {
         val tom: LocalDate? =
             if (vilkår == Vilkår.UNDER_18_ÅR) {
                 person.fødselsdato.til18ÅrsVilkårsdato()
-            } else null
+            } else {
+                null
+            }
 
         return VilkårResultat(
             regelInput = automatiskVurderingResultat.regelInput,

@@ -42,9 +42,10 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMedEtter(tidslinje: Tidslinj
 fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjær(fraOgMed: Tidspunkt<T>, tilOgMed: Tidspunkt<T>): Tidslinje<I, T> {
     val tidslinje = this
 
-    return if (tilOgMed < fraOgMed)
+    return if (tilOgMed < fraOgMed) {
         TomTidslinje()
-    else object : Tidslinje<I, T>() {
+    } else {
+        object : Tidslinje<I, T>() {
         override fun lagPerioder(): Collection<Periode<I, T>> {
             return tidslinje.perioder()
                 .filter { it.fraOgMed <= tilOgMed && it.tilOgMed >= fraOgMed }
@@ -56,6 +57,7 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjær(fraOgMed: Tidspunkt<T>, tilOgMed
                     )
                 }
         }
+    }
     }
 }
 

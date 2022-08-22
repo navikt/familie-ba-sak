@@ -216,8 +216,11 @@ private fun vilkårResultatPasserForAvslagsperiode(
     val erAvslagUtenFomDato = minimertVilkårResultat.periodeFom == null
 
     val fomVilkår =
-        if (erAvslagUtenFomDato) TIDENES_MORGEN.toYearMonth()
-        else minimertVilkårResultat.periodeFom!!.toYearMonth()
+        if (erAvslagUtenFomDato) {
+            TIDENES_MORGEN.toYearMonth()
+        } else {
+            minimertVilkårResultat.periodeFom!!.toYearMonth()
+        }
 
     return fomVilkår == vedtaksperiode.fom.toYearMonth() &&
         minimertVilkårResultat.resultat == Resultat.IKKE_OPPFYLT

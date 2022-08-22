@@ -123,12 +123,14 @@ class DokumentService(
             onFailure = {
                 if (it is Feil) {
                     throw it
-                } else throw Feil(
+                } else {
+                    throw Feil(
                     message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal}. ${it.message}",
                     frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                     httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                     throwable = it
                 )
+                }
             }
         )
     }
@@ -147,7 +149,9 @@ class DokumentService(
                 navSkjemaId = "NAV 33.00-07",
                 overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07"
             )
-        } else null
+        } else {
+            null
+        }
 
         val journalpostId = utgåendeJournalføringService.journalførManueltBrev(
             fnr = manueltBrevRequest.mottakerIdent,

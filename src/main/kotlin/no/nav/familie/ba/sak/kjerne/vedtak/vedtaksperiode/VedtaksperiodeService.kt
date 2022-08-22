@@ -203,7 +203,9 @@ class VedtaksperiodeService(
                     Vedtaksbegrunnelse(
                         standardbegrunnelse = if (vedtak.behandling.fagsak.status == FagsakStatus.LØPENDE) {
                             Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
-                        } else Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
+                        } else {
+                            Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE
+                        },
                         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     )
                 )
@@ -245,11 +247,15 @@ class VedtaksperiodeService(
 
             val fom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
                 YearMonth.now().førsteDagIInneværendeMåned()
-            } else null
+            } else {
+                null
+            }
 
             val tom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
                 finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(vedtak.behandling.id)
-            } else null
+            } else {
+                null
+            }
 
             vedtaksperiodeHentOgPersisterService.lagre(
                 VedtaksperiodeMedBegrunnelser(
@@ -297,9 +303,11 @@ class VedtaksperiodeService(
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
     ): List<VedtaksperiodeMedBegrunnelser> {
         val endringstidspunkt = manueltOverstyrtEndringstidspunkt
-            ?: if (!gjelderFortsattInnvilget)
+            ?: if (!gjelderFortsattInnvilget) {
                 endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
-            else TIDENES_MORGEN
+            } else {
+                TIDENES_MORGEN
+            }
 
         return vedtaksperioderMedBegrunnelser.filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
     }
@@ -390,7 +398,9 @@ class VedtaksperiodeService(
                 persongrunnlag = persongrunnlag,
                 andelerTilkjentYtelse = andelerTilkjentYtelse
             )
-        } else utvidetVedtaksperioderMedBegrunnelser
+        } else {
+            utvidetVedtaksperioderMedBegrunnelser
+        }
     }
 
     private fun hentUtvidetVedtaksperioderMedBegrunnelserOgGyldigeBegrunnelser(
@@ -505,14 +515,19 @@ class VedtaksperiodeService(
         )
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
-            if (forrigeIverksatteBehandling != null)
+            if (forrigeIverksatteBehandling != null) {
                 persongrunnlagService.hentAktiv(behandlingId = forrigeIverksatteBehandling.id)
-            else null
+            } else {
+                null
+            }
         val forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> =
-            if (forrigeIverksatteBehandling != null)
+            if (forrigeIverksatteBehandling != null) {
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
                     behandlingId = forrigeIverksatteBehandling.id
-                ) else emptyList()
+                )
+            } else {
+                emptyList()
+            }
 
         val personopplysningGrunnlag =
             persongrunnlagService.hentAktiv(behandlingId = behandling.id)
@@ -574,7 +589,9 @@ class VedtaksperiodeService(
                 vedtak = vedtak,
                 uregistrerteBarn = uregistrerteBarn
             )
-        } else avslagsperioder
+        } else {
+            avslagsperioder
+        }
     }
 
     private fun leggTilAvslagsbegrunnelseForUregistrertBarn(
@@ -590,7 +607,9 @@ class VedtaksperiodeService(
                     tom = null,
                     type = Vedtaksperiodetype.AVSLAG
                 )
-            } else avslagsperioder
+            } else {
+                avslagsperioder
+            }
 
         return avslagsperioderMedTomPeriode.map {
             if (it.fom == null && it.tom == null && uregistrerteBarn.isNotEmpty()) {
@@ -602,7 +621,9 @@ class VedtaksperiodeService(
                         )
                     )
                 }
-            } else it
+            } else {
+                it
+            }
         }.toList()
     }
 

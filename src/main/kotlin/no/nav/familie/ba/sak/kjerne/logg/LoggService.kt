@@ -260,11 +260,16 @@ class LoggService(
                 type = if (behandling.erManuellMigrering()) LoggType.MIGRERING_BEKREFTET else LoggType.GODKJENNE_VEDTAK,
                 tittel = if (beslutning.erGodkjent()) {
                     if (behandling.erManuellMigrering()) "Migrering bekreftet" else "Vedtak godkjent"
-                } else "Vedtak underkjent",
+                } else {
+                    "Vedtak underkjent"
+                },
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.BESLUTTER),
                 tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else "",
-                opprettetAv = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_NAVN else
+                opprettetAv = if (behandling.erManuellMigrering()) {
+                    SikkerhetContext.SYSTEM_NAVN
+                } else {
                     SikkerhetContext.hentSaksbehandlerNavn()
+                }
             )
         )
     }
@@ -390,11 +395,15 @@ class LoggService(
             Nytt beløp: ${korrigertEtterbetaling.beløp} kr
             Begrunnelse: ${korrigertEtterbetaling.begrunnelse ?: "Ingen begrunnelse"}
             """.trimIndent()
-        } else ""
+        } else {
+            ""
+        }
 
         val tittel = if (korrigertEtterbetaling.aktiv) {
             "Etterbetaling i brev er korrigert"
-        } else "Korrigert etterbetaling er angret"
+        } else {
+            "Korrigert etterbetaling er angret"
+        }
 
         lagre(
             Logg(

@@ -172,9 +172,13 @@ class VilkårsvurderingForNyBehandlingService(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) hentVilkårsvurdering(
+            forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) {
+                hentVilkårsvurdering(
                 forrigeBehandlingSomErVedtatt.id
-            ) else null
+            )
+            } else {
+                null
+            }
         )
 
         if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {

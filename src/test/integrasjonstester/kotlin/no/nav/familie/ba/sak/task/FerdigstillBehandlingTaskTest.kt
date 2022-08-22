@@ -98,7 +98,9 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
                 behandlingId = behandlingEtterVilkårsvurdering.id,
                 steg = StegType.FERDIGSTILLE_BEHANDLING
             )
-        } else behandling
+        } else {
+            behandling
+        }
     }
 
     @Test

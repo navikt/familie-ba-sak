@@ -609,8 +609,9 @@ fun kjørStegprosessForFGB(
             )
         )
 
-    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD)
+    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD) {
         return behandlingEtterPersongrunnlagSteg
+    }
 
     val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
     persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).personer.forEach { barn ->
@@ -747,10 +748,14 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 
     val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
         behandlingEtterBehandlingsresultat,
-        if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) RestTilbakekreving(
+        if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
+            RestTilbakekreving(
             valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
             begrunnelse = "Begrunnelse"
-        ) else null
+        )
+        } else {
+            null
+        }
     )
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterSimuleringSteg
 

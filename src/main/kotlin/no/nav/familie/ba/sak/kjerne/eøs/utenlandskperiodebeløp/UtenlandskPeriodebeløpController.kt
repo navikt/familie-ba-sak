@@ -38,8 +38,9 @@ class UtenlandskPeriodebeløpController(
         @PathVariable behandlingId: Long,
         @Valid @RequestBody restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
+        }
 
         val barnAktører = restUtenlandskPeriodebeløp.barnIdenter.map { personidentService.hentAktør(it) }
 
@@ -58,8 +59,9 @@ class UtenlandskPeriodebeløpController(
         @PathVariable behandlingId: Long,
         @PathVariable utenlandskPeriodebeløpId: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
+        }
 
         utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId)
 

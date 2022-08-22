@@ -69,10 +69,11 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 .map { person -> person.personIdent }
 
         triggesAv.personerManglerOpplysninger ->
-            if (restBehandlingsgrunnlagForBrev.minimertePersonResultater.harPersonerSomManglerOpplysninger())
+            if (restBehandlingsgrunnlagForBrev.minimertePersonResultater.harPersonerSomManglerOpplysninger()) {
                 emptyList()
-            else
+            } else {
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
+            }
 
         erFortsattInnvilgetBegrunnelse -> identerMedUtbetalingPåPeriode
         erEndretUtbetalingBegrunnelse -> hentPersonerForEndretUtbetalingBegrunnelse(
@@ -154,5 +155,7 @@ private fun hentAktuellePersonerForVedtaksperiode(
 ): List<MinimertRestPerson> = personerPåBehandling.filter { person ->
     if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
         identerMedUtbetalingPåPeriode.contains(person.personIdent) || person.type == PersonType.SØKER
-    } else true
+    } else {
+        true
+    }
 }

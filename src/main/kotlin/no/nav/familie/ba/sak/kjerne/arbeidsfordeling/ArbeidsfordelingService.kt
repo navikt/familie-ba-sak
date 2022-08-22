@@ -62,10 +62,14 @@ class ArbeidsfordelingService(
             arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
 
         val forrigeArbeidsfordelingsenhet =
-            if (aktivArbeidsfordelingPåBehandling != null) Arbeidsfordelingsenhet(
+            if (aktivArbeidsfordelingPåBehandling != null) {
+                Arbeidsfordelingsenhet(
                 enhetId = aktivArbeidsfordelingPåBehandling.behandlendeEnhetId,
                 enhetNavn = aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn
-            ) else null
+            )
+            } else {
+                null
+            }
 
         val oppdatertArbeidsfordelingPåBehandling =
             if (behandling.erSatsendring()) {

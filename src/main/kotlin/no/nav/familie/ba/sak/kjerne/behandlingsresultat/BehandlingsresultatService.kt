@@ -43,10 +43,12 @@ class BehandlingsresultatService(
 
         val barna = persongrunnlagService.hentBarna(behandling)
         val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
-        if (barna.isEmpty() && (søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList()).isEmpty()) throw FunksjonellFeil(
+        if (barna.isEmpty() && (søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList()).isEmpty()) {
+            throw FunksjonellFeil(
             melding = "Ingen barn i personopplysningsgrunnlag ved validering av vilkårsvurdering på behandling ${behandling.id}",
             frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering."
         )
+        }
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
             ?: throw Feil("Finner ikke aktiv vilkårsvurdering")
@@ -113,12 +115,16 @@ class BehandlingsresultatService(
     private fun validerYtelsePersoner(behandlingId: Long, ytelsePersoner: List<YtelsePerson>) {
         val søkerAktør = persongrunnlagService.hentSøker(behandlingId)?.aktør
             ?: throw Feil("Fant ikke søker på behandling")
-        if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.aktør != søkerAktør }) throw Feil(
+        if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.aktør != søkerAktør }) {
+            throw Feil(
             "Barn kan ikke ha ytelsetype utvidet"
         )
-        if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.aktør == søkerAktør }) throw Feil(
+        }
+        if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.aktør == søkerAktør }) {
+            throw Feil(
             "Søker kan ikke ha ytelsetype ordinær"
         )
+        }
     }
 
     private fun hentPersonerFramstiltKravFor(
@@ -132,9 +138,11 @@ class BehandlingsresultatService(
             ?: emptyList()
 
         val utvidetBarnetrygdSøker =
-            if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET)
+            if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET) {
                 listOf(behandling.fagsak.aktør)
-            else emptyList()
+            } else {
+                emptyList()
+            }
 
         val nyeBarn = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
             .map { it.aktør }

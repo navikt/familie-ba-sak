@@ -78,7 +78,7 @@ class UtbetalingsoppdragGenerator(
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
-        val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty())
+        val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
             lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
                 andeler = andelerTilOpprettelse,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
@@ -86,13 +86,19 @@ class UtbetalingsoppdragGenerator(
                 sisteOffsetIKjedeOversikt = sisteOffsetPerIdent,
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 skalOppdatereTilkjentYtelse = !erSimulering,
-            ) else emptyList()
+            )
+        } else {
+            emptyList()
+        }
 
-        val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty())
+        val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty()) {
             lagUtbetalingsperioderForOpphør(
                 andeler = andelerTilOpphør,
                 vedtak = vedtak,
-            ) else emptyList()
+            )
+        } else {
+            emptyList()
+        }
 
         return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
@@ -132,10 +138,12 @@ class UtbetalingsoppdragGenerator(
         skalOppdatereTilkjentYtelse: Boolean,
     ): List<Utbetalingsperiode> {
         var offset =
-            if (!erFørsteBehandlingPåFagsak)
+            if (!erFørsteBehandlingPåFagsak) {
                 sisteOffsetPåFagsak?.plus(1)
                     ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
-            else 0
+            } else {
+                0
+            }
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(
             vedtak = vedtak

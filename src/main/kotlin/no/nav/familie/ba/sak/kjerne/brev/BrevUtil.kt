@@ -51,10 +51,9 @@ fun hentVedtaksbrevmal(behandling: Behandling): Brevmal {
         throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
     }
 
-    val brevmal = if (behandling.skalBehandlesAutomatisk)
-
+    val brevmal = if (behandling.skalBehandlesAutomatisk) {
         hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak, behandling.fagsak.status)
-    else {
+    } else {
         hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
     }
 
@@ -67,7 +66,9 @@ private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fa
         BehandlingÅrsak.FØDSELSHENDELSE -> {
             if (fagsakStatus == FagsakStatus.LØPENDE) {
                 Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR
-            } else Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN
+            } else {
+                Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN
+            }
         }
         BehandlingÅrsak.OMREGNING_6ÅR,
         BehandlingÅrsak.OMREGNING_18ÅR,
@@ -151,8 +152,11 @@ fun hentSaksbehandlerOgBeslutter(behandling: Behandling, totrinnskontroll: Totri
         behandling.steg == StegType.BESLUTTE_VEDTAK -> {
             Pair(
                 totrinnskontroll.saksbehandler,
-                if (totrinnskontroll.saksbehandler == SikkerhetContext.hentSaksbehandlerNavn()) "Beslutter"
-                else SikkerhetContext.hentSaksbehandlerNavn()
+                if (totrinnskontroll.saksbehandler == SikkerhetContext.hentSaksbehandlerNavn()) {
+                    "Beslutter"
+                } else {
+                    SikkerhetContext.hentSaksbehandlerNavn()
+                }
             )
         }
         else -> {
@@ -175,7 +179,9 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
             behandling.resultat == FORTSATT_INNVILGET -> "Vedtak om fortsatt barnetrygd"
             else -> null
         }
-    } else null
+    } else {
+        null
+    }
 }
 
 fun hjemlerTilHjemmeltekst(hjemler: List<String>, lovForHjemmel: String): String {

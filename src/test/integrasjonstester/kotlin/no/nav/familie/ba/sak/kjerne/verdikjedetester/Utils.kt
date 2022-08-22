@@ -40,8 +40,9 @@ fun generellAssertRestUtvidetBehandling(
     behandlingStegType: StegType? = null,
     behandlingsresultat: Behandlingsresultat? = null
 ) {
-    if (restUtvidetBehandling.status != Ressurs.Status.SUKSESS)
+    if (restUtvidetBehandling.status != Ressurs.Status.SUKSESS) {
         throw IllegalStateException("generellAssertRestUtvidetBehandling feilet. status: ${restUtvidetBehandling.status.name},  melding: ${restUtvidetBehandling.melding}")
+    }
 
     assertEquals(behandlingStatus, restUtvidetBehandling.data?.status)
 
@@ -187,10 +188,14 @@ fun håndterIverksettingAvBehandling(
         )
 
     val behandlingEtterIverksettTilbakekreving =
-        if (behandlingEtterStatusFraOppdrag.steg == StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) stegService.håndterIverksettMotFamilieTilbake(
+        if (behandlingEtterStatusFraOppdrag.steg == StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) {
+            stegService.håndterIverksettMotFamilieTilbake(
             behandling = behandlingEtterStatusFraOppdrag,
             metadata = Properties()
-        ) else behandlingEtterStatusFraOppdrag
+        )
+        } else {
+            behandlingEtterStatusFraOppdrag
+        }
 
     val behandlingSomSkalFerdigstilles =
         if (behandlingEtterIverksettTilbakekreving.steg == StegType.JOURNALFØR_VEDTAKSBREV) {
@@ -217,7 +222,9 @@ fun håndterIverksettingAvBehandling(
                     )
                 )
             behandlingEtterDistribuertVedtak
-        } else behandlingEtterStatusFraOppdrag
+        } else {
+            behandlingEtterStatusFraOppdrag
+        }
 
     val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingSomSkalFerdigstilles)
 

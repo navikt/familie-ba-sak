@@ -53,10 +53,13 @@ class SmåbarnstilleggService(
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId)
 
-        return if (forrigeIverksatteBehandling != null) periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
+        return if (forrigeIverksatteBehandling != null) {
+            periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
             behandlingId = forrigeIverksatteBehandling.id
         ).map { it.tilInternPeriodeOvergangsstønad() }
-        else emptyList()
+        } else {
+            emptyList()
+        }
     }
 
     fun vedtakOmOvergangsstønadPåvirkerFagsak(fagsak: Fagsak): Boolean {

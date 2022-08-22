@@ -46,7 +46,9 @@ class PersonidentService(
             logger.info("Legger til ny ident")
             secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
             opprettPersonIdent(aktør, nyIdent.ident)
-        } else aktør
+        } else {
+            aktør
+        }
     }
 
     @Transactional

@@ -53,9 +53,11 @@ class BrevPeriodeGenerator(
         if (begrunnelserOgFritekster.isEmpty()) return null
 
         val tomDato =
-            if (minimertVedtaksperiode.tom?.erSenereEnnInneværendeMåned() == false)
+            if (minimertVedtaksperiode.tom?.erSenereEnnInneværendeMåned() == false) {
                 minimertVedtaksperiode.tom.tilDagMånedÅr()
-            else null
+            } else {
+                null
+            }
 
         val identerIBegrunnelene = begrunnelseGrunnlagMedPersoner
             .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
@@ -241,6 +243,8 @@ class BrevPeriodeGenerator(
         return if (erAutobrev && fom != null) {
             val fra = if (målform == Målform.NB) "Fra" else "Frå"
             "$fra ${fom.tilDagMånedÅr()} får du:"
-        } else null
+        } else {
+            null
+        }
     }
 }

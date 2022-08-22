@@ -54,7 +54,9 @@ class BehandlingsresultaterTest {
                     "${behandlingsresultatPersonTestConfig.beskrivelse}\nForventet ${behandlingsresultatPersonTestConfig.forventetResultat}, men fikk $behandlingsresultat."
                 )
                 acc + 1
-            } else acc
+            } else {
+                acc
+            }
         } ?: 0
 
         assert(antallFeil == 0)

@@ -32,8 +32,11 @@ fun List<RestRegisteropplysning>.fyllInnTomDatoer(): List<RestRegisteropplysning
     this
         .sortedBy { it.fom }
         .foldRight(mutableListOf<RestRegisteropplysning>()) { foregående, acc ->
-            if (acc.isEmpty() || foregående.tom != null || foregående.fom == null) acc.add(foregående)
-            else acc.add(foregående.copy(tom = acc.last().fom?.minusDays(1)))
+            if (acc.isEmpty() || foregående.tom != null || foregående.fom == null) {
+                acc.add(foregående)
+            } else {
+                acc.add(foregående.copy(tom = acc.last().fom?.minusDays(1)))
+            }
             acc
         }
         .reversed()

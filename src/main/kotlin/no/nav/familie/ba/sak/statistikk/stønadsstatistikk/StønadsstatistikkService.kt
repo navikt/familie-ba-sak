@@ -193,12 +193,18 @@ class StønadsstatistikkService(
     }
 
     private fun hentStatsborgerskap(person: Person): List<String> {
-        return if (person.statsborgerskap.isNotEmpty()) person.statsborgerskap.filtrerGjeldendeNå().map { it.landkode }
-        else listOf(personopplysningerService.hentGjeldendeStatsborgerskap(person.aktør).land)
+        return if (person.statsborgerskap.isNotEmpty()) {
+            person.statsborgerskap.filtrerGjeldendeNå().map { it.landkode }
+        } else {
+            listOf(personopplysningerService.hentGjeldendeStatsborgerskap(person.aktør).land)
+        }
     }
 
-    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.isNotEmpty()) "NO"
-    else if (personopplysningerService.hentPersoninfoEnkel(person.aktør).bostedsadresser.isNotEmpty()) "NO" else {
+    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.isNotEmpty()) {
+        "NO"
+    } else if (personopplysningerService.hentPersoninfoEnkel(person.aktør).bostedsadresser.isNotEmpty()) {
+        "NO"
+    } else {
         val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(person.aktør)
 
         if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {

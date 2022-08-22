@@ -71,7 +71,9 @@ class BehandlingstemaService(
                             behandlingstema = lagretBehandling.underkategori.tilOppgaveBehandlingTema().value,
                             behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value
                         )
-                    } else null
+                    } else {
+                        null
+                    }
                 }
 
                 if (manueltOppdatert && skalOppdatereKategoriEllerUnderkategori) {
@@ -84,7 +86,9 @@ class BehandlingstemaService(
                     )
                 }
             }
-        } else behandling
+        } else {
+            behandling
+        }
     }
 
     fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori {

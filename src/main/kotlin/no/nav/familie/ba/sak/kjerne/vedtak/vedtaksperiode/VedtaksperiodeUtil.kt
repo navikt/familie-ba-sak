@@ -228,11 +228,15 @@ fun hentGyldigeBegrunnelserForPeriode(
         endretUtbetalingAndeler = endretUtbetalingAndeler,
         andelerTilkjentYtelse = andelerTilkjentYtelse
     )
-    val eøsBegrunnelser = if (kanBehandleEØS) hentGyldigeEØSBegrunnelserForPeriode(
+    val eøsBegrunnelser = if (kanBehandleEØS) {
+        hentGyldigeEØSBegrunnelserForPeriode(
         sanityEØSBegrunnelser = sanityEØSBegrunnelser,
         kompetanserIPeriode = kompetanserIPeriode,
         kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
-    ) else emptyList()
+    )
+    } else {
+        emptyList()
+    }
 
     return standardbegrunnelser + eøsBegrunnelser
 }
@@ -313,7 +317,9 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
         }.filter {
             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
                 endretUtbetalingsperiodeBegrunnelser.contains(it)
-            } else true
+            } else {
+                true
+            }
         }
 
     return when (minimertVedtaksperiode.type) {

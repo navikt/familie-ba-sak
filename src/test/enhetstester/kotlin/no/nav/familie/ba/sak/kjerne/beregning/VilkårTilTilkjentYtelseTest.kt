@@ -125,10 +125,12 @@ class VilkårTilTilkjentYtelseTest {
                     YtelseType.SMÅBARNSTILLEGG.name
                 )
                 .bygg()
-        } else TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
+        } else {
+            TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
             .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
             .medAndelTilkjentYtelse(søker, søkerAndel1Beløp, søkerAndel1Periode, søkerAndel1Type)
             .bygg()
+        }
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
@@ -137,14 +139,17 @@ class VilkårTilTilkjentYtelseTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
         ) { aktør ->
-            if (småbarnstilleggTestPeriode != null)
+            if (småbarnstilleggTestPeriode != null) {
                 listOf(
                     InternPeriodeOvergangsstønad(
                         personIdent = aktør.aktivFødselsnummer(),
                         fomDato = småbarnstilleggTestPeriode.fraOgMed,
                         tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
                     )
-                ) else emptyList()
+                )
+            } else {
+                emptyList()
+            }
         }
 
         Assertions.assertEquals(
@@ -235,8 +240,9 @@ class TestVilkårsvurderingBuilder(sakType: String) {
         periode: String?,
         erDeltBosted: Boolean? = null
     ): TestVilkårsvurderingBuilder {
-        if (vilkår.isNullOrEmpty() || periode.isNullOrEmpty())
+        if (vilkår.isNullOrEmpty() || periode.isNullOrEmpty()) {
             return this
+        }
 
         val ident = person.aktør.aktivFødselsnummer()
         val aktørId = person.aktør
@@ -289,8 +295,9 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
         periode: String?,
         type: String?
     ): TestTilkjentYtelseBuilder {
-        if (beløp == null || periode.isNullOrEmpty() || type.isNullOrEmpty())
+        if (beløp == null || periode.isNullOrEmpty() || type.isNullOrEmpty()) {
             return this
+        }
 
         val stønadPeriode = TestPeriode.parse(periode)
 
@@ -349,9 +356,13 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
                 val fom = yearMonthMatch.groupValues[1].let { YearMonth.parse(it) }
                 val tom =
                     yearMonthMatch.groupValues[2].let {
-                        if (it.length == 7) YearMonth.parse(it) else YearMonth.from(
+                        if (it.length == 7) {
+                            YearMonth.parse(it)
+                        } else {
+                            YearMonth.from(
                             LocalDate.MAX
                         )
+                        }
                     }
 
                 return TestPeriode(fom!!.atDay(1), tom?.atEndOfMonth())

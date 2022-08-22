@@ -407,10 +407,11 @@ class ClientMocks {
             every {
                 mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(capture(idSlot))
             } answers {
-                if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured.aktivFødselsnummer())
+                if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured.aktivFødselsnummer()) {
                     ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
-                else
+                } else {
                     ADRESSEBESKYTTELSEGRADERING.UGRADERT
+                }
             }
 
             every { mockPersonopplysningerService.harVerge(mockSøkerAutomatiskBehandlingAktør) } returns VergeResponse(

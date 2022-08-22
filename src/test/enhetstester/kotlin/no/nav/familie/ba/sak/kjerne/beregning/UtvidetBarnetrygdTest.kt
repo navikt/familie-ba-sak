@@ -994,10 +994,11 @@ internal class UtvidetBarnetrygdTest {
         erDeltBosted: Boolean = false,
         fødselsdato: LocalDate = fødselsdatoOver6År
     ): Set<VilkårResultat> {
-        val vilkårSomSkalVurderes = if (erUtvidet)
+        val vilkårSomSkalVurderes = if (erUtvidet) {
             listOf(Vilkår.UTVIDET_BARNETRYGD)
-        else
+        } else {
             Vilkår.hentVilkårFor(personType = personType)
+        }
 
         return vilkårSomSkalVurderes.map {
             VilkårResultat(

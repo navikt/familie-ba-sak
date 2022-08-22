@@ -440,9 +440,11 @@ class MigreringService(
         }
 
         if (førsteUtbetalingsbeløp != beløpFraInfotrygd) {
-            val beløpfeilType = if (infotrygdSak.undervalg == "MD")
-                MigreringsfeilType.BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD else
+            val beløpfeilType = if (infotrygdSak.undervalg == "MD") {
+                MigreringsfeilType.BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD
+            } else {
                 MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD
+            }
             secureLog.info(
                 "Ulikt beløp ba-sak og infotrygd migrering. Andeler fra og med ${førsteAndelerTilkjentYtelse.first().stønadFom}: " +
                     "$førsteAndelerTilkjentYtelse"

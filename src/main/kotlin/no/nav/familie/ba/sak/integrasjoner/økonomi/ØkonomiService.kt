@@ -126,8 +126,9 @@ class ØkonomiService(
                         oppdatertBehandling.id
                     ).resultat == Behandlingsresultat.OPPHØRT
                 )
-            )
+            ) {
                 validerOpphørsoppdrag(utbetalingsoppdrag)
+            }
 
             utbetalingsoppdrag
         }
@@ -168,8 +169,9 @@ class ØkonomiService(
             error("Generert utbetalingsoppdrag for opphør inneholder oppdragsperioder med løpende utbetaling.")
         }
 
-        if (utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }.isEmpty())
+        if (utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }.isEmpty()) {
             error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
+        }
     }
 
     private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {

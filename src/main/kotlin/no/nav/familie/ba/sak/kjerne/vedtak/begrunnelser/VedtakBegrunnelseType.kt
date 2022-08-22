@@ -21,11 +21,17 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {
     VedtakBegrunnelseType.AVSLAG ->
-        if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) ""
-        else if (periode.tom == TIDENES_ENDE) periode.fom.tilMånedÅr()
-        else "${periode.fom.tilMånedÅr()} til ${periode.tom.tilMånedÅr()}"
+        if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) {
+            ""
+        } else if (periode.tom == TIDENES_ENDE) {
+            periode.fom.tilMånedÅr()
+        } else {
+            "${periode.fom.tilMånedÅr()} til ${periode.tom.tilMånedÅr()}"
+        }
     else ->
-        if (periode.fom == TIDENES_MORGEN)
+        if (periode.fom == TIDENES_MORGEN) {
             throw Feil("Prøver å finne fom-dato for begrunnelse, men fikk \"TIDENES_MORGEN\".")
-        else periode.fom.forrigeMåned().tilMånedÅr()
+        } else {
+            periode.fom.forrigeMåned().tilMånedÅr()
+        }
 }

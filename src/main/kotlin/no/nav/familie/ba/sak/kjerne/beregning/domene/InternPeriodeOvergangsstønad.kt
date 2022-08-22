@@ -37,7 +37,9 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
             if (sammenslåttePerioder.lastOrNull()?.tomDato?.toYearMonth() == nestePeriode.fomDato.forrigeMåned()
             ) {
                 sammenslåttePerioder.apply { add(removeLast().copy(tomDato = nestePeriode.tomDato)) }
-            } else sammenslåttePerioder.apply { add(nestePeriode) }
+            } else {
+                sammenslåttePerioder.apply { add(nestePeriode) }
+            }
         }
 }
 
@@ -80,8 +82,11 @@ fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandl
 
     val oppsplittedeFramtigigePerioder = gammelOvergangsstønadTidslinje
         .kombinerMed(nyeOvergangsstønadTidslinje) { gammelOvergangsstønadPeriode, nyOvergangsstønadPeriode ->
-            if (nyOvergangsstønadPeriode == null) null
-            else gammelOvergangsstønadPeriode ?: nyOvergangsstønadPeriode
+            if (nyOvergangsstønadPeriode == null) {
+                null
+            } else {
+                gammelOvergangsstønadPeriode ?: nyOvergangsstønadPeriode
+            }
         }
         .lagInternePerioderOvergangsstønad()
 

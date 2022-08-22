@@ -68,9 +68,12 @@ object YtelsePersonUtils {
                 resultater.add(YtelsePersonResultat.INNVILGET)
             }
 
-            val ytelseSlutt: YearMonth? = if (behandlingsresultatPerson.andeler.isNotEmpty())
+            val ytelseSlutt: YearMonth? = if (behandlingsresultatPerson.andeler.isNotEmpty()) {
                 behandlingsresultatPerson.andeler.maxByOrNull { it.stønadTom }?.stønadTom
-                    ?: throw Feil("Finnes andel uten tom-dato") else TIDENES_MORGEN.toYearMonth()
+                    ?: throw Feil("Finnes andel uten tom-dato")
+            } else {
+                TIDENES_MORGEN.toYearMonth()
+            }
 
             utledYtelsePersonResultatVedEndring(
                 behandlingsresultatPerson,
@@ -171,7 +174,9 @@ object YtelsePersonUtils {
                 erLagtTilSegmenter || erFjernetSegmenter -> YtelsePersonResultat.ENDRET_UTEN_UTBETALING
                 else -> null
             }
-        } else null
+        } else {
+            null
+        }
     }
 
     fun erAndelMedEndretBeløp(

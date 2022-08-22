@@ -25,7 +25,9 @@ class FiltreringFødselshendelserSteg(
 
         return if (!fødselshendelsefiltreringResultat.erOppfylt()) {
             StegType.HENLEGG_BEHANDLING
-        } else hentNesteStegForNormalFlyt(behandling)
+        } else {
+            hentNesteStegForNormalFlyt(behandling)
+        }
     }
 
     override fun stegType(): StegType {

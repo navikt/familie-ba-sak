@@ -86,10 +86,13 @@ fun kjørStegprosessForBehandling(
     val behandlingEtterPersongrunnlagSteg =
         if (behandlingÅrsak == BehandlingÅrsak.SØKNAD || behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             håndterSøknadSteg(stegService, behandling, søkerFnr, barnasIdenter, underkategori)
-        } else behandling
+        } else {
+            behandling
+        }
 
-    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD)
+    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD) {
         return behandlingEtterPersongrunnlagSteg
+    }
 
     val behandlingEtterVilkårsvurderingSteg =
         håndterVilkårsvurderingSteg(
@@ -290,10 +293,14 @@ private fun hånderSilmuleringssteg(
 ): Behandling {
     return stegService.håndterVurderTilbakekreving(
         behandlingEtterBehandlingsresultat,
-        if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) RestTilbakekreving(
+        if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
+            RestTilbakekreving(
             valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
             begrunnelse = "Begrunnelse"
-        ) else null
+        )
+        } else {
+            null
+        }
     )
 }
 

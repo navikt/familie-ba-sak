@@ -65,7 +65,9 @@ object TilkjentYtelseValidering {
 
                 if (etterbetalingErUgyldig) {
                     aktørId
-                } else null
+                } else {
+                    null
+                }
             }
 
         return personerMedUgyldigEtterbetaling

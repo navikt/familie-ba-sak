@@ -62,7 +62,9 @@ fun opprettVarsel(tilbakekreving: Tilbakekreving?, simulering: List<ØkonomiSimu
             sumFeilutbetaling = restSimulering.feilutbetaling,
             perioder = slåsammenNærliggendeFeilutbtalingPerioder(restSimulering.perioder)
         )
-    } else null
+    } else {
+        null
+    }
 
 fun hentFaktainfoForTilbakekreving(behandling: Behandling, tilbakekreving: Tilbakekreving): Faktainfo =
     Faktainfo(

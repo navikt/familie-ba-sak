@@ -150,11 +150,12 @@ object EndretUtbetalingAndelValidering {
     }
 
     fun validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler: List<EndretUtbetalingAndel>) {
-        if (endretUtbetalingAndeler.any { it.andelTilkjentYtelser.isEmpty() })
+        if (endretUtbetalingAndeler.any { it.andelTilkjentYtelser.isEmpty() }) {
             throw FunksjonellFeil(
                 melding = "Det er opprettet instanser av EndretUtbetalingandel som ikke er tilknyttet noen andeler. De må enten lagres eller slettes av SB.",
                 frontendFeilmelding = "Du har endrede utbetalingsperioder. Bekreft, slett eller oppdater periodene i listen."
             )
+        }
     }
 }
 

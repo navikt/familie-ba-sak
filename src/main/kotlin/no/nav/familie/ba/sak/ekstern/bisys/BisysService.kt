@@ -95,7 +95,9 @@ class BisysService(
                     sammenslåttePerioder.lastOrNull()?.deltBosted == nesteUtbetaling.deltBosted
                 ) {
                     sammenslåttePerioder.apply { add(removeLast().copy(tomMåned = nesteUtbetaling.tomMåned)) }
-                } else sammenslåttePerioder.apply { add(nesteUtbetaling) }
+                } else {
+                    sammenslåttePerioder.apply { add(nesteUtbetaling) }
+                }
             }
     }
 

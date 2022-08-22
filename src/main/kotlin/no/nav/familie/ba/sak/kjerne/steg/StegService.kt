@@ -149,9 +149,11 @@ class StegService(
         return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
-                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE)
+                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE) {
                     BehandlingType.REVURDERING
-                else BehandlingType.FØRSTEGANGSBEHANDLING,
+                } else {
+                    BehandlingType.FØRSTEGANGSBEHANDLING
+                },
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = nyBehandlingHendelse.barnasIdenter,
@@ -224,7 +226,9 @@ class StegService(
 
         return if (behandlingEtterVilkårsvurdering.skalBehandlesAutomatisk) {
             håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
-        } else behandlingEtterVilkårsvurdering
+        } else {
+            behandlingEtterVilkårsvurdering
+        }
     }
 
     @Transactional
@@ -242,7 +246,9 @@ class StegService(
             håndterVurderTilbakekreving(
                 behandling = behandlingEtterBehandlingsresultatSteg
             )
-        } else behandlingEtterBehandlingsresultatSteg
+        } else {
+            behandlingEtterBehandlingsresultatSteg
+        }
     }
 
     @Transactional

@@ -37,7 +37,9 @@ class SimuleringService(
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
             beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = vedtak.behandling)
-        ) return null
+        ) {
+            return null
+        }
 
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
@@ -81,7 +83,9 @@ class SimuleringService(
 
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
             oppdaterSimuleringPåBehandling(behandling)
-        } else simulering
+        } else {
+            simulering
+        }
     }
 
     private fun simuleringErUtdatert(simulering: RestSimulering) =

@@ -42,10 +42,14 @@ data class UtbetalingsperiodeMal(
     ): Utbetalingsperiode =
         Utbetalingsperiode(
             erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
-            opphør = if (erEndringPåEksisterendePeriode) Opphør(
+            opphør = if (erEndringPåEksisterendePeriode) {
+                Opphør(
                 opphørKjedeFom?.førsteDagIInneværendeMåned()
                     ?: error("Mangler opphørsdato for kjede")
-            ) else null,
+            )
+            } else {
+                null
+            },
             forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() },
             periodeId = periodeIdOffset.toLong(),
             datoForVedtak = vedtak.vedtaksdato?.toLocalDate() ?: now(),

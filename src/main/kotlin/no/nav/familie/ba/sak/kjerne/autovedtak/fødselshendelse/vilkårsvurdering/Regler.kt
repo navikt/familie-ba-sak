@@ -47,11 +47,13 @@ data class VurderPersonErBosattIRiket(
         }
 
         if (adresser.isEmpty()) return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
-        if (harPersonKunAdresserUtenFom(adresser)) return Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET_KUN_ADRESSER_UTEN_FOM)
-        else if (harPersonBoddPåSisteAdresseMinstFraVurderingstidspunkt(adresser, vurderFra)) return Evaluering.oppfylt(
+        if (harPersonKunAdresserUtenFom(adresser)) {
+            return Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET_KUN_ADRESSER_UTEN_FOM)
+        } else if (harPersonBoddPåSisteAdresseMinstFraVurderingstidspunkt(adresser, vurderFra)) {
+            return Evaluering.oppfylt(
             VilkårOppfyltÅrsak.BOR_I_RIKET
         )
-        else if (adresser.filter { !it.harGyldigFom() }.size > 1) return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM)
+        } else if (adresser.filter { !it.harGyldigFom() }.size > 1) return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM)
 
         val adresserMedGyldigFom = adresser.filter { it.harGyldigFom() }
 
@@ -64,9 +66,11 @@ data class VurderPersonErBosattIRiket(
                 adresserMedGyldigFom,
                 vurderFra
             )
-        )
+        ) {
             Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET)
-        else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
+        } else {
+            Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
+        }
     }
 
     /**
@@ -106,8 +110,11 @@ data class VurderBarnErUnder18(
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering =
-        if (alder < 18) Evaluering.oppfylt(VilkårOppfyltÅrsak.ER_UNDER_18_ÅR)
-        else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.ER_IKKE_UNDER_18_ÅR)
+        if (alder < 18) {
+            Evaluering.oppfylt(VilkårOppfyltÅrsak.ER_UNDER_18_ÅR)
+        } else {
+            Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.ER_IKKE_UNDER_18_ÅR)
+        }
 }
 
 data class VurderBarnErBosattMedSøker(
@@ -120,8 +127,11 @@ data class VurderBarnErBosattMedSøker(
                 adresser = barnAdresser,
                 andreAdresser = søkerAdresser
             )
-        ) Evaluering.oppfylt(VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
-        else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
+        ) {
+            Evaluering.oppfylt(VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
+        } else {
+            Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
+        }
     }
 }
 
@@ -168,11 +178,13 @@ data class VurderPersonHarLovligOpphold(
             Medlemskap.TREDJELANDSBORGER -> {
                 val morErUkrainskStatsborger = morLovligOppholdFaktaEØS.statsborgerskap.any { it.landkode == "UKR" }
                 // Midlertidig regel for Ukrainakonflikten
-                if (morErUkrainskStatsborger)
+                if (morErUkrainskStatsborger) {
                     Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN)
-                else if (opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse()) {
+                } else if (opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse()) {
                     Evaluering.oppfylt(VilkårOppfyltÅrsak.TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD)
-                } else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
+                } else {
+                    Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
+                }
             }
             Medlemskap.EØS -> vurderLovligOppholdForEØSBorger(
                 morLovligOppholdFaktaEØS,
@@ -181,7 +193,9 @@ data class VurderPersonHarLovligOpphold(
             Medlemskap.STATSLØS, Medlemskap.UKJENT -> {
                 if (opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse()) {
                     Evaluering.oppfylt(VilkårOppfyltÅrsak.UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD)
-                } else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.STATSLØS)
+                } else {
+                    Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.STATSLØS)
+                }
             }
             else -> Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE)
         }
@@ -266,18 +280,20 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
 
     if (perioderInnenAngittTidsrom.isEmpty()) return Duration.between(fom.atStartOfDay(), tom.atStartOfDay()).toDays()
 
-    val defaultAvstand = if (perioderInnenAngittTidsrom.first().fom!!.isAfter(fom))
+    val defaultAvstand = if (perioderInnenAngittTidsrom.first().fom!!.isAfter(fom)) {
         Duration.between(
             fom.atStartOfDay(),
             perioderInnenAngittTidsrom.first().fom!!.atStartOfDay()
         )
             .toDays()
-    else if (perioderInnenAngittTidsrom.last().tom != null && perioderInnenAngittTidsrom.last().tom!!.isBefore(tom))
+    } else if (perioderInnenAngittTidsrom.last().tom != null && perioderInnenAngittTidsrom.last().tom!!.isBefore(tom)) {
         Duration.between(
             perioderInnenAngittTidsrom.last().tom!!.atStartOfDay(),
             tom.atStartOfDay()
         ).toDays()
-    else 0L
+    } else {
+        0L
+    }
 
     return perioderInnenAngittTidsrom
         .zipWithNext()

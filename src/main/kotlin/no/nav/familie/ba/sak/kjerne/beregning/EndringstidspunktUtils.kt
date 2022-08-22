@@ -90,7 +90,9 @@ private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>
             this.localDateInterval,
             hentBeløpsendringPåPersonISegment(this.value)
         )
-    } else null
+    } else {
+        null
+    }
 }
 
 private fun erEndringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet: List<AndelTilkjentYtelseDataForÅKalkulereEndring>): Boolean {
@@ -126,7 +128,9 @@ private fun List<AndelTilkjentYtelse>.hentTidslinjerForPersoner(behandlingAlder:
                     behandlingAlder = behandlingAlder,
                     aktørId = aktørId
                 )
-            } else aktørId to andeler.hentTidslinje(behandlingAlder)
+            } else {
+                aktørId to andeler.hentTidslinje(behandlingAlder)
+            }
         }.toMap()
 }
 

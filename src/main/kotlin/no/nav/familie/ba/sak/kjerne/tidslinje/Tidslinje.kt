@@ -60,8 +60,9 @@ abstract class Tidslinje<I, T : Tidsenhet> {
     override fun equals(other: Any?): Boolean {
         return if (other is Tidslinje<*, *>) {
             perioder() == other.perioder()
-        } else
+        } else {
             false
+        }
     }
 
     override fun toString(): String =

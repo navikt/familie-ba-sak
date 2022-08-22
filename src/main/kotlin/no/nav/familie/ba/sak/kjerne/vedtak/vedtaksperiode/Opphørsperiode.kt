@@ -24,10 +24,14 @@ fun mapTilOpphørsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ): List<Opphørsperiode> {
-    val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) mapTilUtbetalingsperioder(
+    val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) {
+        mapTilUtbetalingsperioder(
         personopplysningGrunnlag = forrigePersonopplysningGrunnlag,
         andelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
-    ) else emptyList()
+    )
+    } else {
+        emptyList()
+    }
     val utbetalingsperioder =
         mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
 
@@ -38,7 +42,8 @@ fun mapTilOpphørsperioder(
                 periodeTom = forrigeUtbetalingsperioder.maxOf { it.periodeTom }
             )
         )
-    } else if (utbetalingsperioder.isEmpty()) {
+    } else {
+        if (utbetalingsperioder.isEmpty()) {
         emptyList()
     } else {
         listOf(
@@ -50,6 +55,7 @@ fun mapTilOpphørsperioder(
             finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
         ).flatten()
     }.sortedBy { it.periodeFom }
+    }
 
     return slåSammenOpphørsperioder(alleOpphørsperioder)
 }

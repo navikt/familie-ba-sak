@@ -77,9 +77,11 @@ abstract class GrBostedsadresse(
         val fregManglendeFlytteDato = LocalDate.of(1, 1, 1)
 
         fun MutableList<GrBostedsadresse>.sisteAdresse(): GrBostedsadresse? {
-            if (this.filter { it.periode?.fom == null || it.periode?.fom == fregManglendeFlytteDato }.size > 1) throw Feil(
+            if (this.filter { it.periode?.fom == null || it.periode?.fom == fregManglendeFlytteDato }.size > 1) {
+                throw Feil(
                 "Finnes flere bostedsadresser uten fom-dato"
             )
+            }
             return this.sortedBy { it.periode?.fom }.lastOrNull()
         }
 

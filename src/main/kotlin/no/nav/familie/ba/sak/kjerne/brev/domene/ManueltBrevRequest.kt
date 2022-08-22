@@ -148,11 +148,13 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             )
         )
     Brevmal.VARSEL_OM_REVURDERING_SAMBOER ->
-        if (this.datoAvtale == null) throw FunksjonellFeil(
+        if (this.datoAvtale == null) {
+            throw FunksjonellFeil(
             frontendFeilmelding = "Du må sette dato for samboerskap for å sende dette brevet.",
             melding = "Dato er ikke satt for brevtype 'varsel om revurdering samboer'"
         )
-        else VarselOmRevurderingSamboerBrev(
+        } else {
+            VarselOmRevurderingSamboerBrev(
             data = VarselOmRevurderingSamboerData(
                 delmalData = VarselOmRevurderingSamboerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
                 flettefelter = VarselOmRevurderingSamboerData.Flettefelter(
@@ -162,6 +164,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 )
             )
         )
+        }
     Brevmal.SVARTIDSBREV ->
         Svartidsbrev(
             navn = this.mottakerNavn,
@@ -170,7 +173,9 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             mal = Brevmal.SVARTIDSBREV,
             erEøsBehandling = if (this.behandlingKategori == null) {
                 throw Feil("Trenger å vite om behandling er EØS for å sende ut svartidsbrev.")
-            } else this.behandlingKategori == BehandlingKategori.EØS
+            } else {
+                this.behandlingKategori == BehandlingKategori.EØS
+            }
         )
     Brevmal.FORLENGET_SVARTIDSBREV ->
         ForlengetSvartidsbrev(
