@@ -84,7 +84,7 @@ data class Behandling(
     var overstyrtEndringstidspunkt: LocalDate? = null,
 
     @OneToOne(mappedBy = "behandling", optional = true)
-    var verge: Verge? = null
+    val verge: Verge? = null
 ) : BaseEntitet() {
 
     val steg: StegType

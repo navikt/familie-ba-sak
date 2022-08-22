@@ -66,6 +66,10 @@ class PersonopplysningerService(
         return hentPersoninfoMedQuery(aktør, PersonInfoQuery.ENKEL)
     }
 
+    fun hentPersoninfoNavnOgAdresse(aktør: Aktør): PersonInfo {
+        return hentPersoninfoMedQuery(aktør, PersonInfoQuery.NAVN_OG_ADRESSE)
+    }
+
     private fun hentPersoninfoMedQuery(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
         return pdlRestClient.hentPerson(aktør, personInfoQuery)
     }

@@ -93,7 +93,7 @@ class LoggService(
     }
 
     fun opprettRegistrerVergeLogg(behandling: Behandling) {
-        val tittel = "verge ble registrert"
+        val tittel = "Verge ble registrert"
         lagre(
             Logg(
                 behandlingId = behandling.id,
