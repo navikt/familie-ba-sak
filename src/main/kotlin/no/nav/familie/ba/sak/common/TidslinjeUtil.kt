@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import java.time.LocalDate
+import java.time.YearMonth
 
 fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned> = tidslinje {
     listOf(
@@ -33,6 +34,16 @@ fun erTilogMed3ÅrTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned>
         Periode(
             fødselsdato.toYearMonth().tilTidspunkt().neste(),
             fødselsdato.plusYears(3).toYearMonth().tilTidspunkt(),
+            true
+        )
+    )
+}
+
+fun opprettBooleanTidslinje(fraÅrMåned: YearMonth, tilÅrMåned: YearMonth) = tidslinje {
+    listOf(
+        Periode(
+            fraÅrMåned.tilTidspunkt(),
+            tilÅrMåned.tilTidspunkt(),
             true
         )
     )
