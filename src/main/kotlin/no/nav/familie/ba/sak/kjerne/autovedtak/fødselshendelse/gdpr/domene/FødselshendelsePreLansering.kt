@@ -35,7 +35,8 @@ data class FødselshendelsePreLansering(
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandlingId: Long,
 
-    @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
 
     @Column(name = "ny_behandling_hendelse", nullable = false, updatable = false, columnDefinition = "TEXT")

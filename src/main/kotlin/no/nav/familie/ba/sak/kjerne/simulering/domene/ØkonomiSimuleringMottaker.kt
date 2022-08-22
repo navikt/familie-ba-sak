@@ -40,7 +40,8 @@ data class ØkonomiSimuleringMottaker(
     @Column(name = "mottaker_type", nullable = false)
     val mottakerType: MottakerType,
 
-    @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
 
     @OneToMany(

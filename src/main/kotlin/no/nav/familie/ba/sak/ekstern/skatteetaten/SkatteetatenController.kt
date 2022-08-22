@@ -37,7 +37,9 @@ class SkatteetatenController(
         produces = ["application/json;charset=UTF-8"]
     )
     fun finnPersonerMedUtvidetBarnetrygd(
-        @NotNull @RequestParam(value = "aar", required = true) aar: String
+        @NotNull
+        @RequestParam(value = "aar", required = true)
+        aar: String
     ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
         logger.info("Treff på finnPersonerMedUtvidetBarnetrygd")
         val respons = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_EKTE_DATA)) {
@@ -56,7 +58,9 @@ class SkatteetatenController(
         produces = ["application/json;charset=UTF-8"]
     )
     fun finnPersonerMedUtvidetBarnetrygdTest(
-        @NotNull @RequestParam(value = "aar", required = true) aar: String
+        @NotNull
+        @RequestParam(value = "aar", required = true)
+        aar: String
     ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
         logger.info("Treff på finnPersonerMedUtvidetBarnetrygdTest")
         val respons = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar)
@@ -69,7 +73,8 @@ class SkatteetatenController(
         consumes = ["application/json"]
     )
     fun hentPerioderMedUtvidetBarnetrygd(
-        @Valid @RequestBody perioderRequest: SkatteetatenPerioderRequest
+        @Valid @RequestBody
+        perioderRequest: SkatteetatenPerioderRequest
     ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
         logger.info("Treff på hentPerioderMedUtvidetBarnetrygd")
         val response = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_EKTE_DATA)) {
@@ -89,7 +94,8 @@ class SkatteetatenController(
         consumes = ["application/json"]
     )
     fun hentPerioderMedUtvidetBarnetrygdForMidlertidigTest(
-        @Valid @RequestBody perioderRequest: SkatteetatenPerioderRequest
+        @Valid @RequestBody
+        perioderRequest: SkatteetatenPerioderRequest
     ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
         logger.info("Treff på hentPerioderMedUtvidetBarnetrygdForMidlertidigTest")
         val response =

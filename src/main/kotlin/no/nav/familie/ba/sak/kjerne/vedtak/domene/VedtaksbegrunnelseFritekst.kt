@@ -27,7 +27,8 @@ class VedtaksbegrunnelseFritekst(
     val id: Long = 0,
 
     @JsonIgnore
-    @ManyToOne @JoinColumn(name = "fk_vedtaksperiode_id")
+    @ManyToOne
+    @JoinColumn(name = "fk_vedtaksperiode_id")
     val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
 
     @Column(name = "fritekst", updatable = false)

@@ -32,7 +32,8 @@ class EØSBegrunnelse(
     val id: Long = 0,
 
     @JsonIgnore
-    @ManyToOne @JoinColumn(name = "fk_vedtaksperiode_id", nullable = false, updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "fk_vedtaksperiode_id", nullable = false, updatable = false)
     val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
 
     @Enumerated(EnumType.STRING)

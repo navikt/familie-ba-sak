@@ -36,7 +36,8 @@ class UtenlandskPeriodebeløpController(
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterUtenlandskPeriodebeløp(
         @PathVariable behandlingId: Long,
-        @Valid @RequestBody restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp
+        @Valid @RequestBody
+        restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()

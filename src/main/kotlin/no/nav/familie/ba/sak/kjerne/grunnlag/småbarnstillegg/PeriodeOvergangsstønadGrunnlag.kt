@@ -39,7 +39,8 @@ class PeriodeOvergangsstønadGrunnlag(
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandlingId: Long,
 
-    @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
 
     @Column(name = "fom", nullable = false, columnDefinition = "DATE")

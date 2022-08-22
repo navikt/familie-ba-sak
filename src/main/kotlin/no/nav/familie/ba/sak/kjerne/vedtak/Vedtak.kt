@@ -24,7 +24,8 @@ class Vedtak(
     @SequenceGenerator(name = "vedtak_seq_generator", sequenceName = "vedtak_seq", allocationSize = 50)
     val id: Long = 0,
 
-    @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
 
     @Column(name = "vedtaksdato", nullable = true)

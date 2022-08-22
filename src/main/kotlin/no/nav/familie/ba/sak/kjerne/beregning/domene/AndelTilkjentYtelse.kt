@@ -61,7 +61,8 @@ data class AndelTilkjentYtelse(
     @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
     var tilkjentYtelse: TilkjentYtelse,
 
-    @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
 
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
