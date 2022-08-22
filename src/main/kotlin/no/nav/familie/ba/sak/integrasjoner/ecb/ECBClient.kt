@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRatesData
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.http.client.AbstractRestClient
-import org.simpleframework.xml.Serializer
-import org.simpleframework.xml.core.Persister
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -33,9 +31,6 @@ class ECBClient(val restTemplate: RestTemplate, @Value("\${FAMILIE_ECB_API_URL}"
                 return ECBXmlParser.parse(ecbResponseString)
             }
             throw getECBClientException(currency, exchangeRateDate)
-            // throwNotFound(currency, exchangeRateDate)
-            // val serializer: Serializer = Persister()
-            // return serializer.read(ECBExchangeRatesData::class.java, ecbResponseString)
         } catch (e: IntegrasjonException) {
             val feilmelding = "Teknisk feil ved henting av valutakurs fra European Central Bank"
             throw Feil(feilmelding, feilmelding, HttpStatus.INTERNAL_SERVER_ERROR, e, e.cause)
@@ -55,7 +50,7 @@ class ECBClient(val restTemplate: RestTemplate, @Value("\${FAMILIE_ECB_API_URL}"
         return ""
     }
 
-    private fun getECBClientException(currency: String, exchangeRateDate: LocalDate) : ECBClientException{
+    private fun getECBClientException(currency: String, exchangeRateDate: LocalDate): ECBClientException {
         val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
         val formattedExchangeRateDate = exchangeRateDate.format(dateTimeFormatter)
         return ECBClientException("Fant ingen valutakurser for $currency med kursdato $formattedExchangeRateDate")
