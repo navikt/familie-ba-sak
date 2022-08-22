@@ -56,10 +56,14 @@ class UtbetalingsoppdragService(
         return utbetalingsoppdrag
 
         // beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
-        // iverksettOppdrag(utbetalingsoppdrag)
+        // iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
     }
 
-    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
+    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, behandlingId: Long) {
+        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
+            logger.warn("Iverksetter ikke noe mot oppdrag. Ingen utbetalingsperioder. behandlingId=$behandlingId")
+            return
+        }
         try {
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
         } catch (exception: Exception) {
