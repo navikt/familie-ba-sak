@@ -45,7 +45,7 @@ import java.time.LocalDate
 fun hentPerioderMedUtbetaling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak
-) = andelerTilkjentYtelse.lagVertikaleSegmenter()
+): List<VedtaksperiodeMedBegrunnelser> = andelerTilkjentYtelse.lagVertikaleSegmenter()
     .map { (segmenter, _) ->
         VedtaksperiodeMedBegrunnelser(
             fom = segmenter.fom,

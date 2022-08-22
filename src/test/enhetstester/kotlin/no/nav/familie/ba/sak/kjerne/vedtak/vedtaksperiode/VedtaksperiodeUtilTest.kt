@@ -1,7 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -17,6 +24,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 class VedtaksperiodeUtilTest {
 
@@ -338,5 +346,138 @@ class VedtaksperiodeUtilTest {
         internal fun beforeAll() {
             sanityEØSBegrunnelser = hentEØSBegrunnelser()
         }
+    }
+
+    @Test
+    fun `Skal beholde split i andel tilkjent ytelse`() {
+        val mars2020 = YearMonth.of(2020, 3)
+        val april2020 = YearMonth.of(2020, 4)
+        val mai2020 = YearMonth.of(2020, 5)
+        val juli2020 = YearMonth.of(2020, 7)
+
+        val person1 = lagPerson()
+        val person2 = lagPerson()
+
+        val vedtak = lagVedtak()
+
+        val andelPerson1MarsTilApril = lagAndelTilkjentYtelse(
+            fom = mars2020,
+            tom = april2020,
+            beløp = 1000,
+            person = person1
+        )
+
+        val andelPerson1MaiTilJuli = lagAndelTilkjentYtelse(
+            fom = mai2020,
+            tom = juli2020,
+            beløp = 1000,
+            person = person1
+        )
+
+        val andelPerson2MarsTilJuli = lagAndelTilkjentYtelse(
+            fom = mars2020,
+            tom = juli2020,
+            beløp = 1000,
+            person = person2
+        )
+
+        val forventetResultat = listOf(
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = mars2020.førsteDagIInneværendeMåned(),
+                tom = april2020.sisteDagIInneværendeMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+                begrunnelser = mutableSetOf()
+            ),
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = mai2020.førsteDagIInneværendeMåned(),
+                tom = juli2020.sisteDagIInneværendeMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+                begrunnelser = mutableSetOf()
+            ),
+        )
+
+        val faktiskResultat = hentPerioderMedUtbetaling(
+            listOf(andelPerson1MarsTilApril, andelPerson1MaiTilJuli, andelPerson2MarsTilJuli),
+            vedtak
+        )
+
+        Assertions.assertEquals(
+            forventetResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
+            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) }
+        )
+
+        Assertions.assertEquals(
+            forventetResultat.map { it.type }.toSet(),
+            faktiskResultat.map { it.type }.toSet()
+        )
+    }
+
+    @Test
+    fun `Skal splitte på forskjellige personer`() {
+        val mars2020 = YearMonth.of(2020, 3)
+        val april2020 = YearMonth.of(2020, 4)
+        val mai2020 = YearMonth.of(2020, 5)
+        val juni2020 = YearMonth.of(2020, 6)
+        val juli2020 = YearMonth.of(2020, 7)
+
+        val person1 = lagPerson()
+        val person2 = lagPerson()
+
+        val vedtak = lagVedtak()
+
+        val andelPerson1MarsTilMai = lagAndelTilkjentYtelse(
+            fom = mars2020,
+            tom = mai2020,
+            beløp = 1000,
+            person = person1
+        )
+
+        val andelPerson2MaiTilJuli = lagAndelTilkjentYtelse(
+            fom = mai2020,
+            tom = juli2020,
+            beløp = 1000,
+            person = person2
+        )
+
+        val forventetResultat = listOf(
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = mars2020.førsteDagIInneværendeMåned(),
+                tom = april2020.sisteDagIInneværendeMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+                begrunnelser = mutableSetOf()
+            ),
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = mai2020.førsteDagIInneværendeMåned(),
+                tom = mai2020.sisteDagIInneværendeMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+                begrunnelser = mutableSetOf()
+            ),
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = juni2020.førsteDagIInneværendeMåned(),
+                tom = juli2020.sisteDagIInneværendeMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+                begrunnelser = mutableSetOf()
+            ),
+        )
+
+        val faktiskResultat = hentPerioderMedUtbetaling(
+            listOf(andelPerson1MarsTilMai, andelPerson2MaiTilJuli),
+            vedtak
+        )
+
+        Assertions.assertEquals(
+            forventetResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
+            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) }
+        )
+
+        Assertions.assertEquals(
+            forventetResultat.map { it.type }.toSet(),
+            faktiskResultat.map { it.type }.toSet()
+        )
     }
 }
