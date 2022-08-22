@@ -1,11 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 
-import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRatesData
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.exchangeRatesForCurrency
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.simpleframework.xml.Serializer
-import org.simpleframework.xml.core.Persister
 import java.math.BigDecimal
 
 class ECBXmlParserTest {

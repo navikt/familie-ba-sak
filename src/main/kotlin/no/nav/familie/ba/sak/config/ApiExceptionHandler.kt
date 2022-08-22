@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.common.RessursUtils.rolleTilgangResponse
 import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBClientException
+import no.nav.familie.ba.sak.integrasjoner.ecb.ECBException
+import no.nav.familie.ba.sak.integrasjoner.ecb.ECBServiceException
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.KanIkkeMigrereException
 import no.nav.familie.http.client.RessursException
@@ -76,10 +78,10 @@ class ApiExceptionHandler {
             .body(Ressurs.failure(frontendFeilmelding = "Fant ikke person"))
     }
 
-    @ExceptionHandler(ECBClientException::class)
-    fun handleECBClientException(feil: ECBClientException): ResponseEntity<Ressurs<Nothing>> {
+    @ExceptionHandler(ECBClientException::class, ECBServiceException::class)
+    fun handleECBClientException(feil: ECBException): ResponseEntity<Ressurs<Nothing>> {
         logger.warn(feil.message)
-        return ResponseEntity.ok()
+        return ResponseEntity.internalServerError()
             .body(Ressurs.failure(frontendFeilmelding = feil.message))
     }
 

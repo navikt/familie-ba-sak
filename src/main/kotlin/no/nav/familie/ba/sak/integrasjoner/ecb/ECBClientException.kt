@@ -1,3 +1,3 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 
-class ECBClientException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+class ECBClientException(override val message: String, override val cause: Throwable? = null) : RuntimeException(message, cause), ECBException
