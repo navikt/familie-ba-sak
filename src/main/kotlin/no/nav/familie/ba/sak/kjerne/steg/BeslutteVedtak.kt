@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
@@ -151,7 +152,7 @@ class BeslutteVedtak(
 
     private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
-            søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+            søkerIdent = if (behandling.fagsak.type == FagsakType.INSTITUSJON) behandling.fagsak.institusjon!!.orgNummer!! else behandling.fagsak.aktør.aktivFødselsnummer(),
             behandlingsId = behandling.id
         )
         taskRepository.save(ferdigstillBehandlingTask)
