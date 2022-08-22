@@ -105,7 +105,8 @@ data class MånedTidspunkt internal constructor(
 
         private fun YearMonth?.tilTidspunktEllerUendelig(default: YearMonth?, uendelighet: Uendelighet) =
             this?.let { MånedTidspunkt(it, Uendelighet.INGEN) } ?: MånedTidspunkt(
-                default ?: YearMonth.now(), uendelighet
+                default ?: YearMonth.now(),
+                uendelighet
             )
 
         fun månedForUendeligLengeSiden(måned: YearMonth = YearMonth.now()) =

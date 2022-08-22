@@ -57,7 +57,9 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         val osTom = LocalDate.now().plusMonths(2).sisteDagIMåned()
 
         val behandling1 = fullførBehandlingMedOvergangsstønad(
-            fagsak = fagsak, personScenario = personScenario, barnFødselsdato = barnFødselsdato,
+            fagsak = fagsak,
+            personScenario = personScenario,
+            barnFødselsdato = barnFødselsdato,
             overgangsstønadPerioder = listOf(
                 PeriodeOvergangsstønad(
                     personIdent = personScenario.søker.ident!!,

@@ -257,7 +257,8 @@ data class VilkårsvurderingForNyBehandlingUtils(
 
             val manglendePerioder = VilkårsvurderingMigreringUtils.kopiManglendePerioderFraForrigeVilkårsvurdering(
                 vilkårResultater,
-                forrigeBehandlingVilkårsvurdering, person
+                forrigeBehandlingVilkårsvurdering,
+                person
             )
             vilkårResultater.addAll(manglendePerioder.map { it.kopierMedParent(personResultat) }.toSet())
             personResultat.setSortedVilkårResultater(vilkårResultater)

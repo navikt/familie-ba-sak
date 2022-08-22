@@ -60,7 +60,8 @@ class DokumentService(
     private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
         Metrics.counter(
             "brev.sendt",
-            "brevtype", it.visningsTekst
+            "brevtype",
+            it.visningsTekst
         )
     }
 
@@ -68,7 +69,8 @@ class DokumentService(
         mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
             Metrics.counter(
                 "brev.ikke.sendt.ukjent.andresse",
-                "brevtype", it.visningsTekst
+                "brevtype",
+                it.visningsTekst
             )
         }
 

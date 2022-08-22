@@ -107,12 +107,16 @@ class FiltreringsregelForFlereBarnTest {
                             aktør = gyldigAktør
                         ),
                         genererPerson(
-                            type = PersonType.BARN, personopplysningGrunnlag = this, aktør = barnAktør0,
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør0,
                             fødselsDato = LocalDate.now().minusMonths(1),
                             dødsfallDato = LocalDate.now().toString()
                         ),
                         genererPerson(
-                            type = PersonType.BARN, personopplysningGrunnlag = this, aktør = barnAktør1,
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør1,
                             fødselsDato = LocalDate.now().minusMonths(1)
                         )
                     )
@@ -171,11 +175,15 @@ class FiltreringsregelForFlereBarnTest {
                             aktør = gyldigAktør
                         ),
                         genererPerson(
-                            type = PersonType.BARN, personopplysningGrunnlag = this, aktør = barnAktør0,
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør0,
                             fødselsDato = LocalDate.now().minusMonths(1)
                         ),
                         genererPerson(
-                            type = PersonType.BARN, personopplysningGrunnlag = this, aktør = barnAktør1,
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør1,
                             fødselsDato = LocalDate.now().minusMonths(1)
                         )
                     )

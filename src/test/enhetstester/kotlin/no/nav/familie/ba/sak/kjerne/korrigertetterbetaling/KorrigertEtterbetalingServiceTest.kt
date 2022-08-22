@@ -50,7 +50,8 @@ internal class KorrigertEtterbetalingServiceTest {
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 
         every { korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id) } returns listOf(
-            korrigertEtterbetaling, korrigertEtterbetaling
+            korrigertEtterbetaling,
+            korrigertEtterbetaling
         )
 
         val hentetKorrigertEtterbetaling =

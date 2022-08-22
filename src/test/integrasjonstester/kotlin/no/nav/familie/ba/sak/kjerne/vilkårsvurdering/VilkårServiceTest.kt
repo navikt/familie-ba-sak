@@ -118,7 +118,9 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, fnr, listOf(barnFnr),
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
@@ -151,7 +153,9 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, fnr, listOf(barnFnr),
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
@@ -201,7 +205,9 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, fnr, listOf(barnFnr),
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
@@ -242,7 +248,9 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, fnr, listOf(barnFnr),
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
@@ -261,7 +269,9 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, fnr, listOf(barnFnr),
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
@@ -306,7 +316,9 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, fnr, listOf(barnFnr),
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
@@ -322,7 +334,8 @@ class VilkårServiceTest(
         vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
                 vilkårService.endreVilkår(
-                    behandlingId = behandling.id, vilkårId = it.id,
+                    behandlingId = behandling.id,
+                    vilkårId = it.id,
                     restPersonResultat =
                     RestPersonResultat(
                         personIdent = personResultat.aktør.aktivFødselsnummer(),
@@ -346,7 +359,9 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag2 =
             lagTestPersonopplysningGrunnlag(
-                behandling2.id, fnr, listOf(barnFnr, barnFnr2),
+                behandling2.id,
+                fnr,
+                listOf(barnFnr, barnFnr2),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr, barnFnr2), true)
             )
@@ -384,7 +399,9 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, fnr, listOf(barnFnr),
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
@@ -409,7 +426,9 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag2 =
             lagTestPersonopplysningGrunnlag(
-                behandling2.id, fnr, listOf(barnFnr, barnFnr2),
+                behandling2.id,
+                fnr,
+                listOf(barnFnr, barnFnr2),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr, barnFnr2), true)
             )
@@ -507,7 +526,9 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, fnr, listOf(barnFnr),
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
@@ -656,7 +677,8 @@ class VilkårServiceTest(
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             LocalDate.now().minusYears(1),
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -694,7 +716,8 @@ class VilkårServiceTest(
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             LocalDate.now().minusYears(1),
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -818,7 +841,8 @@ class VilkårServiceTest(
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             LocalDate.now().minusYears(1),
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -981,7 +1005,8 @@ class VilkårServiceTest(
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             barnetsFødselsdato,
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -1051,7 +1076,8 @@ class VilkårServiceTest(
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             barnetsFødselsdato,
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -1102,7 +1128,8 @@ class VilkårServiceTest(
         )
         val exception = assertThrows<RuntimeException> {
             vilkårService.endreVilkår(
-                behandling.id, vilkårId,
+                behandling.id,
+                vilkårId,
                 RestPersonResultat(
                     barnFnr,
                     listOf(restVilkårResultat)
@@ -1178,7 +1205,8 @@ class VilkårServiceTest(
         )
         val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             forrigeBehandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             barnetsFødselsdato,
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -1227,7 +1255,8 @@ class VilkårServiceTest(
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             barnetsFødselsdato,
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)

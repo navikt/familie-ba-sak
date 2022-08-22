@@ -86,7 +86,9 @@ class LovligOppholdVilkårTest {
             tredjelandsborger.copy(
                 statsborgerskap = mutableListOf(
                     GrStatsborgerskap(
-                        landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = tredjelandsborger
+                        landkode = "ANG",
+                        medlemskap = Medlemskap.TREDJELANDSBORGER,
+                        person = tredjelandsborger
                     )
                 ),
                 opphold = mutableListOf(
@@ -95,7 +97,8 @@ class LovligOppholdVilkårTest {
                             fom = LocalDate.now().minusYears(10),
                             tom = LocalDate.now().minusYears(5)
                         ),
-                        type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = tredjelandsborger
+                        type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                        person = tredjelandsborger
                     )
                 )
             )
@@ -110,7 +113,8 @@ class LovligOppholdVilkårTest {
                             fom = LocalDate.now().minusYears(10),
                             tom = LocalDate.now().minusYears(5)
                         ),
-                        type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this
+                        type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                        person = this
                     )
                 )
             }
@@ -124,7 +128,9 @@ class LovligOppholdVilkårTest {
             tredjelandsborger.copy(
                 statsborgerskap = mutableListOf(
                     GrStatsborgerskap(
-                        landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = tredjelandsborger
+                        landkode = "ANG",
+                        medlemskap = Medlemskap.TREDJELANDSBORGER,
+                        person = tredjelandsborger
                     )
                 ),
                 opphold = mutableListOf(
@@ -133,14 +139,16 @@ class LovligOppholdVilkårTest {
                             fom = LocalDate.now().minusYears(10),
                             tom = LocalDate.now().minusYears(5)
                         ),
-                        type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER, person = tredjelandsborger
+                        type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
+                        person = tredjelandsborger
                     ),
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(5),
                             tom = null
                         ),
-                        type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = tredjelandsborger
+                        type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                        person = tredjelandsborger
                     )
                 )
             )
@@ -155,14 +163,16 @@ class LovligOppholdVilkårTest {
                             fom = LocalDate.now().minusYears(10),
                             tom = LocalDate.now().minusYears(5)
                         ),
-                        type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER, person = this
+                        type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
+                        person = this
                     ),
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(5),
                             tom = null
                         ),
-                        type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this
+                        type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                        person = this
                     )
                 )
             }
@@ -388,7 +398,9 @@ class LovligOppholdVilkårTest {
         return tredjelandsborger.copy(
             statsborgerskap = mutableListOf(
                 GrStatsborgerskap(
-                    landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = tredjelandsborger
+                    landkode = "ANG",
+                    medlemskap = Medlemskap.TREDJELANDSBORGER,
+                    person = tredjelandsborger
                 )
             ),
             opphold = mutableListOf(
@@ -407,42 +419,54 @@ class LovligOppholdVilkårTest {
         val tredjelandsborger = tilfeldigPerson(personType = PersonType.SØKER).apply {
             statsborgerskap = mutableListOf(
                 GrStatsborgerskap(
-                    landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = this
+                    landkode = "ANG",
+                    medlemskap = Medlemskap.TREDJELANDSBORGER,
+                    person = this
                 )
             )
         }
         val eøsBorger = tilfeldigPerson(personType = PersonType.SØKER).apply {
             statsborgerskap = mutableListOf(
                 GrStatsborgerskap(
-                    landkode = "POL", medlemskap = Medlemskap.EØS, person = this
+                    landkode = "POL",
+                    medlemskap = Medlemskap.EØS,
+                    person = this
                 )
             )
         }
         val annenForelderNordiskBorger = tilfeldigPerson(personType = PersonType.SØKER).apply {
             statsborgerskap = mutableListOf(
                 GrStatsborgerskap(
-                    landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = this
+                    landkode = "NOR",
+                    medlemskap = Medlemskap.NORDEN,
+                    person = this
                 )
             )
         }
         val annenForelderEØS = tilfeldigPerson(personType = PersonType.SØKER).apply {
             statsborgerskap = mutableListOf(
                 GrStatsborgerskap(
-                    landkode = "POL", medlemskap = Medlemskap.EØS, person = this
+                    landkode = "POL",
+                    medlemskap = Medlemskap.EØS,
+                    person = this
                 )
             )
         }
         val statsløsPerson = tilfeldigPerson(personType = PersonType.SØKER).apply {
             statsborgerskap = mutableListOf(
                 GrStatsborgerskap(
-                    landkode = "XXX", medlemskap = Medlemskap.STATSLØS, person = this
+                    landkode = "XXX",
+                    medlemskap = Medlemskap.STATSLØS,
+                    person = this
                 )
             )
         }
         val ukjentStatsborger = tilfeldigPerson(personType = PersonType.SØKER).apply {
             statsborgerskap = mutableListOf(
                 GrStatsborgerskap(
-                    landkode = "XUK", medlemskap = Medlemskap.UKJENT, person = this
+                    landkode = "XUK",
+                    medlemskap = Medlemskap.UKJENT,
+                    person = this
                 )
             )
         }

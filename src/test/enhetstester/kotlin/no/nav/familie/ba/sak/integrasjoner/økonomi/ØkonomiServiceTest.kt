@@ -28,13 +28,17 @@ internal class ØkonomiServiceTest {
 
         val utbetalingsPeriode = listOf(
             lagEksternUtbetalingsperiode(
-                opphør = Opphør(opphørDato), fom = fom.minusMonths(10), tom = tom.minusMonths(8)
+                opphør = Opphør(opphørDato),
+                fom = fom.minusMonths(10),
+                tom = tom.minusMonths(8)
             ),
             lagEksternUtbetalingsperiode(
-                fom = fom.minusMonths(7), tom = tom.minusMonths(6)
+                fom = fom.minusMonths(7),
+                tom = tom.minusMonths(6)
             ),
             lagEksternUtbetalingsperiode(
-                fom = fom.minusMonths(5), tom = tom.minusMonths(4)
+                fom = fom.minusMonths(5),
+                tom = tom.minusMonths(4)
             ),
         )
 
@@ -52,13 +56,17 @@ internal class ØkonomiServiceTest {
 
         val utbetalingsPeriode = listOf(
             lagEksternUtbetalingsperiode(
-                opphør = Opphør(opphørDato), fom = fom.minusMonths(10), tom = tom.minusMonths(8)
+                opphør = Opphør(opphørDato),
+                fom = fom.minusMonths(10),
+                tom = tom.minusMonths(8)
             ),
             lagEksternUtbetalingsperiode(
-                fom = fom.minusMonths(7), tom = tom.minusMonths(6)
+                fom = fom.minusMonths(7),
+                tom = tom.minusMonths(6)
             ),
             lagEksternUtbetalingsperiode(
-                fom = fom.minusMonths(5), tom = tom.plusMonths(1)
+                fom = fom.minusMonths(5),
+                tom = tom.plusMonths(1)
             ),
         )
         assertThrows<IllegalStateException> {

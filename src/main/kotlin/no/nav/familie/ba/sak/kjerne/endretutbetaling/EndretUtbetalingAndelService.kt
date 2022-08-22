@@ -77,7 +77,9 @@ class EndretUtbetalingAndelService(
         validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, andelTilkjentYtelser)
 
         beregningService.oppdaterBehandlingMedBeregning(
-            behandling, personopplysningGrunnlag, endretUtbetalingAndel
+            behandling,
+            personopplysningGrunnlag,
+            endretUtbetalingAndel
         )
     }
 

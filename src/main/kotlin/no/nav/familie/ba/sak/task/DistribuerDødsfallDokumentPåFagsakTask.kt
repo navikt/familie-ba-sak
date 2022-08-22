@@ -37,7 +37,8 @@ class DistribuerDødsfallDokumentPåFagsakTask(
         mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
             Metrics.counter(
                 "brev.ikke.sendt.ukjent.dodsbo",
-                "brevtype", it.visningsTekst
+                "brevtype",
+                it.visningsTekst
             )
         }
 

@@ -101,7 +101,9 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør)
         } returns PersonInfo(
-            fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
+            fødselsdato = LocalDate.of(2009, 5, 1),
+            kjønn = Kjønn.MANN,
+            navn = "Barn Mocksen",
             forelderBarnRelasjon = setOf(
                 ForelderBarnRelasjon(
                     farAktør,
@@ -429,8 +431,11 @@ class ClientMocks {
         const val INTEGRASJONER_FNR = "10000111111"
         val bostedsadresse = Bostedsadresse(
             matrikkeladresse = Matrikkeladresse(
-                matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
-                postnummer = "0202", kommunenummer = "2231"
+                matrikkelId = 123L,
+                bruksenhetsnummer = "H301",
+                tilleggsnavn = "navn",
+                postnummer = "0202",
+                kommunenummer = "2231"
             )
         )
         private val bostedsadresseHistorikk = mutableListOf(

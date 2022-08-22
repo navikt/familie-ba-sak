@@ -75,7 +75,9 @@ class BeslutteVedtakTest {
                 any()
             )
         } returns Totrinnskontroll(
-            behandling = lagBehandling(), saksbehandler = "Mock Saksbehandler", saksbehandlerId = "Mock.Saksbehandler"
+            behandling = lagBehandling(),
+            saksbehandler = "Mock Saksbehandler",
+            saksbehandlerId = "Mock.Saksbehandler"
         )
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
@@ -131,7 +133,8 @@ class BeslutteVedtakTest {
                 any(),
                 any(),
                 any(),
-                any(), any()
+                any(),
+                any()
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 

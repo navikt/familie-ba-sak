@@ -35,7 +35,8 @@ class SmåbarnstilleggService(
         periodeOvergangsstønadGrunnlagRepository.saveAll(
             periodeOvergangsstønad.map {
                 it.tilPeriodeOvergangsstønadGrunnlag(
-                    behandlingId = behandlingId, aktør = søkerAktør
+                    behandlingId = behandlingId,
+                    aktør = søkerAktør
                 )
             }
         )

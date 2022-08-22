@@ -18,7 +18,9 @@ data class VarselbrevMedÅrsaker(
         data = VarselOmRevurderingData(
             delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = enhet)),
             flettefelter = VarselOmRevurderingData.Flettefelter(
-                navn = navn, fodselsnummer = fødselsnummer, varselÅrsaker = varselÅrsaker
+                navn = navn,
+                fodselsnummer = fødselsnummer,
+                varselÅrsaker = varselÅrsaker
             ),
         )
     )

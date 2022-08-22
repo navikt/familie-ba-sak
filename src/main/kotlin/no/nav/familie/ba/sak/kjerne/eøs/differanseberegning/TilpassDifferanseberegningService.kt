@@ -31,7 +31,9 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
         val oppdaterteAndeler = beregnDifferanse(
-            tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
+            tilkjentYtelse.andelerTilkjentYtelse,
+            utenlandskePeriodebeløp,
+            valutakurser
         )
 
         if (featureToggleService.kanHåndtereEøsUtenomPrimærland()) {
@@ -55,7 +57,9 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 
         val oppdaterteAndeler = beregnDifferanse(
-            tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
+            tilkjentYtelse.andelerTilkjentYtelse,
+            utenlandskePeriodebeløp,
+            valutakurser
         )
 
         if (featureToggleService.kanHåndtereEøsUtenomPrimærland()) {
@@ -77,7 +81,9 @@ class TilpassDifferanseberegningEtterValutakursService(
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
         val oppdaterteAndeler = beregnDifferanse(
-            tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser
+            tilkjentYtelse.andelerTilkjentYtelse,
+            utenlandskePeriodebeløp,
+            valutakurser
         )
 
         if (featureToggleService.kanHåndtereEøsUtenomPrimærland()) {

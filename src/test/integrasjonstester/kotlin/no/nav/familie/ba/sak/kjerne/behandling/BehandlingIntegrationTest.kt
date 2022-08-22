@@ -318,8 +318,11 @@ class BehandlingIntegrationTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr),
-                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
+                behandling.id,
+                søkerFnr,
+                listOf(barn1Fnr, barn2Fnr),
+                søkerAktør = behandling.fagsak.aktør,
+                barnAktør = barnAktør
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
@@ -432,8 +435,11 @@ class BehandlingIntegrationTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr, barn3Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr),
-                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
+                behandling.id,
+                søkerFnr,
+                listOf(barn1Fnr, barn2Fnr, barn3Fnr),
+                søkerAktør = behandling.fagsak.aktør,
+                barnAktør = barnAktør
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 

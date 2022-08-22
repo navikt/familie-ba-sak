@@ -28,7 +28,8 @@ class TriggesAvTest {
         )
 
     val triggesAvEtterEndretUtbetaling = lagTriggesAv(
-        etterEndretUtbetaling = true, endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES,
+        etterEndretUtbetaling = true,
+        endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES,
         endringsaarsaker = setOf(
             Årsak.DELT_BOSTED
         ),
@@ -37,7 +38,8 @@ class TriggesAvTest {
 
     val triggesIkkeAvSkalUtbetalesMedUtvidetVilkår =
         lagTriggesAv(
-            endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES, etterEndretUtbetaling = false,
+            endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES,
+            etterEndretUtbetaling = false,
             endringsaarsaker = setOf(
                 Årsak.DELT_BOSTED
             ),
@@ -46,7 +48,8 @@ class TriggesAvTest {
 
     val triggesIkkeAvSkalUtbetalesUtenUtvidetVilkår =
         lagTriggesAv(
-            endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES, etterEndretUtbetaling = false,
+            endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES,
+            etterEndretUtbetaling = false,
             endringsaarsaker = setOf(
                 Årsak.DELT_BOSTED
             ),
@@ -54,7 +57,8 @@ class TriggesAvTest {
         )
 
     val triggesAvSkalUtbetalesMedUtvidetVilkår = lagTriggesAv(
-        endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES, etterEndretUtbetaling = false,
+        endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES,
+        etterEndretUtbetaling = false,
         endringsaarsaker = setOf(
             Årsak.DELT_BOSTED
         ),
@@ -62,7 +66,8 @@ class TriggesAvTest {
     )
 
     val triggesAvSkalUtbetalesUtenUtvidetVilkår = lagTriggesAv(
-        endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES, etterEndretUtbetaling = false,
+        endretUtbetalingSkalUtbetales = EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES,
+        etterEndretUtbetaling = false,
         endringsaarsaker = setOf(
             Årsak.DELT_BOSTED
         ),

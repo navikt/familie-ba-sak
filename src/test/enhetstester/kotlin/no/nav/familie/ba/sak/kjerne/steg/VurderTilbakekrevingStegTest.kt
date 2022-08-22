@@ -61,7 +61,8 @@ class VurderTilbakekrevingStegTest {
     fun `skal utføre steg for vanlig behandling uten åpen tilbakekreving`() {
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
@@ -74,7 +75,8 @@ class VurderTilbakekrevingStegTest {
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns true
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
@@ -95,7 +97,8 @@ class VurderTilbakekrevingStegTest {
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertEquals(
@@ -127,7 +130,8 @@ class VurderTilbakekrevingStegTest {
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertEquals(
@@ -159,7 +163,8 @@ class VurderTilbakekrevingStegTest {
 
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
@@ -177,7 +182,8 @@ class VurderTilbakekrevingStegTest {
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertEquals(
@@ -210,7 +216,8 @@ class VurderTilbakekrevingStegTest {
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertEquals(
@@ -251,7 +258,8 @@ class VurderTilbakekrevingStegTest {
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertEquals(
@@ -284,7 +292,8 @@ class VurderTilbakekrevingStegTest {
 
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
@@ -321,7 +330,8 @@ class VurderTilbakekrevingStegTest {
 
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }

@@ -181,7 +181,11 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 1
             ),
             lagAndelTilkjentYtelse(
-                førsteDatoKjede2, årMnd("2037-02"), YtelseType.ORDINÆR_BARNETRYGD, 1054, behandling,
+                førsteDatoKjede2,
+                årMnd("2037-02"),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
                 periodeIdOffset = 2
             )
         )

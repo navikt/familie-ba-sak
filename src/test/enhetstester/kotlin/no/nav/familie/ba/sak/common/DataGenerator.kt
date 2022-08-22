@@ -149,7 +149,8 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
 }
 
 fun defaultFagsak(aktør: Aktør = tilAktør(randomFnr())) = Fagsak(
-    1, aktør = aktør
+    1,
+    aktør = aktør
 )
 
 fun lagBehandling(
@@ -319,8 +320,11 @@ fun lagTestPersonopplysningGrunnlag(
 ): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
     val bostedsadresse = GrMatrikkeladresse(
-        matrikkelId = null, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
-        postnummer = "0202", kommunenummer = "2231"
+        matrikkelId = null,
+        bruksenhetsnummer = "H301",
+        tilleggsnavn = "navn",
+        postnummer = "0202",
+        kommunenummer = "2231"
     )
 
     val søker = Person(

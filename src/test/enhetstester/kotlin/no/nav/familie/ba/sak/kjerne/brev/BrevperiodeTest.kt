@@ -152,7 +152,8 @@ class BrevperiodeTest {
                 } else {
                     null
                 },
-                output.belop?.single(), "belop"
+                output.belop?.single(),
+                "belop"
             )
 
             val forventedeBegrunnelser = forventetOutput.begrunnelser.map {

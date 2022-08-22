@@ -207,7 +207,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val result = testDataInfotrygd.flatMap {
             listOf(
                 SkatteetatenPerioder(
-                    it.fnr, it.endretDato,
+                    it.fnr,
+                    it.endretDato,
                     it.perioder.map { p ->
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),
@@ -304,7 +305,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         } returns testDataInfotrygd.flatMap {
             listOf(
                 SkatteetatenPerioder(
-                    it.fnr, it.endretDato,
+                    it.fnr,
+                    it.endretDato,
                     it.perioder.map { p ->
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),
@@ -378,7 +380,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         } returns testDataInfotrygd.flatMap {
             listOf(
                 SkatteetatenPerioder(
-                    it.fnr, it.endretDato,
+                    it.fnr,
+                    it.endretDato,
                     it.perioder.map { p ->
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),
@@ -452,7 +455,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         } returns testDataInfotrygd.flatMap {
             listOf(
                 SkatteetatenPerioder(
-                    it.fnr, it.endretDato,
+                    it.fnr,
+                    it.endretDato,
                     it.perioder.map { p ->
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),

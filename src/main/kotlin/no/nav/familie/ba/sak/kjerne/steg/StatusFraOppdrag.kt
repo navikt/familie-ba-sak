@@ -81,7 +81,8 @@ class StatusFraOppdrag(
 
     private fun opprettTaskIverksettMotTilbake(behandlingsId: Long, metadata: Properties) {
         val ferdigstillBehandling = IverksettMotFamilieTilbakeTask.opprettTask(
-            behandlingsId, metadata
+            behandlingsId,
+            metadata
         )
         taskRepository.save(ferdigstillBehandling)
     }

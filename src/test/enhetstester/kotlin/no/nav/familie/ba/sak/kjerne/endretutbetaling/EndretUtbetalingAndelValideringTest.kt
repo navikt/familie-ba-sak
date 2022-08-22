@@ -704,7 +704,9 @@ class EndretUtbetalingAndelValideringTest {
 
         val deltBostedEndring =
             endretUtbetalingAndel(
-                barn, YtelseType.ORDINÆR_BARNETRYGD, BigDecimal.ZERO,
+                barn,
+                YtelseType.ORDINÆR_BARNETRYGD,
+                BigDecimal.ZERO,
                 fomUtvidet = fom1,
                 tomUtvidet = tom2,
             )

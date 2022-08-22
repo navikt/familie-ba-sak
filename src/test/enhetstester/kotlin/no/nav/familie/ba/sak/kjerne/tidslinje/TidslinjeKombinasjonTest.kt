@@ -19,7 +19,12 @@ class TidslinjeKombinasjonTest {
         assertTidslinjer(
             linje1 = "abcdef",
             linje2 = "fedcba",
-            "af", "be", "cd", "dc", "eb", "fa"
+            "af",
+            "be",
+            "cd",
+            "dc",
+            "eb",
+            "fa"
         )
     }
 
@@ -28,7 +33,12 @@ class TidslinjeKombinasjonTest {
         assertTidslinjer(
             linje1 = "  ab",
             linje2 = "fedcba",
-            "f", "e", "ad", "bc", "b", "a"
+            "f",
+            "e",
+            "ad",
+            "bc",
+            "b",
+            "a"
         )
     }
 
@@ -37,7 +47,12 @@ class TidslinjeKombinasjonTest {
         assertTidslinjer(
             linje1 = "abc>",
             linje2 = "abacd>",
-            "aa", "bb", "ca", "cc", "cd", ">"
+            "aa",
+            "bb",
+            "ca",
+            "cc",
+            "cd",
+            ">"
         )
     }
 

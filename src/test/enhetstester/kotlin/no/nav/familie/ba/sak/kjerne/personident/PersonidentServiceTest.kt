@@ -37,7 +37,10 @@ internal class PersonidentServiceTest {
     private val personIdentSlot = slot<Personident>()
     private val aktørSlot = slot<Aktør>()
     private val personidentService = PersonidentService(
-        personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
+        personidentRepository,
+        aktørIdRepository,
+        pdlIdentRestClient,
+        mockk()
     )
 
     @BeforeAll
@@ -108,7 +111,10 @@ internal class PersonidentServiceTest {
         }
 
         val personidentService = PersonidentService(
-            personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
+            personidentRepository,
+            aktørIdRepository,
+            pdlIdentRestClient,
+            mockk()
         )
 
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
@@ -134,7 +140,10 @@ internal class PersonidentServiceTest {
 
         val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
         val personidentService = PersonidentService(
-            personidentRepository, aktørIdRepository, pdlIdentRestClient, taskRepositoryMock
+            personidentRepository,
+            aktørIdRepository,
+            pdlIdentRestClient,
+            taskRepositoryMock
         )
 
         every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
@@ -179,7 +188,10 @@ internal class PersonidentServiceTest {
 
         val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
         val personidentService = PersonidentService(
-            personidentRepository, aktørIdRepository, pdlIdentRestClient, taskRepositoryMock
+            personidentRepository,
+            aktørIdRepository,
+            pdlIdentRestClient,
+            taskRepositoryMock
         )
 
         every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
@@ -234,7 +246,10 @@ internal class PersonidentServiceTest {
         }
 
         val personidentService = PersonidentService(
-            personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
+            personidentRepository,
+            aktørIdRepository,
+            pdlIdentRestClient,
+            mockk()
         )
 
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomFinnes))
@@ -360,7 +375,10 @@ internal class PersonidentServiceTest {
         }
 
         val personidentService = PersonidentService(
-            personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
+            personidentRepository,
+            aktørIdRepository,
+            pdlIdentRestClient,
+            mockk()
         )
 
         assertThrows<Feil> { personidentService.håndterNyIdent(nyIdent = PersonIdent(mergedPersonident)) }

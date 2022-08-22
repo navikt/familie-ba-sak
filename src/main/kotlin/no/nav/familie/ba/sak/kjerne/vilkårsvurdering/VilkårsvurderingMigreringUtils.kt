@@ -17,7 +17,8 @@ object VilkårsvurderingMigreringUtils {
     ): LocalDate {
         val forrigeVilkårResultat = hentForrigeVilkårsvurderingVilkårResultater(
             forrigeBehandlingsvilkårsvurdering,
-            vilkår, person
+            vilkår,
+            person
         ).filter { it.periodeFom != null }
         val forrigeVilkårsPeriodeFom =
             if (forrigeVilkårResultat.isNotEmpty()) forrigeVilkårResultat.minOf { it.periodeFom!! } else null
@@ -39,7 +40,9 @@ object VilkårsvurderingMigreringUtils {
         periodeFom: LocalDate,
     ): LocalDate? {
         val forrigeVilkårsPeriodeTom: LocalDate? = hentForrigeVilkårsvurderingVilkårResultater(
-            forrigeBehandlingsvilkårsvurdering, vilkår, person
+            forrigeBehandlingsvilkårsvurdering,
+            vilkår,
+            person
         ).minWithOrNull(VilkårResultat.VilkårResultatComparator)?.periodeTom
         return when {
             vilkår == Vilkår.UNDER_18_ÅR -> periodeFom.til18ÅrsVilkårsdato()
