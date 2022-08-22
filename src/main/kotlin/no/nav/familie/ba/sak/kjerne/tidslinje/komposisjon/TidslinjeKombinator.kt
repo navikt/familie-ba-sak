@@ -97,3 +97,28 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.tidspunktKombinerMed(
             )
     }
 }
+
+/**
+ * Extension-metode for å kombinere tre tidslinjer
+ * Kombinasjonen baserer seg på TidslinjeSomStykkerOppTiden, som itererer gjennom alle tidspunktene
+ * fra minste fraOgMed til største fraOgMed() fra alle tidslinjene
+ * Tidsenhet (T) må være av samme type
+ * Hver av tidslinjene kan ha ulik innholdstype, hhv A, B og C
+ * Kombintor-funksjonen tar inn (nullable) av A, B og C og returner (nullable) R
+ * Resultatet er en tidslinje med tidsenhet T og innhold R
+ */
+fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMed(
+    tidslinjeB: Tidslinje<B, T>,
+    tidslinjeC: Tidslinje<C, T>,
+    kombinator: (A?, B?, C?) -> R?
+): Tidslinje<R, T> {
+    val tidslinjeA = this
+    return object : TidslinjeSomStykkerOppTiden<R, T>(tidslinjeA, tidslinjeB, tidslinjeC) {
+        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
+            kombinator(
+                tidslinjeA.innholdForTidspunkt(tidspunkt),
+                tidslinjeB.innholdForTidspunkt(tidspunkt),
+                tidslinjeC.innholdForTidspunkt(tidspunkt)
+            )
+    }
+}
