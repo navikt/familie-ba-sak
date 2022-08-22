@@ -68,15 +68,16 @@ class BeregningServiceTest {
         val fagsakService = mockk<FagsakService>()
 
         beregningService = BeregningService(
-            andelTilkjentYtelseRepository,
-            fagsakService,
-            behandlingHentOgPersisterService,
-            tilkjentYtelseRepository,
-            vilkårsvurderingRepository,
-            behandlingRepository,
-            personopplysningGrunnlagRepository,
-            endretUtbetalingAndelRepository,
-            småbarnstilleggService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            behandlingRepository = behandlingRepository,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+            endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
+            småbarnstilleggService = småbarnstilleggService,
+            featureToggleService = featureToggleService
         )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
