@@ -111,9 +111,9 @@ class PersongrunnlagService(
 
         if (barnIGrunnlag.contains(nyttbarnAktør)) {
             throw FunksjonellFeil(
-            melding = "Forsøker å legge til barn som allerede finnes i personopplysningsgrunnlag ${personopplysningGrunnlag.id}",
-            frontendFeilmelding = "Barn finnes allerede på behandling og er derfor ikke lagt til."
-        )
+                melding = "Forsøker å legge til barn som allerede finnes i personopplysningsgrunnlag ${personopplysningGrunnlag.id}",
+                frontendFeilmelding = "Barn finnes allerede på behandling og er derfor ikke lagt til."
+            )
         }
 
         val oppdatertGrunnlag = hentOgLagreSøkerOgBarnINyttGrunnlag(

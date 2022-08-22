@@ -750,9 +750,9 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
         behandlingEtterBehandlingsresultat,
         if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
             RestTilbakekreving(
-            valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-            begrunnelse = "Begrunnelse"
-        )
+                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                begrunnelse = "Begrunnelse"
+            )
         } else {
             null
         }

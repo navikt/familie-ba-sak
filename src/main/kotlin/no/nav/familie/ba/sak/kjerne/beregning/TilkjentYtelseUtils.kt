@@ -316,31 +316,31 @@ object TilkjentYtelseUtils {
         )
         val satsperioderFørFylte6År = if (periodeUnder6År != null) {
             SatsService.hentGyldigSatsFor(
-            satstype = SatsType.TILLEGG_ORBA,
-            stønadFraOgMed = settRiktigStønadFom(
-                fraOgMed = periodeUnder6År.fom
-            ),
-            stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
-            maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
-        )
+                satstype = SatsType.TILLEGG_ORBA,
+                stønadFraOgMed = settRiktigStønadFom(
+                    fraOgMed = periodeUnder6År.fom
+                ),
+                stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
+                maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
+            )
         } else {
             emptyList()
         }
 
         val satsperioderEtterFylte6År = if (periodeOver6år != null) {
             SatsService.hentGyldigSatsFor(
-            satstype = SatsType.ORBA,
-            stønadFraOgMed = settRiktigStønadFom(
-                skalStarteSammeMåned =
-                periodeUnder6År != null,
-                fraOgMed = periodeOver6år.fom
-            ),
-            stønadTilOgMed = settRiktigStønadTom(
-                skalAvsluttesMånedenFør = skalAvsluttesMånedenFør,
-                tilOgMed = periodeOver6år.tom
-            ),
-            maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
-        )
+                satstype = SatsType.ORBA,
+                stønadFraOgMed = settRiktigStønadFom(
+                    skalStarteSammeMåned =
+                    periodeUnder6År != null,
+                    fraOgMed = periodeOver6år.fom
+                ),
+                stønadTilOgMed = settRiktigStønadTom(
+                    skalAvsluttesMånedenFør = skalAvsluttesMånedenFør,
+                    tilOgMed = periodeOver6år.tom
+                ),
+                maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
+            )
         } else {
             emptyList()
         }

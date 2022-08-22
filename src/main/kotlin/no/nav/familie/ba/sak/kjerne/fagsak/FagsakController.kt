@@ -46,11 +46,11 @@ class FagsakController(
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
         if (fagsakRequest.personIdent != null) {
             tilgangService.validerTilgangTilPersoner(
-            personIdenter = listOf(
-                fagsakRequest.personIdent
-            ),
-            event = AuditLoggerEvent.CREATE
-        )
+                personIdenter = listOf(
+                    fagsakRequest.personIdent
+                ),
+                event = AuditLoggerEvent.CREATE
+            )
         }
         tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 

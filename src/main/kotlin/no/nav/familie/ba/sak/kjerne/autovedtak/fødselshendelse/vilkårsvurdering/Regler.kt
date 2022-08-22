@@ -51,8 +51,8 @@ data class VurderPersonErBosattIRiket(
             return Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET_KUN_ADRESSER_UTEN_FOM)
         } else if (harPersonBoddPåSisteAdresseMinstFraVurderingstidspunkt(adresser, vurderFra)) {
             return Evaluering.oppfylt(
-            VilkårOppfyltÅrsak.BOR_I_RIKET
-        )
+                VilkårOppfyltÅrsak.BOR_I_RIKET
+            )
         } else if (adresser.filter { !it.harGyldigFom() }.size > 1) return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM)
 
         val adresserMedGyldigFom = adresser.filter { it.harGyldigFom() }

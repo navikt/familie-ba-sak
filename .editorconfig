@@ -1,2 +1,2 @@
 [*.{kt,kts}]
-ktlint_disabled_rules=import-ordering,filename,trailing-comma-on-call-site,trailing-comma-on-declaration-site,curly-spacing,annotation,argument-list-wrapping,chain-wrapping,enum-entry-name-case,final-newline,indent,max-line-length,modifier-order
+ktlint_disabled_rules=import-ordering,filename,trailing-comma-on-call-site,trailing-comma-on-declaration-site,curly-spacing,annotation,argument-list-wrapping,chain-wrapping,enum-entry-name-case,final-newline

@@ -125,26 +125,26 @@ enum class Vilkår(
             )
             LOVLIG_OPPHOLD -> if (person.type == BARN) {
                 VurderBarnHarLovligOpphold(
-                aktør = person.aktør
-            )
+                    aktør = person.aktør
+                )
             } else {
                 VurderPersonHarLovligOpphold(
-                morLovligOppholdFaktaEØS = LovligOppholdFaktaEØS(
-                    arbeidsforhold = person.arbeidsforhold,
-                    bostedsadresser = person.bostedsadresser,
-                    statsborgerskap = person.statsborgerskap
-                ),
-                annenForelderLovligOppholdFaktaEØS = if (annenForelder != null) {
-                    LovligOppholdFaktaEØS(
-                        arbeidsforhold = annenForelder.arbeidsforhold,
-                        bostedsadresser = annenForelder.bostedsadresser,
-                        statsborgerskap = annenForelder.statsborgerskap
-                    )
-                } else {
-                    null
-                },
-                opphold = person.opphold
-            )
+                    morLovligOppholdFaktaEØS = LovligOppholdFaktaEØS(
+                        arbeidsforhold = person.arbeidsforhold,
+                        bostedsadresser = person.bostedsadresser,
+                        statsborgerskap = person.statsborgerskap
+                    ),
+                    annenForelderLovligOppholdFaktaEØS = if (annenForelder != null) {
+                        LovligOppholdFaktaEØS(
+                            arbeidsforhold = annenForelder.arbeidsforhold,
+                            bostedsadresser = annenForelder.bostedsadresser,
+                            statsborgerskap = annenForelder.statsborgerskap
+                        )
+                    } else {
+                        null
+                    },
+                    opphold = person.opphold
+                )
             }
             UTVIDET_BARNETRYGD -> throw Feil("Ikke støtte for å automatisk vurdere vilkåret ${this.beskrivelse}")
         }

@@ -127,9 +127,9 @@ class VilkårTilTilkjentYtelseTest {
                 .bygg()
         } else {
             TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
-            .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
-            .medAndelTilkjentYtelse(søker, søkerAndel1Beløp, søkerAndel1Periode, søkerAndel1Type)
-            .bygg()
+                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
+                .medAndelTilkjentYtelse(søker, søkerAndel1Beløp, søkerAndel1Periode, søkerAndel1Type)
+                .bygg()
         }
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
@@ -360,8 +360,8 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
                             YearMonth.parse(it)
                         } else {
                             YearMonth.from(
-                            LocalDate.MAX
-                        )
+                                LocalDate.MAX
+                            )
                         }
                     }
 

@@ -43,9 +43,9 @@ class ArbeidsfordelingController(
 
         if (endreBehandlendeEnhet.begrunnelse.isBlank()) {
             throw FunksjonellFeil(
-            melding = "Begrunnelse kan ikke være tom",
-            frontendFeilmelding = "Du må skrive en begrunnelse for endring av enhet"
-        )
+                melding = "Begrunnelse kan ikke være tom",
+                frontendFeilmelding = "Du må skrive en begrunnelse for endring av enhet"
+            )
         }
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)

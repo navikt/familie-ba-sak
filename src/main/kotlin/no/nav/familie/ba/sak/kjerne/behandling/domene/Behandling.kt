@@ -125,9 +125,9 @@ data class Behandling(
                 true
             } else {
                 throw Feil(
-                "Behandling er teknisk opphør, men årsak $opprettetÅrsak " +
-                    "og type $type samsvarer ikke."
-            )
+                    "Behandling er teknisk opphør, men årsak $opprettetÅrsak " +
+                        "og type $type samsvarer ikke."
+                )
             }
         } else {
             false

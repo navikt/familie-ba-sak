@@ -15,18 +15,18 @@ data class RestRegistrerInstitusjonOgVerge(
 
     fun tilVerge(behandling: Behandling): Verge? = if (vergeInfo != null) {
         Verge(
-        ident = vergeInfo.ident,
-        behandling = behandling
-    )
+            ident = vergeInfo.ident,
+            behandling = behandling
+        )
     } else {
         null
     }
 
     fun tilInstitusjon(): Institusjon? = if (institusjonInfo != null) {
         Institusjon(
-        orgNummer = institusjonInfo.orgNummer,
-        tssEksternId = institusjonInfo.eksternTssNummer,
-    )
+            orgNummer = institusjonInfo.orgNummer,
+            tssEksternId = institusjonInfo.eksternTssNummer,
+        )
     } else {
         null
     }

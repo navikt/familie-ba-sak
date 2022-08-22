@@ -55,8 +55,8 @@ class SmåbarnstilleggService(
 
         return if (forrigeIverksatteBehandling != null) {
             periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
-            behandlingId = forrigeIverksatteBehandling.id
-        ).map { it.tilInternPeriodeOvergangsstønad() }
+                behandlingId = forrigeIverksatteBehandling.id
+            ).map { it.tilInternPeriodeOvergangsstønad() }
         } else {
             emptyList()
         }

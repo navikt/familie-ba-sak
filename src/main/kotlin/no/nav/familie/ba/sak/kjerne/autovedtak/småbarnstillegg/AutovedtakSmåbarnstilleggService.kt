@@ -128,8 +128,8 @@ class AutovedtakSmåbarnstilleggService(
                 emptyList()
             } else {
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = sistIverksatteBehandling.id
-            ).filter { it.erSmåbarnstillegg() }
+                    behandlingId = sistIverksatteBehandling.id
+                ).filter { it.erSmåbarnstillegg() }
             }
 
         val nyeSmåbarnstilleggAndeler =
@@ -137,8 +137,8 @@ class AutovedtakSmåbarnstilleggService(
                 emptyList()
             } else {
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = behandlingEtterBehandlingsresultat.id
-            ).filter { it.erSmåbarnstillegg() }
+                    behandlingId = behandlingEtterBehandlingsresultat.id
+                ).filter { it.erSmåbarnstillegg() }
             }
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(

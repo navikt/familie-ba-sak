@@ -190,9 +190,9 @@ fun håndterIverksettingAvBehandling(
     val behandlingEtterIverksettTilbakekreving =
         if (behandlingEtterStatusFraOppdrag.steg == StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) {
             stegService.håndterIverksettMotFamilieTilbake(
-            behandling = behandlingEtterStatusFraOppdrag,
-            metadata = Properties()
-        )
+                behandling = behandlingEtterStatusFraOppdrag,
+                metadata = Properties()
+            )
         } else {
             behandlingEtterStatusFraOppdrag
         }

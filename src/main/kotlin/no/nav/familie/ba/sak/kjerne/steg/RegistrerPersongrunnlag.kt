@@ -43,8 +43,8 @@ class RegistrerPersongrunnlag(
         eøsSkjemaerForNyBehandlingService.kopierEøsSkjemaer(
             forrigeBehandlingSomErVedtattId = if (forrigeBehandlingSomErVedtatt != null) {
                 BehandlingId(
-                forrigeBehandlingSomErVedtatt.id
-            )
+                    forrigeBehandlingSomErVedtatt.id
+                )
             } else {
                 null
             },

@@ -113,9 +113,9 @@ data class VilkårsvurderingForNyBehandlingUtils(
             // NB Dette må gjøres om når vi skal begynne å migrere EØS-saker
             val ytelseType = if (person.type == PersonType.SØKER) {
                 when (vilkårsvurdering.behandling.underkategori) {
-                BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
-                BehandlingUnderkategori.ORDINÆR -> YtelseType.ORDINÆR_BARNETRYGD
-            }
+                    BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
+                    BehandlingUnderkategori.ORDINÆR -> YtelseType.ORDINÆR_BARNETRYGD
+                }
             } else {
                 YtelseType.ORDINÆR_BARNETRYGD
             }

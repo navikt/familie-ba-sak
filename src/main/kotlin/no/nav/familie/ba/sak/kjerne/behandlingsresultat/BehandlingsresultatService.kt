@@ -45,9 +45,9 @@ class BehandlingsresultatService(
         val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         if (barna.isEmpty() && (søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList()).isEmpty()) {
             throw FunksjonellFeil(
-            melding = "Ingen barn i personopplysningsgrunnlag ved validering av vilkårsvurdering på behandling ${behandling.id}",
-            frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering."
-        )
+                melding = "Ingen barn i personopplysningsgrunnlag ved validering av vilkårsvurdering på behandling ${behandling.id}",
+                frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering."
+            )
         }
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
@@ -117,13 +117,13 @@ class BehandlingsresultatService(
             ?: throw Feil("Fant ikke søker på behandling")
         if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.aktør != søkerAktør }) {
             throw Feil(
-            "Barn kan ikke ha ytelsetype utvidet"
-        )
+                "Barn kan ikke ha ytelsetype utvidet"
+            )
         }
         if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.aktør == søkerAktør }) {
             throw Feil(
-            "Søker kan ikke ha ytelsetype ordinær"
-        )
+                "Søker kan ikke ha ytelsetype ordinær"
+            )
         }
     }
 

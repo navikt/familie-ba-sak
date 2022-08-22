@@ -26,7 +26,7 @@ data class Aktør(
     @Column(name = "aktoer_id", updatable = false, length = 50)
     // Validator kommer virke først i Spring 3.0 grunnet at hibernate tatt i bruke Jakarta.
     @Pattern(regexp = VALID_REGEXP)
-val aktørId: String,
+    val aktørId: String,
 
     @OneToMany(
         fetch = FetchType.EAGER,

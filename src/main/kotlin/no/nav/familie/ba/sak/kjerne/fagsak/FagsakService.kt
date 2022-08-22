@@ -147,8 +147,8 @@ class FagsakService(
             Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id))
         } else {
             Ressurs.failure(
-            errorMessage = "Fant ikke fagsak på person"
-        )
+                errorMessage = "Fant ikke fagsak på person"
+            )
         }
     }
 
@@ -158,8 +158,8 @@ class FagsakService(
             Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
         } else {
             Ressurs.failure(
-            errorMessage = "Fant ikke fagsaker på person"
-        )
+                errorMessage = "Fant ikke fagsaker på person"
+            )
         }
     }
 

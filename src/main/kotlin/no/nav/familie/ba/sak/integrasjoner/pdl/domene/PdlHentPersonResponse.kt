@@ -31,8 +31,8 @@ data class PdlPersonData(
         if (foedsel.isEmpty()) throw PdlPersonKanIkkeBehandlesIFagsystem("mangler fødselsdato")
         if (folkeregisteridentifikator.firstOrNull()?.status == FolkeregisteridentifikatorStatus.OPPHOERT) {
             throw PdlPersonKanIkkeBehandlesIFagsystem(
-            "er opphørt"
-        )
+                "er opphørt"
+            )
         }
     }
 }

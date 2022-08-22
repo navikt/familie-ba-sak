@@ -46,18 +46,18 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjær(fraOgMed: Tidspunkt<T>, tilOgMed
         TomTidslinje()
     } else {
         object : Tidslinje<I, T>() {
-        override fun lagPerioder(): Collection<Periode<I, T>> {
-            return tidslinje.perioder()
-                .filter { it.fraOgMed <= tilOgMed && it.tilOgMed >= fraOgMed }
-                .map {
-                    Periode(
-                        størsteFraOgMed(fraOgMed, it.fraOgMed),
-                        minsteTilOgMed(tilOgMed, it.tilOgMed),
-                        it.innhold
-                    )
-                }
+            override fun lagPerioder(): Collection<Periode<I, T>> {
+                return tidslinje.perioder()
+                    .filter { it.fraOgMed <= tilOgMed && it.tilOgMed >= fraOgMed }
+                    .map {
+                        Periode(
+                            størsteFraOgMed(fraOgMed, it.fraOgMed),
+                            minsteTilOgMed(tilOgMed, it.tilOgMed),
+                            it.innhold
+                        )
+                    }
+            }
         }
-    }
     }
 }
 

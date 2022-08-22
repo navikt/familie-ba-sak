@@ -230,10 +230,10 @@ fun hentGyldigeBegrunnelserForPeriode(
     )
     val eøsBegrunnelser = if (kanBehandleEØS) {
         hentGyldigeEØSBegrunnelserForPeriode(
-        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-        kompetanserIPeriode = kompetanserIPeriode,
-        kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
-    )
+            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+            kompetanserIPeriode = kompetanserIPeriode,
+            kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
+        )
     } else {
         emptyList()
     }

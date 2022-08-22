@@ -79,10 +79,10 @@ data class NullTidspunkt<T : Tidsenhet> internal constructor(private val uendeli
             }
         } else {
             when (uendelighet) {
-            Uendelighet.FREMTID -> 1 // Dette skal alltid være det seneste tidspunktet i alle sammenlikninger
-            Uendelighet.FORTID -> -1 // Dette skal alltid være det tidligste tidspunktet i alle sammenlikninger
-            else -> throw nullTidspunktException // Skal ikke inntreffe
-        }
+                Uendelighet.FREMTID -> 1 // Dette skal alltid være det seneste tidspunktet i alle sammenlikninger
+                Uendelighet.FORTID -> -1 // Dette skal alltid være det tidligste tidspunktet i alle sammenlikninger
+                else -> throw nullTidspunktException // Skal ikke inntreffe
+            }
         }
     }
 }

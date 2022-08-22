@@ -186,11 +186,11 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
             null
         } else {
             this.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
-            periode = Periode(
-                fom = vedtaksperiode.fom,
-                tom = vedtaksperiode.tom ?: TIDENES_ENDE
+                periode = Periode(
+                    fom = vedtaksperiode.fom,
+                    tom = vedtaksperiode.tom ?: TIDENES_ENDE
+                )
             )
-        )
         }
 
     val beløp = this.hentBeløp(gjelderSøker, minimerteUtbetalingsperiodeDetaljer)

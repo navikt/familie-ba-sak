@@ -44,9 +44,9 @@ data class UtbetalingsperiodeMal(
             erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
             opphør = if (erEndringPåEksisterendePeriode) {
                 Opphør(
-                opphørKjedeFom?.førsteDagIInneværendeMåned()
-                    ?: error("Mangler opphørsdato for kjede")
-            )
+                    opphørKjedeFom?.førsteDagIInneværendeMåned()
+                        ?: error("Mangler opphørsdato for kjede")
+                )
             } else {
                 null
             },

@@ -210,8 +210,8 @@ class BeregningService(
                 emptyList()
             } else {
                 hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = sistIverksatteBehandling.id
-            ).filter { it.erSmåbarnstillegg() }
+                    behandlingId = sistIverksatteBehandling.id
+                ).filter { it.erSmåbarnstillegg() }
             }
 
         val nyeSmåbarnstilleggAndeler =
@@ -219,8 +219,8 @@ class BeregningService(
                 emptyList()
             } else {
                 hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = behandling.id
-            ).filter { it.erSmåbarnstillegg() }
+                    behandlingId = behandling.id
+                ).filter { it.erSmåbarnstillegg() }
             }
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(

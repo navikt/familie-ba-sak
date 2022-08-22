@@ -350,7 +350,7 @@ class FagsakServiceTest(
 
     // Satte XX for at dette testet skal kjøre sist.
     @Test
-fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
+    fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
         } answers {

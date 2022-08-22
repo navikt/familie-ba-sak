@@ -34,9 +34,9 @@ fun lagPersonResultatAvOverstyrteResultater(
                     person.fødselsdato
                 } else {
                     maxOf(
-                    person.fødselsdato,
-                    LocalDate.now().minusYears(3)
-                )
+                        person.fødselsdato,
+                        LocalDate.now().minusYears(3)
+                    )
                 },
                 periodeTom = if (vilkårType == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null,
                 vilkårType = vilkårType,

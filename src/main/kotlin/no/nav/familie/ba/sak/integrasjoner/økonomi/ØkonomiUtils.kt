@@ -80,7 +80,7 @@ object ØkonomiUtils {
         val førsteEndring = forrige.disjunkteAndeler(oppdatert).minByOrNull { it.stønadFom }?.stønadFom
         return if (førsteEndring != null) {
             forrige.snittAndeler(oppdatert)
-            .filter { it.stønadFom.isBefore(førsteEndring) }
+                .filter { it.stønadFom.isBefore(førsteEndring) }
         } else {
             forrigeKjede ?: emptyList()
         }

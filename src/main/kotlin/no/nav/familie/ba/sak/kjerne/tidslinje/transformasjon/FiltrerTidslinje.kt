@@ -23,9 +23,9 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrer(filter: (I?) -> Boolean): Tidslin
         TomTidslinje()
     } else {
         object : Tidslinje<I, T>() {
-        override fun lagPerioder(): Collection<Periode<I, T>> =
-            tidslinje.perioder().filter { filter(it.innhold) }
-    }
+            override fun lagPerioder(): Collection<Periode<I, T>> =
+                tidslinje.perioder().filter { filter(it.innhold) }
+        }
     }
 }
 

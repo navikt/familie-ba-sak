@@ -174,8 +174,8 @@ class VilkårsvurderingForNyBehandlingService(
             løpendeUnderkategori = løpendeUnderkategori,
             forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) {
                 hentVilkårsvurdering(
-                forrigeBehandlingSomErVedtatt.id
-            )
+                    forrigeBehandlingSomErVedtatt.id
+                )
             } else {
                 null
             }

@@ -26,12 +26,12 @@ object Utils {
             reader.read(FileReader("pom.xml"))
         } else {
             reader.read(
-            InputStreamReader(
-                ClassPathResource(
-                    "META-INF/maven/no.nav.familie.ba.sak/familie-ba-sak/pom.xml"
-                ).inputStream
+                InputStreamReader(
+                    ClassPathResource(
+                        "META-INF/maven/no.nav.familie.ba.sak/familie-ba-sak/pom.xml"
+                    ).inputStream
+                )
             )
-        )
         }
 
         return model.properties[key]?.toString()

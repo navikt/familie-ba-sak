@@ -64,9 +64,9 @@ class ArbeidsfordelingService(
         val forrigeArbeidsfordelingsenhet =
             if (aktivArbeidsfordelingPåBehandling != null) {
                 Arbeidsfordelingsenhet(
-                enhetId = aktivArbeidsfordelingPåBehandling.behandlendeEnhetId,
-                enhetNavn = aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn
-            )
+                    enhetId = aktivArbeidsfordelingPåBehandling.behandlendeEnhetId,
+                    enhetNavn = aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn
+                )
             } else {
                 null
             }
