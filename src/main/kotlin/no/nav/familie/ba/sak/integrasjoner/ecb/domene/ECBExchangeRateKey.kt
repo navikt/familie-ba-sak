@@ -8,9 +8,9 @@ import org.simpleframework.xml.Root
 class ECBExchangeRateKey {
     @field:Path(value = "Value[1]")
     @field:Attribute(name = "value")
-    var frequency: String? = null
+    lateinit var frequency: String
 
     @field:Path(value = "Value[2]")
     @field:Attribute(name = "value")
-    var currency: String? = null
+    lateinit var currency: String
 }

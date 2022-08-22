@@ -6,8 +6,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.simpleframework.xml.Serializer
 import org.simpleframework.xml.core.Persister
+import java.math.BigDecimal
 
-class ECBXmlParsingTest {
+class ECBXmlParserTest {
     val ecbXml = """
         <?xml version="1.0" encoding="UTF-8"?>
         <message:GenericData xmlns:message="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message" xmlns:common="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:generic="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/data/generic" xsi:schemaLocation="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXMessage.xsd http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXCommon.xsd http://www.sdmx.org/resources/sdmxml/schemas/v2_1/data/generic https://sdw-wsrest.ecb.europa.eu:443/vocabulary/sdmx/2_1/SDMXDataGeneric.xsd">
@@ -98,19 +99,18 @@ class ECBXmlParsingTest {
     """.trimIndent()
 
     @Test
-    fun testXMLParse() {
-        val serializer: Serializer = Persister()
-        val ecbExchangeRatesData = serializer.read(ECBExchangeRatesData::class.java, ecbXml)
-        assertEquals(ecbExchangeRatesData.exchangeRatesForCountries.size, 2)
+    fun `Test at ECBXmlParser parser xml string som forventet`() {
+        val ecbExchangeRatesData = ECBXmlParser.parse(ecbXml)
+        assertEquals(ecbExchangeRatesData.exchangeRatesForCurrencies.size, 2)
         val nokExchangeRates = ecbExchangeRatesData.exchangeRatesForCurrency("NOK")
         val sekExchangeRates = ecbExchangeRatesData.exchangeRatesForCurrency("SEK")
         assertEquals(2, nokExchangeRates.size)
         assertEquals(2, sekExchangeRates.size)
 
-        assertEquals("10.337", nokExchangeRates.filter { it.date == "2022-06-28" }[0].value)
-        assertEquals("10.3065", nokExchangeRates.filter { it.date == "2022-06-29" }[0].value)
+        assertEquals(BigDecimal.valueOf(10.337), nokExchangeRates.filter { it.date == "2022-06-28" }[0].value)
+        assertEquals(BigDecimal.valueOf(10.3065), nokExchangeRates.filter { it.date == "2022-06-29" }[0].value)
 
-        assertEquals("10.6543", sekExchangeRates.filter { it.date == "2022-06-28" }[0].value)
-        assertEquals("10.6848", sekExchangeRates.filter { it.date == "2022-06-29" }[0].value)
+        assertEquals(BigDecimal.valueOf(10.6543), sekExchangeRates.filter { it.date == "2022-06-28" }[0].value)
+        assertEquals(BigDecimal.valueOf(10.6848), sekExchangeRates.filter { it.date == "2022-06-29" }[0].value)
     }
 }

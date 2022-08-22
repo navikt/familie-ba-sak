@@ -3,7 +3,6 @@ import org.simpleframework.xml.Attribute
 import org.simpleframework.xml.Path
 import org.simpleframework.xml.Root
 import java.math.BigDecimal
-import java.time.LocalDate
 
 @Root(name = "Obs", strict = false)
 class ECBExchangeRate {

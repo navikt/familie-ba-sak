@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/differanseberegning/valutakurs")
@@ -42,9 +43,13 @@ class ValutakursController(
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
 
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
-        val valutakurs = oppdaterValutakursMedKursFraECB(restValutakurs, restValutakurs.tilValutakurs(barnAktører = barnAktører))
 
-        valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutakurs)
+        if (skalManueltSetteValutakurs(restValutakurs)) {
+            valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), restValutakurs.tilValutakurs(barnAktører))
+        } else {
+            val valutakurs = oppdaterValutakursMedKursFraECB(restValutakurs, restValutakurs.tilValutakurs(barnAktører = barnAktører))
+            valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutakurs)
+        }
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -64,9 +69,23 @@ class ValutakursController(
 
     private fun oppdaterValutakursMedKursFraECB(restValutakurs: RestValutakurs, valutakurs: Valutakurs): Valutakurs {
         val eksisterendeValutakurs = valutakursService.hentValutakurs(restValutakurs.id)
-        if (restValutakurs.valutakode != null && restValutakurs.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != restValutakurs.valutakursdato || eksisterendeValutakurs.valutakode != restValutakurs.valutakode)) {
-            return valutakurs.copy(kurs = ecbService.hentValutakurs(restValutakurs.valutakode, restValutakurs.valutakursdato))
+        if (valutakursErEndret(restValutakurs, eksisterendeValutakurs)) {
+            return valutakurs.copy(kurs = ecbService.hentValutakurs(restValutakurs.valutakode!!, restValutakurs.valutakursdato!!))
         }
         return valutakurs
+    }
+
+    /**
+     * Sjekker om valuta er Islandske Kroner og kursdato er før 01.02.2018
+     */
+    private fun skalManueltSetteValutakurs(restValutakurs: RestValutakurs): Boolean {
+        return restValutakurs.valutakursdato != null && restValutakurs.valutakode == "ISK" && restValutakurs.valutakursdato.isBefore(LocalDate.of(2018, 2, 1))
+    }
+
+    /**
+     * Sjekker om *restValutakurs* inneholder nødvendige verdier og sammenligner disse med *eksisterendeValutakurs*
+     */
+    private fun valutakursErEndret(restValutakurs: RestValutakurs, eksisterendeValutakurs: Valutakurs): Boolean {
+        return restValutakurs.valutakode != null && restValutakurs.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != restValutakurs.valutakursdato || eksisterendeValutakurs.valutakode != restValutakurs.valutakode)
     }
 }
