@@ -55,6 +55,7 @@ class DokumentService(
     private val settPåVentService: SettPåVentService,
     private val utgåendeJournalføringService: UtgåendeJournalføringService,
 ) {
+
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
@@ -183,7 +184,7 @@ class DokumentService(
 
         DistribuerDokumentTask.opprettDistribuerDokumentTask(
             distribuerDokumentDTO = DistribuerDokumentDTO(
-                personIdent = manueltBrevRequest.mottakerIdent,
+                personEllerInstitusjonIdent = manueltBrevRequest.mottakerIdent,
                 behandlingId = behandling?.id,
                 journalpostId = journalpostId,
                 brevmal = manueltBrevRequest.brevmal,
@@ -289,6 +290,7 @@ class DokumentService(
     }
 
     companion object {
+
         fun alleredeDistribuertMelding(journalpostId: String, behandlingId: Long?) =
             "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering." +
                 if (behandlingId != null) " BehandlingId=$behandlingId." else ""

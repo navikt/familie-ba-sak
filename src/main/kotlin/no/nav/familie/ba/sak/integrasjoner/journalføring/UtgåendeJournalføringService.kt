@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALF
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.BrukerIdType
+import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
@@ -30,7 +31,7 @@ class UtgåendeJournalføringService(
         førsteside: Førsteside?
     ): String {
         return journalførDokument(
-            fnr = fnr,
+            brukerId = fnr,
             fagsakId = fagsakId,
             journalførendeEnhet = journalførendeEnhet,
             brev = listOf(
@@ -45,13 +46,15 @@ class UtgåendeJournalføringService(
     }
 
     fun journalførDokument(
-        fnr: String,
+        brukerId: String,
         fagsakId: String,
         journalførendeEnhet: String? = null,
         brev: List<Dokument>,
         vedlegg: List<Dokument> = emptyList(),
         førsteside: Førsteside? = null,
-        behandlingId: Long? = null
+        behandlingId: Long? = null,
+        brukersType: BrukerIdType = BrukerIdType.FNR,
+        brukersNavn: String = ""
     ): String {
         if (journalførendeEnhet == DEFAULT_JOURNALFØRENDE_ENHET) {
             logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
@@ -63,7 +66,12 @@ class UtgåendeJournalføringService(
         val journalpostId = try {
             val journalpost = integrasjonClient.journalførDokument(
                 ArkiverDokumentRequest(
-                    fnr = fnr,
+                    fnr = brukerId,
+                    avsenderMottaker = if (brukersType == BrukerIdType.ORGNR) AvsenderMottaker(
+                        brukerId,
+                        brukersType,
+                        brukersNavn
+                    ) else null,
                     forsøkFerdigstill = true,
                     hoveddokumentvarianter = brev,
                     vedleggsdokumenter = vedlegg,
@@ -87,7 +95,7 @@ class UtgåendeJournalføringService(
                             "med eksternReferanseId=$eksternReferanseId. Bruker eksisterende journalpost."
                     )
 
-                    hentEksisterendeJournalpost(eksternReferanseId, fnr)
+                    hentEksisterendeJournalpost(eksternReferanseId, brukerId)
                 }
                 else -> throw ressursException
             }

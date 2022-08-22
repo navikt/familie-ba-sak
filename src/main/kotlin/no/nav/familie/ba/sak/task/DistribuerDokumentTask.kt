@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask.Companion.TASK_STEP_TYPE
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -64,7 +65,8 @@ class DistribuerDokumentTask(
 data class DistribuerDokumentDTO(
     val behandlingId: Long?,
     val journalpostId: String,
-    val personIdent: String,
+    val personEllerInstitusjonIdent: String,
+    val mottakersType: BrukerIdType = BrukerIdType.FNR,
     val brevmal: Brevmal,
     val erManueltSendt: Boolean,
 )

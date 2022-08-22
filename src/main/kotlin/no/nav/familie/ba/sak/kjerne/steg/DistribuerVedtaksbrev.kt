@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -28,10 +29,13 @@ class DistribuerVedtaksbrev(
             loggBehandlerRolle = BehandlerRolle.SYSTEM,
             brevmal = data.brevmal
         )
-        val aktør = personidentService.hentAktør(data.personIdent)
+        val søkerIdent =
+            if (data.mottakersType == BrukerIdType.FNR) personidentService.hentAktør(data.personEllerInstitusjonIdent)
+                .aktivFødselsnummer()
+            else data.personEllerInstitusjonIdent
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
-            søkerPersonIdent = aktør.aktivFødselsnummer(),
+            søkerIdent = søkerIdent,
             behandlingsId = data.behandlingId!!
         )
         taskRepository.save(ferdigstillBehandlingTask)
