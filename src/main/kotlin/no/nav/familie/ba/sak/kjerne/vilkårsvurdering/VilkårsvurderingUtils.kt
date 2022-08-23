@@ -320,7 +320,9 @@ private fun utledResultat(
 private fun utledResultatForGiftPartnerskap(person: Person) =
     if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true) {
         Resultat.OPPFYLT
-    } else Resultat.IKKE_VURDERT
+    } else {
+        Resultat.IKKE_VURDERT
+    }
 
 private fun utledBegrunnelse(
     vilkår: Vilkår,
