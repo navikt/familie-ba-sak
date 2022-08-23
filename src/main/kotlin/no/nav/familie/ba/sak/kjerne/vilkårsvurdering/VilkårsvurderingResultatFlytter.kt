@@ -132,23 +132,34 @@ object VilkårsvurderingResultatFlytter {
             personsVilkårOppdatert.addAll(utvidetVilkår)
         }
 
-        val fjernFraPersonsVilkårAktivt = personFraInitVilkårResultater
-            .map { it.vilkårType }
-            .flatMap { vilkårTypeFraInit ->
-                personenSomFinnesVilkårResultater.filter { it.vilkårType == vilkårTypeFraInit }
-            }
-        val personsVilkårAktivt = (personenSomFinnesVilkårResultater - fjernFraPersonsVilkårAktivt)
-            .filterNot {
-                forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet &&
-                    personenSomFinnesVilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-                        .contains(it)
-            }.toSet()
+        val personsVilkårAktivt = finnPersonsVilkårAktivt(
+            personFraInitVilkårResultater,
+            personenSomFinnesVilkårResultater,
+            forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet
+        )
 
         return AktivtOgOppdatertVilkårResultat(
             personsVilkårAktivt = personsVilkårAktivt,
             personsVilkårOppdatert = personsVilkårOppdatert
         )
     }
+
+    private fun finnPersonsVilkårAktivt(
+        personFraInitVilkårResultater: Set<VilkårResultat>,
+        personenSomFinnesVilkårResultater: Set<VilkårResultat>,
+        forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet: Boolean
+    ): Set<VilkårResultat> = (
+        personenSomFinnesVilkårResultater - personFraInitVilkårResultater
+            .map { it.vilkårType }
+            .flatMap { vilkårTypeFraInit ->
+                personenSomFinnesVilkårResultater.filter { it.vilkårType == vilkårTypeFraInit }
+            }
+        )
+        .filterNot {
+            forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet &&
+                personenSomFinnesVilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                    .contains(it)
+        }.toSet()
 
     // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
     // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
