@@ -115,8 +115,6 @@ object VilkårsvurderingResultatFlytter {
             val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
                 kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling
             )
-            val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
-            personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
 
             if (vilkårSomSkalKopieresOver.isEmpty()) {
                 // Legg til nytt vilkår på person
@@ -127,6 +125,23 @@ object VilkårsvurderingResultatFlytter {
                             periode eksisterer. */
 
                 personsVilkårOppdatert.addAll(vilkårSomSkalKopieresOver)
+            }
+        }
+        personFraInitVilkårResultater.forEach { vilkårFraInit ->
+            val vilkårSomFinnes = personenSomFinnesVilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
+
+            val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
+                kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling
+            )
+            val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
+            personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
+
+            if (vilkårSomSkalKopieresOver.isEmpty()) {
+                // Legg til nytt vilkår på person
+            } else {
+                /*  Vilkår er vurdert på person - flytt fra aktivt og overskriv initierte
+                            ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
+                            periode eksisterer. */
                 personsVilkårAktivt.removeAll(vilkårSomSkalKopieresOver)
             }
         }
