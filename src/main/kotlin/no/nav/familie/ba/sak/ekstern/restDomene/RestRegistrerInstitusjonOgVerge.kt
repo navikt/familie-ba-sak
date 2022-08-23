@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.verge.Verge
 
-data class VergeInfo(val navn: String?, val adresse: String?, val ident: String)
+data class VergeInfo(val ident: String)
 
 data class InstitusjonInfo(val orgNummer: String, val eksternTssNummer: String)
 
