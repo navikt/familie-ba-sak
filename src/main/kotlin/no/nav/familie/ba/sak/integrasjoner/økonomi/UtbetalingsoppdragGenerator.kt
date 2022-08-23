@@ -87,7 +87,7 @@ class UtbetalingsoppdragGenerator(
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 skalOppdatereTilkjentYtelse = !erSimulering
             )
-       } else {
+        } else {
             emptyList()
         }
 
@@ -99,7 +99,6 @@ class UtbetalingsoppdragGenerator(
         } else {
             emptyList()
         }
-
 
         return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,

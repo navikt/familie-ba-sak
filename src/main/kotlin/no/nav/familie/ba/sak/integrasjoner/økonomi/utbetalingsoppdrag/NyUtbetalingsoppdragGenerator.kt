@@ -123,7 +123,9 @@ class NyUtbetalingsoppdragGenerator {
             if (!erFørsteBehandlingPåFagsak) {
                 sisteOffsetPåFagsak?.plus(1)
                     ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
-            } else 0
+            } else {
+                0
+            }
 
         return andeler.filter { kjede -> kjede.isNotEmpty() }
             .flatMap { kjede: List<AndelTilkjentYtelse> ->
