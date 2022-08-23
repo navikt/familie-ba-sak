@@ -116,6 +116,13 @@ object VilkårsvurderingResultatFlytter {
                 .filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling)
                 .ifEmpty { setOf(vilkårFraInit) }
         }.toMutableSet()
+        val forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet =
+            forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet(
+                personsVilkårOppdatert,
+                personResultaterFraForrigeBehandling,
+                løpendeUnderkategori,
+                personFraInitAktør
+            )
         val fjernFraPersonsVilkårAktivt = personFraInitVilkårResultater
             .map { it.vilkårType }
             .flatMap { vilkårTypeFraInit ->
@@ -123,16 +130,16 @@ object VilkårsvurderingResultatFlytter {
             }
         val personsVilkårAktivt = (personenSomFinnesVilkårResultater - fjernFraPersonsVilkårAktivt).toMutableSet()
 
-        if (forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet(
-                personsVilkårOppdatert,
-                personResultaterFraForrigeBehandling,
-                løpendeUnderkategori,
-                personFraInitAktør
-            )
+        if (forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet
         ) {
             val utvidetVilkår =
                 personenSomFinnesVilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
             personsVilkårOppdatert.addAll(utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling))
+        }
+        if (forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet
+        ) {
+            val utvidetVilkår =
+                personenSomFinnesVilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
             personsVilkårAktivt.removeAll(utvidetVilkår)
         }
 
