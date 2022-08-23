@@ -28,8 +28,9 @@ class ECBClient(@Qualifier("ecbRestTemplate") val restTemplate: RestOperations, 
             val ecbExchangeRatesData: ECBExchangeRatesData? = kallEksternTjeneste("ECB", uri, "Hente valutakurser fra European Central Bank") {
                 getForEntity(uri, httpHeaders())
             }
-            if (ecbExchangeRatesData != null)
+            if (ecbExchangeRatesData != null) {
                 return ecbExchangeRatesData
+            }
             throw getECBClientException(currency, exchangeRateDate)
         } catch (e: IntegrasjonException) {
             val feilmelding = "Teknisk feil ved henting av valutakurs fra European Central Bank"

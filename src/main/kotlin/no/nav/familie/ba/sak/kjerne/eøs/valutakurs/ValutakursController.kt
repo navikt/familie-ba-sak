@@ -32,7 +32,7 @@ class ValutakursController(
     private val valutakursService: ValutakursService,
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val ecbService: ECBService,
+    private val ecbService: ECBService
 ) {
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterValutakurs(

@@ -26,12 +26,8 @@ class ECBServiceTest {
         val ecbExchangeRatesData = ECBExchangeRatesData(
             ECBExchangeRatesDataSet(
                 listOf(
-                    ECBExchangeRatesForCurrency(
-                        listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-06-28"), ECBExchangeRateValue(BigDecimal.valueOf(10.337))))
-                    ),
-                    ECBExchangeRatesForCurrency(
-                        listOf(ECBExchangeRateKey("CURRENCY", "SEK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-06-28"), ECBExchangeRateValue(BigDecimal.valueOf(10.6543))))
-                    )
+                    ECBExchangeRatesForCurrency(listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-06-28"), ECBExchangeRateValue(BigDecimal.valueOf(10.337))))),
+                    ECBExchangeRatesForCurrency(listOf(ECBExchangeRateKey("CURRENCY", "SEK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-06-28"), ECBExchangeRateValue(BigDecimal.valueOf(10.6543)))))
                 )
             )
         )
@@ -58,9 +54,7 @@ class ECBServiceTest {
         val ecbExchangeRatesData = ECBExchangeRatesData(
             ECBExchangeRatesDataSet(
                 listOf(
-                    ECBExchangeRatesForCurrency(
-                        listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-23"), ECBExchangeRateValue(BigDecimal.valueOf(9.4567))))
-                    )
+                    ECBExchangeRatesForCurrency(listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-23"), ECBExchangeRateValue(BigDecimal.valueOf(9.4567)))))
                 )
             )
         )
@@ -76,12 +70,8 @@ class ECBServiceTest {
         val ecbExchangeRatesData = ECBExchangeRatesData(
             ECBExchangeRatesDataSet(
                 listOf(
-                    ECBExchangeRatesForCurrency(
-                        listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-21"), ECBExchangeRateValue(BigDecimal.valueOf(9.4567))))
-                    ),
-                    ECBExchangeRatesForCurrency(
-                        listOf(ECBExchangeRateKey("CURRENCY", "SEK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-21"), ECBExchangeRateValue(BigDecimal.valueOf(9.4567))))
-                    )
+                    ECBExchangeRatesForCurrency(listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-21"), ECBExchangeRateValue(BigDecimal.valueOf(9.4567))))),
+                    ECBExchangeRatesForCurrency(listOf(ECBExchangeRateKey("CURRENCY", "SEK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-21"), ECBExchangeRateValue(BigDecimal.valueOf(9.4567)))))
                 )
             )
         )
@@ -98,9 +88,7 @@ class ECBServiceTest {
         val ecbExchangeRatesData = ECBExchangeRatesData(
             ECBExchangeRatesDataSet(
                 listOf(
-                    ECBExchangeRatesForCurrency(
-                        listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-20"), ECBExchangeRateValue(nokTilEur)))
-                    )
+                    ECBExchangeRatesForCurrency(listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-20"), ECBExchangeRateValue(nokTilEur))))
                 )
             )
         )
