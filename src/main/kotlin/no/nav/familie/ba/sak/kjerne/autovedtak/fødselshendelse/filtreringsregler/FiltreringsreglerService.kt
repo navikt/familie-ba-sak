@@ -33,7 +33,7 @@ class FiltreringsreglerService(
     private val localDateService: LocalDateService,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
     private val behandlingService: BehandlingService,
-    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
@@ -132,7 +132,7 @@ class FiltreringsreglerService(
 
     private fun erSakenMigrertEtterBarnFødt(
         barnaFraHendelse: List<Person>,
-        migreringsdatoForFagsak: LocalDate?,
+        migreringsdatoForFagsak: LocalDate?
     ): Boolean = migreringsdatoForFagsak?.isAfter(barnaFraHendelse.minOf { it.fødselsdato }) == true
 
     private fun finnRestenAvBarnasPersonInfo(morsAktørId: Aktør, barnaFraHendelse: List<Person>): List<PersonInfo> {

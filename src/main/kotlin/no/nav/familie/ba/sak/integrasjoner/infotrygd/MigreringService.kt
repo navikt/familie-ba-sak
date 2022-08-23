@@ -275,7 +275,6 @@ class MigreringService(
     }
 
     private fun kastFeilEllerHentUnderkategori(sak: Sak): BehandlingUnderkategori {
-
         return when {
             (sak.valg == "OR" && sak.undervalg in listOf("OS", "MD")) -> {
                 BehandlingUnderkategori.ORDINÆR
@@ -416,7 +415,7 @@ class MigreringService(
         førsteAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         infotrygdSak: Sak,
         fnr: String,
-        barnasIdenter: List<String>,
+        barnasIdenter: List<String>
     ) {
         val førsteUtbetalingsbeløp = førsteAndelerTilkjentYtelse.sumOf { it.kalkulertUtbetalingsbeløp }
         val delytelserInfotrygd = infotrygdSak.stønad!!.delytelse.filter { it.tom == null }
@@ -441,9 +440,11 @@ class MigreringService(
         }
 
         if (førsteUtbetalingsbeløp != beløpFraInfotrygd) {
-            val beløpfeilType = if (infotrygdSak.undervalg == "MD")
-                MigreringsfeilType.BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD else
+            val beløpfeilType = if (infotrygdSak.undervalg == "MD") {
+                MigreringsfeilType.BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD
+            } else {
                 MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD
+            }
             secureLog.info(
                 "Ulikt beløp ba-sak og infotrygd migrering. Andeler fra og med ${førsteAndelerTilkjentYtelse.first().stønadFom}: " +
                     "$førsteAndelerTilkjentYtelse"
@@ -506,7 +507,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
     UKJENT("Ukjent migreringsfeil"),
     ÅPEN_SAK_INFOTRYGD("Bruker har åpen behandling i Infotrygd"),
-    DELYTELSE_OG_ANTALLBARN_NULL("Infotrygdsak mangler delytelse og antall barn er 0"), // Disse kan man nok la være å migrere
+    DELYTELSE_OG_ANTALLBARN_NULL("Infotrygdsak mangler delytelse og antall barn er 0") // Disse kan man nok la være å migrere
 }
 
 open class KanIkkeMigrereException(

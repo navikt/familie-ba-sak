@@ -43,7 +43,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
@@ -58,7 +58,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 2108,
                 person = person2
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -84,7 +84,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
@@ -109,7 +109,7 @@ class EndringstidspunktUtilsTest {
                         årsak = Årsak.DELT_BOSTED
                     )
                 )
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -145,7 +145,7 @@ class EndringstidspunktUtilsTest {
                         årsak = Årsak.DELT_BOSTED
                     )
                 )
-            ),
+            )
         )
 
         val andeler = listOf(
@@ -170,7 +170,7 @@ class EndringstidspunktUtilsTest {
                         årsak = Årsak.ALLEREDE_UTBETALT
                     )
                 )
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -196,7 +196,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
@@ -211,7 +211,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -246,7 +246,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
@@ -261,7 +261,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -287,7 +287,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
@@ -308,7 +308,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -334,7 +334,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
@@ -349,7 +349,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person1
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -378,7 +378,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
@@ -393,7 +393,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned().minusMonths(1),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -414,7 +414,7 @@ class EndringstidspunktUtilsTest {
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 0,
                 person = person1
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -442,7 +442,7 @@ class EndringstidspunktUtilsTest {
                 beløp = 1054,
                 person = person3,
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD
-            ),
+            )
         )
 
         val andeler = listOf(
@@ -487,7 +487,7 @@ class EndringstidspunktUtilsTest {
                 person = person3,
                 prosent = BigDecimal(50),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -649,7 +649,7 @@ class EndringstidspunktUtilsTest {
                 søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
-            ),
+            )
         )
         val nyKompetansePerioder = listOf(
             lagKompetanse(
@@ -663,7 +663,7 @@ class EndringstidspunktUtilsTest {
                 søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør2)
-            ),
+            )
         )
         assertEquals(
             YearMonth.of(2022, 6),
@@ -686,7 +686,7 @@ class EndringstidspunktUtilsTest {
                 søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør2)
-            ),
+            )
         )
         val nyKompetansePerioder = listOf(
             lagKompetanse(
@@ -694,7 +694,7 @@ class EndringstidspunktUtilsTest {
                 søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
-            ),
+            )
         )
         assertEquals(
             YearMonth.of(2022, 6),
@@ -721,7 +721,7 @@ class EndringstidspunktUtilsTest {
                 søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
-            ),
+            )
         )
         val nyKompetansePerioder = emptyList<Kompetanse>()
         assertEquals(
@@ -740,7 +740,7 @@ class EndringstidspunktUtilsTest {
                 søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
-            ),
+            )
         )
         assertEquals(
             YearMonth.of(2022, 6),

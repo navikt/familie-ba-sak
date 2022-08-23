@@ -200,7 +200,6 @@ object VilkårsvurderingUtils {
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
         løpendeUnderkategori: BehandlingUnderkategori? = null
     ): Pair<Vilkårsvurdering, Vilkårsvurdering> {
-
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
         val initiellVilkårsvurderingKopi = initiellVilkårsvurdering.kopier()
@@ -252,7 +251,6 @@ object VilkårsvurderingUtils {
         løpendeUnderkategori: BehandlingUnderkategori?,
         personResultaterAktivt: MutableSet<PersonResultat>
     ) {
-
         val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
         val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
         personFraInit.vilkårResultater.forEach { vilkårFraInit ->
@@ -360,7 +358,7 @@ fun eøsStandardbegrunnelserTilNedtrekksmenytekster(
 
 fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    vedtakBegrunnelse: Standardbegrunnelse,
+    vedtakBegrunnelse: Standardbegrunnelse
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
     val sanityBegrunnelse = vedtakBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser) ?: return emptyList()
 
@@ -463,8 +461,11 @@ private fun utledResultat(
 }
 
 private fun utledResultatForGiftPartnerskap(person: Person) =
-    if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true)
-        Resultat.OPPFYLT else Resultat.IKKE_VURDERT
+    if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true) {
+        Resultat.OPPFYLT
+    } else {
+        Resultat.IKKE_VURDERT
+    }
 
 private fun utledBegrunnelse(
     vilkår: Vilkår,
@@ -472,9 +473,12 @@ private fun utledBegrunnelse(
 ) = when {
     person.erDød() -> "Dødsfall"
     vilkår == Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
-    vilkår == Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
+    vilkår == Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false) {
         "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
-            "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
+            "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen"
+    } else {
+        ""
+    }
 
     else -> ""
 }

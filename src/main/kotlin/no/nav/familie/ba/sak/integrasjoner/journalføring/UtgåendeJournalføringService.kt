@@ -41,7 +41,7 @@ class UtgåendeJournalføringService(
                     dokumenttype = dokumenttype
                 )
             ),
-            førsteside = førsteside,
+            førsteside = førsteside
         )
     }
 
@@ -110,7 +110,7 @@ class UtgåendeJournalføringService(
     ): String = integrasjonClient.hentJournalposterForBruker(
         JournalposterForBrukerRequest(
             brukerId = Bruker(id = fnr, type = BrukerIdType.FNR),
-            antall = 50,
+            antall = 50
         )
     ).single { it.eksternReferanseId == eksternReferanseId }.journalpostId
 

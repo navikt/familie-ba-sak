@@ -48,7 +48,7 @@ data class Valutakurs(
     val valutakode: String? = null,
 
     @Column(name = "kurs", nullable = false)
-    val kurs: BigDecimal? = null,
+    val kurs: BigDecimal? = null
 ) : PeriodeOgBarnSkjemaEntitet<Valutakurs>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "valutakurs_seq_generator")

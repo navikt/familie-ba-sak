@@ -12,5 +12,5 @@ data class MigreringResponseDto(
     val infotrygdTkNr: String? = null,
     val infotrygdVirkningFom: String? = null,
     val infotrygdIverksattFom: String? = null,
-    val infotrygdRegion: String? = null,
+    val infotrygdRegion: String? = null
 )

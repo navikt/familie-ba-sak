@@ -110,7 +110,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                 fom = YearMonth.now().minusYears(3).plusMonths(1),
                 tom = YearMonth.now().plusYears(2),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn3,
+                person = barn3
             )
         )
 
@@ -163,13 +163,13 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                 fom = YearMonth.now().minusYears(1).plusMonths(1),
                 tom = YearMonth.now().plusYears(5),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn1,
+                person = barn1
             ),
             lagAndelTilkjentYtelse(
                 fom = barn2.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().plusYears(6),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn2,
+                person = barn2
             )
         )
 
@@ -222,13 +222,13 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                 fom = barn1.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().plusYears(5),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn1,
+                person = barn1
             ),
             lagAndelTilkjentYtelse(
                 fom = barn2.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().plusYears(6),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn2,
+                person = barn2
             )
         )
 

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfoMedNavnOgAdresse
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -41,9 +42,7 @@ class PersonController(
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
         val aktør = personidentService.hentAktør(personIdent)
         val personinfo = familieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
-            ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
-                personidentService.hentAktør(personIdent)
-            )
+            ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
                 .tilRestPersonInfo(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
@@ -53,8 +52,22 @@ class PersonController(
         @RequestHeader personIdent: String,
         @RequestBody personIdentBody: PersonIdent?
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
-        val personinfo = personopplysningerService.hentPersoninfoEnkel(personidentService.hentAktør(personIdent))
-        return ResponseEntity.ok(Ressurs.success(personinfo.tilRestPersonInfo(personIdent)))
+        val aktør = personidentService.hentAktør(personIdent)
+        val personinfo = familieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+            ?: personopplysningerService.hentPersoninfoEnkel(aktør)
+                .tilRestPersonInfo(personIdent)
+        return ResponseEntity.ok(Ressurs.success(personinfo))
+    }
+
+    @GetMapping(path = ["/adresse"])
+    fun hentPersonAdresse(
+        @RequestHeader personIdent: String
+    ): ResponseEntity<Ressurs<RestPersonInfo>> {
+        val aktør = personidentService.hentAktør(personIdent)
+        val personinfo = familieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+            ?: personopplysningerService.hentPersoninfoNavnOgAdresse(aktør)
+                .tilRestPersonInfoMedNavnOgAdresse(personIdent)
+        return ResponseEntity.ok(Ressurs.success(personinfo))
     }
 
     @GetMapping(path = ["/oppdater-registeropplysninger/{behandlingId}"])

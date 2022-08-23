@@ -147,13 +147,14 @@ data class UtvidetBarnetrygdGenerator(
                         prosentForPeriode = prosentForPeriode,
                         personType = PersonType.BARN
                     )
-                } else
+                } else {
                     sammenslåttePerioder + lagSegmentMedPeriodeData(
                         fom = nestePeriode.fom,
                         tom = nestePeriode.tom,
                         prosentForPeriode = nestePeriode.value.maxOf { it.prosent },
                         personType = PersonType.BARN
                     )
+                }
             }
     }
 
@@ -193,14 +194,16 @@ data class UtvidetBarnetrygdGenerator(
 }
 
 fun VilkårResultat.tilDatoSegment(
-    utvidetVilkår: List<VilkårResultat>,
+    utvidetVilkår: List<VilkårResultat>
 ): LocalDateSegment<List<UtvidetBarnetrygdGenerator.PeriodeData>> {
     if (this.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvidet barnetrygd")
     val fraOgMedDato = this.periodeFom!!.førsteDagINesteMåned()
     val tilOgMedDato = finnTilOgMedDato(tilOgMed = this.periodeTom, vilkårResultater = utvidetVilkår)
     if (tilOgMedDato.toYearMonth() == fraOgMedDato.toYearMonth()
         .minusMonths(1)
-    ) throw FunksjonellFeil("Du kan ikke legge inn fom. og tom. innenfor samme kalendermåned. Gå til utvidet barnetrygd vilkåret for å endre.")
+    ) {
+        throw FunksjonellFeil("Du kan ikke legge inn fom. og tom. innenfor samme kalendermåned. Gå til utvidet barnetrygd vilkåret for å endre.")
+    }
     return LocalDateSegment(
         fraOgMedDato,
         tilOgMedDato,
@@ -224,5 +227,7 @@ fun finnTilOgMedDato(
 
     return if (skalVidereføresEnMndEkstra) {
         tilOgMed.plusMonths(1).sisteDagIMåned()
-    } else tilOgMed.sisteDagIMåned()
+    } else {
+        tilOgMed.sisteDagIMåned()
+    }
 }

@@ -33,7 +33,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Iverksetter mot oppdrag",
+            formål = "Iverksetter mot oppdrag"
         ) {
             postForEntity(uri = uri, utbetalingsoppdrag)
         }
@@ -50,7 +50,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Henter simulering fra Økonomi",
+            formål = "Henter simulering fra Økonomi"
         ) {
             postForEntity(uri = uri, utbetalingsoppdrag)
         }
@@ -61,7 +61,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Henter oppdragstatus fra Økonomi",
+            formål = "Henter oppdragstatus fra Økonomi"
         ) {
             postForEntity(uri = uri, oppdragId)
         }
@@ -72,7 +72,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Gjør grensesnittavstemming mot oppdrag",
+            formål = "Gjør grensesnittavstemming mot oppdrag"
         ) {
             postForEntity(
                 uri = uri,
@@ -94,7 +94,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Gjør konsistensavstemming mot oppdrag (Deprecated)",
+            formål = "Gjør konsistensavstemming mot oppdrag (Deprecated)"
         ) {
             postForEntity(
                 uri = uri,
@@ -119,7 +119,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Start konsistensavstemming mot oppdrag i batch",
+            formål = "Start konsistensavstemming mot oppdrag i batch"
         ) {
             postForEntity(
                 uri = uri,
@@ -135,7 +135,7 @@ class ØkonomiKlient(
     fun konsistensavstemOppdragData(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>,
-        transaksjonsId: UUID,
+        transaksjonsId: UUID
     ): String {
         val uri = URI.create(
             "$familieOppdragUri/v2/konsistensavstemming" +
@@ -145,7 +145,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Konsistenstavstemmer chunk mot oppdrag",
+            formål = "Konsistenstavstemmer chunk mot oppdrag"
         ) {
             postForEntity(
                 uri = uri,
@@ -169,7 +169,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Avslutt konsistensavstemming mot oppdrag",
+            formål = "Avslutt konsistensavstemming mot oppdrag"
         ) {
             postForEntity(
                 uri = uri,

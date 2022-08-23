@@ -40,7 +40,6 @@ class AnnenVurderingServiceTest {
 
     @Test
     fun `Verifiser endreAnnenVurdering`() {
-
         every { annenVurderingRepository.findById(any()) } returns Optional.of(
             AnnenVurdering(
                 resultat = Resultat.OPPFYLT,

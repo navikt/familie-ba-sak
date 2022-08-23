@@ -18,7 +18,7 @@ object AndelTilkjentYtelsePraktiskLikhet {
 
     private fun AndelTilkjentYtelse.andelSomKanSammenliknes() =
         copy(
-            id = 0, // Er med i hashCode, men ikke i equals i AndelTilkjentYtelse
+            id = 0 // Er med i hashCode, men ikke i equals i AndelTilkjentYtelse
             // Andre felter som er funksjonelt viktige for praktisk likhet er med i equals og hashCode
         )
 }

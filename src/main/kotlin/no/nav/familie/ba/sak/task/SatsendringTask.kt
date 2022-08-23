@@ -14,7 +14,7 @@ import java.util.Properties
     maxAntallFeil = 1
 )
 class SatsendringTask(
-    val autovedtakSatsendringService: AutovedtakSatsendringService,
+    val autovedtakSatsendringService: AutovedtakSatsendringService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

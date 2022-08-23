@@ -29,7 +29,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val mockPersonopplysningerService: PersonopplysningerService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    @Autowired val databaseCleanupService: DatabaseCleanupService,
+    @Autowired val databaseCleanupService: DatabaseCleanupService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -126,7 +126,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
                         postnummer = "9050"
                     ),
                     matrikkeladresse = null,
-                    ukjentBosted = null,
+                    ukjentBosted = null
                 )
             )
         )

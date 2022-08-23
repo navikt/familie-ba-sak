@@ -27,7 +27,7 @@ class MinimertEndretAndel(
 
         return MånedPeriode(
             this.fom!!,
-            this.tom!!,
+            this.tom!!
         ).overlapperHeltEllerDelvisMed(
             MånedPeriode(
                 nullableMånedPeriode.fom,

@@ -22,7 +22,7 @@ class SmåbarnstilleggService(
     private val efSakRestClient: EfSakRestClient,
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val persongrunnlagService: PersongrunnlagService,
+    private val persongrunnlagService: PersongrunnlagService
 ) {
 
     fun hentOgLagrePerioderMedFullOvergangsstønad(
@@ -35,7 +35,8 @@ class SmåbarnstilleggService(
         periodeOvergangsstønadGrunnlagRepository.saveAll(
             periodeOvergangsstønad.map {
                 it.tilPeriodeOvergangsstønadGrunnlag(
-                    behandlingId = behandlingId, aktør = søkerAktør
+                    behandlingId = behandlingId,
+                    aktør = søkerAktør
                 )
             }
         )
@@ -53,10 +54,13 @@ class SmåbarnstilleggService(
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId)
 
-        return if (forrigeIverksatteBehandling != null) periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
-            behandlingId = forrigeIverksatteBehandling.id
-        ).map { it.tilInternPeriodeOvergangsstønad() }
-        else emptyList()
+        return if (forrigeIverksatteBehandling != null) {
+            periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
+                behandlingId = forrigeIverksatteBehandling.id
+            ).map { it.tilInternPeriodeOvergangsstønad() }
+        } else {
+            emptyList()
+        }
     }
 
     fun vedtakOmOvergangsstønadPåvirkerFagsak(fagsak: Fagsak): Boolean {
@@ -88,7 +92,7 @@ class SmåbarnstilleggService(
                     it.aktør,
                     it.fødselsdato
                 )
-            },
+            }
         )
     }
 

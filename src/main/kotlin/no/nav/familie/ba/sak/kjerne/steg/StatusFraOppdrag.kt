@@ -25,7 +25,7 @@ data class StatusFraOppdragMedTask(
 @Service
 class StatusFraOppdrag(
     private val økonomiService: ØkonomiService,
-    private val taskRepository: TaskRepositoryWrapper,
+    private val taskRepository: TaskRepositoryWrapper
 ) : BehandlingSteg<StatusFraOppdragMedTask> {
 
     override fun utførStegOgAngiNeste(
@@ -81,7 +81,8 @@ class StatusFraOppdrag(
 
     private fun opprettTaskIverksettMotTilbake(behandlingsId: Long, metadata: Properties) {
         val ferdigstillBehandling = IverksettMotFamilieTilbakeTask.opprettTask(
-            behandlingsId, metadata
+            behandlingsId,
+            metadata
         )
         taskRepository.save(ferdigstillBehandling)
     }

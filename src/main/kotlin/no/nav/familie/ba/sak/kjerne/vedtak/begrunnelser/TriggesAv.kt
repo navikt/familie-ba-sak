@@ -43,7 +43,7 @@ data class TriggesAv(
 
     fun erUtdypendeVilkårsvurderingOppfyltReduksjon(
         vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
-        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
+        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?
     ): Boolean {
         return erDeltBostedOppfyltReduksjon(
             vilkårSomAvsluttesRettFørDennePerioden = vilkårSomAvsluttesRettFørDennePerioden,
@@ -84,7 +84,7 @@ data class TriggesAv(
 
     private fun erDeltBostedOppfyltReduksjon(
         vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
-        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
+        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?
     ): Boolean {
         val avsluttetVilkårInneholdtDeltBosted =
             vilkårSomAvsluttesRettFørDennePerioden.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
@@ -102,7 +102,7 @@ data class TriggesAv(
 
 fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
     minimertEndretAndel: MinimertEndretAndel,
-    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
 ): Boolean {
     val hørerTilEtterEndretUtbetaling = this.etterEndretUtbetaling
 
@@ -112,7 +112,7 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
         this.endretUtbetalingSkalUtbetales == EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT ||
             oppfyllerUtvidetScenario(
                 vilkårBegrunnelsenGjelderFor = this.vilkår,
-                minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+                minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer
             )
 
     val erAvSammeÅrsak = this.endringsaarsaker.contains(minimertEndretAndel.årsak)
@@ -135,7 +135,7 @@ fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
 
 private fun oppfyllerUtvidetScenario(
     vilkårBegrunnelsenGjelderFor: Set<Vilkår>?,
-    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
 ): Boolean {
     val begrunnelseGjelderUtvidet = vilkårBegrunnelsenGjelderFor?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 

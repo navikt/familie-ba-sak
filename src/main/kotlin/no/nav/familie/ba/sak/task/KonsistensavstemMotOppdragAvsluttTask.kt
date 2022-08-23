@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 )
 class KonsistensavstemMotOppdragAvsluttTask(
     val avstemmingService: AvstemmingService,
-    val dataChunkRepository: DataChunkRepository,
+    val dataChunkRepository: DataChunkRepository
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

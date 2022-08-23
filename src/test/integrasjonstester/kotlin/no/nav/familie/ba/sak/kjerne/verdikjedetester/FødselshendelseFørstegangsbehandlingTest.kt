@@ -63,7 +63,7 @@ class FødselshendelseFørstegangsbehandlingTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService,
+            personidentService = personidentService
         )
 
         val restFagsakEtterBehandlingAvsluttet =
@@ -93,20 +93,20 @@ class FødselshendelseFørstegangsbehandlingTest(
 
         assertEquals(
             1654,
-            desember2021Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt(),
+            desember2021Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt()
         )
         assertEquals(
             Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
-            desember2021Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse,
+            desember2021Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse
         )
 
         assertEquals(
             1676,
-            januar2022Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt(),
+            januar2022Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt()
         )
         assertEquals(
             Standardbegrunnelse.INNVILGET_SATSENDRING,
-            januar2022Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse,
+            januar2022Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse
         )
     }
 

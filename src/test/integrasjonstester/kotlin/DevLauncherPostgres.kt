@@ -17,8 +17,9 @@ fun main(args: Array<String>) {
         "task-scheduling"
     )
 
-    if (args.contains("--dbcontainer"))
+    if (args.contains("--dbcontainer")) {
         springBuilder.initializers(DbContainerInitializer())
+    }
 
     springBuilder.run(*args)
 }

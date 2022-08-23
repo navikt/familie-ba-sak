@@ -38,7 +38,6 @@ fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
 private fun AndelTilkjentYtelse.medDifferanseberegning(
     utenlandskPeriodebeløpINorskeKroner: BigDecimal
 ): AndelTilkjentYtelse {
-
     val avrundetUtenlandskPeriodebeløp = utenlandskPeriodebeløpINorskeKroner
         .toBigInteger().intValueExact() // Fjern desimaler for å gi fordel til søker
 

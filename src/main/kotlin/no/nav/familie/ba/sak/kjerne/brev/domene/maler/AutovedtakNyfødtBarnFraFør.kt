@@ -9,7 +9,7 @@ data class AutovedtakNyfødtBarnFraFør(
 
     constructor(
         vedtakFellesfelter: VedtakFellesfelter,
-        etterbetaling: Etterbetaling?,
+        etterbetaling: Etterbetaling?
     ) :
         this(
             data = AutovedtakNyfødtBarnFraFørData(
@@ -38,6 +38,6 @@ data class AutovedtakNyfødtBarnFraFørData(
     data class Delmaler(
         val etterbetaling: Etterbetaling?,
         val hjemmeltekst: Hjemmeltekst,
-        val autoUnderskrift: AutoUnderskrift,
+        val autoUnderskrift: AutoUnderskrift
     )
 }

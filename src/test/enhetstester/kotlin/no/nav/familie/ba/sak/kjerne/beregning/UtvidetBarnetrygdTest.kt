@@ -42,7 +42,6 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler får høyeste beløp når det utbetales til flere barn med ulike beløp`() {
-
         val søker =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val barnA =
@@ -138,7 +137,6 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler får høyeste ordinærsats når søker har tillegg for barn under 6 år`() {
-
         val søker =
             OppfyltPeriode(fom = fødselsdatoUnder6År, tom = LocalDate.of(2021, 6, 15))
         val oppfyltBarn =
@@ -375,7 +373,6 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler slutter siste dag i  måneden som vilkår ikke er innfridd lenger`() {
-
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val søkerUtvidet =
@@ -883,7 +880,7 @@ internal class UtvidetBarnetrygdTest {
 
         assertThrows<FunksjonellFeil> {
             utvidetVilkårResultat.tilDatoSegment(
-                utvidetVilkår = listOf(utvidetVilkårResultat),
+                utvidetVilkår = listOf(utvidetVilkårResultat)
             )
         }
     }
@@ -894,7 +891,7 @@ internal class UtvidetBarnetrygdTest {
 
         assertDoesNotThrow {
             utvidetVilkårResultat.tilDatoSegment(
-                utvidetVilkår = listOf(utvidetVilkårResultat, lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 3, 1), periodeTom = null)),
+                utvidetVilkår = listOf(utvidetVilkårResultat, lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 3, 1), periodeTom = null))
             )
         }
     }
@@ -997,10 +994,11 @@ internal class UtvidetBarnetrygdTest {
         erDeltBosted: Boolean = false,
         fødselsdato: LocalDate = fødselsdatoOver6År
     ): Set<VilkårResultat> {
-        val vilkårSomSkalVurderes = if (erUtvidet)
+        val vilkårSomSkalVurderes = if (erUtvidet) {
             listOf(Vilkår.UTVIDET_BARNETRYGD)
-        else
+        } else {
             Vilkår.hentVilkårFor(personType = personType)
+        }
 
         return vilkårSomSkalVurderes.map {
             VilkårResultat(

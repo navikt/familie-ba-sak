@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import java.util.concurrent.atomic.AtomicLong
 
 fun <S : PeriodeOgBarnSkjemaEntitet<S>> mockPeriodeBarnSkjemaRepository(): PeriodeOgBarnSkjemaRepository<S> {
-
     val minnebasertSkjemaRepository = MinnebasertSkjemaRepository<S>()
     val mockSkjemaRepository = mockk<PeriodeOgBarnSkjemaRepository<S>>()
 
@@ -46,7 +45,6 @@ private class MinnebasertSkjemaRepository<S> where S : PeriodeOgBarnSkjemaEntite
     private val skjemaer = mutableMapOf<Long, S>()
 
     fun hentSkjemaer(behandlingId: Long): List<S> {
-
         return skjemaer.values
             .filter { it.behandlingId == behandlingId }
     }
@@ -57,8 +55,9 @@ private class MinnebasertSkjemaRepository<S> where S : PeriodeOgBarnSkjemaEntite
     fun save(skjemaer: Iterable<S>) = skjemaer.map { save(it) }
 
     private fun save(skjema: S): S {
-        if (skjema.id == 0L)
+        if (skjema.id == 0L) {
             skjema.id = løpenummer.neste()
+        }
 
         skjemaer[skjema.id] = skjema
         return skjema

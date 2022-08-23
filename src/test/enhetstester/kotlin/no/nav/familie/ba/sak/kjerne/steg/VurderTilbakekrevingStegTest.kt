@@ -61,7 +61,8 @@ class VurderTilbakekrevingStegTest {
     fun `skal utføre steg for vanlig behandling uten åpen tilbakekreving`() {
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
@@ -74,7 +75,8 @@ class VurderTilbakekrevingStegTest {
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns true
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
@@ -95,7 +97,8 @@ class VurderTilbakekrevingStegTest {
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertEquals(
@@ -127,7 +130,8 @@ class VurderTilbakekrevingStegTest {
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertEquals(
@@ -159,7 +163,8 @@ class VurderTilbakekrevingStegTest {
 
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
@@ -177,7 +182,8 @@ class VurderTilbakekrevingStegTest {
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertEquals(
@@ -210,7 +216,8 @@ class VurderTilbakekrevingStegTest {
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertEquals(
@@ -251,7 +258,8 @@ class VurderTilbakekrevingStegTest {
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertEquals(
@@ -284,7 +292,8 @@ class VurderTilbakekrevingStegTest {
 
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
@@ -321,7 +330,8 @@ class VurderTilbakekrevingStegTest {
 
         val stegType = assertDoesNotThrow {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling, restTilbakekreving
+                behandling,
+                restTilbakekreving
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
@@ -332,7 +342,7 @@ class VurderTilbakekrevingStegTest {
         mottakerNummer: String? = randomFnr(),
         mottakerType: MottakerType = MottakerType.BRUKER,
         behandling: Behandling = mockk(relaxed = true),
-        økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = listOf(mockVedtakSimuleringPostering()),
+        økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = listOf(mockVedtakSimuleringPostering())
     ) = ØkonomiSimuleringMottaker(id, mottakerNummer, mottakerType, behandling, økonomiSimuleringPostering)
 
     private fun mockVedtakSimuleringPostering(
@@ -344,7 +354,7 @@ class VurderTilbakekrevingStegTest {
         betalingType: BetalingType = BetalingType.DEBIT,
         posteringType: PosteringType = PosteringType.YTELSE,
         forfallsdato: LocalDate = LocalDate.now().minusMonths(1),
-        utenInntrekk: Boolean = false,
+        utenInntrekk: Boolean = false
     ) = ØkonomiSimuleringPostering(
         økonomiSimuleringMottaker = økonomiSimuleringMottaker,
         fagOmrådeKode = fagOmrådeKode,
@@ -354,6 +364,6 @@ class VurderTilbakekrevingStegTest {
         beløp = beløp.toBigDecimal(),
         posteringType = posteringType,
         forfallsdato = forfallsdato,
-        utenInntrekk = utenInntrekk,
+        utenInntrekk = utenInntrekk
     )
 }

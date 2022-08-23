@@ -13,8 +13,9 @@ fun main(args: Array<String>) {
         "mock-infotrygd-barnetrygd"
     )
 
-    if (args.contains("--dbcontainer"))
+    if (args.contains("--dbcontainer")) {
         springBuilder.initializers(DbContainerInitializer())
+    }
 
     springBuilder.run(*args)
 }

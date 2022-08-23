@@ -47,7 +47,8 @@ data class Person(
     val id: Long = 0,
 
     // SØKER, BARN, ANNENPART
-    @Enumerated(EnumType.STRING) @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
     val type: PersonType,
 
     @Column(name = "foedselsdato", nullable = false)
@@ -56,10 +57,12 @@ data class Person(
     @Column(name = "navn", nullable = false)
     val navn: String = "",
 
-    @Enumerated(EnumType.STRING) @Column(name = "kjoenn", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kjoenn", nullable = false)
     val kjønn: Kjønn,
 
-    @Enumerated(EnumType.STRING) @Column(name = "maalform", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "maalform", nullable = false)
     val målform: Målform = Målform.NB,
 
     @JsonIgnore

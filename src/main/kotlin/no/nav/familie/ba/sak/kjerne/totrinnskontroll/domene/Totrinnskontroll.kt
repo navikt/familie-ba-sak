@@ -26,7 +26,8 @@ data class Totrinnskontroll(
     @SequenceGenerator(name = "totrinnskontroll_seq_generator", sequenceName = "totrinnskontroll_seq", allocationSize = 50)
     val id: Long = 0,
 
-    @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
 
     @Column(name = "aktiv", nullable = false)
@@ -49,7 +50,7 @@ data class Totrinnskontroll(
 
     @Column(name = "kontrollerte_sider")
     @Convert(converter = StringListConverter::class)
-    var kontrollerteSider: List<String> = emptyList(),
+    var kontrollerteSider: List<String> = emptyList()
 ) : BaseEntitet() {
 
     fun erBesluttet(): Boolean {

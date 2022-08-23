@@ -109,7 +109,8 @@ class JournalførVedtaksbrev(
         )
         val vedlegg = listOf(
             Dokument(
-                vedleggPdf, filtype = Filtype.PDFA,
+                vedleggPdf,
+                filtype = Filtype.PDFA,
                 dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
                 tittel = VEDTAK_VEDLEGG_TITTEL
             )

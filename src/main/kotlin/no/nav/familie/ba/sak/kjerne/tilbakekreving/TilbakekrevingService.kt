@@ -37,7 +37,7 @@ class TilbakekrevingService(
     private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val tilbakekrevingKlient: TilbakekrevingKlient,
+    private val tilbakekrevingKlient: TilbakekrevingKlient
 ) {
 
     fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, behandlingId: Long) {
@@ -60,7 +60,7 @@ class TilbakekrevingService(
             valg = restTilbakekreving.valg,
             varsel = restTilbakekreving.varsel,
             tilbakekrevingsbehandlingId = tilbakekrevingRepository
-                .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId,
+                .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId
         )
 
         tilbakekrevingRepository.deleteByBehandlingId(behandlingId)
@@ -76,7 +76,7 @@ class TilbakekrevingService(
 
     fun hentForhåndsvisningVarselbrev(
         behandlingId: Long,
-        forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest,
+        forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest
     ): ByteArray {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
@@ -154,7 +154,7 @@ class TilbakekrevingService(
             revurderingsvedtaksdato = revurderingsvedtaksdato,
             // Verge er per nå ikke støttet i familie-ba-sak.
             verge = null,
-            faktainfo = hentFaktainfoForTilbakekreving(behandling, tilbakekreving),
+            faktainfo = hentFaktainfoForTilbakekreving(behandling, tilbakekreving)
         )
     }
 

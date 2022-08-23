@@ -39,7 +39,8 @@ class PeriodeOvergangsstønadGrunnlag(
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandlingId: Long,
 
-    @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
 
     @Column(name = "fom", nullable = false, columnDefinition = "DATE")
@@ -50,7 +51,7 @@ class PeriodeOvergangsstønadGrunnlag(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "datakilde", nullable = false)
-    val datakilde: PeriodeOvergangsstønad.Datakilde,
+    val datakilde: PeriodeOvergangsstønad.Datakilde
 ) : BaseEntitet() {
     fun tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
         personIdent = this.aktør.aktivFødselsnummer(),

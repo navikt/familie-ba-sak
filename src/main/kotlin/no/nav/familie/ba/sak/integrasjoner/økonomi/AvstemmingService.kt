@@ -28,10 +28,9 @@ class AvstemmingService(
     private val beregningService: BeregningService,
     private val taskRepository: TaskRepository,
     private val batchRepository: BatchRepository,
-    private val dataChunkRepository: DataChunkRepository,
+    private val dataChunkRepository: DataChunkRepository
 ) {
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime) {
-
         økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato)
     }
 
@@ -53,7 +52,7 @@ class AvstemmingService(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>,
         transaksjonsId: UUID,
-        chunkNr: Int,
+        chunkNr: Int
     ) {
         logger.info("Utfører konsisensavstemming: Sender perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr")
         val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
@@ -91,7 +90,7 @@ class AvstemmingService(
                 KonsistensavstemmingAvsluttTaskDTO(
                     batchId = batchId,
                     transaksjonsId = transaksjonsId,
-                    avstemmingsdato = avstemmingsdato,
+                    avstemmingsdato = avstemmingsdato
                 )
             )
         )
@@ -126,7 +125,7 @@ class AvstemmingService(
                     transaksjonsId = transaksjonsId,
                     chunkNr = chunkNr,
                     avstemmingdato = avstemmingsdato,
-                    perioderForBehandling = perioderTilAvstemming,
+                    perioderForBehandling = perioderTilAvstemming
                 )
             )
         )

@@ -8,7 +8,7 @@ data class ForsattInnvilget(
 ) : Vedtaksbrev {
 
     constructor(
-        vedtakFellesfelter: VedtakFellesfelter,
+        vedtakFellesfelter: VedtakFellesfelter
     ) :
         this(
             data = ForsattInnvilgetData(
@@ -18,13 +18,13 @@ data class ForsattInnvilget(
                         saksbehandler = vedtakFellesfelter.saksbehandler,
                         beslutter = vedtakFellesfelter.beslutter
                     ),
-                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
                 ),
-                perioder = vedtakFellesfelter.perioder,
+                perioder = vedtakFellesfelter.perioder
             )
         )
 }
@@ -37,6 +37,6 @@ data class ForsattInnvilgetData(
 
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
-        val hjemmeltekst: Hjemmeltekst,
+        val hjemmeltekst: Hjemmeltekst
     )
 }

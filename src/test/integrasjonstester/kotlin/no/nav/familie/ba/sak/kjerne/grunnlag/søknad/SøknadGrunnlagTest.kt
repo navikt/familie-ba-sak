@@ -204,7 +204,7 @@ class SøknadGrunnlagTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         val tilkjentYtelse =
@@ -271,7 +271,7 @@ class SøknadGrunnlagTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         val behandlingEtterNyRegistrering = stegService.håndterSøknad(
