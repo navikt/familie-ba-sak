@@ -51,10 +51,11 @@ class JournalførVedtaksbrev(
         val behanlendeEnhet =
             arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
 
-        val mottaker = if (fagsak?.type == FagsakType.INSTITUSJON)
+        val mottaker = if (fagsak?.type == FagsakType.INSTITUSJON) {
             mutableListOf(Pair(fagsak.institusjon!!.orgNummer!!, BrukerIdType.ORGNR))
-        else
+        } else {
             mutableListOf(Pair(vedtak.behandling.fagsak.aktør.aktivFødselsnummer(), BrukerIdType.FNR))
+        }
         if (vedtak.behandling.verge != null && vedtak.behandling.verge?.ident != null) {
             mottaker.add(Pair(vedtak.behandling.verge!!.ident!!, BrukerIdType.FNR))
         }

@@ -67,11 +67,15 @@ class UtgåendeJournalføringService(
             val journalpost = integrasjonClient.journalførDokument(
                 ArkiverDokumentRequest(
                     fnr = brukerId,
-                    avsenderMottaker = if (brukersType == BrukerIdType.ORGNR) AvsenderMottaker(
-                        brukerId,
-                        brukersType,
-                        brukersNavn
-                    ) else null,
+                    avsenderMottaker = if (brukersType == BrukerIdType.ORGNR) {
+                        AvsenderMottaker(
+                            brukerId,
+                            brukersType,
+                            brukersNavn
+                        )
+                    } else {
+                        null
+                    },
                     forsøkFerdigstill = true,
                     hoveddokumentvarianter = brev,
                     vedleggsdokumenter = vedlegg,

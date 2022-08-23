@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 @Service
 class DistribuerVedtaksbrev(
     private val dokumentService: DokumentService,
-    private val taskRepository: TaskRepositoryWrapper,
+    private val taskRepository: TaskRepositoryWrapper
 ) : BehandlingSteg<DistribuerDokumentDTO> {
 
     override fun utførStegOgAngiNeste(
