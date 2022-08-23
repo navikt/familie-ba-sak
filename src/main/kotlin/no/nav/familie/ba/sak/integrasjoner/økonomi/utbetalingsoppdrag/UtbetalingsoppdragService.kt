@@ -164,6 +164,7 @@ class UtbetalingsoppdragService(
         val alleAndelerTilkjentYtelserIverksattMotØkonomi =
             beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
                 .flatMap { it.andelerTilkjentYtelse }
+                .filter { it.erAndelSomSkalSendesTilOppdrag() }
         val alleTideligereKjederIverksattMotØkonomi =
             kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
 
