@@ -44,7 +44,8 @@ class SimuleringService(
     private val simulertForskjellNyGammel = Metrics.counter("familie.ba.sak.oppdrag.simulert.forskjell")
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
-        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
+        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET ||
+            vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
             beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = vedtak.behandling)
         ) {
             return null
@@ -61,7 +62,6 @@ class SimuleringService(
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             erSimulering = true
         )
-        simulert.increment()
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
             val generertUtbetalingsoppdrag = utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 vedtak = vedtak,
@@ -74,7 +74,10 @@ class SimuleringService(
                 secureLogger.info("Generert utbetalingsoppdrag på ny måte=$generertUtbetalingsoppdrag")
             }
         }
+        // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
+        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
 
+        simulert.increment()
         return økonomiKlient.hentSimulering(utbetalingsoppdrag)
     }
 
