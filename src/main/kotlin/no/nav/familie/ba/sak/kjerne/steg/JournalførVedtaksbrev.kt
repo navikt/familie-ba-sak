@@ -52,26 +52,27 @@ class JournalførVedtaksbrev(
             arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
 
         val mottaker = if (fagsak?.type == FagsakType.INSTITUSJON) {
-            mutableListOf(Pair(fagsak.institusjon!!.orgNummer!!, BrukerIdType.ORGNR))
+            mutableListOf(MottakerInfo(fagsak.institusjon!!.orgNummer!!, BrukerIdType.ORGNR, false))
         } else {
-            mutableListOf(Pair(vedtak.behandling.fagsak.aktør.aktivFødselsnummer(), BrukerIdType.FNR))
+            mutableListOf(MottakerInfo(vedtak.behandling.fagsak.aktør.aktivFødselsnummer(), BrukerIdType.FNR, false))
         }
         if (vedtak.behandling.verge != null && vedtak.behandling.verge?.ident != null) {
-            mottaker.add(Pair(vedtak.behandling.verge!!.ident!!, BrukerIdType.FNR))
+            mottaker.add(MottakerInfo(vedtak.behandling.verge!!.ident!!, BrukerIdType.FNR, true))
         }
 
         mottaker.forEach {
             val journalpostId = journalførVedtaksbrev(
-                brukersId = it.first,
+                brukersId = it.brukerId,
                 fagsakId = fagsakId,
                 vedtak = vedtak,
                 journalførendeEnhet = behanlendeEnhet,
-                brukersType = it.second
+                brukersType = it.brukerIdType,
+                tilVerge = it.erVerge
             )
 
             val nyTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
                 distribuerDokumentDTO = DistribuerDokumentDTO(
-                    personEllerInstitusjonIdent = it.first,
+                    personEllerInstitusjonIdent = it.brukerId,
                     behandlingId = vedtak.behandling.id,
                     journalpostId = journalpostId,
                     brevmal = hentBrevmal(behandling),
@@ -90,7 +91,8 @@ class JournalførVedtaksbrev(
         brukersType: BrukerIdType,
         fagsakId: String,
         vedtak: Vedtak,
-        journalførendeEnhet: String
+        journalførendeEnhet: String,
+        tilVerge: Boolean = false
     ): String {
         val vedleggPdf =
             hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
@@ -123,7 +125,8 @@ class JournalførVedtaksbrev(
             brev = brev,
             vedlegg = vedlegg,
             behandlingId = vedtak.behandling.id,
-            brukersType = brukersType
+            brukersType = brukersType,
+            tilVerge = tilVerge
         )
     }
 
@@ -141,3 +144,9 @@ class JournalførVedtaksbrev(
         }
     }
 }
+
+data class MottakerInfo(
+    val brukerId: String,
+    val brukerIdType: BrukerIdType,
+    val erVerge: Boolean
+)

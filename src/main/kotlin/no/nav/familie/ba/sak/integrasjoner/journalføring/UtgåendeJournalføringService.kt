@@ -28,7 +28,8 @@ class UtgåendeJournalføringService(
         journalførendeEnhet: String,
         brev: ByteArray,
         dokumenttype: Dokumenttype,
-        førsteside: Førsteside?
+        førsteside: Førsteside?,
+        tilVerge: Boolean = false
     ): String {
         return journalførDokument(
             brukerId = fnr,
@@ -41,7 +42,8 @@ class UtgåendeJournalføringService(
                     dokumenttype = dokumenttype
                 )
             ),
-            førsteside = førsteside
+            førsteside = førsteside,
+            tilVerge = tilVerge
         )
     }
 
@@ -54,14 +56,15 @@ class UtgåendeJournalføringService(
         førsteside: Førsteside? = null,
         behandlingId: Long? = null,
         brukersType: BrukerIdType = BrukerIdType.FNR,
-        brukersNavn: String = ""
+        brukersNavn: String = "",
+        tilVerge: Boolean = false
     ): String {
         if (journalførendeEnhet == DEFAULT_JOURNALFØRENDE_ENHET) {
             logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
         }
 
         val eksternReferanseId =
-            genererEksternReferanseIdForJournalpost(fagsakId, behandlingId)
+            genererEksternReferanseIdForJournalpost(fagsakId, behandlingId, tilVerge)
 
         val journalpostId = try {
             val journalpost = integrasjonClient.journalførDokument(
@@ -118,8 +121,8 @@ class UtgåendeJournalføringService(
         )
     ).single { it.eksternReferanseId == eksternReferanseId }.journalpostId
 
-    fun genererEksternReferanseIdForJournalpost(fagsakId: String, behandlingId: Long?) =
-        "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
+    fun genererEksternReferanseIdForJournalpost(fagsakId: String, behandlingId: Long?, tilVerge: Boolean) =
+        "${fagsakId}_${behandlingId}${if (tilVerge) "_verge" else ""}_${MDCOperations.getCallId()}"
 
     companion object {
 
