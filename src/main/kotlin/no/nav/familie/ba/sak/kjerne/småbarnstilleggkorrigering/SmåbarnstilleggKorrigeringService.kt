@@ -56,12 +56,12 @@ class SmåbarnstilleggKorrigeringService(
         val eksisterendeSmåBarnstilleggTidslinje = AndelTilkjentYtelseTidslinje(listOf(småBarnstilleggSomHarOverlappendePeriode))
         val filtrerBortSingelMånedTidslinje = opprettBooleanTidslinje(årMåned, årMåned)
 
-        val tidslinjeUtenOverlapp =
+        val perioderUtenOverlapp =
             eksisterendeSmåBarnstilleggTidslinje
                 .filtrerMed(filtrerBortSingelMånedTidslinje).perioder()
                 .filter { it.innhold == null }
 
-        val nyOppsplittetSmåbarnstillegg = tidslinjeUtenOverlapp.map {
+        val nyOppsplittetSmåbarnstillegg = perioderUtenOverlapp.map {
             opprettNyttSmåbarnstillegg(behandling, tilkjentYtelse, it.fraOgMed.tilYearMonth(), it.tilOgMed.tilYearMonth())
         }
 
