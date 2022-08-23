@@ -74,8 +74,7 @@ class JournalførVedtaksbrev(
                     behandlingId = vedtak.behandling.id,
                     journalpostId = journalpostId,
                     brevmal = hentBrevmal(behandling),
-                    erManueltSendt = false,
-                    mottakersType = it.second
+                    erManueltSendt = false
                 ),
                 properties = data.task.metadata
             )
