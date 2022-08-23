@@ -300,7 +300,6 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Opprett barnas beregning på vedtak`() {
-
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -319,8 +318,11 @@ class BehandlingIntegrationTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr),
-                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
+                behandling.id,
+                søkerFnr,
+                listOf(barn1Fnr, barn2Fnr),
+                søkerAktør = behandling.fagsak.aktør,
+                barnAktør = barnAktør
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
@@ -413,7 +415,6 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Endre barnas beregning på vedtak`() {
-
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -434,8 +435,11 @@ class BehandlingIntegrationTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr, barn3Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr),
-                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
+                behandling.id,
+                søkerFnr,
+                listOf(barn1Fnr, barn2Fnr, barn3Fnr),
+                søkerAktør = behandling.fagsak.aktør,
+                barnAktør = barnAktør
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
@@ -551,7 +555,7 @@ class BehandlingIntegrationTest(
                     )
                 )
             ),
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT))
         )
 
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barn1Fnr)) } returns PersonInfo(
@@ -571,7 +575,7 @@ class BehandlingIntegrationTest(
                     )
                 )
             ),
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT))
         )
 
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barn2Fnr)) } returns PersonInfo(
@@ -581,7 +585,7 @@ class BehandlingIntegrationTest(
             kjønn = Kjønn.KVINNE,
             forelderBarnRelasjon = emptySet(),
             bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune))),
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT))
         )
 
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns PersonInfo(
@@ -599,7 +603,7 @@ class BehandlingIntegrationTest(
                         søkerPostnummer
                     )
                 )
-            ),
+            )
         )
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barn1Fnr)) } returns PersonInfo(
             fødselsdato = LocalDate.of(2009, 1, 1),

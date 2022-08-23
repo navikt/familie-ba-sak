@@ -20,13 +20,13 @@ enum class BrevPeriodeType(val apiNavn: String) {
     OPPHOR("opphor"),
     AVSLAG("avslag"),
     AVSLAG_UTEN_PERIODE("avslagUtenPeriode"),
-    FORTSATT_INNVILGET("fortsattInnvilget"),
+    FORTSATT_INNVILGET("fortsattInnvilget")
 }
 
 enum class EndretUtbetalingBrevPeriodeType(val apiNavn: String) {
     ENDRET_UTBETALINGSPERIODE("endretUtbetalingsperiode"),
     ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING("endretUtbetalingsperiodeDelvisUtbetaling"),
-    ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING("endretUtbetalingsperiodeIngenUtbetaling"),
+    ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING("endretUtbetalingsperiodeIngenUtbetaling")
 }
 
 data class VedtakFellesfelter(

@@ -78,7 +78,7 @@ class FødselshendelseHenleggelseTest(
                     RestScenarioPerson(
                         fødselsdato = now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen",
+                        etternavn = "Barnesen"
                     )
                 )
             )
@@ -94,7 +94,7 @@ class FødselshendelseHenleggelseTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService,
+            personidentService = personidentService
         )
         assertNull(behandling)
 
@@ -116,7 +116,7 @@ class FødselshendelseHenleggelseTest(
                     RestScenarioPerson(
                         fødselsdato = now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen",
+                        etternavn = "Barnesen"
                     )
                 )
             )
@@ -194,14 +194,14 @@ class FødselshendelseHenleggelseTest(
                                 postnummer = "0202",
                                 kommunenummer = "2231"
                             )
-                        ),
+                        )
                     )
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = now().toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen",
+                        etternavn = "Barnesen"
                     )
                 )
             )
@@ -302,12 +302,12 @@ class FødselshendelseHenleggelseTest(
                     RestScenarioPerson(
                         fødselsdato = now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen",
+                        etternavn = "Barnesen"
                     ),
                     RestScenarioPerson(
                         fødselsdato = now().minusYears(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen",
+                        etternavn = "Barnesen"
                     )
                 )
             )
@@ -362,7 +362,6 @@ class FødselshendelseHenleggelseTest(
 
     @Test
     fun `Skal sende tredjelandsborgere fra Ukraina til manuel oppfølging (midlertidig regel for ukrainakonflikten)`() {
-
         val fødselsdato = "1993-01-12"
         val barnFødselsdato = LocalDate.now()
         val scenario = mockServerKlient().lagScenario(
@@ -391,7 +390,7 @@ class FødselshendelseHenleggelseTest(
                                 gyldigTilOgMed = null
                             )
                         )
-                    ),
+                    )
                 )
             )
         )
@@ -405,7 +404,7 @@ class FødselshendelseHenleggelseTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService,
+            personidentService = personidentService
         )!!
 
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling.resultat)
@@ -415,7 +414,7 @@ class FødselshendelseHenleggelseTest(
             opprettTaskService.opprettOppgaveTask(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN.beskrivelse}",
+                beskrivelse = "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN.beskrivelse}"
             )
         }
     }

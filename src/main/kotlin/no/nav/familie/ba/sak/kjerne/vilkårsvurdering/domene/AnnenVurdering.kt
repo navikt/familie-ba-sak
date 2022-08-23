@@ -30,7 +30,8 @@ data class AnnenVurdering(
     )
     val id: Long = 0,
 
-    @ManyToOne @JoinColumn(name = "fk_person_resultat_id")
+    @ManyToOne
+    @JoinColumn(name = "fk_person_resultat_id")
     var personResultat: PersonResultat,
 
     @Enumerated(EnumType.STRING)
@@ -50,7 +51,7 @@ data class AnnenVurdering(
             personResultat = nyPersonResultat ?: personResultat,
             type = type,
             resultat = resultat,
-            begrunnelse = begrunnelse,
+            begrunnelse = begrunnelse
         )
     }
 

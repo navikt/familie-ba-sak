@@ -54,17 +54,18 @@ class Vedtaksbegrunnelse(
     val id: Long = 0,
 
     @JsonIgnore
-    @ManyToOne @JoinColumn(name = "fk_vedtaksperiode_id", nullable = false, updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "fk_vedtaksperiode_id", nullable = false, updatable = false)
     val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
-    val standardbegrunnelse: Standardbegrunnelse,
+    val standardbegrunnelse: Standardbegrunnelse
 ) {
 
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        standardbegrunnelse = this.standardbegrunnelse,
+        standardbegrunnelse = this.standardbegrunnelse
     )
 
     override fun toString(): String {
@@ -81,7 +82,7 @@ fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
 enum class Begrunnelsetype {
     STANDARD_BEGRUNNELSE,
     EØS_BEGRUNNELSE,
-    FRITEKST,
+    FRITEKST
 }
 
 interface Begrunnelse : Comparable<Begrunnelse> {
@@ -89,7 +90,6 @@ interface Begrunnelse : Comparable<Begrunnelse> {
     val vedtakBegrunnelseType: VedtakBegrunnelseType?
 
     override fun compareTo(other: Begrunnelse): Int {
-
         return when {
             this.type == Begrunnelsetype.FRITEKST -> Int.MAX_VALUE
             other.type == Begrunnelsetype.FRITEKST -> -Int.MAX_VALUE
@@ -127,7 +127,7 @@ data class BegrunnelseData(
 }
 
 data class FritekstBegrunnelse(
-    val fritekst: String,
+    val fritekst: String
 ) : Begrunnelse {
     override val vedtakBegrunnelseType: VedtakBegrunnelseType? = null
     override val type: Begrunnelsetype = Begrunnelsetype.FRITEKST
@@ -143,7 +143,7 @@ data class EØSBegrunnelseData(
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
     val maalform: String,
-    val sokersAktivitet: SøkersAktivitet,
+    val sokersAktivitet: SøkersAktivitet
 ) : BegrunnelseMedData {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
 }
@@ -179,17 +179,20 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     val antallBarn = this.hentAntallBarnForBegrunnelse(
         uregistrerteBarn = uregistrerteBarn,
         gjelderSøker = gjelderSøker,
-        barnasFødselsdatoer = barnasFødselsdatoer,
+        barnasFødselsdatoer = barnasFødselsdatoer
     )
 
     val månedOgÅrBegrunnelsenGjelderFor =
-        if (vedtaksperiode.fom == null) null
-        else this.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
-            periode = Periode(
-                fom = vedtaksperiode.fom,
-                tom = vedtaksperiode.tom ?: TIDENES_ENDE
+        if (vedtaksperiode.fom == null) {
+            null
+        } else {
+            this.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+                periode = Periode(
+                    fom = vedtaksperiode.fom,
+                    tom = vedtaksperiode.tom ?: TIDENES_ENDE
+                )
             )
-        )
+        }
 
     val beløp = this.hentBeløp(gjelderSøker, minimerteUtbetalingsperiodeDetaljer)
 
@@ -206,7 +209,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
 
     this.validerBrevbegrunnelse(
         gjelderSøker = gjelderSøker,
-        barnasFødselsdatoer = barnasFødselsdatoer,
+        barnasFødselsdatoer = barnasFødselsdatoer
     )
 
     return BegrunnelseData(
@@ -272,7 +275,7 @@ fun Standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
 
 private fun BrevBegrunnelseGrunnlagMedPersoner.validerBrevbegrunnelse(
     gjelderSøker: Boolean,
-    barnasFødselsdatoer: List<LocalDate>,
+    barnasFødselsdatoer: List<LocalDate>
 ) {
     if (!gjelderSøker && barnasFødselsdatoer.isEmpty() &&
         !this.triggesAv.satsendring &&

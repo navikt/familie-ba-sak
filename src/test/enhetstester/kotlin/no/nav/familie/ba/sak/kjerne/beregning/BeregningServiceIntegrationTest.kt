@@ -101,7 +101,6 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun skalLagreRiktigTilkjentYtelseForOpphørMedToBarn() {
-
         val fnr = randomFnr()
         val dagensDato = LocalDate.now()
         val fomBarn1 = dagensDato.withDayOfMonth(1)
@@ -149,7 +148,6 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun skalLagreRiktigTilkjentYtelseForRevurderingMedToBarn() {
-
         val fnr = randomFnr()
         val dagensDato = LocalDate.now()
         val opphørFomBarn1 = LocalDate.of(2020, 5, 1)
@@ -220,8 +218,11 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr),
-                søkerAktør = fagsak.aktør, barnAktør = barnAktør
+                behandling.id,
+                søkerFnr,
+                listOf(barn1Fnr, barn2Fnr),
+                søkerAktør = fagsak.aktør,
+                barnAktør = barnAktør
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 

@@ -69,7 +69,7 @@ open class EksternTjenesteFeilException(
     val eksternTjenesteFeil: EksternTjenesteFeil,
     val melding: String,
     val request: Any?,
-    val throwable: Throwable? = null,
+    val throwable: Throwable? = null
 ) : RuntimeException(melding, throwable) {
 
     init {

@@ -18,7 +18,7 @@ import java.time.YearMonth
 
 @Component
 class UtbetalingsoppdragGenerator(
-    private val beregningService: BeregningService,
+    private val beregningService: BeregningService
 ) {
 
     /**
@@ -49,7 +49,7 @@ class UtbetalingsoppdragGenerator(
         sisteOffsetPåFagsak: Int? = null,
         oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
         erSimulering: Boolean = false,
-        endretMigreringsDato: YearMonth? = null,
+        endretMigreringsDato: YearMonth? = null
     ): Utbetalingsoppdrag {
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
         // Da de har opplevd å motta
@@ -78,21 +78,27 @@ class UtbetalingsoppdragGenerator(
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
-        val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty())
+        val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
             lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
                 andeler = andelerTilOpprettelse,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                 vedtak = vedtak,
                 sisteOffsetIKjedeOversikt = sisteOffsetPerIdent,
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
-                skalOppdatereTilkjentYtelse = !erSimulering,
-            ) else emptyList()
+                skalOppdatereTilkjentYtelse = !erSimulering
+            )
+        } else {
+            emptyList()
+        }
 
-        val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty())
+        val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty()) {
             lagUtbetalingsperioderForOpphør(
                 andeler = andelerTilOpphør,
-                vedtak = vedtak,
-            ) else emptyList()
+                vedtak = vedtak
+            )
+        } else {
+            emptyList()
+        }
 
         return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
@@ -129,13 +135,15 @@ class UtbetalingsoppdragGenerator(
         erFørsteBehandlingPåFagsak: Boolean,
         sisteOffsetIKjedeOversikt: Map<String, Int>,
         sisteOffsetPåFagsak: Int? = null,
-        skalOppdatereTilkjentYtelse: Boolean,
+        skalOppdatereTilkjentYtelse: Boolean
     ): List<Utbetalingsperiode> {
         var offset =
-            if (!erFørsteBehandlingPåFagsak)
+            if (!erFørsteBehandlingPåFagsak) {
                 sisteOffsetPåFagsak?.plus(1)
                     ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
-            else 0
+            } else {
+                0
+            }
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(
             vedtak = vedtak

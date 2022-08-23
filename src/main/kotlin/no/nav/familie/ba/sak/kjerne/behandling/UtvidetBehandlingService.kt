@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
@@ -133,7 +134,9 @@ class UtvidetBehandlingService(
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
                     vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
                         .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }.sortedBy { it.fom }
-                } else emptyList(),
+                } else {
+                    emptyList()
+                },
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),
             kompetanser = kompetanser.map { it.tilRestKompetanse() }.sortedByDescending { it.fom },
@@ -143,6 +146,7 @@ class UtvidetBehandlingService(
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
             valutakurser = valutakurser.map { it.tilRestValutakurs() },
             utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() },
+            verge = behandling.verge?.let { VergeInfo(it.navn, it.adresse, it.ident) },
             korrigertEtterbetaling = korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(behandlingId)
                 ?.tilRestKorrigertEtterbetaling()
         )

@@ -47,7 +47,6 @@ class OppgaveService(
         tilordnetNavIdent: String? = null,
         beskrivelse: String? = null
     ): String {
-
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 

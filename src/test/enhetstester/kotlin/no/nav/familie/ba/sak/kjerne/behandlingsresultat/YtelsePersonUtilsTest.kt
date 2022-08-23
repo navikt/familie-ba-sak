@@ -47,7 +47,7 @@ class YtelsePersonUtilsTest {
                     lagBehandlingsresultatAndelTilkjentYtelse(
                         fom = inneværendeMåned().minusYears(3).toString(),
                         tom = "2020-01",
-                        kalkulertUtbetalingsbeløp = 1054,
+                        kalkulertUtbetalingsbeløp = 1054
                     )
                 ),
                 andeler = emptyList()

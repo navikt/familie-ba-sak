@@ -74,7 +74,6 @@ class VilkårsvurderingForNyBehandlingService(
         forrigeBehandlingSomErVedtatt: Behandling,
         nyMigreringsdato: LocalDate
     ): Vilkårsvurdering {
-
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
             personResultater =
                 VilkårsvurderingForNyBehandlingUtils(
@@ -173,9 +172,13 @@ class VilkårsvurderingForNyBehandlingService(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) hentVilkårsvurdering(
-                forrigeBehandlingSomErVedtatt.id
-            ) else null
+            forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) {
+                hentVilkårsvurdering(
+                    forrigeBehandlingSomErVedtatt.id
+                )
+            } else {
+                null
+            }
         )
 
         if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {

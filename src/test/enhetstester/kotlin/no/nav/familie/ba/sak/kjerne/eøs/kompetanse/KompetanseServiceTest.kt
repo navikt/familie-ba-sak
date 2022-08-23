@@ -33,13 +33,13 @@ internal class KompetanseServiceTest {
 
     val kompetanseService = KompetanseService(
         mockKompetanseRepository,
-        emptyList(),
+        emptyList()
     )
 
     val tilpassKompetanserTilRegelverkService = TilpassKompetanserTilRegelverkService(
         vilkårsvurderingTidslinjeService,
         mockKompetanseRepository,
-        emptyList(),
+        emptyList()
     )
 
     @BeforeEach

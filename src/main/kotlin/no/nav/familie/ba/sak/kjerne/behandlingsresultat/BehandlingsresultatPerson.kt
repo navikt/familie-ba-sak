@@ -18,7 +18,7 @@ data class BehandlingsresultatPerson(
     val søktForPerson: Boolean,
     val eksplisittAvslag: Boolean = false,
     val forrigeAndeler: List<BehandlingsresultatAndelTilkjentYtelse> = emptyList(),
-    val andeler: List<BehandlingsresultatAndelTilkjentYtelse>,
+    val andeler: List<BehandlingsresultatAndelTilkjentYtelse>
 ) {
 
     /**
@@ -32,7 +32,7 @@ data class BehandlingsresultatPerson(
         return YtelsePerson(
             aktør = aktør,
             ytelseType = utledYtelseType(),
-            kravOpprinnelse = utledKravOpprinnelser(),
+            kravOpprinnelse = utledKravOpprinnelser()
         )
     }
 
@@ -90,7 +90,7 @@ fun BarnMedOpplysninger.tilMinimertUregisrertBarn() = MinimertUregistrertBarn(
 data class BehandlingsresultatAndelTilkjentYtelse(
     val stønadFom: YearMonth,
     val stønadTom: YearMonth,
-    val kalkulertUtbetalingsbeløp: Int,
+    val kalkulertUtbetalingsbeløp: Int
 ) {
     val periode
         get() = MånedPeriode(stønadFom, stønadTom)
@@ -115,7 +115,6 @@ fun lagBehandlingsresultatAndelTilkjentYtelse(
     tom: String,
     kalkulertUtbetalingsbeløp: Int
 ): BehandlingsresultatAndelTilkjentYtelse {
-
     return BehandlingsresultatAndelTilkjentYtelse(
         stønadFom = YearMonth.parse(fom),
         stønadTom = YearMonth.parse(tom),

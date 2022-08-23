@@ -17,7 +17,7 @@ class MinimertVedtaksperiode(
     val utbetalingsperioder: List<UtbetalingsperiodeDetalj>
 ) {
     fun finnEndredeAndelerISammePeriode(
-        endretUtbetalingAndeler: List<MinimertEndretAndel>,
+        endretUtbetalingAndeler: List<MinimertEndretAndel>
     ) = endretUtbetalingAndeler.filter {
         it.erOverlappendeMed(
             NullableMånedPeriode(

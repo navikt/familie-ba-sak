@@ -49,7 +49,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
                 utdypendeVilkårsvurderinger = emptyList()
-            ),
+            )
         )
 
         val barnPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn.aktør)

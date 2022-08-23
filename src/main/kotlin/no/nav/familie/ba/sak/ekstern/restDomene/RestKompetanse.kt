@@ -48,5 +48,5 @@ fun RestKompetanse.tilKompetanse(barnAktører: List<Aktør>) = Kompetanse(
     annenForeldersAktivitet = this.annenForeldersAktivitet,
     annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
     barnetsBostedsland = this.barnetsBostedsland,
-    resultat = this.resultat,
+    resultat = this.resultat
 )

@@ -7,7 +7,7 @@ import java.time.YearMonth
 
 fun erStartPåUtvidetSammeMåned(
     andelTilkjentYtelser: List<AndelTilkjentYtelse>,
-    fom: YearMonth?,
+    fom: YearMonth?
 ) = andelTilkjentYtelser.any { it.stønadFom == fom && it.type == YtelseType.UTVIDET_BARNETRYGD }
 
 fun beregnGyldigTomIFremtiden(

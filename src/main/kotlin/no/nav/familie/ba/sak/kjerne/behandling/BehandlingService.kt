@@ -65,7 +65,7 @@ class BehandlingService(
     private val personidentService: PersonidentService,
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val vilkårsvurderingService: VilkårsvurderingService
 ) {
 
     @Transactional
@@ -83,12 +83,11 @@ class BehandlingService(
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
-
             val kategori = bestemKategoriVedOpprettelse(
                 overstyrtKategori = nyBehandling.kategori,
                 behandlingType = nyBehandling.behandlingType,
                 behandlingÅrsak = nyBehandling.behandlingÅrsak,
-                kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id),
+                kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id)
             )
 
             val underkategori = bestemUnderkategori(
@@ -96,7 +95,7 @@ class BehandlingService(
                 underkategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsak.id),
                 underkategoriFraInneværendeBehandling = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(
                     fagsak.id
-                ),
+                )
             )
 
             sjekkEøsToggleOgThrowHvisBrudd(kategori)
@@ -161,7 +160,7 @@ class BehandlingService(
     }
 
     private fun sjekkEøsToggleOgThrowHvisBrudd(
-        kategori: BehandlingKategori,
+        kategori: BehandlingKategori
     ) {
         if (kategori == BehandlingKategori.EØS && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
             throw FunksjonellFeil(
@@ -286,7 +285,7 @@ class BehandlingService(
         return Behandlingutils.harBehandlingsårsakAlleredeKjørt(
             behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId),
             behandlingÅrsak = behandlingÅrsak,
-            måned = måned,
+            måned = måned
         )
     }
 

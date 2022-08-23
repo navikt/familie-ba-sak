@@ -31,7 +31,6 @@ class TilkjentYtelseDifferanseberegningTest {
 
     @Test
     fun `skal gjøre differanseberegning på en tilkjent ytelse med endringsperioder`() {
-
         val barnsFødselsdato = 13.jan(2020)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())

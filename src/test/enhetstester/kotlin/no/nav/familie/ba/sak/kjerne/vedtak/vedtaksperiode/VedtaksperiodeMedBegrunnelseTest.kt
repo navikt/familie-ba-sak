@@ -96,7 +96,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
+                        Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
@@ -127,7 +127,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
+                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
@@ -158,7 +158,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
+                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
@@ -189,7 +189,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD,
+                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,

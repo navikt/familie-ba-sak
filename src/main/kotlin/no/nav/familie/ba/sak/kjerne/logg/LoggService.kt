@@ -93,7 +93,7 @@ class LoggService(
     }
 
     fun opprettRegistrerVergeLogg(behandling: Behandling) {
-        val tittel = "verge ble registrert"
+        val tittel = "Verge ble registrert"
         lagre(
             Logg(
                 behandlingId = behandling.id,
@@ -154,7 +154,6 @@ class LoggService(
         forrigeBehandlingsresultat: Behandlingsresultat,
         nyttBehandlingsresultat: Behandlingsresultat
     ): Logg? {
-
         val tekst = when {
             forrigeBehandlingsresultat == Behandlingsresultat.IKKE_VURDERT -> {
                 "Resultat ble ${nyttBehandlingsresultat.displayName.lowercase()}"
@@ -261,11 +260,16 @@ class LoggService(
                 type = if (behandling.erManuellMigrering()) LoggType.MIGRERING_BEKREFTET else LoggType.GODKJENNE_VEDTAK,
                 tittel = if (beslutning.erGodkjent()) {
                     if (behandling.erManuellMigrering()) "Migrering bekreftet" else "Vedtak godkjent"
-                } else "Vedtak underkjent",
+                } else {
+                    "Vedtak underkjent"
+                },
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.BESLUTTER),
                 tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else "",
-                opprettetAv = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_NAVN else
+                opprettetAv = if (behandling.erManuellMigrering()) {
+                    SikkerhetContext.SYSTEM_NAVN
+                } else {
                     SikkerhetContext.hentSaksbehandlerNavn()
+                }
             )
         )
     }
@@ -308,7 +312,7 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.FERDIGSTILLE_BEHANDLING,
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM)
             )
         )
     }
@@ -391,11 +395,15 @@ class LoggService(
             Nytt beløp: ${korrigertEtterbetaling.beløp} kr
             Begrunnelse: ${korrigertEtterbetaling.begrunnelse ?: "Ingen begrunnelse"}
             """.trimIndent()
-        } else ""
+        } else {
+            ""
+        }
 
         val tittel = if (korrigertEtterbetaling.aktiv) {
             "Etterbetaling i brev er korrigert"
-        } else "Korrigert etterbetaling er angret"
+        } else {
+            "Korrigert etterbetaling er angret"
+        }
 
         lagre(
             Logg(
@@ -462,5 +470,5 @@ class LoggService(
 
 enum class RegistrerVergeLoggType {
     VERGE_REGISTRERT,
-    INSTITUSJON_REGISTRERT,
+    INSTITUSJON_REGISTRERT
 }

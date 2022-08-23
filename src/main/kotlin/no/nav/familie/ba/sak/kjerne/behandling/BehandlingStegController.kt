@@ -39,7 +39,7 @@ class BehandlingStegController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val stegService: StegService,
     private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @PostMapping(
@@ -173,7 +173,7 @@ class BehandlingStegController(
         validerhenleggelsestype(
             henleggÅrsak = henleggInfo.årsak,
             tekniskVedlikeholdToggel = featureToggleService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE),
-            behandlingId = behandling.id,
+            behandlingId = behandling.id
         )
 
         validerTilgangTilHenleggelseAvBehandling(

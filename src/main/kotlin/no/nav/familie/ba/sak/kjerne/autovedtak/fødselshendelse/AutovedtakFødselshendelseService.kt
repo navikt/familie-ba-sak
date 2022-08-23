@@ -128,9 +128,11 @@ class AutovedtakFødselshendelseService(
             henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandlingEtterFiltrering,
                 begrunnelse = filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
-                    .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
+                    .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse
             )
-        } else vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = barnSomSkalBehandlesForMor)
+        } else {
+            vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = barnSomSkalBehandlesForMor)
+        }
     }
 
     private fun vurderVilkår(behandling: Behandling, barnaSomVurderes: List<String>): String {
@@ -193,9 +195,13 @@ class AutovedtakFødselshendelseService(
         ).forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
 
         val barnaSomHarBlittBehandlet =
-            if (fagsak != null) behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).flatMap {
-                persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
-            }.distinct() else emptyList()
+            if (fagsak != null) {
+                behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).flatMap {
+                    persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
+                }.distinct()
+            } else {
+                emptyList()
+            }
 
         return finnBarnSomSkalBehandlesForMor(
             nyBehandlingHendelse = nyBehandlingHendelse,
@@ -207,7 +213,7 @@ class AutovedtakFødselshendelseService(
 
     private fun henleggBehandlingOgOpprettManuellOppgave(
         behandling: Behandling,
-        begrunnelse: String = "",
+        begrunnelse: String = ""
     ): String {
         val begrunnelseForManuellOppgave = if (begrunnelse == "") {
             hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)

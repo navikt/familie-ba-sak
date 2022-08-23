@@ -14,7 +14,7 @@ inline fun <reified Data> kallEksternTjeneste(
     tjeneste: String,
     uri: URI,
     formål: String,
-    eksterntKall: () -> Data,
+    eksterntKall: () -> Data
 ): Data {
     loggEksternKall(tjeneste, uri, formål)
 
@@ -31,7 +31,7 @@ inline fun <reified Data> kallEksternTjenesteRessurs(
     tjeneste: String,
     uri: URI,
     formål: String,
-    eksterntKall: () -> Ressurs<Data>,
+    eksterntKall: () -> Ressurs<Data>
 ): Data {
     loggEksternKall(tjeneste, uri, formål)
 
@@ -48,7 +48,7 @@ inline fun <reified Data> kallEksternTjenesteUtenRespons(
     tjeneste: String,
     uri: URI,
     formål: String,
-    eksterntKall: () -> Ressurs<Data>,
+    eksterntKall: () -> Ressurs<Data>
 ) {
     loggEksternKall(tjeneste, uri, formål)
 
@@ -78,7 +78,7 @@ fun handleException(
     exception: Exception,
     tjeneste: String,
     uri: URI,
-    formål: String,
+    formål: String
 ): Exception {
     return when (exception) {
         is RessursException -> {
@@ -110,7 +110,7 @@ private fun opprettIntegrasjonsException(
     tjeneste: String,
     uri: URI,
     exception: Exception,
-    formål: String,
+    formål: String
 ): IntegrasjonException {
     val melding = if (exception is RessursException) {
         exception.ressurs.melding

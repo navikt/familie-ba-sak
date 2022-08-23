@@ -21,7 +21,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val kompetanseRepository: KompetanseRepository,
+    private val kompetanseRepository: KompetanseRepository
 ) {
 
     fun hentUtbetalingsperioder(
@@ -56,7 +56,9 @@ class UtbetalingsperiodeMedBegrunnelserService(
                 utbetalingsperioder = utbetalingsperioderMedReduksjon,
                 kompetanser = kompetanser.toList()
             )
-        } else utbetalingsperioderMedReduksjon
+        } else {
+            utbetalingsperioderMedReduksjon
+        }
     }
 
     fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
@@ -88,7 +90,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = opphørsperioder,
-            aktørerIForrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag.søkerOgBarn.map { it.aktør },
+            aktørerIForrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag.søkerOgBarn.map { it.aktør }
         )
     }
 }
