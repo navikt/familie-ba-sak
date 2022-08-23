@@ -52,6 +52,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
             )
         }
 
+        assertThat(småbarnsTillegg.type, Is(YtelseType.SMÅBARNSTILLEGG))
         assertThat(småbarnsTillegg.stønadFom, Is(YearMonth.of(2020, 10)))
         assertThat(småbarnsTillegg.stønadTom, Is(YearMonth.of(2020, 10)))
     }
@@ -103,6 +104,8 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
                 "Småbarnstillegg for mai 2020 fjernet"
             )
         }
+
+        assertThat(oppsplittetSmåbarnstillegg.size, Is(2))
 
         assertThat(oppsplittetSmåbarnstillegg[0].stønadFom, Is(YearMonth.of(2010, 10)))
         assertThat(oppsplittetSmåbarnstillegg[0].stønadTom, Is(YearMonth.of(2020, 4)))

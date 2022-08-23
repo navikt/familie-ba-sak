@@ -32,8 +32,9 @@ class SmåbarnstilleggKorrigeringService(
 
         val overlappendePeriodeFinnes = finnOverlappendeSmåbarnstilleggPeriode(andelTilkjentYtelser, årMåned)
 
-        if (overlappendePeriodeFinnes != null)
+        if (overlappendePeriodeFinnes != null) {
             throw FunksjonellFeil("Det er ikke mulig å legge til småbarnstillegg for ${årMåned.tilMånedÅr()} fordi det allerede finnes småbarnstillegg for denne perioden")
+        }
 
         val nySmåbarnstillegg = opprettNyttSmåbarnstillegg(behandling, tilkjentYtelse, årMåned, årMåned)
 
@@ -76,10 +77,12 @@ class SmåbarnstilleggKorrigeringService(
         behandling: Behandling,
         tilkjentYtelse: TilkjentYtelse,
         stønadFom: YearMonth,
-        stønadTom: YearMonth,
+        stønadTom: YearMonth
     ): AndelTilkjentYtelse {
         val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(
-            satstype = SatsType.SMA, stønadFraOgMed = stønadFom, stønadTilOgMed = stønadTom
+            satstype = SatsType.SMA,
+            stønadFraOgMed = stønadFom,
+            stønadTilOgMed = stønadTom
         ).singleOrNull()?.sats ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
 
         return AndelTilkjentYtelse(

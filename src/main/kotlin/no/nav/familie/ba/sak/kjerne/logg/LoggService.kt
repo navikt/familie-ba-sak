@@ -422,7 +422,7 @@ class LoggService(
     fun opprettSmåbarnstilleggLogg(
         behandling: Behandling,
         tittel: String
-    ) {
+    ) =
         lagre(
             Logg(
                 behandlingId = behandling.id,
@@ -435,7 +435,6 @@ class LoggService(
                 tekst = ""
             )
         )
-    }
 
     fun gjenopptaBehandlingLogg(behandling: Behandling) {
         lagre(
