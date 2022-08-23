@@ -41,7 +41,9 @@ internal class OppdaterSkjemaTest {
         val kompetanse = kompetanse(
             jan(2019),
             "---SSS                               PPP------",
-            barn1, barn2, barn3
+            barn1,
+            barn2,
+            barn3
         )
 
         val faktiskeKompetanser = oppdaterSkjemaerRekursivt(kompetanser, kompetanse)

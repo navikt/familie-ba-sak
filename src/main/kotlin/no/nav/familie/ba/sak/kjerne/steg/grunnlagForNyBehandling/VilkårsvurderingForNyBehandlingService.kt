@@ -75,7 +75,6 @@ class VilkårsvurderingForNyBehandlingService(
         forrigeBehandlingSomErVedtatt: Behandling,
         nyMigreringsdato: LocalDate
     ): Vilkårsvurdering {
-
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
             personResultater =
                 VilkårsvurderingForNyBehandlingUtils(

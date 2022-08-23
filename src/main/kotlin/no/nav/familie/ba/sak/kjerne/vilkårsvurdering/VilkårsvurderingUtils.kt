@@ -331,7 +331,9 @@ private fun utledBegrunnelse(
     vilkår == Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false) {
         "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
             "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen"
-    } else ""
+    } else {
+        ""
+    }
 
     else -> ""
 }

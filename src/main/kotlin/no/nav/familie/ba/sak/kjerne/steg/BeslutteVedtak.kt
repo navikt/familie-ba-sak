@@ -63,10 +63,16 @@ class BeslutteVedtak(
         }
         val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(
             behandling = behandling,
-            beslutter = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_NAVN else
-                SikkerhetContext.hentSaksbehandlerNavn(),
-            beslutterId = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_FORKORTELSE else
-                SikkerhetContext.hentSaksbehandler(),
+            beslutter = if (behandling.erManuellMigrering()) {
+                SikkerhetContext.SYSTEM_NAVN
+            } else {
+                SikkerhetContext.hentSaksbehandlerNavn()
+            },
+            beslutterId = if (behandling.erManuellMigrering()) {
+                SikkerhetContext.SYSTEM_FORKORTELSE
+            } else {
+                SikkerhetContext.hentSaksbehandler()
+            },
             beslutning = data.beslutning,
             kontrollerteSider = data.kontrollerteSider
         )
@@ -85,15 +91,18 @@ class BeslutteVedtak(
                     opprettTaskIverksettMotOppdrag(behandling, vedtak)
                 }
                 StegType.JOURNALFØR_VEDTAKSBREV -> {
-                    if (!behandling.erBehandlingMedVedtaksbrevutsending())
+                    if (!behandling.erBehandlingMedVedtaksbrevutsending()) {
                         throw Feil("Prøvde å opprette vedtaksbrev for behandling som ikke skal sende ut vedtaksbrev.")
+                    }
 
                     opprettJournalførVedtaksbrevTask(behandling, vedtak)
                 }
                 StegType.FERDIGSTILLE_BEHANDLING -> {
                     if (behandling.type == BehandlingType.TEKNISK_ENDRING) {
                         opprettFerdigstillBehandlingTask(behandling)
-                    } else throw Feil("Neste steg 'ferdigstille behandling' er ikke implementert på 'beslutte vedtak'-steg")
+                    } else {
+                        throw Feil("Neste steg 'ferdigstille behandling' er ikke implementert på 'beslutte vedtak'-steg")
+                    }
                 }
                 else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på 'beslutte vedtak'-steg")
             }

@@ -38,11 +38,10 @@ fun hentRestBehandlingsgrunnlagForBrev(
     vilkårsvurdering: Vilkårsvurdering,
     endredeUtbetalingAndeler: List<EndretUtbetalingAndel>
 ): RestBehandlingsgrunnlagForBrev {
-
     return RestBehandlingsgrunnlagForBrev(
         personerPåBehandling = persongrunnlag.søkerOgBarn.map { it.tilMinimertPerson() },
         minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-        minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertRestEndretUtbetalingAndel() },
+        minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertRestEndretUtbetalingAndel() }
     )
 }
 
@@ -51,7 +50,7 @@ fun hentMinimerteKompetanserForPeriode(
     fom: YearMonth?,
     tom: YearMonth?,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    landkoderISO2: Map<String, String>,
+    landkoderISO2: Map<String, String>
 ): List<MinimertKompetanse> {
     val minimerteKompetanser = kompetanser.hentIPeriode(fom, tom)
         .map {

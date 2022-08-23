@@ -66,7 +66,7 @@ fun kjørStegprosessForBehandling(
     endretUtbetalingAndelService: EndretUtbetalingAndelService,
     fagsakService: FagsakService,
     persongrunnlagService: PersongrunnlagService,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
 ): Behandling {
     fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
@@ -86,10 +86,13 @@ fun kjørStegprosessForBehandling(
     val behandlingEtterPersongrunnlagSteg =
         if (behandlingÅrsak == BehandlingÅrsak.SØKNAD || behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             håndterSøknadSteg(stegService, behandling, søkerFnr, barnasIdenter, underkategori)
-        } else behandling
+        } else {
+            behandling
+        }
 
-    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD)
+    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD) {
         return behandlingEtterPersongrunnlagSteg
+    }
 
     val behandlingEtterVilkårsvurderingSteg =
         håndterVilkårsvurderingSteg(
@@ -116,7 +119,7 @@ fun kjørStegprosessForBehandling(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             sanityBegrunnelser = hentBegrunnelser(),
-            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!,
+            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!
         )
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
@@ -174,7 +177,7 @@ private fun håndterSendtTilBeslutterSteg(
     andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     endretUtbetalingAndelService: EndretUtbetalingAndelService,
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    vilkårsvurdering: Vilkårsvurdering,
+    vilkårsvurdering: Vilkårsvurdering
 ): Behandling {
     val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
         behandlingId = behandlingEtterSimuleringSteg.id
@@ -237,7 +240,7 @@ private fun håndterStatusFraOppdragSteg(
     stegService: StegService,
     behandlingEtterIverksetteVedtak: Behandling,
     søkerFnr: String,
-    vedtakService: VedtakService,
+    vedtakService: VedtakService
 ): Behandling {
     val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterIverksetteVedtak.id)
     return stegService.håndterStatusFraØkonomi(
@@ -258,7 +261,7 @@ private fun håndterStatusFraOppdragSteg(
 private fun håndterIverksetteVedtakSteg(
     stegService: StegService,
     behandlingEtterBeslutteVedtak: Behandling,
-    vedtakService: VedtakService,
+    vedtakService: VedtakService
 ): Behandling {
     val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterBeslutteVedtak.id)
     return stegService.håndterIverksettMotØkonomi(
@@ -267,7 +270,7 @@ private fun håndterIverksetteVedtakSteg(
             behandlingsId = behandlingEtterBeslutteVedtak.id,
             vedtaksId = vedtak!!.id,
             saksbehandlerId = "System",
-            personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer(),
+            personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer()
         )
     )
 }
@@ -290,10 +293,14 @@ private fun hånderSilmuleringssteg(
 ): Behandling {
     return stegService.håndterVurderTilbakekreving(
         behandlingEtterBehandlingsresultat,
-        if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) RestTilbakekreving(
-            valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-            begrunnelse = "Begrunnelse"
-        ) else null
+        if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
+            RestTilbakekreving(
+                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                begrunnelse = "Begrunnelse"
+            )
+        } else {
+            null
+        }
     )
 }
 
@@ -350,7 +357,7 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
 
     val utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
         personopplysningGrunnlag = personopplysningGrunnlag,
-        andelerTilkjentYtelse = andelerTilkjentYtelse,
+        andelerTilkjentYtelse = andelerTilkjentYtelse
     )
 
     val aktørerMedUtbetaling =

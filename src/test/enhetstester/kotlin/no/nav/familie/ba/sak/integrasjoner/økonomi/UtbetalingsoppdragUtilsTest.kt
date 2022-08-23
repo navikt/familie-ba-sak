@@ -20,7 +20,7 @@ class UtbetalingsoppdragUtilsTest {
                 kodeEndring = Utbetalingsoppdrag.KodeEndring.ENDR,
                 saksbehandlerId = "",
                 saksnummer = "",
-                utbetalingsperiode = emptyList(),
+                utbetalingsperiode = emptyList()
             ).valider(behandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET)
         }
         assertTrue(
@@ -38,7 +38,7 @@ class UtbetalingsoppdragUtilsTest {
                 kodeEndring = Utbetalingsoppdrag.KodeEndring.ENDR,
                 saksbehandlerId = "",
                 saksnummer = "",
-                utbetalingsperiode = listOf(mockk()),
+                utbetalingsperiode = listOf(mockk())
             ).valider(behandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET)
         }
         assertTrue(

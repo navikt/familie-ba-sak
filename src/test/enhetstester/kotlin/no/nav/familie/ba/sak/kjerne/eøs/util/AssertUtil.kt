@@ -7,7 +7,8 @@ fun <T> assertEqualsUnordered(
     actual: Collection<T>
 ) {
     Assertions.assertEquals(
-        expected.size, actual.size,
+        expected.size,
+        actual.size,
         "Forskjellig antall. Forventet ${expected.size} men fikk ${actual.size}"
     )
     Assertions.assertTrue(

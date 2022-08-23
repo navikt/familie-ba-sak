@@ -40,7 +40,8 @@ data class ØkonomiSimuleringMottaker(
     @Column(name = "mottaker_type", nullable = false)
     val mottakerType: MottakerType,
 
-    @ManyToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
 
     @OneToMany(
@@ -49,7 +50,7 @@ data class ØkonomiSimuleringMottaker(
         fetch = FetchType.EAGER,
         orphanRemoval = true
     )
-    var økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = emptyList(),
+    var økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = emptyList()
 ) : BaseEntitet() {
 
     override fun hashCode() = id.hashCode()

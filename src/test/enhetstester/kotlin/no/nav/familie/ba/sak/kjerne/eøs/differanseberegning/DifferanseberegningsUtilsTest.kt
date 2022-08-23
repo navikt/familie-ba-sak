@@ -22,7 +22,6 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal multiplisere valutabeløp med valutakurs`() {
-
         val valutabeløp = 1200.i("EUR")
         val kurs = 9.731.kronerPer("EUR")
 
@@ -31,7 +30,6 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal ikke multiplisere valutabeløp med valutakurs når valuta er forskjellig, men returnere null`() {
-
         val valutabeløp = 1200.i("EUR")
         val kurs = 9.73.kronerPer("DKK")
 
@@ -40,7 +38,6 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal konvertere årlig utenlandsk periodebeløp til månedlig`() {
-
         val månedligValutabeløp = 1200.i("EUR").somUtenlandskPeriodebeløp(ÅRLIG)
             .tilMånedligValutabeløp()
 
@@ -49,7 +46,6 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal konvertere kvartalsvis utenlandsk periodebeløp til månedlig`() {
-
         val månedligValutabeløp = 300.i("EUR").somUtenlandskPeriodebeløp(KVARTALSVIS)
             .tilMånedligValutabeløp()
 
@@ -58,7 +54,6 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Månedlig utenlandsk periodebeløp skal ikke endres`() {
-
         val månedligValutabeløp = 100.i("EUR").somUtenlandskPeriodebeløp(MÅNEDLIG)
             .tilMånedligValutabeløp()
 
@@ -67,7 +62,6 @@ class DifferanseberegningsUtilsTest {
 
     @Test
     fun `Skal konvertere ukentlig utenlandsk periodebeløp til månedlig`() {
-
         val månedligValutabeløp = 25.i("EUR").somUtenlandskPeriodebeløp(UKENTLIG)
             .tilMånedligValutabeløp()
 

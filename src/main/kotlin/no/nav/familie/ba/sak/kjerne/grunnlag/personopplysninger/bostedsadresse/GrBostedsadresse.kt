@@ -50,7 +50,7 @@ abstract class GrBostedsadresse(
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "fk_po_person_id")
-    open var person: Person? = null,
+    open var person: Person? = null
 ) : BaseEntitet() {
 
     abstract fun toSecureString(): String
@@ -77,9 +77,11 @@ abstract class GrBostedsadresse(
         val fregManglendeFlytteDato = LocalDate.of(1, 1, 1)
 
         fun MutableList<GrBostedsadresse>.sisteAdresse(): GrBostedsadresse? {
-            if (this.filter { it.periode?.fom == null || it.periode?.fom == fregManglendeFlytteDato }.size > 1) throw Feil(
-                "Finnes flere bostedsadresser uten fom-dato"
-            )
+            if (this.filter { it.periode?.fom == null || it.periode?.fom == fregManglendeFlytteDato }.size > 1) {
+                throw Feil(
+                    "Finnes flere bostedsadresser uten fom-dato"
+                )
+            }
             return this.sortedBy { it.periode?.fom }.lastOrNull()
         }
 

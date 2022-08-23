@@ -172,7 +172,6 @@ class TilgangServiceTest {
 
     @Test
     fun `validerTilgangTilFagsak - skal kaste feil dersom søker eller et eller flere av barna har diskresjonskode og saksbehandler mangler tilgang`() {
-
         every { fagsakService.hentAktør(fagsak.id) }.returns(aktør)
         every { behandlingHentOgPersisterService.hentBehandlinger(fagsak.id) }.returns(listOf(behandling))
         every { persongrunnlagService.hentAktiv(behandling.id) }.returns(

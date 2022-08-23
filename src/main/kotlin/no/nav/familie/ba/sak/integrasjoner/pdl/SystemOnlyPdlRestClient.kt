@@ -20,7 +20,7 @@ import java.net.URI
 class SystemOnlyPdlRestClient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
     @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
-    override val personidentService: PersonidentService,
+    override val personidentService: PersonidentService
 ) : PdlRestClient(pdlBaseUrl, restTemplate, personidentService) {
 
     @Cacheable("adressebeskyttelse", cacheManager = "shortCache")

@@ -44,7 +44,7 @@ object TilkjentYtelseValidering {
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        kravDato: LocalDateTime,
+        kravDato: LocalDateTime
     ): List<String> {
         val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato)
 
@@ -65,7 +65,9 @@ object TilkjentYtelseValidering {
 
                 if (etterbetalingErUgyldig) {
                     aktørId
-                } else null
+                } else {
+                    null
+                }
             }
 
         return personerMedUgyldigEtterbetaling
@@ -75,7 +77,6 @@ object TilkjentYtelseValidering {
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?
     ): Set<String> {
-
         val aktørIderFraAndeler = andelerTilkjentYtelse.map { it.aktør.aktørId }
         val aktøerIderFraForrigeAndeler = forrigeAndelerTilkjentYtelse?.map { it.aktør.aktørId } ?: emptyList()
         return (aktørIderFraAndeler + aktøerIderFraForrigeAndeler).toSet()
@@ -132,7 +133,7 @@ object TilkjentYtelseValidering {
     fun validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
         behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
         barnMedAndreRelevanteTilkjentYtelser: List<Pair<Person, List<TilkjentYtelse>>>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
     ) {
         val barna = personopplysningGrunnlag.barna.sortedBy { it.fødselsdato }
 
@@ -180,7 +181,7 @@ object TilkjentYtelseValidering {
 
     private fun erOverlappAvAndeler(
         andeler: List<AndelTilkjentYtelse>,
-        barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
+        barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>
     ): Boolean {
         return andeler.any { andelTilkjentYtelse ->
             barnsAndelerFraAndreBehandlinger.any {

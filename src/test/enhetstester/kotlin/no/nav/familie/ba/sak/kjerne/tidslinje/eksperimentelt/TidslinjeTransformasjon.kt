@@ -18,7 +18,6 @@ fun <I, T : Tidsenhet, R> Tidslinje<I, T>.windowed(
     partialWindows: Boolean = false,
     mapper: (List<Periode<I, T>>) -> Periode<R, T>
 ): Tidslinje<R, T> {
-
     val tidslinje = this
 
     return object : Tidslinje<R, T>() {
@@ -28,8 +27,9 @@ fun <I, T : Tidsenhet, R> Tidslinje<I, T>.windowed(
         override fun lagPerioder(): Collection<Periode<R, T>> =
             tidslinje.perioder().windowed(size, step, partialWindows) { perioder ->
                 val periode = mapper(perioder)
-                if (periode.fraOgMed < fraOgMed || periode.tilOgMed > tilOgMed)
+                if (periode.fraOgMed < fraOgMed || periode.tilOgMed > tilOgMed) {
                     throw IllegalArgumentException("Forsøk på å flytte perioden utenfor grensene for tidslinjen")
+                }
                 periode
             }
     }

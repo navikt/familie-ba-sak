@@ -33,7 +33,6 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
     @Test
     fun `teste nye andeler tilkjent ytelse for to barn med endrete utbetalingsandeler`() {
-
         /**
          * Tidslinjer barn 1:
          * -------------[############]-----------[#########]---------- AndelTilkjentYtelse

@@ -53,14 +53,15 @@ class DokumentService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val rolleConfig: RolleConfig,
     private val settPåVentService: SettPåVentService,
-    private val utgåendeJournalføringService: UtgåendeJournalføringService,
+    private val utgåendeJournalføringService: UtgåendeJournalføringService
 ) {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
         Metrics.counter(
             "brev.sendt",
-            "brevtype", it.visningsTekst
+            "brevtype",
+            it.visningsTekst
         )
     }
 
@@ -68,7 +69,8 @@ class DokumentService(
         mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
             Metrics.counter(
                 "brev.ikke.sendt.ukjent.andresse",
-                "brevtype", it.visningsTekst
+                "brevtype",
+                it.visningsTekst
             )
         }
 
@@ -123,12 +125,14 @@ class DokumentService(
             onFailure = {
                 if (it is Feil) {
                     throw it
-                } else throw Feil(
-                    message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal}. ${it.message}",
-                    frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
-                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                    throwable = it
-                )
+                } else {
+                    throw Feil(
+                        message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal}. ${it.message}",
+                        frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                        throwable = it
+                    )
+                }
             }
         )
     }
@@ -139,7 +143,6 @@ class DokumentService(
         behandling: Behandling? = null,
         fagsakId: Long
     ) {
-
         val generertBrev = genererManueltBrev(manueltBrevRequest)
 
         val førsteside = if (manueltBrevRequest.brevmal.skalGenerereForside()) {
@@ -148,7 +151,9 @@ class DokumentService(
                 navSkjemaId = "NAV 33.00-07",
                 overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07"
             )
-        } else null
+        } else {
+            null
+        }
 
         val journalpostId = utgåendeJournalføringService.journalførManueltBrev(
             fnr = manueltBrevRequest.mottakerIdent,
@@ -157,7 +162,7 @@ class DokumentService(
                 ?: DEFAULT_JOURNALFØRENDE_ENHET,
             brev = generertBrev,
             førsteside = førsteside,
-            dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
+            dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType()
         )
 
         if (behandling != null) {
@@ -210,7 +215,7 @@ class DokumentService(
                     .plusDays(
                         manueltBrevRequest.brevmal.ventefristDager(
                             manuellFrist = manueltBrevRequest.antallUkerSvarfrist?.toLong(),
-                            behandlingKategori = behandling.kategori,
+                            behandlingKategori = behandling.kategori
                         )
                     ),
                 årsak = manueltBrevRequest.brevmal.venteårsak()
@@ -222,7 +227,7 @@ class DokumentService(
         journalpostId: String,
         behandlingId: Long?,
         loggBehandlerRolle: BehandlerRolle,
-        brevmal: Brevmal,
+        brevmal: Brevmal
     ) = try {
         distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
     } catch (ressursException: RessursException) {
@@ -252,7 +257,7 @@ class DokumentService(
         logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent dødsboadresse.")
         loggService.opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(
             behandlingId = behandlingId,
-            brevnavn = brevmal.visningsTekst,
+            brevnavn = brevmal.visningsTekst
         )
     }
 
@@ -264,7 +269,7 @@ class DokumentService(
         logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent adresse.")
         loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(
             behandlingId = behandlingId,
-            brevnavn = brevMal.visningsTekst,
+            brevnavn = brevMal.visningsTekst
         )
         antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
     }
@@ -273,7 +278,7 @@ class DokumentService(
         journalpostId: String,
         behandlingId: Long?,
         brevMal: Brevmal,
-        loggBehandlerRolle: BehandlerRolle,
+        loggBehandlerRolle: BehandlerRolle
     ) {
         integrasjonClient.distribuerBrev(journalpostId = journalpostId, distribusjonstype = brevMal.distribusjonstype)
 

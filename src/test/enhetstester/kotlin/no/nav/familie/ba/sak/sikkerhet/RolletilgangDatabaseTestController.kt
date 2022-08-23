@@ -30,7 +30,9 @@ class RolletilgangDatabaseTestController(
             listOf("prod", "preprod")
                 .contains(it.trim(' '))
         }
-        ) error("Controller feilaktig aktivert i miljø")
+        ) {
+            error("Controller feilaktig aktivert i miljø")
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(Ressurs.success(behandlingService.opprettBehandling(nyBehandling)))
     }

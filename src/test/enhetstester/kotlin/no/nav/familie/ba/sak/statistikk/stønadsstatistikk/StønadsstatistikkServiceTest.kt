@@ -61,7 +61,7 @@ internal class StønadsstatistikkServiceTest(
     private val kompetanseService: KompetanseService,
 
     @MockK
-    private val vedtakRepository: VedtakRepository,
+    private val vedtakRepository: VedtakRepository
 ) {
 
     private val stønadsstatistikkService =

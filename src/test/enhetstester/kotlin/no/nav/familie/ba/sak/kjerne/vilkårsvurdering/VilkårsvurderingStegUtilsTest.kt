@@ -47,23 +47,38 @@ class VilkårsvurderingStegUtilsTest {
 
         personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = personAktørId,
+            aktør = personAktørId
         )
 
         vilkårResultat1 = VilkårResultat(
-            1, personResultat, vilkår, resultat,
-            LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-            "", vilkårsvurdering.behandling.id
+            1,
+            personResultat,
+            vilkår,
+            resultat,
+            LocalDate.of(2010, 1, 1),
+            LocalDate.of(2010, 6, 1),
+            "",
+            vilkårsvurdering.behandling.id
         )
         vilkårResultat2 = VilkårResultat(
-            2, personResultat, vilkår, resultat,
-            LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
-            "", vilkårsvurdering.behandling.id
+            2,
+            personResultat,
+            vilkår,
+            resultat,
+            LocalDate.of(2010, 6, 2),
+            LocalDate.of(2010, 8, 1),
+            "",
+            vilkårsvurdering.behandling.id
         )
         vilkårResultat3 = VilkårResultat(
-            3, personResultat, vilkår, resultat,
-            LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
-            "", vilkårsvurdering.behandling.id
+            3,
+            personResultat,
+            vilkår,
+            resultat,
+            LocalDate.of(2010, 8, 2),
+            LocalDate.of(2010, 12, 1),
+            "",
+            vilkårsvurdering.behandling.id
         )
         personResultat.setSortedVilkårResultater(
             setOf(
@@ -312,13 +327,18 @@ class VilkårsvurderingStegUtilsTest {
     fun `Skal nullstille periode hvis det kun finnes en periode`() {
         val mockPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = randomAktør(),
+            aktør = randomAktør()
         )
 
         val mockVilkårResultat = VilkårResultat(
-            1, mockPersonResultat, vilkår, resultat,
-            LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-            "", vilkårsvurdering.behandling.id
+            1,
+            mockPersonResultat,
+            vilkår,
+            resultat,
+            LocalDate.of(2010, 1, 1),
+            LocalDate.of(2010, 6, 1),
+            "",
+            vilkårsvurdering.behandling.id
         )
         mockPersonResultat.setSortedVilkårResultater(setOf(mockVilkårResultat))
 

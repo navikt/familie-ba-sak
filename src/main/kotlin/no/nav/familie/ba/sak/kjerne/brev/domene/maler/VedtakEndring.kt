@@ -46,6 +46,6 @@ data class EndringVedtakData(
         val etterbetaling: Etterbetaling?,
         val feilutbetaling: Boolean,
         val hjemmeltekst: Hjemmeltekst,
-        val klage: Boolean,
+        val klage: Boolean
     )
 }

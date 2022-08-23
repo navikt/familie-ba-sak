@@ -103,7 +103,6 @@ class VilkårsvurderingTestController(
         @PathVariable behandlingId: Long,
         @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)
 
@@ -136,7 +135,6 @@ fun Map<LocalDate, Map<Vilkår, String>>.tilVilkårsvurdering(
     behandling: Behandling,
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ): Vilkårsvurdering {
-
     val builder = VilkårsvurderingBuilder<Måned>(behandling)
 
     this.entries.forEach { (startTidspunkt, vilkårsresultater) ->

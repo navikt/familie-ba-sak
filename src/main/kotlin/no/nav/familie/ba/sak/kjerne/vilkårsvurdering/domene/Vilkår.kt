@@ -73,7 +73,9 @@ enum class Vilkår(
             return values().filter {
                 if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) {
                     personType in it.parterDetteGjelderFor
-                } else personType in it.parterDetteGjelderFor && ytelseType == it.ytelseType
+                } else {
+                    personType in it.parterDetteGjelderFor && ytelseType == it.ytelseType
+                }
             }.toSet()
         }
 
@@ -83,7 +85,7 @@ enum class Vilkår(
                 BOR_MED_SØKER,
                 GIFT_PARTNERSKAP,
                 BOSATT_I_RIKET,
-                LOVLIG_OPPHOLD,
+                LOVLIG_OPPHOLD
             )
         }
     }
@@ -91,8 +93,11 @@ enum class Vilkår(
     fun defaultRegelverk(behandlingKategori: BehandlingKategori): Regelverk? {
         return when (this) {
             BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD, UTVIDET_BARNETRYGD -> {
-                if (behandlingKategori == BehandlingKategori.EØS)
-                    Regelverk.EØS_FORORDNINGEN else Regelverk.NASJONALE_REGLER
+                if (behandlingKategori == BehandlingKategori.EØS) {
+                    Regelverk.EØS_FORORDNINGEN
+                } else {
+                    Regelverk.NASJONALE_REGLER
+                }
             }
             UNDER_18_ÅR, GIFT_PARTNERSKAP -> null
         }
@@ -101,7 +106,7 @@ enum class Vilkår(
     fun vurderVilkår(
         person: Person,
         vurderFra: LocalDate = LocalDate.now(),
-        annenForelder: Person? = null,
+        annenForelder: Person? = null
     ): AutomatiskVurdering {
         val vilkårsregel = when (this) {
             UNDER_18_ÅR -> VurderBarnErUnder18(
@@ -118,23 +123,29 @@ enum class Vilkår(
                 adresser = person.bostedsadresser,
                 vurderFra = vurderFra
             )
-            LOVLIG_OPPHOLD -> if (person.type == BARN) VurderBarnHarLovligOpphold(
-                aktør = person.aktør
-            )
-            else VurderPersonHarLovligOpphold(
-                morLovligOppholdFaktaEØS = LovligOppholdFaktaEØS(
-                    arbeidsforhold = person.arbeidsforhold,
-                    bostedsadresser = person.bostedsadresser,
-                    statsborgerskap = person.statsborgerskap
-                ),
-                annenForelderLovligOppholdFaktaEØS = if (annenForelder != null)
-                    LovligOppholdFaktaEØS(
-                        arbeidsforhold = annenForelder.arbeidsforhold,
-                        bostedsadresser = annenForelder.bostedsadresser,
-                        statsborgerskap = annenForelder.statsborgerskap
-                    ) else null,
-                opphold = person.opphold
-            )
+            LOVLIG_OPPHOLD -> if (person.type == BARN) {
+                VurderBarnHarLovligOpphold(
+                    aktør = person.aktør
+                )
+            } else {
+                VurderPersonHarLovligOpphold(
+                    morLovligOppholdFaktaEØS = LovligOppholdFaktaEØS(
+                        arbeidsforhold = person.arbeidsforhold,
+                        bostedsadresser = person.bostedsadresser,
+                        statsborgerskap = person.statsborgerskap
+                    ),
+                    annenForelderLovligOppholdFaktaEØS = if (annenForelder != null) {
+                        LovligOppholdFaktaEØS(
+                            arbeidsforhold = annenForelder.arbeidsforhold,
+                            bostedsadresser = annenForelder.bostedsadresser,
+                            statsborgerskap = annenForelder.statsborgerskap
+                        )
+                    } else {
+                        null
+                    },
+                    opphold = person.opphold
+                )
+            }
             UTVIDET_BARNETRYGD -> throw Feil("Ikke støtte for å automatisk vurdere vilkåret ${this.beskrivelse}")
         }
 

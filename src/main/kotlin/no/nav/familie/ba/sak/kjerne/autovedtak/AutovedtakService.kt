@@ -30,7 +30,7 @@ class AutovedtakService(
     fun opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
         aktør: Aktør,
         behandlingType: BehandlingType,
-        behandlingÅrsak: BehandlingÅrsak,
+        behandlingÅrsak: BehandlingÅrsak
     ): Behandling {
         val nyBehandling = stegService.håndterNyBehandling(
             NyBehandling(

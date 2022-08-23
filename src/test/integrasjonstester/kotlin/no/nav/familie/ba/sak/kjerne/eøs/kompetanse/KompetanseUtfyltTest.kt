@@ -102,7 +102,7 @@ class KompetanseUtfyltTest {
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG dersom 1 til 4 felter er satt med unntak av regel om annenForeldersAktivitet`() {
         var kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.IKKE_AKTUELT,
+            annenForeldersAktivitet = AnnenForeldersAktivitet.IKKE_AKTUELT
         )
 
         var restKompetanse = kompetanse.tilRestKompetanse()
@@ -111,7 +111,7 @@ class KompetanseUtfyltTest {
 
         kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
-            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()
@@ -121,7 +121,7 @@ class KompetanseUtfyltTest {
         kompetanse = lagKompetanse(
             annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
-            kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+            kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()

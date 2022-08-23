@@ -39,7 +39,8 @@ data class GrSivilstand(
     @Column(name = "fom")
     val fom: LocalDate? = null,
 
-    @Enumerated(EnumType.STRING) @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
     val type: SIVILSTAND,
 
     @JsonIgnore

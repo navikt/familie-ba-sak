@@ -78,12 +78,12 @@ class VilkårsresultatMånedTidslinjeTest {
     fun `Bytte av regelverk innen en måned skal gi kontinuerlig oppfylt tidslinje`() {
         val dagvilkårtidslinje = konkatenerTidslinjer(
             (26.feb(2020)..7.mar(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
-            (21.mar(2020)..13.mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
+            (21.mar(2020)..13.mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) }
         )
 
         val forventetMånedstidslinje = konkatenerTidslinjer(
             mar(2020).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
-            (apr(2020)..mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
+            (apr(2020)..mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) }
         )
 
         val faktiskMånedstidslinje =

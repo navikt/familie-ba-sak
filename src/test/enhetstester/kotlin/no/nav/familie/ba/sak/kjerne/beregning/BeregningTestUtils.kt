@@ -69,7 +69,6 @@ fun lagTestUtbetalingsoppdragForOpphørMedToBarn(
     datoTomBarn2: LocalDate,
     opphørFom: LocalDate
 ): Utbetalingsoppdrag {
-
     return Utbetalingsoppdrag(
         Utbetalingsoppdrag.KodeEndring.NY,
         "BA",
