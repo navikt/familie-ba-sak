@@ -107,25 +107,15 @@ object VilkårsvurderingResultatFlytter {
         personFraInitVilkårResultater: Set<VilkårResultat>,
         personFraInitAktør: Aktør
     ): AktivtOgOppdatertVilkårResultat {
-        val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
-        personFraInitVilkårResultater.forEach { vilkårFraInit ->
-            val vilkårSomFinnes = personenSomFinnesVilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
-
-            val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
-                kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling
-            )
-
-            if (vilkårSomSkalKopieresOver.isEmpty()) {
-                // Legg til nytt vilkår på person
-                personsVilkårOppdatert.add(vilkårFraInit)
-            } else {
-                /*  Vilkår er vurdert på person - flytt fra aktivt og overskriv initierte
-                            ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
-                            periode eksisterer. */
-
-                personsVilkårOppdatert.addAll(vilkårSomSkalKopieresOver)
-            }
-        }
+        /*  Vilkår er vurdert på person - flytt fra aktivt og overskriv initierte
+                    ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
+                    periode eksisterer. */
+        val personsVilkårOppdatert = personFraInitVilkårResultater.flatMap { vilkårFraInit ->
+            personenSomFinnesVilkårResultater
+                .filter { it.vilkårType == vilkårFraInit.vilkårType }
+                .filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling)
+                .ifEmpty { setOf(vilkårFraInit) }
+        }.toMutableSet()
         val fjernFraPersonsVilkårAktivt = personFraInitVilkårResultater
             .map { it.vilkårType }
             .flatMap { vilkårTypeFraInit ->
