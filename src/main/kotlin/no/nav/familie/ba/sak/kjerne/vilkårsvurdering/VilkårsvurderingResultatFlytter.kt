@@ -128,19 +128,18 @@ object VilkårsvurderingResultatFlytter {
             .flatMap { vilkårTypeFraInit ->
                 personenSomFinnesVilkårResultater.filter { it.vilkårType == vilkårTypeFraInit }
             }
-        val personsVilkårAktivt = (personenSomFinnesVilkårResultater - fjernFraPersonsVilkårAktivt).toMutableSet()
+        val personsVilkårAktivt = (personenSomFinnesVilkårResultater - fjernFraPersonsVilkårAktivt)
+            .filterNot {
+                forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet &&
+                    personenSomFinnesVilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                        .contains(it)
+            }.toSet()
 
         if (forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet
         ) {
             val utvidetVilkår =
                 personenSomFinnesVilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
             personsVilkårOppdatert.addAll(utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling))
-        }
-        if (forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet
-        ) {
-            val utvidetVilkår =
-                personenSomFinnesVilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-            personsVilkårAktivt.removeAll(utvidetVilkår)
         }
 
         return AktivtOgOppdatertVilkårResultat(
