@@ -107,7 +107,6 @@ object VilkårsvurderingResultatFlytter {
         personFraInitVilkårResultater: Set<VilkårResultat>,
         personFraInitAktør: Aktør
     ): AktivtOgOppdatertVilkårResultat {
-        val personsVilkårAktivt = personenSomFinnesVilkårResultater.toMutableSet()
         val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
         personFraInitVilkårResultater.forEach { vilkårFraInit ->
             val vilkårSomFinnes = personenSomFinnesVilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
@@ -127,24 +126,12 @@ object VilkårsvurderingResultatFlytter {
                 personsVilkårOppdatert.addAll(vilkårSomSkalKopieresOver)
             }
         }
-        personFraInitVilkårResultater.forEach { vilkårFraInit ->
-            val vilkårSomFinnes = personenSomFinnesVilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
-
-            val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
-                kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling
-            )
-            val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
-            personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
-
-            if (vilkårSomSkalKopieresOver.isEmpty()) {
-                // Legg til nytt vilkår på person
-            } else {
-                /*  Vilkår er vurdert på person - flytt fra aktivt og overskriv initierte
-                            ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
-                            periode eksisterer. */
-                personsVilkårAktivt.removeAll(vilkårSomSkalKopieresOver)
+        val fjernFraPersonsVilkårAktivt = personFraInitVilkårResultater
+            .map { it.vilkårType }
+            .flatMap { vilkårTypeFraInit ->
+                personenSomFinnesVilkårResultater.filter { it.vilkårType == vilkårTypeFraInit }
             }
-        }
+        val personsVilkårAktivt = (personenSomFinnesVilkårResultater - fjernFraPersonsVilkårAktivt).toMutableSet()
 
         if (forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet(
                 personsVilkårOppdatert,
