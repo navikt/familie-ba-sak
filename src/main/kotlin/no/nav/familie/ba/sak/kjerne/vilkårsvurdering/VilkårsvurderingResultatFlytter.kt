@@ -110,6 +110,35 @@ object VilkårsvurderingResultatFlytter {
         /*  Vilkår er vurdert på person - flytt fra aktivt og overskriv initierte
                     ikke oppfylte eller ikke vurdert perioder skal ikke kopieres om minst en oppfylt
                     periode eksisterer. */
+        val (personsVilkårOppdatert, forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet) = finnPersonsVilkårOppdatert(
+            personFraInitVilkårResultater,
+            personenSomFinnesVilkårResultater,
+            kopieringSkjerFraForrigeBehandling,
+            personResultaterFraForrigeBehandling,
+            løpendeUnderkategori,
+            personFraInitAktør
+        )
+
+        val personsVilkårAktivt = finnPersonsVilkårAktivt(
+            personFraInitVilkårResultater,
+            personenSomFinnesVilkårResultater,
+            forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet
+        )
+
+        return AktivtOgOppdatertVilkårResultat(
+            personsVilkårAktivt = personsVilkårAktivt,
+            personsVilkårOppdatert = personsVilkårOppdatert
+        )
+    }
+
+    private fun finnPersonsVilkårOppdatert(
+        personFraInitVilkårResultater: Set<VilkårResultat>,
+        personenSomFinnesVilkårResultater: Set<VilkårResultat>,
+        kopieringSkjerFraForrigeBehandling: Boolean,
+        personResultaterFraForrigeBehandling: Set<PersonResultat>?,
+        løpendeUnderkategori: BehandlingUnderkategori?,
+        personFraInitAktør: Aktør
+    ): Pair<MutableSet<VilkårResultat>, Boolean> {
         val personsVilkårOppdatert = personFraInitVilkårResultater.flatMap { vilkårFraInit ->
             personenSomFinnesVilkårResultater
                 .filter { it.vilkårType == vilkårFraInit.vilkårType }
@@ -131,17 +160,7 @@ object VilkårsvurderingResultatFlytter {
                 .filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling)
             personsVilkårOppdatert.addAll(utvidetVilkår)
         }
-
-        val personsVilkårAktivt = finnPersonsVilkårAktivt(
-            personFraInitVilkårResultater,
-            personenSomFinnesVilkårResultater,
-            forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet
-        )
-
-        return AktivtOgOppdatertVilkårResultat(
-            personsVilkårAktivt = personsVilkårAktivt,
-            personsVilkårOppdatert = personsVilkårOppdatert
-        )
+        return Pair(personsVilkårOppdatert, forrigeBehandlingInneholdtUtvidetVilkåretEllerUnderkategorienErUtvidet)
     }
 
     private fun finnPersonsVilkårAktivt(
