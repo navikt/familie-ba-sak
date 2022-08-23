@@ -44,7 +44,6 @@ class RestMappingTest {
 
     @Test
     fun `Fyller ut og sorterer i rett rekkefølge`() {
-
         val fomA = LocalDate.of(2001, 1, 1)
         val fomB = LocalDate.of(2005, 1, 1)
         val tomB = LocalDate.of(2006, 1, 1)

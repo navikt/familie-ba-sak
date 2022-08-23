@@ -79,7 +79,7 @@ class BisysController(private val bisysService: BisysService) {
                     HttpStatus.BAD_REQUEST
                 ),
                 "fraDato kan ikke være lenger enn 5 år tilbake i tid",
-                request,
+                request
             )
         }
 

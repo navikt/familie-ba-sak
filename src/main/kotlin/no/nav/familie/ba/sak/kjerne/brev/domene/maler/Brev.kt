@@ -249,7 +249,7 @@ interface FlettefelterForDokument {
 data class FlettefelterForDokumentImpl(
     override val navn: Flettefelt,
     override val fodselsnummer: Flettefelt,
-    override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+    override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr())
 ) : FlettefelterForDokument {
 
     constructor(

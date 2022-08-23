@@ -67,7 +67,7 @@ class InfotrygdFeedClient(
     @Retryable(
         value = [IOException::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
     )
     private fun sendFeedTilInfotrygd(endpoint: URI, feed: Any) {
         postForEntity<Ressurs<String>>(endpoint, feed)

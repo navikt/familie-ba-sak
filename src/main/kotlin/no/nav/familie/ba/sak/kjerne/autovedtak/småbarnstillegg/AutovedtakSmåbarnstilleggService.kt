@@ -40,7 +40,7 @@ class AutovedtakSmåbarnstilleggService(
     private val beregningService: BeregningService,
     private val autovedtakService: AutovedtakService,
     private val oppgaveService: OppgaveService,
-    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
+    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService
 ) : AutovedtakBehandlingService<Aktør> {
 
     private val antallVedtakOmOvergangsstønad: Counter =
@@ -66,7 +66,7 @@ class AutovedtakSmåbarnstilleggService(
                 "aarsak",
                 it.name,
                 "beskrivelse",
-                it.beskrivelse,
+                it.beskrivelse
             )
         }
 
@@ -124,20 +124,26 @@ class AutovedtakSmåbarnstilleggService(
         val sistIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id)
         val forrigeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) emptyList()
-            else beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = sistIverksatteBehandling.id
-            ).filter { it.erSmåbarnstillegg() }
+            if (sistIverksatteBehandling == null) {
+                emptyList()
+            } else {
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                    behandlingId = sistIverksatteBehandling.id
+                ).filter { it.erSmåbarnstillegg() }
+            }
 
         val nyeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) emptyList()
-            else beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = behandlingEtterBehandlingsresultat.id
-            ).filter { it.erSmåbarnstillegg() }
+            if (sistIverksatteBehandling == null) {
+                emptyList()
+            } else {
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                    behandlingId = behandlingEtterBehandlingsresultat.id
+                ).filter { it.erSmåbarnstillegg() }
+            }
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
             forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
+            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler
         )
 
         vedtaksperiodeHentOgPersisterService.lagre(

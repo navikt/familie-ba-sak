@@ -21,7 +21,7 @@ import java.net.URI
 @Component
 class PdlIdentRestClient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
-    @Qualifier("jwtBearer") val restTemplate: RestOperations,
+    @Qualifier("jwtBearer") val restTemplate: RestOperations
 ) : AbstractRestClient(restTemplate, "pdl.ident") {
     protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
 

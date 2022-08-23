@@ -23,7 +23,7 @@ data class RestSanityEØSBegrunnelse(
     val hjemlerFolketrygdloven: List<String>?,
     val hjemlerEOSForordningen883: List<String>?,
     val hjemlerEOSForordningen987: List<String>?,
-    val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
+    val hjemlerSeperasjonsavtalenStorbritannina: List<String>?
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -43,7 +43,7 @@ data class RestSanityEØSBegrunnelse(
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             hjemlerEØSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
-            hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
+            hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList()
         )
     }
 
@@ -61,7 +61,7 @@ data class SanityEØSBegrunnelse(
     val hjemlerFolketrygdloven: List<String>,
     val hjemlerEØSForordningen883: List<String>,
     val hjemlerEØSForordningen987: List<String>,
-    val hjemlerSeperasjonsavtalenStorbritannina: List<String>,
+    val hjemlerSeperasjonsavtalenStorbritannina: List<String>
 )
 
 fun List<SanityEØSBegrunnelse>.finnBegrunnelse(eøsBegrunnelse: EØSStandardbegrunnelse): SanityEØSBegrunnelse? =

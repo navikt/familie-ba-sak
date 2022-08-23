@@ -77,7 +77,7 @@ fun RestBaseFagsak.tilRestFagsak(
     gjeldendeUtbetalingsperioder = this.gjeldendeUtbetalingsperioder,
     behandlinger = restUtvidetBehandlinger,
     tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
-    fagsakType = this.fagsakType,
+    fagsakType = this.fagsakType
 )
 
 data class RestMinimalFagsak(
@@ -92,7 +92,7 @@ data class RestMinimalFagsak(
     val behandlinger: List<RestVisningBehandling>,
     val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>,
     val migreringsdato: LocalDate? = null,
-    override val fagsakType: FagsakType,
+    override val fagsakType: FagsakType
 ) : RestBaseFagsak(
     opprettetTidspunkt = opprettetTidspunkt,
     id = id,
@@ -102,7 +102,7 @@ data class RestMinimalFagsak(
     løpendeKategori = løpendeKategori,
     løpendeUnderkategori = løpendeUnderkategori,
     gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
-    fagsakType = fagsakType,
+    fagsakType = fagsakType
 )
 
 fun RestBaseFagsak.tilRestMinimalFagsak(
@@ -121,5 +121,5 @@ fun RestBaseFagsak.tilRestMinimalFagsak(
     behandlinger = restVisningBehandlinger,
     tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
     migreringsdato = migreringsdato,
-    fagsakType = this.fagsakType,
+    fagsakType = this.fagsakType
 )

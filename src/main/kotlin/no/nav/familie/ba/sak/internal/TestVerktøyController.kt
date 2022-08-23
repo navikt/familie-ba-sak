@@ -30,7 +30,7 @@ class TestVerktøyController(
     private val personidentService: PersonidentService,
     private val envService: EnvService,
     private val autovedtakStegService: AutovedtakStegService,
-    private val taskRepository: TaskRepositoryWrapper,
+    private val taskRepository: TaskRepositoryWrapper
 ) {
 
     @GetMapping(path = ["/autobrev"])

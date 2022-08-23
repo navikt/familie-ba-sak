@@ -101,7 +101,9 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør)
         } returns PersonInfo(
-            fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
+            fødselsdato = LocalDate.of(2009, 5, 1),
+            kjønn = Kjønn.MANN,
+            navn = "Barn Mocksen",
             forelderBarnRelasjon = setOf(
                 ForelderBarnRelasjon(
                     farAktør,
@@ -239,7 +241,7 @@ class ClientMocks {
                         identSlot2.captured.substring(0, min(11, identSlot2.captured.length)) + "00",
                         false,
                         "AKTORID"
-                    ),
+                    )
                 )
             }
         }
@@ -407,10 +409,11 @@ class ClientMocks {
             every {
                 mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(capture(idSlot))
             } answers {
-                if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured.aktivFødselsnummer())
+                if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured.aktivFødselsnummer()) {
                     ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
-                else
+                } else {
                     ADRESSEBESKYTTELSEGRADERING.UGRADERT
+                }
             }
 
             every { mockPersonopplysningerService.harVerge(mockSøkerAutomatiskBehandlingAktør) } returns VergeResponse(
@@ -428,8 +431,11 @@ class ClientMocks {
         const val INTEGRASJONER_FNR = "10000111111"
         val bostedsadresse = Bostedsadresse(
             matrikkeladresse = Matrikkeladresse(
-                matrikkelId = 123L, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
-                postnummer = "0202", kommunenummer = "2231"
+                matrikkelId = 123L,
+                bruksenhetsnummer = "H301",
+                tilleggsnavn = "navn",
+                postnummer = "0202",
+                kommunenummer = "2231"
             )
         )
         private val bostedsadresseHistorikk = mutableListOf(
@@ -459,7 +465,7 @@ class ClientMocks {
 
         private val sivilstandHistorisk = listOf(
             Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
-            Sivilstand(type = SIVILSTAND.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
+            Sivilstand(type = SIVILSTAND.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4))
         )
 
         val personInfo = mapOf(
@@ -537,7 +543,7 @@ class ClientMocks {
                 bostedsadresser = mutableListOf(bostedsadresse),
                 kjønn = Kjønn.KVINNE,
                 navn = "Mor Integrasjon person",
-                sivilstander = sivilstandHistorisk,
+                sivilstander = sivilstandHistorisk
             ),
             BARN_DET_IKKE_GIS_TILGANG_TIL_FNR to PersonInfo(
                 fødselsdato = LocalDate.of(2019, 6, 22),

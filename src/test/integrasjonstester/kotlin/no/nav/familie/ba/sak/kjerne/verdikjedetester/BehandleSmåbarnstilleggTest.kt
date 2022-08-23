@@ -85,7 +85,7 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val opprettTaskService: OpprettTaskService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
-    @Autowired private val persongrunnlagService: PersongrunnlagService,
+    @Autowired private val persongrunnlagService: PersongrunnlagService
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato = LocalDate.now().minusYears(2)
@@ -111,7 +111,6 @@ class BehandleSmåbarnstilleggTest(
     }
 
     private fun settOppefSakMockForDeFørste2Testene(søkersIdent: String) {
-
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = listOf(
                 PeriodeOvergangsstønad(
@@ -318,7 +317,7 @@ class BehandleSmåbarnstilleggTest(
                     fomDato = periodeMedFullOvergangsstønadFom,
                     tomDato = periodeOvergangsstønadTom,
                     datakilde = PeriodeOvergangsstønad.Datakilde.EF
-                ),
+                )
             )
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
@@ -374,7 +373,7 @@ class BehandleSmåbarnstilleggTest(
                     fomDato = periodeMedFullOvergangsstønadFom,
                     tomDato = periodeOvergangsstønadTom,
                     datakilde = PeriodeOvergangsstønad.Datakilde.EF
-                ),
+                )
             )
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
@@ -490,7 +489,7 @@ class BehandleSmåbarnstilleggTest(
                         fomDato = fomDato,
                         tomDato = tomDato1,
                         datakilde = PeriodeOvergangsstønad.Datakilde.EF
-                    ),
+                    )
                 )
             )
         opprettOgKjørGjennomUtvidetBehandling(
@@ -505,7 +504,7 @@ class BehandleSmåbarnstilleggTest(
                     fomDato = fomDato,
                     tomDato = tomDato2,
                     datakilde = PeriodeOvergangsstønad.Datakilde.EF
-                ),
+                )
             )
         )
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
@@ -539,7 +538,7 @@ class BehandleSmåbarnstilleggTest(
                 vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                 periodeFom = utvidetPeriodeFom,
                 periodeTom = null,
-                personResultat = mockk(relaxed = true),
+                personResultat = mockk(relaxed = true)
             )
         )
 
@@ -562,7 +561,7 @@ class BehandleSmåbarnstilleggTest(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 }

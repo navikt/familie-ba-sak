@@ -33,7 +33,7 @@ class HenleggBehandling(
                 fagsakId = behandling.fagsak.id,
                 manueltBrevRequest = ManueltBrevRequest(
                     mottakerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-                    brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
+                    brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD
                 ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService)
             )
         }

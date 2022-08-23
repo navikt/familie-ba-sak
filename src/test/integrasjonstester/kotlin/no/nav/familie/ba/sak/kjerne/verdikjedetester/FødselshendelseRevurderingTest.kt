@@ -32,7 +32,6 @@ class FødselshendelseRevurderingTest(
 
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
-
         val revurderingsbarnSinFødselsdato = now().minusMonths(3)
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
@@ -62,7 +61,7 @@ class FødselshendelseRevurderingTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService,
+            personidentService = personidentService
         )
 
         val søkerIdent = scenario.søker.ident

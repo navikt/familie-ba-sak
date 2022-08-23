@@ -54,7 +54,7 @@ internal class Autobrev6og18ÅrServiceTest {
         vedtakService = vedtakService,
         infotrygdService = infotrygdService,
         vedtaksperiodeService = vedtaksperiodeService,
-        taskRepository = taskRepository,
+        taskRepository = taskRepository
     )
 
     private val autobrev6og18ÅrService = Autobrev6og18ÅrService(

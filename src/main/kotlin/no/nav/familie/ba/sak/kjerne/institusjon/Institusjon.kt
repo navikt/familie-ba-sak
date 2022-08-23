@@ -24,5 +24,5 @@ data class Institusjon(
     val orgNummer: String?,
 
     @Column(name = "tss_ekstern_id", updatable = false, length = 50)
-    val tssEksternId: String,
+    val tssEksternId: String
 ) : BaseEntitet()

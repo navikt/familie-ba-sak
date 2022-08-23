@@ -248,8 +248,11 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         BehandlingÅrsak.SØKNAD -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> {
-                    if (behandling.fagsak.type == FagsakType.NORMAL) REGISTRERE_SØKNAD
-                    else REGISTRERE_INSTITUSJON_OG_VERGE
+                    if (behandling.fagsak.type == FagsakType.NORMAL) {
+                        REGISTRERE_SØKNAD
+                    } else {
+                        REGISTRERE_INSTITUSJON_OG_VERGE
+                    }
                 }
                 REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_SØKNAD
                 REGISTRERE_SØKNAD -> VILKÅRSVURDERING
@@ -273,8 +276,9 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> {
-                    if (!behandling.skalBehandlesAutomatisk) VURDER_TILBAKEKREVING
-                    else if (behandling.skalBehandlesAutomatisk && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) IVERKSETT_MOT_OPPDRAG else VURDER_TILBAKEKREVING
+                    if (!behandling.skalBehandlesAutomatisk) {
+                        VURDER_TILBAKEKREVING
+                    } else if (behandling.skalBehandlesAutomatisk && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) IVERKSETT_MOT_OPPDRAG else VURDER_TILBAKEKREVING
                 }
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
@@ -293,9 +297,11 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING)
+                BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING) {
                     IVERKSETT_MOT_OPPDRAG
-                else throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
+                } else {
+                    throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
+                }
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET

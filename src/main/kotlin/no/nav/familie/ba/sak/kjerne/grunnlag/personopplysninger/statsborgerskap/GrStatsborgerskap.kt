@@ -43,7 +43,8 @@ data class GrStatsborgerskap(
     @Column(name = "landkode", nullable = false)
     val landkode: String,
 
-    @Enumerated(EnumType.STRING) @Column(name = "medlemskap", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "medlemskap", nullable = false)
     val medlemskap: Medlemskap = Medlemskap.UKJENT,
 
     @JsonIgnore

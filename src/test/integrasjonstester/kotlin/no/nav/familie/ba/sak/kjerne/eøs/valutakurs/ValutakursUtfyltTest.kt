@@ -25,7 +25,7 @@ class ValutakursUtfyltTest {
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG når ett felt er utfylt`() {
         var valutakurs = lagValutakurs(
-            valutakursdato = LocalDate.now(),
+            valutakursdato = LocalDate.now()
         )
 
         var restValutakurs = valutakurs.tilRestValutakurs()

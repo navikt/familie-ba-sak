@@ -22,7 +22,7 @@ class RestartAvSmåbarnstilleggServiceTest {
             opprettTaskService = mockk(),
             vedtakService = mockk(),
             vedtaksperiodeService = mockk(),
-            behandlingMigreringsinfoRepository = behandlingMigreringsinfoRepository,
+            behandlingMigreringsinfoRepository = behandlingMigreringsinfoRepository
         )
     )
 

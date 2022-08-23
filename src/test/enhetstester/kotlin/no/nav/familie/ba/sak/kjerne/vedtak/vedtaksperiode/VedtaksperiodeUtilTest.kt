@@ -260,7 +260,6 @@ class VedtaksperiodeUtilTest {
 
     @Test
     fun `skal finne riktige begrunnelser for kompetanse når barn bor i utlandet`() {
-
         val kompetanserIPeriode: List<Kompetanse> =
             listOf(
                 lagKompetanse(
@@ -296,7 +295,6 @@ class VedtaksperiodeUtilTest {
 
     @Test
     fun `skal finne riktige begrunnelser for kompetanse når barn bor i Norge`() {
-
         val kompetanserIPeriode: List<Kompetanse> =
             listOf(
                 lagKompetanse(
@@ -314,7 +312,7 @@ class VedtaksperiodeUtilTest {
         val forventedeBegrunnelser =
             listOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_FLYTTET_TIL_NORGE,
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE,
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE
             )
 
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(

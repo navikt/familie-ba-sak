@@ -50,7 +50,6 @@ class BehandlingsresultatUtilsTest {
             Behandlingsresultat.FORTSATT_INNVILGET,
             Behandlingsresultat.IKKE_VURDERT
         ).forEach {
-
             val feil = assertThrows<FunksjonellFeil> {
                 BehandlingsresultatUtils.validerBehandlingsresultat(behandling, it)
             }
@@ -70,11 +69,10 @@ class BehandlingsresultatUtilsTest {
 
     @Test
     fun `skal returnere AVSLÅTT_OG_OPPHØRT behandlingsresultat`() {
-
         val personer = listOf(
             lagYtelsePerson(YtelsePersonResultat.AVSLÅTT),
             lagYtelsePerson(YtelsePersonResultat.OPPHØRT),
-            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT),
+            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT)
         )
 
         assertEquals(
@@ -85,10 +83,9 @@ class BehandlingsresultatUtilsTest {
 
     @Test
     fun `skal returnere AVSLÅTT_OG_OPPHØRT behandlingsresultat når et barn har fortsatt opphørt og søker har avslått`() {
-
         val personer = listOf(
             lagYtelsePerson(YtelsePersonResultat.AVSLÅTT),
-            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT),
+            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT)
         )
 
         assertEquals(
@@ -99,11 +96,10 @@ class BehandlingsresultatUtilsTest {
 
     @Test
     fun `skal returnere ENDRET_OG_OPPHØRT behandlingsresultat`() {
-
         val personer = listOf(
             lagYtelsePerson(YtelsePersonResultat.ENDRET_UTBETALING),
             lagYtelsePerson(YtelsePersonResultat.OPPHØRT),
-            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT),
+            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT)
         )
 
         assertEquals(
@@ -114,11 +110,10 @@ class BehandlingsresultatUtilsTest {
 
     @Test
     fun `skal returnere AVSLÅTT_ENDRET_OG_OPPHØRT behandlingsresultat`() {
-
         val personer = listOf(
             lagYtelsePerson(YtelsePersonResultat.ENDRET_UTBETALING),
             lagYtelsePerson(YtelsePersonResultat.AVSLÅTT),
-            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT),
+            lagYtelsePerson(YtelsePersonResultat.FORTSATT_OPPHØRT)
         )
 
         assertEquals(
@@ -145,6 +140,7 @@ class BehandlingsresultatUtilsTest {
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }
+
     @Test
     fun `både ENDRET_UTBETALING og ENDRET_UTEN_UTBETALING som samlede resultater gir behandlingsresultat ENDRET_UTBETALING`() {
         val personer = listOf(
