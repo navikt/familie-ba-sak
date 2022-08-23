@@ -35,7 +35,8 @@ data class DbJournalpost(
     val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
 
     @JsonIgnore
-    @ManyToOne @JoinColumn(name = "fk_behandling_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "fk_behandling_id", nullable = false)
     val behandling: Behandling,
 
     @Column(name = "journalpost_id")

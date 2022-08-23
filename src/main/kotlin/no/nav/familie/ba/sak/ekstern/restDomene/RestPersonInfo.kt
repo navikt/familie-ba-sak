@@ -37,7 +37,7 @@ data class RestForelderBarnRelasjonnMaskert(
 
 data class RestBostedsadresse(
     val adresse: String?,
-    val postnummer: String,
+    val postnummer: String
 )
 
 private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() = RestForelderBarnRelasjonnMaskert(
@@ -76,7 +76,7 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         forelderBarnRelasjon = this.forelderBarnRelasjon.map { it.tilRestForelderBarnRelasjon() },
         forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
         kommunenummer = kommunenummer,
-        dødsfallDato = dødsfallDato,
+        dødsfallDato = dødsfallDato
     )
 }
 

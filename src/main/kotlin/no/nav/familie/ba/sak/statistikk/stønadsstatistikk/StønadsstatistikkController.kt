@@ -77,6 +77,8 @@ class StønadsstatistikkController(
 
         return if (tilkjentYtelse != null) {
             tilkjentYtelse.utbetalingsoppdrag != null
-        } else false
+        } else {
+            false
+        }
     }
 }

@@ -23,7 +23,7 @@ class RestartAvSmåbarnstilleggService(
     private val opprettTaskService: OpprettTaskService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
+    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository
 ) {
 
     /**

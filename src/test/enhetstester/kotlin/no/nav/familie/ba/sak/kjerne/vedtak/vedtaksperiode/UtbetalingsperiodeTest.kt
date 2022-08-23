@@ -17,17 +17,17 @@ class UtbetalingsperiodeTest {
     val utbetalingsperiode1 = lagUtbetalingsperiode(
         periodeFom = fomDato1,
         periodeTom = fomDato1.let { it.withDayOfMonth(it.lengthOfMonth()) },
-        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),
+        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson()))
     )
     val utbetalingsperiode2 = lagUtbetalingsperiode(
         periodeFom = fomDato2,
         periodeTom = fomDato2.let { it.withDayOfMonth(it.lengthOfMonth()) },
-        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),
+        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson()))
     )
     val utbetalingsperiode3 = lagUtbetalingsperiode(
         periodeFom = fomDato3,
         periodeTom = fomDato3.let { it.withDayOfMonth(it.lengthOfMonth()) },
-        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),
+        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson()))
     )
     val utbetalingsperioder = listOf(
         utbetalingsperiode1,
@@ -40,7 +40,7 @@ class UtbetalingsperiodeTest {
         val utbetalingsperiodeForVedtaksperiode =
             hentUtbetalingsperiodeForVedtaksperiode(
                 utbetalingsperioder,
-                fomDato2,
+                fomDato2
             )
 
         Assertions.assertEquals(utbetalingsperiode2.periodeFom, utbetalingsperiodeForVedtaksperiode.periodeFom)
@@ -60,7 +60,7 @@ class UtbetalingsperiodeTest {
         val utbetalingsperiodeForVedtaksperiode =
             hentUtbetalingsperiodeForVedtaksperiode(
                 utbetalingsperioder,
-                null,
+                null
             )
 
         Assertions.assertEquals(utbetalingsperiode3.periodeFom, utbetalingsperiodeForVedtaksperiode.periodeFom)

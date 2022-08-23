@@ -13,7 +13,6 @@ inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(
     pdlResponse: PdlBaseResponse<DATA>,
     dataMapper: (DATA) -> T?
 ): T {
-
     if (pdlResponse.harFeil()) {
         if (pdlResponse.errors?.any { it.extensions?.notFound() == true } == true) {
             throw PdlNotFoundException()

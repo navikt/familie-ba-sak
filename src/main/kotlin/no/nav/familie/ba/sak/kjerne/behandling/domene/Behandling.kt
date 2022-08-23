@@ -121,11 +121,14 @@ data class Behandling(
         ) {
             if (type == BehandlingType.TEKNISK_OPPHØR &&
                 opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
-            )
-                true else throw Feil(
-                "Behandling er teknisk opphør, men årsak $opprettetÅrsak " +
-                    "og type $type samsvarer ikke."
-            )
+            ) {
+                true
+            } else {
+                throw Feil(
+                    "Behandling er teknisk opphør, men årsak $opprettetÅrsak " +
+                        "og type $type samsvarer ikke."
+                )
+            }
         } else {
             false
         }
@@ -144,8 +147,9 @@ data class Behandling(
         ) {
             if (type != BehandlingType.TEKNISK_ENDRING ||
                 opprettetÅrsak != BehandlingÅrsak.TEKNISK_ENDRING
-            )
+            ) {
                 throw Feil("Behandling er teknisk endring, men årsak $opprettetÅrsak og type $type samsvarer ikke.")
+            }
         }
 
         if (type == BehandlingType.REVURDERING && sisteBehandlingSomErVedtatt == null) {
@@ -210,8 +214,11 @@ data class Behandling(
                 BehandlingStegTilstand(
                     behandling = this,
                     behandlingSteg = steg,
-                    behandlingStegStatus = if (steg == SISTE_STEG) BehandlingStegStatus.UTFØRT
-                    else BehandlingStegStatus.IKKE_UTFØRT
+                    behandlingStegStatus = if (steg == SISTE_STEG) {
+                        BehandlingStegStatus.UTFØRT
+                    } else {
+                        BehandlingStegStatus.IKKE_UTFØRT
+                    }
                 )
             )
         }

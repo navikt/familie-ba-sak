@@ -204,7 +204,7 @@ class OppdaterVilkårsvurderingTest {
                     personResultat = personResultat,
                     resultat = Resultat.OPPFYLT,
                     periodeFom = LocalDate.now(),
-                    periodeTom = LocalDate.now().plusYears(1),
+                    periodeTom = LocalDate.now().plusYears(1)
                 )
             )
         personResultat.setSortedVilkårResultater(bosattIRiketVilkårResultater)

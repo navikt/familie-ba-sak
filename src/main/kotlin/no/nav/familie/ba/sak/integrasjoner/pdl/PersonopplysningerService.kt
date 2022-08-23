@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
 class PersonopplysningerService(
     private val pdlRestClient: PdlRestClient,
     private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
-    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
 ) {
 
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
@@ -58,7 +58,7 @@ class PersonopplysningerService(
         }.toSet()
         return personinfo.copy(
             forelderBarnRelasjon = forelderBarnRelasjon,
-            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
+            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert
         )
     }
 

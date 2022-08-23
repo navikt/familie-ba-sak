@@ -33,7 +33,7 @@ data class ArbeidsfordelingPåBehandling(
     var behandlendeEnhetNavn: String,
 
     @Column(name = "manuelt_overstyrt", nullable = false)
-    var manueltOverstyrt: Boolean = false,
+    var manueltOverstyrt: Boolean = false
 ) {
     override fun toString(): String {
         return "ArbeidsfordelingPåBehandling(id=$id, manueltOverstyrt=$manueltOverstyrt)"

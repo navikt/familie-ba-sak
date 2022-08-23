@@ -8,7 +8,6 @@ object YtelseSatsMapper {
     private const val MAX_ALDER_TILLEGG_ORDINÆR_BARNETRYGD = 5
 
     fun map(ytelseType: YtelseType, barnetsAlder: Int? = null): SatsType? {
-
         return if ((
             barnetsAlder
                 ?: Int.MAX_VALUE

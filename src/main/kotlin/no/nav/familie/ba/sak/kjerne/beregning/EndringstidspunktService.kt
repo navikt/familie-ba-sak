@@ -48,7 +48,9 @@ class EndringstidspunktService(
                 } else {
                     TIDENES_ENDE
                 }
-            } else TIDENES_ENDE
+            } else {
+                TIDENES_ENDE
+            }
 
         return minOf(førsteEndringstidspunktFraAndelTilkjentYtelse, førsteEndringstidspunktIKompetansePerioder)
     }

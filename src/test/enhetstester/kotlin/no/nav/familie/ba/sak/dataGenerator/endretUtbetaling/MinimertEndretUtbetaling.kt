@@ -12,7 +12,7 @@ fun lagMinimertEndretUtbetalingAndel(
     fom: YearMonth? = YearMonth.now(),
     tom: YearMonth? = YearMonth.now(),
     årsak: Årsak? = Årsak.DELT_BOSTED,
-    prosent: BigDecimal? = BigDecimal.valueOf(100),
+    prosent: BigDecimal? = BigDecimal.valueOf(100)
 ) = MinimertEndretAndel(
     aktørId = aktørId,
     fom = fom,

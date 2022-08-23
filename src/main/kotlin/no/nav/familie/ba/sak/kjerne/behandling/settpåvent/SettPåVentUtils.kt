@@ -21,7 +21,7 @@ fun validerBehandlingKanSettesPåVent(
     if (frist.isBefore(LocalDate.now())) {
         throw FunksjonellFeil(
             melding = "Frist for å vente på behandling ${behandling.id} er satt før dagens dato.",
-            frontendFeilmelding = "Fristen er satt før dagens dato.",
+            frontendFeilmelding = "Fristen er satt før dagens dato."
         )
     }
 

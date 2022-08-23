@@ -39,11 +39,11 @@ class AutovedtakBrevService(
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val infotrygdService: InfotrygdService,
+    private val infotrygdService: InfotrygdService
 ) : AutovedtakBehandlingService<AutovedtakBrevBehandlingsdata> {
 
     override fun kjørBehandling(
-        behandlingsdata: AutovedtakBrevBehandlingsdata,
+        behandlingsdata: AutovedtakBrevBehandlingsdata
     ): String {
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(

@@ -38,18 +38,20 @@ class FagsakController(
     private val fagsakService: FagsakService,
     private val personidentService: PersonidentService,
     private val tilgangService: TilgangService,
-    private val tilbakekrevingService: TilbakekrevingService,
+    private val tilbakekrevingService: TilbakekrevingService
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
-        if (fagsakRequest.personIdent != null) tilgangService.validerTilgangTilPersoner(
-            personIdenter = listOf(
-                fagsakRequest.personIdent
-            ),
-            event = AuditLoggerEvent.CREATE
-        )
+        if (fagsakRequest.personIdent != null) {
+            tilgangService.validerTilgangTilPersoner(
+                personIdenter = listOf(
+                    fagsakRequest.personIdent
+                ),
+                event = AuditLoggerEvent.CREATE
+            )
+        }
         tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
         return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
@@ -178,7 +180,7 @@ class FagsakController(
 data class FagsakRequest(
     val personIdent: String?,
     val aktørId: String? = null,
-    val fagsakType: FagsakType? = FagsakType.NORMAL,
+    val fagsakType: FagsakType? = FagsakType.NORMAL
 )
 
 data class RestBeslutningPåVedtak(

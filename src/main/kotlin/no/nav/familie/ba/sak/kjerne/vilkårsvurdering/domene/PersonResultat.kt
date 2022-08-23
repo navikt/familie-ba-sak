@@ -38,10 +38,12 @@ class PersonResultat(
     val id: Long = 0,
 
     @JsonIgnore
-    @ManyToOne @JoinColumn(name = "fk_vilkaarsvurdering_id", nullable = false, updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "fk_vilkaarsvurdering_id", nullable = false, updatable = false)
     var vilkårsvurdering: Vilkårsvurdering,
 
-    @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
 
     @OneToMany(

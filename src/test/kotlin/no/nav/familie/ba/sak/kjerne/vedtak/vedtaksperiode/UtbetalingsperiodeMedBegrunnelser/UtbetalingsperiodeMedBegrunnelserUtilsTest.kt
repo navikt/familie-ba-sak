@@ -18,7 +18,6 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
 
     @Test
     fun `skal splitte opp utbetalingsperioder når det er overlappende kompetanse`() {
-
         val periode1 = MånedPeriode(YearMonth.of(2021, 1), YearMonth.of(2021, 1))
         val periode2 = MånedPeriode(YearMonth.of(2021, 2), YearMonth.of(2021, 3))
         val periode3 = MånedPeriode(YearMonth.of(2021, 5), YearMonth.of(2021, 5))
@@ -28,7 +27,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
         val utbetalingsperiode1 = lagVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.UTBETALING,
             fom = periode1.fom.førsteDagIInneværendeMåned(),
-            tom = periode2.tom.sisteDagIInneværendeMåned(),
+            tom = periode2.tom.sisteDagIInneværendeMåned()
         )
 
         val kompetanse1 = lagKompetanse(fom = periode2.fom, tom = periode2.tom, barnAktører = setOf(barnAktør1))
@@ -70,19 +69,18 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
 
     @Test
     fun `Skal splitte opp utbetalingsperioder riktig når kompetanse strekker seg over flere perioder`() {
-
         val utbetalingsperioder = listOf(
             MånedPeriode(YearMonth.of(2020, 5), YearMonth.of(2020, 8)),
             MånedPeriode(YearMonth.of(2020, 9), YearMonth.of(2021, 4)),
             MånedPeriode(YearMonth.of(2021, 5), YearMonth.of(2021, 8)),
             MånedPeriode(YearMonth.of(2021, 9), YearMonth.of(2021, 12)),
             MånedPeriode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
-            MånedPeriode(YearMonth.of(2022, 4), YearMonth.of(2038, 3)),
+            MånedPeriode(YearMonth.of(2022, 4), YearMonth.of(2038, 3))
         ).mapIndexed { index, it ->
             lagVedtaksperiodeMedBegrunnelser(
                 type = Vedtaksperiodetype.UTBETALING,
                 fom = it.fom.førsteDagIInneværendeMåned(),
-                tom = it.tom.sisteDagIInneværendeMåned(),
+                tom = it.tom.sisteDagIInneværendeMåned()
             )
         }
 
@@ -99,7 +97,6 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
 
     @Test
     fun `Skal splitte opp utbetalingsperiodene riktig når det er kompetanse på forskjellige personer`() {
-
         val periode1 = MånedPeriode(YearMonth.of(2021, 1), YearMonth.of(2021, 4))
         val periode2 = MånedPeriode(YearMonth.of(2021, 5), YearMonth.of(2021, 6))
         val periode3 = MånedPeriode(YearMonth.of(2021, 7), YearMonth.of(2022, 1))
@@ -107,7 +104,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
         val utbetalingsperiode1 = lagVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.UTBETALING,
             fom = periode1.fom.førsteDagIInneværendeMåned(),
-            tom = periode3.tom.sisteDagIInneværendeMåned(),
+            tom = periode3.tom.sisteDagIInneværendeMåned()
         )
 
         val kompetanse1 =

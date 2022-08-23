@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
  * Negative <tidsenheter> flytter tidslinjen tilbake
  */
 fun <I, T : Tidsenhet> Tidslinje<I, T>.forskyv(tidsenheter: Long): Tidslinje<I, T> {
-
     val tidslinje = this
 
     return object : Tidslinje<I, T>() {

@@ -151,7 +151,7 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                    årsak = BehandlingÅrsak.FØDSELSHENDELSE
                 ).copy(resultat = Behandlingsresultat.INNVILGET),
                 utførendeStegType = it
             )
@@ -167,13 +167,13 @@ class BehandlingStegTest {
             StegType.FILTRERING_FØDSELSHENDELSER,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
-            StegType.HENLEGG_BEHANDLING,
+            StegType.HENLEGG_BEHANDLING
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                    årsak = BehandlingÅrsak.FØDSELSHENDELSE
                 ).copy(resultat = Behandlingsresultat.AVSLÅTT),
                 utførendeStegType = it
             )
@@ -278,7 +278,7 @@ class BehandlingStegTest {
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.TEKNISK_ENDRING,
                     årsak = BehandlingÅrsak.TEKNISK_ENDRING,
-                    resultat = Behandlingsresultat.FORTSATT_INNVILGET,
+                    resultat = Behandlingsresultat.FORTSATT_INNVILGET
                 ),
                 utførendeStegType = it
             )
@@ -301,7 +301,7 @@ class BehandlingStegTest {
             assertEquals(it, steg)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.OMREGNING_18ÅR,
+                    årsak = BehandlingÅrsak.OMREGNING_18ÅR
                 ).copy(resultat = Behandlingsresultat.INNVILGET),
                 utførendeStegType = it
             )
@@ -330,7 +330,7 @@ class BehandlingStegTest {
             assertEquals(it, steg)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
+                    årsak = BehandlingÅrsak.SMÅBARNSTILLEGG
                 ).copy(resultat = Behandlingsresultat.INNVILGET),
                 utførendeStegType = it
             )
@@ -359,7 +359,7 @@ class BehandlingStegTest {
             assertEquals(it, steg)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
+                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL
                 ).copy(resultat = Behandlingsresultat.INNVILGET),
                 utførendeStegType = it
             )
@@ -382,7 +382,7 @@ class BehandlingStegTest {
             assertEquals(it, steg)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.SATSENDRING,
+                    årsak = BehandlingÅrsak.SATSENDRING
                 ).copy(resultat = Behandlingsresultat.ENDRET_UTBETALING),
                 utførendeStegType = it
             )
@@ -396,14 +396,14 @@ class BehandlingStegTest {
         listOf(
             StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
-            StegType.BEHANDLINGSRESULTAT,
+            StegType.BEHANDLINGSRESULTAT
         ).forEach {
             assertEquals(it, steg)
             if (it == StegType.BEHANDLINGSRESULTAT) {
                 assertThrows<Feil> {
                     hentNesteSteg(
                         behandling = lagBehandling(
-                            årsak = BehandlingÅrsak.SATSENDRING,
+                            årsak = BehandlingÅrsak.SATSENDRING
                         ).copy(resultat = Behandlingsresultat.AVSLÅTT_OG_ENDRET),
                         utførendeStegType = it
                     )
@@ -411,7 +411,7 @@ class BehandlingStegTest {
             } else {
                 steg = hentNesteSteg(
                     behandling = lagBehandling(
-                        årsak = BehandlingÅrsak.SATSENDRING,
+                        årsak = BehandlingÅrsak.SATSENDRING
                     ).copy(resultat = Behandlingsresultat.AVSLÅTT_OG_ENDRET),
                     utførendeStegType = it
                 )
@@ -438,7 +438,7 @@ class BehandlingStegTest {
             assertEquals(it, steg)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
+                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL
                 ).copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET),
                 utførendeStegType = it
             )

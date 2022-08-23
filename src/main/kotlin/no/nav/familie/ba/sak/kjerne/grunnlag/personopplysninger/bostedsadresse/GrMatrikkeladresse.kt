@@ -25,7 +25,7 @@ data class GrMatrikkeladresse(
     val postnummer: String?,
 
     @Column(name = "kommunenummer")
-    val kommunenummer: String?,
+    val kommunenummer: String?
 
 ) : GrBostedsadresse() {
 

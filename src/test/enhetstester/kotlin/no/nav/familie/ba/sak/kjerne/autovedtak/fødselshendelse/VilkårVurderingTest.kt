@@ -91,7 +91,6 @@ class VilkårVurderingTest(
 
     @Test
     fun `Henting og evaluering av oppfylte vilkår gir rett antall samlede resultater`() {
-
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -164,12 +163,24 @@ class VilkårVurderingTest(
     @Test
     fun `Sjekk barn bor med søker`() {
         val søkerAddress = GrVegadresse(
-            1234, "11", "B", "H022",
-            "St. Olavsvegen", "1232", "whatever", "4322"
+            1234,
+            "11",
+            "B",
+            "H022",
+            "St. Olavsvegen",
+            "1232",
+            "whatever",
+            "4322"
         )
         val barnAddress = GrVegadresse(
-            1235, "11", "B", "H024",
-            "St. Olavsvegen", "1232", "whatever", "4322"
+            1235,
+            "11",
+            "B",
+            "H024",
+            "St. Olavsvegen",
+            "1232",
+            "whatever",
+            "4322"
         )
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
 
@@ -193,16 +204,28 @@ class VilkårVurderingTest(
     @Test
     fun `Sjekk barn bor med mor når mor har bodd på adressen lengre enn barn`() {
         val søkerAddress = GrVegadresse(
-            1234, "11", "B", "H022",
-            "St. Olavsvegen", "1232", "whatever", "4322"
+            1234,
+            "11",
+            "B",
+            "H022",
+            "St. Olavsvegen",
+            "1232",
+            "whatever",
+            "4322"
         )
             .apply {
                 periode = DatoIntervallEntitet(LocalDate.now().minusYears(10))
             }
 
         val barnAddress = GrVegadresse(
-            1234, "11", "B", "H024",
-            "St. Olavsvegen", "1232", "whatever", "4322"
+            1234,
+            "11",
+            "B",
+            "H024",
+            "St. Olavsvegen",
+            "1232",
+            "whatever",
+            "4322"
         )
             .apply {
                 periode = DatoIntervallEntitet(LocalDate.now().minusMonths(1))
@@ -234,8 +257,14 @@ class VilkårVurderingTest(
     @Test
     fun `Skal kaste exception - ingen søker`() {
         val søkerAddress = GrVegadresse(
-            1234, "11", "B", "H022",
-            "St. Olavsvegen", "1232", "whatever", "4322"
+            1234,
+            "11",
+            "B",
+            "H022",
+            "St. Olavsvegen",
+            "1232",
+            "whatever",
+            "4322"
         )
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 4)
@@ -312,8 +341,14 @@ class VilkårVurderingTest(
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT).apply {
             bostedsadresser = mutableListOf(
                 GrVegadresse(
-                    1234, "11", "B", "H022",
-                    "St. Olavsvegen", "1232", "whatever", "4322"
+                    1234,
+                    "11",
+                    "B",
+                    "H022",
+                    "St. Olavsvegen",
+                    "1232",
+                    "whatever",
+                    "4322"
                 )
                     .apply {
                         periode = DatoIntervallEntitet(LocalDate.now().minusDays(10))
@@ -331,8 +366,14 @@ class VilkårVurderingTest(
     @Test
     fun `Sjekk at mor er bosatt i norge`() {
         val vegadresse = GrVegadresse(
-            1234, "11", "B", "H022",
-            "St. Olavsvegen", "1232", "whatever", "4322"
+            1234,
+            "11",
+            "B",
+            "H022",
+            "St. Olavsvegen",
+            "1232",
+            "whatever",
+            "4322"
         ).apply {
             periode = DatoIntervallEntitet(TIDENES_MORGEN)
         }
@@ -353,7 +394,7 @@ class VilkårVurderingTest(
             adressenavn = "St. Olavsvegen",
             kommunenummer = "1232",
             tilleggsnavn = "whatever",
-            postnummer = "4322",
+            postnummer = "4322"
         ).apply {
             periode = DatoIntervallEntitet(LocalDate.now().minusMonths(10))
         }
@@ -382,7 +423,7 @@ class VilkårVurderingTest(
                 adressenavn = "St. Olavsvegen",
                 kommunenummer = "1232",
                 tilleggsnavn = "whatever",
-                postnummer = "4322",
+                postnummer = "4322"
             ).apply {
                 periode = it
             }

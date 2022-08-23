@@ -109,10 +109,12 @@ class PersongrunnlagService(
 
         val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.aktør }
 
-        if (barnIGrunnlag.contains(nyttbarnAktør)) throw FunksjonellFeil(
-            melding = "Forsøker å legge til barn som allerede finnes i personopplysningsgrunnlag ${personopplysningGrunnlag.id}",
-            frontendFeilmelding = "Barn finnes allerede på behandling og er derfor ikke lagt til."
-        )
+        if (barnIGrunnlag.contains(nyttbarnAktør)) {
+            throw FunksjonellFeil(
+                melding = "Forsøker å legge til barn som allerede finnes i personopplysningsgrunnlag ${personopplysningGrunnlag.id}",
+                frontendFeilmelding = "Barn finnes allerede på behandling og er derfor ikke lagt til."
+            )
+        }
 
         val oppdatertGrunnlag = hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = personopplysningGrunnlag.søker.aktør,
@@ -151,7 +153,9 @@ class PersongrunnlagService(
         val barnMedTilkjentYtelseIForrigeBehandling =
             if (skalTaMedBarnFraForrigeBehandling(behandling) && forrigeBehandlingSomErVedtatt != null) {
                 finnBarnMedTilkjentYtelseIBehandling(forrigeBehandlingSomErVedtatt)
-            } else emptyList()
+            } else {
+                emptyList()
+            }
 
         hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = søkerAktør,
@@ -176,7 +180,7 @@ class PersongrunnlagService(
         barnFraInneværendeBehandling: List<Aktør>,
         behandling: Behandling,
         målform: Målform,
-        barnFraForrigeBehandling: List<Aktør> = emptyList(),
+        barnFraForrigeBehandling: List<Aktør> = emptyList()
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
@@ -237,8 +241,11 @@ class PersongrunnlagService(
         hentArbeidsforhold: Boolean = false
     ): Person {
         val personinfo =
-            if (enkelPersonInfo) personopplysningerService.hentPersoninfoEnkel(aktør)
-            else personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+            if (enkelPersonInfo) {
+                personopplysningerService.hentPersoninfoEnkel(aktør)
+            } else {
+                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+            }
 
         return Person(
             type = personType,
@@ -247,7 +254,7 @@ class PersongrunnlagService(
             aktør = aktør,
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-            målform = målform,
+            målform = målform
         ).also { person ->
             person.opphold =
                 personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) }?.toMutableList() ?: mutableListOf()

@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
  * Dagverdiene kommer i samme rekkefølge som dagene i måneden, og vil ha null-verdi hvis dagen ikke har en verdi
  */
 fun <I, R> Tidslinje<I, Dag>.tilMåned(mapper: (List<I?>) -> R?): Tidslinje<R, Måned> {
-
     val dagTidslinje = this
 
     return object : Tidslinje<R, Måned>() {
@@ -40,7 +39,6 @@ fun <I, R> Tidslinje<I, Dag>.tilMåned(mapper: (List<I?>) -> R?): Tidslinje<R, M
  * Innholdet hentes fra innholdet siste dag i måneden
  */
 fun <I> Tidslinje<I, Dag>.tilMånedFraSisteDagIMåneden(): Tidslinje<I, Måned> {
-
     val dagTidslinje = this
 
     return object : Tidslinje<I, Måned>() {
@@ -63,7 +61,6 @@ fun <I> Tidslinje<I, Dag>.tilMånedFraSisteDagIMåneden(): Tidslinje<I, Måned> 
  * Siste dag i til-og-med-måneden brukes som siste dag i perioden
  */
 fun <I> Tidslinje<I, Måned>.tilDag(): Tidslinje<I, Dag> {
-
     val månedTidslinje = this
 
     return object : Tidslinje<I, Dag>() {

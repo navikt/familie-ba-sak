@@ -36,7 +36,7 @@ fun splittUtbetalingsperioderPåKompetanser(
 
 data class UtbetalingsperiodeMedOverlappendeKompetanse(
     val vedtaksperiodeOgUnikId: VedtaksperiodeOgUnikId,
-    val kompetanser: List<Kompetanse>,
+    val kompetanser: List<Kompetanse>
 )
 
 fun Tidslinje<UtbetalingsperiodeMedOverlappendeKompetanse, Måned>.lagVedtaksperioderMedBegrunnelser(): List<VedtaksperiodeMedBegrunnelser> =

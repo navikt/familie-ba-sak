@@ -87,7 +87,9 @@ class SendMeldingTilBisysTaskTest {
         every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2037, 12), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2037, 12),
+                    prosent = BigDecimal(100),
                     person = barn1
                 )
             )
@@ -96,7 +98,9 @@ class SendMeldingTilBisysTaskTest {
             // Barn1 opphør fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2022, 3), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2022, 3),
+                    prosent = BigDecimal(100),
                     person = barn1
                 )
             )
@@ -133,7 +137,9 @@ class SendMeldingTilBisysTaskTest {
         every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2037, 12), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2037, 12),
+                    prosent = BigDecimal(100),
                     person = barn1
                 )
             )
@@ -142,13 +148,17 @@ class SendMeldingTilBisysTaskTest {
             // Barn1 reduser fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2022, 3), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2022, 3),
+                    prosent = BigDecimal(100),
                     person = barn1
                 )
             )
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 4), tom = YearMonth.of(2037, 12), prosent = BigDecimal(50),
+                    fom = YearMonth.of(2022, 4),
+                    tom = YearMonth.of(2037, 12),
+                    prosent = BigDecimal(50),
                     person = barn1
                 )
             )
@@ -188,19 +198,25 @@ class SendMeldingTilBisysTaskTest {
         every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2037, 12), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2037, 12),
+                    prosent = BigDecimal(100),
                     person = barn1
                 )
             )
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2037, 12), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2037, 12),
+                    prosent = BigDecimal(100),
                     person = barn2
                 )
             )
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2019, 1), tom = YearMonth.of(2036, 12), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2019, 1),
+                    tom = YearMonth.of(2036, 12),
+                    prosent = BigDecimal(100),
                     person = barn3
                 )
             )
@@ -209,7 +225,9 @@ class SendMeldingTilBisysTaskTest {
             // Barn1 opphør fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2022, 3), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2022, 3),
+                    prosent = BigDecimal(100),
                     person = barn1
                 )
             )
@@ -217,13 +235,17 @@ class SendMeldingTilBisysTaskTest {
             // Barn2 redusert fra 02/2026
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2026, 1), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2026, 1),
+                    prosent = BigDecimal(100),
                     person = barn2
                 )
             )
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2026, 2), tom = YearMonth.of(2037, 12), prosent = BigDecimal(50),
+                    fom = YearMonth.of(2026, 2),
+                    tom = YearMonth.of(2037, 12),
+                    prosent = BigDecimal(50),
                     person = barn2
                 )
             )
@@ -231,13 +253,17 @@ class SendMeldingTilBisysTaskTest {
             // Barn3 redusert fra 04/2019 og opphørt fra 10/2019
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2019, 1), tom = YearMonth.of(2019, 4), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2019, 1),
+                    tom = YearMonth.of(2019, 4),
+                    prosent = BigDecimal(100),
                     person = barn3
                 )
             )
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2019, 5), tom = YearMonth.of(2019, 9), prosent = BigDecimal(50),
+                    fom = YearMonth.of(2019, 5),
+                    tom = YearMonth.of(2019, 9),
+                    prosent = BigDecimal(50),
                     person = barn3
                 )
             )
@@ -278,7 +304,9 @@ class SendMeldingTilBisysTaskTest {
         every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2021, 1), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2021, 1),
+                    prosent = BigDecimal(100),
                     person = barn1
                 )
             )
@@ -287,13 +315,17 @@ class SendMeldingTilBisysTaskTest {
             // Barn1 legger til period fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2022, 3), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2022, 3),
+                    prosent = BigDecimal(100),
                     person = barn1
                 )
             )
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
-                    fom = YearMonth.of(2022, 4), tom = YearMonth.of(2037, 12), prosent = BigDecimal(100),
+                    fom = YearMonth.of(2022, 4),
+                    tom = YearMonth.of(2037, 12),
+                    prosent = BigDecimal(100),
                     person = barn1
                 )
             )

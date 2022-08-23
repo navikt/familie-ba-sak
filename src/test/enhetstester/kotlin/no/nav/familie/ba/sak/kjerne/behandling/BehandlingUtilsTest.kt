@@ -33,7 +33,7 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.ORDINÆR,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                underkategoriFraLøpendeBehandling = null,
+                underkategoriFraLøpendeBehandling = null
             )
         )
     }

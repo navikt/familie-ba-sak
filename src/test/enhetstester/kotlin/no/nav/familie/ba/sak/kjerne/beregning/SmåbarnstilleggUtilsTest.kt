@@ -382,7 +382,7 @@ class SmåbarnstilleggUtilsTest {
                 InternPeriodeOvergangsstønad(
                     personIdent = personIdent,
                     fomDato = LocalDate.now().minusMonths(6),
-                    tomDato = LocalDate.now().plusMonths(6),
+                    tomDato = LocalDate.now().plusMonths(6)
                 )
             ),
             forrigeAndelerTilkjentYtelse = listOf(
@@ -405,7 +405,7 @@ class SmåbarnstilleggUtilsTest {
                     person = tilfeldigPerson(aktør = tilAktør(personIdent))
                 )
             ),
-            barnasAktørerOgFødselsdatoer = listOf(Pair(barnAktør, LocalDate.now().minusYears(2))),
+            barnasAktørerOgFødselsdatoer = listOf(Pair(barnAktør, LocalDate.now().minusYears(2)))
         )
 
         assertTrue(påvirkerFagsak)
@@ -425,7 +425,7 @@ class SmåbarnstilleggUtilsTest {
                 InternPeriodeOvergangsstønad(
                     personIdent = personIdent.aktørId,
                     fomDato = LocalDate.now().minusMonths(10),
-                    tomDato = LocalDate.now().plusMonths(6),
+                    tomDato = LocalDate.now().plusMonths(6)
                 )
             ),
             forrigeAndelerTilkjentYtelse = listOf(
@@ -434,24 +434,24 @@ class SmåbarnstilleggUtilsTest {
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = tilfeldigPerson(aktør = barnIdent),
-                    aktør = barnIdent,
+                    aktør = barnIdent
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(aktør = personIdent),
-                    aktør = personIdent,
+                    aktør = personIdent
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
                     person = tilfeldigPerson(aktør = personIdent),
-                    aktør = personIdent,
+                    aktør = personIdent
                 )
             ),
-            barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
+            barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2)))
         )
 
         assertFalse(påvirkerFagsak)
@@ -471,12 +471,12 @@ class SmåbarnstilleggUtilsTest {
                 InternPeriodeOvergangsstønad(
                     personIdent = personIdent.aktørId,
                     fomDato = LocalDate.now().minusMonths(10),
-                    tomDato = LocalDate.now().minusMonths(6),
+                    tomDato = LocalDate.now().minusMonths(6)
                 ),
                 InternPeriodeOvergangsstønad(
                     personIdent = personIdent.aktørId,
                     fomDato = LocalDate.now().minusMonths(4),
-                    tomDato = LocalDate.now().plusMonths(2),
+                    tomDato = LocalDate.now().plusMonths(2)
                 )
             ),
             forrigeAndelerTilkjentYtelse = listOf(
@@ -485,38 +485,38 @@ class SmåbarnstilleggUtilsTest {
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = tilfeldigPerson(aktør = barnIdent),
-                    aktør = barnIdent,
+                    aktør = barnIdent
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().minusMonths(6),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(aktør = personIdent),
-                    aktør = personIdent,
+                    aktør = personIdent
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().minusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
                     person = tilfeldigPerson(aktør = personIdent),
-                    aktør = personIdent,
+                    aktør = personIdent
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now().plusMonths(2),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(aktør = personIdent),
-                    aktør = personIdent,
+                    aktør = personIdent
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now().plusMonths(2),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
                     person = tilfeldigPerson(aktør = personIdent),
-                    aktør = personIdent,
+                    aktør = personIdent
                 )
             ),
-            barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
+            barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2)))
         )
 
         assertFalse(påvirkerFagsak)
@@ -536,12 +536,12 @@ class SmåbarnstilleggUtilsTest {
                 InternPeriodeOvergangsstønad(
                     personIdent = personIdent.aktørId,
                     fomDato = LocalDate.now().minusMonths(10),
-                    tomDato = LocalDate.now().minusMonths(1),
+                    tomDato = LocalDate.now().minusMonths(1)
                 ),
                 InternPeriodeOvergangsstønad(
                     personIdent = personIdent.aktørId,
                     fomDato = LocalDate.now(),
-                    tomDato = LocalDate.now().plusMonths(6),
+                    tomDato = LocalDate.now().plusMonths(6)
                 )
             ),
             forrigeAndelerTilkjentYtelse = listOf(
@@ -550,24 +550,24 @@ class SmåbarnstilleggUtilsTest {
                     tom = YearMonth.now().plusMonths(10),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = tilfeldigPerson(aktør = barnIdent),
-                    aktør = barnIdent,
+                    aktør = barnIdent
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(10),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(aktør = personIdent),
-                    aktør = personIdent,
+                    aktør = personIdent
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
                     person = tilfeldigPerson(aktør = personIdent),
-                    aktør = personIdent,
-                ),
+                    aktør = personIdent
+                )
             ),
-            barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
+            barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2)))
         )
 
         assertFalse(påvirkerFagsak)
@@ -587,12 +587,12 @@ class SmåbarnstilleggUtilsTest {
                 InternPeriodeOvergangsstønad(
                     personIdent = personIdent.aktørId,
                     fomDato = LocalDate.now().minusMonths(10),
-                    tomDato = LocalDate.now().minusMonths(1),
+                    tomDato = LocalDate.now().minusMonths(1)
                 ),
                 InternPeriodeOvergangsstønad(
                     personIdent = personIdent.aktørId,
                     fomDato = LocalDate.now(),
-                    tomDato = LocalDate.now().plusMonths(8),
+                    tomDato = LocalDate.now().plusMonths(8)
                 )
             ),
             forrigeAndelerTilkjentYtelse = listOf(
@@ -601,24 +601,24 @@ class SmåbarnstilleggUtilsTest {
                     tom = YearMonth.now().plusMonths(10),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = tilfeldigPerson(aktør = barnIdent),
-                    aktør = barnIdent,
+                    aktør = barnIdent
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(10),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(aktør = personIdent),
-                    aktør = personIdent,
+                    aktør = personIdent
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
                     person = tilfeldigPerson(aktør = personIdent),
-                    aktør = personIdent,
-                ),
+                    aktør = personIdent
+                )
             ),
-            barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
+            barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2)))
         )
 
         assertTrue(påvirkerFagsak)
@@ -721,14 +721,14 @@ class SmåbarnstilleggUtilsTest {
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusYears(2),
                 tom = YearMonth.now().minusMonths(10)
-            ),
+            )
         )
 
         val nyeAndeler = forrigeAndeler + listOf(
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now(),
                 tom = YearMonth.now().plusMonths(2)
-            ),
+            )
         )
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
@@ -750,7 +750,7 @@ class SmåbarnstilleggUtilsTest {
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusYears(2),
                 tom = YearMonth.now().minusMonths(10)
-            ),
+            )
         )
 
         val nyeAndeler = listOf(
@@ -761,7 +761,7 @@ class SmåbarnstilleggUtilsTest {
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now(),
                 tom = YearMonth.now().plusMonths(2)
-            ),
+            )
         )
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
@@ -783,7 +783,7 @@ class SmåbarnstilleggUtilsTest {
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusYears(2),
                 tom = YearMonth.now().minusMonths(10)
-            ),
+            )
         )
 
         val nyeAndeler = listOf(
@@ -794,7 +794,7 @@ class SmåbarnstilleggUtilsTest {
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().plusMonths(2),
                 tom = YearMonth.now().plusMonths(4)
-            ),
+            )
         )
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
@@ -816,7 +816,7 @@ class SmåbarnstilleggUtilsTest {
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusYears(2),
                 tom = YearMonth.now().minusMonths(10)
-            ),
+            )
         )
 
         val nyeAndeler = emptyList<AndelTilkjentYtelse>()

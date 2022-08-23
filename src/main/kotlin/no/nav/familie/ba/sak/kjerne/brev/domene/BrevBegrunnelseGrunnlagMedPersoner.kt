@@ -18,7 +18,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
     fun hentAntallBarnForBegrunnelse(
         uregistrerteBarn: List<MinimertUregistrertBarn>,
         gjelderSøker: Boolean,
-        barnasFødselsdatoer: List<LocalDate>,
+        barnasFødselsdatoer: List<LocalDate>
     ): Int {
         val erAvslagUregistrerteBarn =
             this.standardbegrunnelse == Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
@@ -35,7 +35,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
         gjelderSøker: Boolean,
         personerIBehandling: List<MinimertRestPerson>,
         personerPåBegrunnelse: List<MinimertRestPerson>,
-        personerMedUtbetaling: List<MinimertRestPerson>,
+        personerMedUtbetaling: List<MinimertRestPerson>
     ) = when {
         this.standardbegrunnelse == Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN ->
             uregistrerteBarn.mapNotNull { it.fødselsdato }

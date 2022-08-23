@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import java.time.YearMonth
 
 fun Iterable<AndelTilkjentYtelse>.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
-
     return this
         .filter { !it.erSøkersAndel() }
         .groupBy { it.aktør }

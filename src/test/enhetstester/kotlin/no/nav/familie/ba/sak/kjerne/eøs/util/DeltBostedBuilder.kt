@@ -43,8 +43,9 @@ data class DeltBosted(
             barnAktører = barnAktører.map { it.copy() }.toSet(),
             barnPersoner = this.barnPersoner.filter { barnAktører.contains(it.aktør) }
         ).also {
-            if (barnAktører.size != barnPersoner.size)
+            if (barnAktører.size != barnPersoner.size) {
                 throw Error("Ikke samsvar mellom antall aktører og barn lenger")
+            }
         }
 
     override var id: Long = 0

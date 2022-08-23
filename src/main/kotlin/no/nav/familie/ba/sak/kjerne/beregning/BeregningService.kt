@@ -100,12 +100,14 @@ class BeregningService(
                 fagsakId = fagsak.id
             ).singleOrNull()
 
-            if (behandlingSomErSendtTilGodkjenning != null) behandlingSomErSendtTilGodkjenning
-            else {
+            if (behandlingSomErSendtTilGodkjenning != null) {
+                behandlingSomErSendtTilGodkjenning
+            } else {
                 val godkjenteBehandlingerSomIkkeErIverksattEnda =
                     behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
-                if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) godkjenteBehandlingerSomIkkeErIverksattEnda
-                else {
+                if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) {
+                    godkjenteBehandlingerSomIkkeErIverksattEnda
+                } else {
                     val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsak.id)
                     Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
                 }
@@ -154,8 +156,9 @@ class BeregningService(
     ): TilkjentYtelse {
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).filter {
             // Ved automatiske behandlinger ønsker vi alltid å ta vare på de gamle endrede andelene
-            if (behandling.skalBehandlesAutomatisk) true
-            else if (nyEndretUtbetalingAndel != null) {
+            if (behandling.skalBehandlesAutomatisk) {
+                true
+            } else if (nyEndretUtbetalingAndel != null) {
                 it.id == nyEndretUtbetalingAndel.id || it.andelTilkjentYtelser.isNotEmpty()
             } else {
                 it.andelTilkjentYtelser.isNotEmpty()
@@ -206,16 +209,22 @@ class BeregningService(
         if (!behandling.skalBehandlesAutomatisk || !behandling.erSmåbarnstillegg()) return false
 
         val forrigeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) emptyList()
-            else hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = sistIverksatteBehandling.id
-            ).filter { it.erSmåbarnstillegg() }
+            if (sistIverksatteBehandling == null) {
+                emptyList()
+            } else {
+                hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                    behandlingId = sistIverksatteBehandling.id
+                ).filter { it.erSmåbarnstillegg() }
+            }
 
         val nyeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) emptyList()
-            else hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = behandling.id
-            ).filter { it.erSmåbarnstillegg() }
+            if (sistIverksatteBehandling == null) {
+                emptyList()
+            } else {
+                hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                    behandlingId = behandling.id
+                ).filter { it.erSmåbarnstillegg() }
+            }
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
             forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,

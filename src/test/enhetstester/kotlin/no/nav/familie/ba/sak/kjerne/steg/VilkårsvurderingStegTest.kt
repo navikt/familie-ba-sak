@@ -117,7 +117,6 @@ class VilkårsvurderingStegTest {
 
     @Test
     fun `skal validere når regelverk er konsistent`() {
-
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
 
@@ -143,7 +142,6 @@ class VilkårsvurderingStegTest {
 
     @Test
     fun `validering skal feile når det er blanding av regelverk på vilkårene for barnet`() {
-
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
 

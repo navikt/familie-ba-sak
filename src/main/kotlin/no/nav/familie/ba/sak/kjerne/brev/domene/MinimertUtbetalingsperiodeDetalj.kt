@@ -12,7 +12,7 @@ data class MinimertUtbetalingsperiodeDetalj(
     val ytelseType: YtelseType,
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean,
-    val prosent: BigDecimal,
+    val prosent: BigDecimal
 )
 
 fun UtbetalingsperiodeDetalj.tilMinimertUtbetalingsperiodeDetalj() = MinimertUtbetalingsperiodeDetalj(

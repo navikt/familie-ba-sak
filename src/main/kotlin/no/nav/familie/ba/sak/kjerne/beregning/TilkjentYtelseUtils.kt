@@ -43,7 +43,7 @@ object TilkjentYtelseUtils {
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
         skalBrukeNyMåteÅGenerereAndeler: Boolean = true,
-        hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
+        hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() }
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
 
@@ -137,10 +137,12 @@ object TilkjentYtelseUtils {
                             it.aktør,
                             it.fødselsdato
                         )
-                    },
+                    }
                 )
             }
-        } else emptyList()
+        } else {
+            emptyList()
+        }
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker + andelerTilkjentYtelseSmåbarnstillegg)
 
@@ -151,7 +153,6 @@ object TilkjentYtelseUtils {
         andelTilkjentYtelser: MutableSet<AndelTilkjentYtelse>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): MutableSet<AndelTilkjentYtelse> {
-
         if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
 
         val (andelerUtenSmåbarnstillegg, andelerMedSmåbarnstillegg) = andelTilkjentYtelser.partition { !it.erSmåbarnstillegg() }
@@ -183,7 +184,7 @@ object TilkjentYtelseUtils {
                             stønadTom = månedPeriodeEndret.tom,
                             kalkulertUtbetalingsbeløp = nyttNasjonaltPeriodebeløp,
                             nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
-                            endretUtbetalingAndeler = (andelForPerson.endretUtbetalingAndeler + endretUtbetalingAndel).toMutableList(),
+                            endretUtbetalingAndeler = (andelForPerson.endretUtbetalingAndeler + endretUtbetalingAndel).toMutableList()
                         )
                     }
                 )
@@ -313,28 +314,36 @@ object TilkjentYtelseUtils {
             oppfyltFom,
             oppfyltTom
         )
-        val satsperioderFørFylte6År = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
-            satstype = SatsType.TILLEGG_ORBA,
-            stønadFraOgMed = settRiktigStønadFom(
-                fraOgMed = periodeUnder6År.fom
-            ),
-            stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
-            maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
-        ) else emptyList()
+        val satsperioderFørFylte6År = if (periodeUnder6År != null) {
+            SatsService.hentGyldigSatsFor(
+                satstype = SatsType.TILLEGG_ORBA,
+                stønadFraOgMed = settRiktigStønadFom(
+                    fraOgMed = periodeUnder6År.fom
+                ),
+                stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
+                maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022
+            )
+        } else {
+            emptyList()
+        }
 
-        val satsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
-            satstype = SatsType.ORBA,
-            stønadFraOgMed = settRiktigStønadFom(
-                skalStarteSammeMåned =
-                periodeUnder6År != null,
-                fraOgMed = periodeOver6år.fom
-            ),
-            stønadTilOgMed = settRiktigStønadTom(
-                skalAvsluttesMånedenFør = skalAvsluttesMånedenFør,
-                tilOgMed = periodeOver6år.tom
-            ),
-            maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
-        ) else emptyList()
+        val satsperioderEtterFylte6År = if (periodeOver6år != null) {
+            SatsService.hentGyldigSatsFor(
+                satstype = SatsType.ORBA,
+                stønadFraOgMed = settRiktigStønadFom(
+                    skalStarteSammeMåned =
+                    periodeUnder6År != null,
+                    fraOgMed = periodeOver6år.fom
+                ),
+                stønadTilOgMed = settRiktigStønadTom(
+                    skalAvsluttesMånedenFør = skalAvsluttesMånedenFør,
+                    tilOgMed = periodeOver6år.tom
+                ),
+                maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022
+            )
+        } else {
+            emptyList()
+        }
 
         return listOf(satsperioderFørFylte6År, satsperioderEtterFylte6År).flatten()
             .sortedBy { it.fraOgMed }
@@ -365,16 +374,18 @@ object TilkjentYtelseUtils {
     }
 
     private fun settRiktigStønadFom(skalStarteSammeMåned: Boolean = false, fraOgMed: LocalDate): YearMonth =
-        if (skalStarteSammeMåned)
+        if (skalStarteSammeMåned) {
             YearMonth.from(fraOgMed.withDayOfMonth(1))
-        else
+        } else {
             YearMonth.from(fraOgMed.plusMonths(1).withDayOfMonth(1))
+        }
 
     private fun settRiktigStønadTom(skalAvsluttesMånedenFør: Boolean = false, tilOgMed: LocalDate): YearMonth =
-        if (skalAvsluttesMånedenFør)
+        if (skalAvsluttesMånedenFør) {
             YearMonth.from(tilOgMed.plusDays(1).minusMonths(1).sisteDagIMåned())
-        else
+        } else {
             YearMonth.from(tilOgMed.sisteDagIMåned())
+        }
 }
 
 fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair<List<MånedPeriode>, List<MånedPeriode>> {
@@ -410,9 +421,11 @@ fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair
             nesteMånedMedNyOverlappstatus
         }
 
-        if (periodeMedOverlapp)
+        if (periodeMedOverlapp) {
             perioderMedOverlapp.add(MånedPeriode(periodeStart, periodeSlutt))
-        else perioderUtenOverlapp.add(MånedPeriode(periodeStart, periodeSlutt))
+        } else {
+            perioderUtenOverlapp.add(MånedPeriode(periodeStart, periodeSlutt))
+        }
 
         periodeStart = alleMånederMedOverlappstatus
             .filter { it.key > periodeSlutt }

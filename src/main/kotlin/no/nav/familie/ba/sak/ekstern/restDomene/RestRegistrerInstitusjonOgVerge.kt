@@ -13,13 +13,21 @@ data class RestRegistrerInstitusjonOgVerge(
     val institusjonInfo: InstitusjonInfo?
 ) {
 
-    fun tilVerge(behandling: Behandling): Verge? = if (vergeInfo != null) Verge(
-        ident = vergeInfo.ident,
-        behandling = behandling
-    ) else null
+    fun tilVerge(behandling: Behandling): Verge? = if (vergeInfo != null) {
+        Verge(
+            ident = vergeInfo.ident,
+            behandling = behandling
+        )
+    } else {
+        null
+    }
 
-    fun tilInstitusjon(): Institusjon? = if (institusjonInfo != null) Institusjon(
-        orgNummer = institusjonInfo.orgNummer,
-        tssEksternId = institusjonInfo.eksternTssNummer,
-    ) else null
+    fun tilInstitusjon(): Institusjon? = if (institusjonInfo != null) {
+        Institusjon(
+            orgNummer = institusjonInfo.orgNummer,
+            tssEksternId = institusjonInfo.eksternTssNummer
+        )
+    } else {
+        null
+    }
 }

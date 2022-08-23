@@ -104,7 +104,7 @@ internal class EndretUtbetalingAndelTest {
             person = barn,
             fom = YearMonth.now(),
             tom = null,
-            årsak = Årsak.DELT_BOSTED,
+            årsak = Årsak.DELT_BOSTED
         )
 
         val sisteTomPåAndeler = YearMonth.now().plusMonths(10)
@@ -144,7 +144,7 @@ internal class EndretUtbetalingAndelTest {
             person = barn,
             fom = YearMonth.now(),
             tom = null,
-            årsak = Årsak.DELT_BOSTED,
+            årsak = Årsak.DELT_BOSTED
         )
 
         val annenEndretAndel = lagEndretUtbetalingAndel(
