@@ -18,7 +18,8 @@ data class RestPersonInfo(
     val forelderBarnRelasjon: List<RestForelderBarnRelasjon> = emptyList(),
     val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonnMaskert> = emptyList(),
     val kommunenummer: String = "ukjent",
-    val dødsfallDato: String? = null
+    val dødsfallDato: String? = null,
+    val bostedsadresse: RestBostedsadresse? = null
 )
 
 data class RestForelderBarnRelasjon(
@@ -32,6 +33,11 @@ data class RestForelderBarnRelasjon(
 data class RestForelderBarnRelasjonnMaskert(
     val relasjonRolle: FORELDERBARNRELASJONROLLE,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
+)
+
+data class RestBostedsadresse(
+    val adresse: String?,
+    val postnummer: String,
 )
 
 private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() = RestForelderBarnRelasjonnMaskert(
@@ -70,6 +76,23 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         forelderBarnRelasjon = this.forelderBarnRelasjon.map { it.tilRestForelderBarnRelasjon() },
         forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
         kommunenummer = kommunenummer,
-        dødsfallDato = dødsfallDato
+        dødsfallDato = dødsfallDato,
+    )
+}
+
+fun PersonInfo.tilRestPersonInfoMedNavnOgAdresse(personIdent: String): RestPersonInfo {
+    val bostedsadresse = this.bostedsadresser.singleOrNull() // det skal kun være en bostedsadresse i PersonInfo uten historikk
+    val postnummer = bostedsadresse?.vegadresse?.postnummer ?: bostedsadresse?.matrikkeladresse?.postnummer
+    return RestPersonInfo(
+        personIdent = personIdent,
+        fødselsdato = this.fødselsdato,
+        navn = this.navn,
+        bostedsadresse = when (postnummer) {
+            null -> null
+            else -> RestBostedsadresse(
+                adresse = bostedsadresse?.vegadresse?.adressenavn?.plus(" ${bostedsadresse.vegadresse?.husnummer ?: ""}")?.trim(),
+                postnummer = postnummer
+            )
+        }
     )
 }

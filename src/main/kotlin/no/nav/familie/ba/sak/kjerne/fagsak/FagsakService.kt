@@ -280,9 +280,9 @@ class FagsakService(
 
         val erBarn = Period.between(personInfoMedRelasjoner.fødselsdato, LocalDate.now()).years < 18
 
-        if (assosierteFagsakDeltagere.find { it.ident == aktør.aktivFødselsnummer() } == null) {
-            val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).ifEmpty { listOf(null) }
-            fagsaker.forEach { fagsak ->
+        val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).ifEmpty { listOf(null) }
+        fagsaker.forEach { fagsak ->
+            if (assosierteFagsakDeltagere.find { it.ident == aktør.aktivFødselsnummer() && it.fagsakId == fagsak?.id } == null) {
                 assosierteFagsakDeltagere.add(
                     RestFagsakDeltager(
                         navn = personInfoMedRelasjoner.navn,
@@ -372,7 +372,11 @@ class FagsakService(
                         assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
                             navn = personInfoMedRelasjoner.navn,
                             ident = behandling.fagsak.aktør.aktivFødselsnummer(),
-                            rolle = FagsakDeltagerRolle.FORELDER,
+                            rolle =
+                            if (behandling.fagsak.type == FagsakType.NORMAL)
+                                FagsakDeltagerRolle.FORELDER
+                            else
+                                FagsakDeltagerRolle.UKJENT,
                             kjønn = personInfoMedRelasjoner.kjønn,
                             fagsakId = behandling.fagsak.id,
                             fagsakType = behandling.fagsak.type
