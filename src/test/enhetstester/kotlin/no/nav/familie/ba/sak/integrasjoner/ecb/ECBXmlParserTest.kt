@@ -1,5 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRatesData
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.exchangeRatesForCurrency
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -97,7 +101,10 @@ class ECBXmlParserTest {
 
     @Test
     fun `Test at ECBXmlParser parser xml string som forventet`() {
-        val ecbExchangeRatesData = ECBXmlParser.parse(ecbXml)
+        val xmlMapper = XmlMapper()
+        xmlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        xmlMapper.registerKotlinModule()
+        val ecbExchangeRatesData = xmlMapper.readValue(ecbXml, ECBExchangeRatesData::class.java)
         assertEquals(ecbExchangeRatesData.ecbExchangeRatesDataSet.ecbExchangeRatesForCurrencies.size, 2)
         val nokExchangeRates = ecbExchangeRatesData.exchangeRatesForCurrency("NOK")
         val sekExchangeRates = ecbExchangeRatesData.exchangeRatesForCurrency("SEK")

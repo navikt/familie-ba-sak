@@ -5,31 +5,31 @@ import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRatesData
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.http.client.AbstractRestClient
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.jvm.Throws
 
 @Service
-class ECBClient(val restTemplate: RestTemplate, @Value("\${FAMILIE_ECB_API_URL}") private val ecbBaseUrl: String) : AbstractRestClient(restTemplate, "familie-ecb") {
+class ECBClient(@Qualifier("ecbRestTemplate") val restTemplate: RestOperations, @Value("\${FAMILIE_ECB_API_URL}") private val ecbBaseUrl: String) : AbstractRestClient(restTemplate, "familie-ecb") {
 
     @Throws(ECBClientException::class)
     fun getExchangeRates(currency: String, exchangeRateDate: LocalDate): ECBExchangeRatesData {
         val uri = URI.create("${ecbBaseUrl}D.NOK${toCurrencyParam(currency)}.EUR.SP00.A/?startPeriod=$exchangeRateDate&endPeriod=$exchangeRateDate")
 
         try {
-            val ecbResponseString: String? = kallEksternTjeneste("ECB", uri, "Hente valutakurser fra European Central Bank") {
+            val ecbExchangeRatesData: ECBExchangeRatesData? = kallEksternTjeneste("ECB", uri, "Hente valutakurser fra European Central Bank") {
                 getForEntity(uri, httpHeaders())
             }
-            if (!ecbResponseString.isNullOrEmpty()) {
-                return ECBXmlParser.parse(ecbResponseString)
-            }
+            if (ecbExchangeRatesData != null)
+                return ecbExchangeRatesData
             throw getECBClientException(currency, exchangeRateDate)
         } catch (e: IntegrasjonException) {
             val feilmelding = "Teknisk feil ved henting av valutakurs fra European Central Bank"

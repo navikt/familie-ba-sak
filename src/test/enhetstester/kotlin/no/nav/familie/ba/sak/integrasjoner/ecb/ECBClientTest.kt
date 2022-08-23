@@ -1,24 +1,17 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 
-import no.nav.familie.ba.sak.config.restTemplate
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.exchangeRatesForCurrency
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ECBClientTest {
-
-    val ecbApiUrl = "https://sdw-wsrest.ecb.europa.eu/service/data/EXR/"
-    lateinit var ecbClient: ECBClient
-
-    @BeforeAll
-    fun setup() {
-        ecbClient = ECBClient(restTemplate, ecbApiUrl)
-    }
+class ECBClientTest(
+    @Autowired
+    val ecbClient: ECBClient
+) : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Test at ECBClient henter kurser for både SEK og NOK og at valutakursdatoen er korrekt`() {

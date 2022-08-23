@@ -20,8 +20,22 @@ class ECBServiceTest {
 
     @Test
     fun `Hent valutakurs for utenlandsk valuta til NOK og sjekk at beregning av kurs er riktig`() {
-        val ecbService = ECBService(ECBClient(restTemplate, "https://sdw-wsrest.ecb.europa.eu/service/data/EXR/"))
+        val ecbClient = mockk<ECBClient>()
+        val ecbService = ECBService(ecbClient)
         val valutakursDato = LocalDate.of(2022, 6, 28)
+        val ecbExchangeRatesData = ECBExchangeRatesData(
+            ECBExchangeRatesDataSet(
+                listOf(
+                    ECBExchangeRatesForCurrency(
+                        listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-06-28"), ECBExchangeRateValue(BigDecimal.valueOf(10.337))))
+                    ),
+                    ECBExchangeRatesForCurrency(
+                        listOf(ECBExchangeRateKey("CURRENCY", "SEK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-06-28"), ECBExchangeRateValue(BigDecimal.valueOf(10.6543))))
+                    )
+                )
+            )
+        )
+        every { ecbClient.getExchangeRates("SEK", valutakursDato) } returns ecbExchangeRatesData
         val SEKtilNOKValutakurs = ecbService.hentValutakurs("SEK", valutakursDato)
         assertEquals(BigDecimal.valueOf(0.9702185972), SEKtilNOKValutakurs)
     }
