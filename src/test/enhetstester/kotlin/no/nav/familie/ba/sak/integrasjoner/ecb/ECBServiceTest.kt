@@ -1,14 +1,18 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.config.restTemplate
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRate
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRateDate
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRateKey
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRateValue
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRatesData
+import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRatesDataSet
 import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ECBExchangeRatesForCurrency
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -34,54 +38,59 @@ class ECBServiceTest {
 
     @Test
     fun `Test at ECBService kaster ESBServiceException dersom de returnerte kursene ikke inneholder kurs for forespurt valuta`() {
-        val ecbClient = Mockito.mock(ECBClient::class.java)
+        val ecbClient = mockk<ECBClient>()
         val ecbService = ECBService(ecbClient)
         val valutakursDato = LocalDate.of(2022, 7, 22)
-        val ecbExchangeRatesData = ECBExchangeRatesData().with(listOf(ECBExchangeRatesForCurrency().with("NOK", "2022-07-23", BigDecimal.valueOf(9.4567))))
-        Mockito.`when`(ecbClient.getExchangeRates("SEK", valutakursDato)).thenReturn(ecbExchangeRatesData)
+        val ecbExchangeRatesData = ECBExchangeRatesData(
+            ECBExchangeRatesDataSet(
+                listOf(
+                    ECBExchangeRatesForCurrency(
+                        listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-23"), ECBExchangeRateValue(BigDecimal.valueOf(9.4567))))
+                    )
+                )
+            )
+        )
+        every { ecbClient.getExchangeRates("SEK", valutakursDato) } returns ecbExchangeRatesData
         assertThrows<ECBServiceException> { ecbService.hentValutakurs("SEK", valutakursDato) }
     }
 
     @Test
     fun `Test at ECBService kaster ESBServiceException dersom de returnerte kursene ikke inneholder kurser med forespurt dato`() {
-        val ecbClient = Mockito.mock(ECBClient::class.java)
+        val ecbClient = mockk<ECBClient>()
         val ecbService = ECBService(ecbClient)
         val valutakursDato = LocalDate.of(2022, 7, 20)
-        val ecbExchangeRatesData = ECBExchangeRatesData().with(listOf(ECBExchangeRatesForCurrency().with("NOK", "2022-07-21", BigDecimal.valueOf(9.4567)), ECBExchangeRatesForCurrency().with("SEK", "2022-07-21", BigDecimal.valueOf(9.4567))))
-        Mockito.`when`(ecbClient.getExchangeRates("SEK", valutakursDato)).thenReturn(ecbExchangeRatesData)
+        val ecbExchangeRatesData = ECBExchangeRatesData(
+            ECBExchangeRatesDataSet(
+                listOf(
+                    ECBExchangeRatesForCurrency(
+                        listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-21"), ECBExchangeRateValue(BigDecimal.valueOf(9.4567))))
+                    ),
+                    ECBExchangeRatesForCurrency(
+                        listOf(ECBExchangeRateKey("CURRENCY", "SEK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-21"), ECBExchangeRateValue(BigDecimal.valueOf(9.4567))))
+                    )
+                )
+            )
+        )
+        every { ecbClient.getExchangeRates("SEK", valutakursDato) } returns ecbExchangeRatesData
         assertThrows<ECBServiceException> { ecbService.hentValutakurs("SEK", valutakursDato) }
     }
 
     @Test
     fun `Test at ECBService returnerer NOK til EUR dersom den forespurte valutaen er EUR`() {
-        val ecbClient = Mockito.mock(ECBClient::class.java)
+        val ecbClient = mockk<ECBClient>()
         val ecbService = ECBService(ecbClient)
         val nokTilEur = BigDecimal.valueOf(9.4567)
         val valutakursDato = LocalDate.of(2022, 7, 20)
-        val ecbExchangeRatesData = ECBExchangeRatesData().with(listOf(ECBExchangeRatesForCurrency().with("NOK", "2022-07-20", nokTilEur)))
-        Mockito.`when`(ecbClient.getExchangeRates("EUR", valutakursDato)).thenReturn(ecbExchangeRatesData)
+        val ecbExchangeRatesData = ECBExchangeRatesData(
+            ECBExchangeRatesDataSet(
+                listOf(
+                    ECBExchangeRatesForCurrency(
+                        listOf(ECBExchangeRateKey("CURRENCY", "NOK")), listOf(ECBExchangeRate(ECBExchangeRateDate("2022-07-20"), ECBExchangeRateValue(nokTilEur)))
+                    )
+                )
+            )
+        )
+        every { ecbClient.getExchangeRates("EUR", valutakursDato) } returns ecbExchangeRatesData
         assertEquals(nokTilEur, ecbService.hentValutakurs("EUR", valutakursDato))
-    }
-
-    private fun ECBExchangeRatesData.with(exchangeRatesForCurrencies: List<ECBExchangeRatesForCurrency>): ECBExchangeRatesData {
-        this.exchangeRatesForCurrencies = exchangeRatesForCurrencies
-        return this
-    }
-
-    private fun ECBExchangeRatesForCurrency.with(currency: String, date: String, value: BigDecimal): ECBExchangeRatesForCurrency {
-        this.ecbExchangeRateKey = ECBExchangeRateKey().with(currency)
-        this.exchangeRates = listOf(ECBExchangeRate().with(date, value))
-        return this
-    }
-
-    private fun ECBExchangeRateKey.with(currency: String): ECBExchangeRateKey {
-        this.currency = currency
-        return this
-    }
-
-    private fun ECBExchangeRate.with(date: String, value: BigDecimal): ECBExchangeRate {
-        this.date = date
-        this.value = value
-        return this
     }
 }

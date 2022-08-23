@@ -1,16 +1,21 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb.domene
-import org.simpleframework.xml.Attribute
-import org.simpleframework.xml.Path
-import org.simpleframework.xml.Root
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import java.math.BigDecimal
 
-@Root(name = "Obs", strict = false)
-class ECBExchangeRate {
-    @field:Path("ObsDimension")
-    @field:Attribute(name = "value")
-    lateinit var date: String
+data class ECBExchangeRate(
+    @field:JacksonXmlProperty(localName = "ObsDimension")
+    val date: ECBExchangeRateDate,
 
-    @field:Path("ObsValue")
-    @field:Attribute(name = "value")
-    lateinit var value: BigDecimal
-}
+    @field:JacksonXmlProperty(localName = "ObsValue")
+    val ecbExchangeRateValue: ECBExchangeRateValue
+)
+
+data class ECBExchangeRateDate(
+    @field:JacksonXmlProperty(localName = "value", isAttribute = true)
+    val value: String
+)
+
+data class ECBExchangeRateValue(
+    @field:JacksonXmlProperty(localName = "value", isAttribute = true)
+    val value: BigDecimal
+)

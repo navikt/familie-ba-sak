@@ -25,13 +25,13 @@ class ECBClientTest {
         val valutakursDato = LocalDate.of(2022, 7, 22)
         val valutakurser = ecbClient.getExchangeRates("SEK", valutakursDato)
         assertNotNull(valutakurser)
-        assertEquals(2, valutakurser.exchangeRatesForCurrencies.size)
+        assertEquals(2, valutakurser.ecbExchangeRatesDataSet.ecbExchangeRatesForCurrencies.size)
         val sekValutakurs = valutakurser.exchangeRatesForCurrency("SEK")
         val nokValutakurs = valutakurser.exchangeRatesForCurrency("NOK")
         assertEquals(1, sekValutakurs.size)
         assertEquals(1, nokValutakurs.size)
-        assertEquals(valutakursDato.toString(), sekValutakurs.first().date)
-        assertEquals(valutakursDato.toString(), nokValutakurs.first().date)
+        assertEquals(valutakursDato.toString(), sekValutakurs.first().date.value)
+        assertEquals(valutakursDato.toString(), nokValutakurs.first().date.value)
     }
 
     @Test
@@ -39,11 +39,11 @@ class ECBClientTest {
         val valutakursDato = LocalDate.of(2022, 7, 22)
         val valutakurser = ecbClient.getExchangeRates("EUR", valutakursDato)
         assertNotNull(valutakurser)
-        assertEquals(1, valutakurser.exchangeRatesForCurrencies.size)
+        assertEquals(1, valutakurser.ecbExchangeRatesDataSet.ecbExchangeRatesForCurrencies.size)
         val eurValutakurs = valutakurser.exchangeRatesForCurrency("EUR")
         val nokValutakurs = valutakurser.exchangeRatesForCurrency("NOK")
         assertEquals(0, eurValutakurs.size)
         assertEquals(1, nokValutakurs.size)
-        assertEquals(valutakursDato.toString(), nokValutakurs.first().date)
+        assertEquals(valutakursDato.toString(), nokValutakurs.first().date.value)
     }
 }

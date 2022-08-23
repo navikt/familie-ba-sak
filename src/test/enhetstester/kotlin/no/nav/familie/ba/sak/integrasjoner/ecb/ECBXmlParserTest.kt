@@ -98,16 +98,16 @@ class ECBXmlParserTest {
     @Test
     fun `Test at ECBXmlParser parser xml string som forventet`() {
         val ecbExchangeRatesData = ECBXmlParser.parse(ecbXml)
-        assertEquals(ecbExchangeRatesData.exchangeRatesForCurrencies.size, 2)
+        assertEquals(ecbExchangeRatesData.ecbExchangeRatesDataSet.ecbExchangeRatesForCurrencies.size, 2)
         val nokExchangeRates = ecbExchangeRatesData.exchangeRatesForCurrency("NOK")
         val sekExchangeRates = ecbExchangeRatesData.exchangeRatesForCurrency("SEK")
         assertEquals(2, nokExchangeRates.size)
         assertEquals(2, sekExchangeRates.size)
 
-        assertEquals(BigDecimal.valueOf(10.337), nokExchangeRates.filter { it.date == "2022-06-28" }[0].value)
-        assertEquals(BigDecimal.valueOf(10.3065), nokExchangeRates.filter { it.date == "2022-06-29" }[0].value)
+        assertEquals(BigDecimal.valueOf(10.337), nokExchangeRates.filter { it.date.value == "2022-06-28" }[0].ecbExchangeRateValue.value)
+        assertEquals(BigDecimal.valueOf(10.3065), nokExchangeRates.filter { it.date.value == "2022-06-29" }[0].ecbExchangeRateValue.value)
 
-        assertEquals(BigDecimal.valueOf(10.6543), sekExchangeRates.filter { it.date == "2022-06-28" }[0].value)
-        assertEquals(BigDecimal.valueOf(10.6848), sekExchangeRates.filter { it.date == "2022-06-29" }[0].value)
+        assertEquals(BigDecimal.valueOf(10.6543), sekExchangeRates.filter { it.date.value == "2022-06-28" }[0].ecbExchangeRateValue.value)
+        assertEquals(BigDecimal.valueOf(10.6848), sekExchangeRates.filter { it.date.value == "2022-06-29" }[0].ecbExchangeRateValue.value)
     }
 }

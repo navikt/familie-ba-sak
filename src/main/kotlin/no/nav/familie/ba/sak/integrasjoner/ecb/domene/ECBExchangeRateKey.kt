@@ -1,16 +1,12 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb.domene
 
-import org.simpleframework.xml.Attribute
-import org.simpleframework.xml.Path
-import org.simpleframework.xml.Root
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
 
-@Root(name = "SeriesKey", strict = false)
-class ECBExchangeRateKey {
-    @field:Path(value = "Value[1]")
-    @field:Attribute(name = "value")
-    lateinit var frequency: String
-
-    @field:Path(value = "Value[2]")
-    @field:Attribute(name = "value")
-    lateinit var currency: String
-}
+@JacksonXmlRootElement(localName = "Value")
+data class ECBExchangeRateKey(
+    @field:JacksonXmlProperty(isAttribute = true)
+    val id: String,
+    @field:JacksonXmlProperty(isAttribute = true)
+    val value: String
+)

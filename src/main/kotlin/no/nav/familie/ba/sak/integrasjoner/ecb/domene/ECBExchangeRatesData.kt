@@ -1,29 +1,30 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb.domene
-
-import org.simpleframework.xml.ElementList
-import org.simpleframework.xml.Path
-import org.simpleframework.xml.Root
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
 import java.time.LocalDate
 
-@Root(strict = false, name = "GenericData")
-class ECBExchangeRatesData {
-    @field:Path("DataSet")
-    @field:ElementList(name = "Series", inline = true)
-    lateinit var exchangeRatesForCurrencies: List<ECBExchangeRatesForCurrency>
-}
+@JacksonXmlRootElement(localName = "GenericData")
+data class ECBExchangeRatesData(
+    @field:JacksonXmlProperty(localName = "DataSet")
+    val ecbExchangeRatesDataSet: ECBExchangeRatesDataSet
+)
 
 fun ECBExchangeRatesData.exchangeRatesForCurrency(valuta: String): List<ECBExchangeRate> {
-    return this.exchangeRatesForCurrencies.filter {
-        it.ecbExchangeRateKey.currency == valuta
-    }.flatMap { it.exchangeRates }
+    return this.ecbExchangeRatesDataSet.ecbExchangeRatesForCurrencies.filter {
+        it.ecbExchangeRateKeys.any {
+                ecbKeyValue ->
+            ecbKeyValue.id == "CURRENCY" && ecbKeyValue.value == valuta
+        }
+    }.flatMap { it.ecbExchangeRates }
 }
 
 fun ECBExchangeRatesData.toExchangeRates(): List<ExchangeRate> {
-    return this.exchangeRatesForCurrencies
+    return this.ecbExchangeRatesDataSet.ecbExchangeRatesForCurrencies
         .flatMap { ecbExchangeRatesForCurrency ->
-            ecbExchangeRatesForCurrency.exchangeRates
+            ecbExchangeRatesForCurrency.ecbExchangeRates
                 .map { ecbExchangeRate ->
-                    ExchangeRate(ecbExchangeRatesForCurrency.ecbExchangeRateKey.currency, ecbExchangeRate.value, LocalDate.parse(ecbExchangeRate.date))
+                    val currency = ecbExchangeRatesForCurrency.ecbExchangeRateKeys.first { it.id == "CURRENCY" }.value
+                    ExchangeRate(currency, ecbExchangeRate.ecbExchangeRateValue.value, LocalDate.parse(ecbExchangeRate.date.value))
                 }
         }
 }
