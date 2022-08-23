@@ -15,7 +15,10 @@ import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
+import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -36,6 +39,8 @@ class RegistrerInstitusjonOgVergeStegTest {
     private val fagsakRepositoryMock: FagsakRepository = mockk()
     private val loggServiceMock: LoggService = mockk()
     private val behandlingHentOgPersisterServiceMock: BehandlingHentOgPersisterService = mockk()
+    private val fagsakServiceMock: FagsakService = mockk(relaxed = true)
+    private val institusjonRepositoryMock: InstitusjonRepository = mockk()
 
     private lateinit var institusjonService: InstitusjonService
     private lateinit var vergeService: VergeService
@@ -44,14 +49,19 @@ class RegistrerInstitusjonOgVergeStegTest {
     @BeforeAll
     fun setUp() {
         institusjonService =
-            InstitusjonService(fagsakRepository = fagsakRepositoryMock, samhandlerKlient = mockk(relaxed = true))
+            InstitusjonService(
+                fagsakRepository = fagsakRepositoryMock,
+                samhandlerKlient = mockk(relaxed = true),
+                institusjonRepository = institusjonRepositoryMock
+            )
         vergeService = VergeService(vergeRepositoryMock)
         registrerInstitusjonOgVerge =
             RegistrerInstitusjonOgVerge(
                 institusjonService,
                 vergeService,
                 loggServiceMock,
-                behandlingHentOgPersisterServiceMock
+                behandlingHentOgPersisterServiceMock,
+                fagsakServiceMock
             )
     }
 
@@ -66,11 +76,15 @@ class RegistrerInstitusjonOgVergeStegTest {
         val fagsakSlot = slot<Fagsak>()
         val vergeSlot = slot<Verge>()
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
-        every { fagsakRepositoryMock.save(capture(fagsakSlot)) } returns behandling.fagsak
+        every { fagsakServiceMock.lagre(capture(fagsakSlot)) } returns behandling.fagsak
         every { vergeRepositoryMock.findByBehandling(any()) } returns null
         every { vergeRepositoryMock.save(capture(vergeSlot)) } returns Verge(1L, "", behandling)
         every { loggServiceMock.opprettRegistrerVergeLogg(any()) } just runs
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
+        every { institusjonRepositoryMock.findByOrgNummer(any()) } returns Institusjon(
+            orgNummer = "12345",
+            tssEksternId = "cool tsr"
+        )
         every { loggServiceMock.lagre(any()) } returns Logg(
             behandlingId = behandling.id,
             type = LoggType.VERGE_REGISTRERT,
