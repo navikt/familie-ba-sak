@@ -52,14 +52,18 @@ object VilkårsvurderingResultatFlytter {
     ): Pair<Set<PersonResultat>, Set<PersonResultat>> {
         // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
         val personResultaterAktivt = personResultatAktiv.toMutableSet()
-        val personResultaterOppdatert = initiellVilkårsvurdering.personResultater.map { personFraInit ->
-            val personenSomFinnes = personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør }
 
-            val vilkårResultatet: Set<VilkårResultat>
+        val finnesFraFør = initiellVilkårsvurdering.personResultater
+            .filter { personFraInit -> personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør } == null }
+            .map { personFraInit ->
+                tilPersonResultat(initiellVilkårsvurdering, personFraInit.aktør, personFraInit.vilkårResultater)
+            }.toSet()
 
-            if (personenSomFinnes == null) {
-                vilkårResultatet = personFraInit.vilkårResultater
-            } else {
+        val personResultaterOppdatert = initiellVilkårsvurdering.personResultater
+            .filterNot { personFraInit -> personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør } == null }
+            .map { personFraInit ->
+                val personenSomFinnes = personResultaterAktivt.first { it.aktør == personFraInit.aktør }
+
                 // Fyll inn den initierte med person fra aktiv
                 val vilkårSomSkalOppdateresPåEksisterendePerson = finnVilkårSomSkalOppdateresPåEksisterendePerson(
                     kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling,
@@ -69,7 +73,7 @@ object VilkårsvurderingResultatFlytter {
                     personFraInitVilkårResultater = personFraInit.vilkårResultater,
                     personFraInitAktør = personFraInit.aktør
                 )
-                vilkårResultatet = vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
+                val vilkårResultatet = vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
 
                 // Mutering skjer herifrå og u
                 // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
@@ -78,11 +82,10 @@ object VilkårsvurderingResultatFlytter {
                 } else {
                     personenSomFinnes.setSortedVilkårResultater(vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.toSet())
                 }
-            }
-            tilPersonResultat(initiellVilkårsvurdering, personFraInit.aktør, vilkårResultatet)
-        }.toSet()
+                tilPersonResultat(initiellVilkårsvurdering, personFraInit.aktør, vilkårResultatet)
+            }.toSet()
 
-        return Pair(personResultaterOppdatert, personResultaterAktivt)
+        return Pair(personResultaterOppdatert + finnesFraFør, personResultaterAktivt)
     }
 
     private fun tilPersonResultat(
