@@ -53,6 +53,20 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
+@Deprecated("Skal utfases. Bruk hentPerioderMedUtbetaling")
+fun hentPerioderMedUtbetalingGammel(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    vedtak: Vedtak
+) = andelerTilkjentYtelse.lagVertikaleSegmenter()
+    .map { (segmenter, _) ->
+        VedtaksperiodeMedBegrunnelser(
+            fom = segmenter.fom,
+            tom = segmenter.tom,
+            vedtak = vedtak,
+            type = Vedtaksperiodetype.UTBETALING
+        )
+    }
+
 fun hentPerioderMedUtbetaling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak,

@@ -113,6 +113,8 @@ class FeatureToggleConfig(
         const val KAN_BEHANDLE_EØS_SEKUNDERLAND = "familie-ba-sak.behandling.eos-sekunderland"
         const val KAN_BEHANDLE_EØS_TO_PRIMERLAND = "familie-ba-sak.behandling.eos-to-primerland"
         const val KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND = "familie-ba-sak.behandling.utvidet-eos-sekunderland"
+        const val SPLIT_VEDTAK_PÅ_UTDYPENDE_VILKÅRSVURDERING =
+            "familie-ba-sak.feature.split-vedtak-paa-utdypende-vilkaarsvurdering"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
