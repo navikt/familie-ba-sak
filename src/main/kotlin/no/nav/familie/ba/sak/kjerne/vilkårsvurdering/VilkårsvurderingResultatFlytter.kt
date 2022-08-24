@@ -52,8 +52,7 @@ object VilkårsvurderingResultatFlytter {
     ): Pair<Set<PersonResultat>, Set<PersonResultat>> {
         // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
         val personResultaterAktivt = personResultatAktiv.toMutableSet()
-        val personResultaterOppdatert = mutableSetOf<PersonResultat>()
-        initiellVilkårsvurdering.personResultater.forEach { personFraInit ->
+        val personResultaterOppdatert = initiellVilkårsvurdering.personResultater.map { personFraInit ->
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør }
 
             val vilkårResultatet: Set<VilkårResultat>
@@ -80,24 +79,24 @@ object VilkårsvurderingResultatFlytter {
                     personenSomFinnes.setSortedVilkårResultater(vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.toSet())
                 }
             }
-            personResultaterOppdatert.add(
-                PersonResultat(
-                    vilkårsvurdering = initiellVilkårsvurdering,
-                    aktør = personFraInit.aktør
-                ).also {
-                    it.setSortedVilkårResultater(
-                        vilkårResultatet.map { vilkårResultat ->
-                            vilkårResultat.kopierMedParent(
-                                it
-                            )
-                        }.toSet()
-                    )
-                }
-            )
-        }
+            tilPersonResultat(initiellVilkårsvurdering, personFraInit.aktør, vilkårResultatet)
+        }.toSet()
 
         return Pair(personResultaterOppdatert, personResultaterAktivt)
     }
+
+    private fun tilPersonResultat(
+        initiellVilkårsvurdering: Vilkårsvurdering,
+        aktør: Aktør,
+        vilkårResultatet: Set<VilkårResultat>
+    ) =
+        PersonResultat(vilkårsvurdering = initiellVilkårsvurdering, aktør = aktør)
+            .also {
+                it.setSortedVilkårResultater(
+                    vilkårResultatet.map { vilkårResultat -> vilkårResultat.kopierMedParent(it) }
+                        .toSet()
+                )
+            }
 
     private fun finnVilkårSomSkalOppdateresPåEksisterendePerson(
         kopieringSkjerFraForrigeBehandling: Boolean,
