@@ -200,7 +200,7 @@ class ØkonomiService(
             error("Generert utbetalingsoppdrag for opphør inneholder oppdragsperioder med løpende utbetaling.")
         }
 
-        if (utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }.isEmpty()) {
+        if (utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.none { it.opphør != null }) {
             error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
         }
     }
