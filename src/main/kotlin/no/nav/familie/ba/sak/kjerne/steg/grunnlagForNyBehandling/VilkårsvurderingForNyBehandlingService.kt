@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
@@ -216,9 +217,8 @@ class VilkårsvurderingForNyBehandlingService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         løpendeUnderkategori: BehandlingUnderkategori?
     ): Vilkårsvurdering {
-        val vilkårsvurdering = VilkårsvurderingForNyBehandlingUtils(
-            personopplysningGrunnlag = personopplysningGrunnlag
-        ).genererVilkårsvurderingFraForrigeVedtattBehandling(
+        val vilkårsvurdering = genererVilkårsvurderingFraForrigeVedtattBehandling(
+            personopplysningGrunnlag = personopplysningGrunnlag,
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
             behandling = behandling,
@@ -229,6 +229,29 @@ class VilkårsvurderingForNyBehandlingService(
             forrigeBehandlingSomErVedtatt
         )
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+    }
+
+    fun genererVilkårsvurderingFraForrigeVedtattBehandling(
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        initiellVilkårsvurdering: Vilkårsvurdering,
+        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
+        behandling: Behandling,
+        løpendeUnderkategori: BehandlingUnderkategori?
+    ): Vilkårsvurdering {
+        val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
+            aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
+            initiellVilkårsvurdering = initiellVilkårsvurdering,
+            løpendeUnderkategori = løpendeUnderkategori,
+            forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
+        )
+
+        return if (behandling.type == BehandlingType.REVURDERING) {
+            VilkårsvurderingForNyBehandlingUtils(
+                personopplysningGrunnlag = personopplysningGrunnlag
+            ).hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering)
+        } else {
+            vilkårsvurdering
+        }
     }
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(

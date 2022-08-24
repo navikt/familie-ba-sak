@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultatUtils.genererVilkårResultatForEtVilkårPåEnPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -56,26 +55,6 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     vilkårsvurdering = this
                 )
             }
-        }
-    }
-
-    fun genererVilkårsvurderingFraForrigeVedtattBehandling(
-        initiellVilkårsvurdering: Vilkårsvurdering,
-        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
-        behandling: Behandling,
-        løpendeUnderkategori: BehandlingUnderkategori?
-    ): Vilkårsvurdering {
-        val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
-            aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
-            initiellVilkårsvurdering = initiellVilkårsvurdering,
-            løpendeUnderkategori = løpendeUnderkategori,
-            forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
-        )
-
-        return if (behandling.type == BehandlingType.REVURDERING) {
-            hentVilkårsvurderingMedDødsdatoSomTomDato(vilkårsvurdering)
-        } else {
-            vilkårsvurdering
         }
     }
 
