@@ -17,25 +17,27 @@ internal class BehandleFødselshendelseTaskTest {
 
     @Test
     fun `håndterer syntetisk fødselsnummer`() {
-        val velgFagsystemService = mockk<VelgFagSystemService>().apply {
-            every { velgFagsystem(any()) } returns Pair(
-                FagsystemRegelVurdering.SEND_TIL_BA,
-                FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
-            )
-        }
-        val personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() }
         val autovedtakStegService =
             mockk<AutovedtakStegService>().apply { every { kjørBehandlingFødselshendelse(any(), any()) } returns "" }
         val service =
-            BehandleFødselshendelseTask(autovedtakStegService, velgFagsystemService, mockk(), personidentService)
-        val nyBehandlingHendelse = NyBehandlingHendelse(
-            morsIdent = randomFnr(),
-            barnasIdenter = listOf("61031999277")
-        )
+            BehandleFødselshendelseTask(
+                autovedtakStegService,
+                mockk<VelgFagSystemService>().apply {
+                    every { velgFagsystem(any()) } returns Pair(
+                        FagsystemRegelVurdering.SEND_TIL_BA,
+                        FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
+                    )
+                },
+                mockk(),
+                mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() }
+            )
         service.doTask(
             BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(
-                    nyBehandling = nyBehandlingHendelse
+                    nyBehandling = NyBehandlingHendelse(
+                        morsIdent = randomFnr(),
+                        barnasIdenter = listOf("61031999277")
+                    )
                 )
             )
         )
