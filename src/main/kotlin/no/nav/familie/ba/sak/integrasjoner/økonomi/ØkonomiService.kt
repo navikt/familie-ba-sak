@@ -74,8 +74,13 @@ class ØkonomiService(
         }
     }
 
-    fun hentStatus(oppdragId: OppdragId): OppdragStatus =
-        økonomiKlient.hentStatus(oppdragId)
+    fun hentStatus(oppdragId: OppdragId, behandlingId: Long): OppdragStatus {
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId)
+        if (andelerTilkjentYtelse.any { it.erAndelSomSkalSendesTilOppdrag() }) {
+            return økonomiKlient.hentStatus(oppdragId)
+        }
+        return OppdragStatus.KVITTERT_OK // sendte ikke data til økonomi
+    }
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
