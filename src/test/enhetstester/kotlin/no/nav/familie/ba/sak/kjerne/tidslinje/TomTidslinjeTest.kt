@@ -45,7 +45,6 @@ internal class TomTidslinjeTest {
 
     @Test
     fun `test kombinering fra tom tidslinje til tidslinje med innhold`() {
-
         val boolskTidslinje = "tftftftftftft".somBoolskTidslinje(jan(2020))
         val resultat = TomTidslinje<Boolean, Måned>().kombinerMed(boolskTidslinje) { v, h -> v ?: h }
 
@@ -54,7 +53,6 @@ internal class TomTidslinjeTest {
 
     @Test
     fun `test kombinering fra tidslinje med innhold til tom tidslinje`() {
-
         val boolskTidslinje = "tftft    ftft".somBoolskTidslinje(jan(2020))
         val resultat = boolskTidslinje.kombinerMed(TomTidslinje<Boolean, Måned>()) { v, h -> v ?: h }
 

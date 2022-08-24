@@ -31,14 +31,15 @@ class SimuleringService(
     private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
     private val vedtakRepository: VedtakRepository,
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingRepository: BehandlingRepository
 ) {
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
-
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
             beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = vedtak.behandling)
-        ) return null
+        ) {
+            return null
+        }
 
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
@@ -48,7 +49,7 @@ class SimuleringService(
         val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-            erSimulering = true,
+            erSimulering = true
         )
 
         return økonomiKlient.hentSimulering(utbetalingsoppdrag)
@@ -82,7 +83,9 @@ class SimuleringService(
 
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
             oppdaterSimuleringPåBehandling(behandling)
-        } else simulering
+        } else {
+            simulering
+        }
     }
 
     private fun simuleringErUtdatert(simulering: RestSimulering) =

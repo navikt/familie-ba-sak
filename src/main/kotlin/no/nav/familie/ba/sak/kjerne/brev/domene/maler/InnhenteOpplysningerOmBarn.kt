@@ -13,7 +13,7 @@ data class InnhenteOpplysningerOmBarn(
         fødselsnummer: String,
         barnasFødselsdager: String,
         enhet: String,
-        dokumentliste: List<String>,
+        dokumentliste: List<String>
     ) : this(
         mal = mal,
         data = InnhenteOpplysningerOmBarnData(
@@ -23,14 +23,14 @@ data class InnhenteOpplysningerOmBarn(
                 fodselsnummer = fødselsnummer,
                 barnasFødselsdager = barnasFødselsdager,
                 dokumentliste = dokumentliste
-            ),
+            )
         )
     )
 }
 
 data class InnhenteOpplysningerOmBarnData(
     override val delmalData: DelmalData,
-    override val flettefelter: Flettefelter,
+    override val flettefelter: Flettefelter
 ) : BrevData {
 
     data class Flettefelter(
@@ -38,7 +38,7 @@ data class InnhenteOpplysningerOmBarnData(
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
         val barnasFodselsdatoer: Flettefelt,
-        val dokumentliste: Flettefelt,
+        val dokumentliste: Flettefelt
     ) : FlettefelterForDokument {
 
         constructor(

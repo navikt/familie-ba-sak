@@ -46,7 +46,7 @@ fun vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere: List
         tomDatoNestePeriode = nestePeriode?.tom,
         forfallsdatoNestePeriode = nestePeriode?.forfallsdato,
         tidSimuleringHentet = tidSimuleringHentet,
-        tomSisteUtbetaling = tomSisteUtbetaling,
+        tomSisteUtbetaling = tomSisteUtbetaling
     )
 }
 
@@ -57,9 +57,11 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
 
     filterBortUrelevanteVedtakSimuleringPosteringer(økonomiSimuleringMottakere).forEach {
         it.økonomiSimuleringPostering.forEach { postering ->
-            if (simuleringPerioder.containsKey(postering.fom))
+            if (simuleringPerioder.containsKey(postering.fom)) {
                 simuleringPerioder[postering.fom]?.add(postering)
-            else simuleringPerioder[postering.fom] = mutableListOf(postering)
+            } else {
+                simuleringPerioder[postering.fom] = mutableListOf(postering)
+            }
         }
     }
 
@@ -120,7 +122,6 @@ fun hentEtterbetalingIPeriode(
     periode: List<ØkonomiSimuleringPostering>,
     tidSimuleringHentet: LocalDate?
 ): BigDecimal {
-
     val periodeHarPositivFeilutbetaling =
         periode.any { it.posteringType == PosteringType.FEILUTBETALING && it.beløp > BigDecimal.ZERO }
     val sumYtelser =
@@ -130,8 +131,11 @@ fun hentEtterbetalingIPeriode(
         periodeHarPositivFeilutbetaling ->
             BigDecimal.ZERO
         else ->
-            if (sumYtelser < BigDecimal.ZERO) BigDecimal.ZERO
-            else sumYtelser
+            if (sumYtelser < BigDecimal.ZERO) {
+                BigDecimal.ZERO
+            } else {
+                sumYtelser
+            }
     }
 }
 
@@ -151,7 +155,7 @@ fun SimuleringMottaker.tilBehandlingSimuleringMottaker(behandling: Behandling): 
     val behandlingSimuleringMottaker = ØkonomiSimuleringMottaker(
         mottakerNummer = this.mottakerNummer,
         mottakerType = this.mottakerType,
-        behandling = behandling,
+        behandling = behandling
     )
 
     behandlingSimuleringMottaker.økonomiSimuleringPostering = this.simulertPostering.map {
@@ -171,5 +175,5 @@ fun SimulertPostering.tilVedtakSimuleringPostering(økonomiSimuleringMottaker: �
         posteringType = this.posteringType,
         forfallsdato = this.forfallsdato,
         utenInntrekk = this.utenInntrekk,
-        økonomiSimuleringMottaker = økonomiSimuleringMottaker,
+        økonomiSimuleringMottaker = økonomiSimuleringMottaker
     )

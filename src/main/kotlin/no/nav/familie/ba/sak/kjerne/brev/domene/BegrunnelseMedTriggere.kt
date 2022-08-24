@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
 data class BegrunnelseMedTriggere(
     val standardbegrunnelse: Standardbegrunnelse,
-    val triggesAv: TriggesAv,
+    val triggesAv: TriggesAv
 ) {
     fun tilBrevBegrunnelseGrunnlagMedPersoner(
         periode: NullablePeriode,
@@ -24,7 +24,6 @@ data class BegrunnelseMedTriggere(
         minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
         dødeBarnForrigePeriode: List<String>
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
-
         return if (this.standardbegrunnelse.kanDelesOpp) {
             this.standardbegrunnelse.delOpp(
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
@@ -67,7 +66,7 @@ data class BegrunnelseMedTriggere(
     }
 
     fun tilBrevBegrunnelseGrunnlagForLogging() = BrevBegrunnelseGrunnlagForLogging(
-        standardbegrunnelse = this.standardbegrunnelse,
+        standardbegrunnelse = this.standardbegrunnelse
     )
 }
 

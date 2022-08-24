@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -34,7 +35,7 @@ class BehandlingsresultatSteg(
     private val vilkårService: VilkårService,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -58,12 +59,13 @@ class BehandlingsresultatSteg(
         val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
         validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler)
-        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndelerMedÅrsakDeltBosted = endretUtbetalingAndeler.filter { it.årsak == Årsak.DELT_BOSTED })
+        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
+            endretUtbetalingAndelerMedÅrsakDeltBosted = endretUtbetalingAndeler.filter { it.årsak == Årsak.DELT_BOSTED }
+        )
     }
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-
         val behandlingMedOppdatertBehandlingsresultat =
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
@@ -74,6 +76,20 @@ class BehandlingsresultatSteg(
                     resultat = resultat
                 )
             }
+
+        if (behandlingMedOppdatertBehandlingsresultat.erManuellMigrering() &&
+            (
+                behandlingMedOppdatertBehandlingsresultat.resultat.erAvslått() ||
+                    behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.DELVIS_INNVILGET
+                )
+        ) {
+            throw FunksjonellFeil(
+                "Du har fått behandlingsresultatet " +
+                    "${behandlingMedOppdatertBehandlingsresultat.resultat.displayName}. " +
+                    "Dette er ikke støttet på migreringsbehandlinger. " +
+                    "Ta kontakt med Team familie om du er uenig i resultatet."
+            )
+        }
 
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
             behandlingService.nullstillEndringstidspunkt(behandling.id)

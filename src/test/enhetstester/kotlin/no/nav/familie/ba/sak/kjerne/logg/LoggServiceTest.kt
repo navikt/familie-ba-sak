@@ -30,7 +30,7 @@ class LoggServiceTest(
     private val stegService: StegService,
 
     @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService,
+    private val mockPersonopplysningerService: PersonopplysningerService
 ) : AbstractSpringIntegrationTestDev() {
 
     @Test

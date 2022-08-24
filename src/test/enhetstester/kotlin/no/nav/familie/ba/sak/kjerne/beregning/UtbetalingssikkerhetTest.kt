@@ -93,7 +93,7 @@ class UtbetalingssikkerhetTest {
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
                     person = person
-                ),
+                )
             )
         )
 
@@ -130,7 +130,7 @@ class UtbetalingssikkerhetTest {
                     YtelseType.UTVIDET_BARNETRYGD,
                     1500,
                     person = person
-                ),
+                )
             )
         )
 
@@ -169,7 +169,7 @@ class UtbetalingssikkerhetTest {
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
                     person = person
-                ),
+                )
             )
         )
 
@@ -231,7 +231,7 @@ class UtbetalingssikkerhetTest {
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
                 barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
-                personopplysningGrunnlag = personopplysningGrunnlag2,
+                personopplysningGrunnlag = personopplysningGrunnlag2
             )
         }
 
@@ -287,7 +287,7 @@ class UtbetalingssikkerhetTest {
         TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
             barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
-            personopplysningGrunnlag = personopplysningGrunnlag2,
+            personopplysningGrunnlag = personopplysningGrunnlag2
         )
     }
 
@@ -333,7 +333,7 @@ class UtbetalingssikkerhetTest {
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
                 barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
-                personopplysningGrunnlag = personopplysningGrunnlag2,
+                personopplysningGrunnlag = personopplysningGrunnlag2
             )
         }
     }

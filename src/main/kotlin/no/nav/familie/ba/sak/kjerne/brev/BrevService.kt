@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -33,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -51,8 +51,7 @@ class BrevService(
     private val brevPeriodeService: BrevPeriodeService,
     private val sanityService: SanityService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val featureToggleService: FeatureToggleService,
-
+    private val korrigertEtterbetalingService: KorrigertEtterbetalingService
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -70,7 +69,7 @@ class BrevService(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
                 erKlage = vedtak.behandling.erKlage(),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id),
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
             )
 
             Brevmal.VEDTAK_OPPHØRT -> Opphørt(
@@ -81,7 +80,7 @@ class BrevService(
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> OpphørMedEndring(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id),
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
             )
 
             Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
@@ -89,16 +88,19 @@ class BrevService(
             Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter)
 
             Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG -> Autovedtak6og18årOgSmåbarnstillegg(
-                vedtakFellesfelter = vedtakFellesfelter,
+                vedtakFellesfelter = vedtakFellesfelter
             )
+
             Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> AutovedtakNyfødtFørsteBarn(
                 vedtakFellesfelter = vedtakFellesfelter,
-                etterbetaling = hentEtterbetaling(vedtak),
+                etterbetaling = hentEtterbetaling(vedtak)
             )
+
             Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> AutovedtakNyfødtBarnFraFør(
                 vedtakFellesfelter = vedtakFellesfelter,
-                etterbetaling = hentEtterbetaling(vedtak),
+                etterbetaling = hentEtterbetaling(vedtak)
             )
+
             else -> throw Feil("Forsøker å hente vedtaksbrevdata for brevmal ${brevmal.visningsTekst}")
         }
     }
@@ -161,7 +163,6 @@ class BrevService(
         }
 
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
-
         val utvidetVedtaksperioderMedBegrunnelser =
             vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak).filter {
                 !(it.begrunnelser.isEmpty() && it.fritekster.isEmpty() && it.eøsBegrunnelser.isEmpty())
@@ -224,10 +225,15 @@ class BrevService(
     private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? =
         hentEtterbetalingsbeløp(vedtak)?.let { Etterbetaling(it) }
 
-    private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? =
-        simuleringService.hentEtterbetaling(vedtak.behandling.id)
+    private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? {
+        val etterbetalingsBeløp =
+            korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(vedtak.behandling.id)?.beløp?.toBigDecimal()
+                ?: simuleringService.hentEtterbetaling(vedtak.behandling.id)
+
+        return etterbetalingsBeløp
             .takeIf { it > BigDecimal.ZERO }
             ?.run { Utils.formaterBeløp(this.toInt()) }
+    }
 
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
         simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO

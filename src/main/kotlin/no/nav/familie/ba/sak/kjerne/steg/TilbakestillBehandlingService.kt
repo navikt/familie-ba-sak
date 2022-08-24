@@ -106,8 +106,9 @@ class TilbakestillBehandlingService(
     fun tilbakestillBehandlingTilBehandlingsresultat(behandlingId: Long): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        if (behandling.erTilbakestiltTilBehandlingsresultat())
+        if (behandling.erTilbakestiltTilBehandlingsresultat()) {
             return behandling
+        }
 
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(

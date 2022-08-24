@@ -29,7 +29,6 @@ class VedtaksperiodeMedBegrunnelserTidslinjeTest {
 
     @Test
     fun `Skal returnere tidslinje hvor null-datoer er gjort om til uendelighet`() {
-
         val tidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
         val perioderFraTidslinje = tidslinje.perioder()
 
@@ -44,7 +43,6 @@ class VedtaksperiodeMedBegrunnelserTidslinjeTest {
 
     @Test
     fun `Skal gjøre om uendelighet til null-datoer`() {
-
         val tidslinje = VedtaksperiodeMedBegrunnelserTidslinje(utbetalingsperioder)
 
         val vedtaksperioderMedBegrunnelser = tidslinje.lagVedtaksperioderMedBegrunnelser()

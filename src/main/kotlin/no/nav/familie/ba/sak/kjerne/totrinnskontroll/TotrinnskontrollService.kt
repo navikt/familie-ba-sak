@@ -30,7 +30,7 @@ class TotrinnskontrollService(
             Totrinnskontroll(
                 behandling = behandling,
                 saksbehandler = saksbehandler,
-                saksbehandlerId = saksbehandlerId,
+                saksbehandlerId = saksbehandlerId
             )
         )
     }
@@ -78,7 +78,7 @@ class TotrinnskontrollService(
                 saksbehandler = SikkerhetContext.SYSTEM_NAVN,
                 saksbehandlerId = SikkerhetContext.SYSTEM_FORKORTELSE,
                 beslutter = SikkerhetContext.SYSTEM_NAVN,
-                beslutterId = SikkerhetContext.SYSTEM_FORKORTELSE,
+                beslutterId = SikkerhetContext.SYSTEM_FORKORTELSE
             )
         )
     }

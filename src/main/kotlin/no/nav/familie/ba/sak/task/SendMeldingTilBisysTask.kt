@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
@@ -23,16 +24,17 @@ import java.util.Properties
 @Service
 @TaskStepBeskrivelse(
     taskStepType = SendMeldingTilBisysTask.TASK_STEP_TYPE,
-    beskrivelse = "Iverksett vedtak mot oppdrag",
+    beskrivelse = "Send melding til Bisys om opphør eller reduksjon",
     maxAntallFeil = 3
 )
 class SendMeldingTilBisysTask(
     private val kafkaProducer: KafkaProducer,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingRepository: BehandlingRepository
 ) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(SendMeldingTilBisysTask::class.java)
+    private val meldingsTeller = Metrics.counter("familie.ba.sak.bisys.meldinger.sendt")
 
     override fun doTask(task: Task) {
         val behandling = behandlingRepository.finnBehandling(task.payload.toLong())
@@ -53,10 +55,13 @@ class SendMeldingTilBisysTask(
                 return
             }
 
+            logger.info("Sender melding til bisys om opphør eller reduksjon av barnetrygd.")
+
             kafkaProducer.sendBarnetrygdBisysMelding(
                 behandling.id.toString(),
                 barnetrygdBisysMelding
             )
+            meldingsTeller.increment()
         } else {
             logger.info("Sender ikke melding til bisys siden resultat ikke er opphør eller reduksjon.")
         }
@@ -94,7 +99,7 @@ class SendMeldingTilBisysTask(
                                 BarnEndretOpplysning(
                                     ident = barnIdent,
                                     fom = forblePeriode!!.fom,
-                                    årsakskode = BarnetrygdEndretType.RO,
+                                    årsakskode = BarnetrygdEndretType.RO
                                 )
                             )
                         }

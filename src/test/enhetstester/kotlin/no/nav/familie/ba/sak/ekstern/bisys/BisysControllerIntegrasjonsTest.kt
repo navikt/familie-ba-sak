@@ -33,7 +33,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
-@ActiveProfiles("postgres", "mock-pdl", "mock-ident-client", "mock-oauth", "mock-brev-klient")
+@ActiveProfiles("postgres", "integrasjonstest", "mock-pdl", "mock-ident-client", "mock-oauth", "mock-brev-klient")
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
     // Trenger fast port for at klienten i ba-sak kan kalle wiremock'en
@@ -56,7 +56,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         val requestEntity = byggRequestEntity(
             BisysUtvidetBarnetrygdRequest(
-                fnr, LocalDate.now().minusYears(5).minusDays(1)
+                fnr,
+                LocalDate.now().minusYears(5).minusDays(1)
             )
         )
 
@@ -90,7 +91,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         val requestEntity = byggRequestEntity(
             BisysUtvidetBarnetrygdRequest(
-                fnr, LocalDate.now()
+                fnr,
+                LocalDate.now()
             )
         )
 
@@ -126,7 +128,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         val requestEntity = byggRequestEntity(
             BisysUtvidetBarnetrygdRequest(
-                fnr, LocalDate.now().minusYears(4)
+                fnr,
+                LocalDate.now().minusYears(4)
             )
         )
 
@@ -184,7 +187,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         val requestEntity = byggRequestEntity(
             BisysUtvidetBarnetrygdRequest(
-                fnr, LocalDate.now().minusYears(4)
+                fnr,
+                LocalDate.now().minusYears(4)
             )
         )
 
@@ -244,7 +248,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         val requestEntity = byggRequestEntity(
             BisysUtvidetBarnetrygdRequest(
-                fnr, LocalDate.now().minusYears(4)
+                fnr,
+                LocalDate.now().minusYears(4)
             )
         )
 
@@ -289,7 +294,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             hentTokenForBisys()
         )
         val ikkeBisysTjeneste = HttpEntity<String>(
-            "tullball", header
+            "tullball",
+            header
         )
 
         val error = assertThrows<HttpClientErrorException> {

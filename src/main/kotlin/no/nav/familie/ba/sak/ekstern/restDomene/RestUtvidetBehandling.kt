@@ -40,5 +40,7 @@ data class RestUtvidetBehandling(
     val migreringsdato: LocalDate?,
     val endringstidspunkt: LocalDate?,
     val valutakurser: List<RestValutakurs>,
-    val utenlandskePeriodebeløp: List<RestUtenlandskPeriodebeløp>
+    val utenlandskePeriodebeløp: List<RestUtenlandskPeriodebeløp>,
+    val verge: VergeInfo?,
+    val korrigertEtterbetaling: RestKorrigertEtterbetaling?
 )

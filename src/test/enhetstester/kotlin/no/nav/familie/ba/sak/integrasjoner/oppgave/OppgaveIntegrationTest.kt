@@ -43,13 +43,15 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal opprette oppgave og ferdigstille oppgave for behandling`() {
-
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(BARN_FNR), true)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandling.id, SØKER_FNR, listOf(BARN_FNR),
-            søkerAktør = fagsak.aktør, barnAktør = barnAktør
+            behandling.id,
+            SØKER_FNR,
+            listOf(BARN_FNR),
+            søkerAktør = fagsak.aktør,
+            barnAktør = barnAktør
         )
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -87,7 +89,6 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal logge feil ved opprettelse av oppgave på type som ikke er ferdigstilt`() {
-
         val logger: Logger = LoggerFactory.getLogger(OppgaveService::class.java) as Logger
 
         val listAppender: ListAppender<ILoggingEvent> = initLoggingEventListAppender()
@@ -97,8 +98,11 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val barnAktør = personidentService.hentAktørIder(listOf(BARN_FNR))
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandling.id, SØKER_FNR, listOf(BARN_FNR),
-            søkerAktør = fagsak.aktør, barnAktør = barnAktør
+            behandling.id,
+            SØKER_FNR,
+            listOf(BARN_FNR),
+            søkerAktør = fagsak.aktør,
+            barnAktør = barnAktør
         )
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)

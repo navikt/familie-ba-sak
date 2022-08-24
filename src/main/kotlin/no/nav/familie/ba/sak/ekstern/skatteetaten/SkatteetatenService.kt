@@ -119,9 +119,11 @@ class SkatteetatenService(
                         tomMaaned = period.getTom().format(DateTimeFormatter.ofPattern("yyyy-MM"))
                     )
                 )
-                val samletPerioder = if (perioderMap.containsKey(ident))
+                val samletPerioder = if (perioderMap.containsKey(ident)) {
                     perioderMap[ident]!!.perioder + nyList
-                else nyList
+                } else {
+                    nyList
+                }
                 perioderMap[ident] = SkatteetatenPerioder(ident, period.getEndretDato(), samletPerioder)
                 perioderMap
             }
@@ -161,7 +163,9 @@ class SkatteetatenService(
                     val nySammenslåing =
                         sammenslåttePerioder.removeLast().copy(tomMaaned = nesteUtbetaling.tomMaaned)
                     sammenslåttePerioder.apply { add(nySammenslåing) }
-                } else sammenslåttePerioder.apply { add(nesteUtbetaling) }
+                } else {
+                    sammenslåttePerioder.apply { add(nesteUtbetaling) }
+                }
             }
     }
 
@@ -171,8 +175,13 @@ class SkatteetatenService(
 }
 
 fun String.tilDelingsprosent(): SkatteetatenPeriode.Delingsprosent =
-    if (this == "100") SkatteetatenPeriode.Delingsprosent._0 else if (this == "50")
-        SkatteetatenPeriode.Delingsprosent._50 else SkatteetatenPeriode.Delingsprosent.usikker
+    if (this == "100") {
+        SkatteetatenPeriode.Delingsprosent._0
+    } else if (this == "50") {
+        SkatteetatenPeriode.Delingsprosent._50
+    } else {
+        SkatteetatenPeriode.Delingsprosent.usikker
+    }
 
 fun SkatteetatenPeriode.Delingsprosent.tilBigDecimal(): BigDecimal = when (this) {
     SkatteetatenPeriode.Delingsprosent._0 -> BigDecimal.valueOf(100)

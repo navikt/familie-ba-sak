@@ -32,12 +32,11 @@ class ØkonomiService(
     private val økonomiKlient: ØkonomiKlient,
     private val beregningService: BeregningService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
-    private val behandlingService: BehandlingService,
+    private val behandlingService: BehandlingService
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak: Vedtak, saksbehandlerId: String) {
-
         val oppdatertBehandling = vedtak.behandling
         val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
@@ -68,7 +67,7 @@ class ØkonomiService(
         vedtak: Vedtak,
         saksbehandlerId: String,
         erSimulering: Boolean = false,
-        skalValideres: Boolean = true,
+        skalValideres: Boolean = true
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand =
@@ -86,7 +85,7 @@ class ØkonomiService(
                 vedtak = vedtak,
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                 oppdaterteKjeder = oppdaterteKjeder,
-                erSimulering = erSimulering,
+                erSimulering = erSimulering
             )
         } else {
             val forrigeBehandling =
@@ -119,7 +118,7 @@ class ØkonomiService(
                 endretMigreringsDato = beregnOmMigreringsDatoErEndret(
                     vedtak.behandling,
                     forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom
-                ),
+                )
             )
 
             if (!erSimulering && (
@@ -127,8 +126,9 @@ class ØkonomiService(
                         oppdatertBehandling.id
                     ).resultat == Behandlingsresultat.OPPHØRT
                 )
-            )
+            ) {
                 validerOpphørsoppdrag(utbetalingsoppdrag)
+            }
 
             utbetalingsoppdrag
         }
@@ -169,8 +169,9 @@ class ØkonomiService(
             error("Generert utbetalingsoppdrag for opphør inneholder oppdragsperioder med løpende utbetaling.")
         }
 
-        if (utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }.isEmpty())
+        if (utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }.isEmpty()) {
             error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
+        }
     }
 
     private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {

@@ -61,7 +61,7 @@ internal class StønadsstatistikkServiceTest(
     private val kompetanseService: KompetanseService,
 
     @MockK
-    private val vedtakRepository: VedtakRepository,
+    private val vedtakRepository: VedtakRepository
 ) {
 
     private val stønadsstatistikkService =
@@ -146,25 +146,6 @@ internal class StønadsstatistikkServiceTest(
     }
 
     @Test
-    fun hentVedtak() {
-        val vedtak = stønadsstatistikkService.hentVedtak(1L)
-        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
-
-        assertEquals(2, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
-        assertEquals(
-            1 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD),
-            vedtak.utbetalingsperioder[0].utbetaltPerMnd
-        )
-
-        vedtak.utbetalingsperioder
-            .flatMap { it.utbetalingsDetaljer.map { ud -> ud.person } }
-            .filter { it.personIdent != søkerFnr[0] }
-            .forEach {
-                assertEquals(0, it.delingsprosentYtelse)
-            }
-    }
-
-    @Test
     fun hentVedtakV2() {
         val vedtak = stønadsstatistikkService.hentVedtakV2(1L)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
@@ -181,24 +162,6 @@ internal class StønadsstatistikkServiceTest(
             .forEach {
                 assertEquals(0, it.delingsprosentYtelse)
             }
-    }
-
-    @Test
-    fun hentVedtakSomInneholderPerioderSomIkkeErSendtTilOppdrag() {
-        val vedtak = stønadsstatistikkService.hentVedtak(1L)
-        println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
-
-        // skal ikke ta med perioder som ikke er sendt til oppdrag
-        assertEquals(2, vedtak.utbetalingsperioder[0].utbetalingsDetaljer.size)
-    }
-
-    @Test
-    fun `hver utbetalingsDetalj innenfor en utbetalingsperiode skal ha unik delytelseId`() {
-        val vedtak = stønadsstatistikkService.hentVedtak(1L)
-
-        vedtak.utbetalingsperioder.forEach {
-            assertEquals(it.utbetalingsDetaljer.size, it.utbetalingsDetaljer.distinctBy { it.delytelseId }.size)
-        }
     }
 
     /**

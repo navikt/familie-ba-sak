@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetaling
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -92,7 +93,7 @@ class LoggService(
     }
 
     fun opprettRegistrerVergeLogg(behandling: Behandling) {
-        val tittel = "verge ble registrert"
+        val tittel = "Verge ble registrert"
         lagre(
             Logg(
                 behandlingId = behandling.id,
@@ -153,14 +154,15 @@ class LoggService(
         forrigeBehandlingsresultat: Behandlingsresultat,
         nyttBehandlingsresultat: Behandlingsresultat
     ): Logg? {
-
         val tekst = when {
             forrigeBehandlingsresultat == Behandlingsresultat.IKKE_VURDERT -> {
                 "Resultat ble ${nyttBehandlingsresultat.displayName.lowercase()}"
             }
+
             forrigeBehandlingsresultat != nyttBehandlingsresultat -> {
                 "Resultat gikk fra ${forrigeBehandlingsresultat.displayName.lowercase()} til ${nyttBehandlingsresultat.displayName.lowercase()}"
             }
+
             else -> return null
         }
 
@@ -258,11 +260,16 @@ class LoggService(
                 type = if (behandling.erManuellMigrering()) LoggType.MIGRERING_BEKREFTET else LoggType.GODKJENNE_VEDTAK,
                 tittel = if (beslutning.erGodkjent()) {
                     if (behandling.erManuellMigrering()) "Migrering bekreftet" else "Vedtak godkjent"
-                } else "Vedtak underkjent",
+                } else {
+                    "Vedtak underkjent"
+                },
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.BESLUTTER),
                 tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else "",
-                opprettetAv = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_NAVN else
+                opprettetAv = if (behandling.erManuellMigrering()) {
+                    SikkerhetContext.SYSTEM_NAVN
+                } else {
                     SikkerhetContext.hentSaksbehandlerNavn()
+                }
             )
         )
     }
@@ -305,7 +312,7 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.FERDIGSTILLE_BEHANDLING,
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM)
             )
         )
     }
@@ -378,6 +385,57 @@ class LoggService(
         )
     }
 
+    fun opprettKorrigertEtterbetalingLogg(
+        behandling: Behandling,
+        korrigertEtterbetaling: KorrigertEtterbetaling
+    ) {
+        val tekst = if (korrigertEtterbetaling.aktiv) {
+            """
+            Årsak: ${korrigertEtterbetaling.årsak.visningsnavn}
+            Nytt beløp: ${korrigertEtterbetaling.beløp} kr
+            Begrunnelse: ${korrigertEtterbetaling.begrunnelse ?: "Ingen begrunnelse"}
+            """.trimIndent()
+        } else {
+            ""
+        }
+
+        val tittel = if (korrigertEtterbetaling.aktiv) {
+            "Etterbetaling i brev er korrigert"
+        } else {
+            "Korrigert etterbetaling er angret"
+        }
+
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.KORRIGERT_ETTERBETALING,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tittel = tittel,
+                tekst = tekst
+            )
+        )
+    }
+
+    fun opprettSmåbarnstilleggLogg(
+        behandling: Behandling,
+        tittel: String
+    ) =
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.MANUELT_SMÅBARNSTILLEGG_JUSTERING,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tittel = tittel,
+                tekst = ""
+            )
+        )
+
     fun gjenopptaBehandlingLogg(behandling: Behandling) {
         lagre(
             Logg(
@@ -411,5 +469,5 @@ class LoggService(
 
 enum class RegistrerVergeLoggType {
     VERGE_REGISTRERT,
-    INSTITUSJON_REGISTRERT,
+    INSTITUSJON_REGISTRERT
 }

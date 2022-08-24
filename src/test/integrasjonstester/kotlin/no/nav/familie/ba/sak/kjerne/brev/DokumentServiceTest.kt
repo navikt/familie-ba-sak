@@ -96,7 +96,7 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
@@ -130,7 +130,7 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
@@ -168,7 +168,7 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
@@ -226,7 +226,7 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
@@ -251,8 +251,11 @@ class DokumentServiceTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id, fnr, listOf(barn1Fnr, barn2Fnr),
-                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
+                behandling.id,
+                fnr,
+                listOf(barn1Fnr, barn2Fnr),
+                søkerAktør = behandling.fagsak.aktør,
+                barnAktør = barnAktør
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 

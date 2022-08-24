@@ -15,19 +15,23 @@ import java.time.LocalDate
 data class Opphørsperiode(
     override val periodeFom: LocalDate,
     override val periodeTom: LocalDate?,
-    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR,
+    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
 ) : Vedtaksperiode
 
 fun mapTilOpphørsperioder(
     forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? = null,
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ): List<Opphørsperiode> {
-    val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) mapTilUtbetalingsperioder(
-        personopplysningGrunnlag = forrigePersonopplysningGrunnlag,
-        andelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
-    ) else emptyList()
+    val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) {
+        mapTilUtbetalingsperioder(
+            personopplysningGrunnlag = forrigePersonopplysningGrunnlag,
+            andelerTilkjentYtelse = forrigeAndelerTilkjentYtelse
+        )
+    } else {
+        emptyList()
+    }
     val utbetalingsperioder =
         mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
 
@@ -38,18 +42,20 @@ fun mapTilOpphørsperioder(
                 periodeTom = forrigeUtbetalingsperioder.maxOf { it.periodeTom }
             )
         )
-    } else if (utbetalingsperioder.isEmpty()) {
-        emptyList()
     } else {
-        listOf(
-            finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
-                forrigeUtbetalingsperioder = forrigeUtbetalingsperioder,
-                utbetalingsperioder = utbetalingsperioder
-            ),
-            finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
-            finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
-        ).flatten()
-    }.sortedBy { it.periodeFom }
+        if (utbetalingsperioder.isEmpty()) {
+            emptyList()
+        } else {
+            listOf(
+                finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
+                    forrigeUtbetalingsperioder = forrigeUtbetalingsperioder,
+                    utbetalingsperioder = utbetalingsperioder
+                ),
+                finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
+                finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
+            ).flatten()
+        }.sortedBy { it.periodeFom }
+    }
 
     return slåSammenOpphørsperioder(alleOpphørsperioder)
 }

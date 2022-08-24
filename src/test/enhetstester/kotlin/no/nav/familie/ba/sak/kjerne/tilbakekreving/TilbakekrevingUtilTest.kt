@@ -21,12 +21,11 @@ class TilbakekrevingUtilTest {
 
     @Test
     fun `test validerVerdierPåRestTilbakekreving kaster feil ved tilbakekreving uten feilutbetaling`() {
-
         assertThrows<Exception> {
             validerVerdierPåRestTilbakekreving(
                 restTilbakekreving = RestTilbakekreving(
                     valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                    begrunnelse = "",
+                    begrunnelse = ""
                 ),
                 feilutbetaling = BigDecimal.ZERO
             )
@@ -35,7 +34,6 @@ class TilbakekrevingUtilTest {
 
     @Test
     fun `test validerVerdierPåRestTilbakekreving kaster feil ved ingen tilbakekreving når det er en feilutbetaling`() {
-
         assertThrows<Exception> {
             validerVerdierPåRestTilbakekreving(
                 restTilbakekreving = null,
@@ -46,7 +44,6 @@ class TilbakekrevingUtilTest {
 
     @Test
     fun `test sammenslåing av feilutbetalingsperioder med ensom siste periode`() {
-
         val simuleringsPerioder = listOf(
             opprettSimuleringsPeriode(
                 fom = fom1,
@@ -67,7 +64,7 @@ class TilbakekrevingUtilTest {
                 fom = fom4,
                 tom = tom4,
                 feilUtbetaling = BigDecimal.ONE
-            ),
+            )
         )
 
         val sammenslåttePerioder = slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder)
@@ -81,7 +78,6 @@ class TilbakekrevingUtilTest {
 
     @Test
     fun `test sammenslåing av feilutbetalingsperioder med ensom første periode`() {
-
         val simuleringsPerioder = listOf(
             opprettSimuleringsPeriode(
                 fom = fom1,
@@ -102,7 +98,7 @@ class TilbakekrevingUtilTest {
                 fom = fom4,
                 tom = tom4,
                 feilUtbetaling = BigDecimal.ONE
-            ),
+            )
         )
 
         val sammenslåttePerioder = slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder)

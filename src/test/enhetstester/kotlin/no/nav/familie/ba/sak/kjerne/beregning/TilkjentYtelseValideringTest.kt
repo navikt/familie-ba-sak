@@ -61,7 +61,7 @@ class TilkjentYtelseValideringTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
         val andeler2 = listOf(
             lagAndelTilkjentYtelse(
@@ -69,7 +69,7 @@ class TilkjentYtelseValideringTest {
                 tom = inneværendeMåned(),
                 beløp = 2108,
                 person = person2
-            ),
+            )
         )
         Assertions.assertTrue(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
@@ -104,7 +104,7 @@ class TilkjentYtelseValideringTest {
                 tom = inneværendeMåned(),
                 beløp = 2108,
                 person = person1
-            ),
+            )
         )
 
         Assertions.assertFalse(
@@ -126,7 +126,7 @@ class TilkjentYtelseValideringTest {
                 tom = inneværendeMåned(),
                 beløp = 2108,
                 person = person1
-            ),
+            )
         )
 
         val andeler = listOf(
@@ -135,7 +135,7 @@ class TilkjentYtelseValideringTest {
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person1
-            ),
+            )
         )
 
         Assertions.assertFalse(
@@ -164,7 +164,7 @@ class TilkjentYtelseValideringTest {
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
-            ),
+            )
         )
 
         val andeler = listOf(
@@ -173,7 +173,7 @@ class TilkjentYtelseValideringTest {
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
-            ),
+            )
         )
 
         Assertions.assertFalse(

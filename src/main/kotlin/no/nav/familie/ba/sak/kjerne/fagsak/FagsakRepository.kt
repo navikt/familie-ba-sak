@@ -51,7 +51,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                 WHERE ty.utbetalingsoppdrag IS NOT NULL
                                   AND f.status = 'LØPENDE'
                                   AND f.arkivert = FALSE
-                                GROUP BY b.id)
+                                GROUP BY b.fk_fagsak_id)
                                 
                             SELECT silp.fagsakid
                             FROM sisteiverksatte silp
@@ -125,11 +125,11 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 AND NOT EXISTS (SELECT b2 from Behandling b2 where b2.fagsak.id = b.fagsak.id AND b2.status <> 'AVSLUTTET')
                 AND aty.type = 'SMÅBARNSTILLEGG'
                 AND aty.stønadTom = :stønadTom
-        """,
+        """
     )
     fun finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
         iverksatteLøpendeBehandlinger: List<Long>,
-        stønadTom: YearMonth = YearMonth.now().minusMonths(1),
+        stønadTom: YearMonth = YearMonth.now().minusMonths(1)
     ): List<Long>
 
     @Query(

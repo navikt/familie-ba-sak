@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
-import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdBisysMelding
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -24,7 +23,6 @@ import java.time.LocalDateTime
 
 interface KafkaProducer {
 
-    fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long
     fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long
     fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long
     fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long
@@ -52,25 +50,19 @@ interface KafkaProducer {
 class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) :
     KafkaProducer {
 
-    private val vedtakCounter = Metrics.counter(COUNTER_NAME, "type", "vedtak")
     private val vedtakV2Counter = Metrics.counter(COUNTER_NAME, "type", "vedtakV2")
     private val saksstatistikkSakDvhCounter = Metrics.counter(COUNTER_NAME, "type", "sak")
     private val saksstatistikkBehandlingDvhCounter = Metrics.counter(COUNTER_NAME, "type", "behandling")
+
     @Autowired
     @Qualifier("kafkaObjectMapper")
     lateinit var kafkaObjectMapper: ObjectMapper
+
     @Autowired
     lateinit var kafkaTemplate: KafkaTemplate<String, Any>
 
     @Autowired
     lateinit var kafkaAivenTemplate: KafkaTemplate<String, String>
-
-    override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
-        val response = kafkaTemplate.send(VEDTAK_TOPIC, vedtak.funksjonellId!!, vedtak).get()
-        logger.info("$VEDTAK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
-        vedtakCounter.increment()
-        return response.recordMetadata.offset()
-    }
 
     override fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long {
         val vedtakForDVHV2Melding =
@@ -163,7 +155,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
-        private const val VEDTAK_TOPIC = "aapen-barnetrygd-vedtak-v1"
         private const val VEDTAKV2_TOPIC = "teamfamilie.aapen-barnetrygd-vedtak-v2"
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "aapen-barnetrygd-saksstatistikk-behandling-v1"
         private const val SAKSSTATISTIKK_SAK_TOPIC = "aapen-barnetrygd-saksstatistikk-sak-v1"
@@ -177,13 +168,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 @Service
 class MockKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) :
     KafkaProducer {
-
-    override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
-        logger.info("Skipper sending av vedtak for ${vedtak.behandlingsId} fordi kafka ikke er enablet")
-
-        sendteMeldinger["vedtak-${vedtak.behandlingsId}"] = vedtak
-        return 0
-    }
 
     override fun sendMessageForTopicVedtakV2(vedtak: VedtakDVHV2): Long {
         logger.info("Skipper sending av vedtakV2 for ${vedtak.behandlingsId} fordi kafka Aiven for DVH V2 ikke er enablet")
