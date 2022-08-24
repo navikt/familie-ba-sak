@@ -68,7 +68,7 @@ class RegistrerInstitusjonOgVergeStegTest {
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
         every { fagsakRepositoryMock.save(capture(fagsakSlot)) } returns behandling.fagsak
         every { vergeRepositoryMock.findByBehandling(any()) } returns null
-        every { vergeRepositoryMock.save(capture(vergeSlot)) } returns Verge(1L, "", "", "", behandling)
+        every { vergeRepositoryMock.save(capture(vergeSlot)) } returns Verge(1L, "", behandling)
         every { loggServiceMock.opprettRegistrerVergeLogg(any()) } just runs
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
         every { loggServiceMock.lagre(any()) } returns Logg(
@@ -81,8 +81,6 @@ class RegistrerInstitusjonOgVergeStegTest {
         every { behandlingHentOgPersisterServiceMock.hent(any()) } returns behandling
         val restRegistrerInstitusjonOgVerge = RestRegistrerInstitusjonOgVerge(
             vergeInfo = VergeInfo(
-                "verge navn",
-                "verge adresse",
                 "12345678910"
             ),
             institusjonInfo = InstitusjonInfo("12345", "cool tsr")
@@ -109,7 +107,7 @@ class RegistrerInstitusjonOgVergeStegTest {
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
         every { fagsakRepositoryMock.save(any()) } returns behandling.fagsak
         every { vergeRepositoryMock.findByBehandling(any()) } returns null
-        every { vergeRepositoryMock.save(any()) } returns Verge(1L, "", "", "", behandling)
+        every { vergeRepositoryMock.save(any()) } returns Verge(1L, "", behandling)
         every { loggServiceMock.opprettRegistrerVergeLogg(any()) } just runs
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
         every { loggServiceMock.lagre(any()) } returns Logg(
@@ -121,11 +119,7 @@ class RegistrerInstitusjonOgVergeStegTest {
         )
         every { behandlingHentOgPersisterServiceMock.hent(any()) } returns behandling
         val restRegistrerInstitusjonOgVerge = RestRegistrerInstitusjonOgVerge(
-            vergeInfo = VergeInfo(
-                "verge navn",
-                "verge adresse",
-                "12345678910"
-            ),
+            vergeInfo = VergeInfo("12345678910"),
             institusjonInfo = InstitusjonInfo("12345", "cool tsr")
         )
 
