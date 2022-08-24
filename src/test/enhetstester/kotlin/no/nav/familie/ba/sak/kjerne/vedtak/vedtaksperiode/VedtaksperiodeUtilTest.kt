@@ -5,21 +5,34 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -268,7 +281,6 @@ class VedtaksperiodeUtilTest {
 
     @Test
     fun `skal finne riktige begrunnelser for kompetanse når barn bor i utlandet`() {
-
         val kompetanserIPeriode: List<Kompetanse> =
             listOf(
                 lagKompetanse(
@@ -304,7 +316,6 @@ class VedtaksperiodeUtilTest {
 
     @Test
     fun `skal finne riktige begrunnelser for kompetanse når barn bor i Norge`() {
-
         val kompetanserIPeriode: List<Kompetanse> =
             listOf(
                 lagKompetanse(
@@ -398,9 +409,16 @@ class VedtaksperiodeUtilTest {
             ),
         )
 
+        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
+        val personResultater = setOf(
+            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person1),
+            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2),
+        )
+
         val faktiskResultat = hentPerioderMedUtbetaling(
             listOf(andelPerson1MarsTilApril, andelPerson1MaiTilJuli, andelPerson2MarsTilJuli),
-            vedtak
+            vedtak,
+            personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
         )
 
         Assertions.assertEquals(
@@ -422,8 +440,8 @@ class VedtaksperiodeUtilTest {
         val juni2020 = YearMonth.of(2020, 6)
         val juli2020 = YearMonth.of(2020, 7)
 
-        val person1 = lagPerson()
-        val person2 = lagPerson()
+        val person1 = lagPerson(type = PersonType.BARN)
+        val person2 = lagPerson(type = PersonType.BARN)
 
         val vedtak = lagVedtak()
 
@@ -465,9 +483,122 @@ class VedtaksperiodeUtilTest {
             ),
         )
 
+        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
+        val personResultater = setOf(
+            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person1),
+            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2),
+        )
+
         val faktiskResultat = hentPerioderMedUtbetaling(
             listOf(andelPerson1MarsTilMai, andelPerson2MaiTilJuli),
-            vedtak
+            vedtak,
+            personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
+        )
+
+        Assertions.assertEquals(
+            forventetResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
+            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) }
+        )
+
+        Assertions.assertEquals(
+            forventetResultat.map { it.type }.toSet(),
+            faktiskResultat.map { it.type }.toSet()
+        )
+    }
+
+    @Test
+    fun `Skal splitte på utdypendeVilkårsvurdering`() {
+        val mars2020 = YearMonth.of(2020, 3)
+        val april2020 = YearMonth.of(2020, 4)
+        val mai2020 = YearMonth.of(2020, 5)
+        val juli2020 = YearMonth.of(2020, 7)
+
+        val søker = lagPerson()
+        val barn = lagPerson()
+
+        val vedtak = lagVedtak()
+
+        val andelBarnMarsTilJuli = lagAndelTilkjentYtelse(
+            fom = mars2020,
+            tom = juli2020,
+            beløp = 1000,
+            person = barn
+        )
+
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søkerAktør = søker.aktør,
+            behandling = lagBehandling(),
+            resultat = Resultat.OPPFYLT
+        )
+
+        val personResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = barn.aktør
+        )
+        val vilkårResultaterUtenomBorMedSøker = Vilkår.hentVilkårFor(PersonType.BARN)
+            .filter { it != Vilkår.BOR_MED_SØKER }
+            .filter { it != Vilkår.UNDER_18_ÅR }
+            .map {
+                VilkårResultat(
+                    personResultat = personResultat,
+                    periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
+                    periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+                    vilkårType = it,
+                    resultat = Resultat.OPPFYLT,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    utdypendeVilkårsvurderinger = emptyList()
+                )
+            }
+        val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurdering = VilkårResultat(
+            personResultat = personResultat,
+            periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
+            periodeTom = april2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            resultat = Resultat.OPPFYLT,
+            begrunnelse = "",
+            behandlingId = vilkårsvurdering.behandling.id,
+            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_SØKER)
+        )
+        val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurdering = VilkårResultat(
+            personResultat = personResultat,
+            periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
+            periodeTom = juli2020.sisteDagIInneværendeMåned().minusMonths(1),
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            resultat = Resultat.OPPFYLT,
+            begrunnelse = "",
+            behandlingId = vilkårsvurdering.behandling.id,
+            utdypendeVilkårsvurderinger = emptyList()
+        )
+        val vilkårResultater = vilkårResultaterUtenomBorMedSøker +
+            vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurdering +
+            vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurdering
+
+        personResultat.setSortedVilkårResultater(
+            vilkårResultater.toSet()
+        )
+
+        val forventetResultat = listOf(
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = mars2020.førsteDagIInneværendeMåned(),
+                tom = april2020.sisteDagIInneværendeMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+                begrunnelser = mutableSetOf()
+            ),
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = mai2020.førsteDagIInneværendeMåned(),
+                tom = juli2020.sisteDagIInneværendeMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+                begrunnelser = mutableSetOf()
+            ),
+        )
+
+        val faktiskResultat = hentPerioderMedUtbetaling(
+            listOf(andelBarnMarsTilJuli),
+            vedtak,
+            setOf(personResultat).tilFørskjøvetVilkårResultatTidslinjeMap()
         )
 
         Assertions.assertEquals(
@@ -481,3 +612,13 @@ class VedtaksperiodeUtilTest {
         )
     }
 }
+
+private fun Vilkårsvurdering.lagGodkjentPersonResultatForBarn(person: Person) = lagPersonResultat(
+    vilkårsvurdering = this,
+    aktør = person.aktør,
+    resultat = Resultat.OPPFYLT,
+    periodeFom = person.fødselsdato,
+    periodeTom = person.fødselsdato.til18ÅrsVilkårsdato(),
+    lagFullstendigVilkårResultat = true,
+    personType = person.type
+)
