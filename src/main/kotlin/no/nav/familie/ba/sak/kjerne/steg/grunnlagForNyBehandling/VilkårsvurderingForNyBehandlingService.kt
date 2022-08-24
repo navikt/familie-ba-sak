@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingResultatFlytter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -169,26 +168,26 @@ class VilkårsvurderingForNyBehandlingService(
         forrigeBehandlingSomErVedtatt: Behandling?,
         bekreftEndringerViaFrontend: Boolean
     ): Vilkårsvurdering {
-        val (initieltVilkårsVurderingSomErOppdatert, aktivtPersonResultatSomErRedusert) = VilkårsvurderingResultatFlytter.flyttResultaterTilInitielt(
+        val (initieltSomErOppdatert, aktivtSomErRedusert) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            personResultaterFraForrigeBehandling = if (forrigeBehandlingSomErVedtatt != null) {
+            forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) {
                 hentVilkårsvurdering(
                     forrigeBehandlingSomErVedtatt.id
-                )?.personResultater
+                )
             } else {
                 null
             }
         )
 
-        if (aktivtPersonResultatSomErRedusert.isNotEmpty() && !bekreftEndringerViaFrontend) {
+        if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
             throw FunksjonellFeil(
                 melding = "Saksbehandler forsøker å fjerne vilkår fra vilkårsvurdering",
-                frontendFeilmelding = VilkårsvurderingUtils.lagFjernAdvarsel(aktivtPersonResultatSomErRedusert)
+                frontendFeilmelding = VilkårsvurderingUtils.lagFjernAdvarsel(aktivtSomErRedusert.personResultater)
             )
         }
-        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltVilkårsVurderingSomErOppdatert)
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initieltSomErOppdatert)
     }
 
     private fun tellMetrikkerForFødselshendelse(

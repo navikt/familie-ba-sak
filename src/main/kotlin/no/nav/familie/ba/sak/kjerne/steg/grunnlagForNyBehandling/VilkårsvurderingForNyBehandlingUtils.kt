@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultatUtils.genererVilkårResultatForEtVilkårPåEnPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingResultatFlytter
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -65,11 +65,11 @@ data class VilkårsvurderingForNyBehandlingUtils(
         behandling: Behandling,
         løpendeUnderkategori: BehandlingUnderkategori?
     ): Vilkårsvurdering {
-        val (vilkårsvurdering) = VilkårsvurderingResultatFlytter.flyttResultaterTilInitielt(
+        val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
             aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
-            personResultaterFraForrigeBehandling = forrigeBehandlingVilkårsvurdering.personResultater
+            forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering
         )
 
         return if (behandling.type == BehandlingType.REVURDERING) {
