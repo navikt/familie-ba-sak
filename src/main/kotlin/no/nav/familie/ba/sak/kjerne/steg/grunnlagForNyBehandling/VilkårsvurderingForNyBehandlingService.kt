@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMetrics
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingProxy
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -27,7 +28,8 @@ class VilkårsvurderingForNyBehandlingService(
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingstemaService: BehandlingstemaService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
-    private val vilkårsvurderingMetrics: VilkårsvurderingMetrics
+    private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
+    private val vilkårsvurderingProxy: VilkårsvurderingProxy
 ) {
 
     fun opprettVilkårsvurderingUtenomHovedflyt(
@@ -169,7 +171,7 @@ class VilkårsvurderingForNyBehandlingService(
         forrigeBehandlingSomErVedtatt: Behandling?,
         bekreftEndringerViaFrontend: Boolean
     ): Vilkårsvurdering {
-        val (initieltSomErOppdatert, aktivtSomErRedusert) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
+        val (initieltSomErOppdatert, aktivtSomErRedusert) = vilkårsvurderingProxy.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             aktivVilkårsvurdering = aktivVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,
@@ -238,7 +240,7 @@ class VilkårsvurderingForNyBehandlingService(
         behandling: Behandling,
         løpendeUnderkategori: BehandlingUnderkategori?
     ): Vilkårsvurdering {
-        val (vilkårsvurdering) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
+        val (vilkårsvurdering) = vilkårsvurderingProxy.flyttResultaterTilInitielt(
             aktivVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             løpendeUnderkategori = løpendeUnderkategori,

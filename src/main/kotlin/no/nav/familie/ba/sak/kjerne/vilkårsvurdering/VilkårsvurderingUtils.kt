@@ -194,7 +194,7 @@ object VilkårsvurderingUtils {
      * initieltResultat (neste aktivt) med vilkår som skal benyttes videre
      * aktivtResultat med hvilke vilkår som ikke skal benyttes videre
      */
-    fun flyttResultaterTilInitielt(
+    internal fun flyttResultaterTilInitielt(
         initiellVilkårsvurdering: Vilkårsvurdering,
         aktivVilkårsvurdering: Vilkårsvurdering,
         forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
