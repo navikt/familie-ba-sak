@@ -33,36 +33,35 @@ object VilkårsvurderingResultatFlytter {
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
         val initiellVilkårsvurderingKopi = initiellVilkårsvurdering.kopier()
-        val (oppdatert, aktivt) = finnOppdatertePersonResultater(
+        val (oppdatert, aktivt, oppdateringer) = finnOppdatertePersonResultater(
             initiellVilkårsvurdering = initiellVilkårsvurderingKopi,
             personResultaterFraForrigeBehandling = personResultaterFraForrigeBehandling,
             løpendeUnderkategori = løpendeUnderkategori,
             kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id,
             personResultatAktiv = aktivVilkårsvurdering.kopier().personResultater
         )
+        oppdateringer.forEach { it.first.setSortedVilkårResultater(it.second) }
         return Pair(initiellVilkårsvurderingKopi.also { it.personResultater = oppdatert }, aktivt)
     }
 
+    // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
     private fun finnOppdatertePersonResultater(
         initiellVilkårsvurdering: Vilkårsvurdering,
         personResultaterFraForrigeBehandling: Set<PersonResultat>? = null,
         løpendeUnderkategori: BehandlingUnderkategori? = null,
         kopieringSkjerFraForrigeBehandling: Boolean,
         personResultatAktiv: Set<PersonResultat>
-    ): Pair<Set<PersonResultat>, Set<PersonResultat>> {
-        // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
-        val personResultaterAktivt = personResultatAktiv.toMutableSet()
-
+    ): InlineReturnobjekt {
         val finnesFraFør = initiellVilkårsvurdering.personResultater
-            .filterNot { personFraInit -> personResultaterAktivt.map { it.aktør }.contains(personFraInit.aktør) }
+            .filterNot { personFraInit -> personResultatAktiv.map { it.aktør }.contains(personFraInit.aktør) }
             .map { personFraInit ->
                 tilPersonResultat(initiellVilkårsvurdering, personFraInit.aktør, personFraInit.vilkårResultater)
             }.toSet()
 
-        val personResultaterOppdatert = initiellVilkårsvurdering.personResultater
-            .filter { personFraInit -> personResultaterAktivt.map { it.aktør }.contains(personFraInit.aktør) }
+        val triple = initiellVilkårsvurdering.personResultater
+            .filter { personFraInit -> personResultatAktiv.map { it.aktør }.contains(personFraInit.aktør) }
             .map { personFraInit ->
-                val personenSomFinnes = personResultaterAktivt.first { it.aktør == personFraInit.aktør }
+                val personenSomFinnes = personResultatAktiv.first { it.aktør == personFraInit.aktør }
 
                 // Fyll inn den initierte med person fra aktiv
                 val vilkårSomSkalOppdateresPåEksisterendePerson = finnVilkårSomSkalOppdateresPåEksisterendePerson(
@@ -73,21 +72,23 @@ object VilkårsvurderingResultatFlytter {
                     personFraInitVilkårResultater = personFraInit.vilkårResultater,
                     personFraInitAktør = personFraInit.aktør
                 )
-
-                // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
-                if (vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.isEmpty()) {
-                    personResultaterAktivt.remove(personenSomFinnes)
-                } else {
-                    personenSomFinnes.setSortedVilkårResultater(vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.toSet())
-                }
-                tilPersonResultat(
-                    initiellVilkårsvurdering,
-                    personFraInit.aktør,
-                    vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
+                Triple(
+                    personenSomFinnes,
+                    tilPersonResultat(
+                        initiellVilkårsvurdering,
+                        personFraInit.aktør,
+                        vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
+                    ),
+                    vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt
                 )
-            }.toSet()
+            }
 
-        return Pair(personResultaterOppdatert + finnesFraFør, personResultaterAktivt)
+        val personResultaterOppdatert = triple.map { it.second }.toSet()
+        val personResultaterAktive =
+            personResultatAktiv.toMutableSet() - triple.filter { it.third.isEmpty() }.map { it.first }.toSet()
+        val oppdateringer = triple.filter { it.third.isNotEmpty() }.map { it.first to it.third }
+
+        return InlineReturnobjekt(personResultaterOppdatert + finnesFraFør, personResultaterAktive, oppdateringer)
     }
 
     private fun tilPersonResultat(
@@ -223,5 +224,11 @@ object VilkårsvurderingResultatFlytter {
     private data class AktivtOgOppdatertVilkårResultat(
         val personsVilkårAktivt: Set<VilkårResultat>,
         val personsVilkårOppdatert: Set<VilkårResultat>
+    )
+
+    private data class InlineReturnobjekt(
+        val personsVilkårOppdatert: Set<PersonResultat>,
+        val personsVilkårAktivt: Set<PersonResultat>,
+        val oppdateringer: List<Pair<PersonResultat, Set<VilkårResultat>>>
     )
 }
