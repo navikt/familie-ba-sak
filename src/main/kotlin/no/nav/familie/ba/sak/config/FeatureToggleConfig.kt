@@ -107,12 +107,15 @@ class FeatureToggleConfig(
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
         const val KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED = "familie-ba-sak.manuell-migrering-ikke-delt-bosted"
-        const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING = "familie-ba-sak.endringer.validering.migeringsbehandling"
+        const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING =
+            "familie-ba-sak.endringer.validering.migeringsbehandling"
         const val NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE = "familie-ba-sak.behandling.generer-andeler-med-ny-metode"
 
         const val KAN_BEHANDLE_EØS_SEKUNDERLAND = "familie-ba-sak.behandling.eos-sekunderland"
         const val KAN_BEHANDLE_EØS_TO_PRIMERLAND = "familie-ba-sak.behandling.eos-to-primerland"
         const val KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND = "familie-ba-sak.behandling.utvidet-eos-sekunderland"
+
+        const val NY_VILKÅRSVURDERINGFLYTTING = "familie-ba-sak.behandling.vilkårsvurdering.ny-flytting"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
