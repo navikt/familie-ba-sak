@@ -52,7 +52,7 @@ object VilkårsvurderingResultatFlytter {
         kopieringSkjerFraForrigeBehandling: Boolean,
         personResultatAktiv: Set<PersonResultat>
     ): InlineReturnobjekt {
-        val finnesFraFør = initiellVilkårsvurdering.personResultater
+        val finnesIkkeFraFør = initiellVilkårsvurdering.personResultater
             .filterNot { personFraInit -> personResultatAktiv.map { it.aktør }.contains(personFraInit.aktør) }
             .map { personFraInit ->
                 tilPersonResultat(initiellVilkårsvurdering, personFraInit.aktør, personFraInit.vilkårResultater)
@@ -88,7 +88,7 @@ object VilkårsvurderingResultatFlytter {
             personResultatAktiv.toMutableSet() - triple.filter { it.third.isEmpty() }.map { it.first }.toSet()
         val oppdateringer = triple.filter { it.third.isNotEmpty() }.map { it.first to it.third }
 
-        return InlineReturnobjekt(personResultaterOppdatert + finnesFraFør, personResultaterAktive, oppdateringer)
+        return InlineReturnobjekt(personResultaterOppdatert + finnesIkkeFraFør, personResultaterAktive, oppdateringer)
     }
 
     private fun tilPersonResultat(
