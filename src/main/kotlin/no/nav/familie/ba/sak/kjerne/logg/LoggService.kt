@@ -419,6 +419,23 @@ class LoggService(
         )
     }
 
+    fun opprettSmåbarnstilleggLogg(
+        behandling: Behandling,
+        tittel: String
+    ) =
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.MANUELT_SMÅBARNSTILLEGG_JUSTERING,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tittel = tittel,
+                tekst = ""
+            )
+        )
+
     fun gjenopptaBehandlingLogg(behandling: Behandling) {
         lagre(
             Logg(
