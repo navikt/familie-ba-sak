@@ -73,18 +73,26 @@ class NyUtbetalingsoppdragGenerator {
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
-        val opprettes: List<Utbetalingsperiode> = lagUtbetalingsperioderForOpprettelse(
-            andeler = andelerTilOpprettelse,
-            erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
-            vedtak = vedtak,
-            sisteOffsetIKjedeOversikt = sisteOffsetPerIdent,
-            sisteOffsetPåFagsak = sisteOffsetPåFagsak
-        )
-
-        val opphøres: List<Utbetalingsperiode> = lagUtbetalingsperioderForOpphør(
-            andeler = andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato),
-            vedtak = vedtak
-        )
+        val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
+            lagUtbetalingsperioderForOpprettelse(
+                andeler = andelerTilOpprettelse,
+                erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
+                vedtak = vedtak,
+                sisteOffsetIKjedeOversikt = sisteOffsetPerIdent,
+                sisteOffsetPåFagsak = sisteOffsetPåFagsak
+            )
+        } else {
+            emptyList()
+        }
+        val andelerTilOpphør = andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato)
+        val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty()) {
+            lagUtbetalingsperioderForOpphør(
+                andeler = andelerTilOpphør,
+                vedtak = vedtak
+            )
+        } else {
+            emptyList()
+        }
 
         return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
