@@ -23,8 +23,14 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -41,6 +47,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
@@ -48,17 +56,38 @@ import java.time.LocalDate
 fun hentPerioderMedUtbetaling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak,
-) = andelerTilkjentYtelse
-    .tilTidslinjerPerPerson().values
-    .kombinerUtenNull { it }
-    .perioder()
-    .map {
-        VedtaksperiodeMedBegrunnelser(
-            fom = it.fraOgMed.tilYearMonth().førsteDagIInneværendeMåned(),
-            tom = it.tilOgMed.tilYearMonth().sisteDagIInneværendeMåned(),
-            vedtak = vedtak,
-            type = Vedtaksperiodetype.UTBETALING
-        )
+    forskjøvetVilkårResultatTidslinjeMap: Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>
+): List<VedtaksperiodeMedBegrunnelser> {
+    val utdypendeVilkårsvurderingTidslinje =
+        forskjøvetVilkårResultatTidslinjeMap
+            .tilUtdypendeVilkårsvurderingTidslinjeMap().values
+            .kombinerUtenNull { it.flatten().toSet().ifEmpty { null } }
+            .filtrerIkkeNull()
+            .slåSammenLike()
+
+    return andelerTilkjentYtelse
+        .tilTidslinjerPerPerson().values
+        .kombinerUtenNull { it }
+        .leftJoin(utdypendeVilkårsvurderingTidslinje) { andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode ->
+            Pair(andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode)
+        }
+        .perioder()
+        .map {
+            VedtaksperiodeMedBegrunnelser(
+                fom = it.fraOgMed.tilYearMonth().førsteDagIInneværendeMåned(),
+                tom = it.tilOgMed.tilYearMonth().sisteDagIInneværendeMåned(),
+                vedtak = vedtak,
+                type = Vedtaksperiodetype.UTBETALING
+            )
+        }
+}
+
+private fun Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>.tilUtdypendeVilkårsvurderingTidslinjeMap():
+    Map<Aktør, Tidslinje<Set<UtdypendeVilkårsvurdering>, Måned>> = this
+    .mapValues { (_, vilkårsvurderingTidslinje) ->
+        vilkårsvurderingTidslinje.map { vilkårResultater ->
+            vilkårResultater?.flatMap { it.utdypendeVilkårsvurderinger }?.toSet()
+        }
     }
 
 fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(

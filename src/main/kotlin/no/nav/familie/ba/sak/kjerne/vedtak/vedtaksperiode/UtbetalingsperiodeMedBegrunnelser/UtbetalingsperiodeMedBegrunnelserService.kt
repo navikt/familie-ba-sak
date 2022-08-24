@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentPerioderMedUtbetaling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.identifiserReduksjonsperioderFraSistIverksatteBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,6 +24,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val kompetanseRepository: KompetanseRepository,
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
 
     fun hentUtbetalingsperioder(
@@ -30,10 +33,15 @@ class UtbetalingsperiodeMedBegrunnelserService(
     ): List<VedtaksperiodeMedBegrunnelser> {
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = vedtak.behandling.id)
+
+        val forskjøvetVilkårResultatTidslinjeMap =
+            vilkårsvurdering.personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
 
         val utbetalingsperioder = hentPerioderMedUtbetaling(
-            andelerTilkjentYtelse,
-            vedtak
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            vedtak = vedtak,
+            forskjøvetVilkårResultatTidslinjeMap = forskjøvetVilkårResultatTidslinjeMap
         )
 
         val perioderMedReduksjonFraSistIverksatteBehandling =
@@ -58,7 +66,6 @@ class UtbetalingsperiodeMedBegrunnelserService(
             )
         } else utbetalingsperioderMedReduksjon
     }
-
     fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
         vedtak: Vedtak,
         utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
