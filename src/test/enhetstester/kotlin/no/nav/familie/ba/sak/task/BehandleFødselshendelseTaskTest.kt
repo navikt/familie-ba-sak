@@ -19,19 +19,7 @@ internal class BehandleFødselshendelseTaskTest {
     fun `håndterer syntetisk fødselsnummer`() {
         val autovedtakStegService =
             mockk<AutovedtakStegService>().apply { every { kjørBehandlingFødselshendelse(any(), any()) } returns "" }
-        val service =
-            BehandleFødselshendelseTask(
-                autovedtakStegService,
-                mockk<VelgFagSystemService>().apply {
-                    every { velgFagsystem(any()) } returns Pair(
-                        FagsystemRegelVurdering.SEND_TIL_BA,
-                        FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
-                    )
-                },
-                mockk(),
-                mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() }
-            )
-        service.doTask(
+        settOppBehandleFødselshendelseTask(autovedtakStegService).doTask(
             BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(
                     nyBehandling = NyBehandlingHendelse(
@@ -43,4 +31,34 @@ internal class BehandleFødselshendelseTaskTest {
         )
         verify { autovedtakStegService.kjørBehandlingFødselshendelse(any(), any()) }
     }
+
+    @Test
+    fun `håndterer vanlig fødselsnummer`() {
+        val autovedtakStegService =
+            mockk<AutovedtakStegService>().apply { every { kjørBehandlingFødselshendelse(any(), any()) } returns "" }
+        settOppBehandleFødselshendelseTask(autovedtakStegService).doTask(
+            BehandleFødselshendelseTask.opprettTask(
+                BehandleFødselshendelseTaskDTO(
+                    nyBehandling = NyBehandlingHendelse(
+                        morsIdent = randomFnr(),
+                        barnasIdenter = listOf("31018721832")
+                    )
+                )
+            )
+        )
+        verify { autovedtakStegService.kjørBehandlingFødselshendelse(any(), any()) }
+    }
+
+    private fun settOppBehandleFødselshendelseTask(autovedtakStegService: AutovedtakStegService): BehandleFødselshendelseTask =
+        BehandleFødselshendelseTask(
+            autovedtakStegService,
+            mockk<VelgFagSystemService>().apply {
+                every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
+                    FagsystemRegelVurdering.SEND_TIL_BA,
+                    FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
+                )
+            },
+            mockk(),
+            mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() }
+        )
 }
