@@ -146,7 +146,7 @@ class UtvidetBehandlingService(
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
             valutakurser = valutakurser.map { it.tilRestValutakurs() },
             utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() },
-            verge = behandling.verge?.let { VergeInfo(it.navn, it.adresse, it.ident) },
+            verge = behandling.verge?.let { VergeInfo(it.ident) },
             korrigertEtterbetaling = korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(behandlingId)
                 ?.tilRestKorrigertEtterbetaling()
         )
