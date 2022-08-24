@@ -54,13 +54,13 @@ object VilkårsvurderingResultatFlytter {
         val personResultaterAktivt = personResultatAktiv.toMutableSet()
 
         val finnesFraFør = initiellVilkårsvurdering.personResultater
-            .filter { personFraInit -> personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør } == null }
+            .filterNot { personFraInit -> personResultaterAktivt.map { it.aktør }.contains(personFraInit.aktør) }
             .map { personFraInit ->
                 tilPersonResultat(initiellVilkårsvurdering, personFraInit.aktør, personFraInit.vilkårResultater)
             }.toSet()
 
         val personResultaterOppdatert = initiellVilkårsvurdering.personResultater
-            .filterNot { personFraInit -> personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør } == null }
+            .filter { personFraInit -> personResultaterAktivt.map { it.aktør }.contains(personFraInit.aktør) }
             .map { personFraInit ->
                 val personenSomFinnes = personResultaterAktivt.first { it.aktør == personFraInit.aktør }
 
@@ -73,16 +73,18 @@ object VilkårsvurderingResultatFlytter {
                     personFraInitVilkårResultater = personFraInit.vilkårResultater,
                     personFraInitAktør = personFraInit.aktør
                 )
-                val vilkårResultatet = vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
 
-                // Mutering skjer herifrå og u
                 // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
                 if (vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.isEmpty()) {
                     personResultaterAktivt.remove(personenSomFinnes)
                 } else {
                     personenSomFinnes.setSortedVilkårResultater(vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårAktivt.toSet())
                 }
-                tilPersonResultat(initiellVilkårsvurdering, personFraInit.aktør, vilkårResultatet)
+                tilPersonResultat(
+                    initiellVilkårsvurdering,
+                    personFraInit.aktør,
+                    vilkårSomSkalOppdateresPåEksisterendePerson.personsVilkårOppdatert
+                )
             }.toSet()
 
         return Pair(personResultaterOppdatert + finnesFraFør, personResultaterAktivt)
