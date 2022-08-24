@@ -73,32 +73,32 @@ class JournalførVedtaksbrev(
                 tilVerge = mottakerInfo.erVerge
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
-        Lagt inn
-            journalposterTilDistribusjon.forEach {
-                if (it.value.erVerge) {
-                    val distribuerTilVergeTask = DistribuerVedtaksbrevTilVergeTask.opprettDistribuerVedtaksbrevTilVergeTask(
-                        distribuerVedtaksbrevTilVergeDTO = DistribuerVedtaksbrevTilVergeDTO(
-                            behandlingId = vedtak.behandling.id,
-                            personIdent = it.value.brukerId,
-                            journalpostId = it.key
-                        ),
-                        properties = data.task.metadata
-                    )
-                    taskRepository.save(distribuerTilVergeTask)
-                } else {
-                    val distribuerTilSøkerTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
-                        distribuerDokumentDTO = DistribuerDokumentDTO(
-                            personEllerInstitusjonIdent = it.value.brukerId,
-                            behandlingId = vedtak.behandling.id,
-                            journalpostId = it.key,
-                            brevmal = hentBrevmal(behandling),
-                            erManueltSendt = false
-                        ),
-                        properties = data.task.metadata
-                    )
-                    taskRepository.save(distribuerTilSøkerTask)
-                }
+
+        journalposterTilDistribusjon.forEach {
+            if (it.value.erVerge) {
+                val distribuerTilVergeTask = DistribuerVedtaksbrevTilVergeTask.opprettDistribuerVedtaksbrevTilVergeTask(
+                    distribuerVedtaksbrevTilVergeDTO = DistribuerVedtaksbrevTilVergeDTO(
+                        behandlingId = vedtak.behandling.id,
+                        personIdent = it.value.brukerId,
+                        journalpostId = it.key
+                    ),
+                    properties = data.task.metadata
+                )
+                taskRepository.save(distribuerTilVergeTask)
+            } else {
+                val distribuerTilSøkerTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
+                    distribuerDokumentDTO = DistribuerDokumentDTO(
+                        personEllerInstitusjonIdent = it.value.brukerId,
+                        behandlingId = vedtak.behandling.id,
+                        journalpostId = it.key,
+                        brevmal = hentBrevmal(behandling),
+                        erManueltSendt = false
+                    ),
+                    properties = data.task.metadata
+                )
+                taskRepository.save(distribuerTilSøkerTask)
             }
+        }
 
         return hentNesteStegForNormalFlyt(behandling)
     }
