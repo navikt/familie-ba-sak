@@ -570,7 +570,7 @@ class BehandlingIntegrationTest(
                     periodeFom = mars2018.minusMonths(1).toLocalDate(),
                     periodeTom = mars2018.toLocalDate().minusDays(1),
                     vilkårType = it,
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    behandlingId = vilkårsvurdering.behandling.id
                 )
             }.toSet() + Vilkår.hentVilkårFor(PersonType.BARN).map {
                 lagVilkårResultat(
@@ -581,7 +581,9 @@ class BehandlingIntegrationTest(
                     behandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger = if (it == Vilkår.BOR_MED_SØKER) {
                         listOf(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
-                    } else emptyList()
+                    } else {
+                        emptyList()
+                    }
                 )
             }.toSet()
         )
