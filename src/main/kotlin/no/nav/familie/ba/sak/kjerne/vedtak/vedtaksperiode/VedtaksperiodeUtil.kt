@@ -24,7 +24,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
@@ -75,8 +75,8 @@ fun hentPerioderMedUtbetaling(
     val utdypendeVilkårsvurderingTidslinje =
         forskjøvetVilkårResultatTidslinjeMap
             .tilUtdypendeVilkårsvurderingTidslinjeMap().values
-            .kombinerUtenNull { it.flatten().toSet().ifEmpty { null } }
-            .filtrerIkkeNull()
+            .kombinerUtenNull { it.flatten().toSet() }
+            .filtrer { it != null && it.isNotEmpty() }
             .slåSammenLike()
 
     return andelerTilkjentYtelse
