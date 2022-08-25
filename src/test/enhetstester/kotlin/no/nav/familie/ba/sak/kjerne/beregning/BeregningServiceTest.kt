@@ -1074,7 +1074,7 @@ class BeregningServiceTest {
                     periodeTom = utvidetTom,
                     begrunnelse = "",
                     behandlingId = behandling.id
-                ),
+                )
             )
         )
 
@@ -1131,7 +1131,7 @@ class BeregningServiceTest {
                         periodeTom = barn.fødselsdato.plusYears(18),
                         begrunnelse = "",
                         behandlingId = behandling.id
-                    ),
+                    )
                 )
             )
             barnPersonResultat

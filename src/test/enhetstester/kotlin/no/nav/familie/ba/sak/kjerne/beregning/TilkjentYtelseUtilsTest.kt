@@ -1107,9 +1107,9 @@ internal class TilkjentYtelseUtilsTest {
                     fom = LocalDate.now().minusMonths(5),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barn.aktør,
-                ),
-            ),
+                    aktør = barn.aktør
+                )
+            )
         )
 
         val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantTidsperiode.tom) }
@@ -1182,14 +1182,14 @@ internal class TilkjentYtelseUtilsTest {
                     årsak = Årsak.ETTERBETALING_3ÅR,
                     fom = langEndringsperiode.fom,
                     tom = langEndringsperiode.tom
-                ),
+                )
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
                     fom = LocalDate.now().minusMonths(5),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barn.aktør,
+                    aktør = barn.aktør
                 ),
                 AtypiskVilkår(
                     fom = relevantTidsperiode.fom.førsteDagIInneværendeMåned(),
@@ -1197,7 +1197,7 @@ internal class TilkjentYtelseUtilsTest {
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barn2.aktør,
                     utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED
-                ),
+                )
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
@@ -1287,8 +1287,8 @@ internal class TilkjentYtelseUtilsTest {
                     fom = borMedSøkerStart,
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barn.aktør,
-                ),
+                    aktør = barn.aktør
+                )
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
@@ -1350,8 +1350,8 @@ internal class TilkjentYtelseUtilsTest {
                     fom = borMedSøkerStart,
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barn.aktør,
-                ),
+                    aktør = barn.aktør
+                )
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
@@ -1413,8 +1413,8 @@ internal class TilkjentYtelseUtilsTest {
                     fom = borMedSøkerStart,
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barn.aktør,
-                ),
+                    aktør = barn.aktør
+                )
             ),
             osPerioder = listOf(osPeriode)
         )
@@ -1513,7 +1513,7 @@ internal class TilkjentYtelseUtilsTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = lagPersonopplysningsgrunnlag(personer = barna.plus(søker), behandlingId = vilkårsvurdering.behandling.id),
             behandling = vilkårsvurdering.behandling,
-            endretUtbetalingAndeler = endretUtbetalingAndeler,
+            endretUtbetalingAndeler = endretUtbetalingAndeler
         ) { (_) ->
             lagOvergangsstønadPerioder(perioder = osPerioder, søkerIdent = søker.aktør.aktivFødselsnummer())
         }
