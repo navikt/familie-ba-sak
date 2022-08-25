@@ -296,7 +296,7 @@ fun lagTestPersonopplysningGrunnlag(
     behandlingId: Long,
     søkerPersonIdent: String,
     barnasIdenter: List<String>,
-    barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1),
+    barnasFødselsdatoer: List<LocalDate> = listOf<LocalDate>(LocalDate.of(2019, 1, 1)),
     søkerAktør: Aktør = tilAktør(søkerPersonIdent).also {
         it.personidenter.add(
             Personident(
@@ -347,13 +347,13 @@ fun lagTestPersonopplysningGrunnlag(
     }
     personopplysningGrunnlag.personer.add(søker)
 
-    barnAktør.map {
+    barnAktør.mapIndexed { index, aktør ->
         personopplysningGrunnlag.personer.add(
             Person(
-                aktør = it,
+                aktør = aktør,
                 type = PersonType.BARN,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fødselsdato = barnFødselsdato,
+                fødselsdato = barnasFødselsdatoer.get(index),
                 navn = "",
                 kjønn = Kjønn.MANN
             ).also { barn ->
@@ -463,7 +463,8 @@ fun lagPersonResultat(
     lagFullstendigVilkårResultat: Boolean = false,
     personType: PersonType = PersonType.BARN,
     vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
-    erDeltBosted: Boolean = false
+    erDeltBosted: Boolean = false,
+    erDeltBostedSkalIkkeDeles: Boolean = false
 ): PersonResultat {
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
@@ -482,7 +483,11 @@ fun lagPersonResultat(
                     begrunnelse = "",
                     behandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger = listOfNotNull(
-                        if (erDeltBosted && it == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                        when {
+                            erDeltBosted && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED
+                            erDeltBostedSkalIkkeDeles && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+                            else -> null
+                        }
                     )
                 )
             }.toSet()

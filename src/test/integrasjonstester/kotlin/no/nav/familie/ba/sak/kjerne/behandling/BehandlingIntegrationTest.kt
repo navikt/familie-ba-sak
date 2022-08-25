@@ -515,6 +515,123 @@ class BehandlingIntegrationTest(
     }
 
     @Test
+    fun `Vedtaksperioder skal bevare splitt i vilkårsvurdering`() {
+
+        val søkerFnr = randomFnr()
+        val barn1Fnr = randomFnr()
+        val barn2Fnr = randomFnr()
+
+        val søkerAktørId = personidentService.hentAktør(søkerFnr)
+        val barn1AktørId = personidentService.hentAktør(barn1Fnr)
+        val barn2AktørId = personidentService.hentAktør(barn2Fnr)
+
+        val barn1Fødselsdato = LocalDate.of(2007, 2, 10)
+        val barn2Fødselsdato = LocalDate.of(2013, 11, 10)
+
+        val mars2018 = YearMonth.of(2018, 3)
+        val stønadTom = barn2Fødselsdato.plusYears(18).minusMonths(1)
+
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
+
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                søkerFnr,
+                listOf(barn1Fnr, barn2Fnr),
+                søkerAktør = behandling.fagsak.aktør,
+                barnAktør = barnAktør,
+                barnasFødselsdatoer = listOf(barn1Fødselsdato, barn2Fødselsdato)
+            )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
+
+        val vilkårsvurdering =
+            Vilkårsvurdering(behandling = behandling)
+        vilkårsvurdering.personResultater = setOf(
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = søkerAktørId,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = mars2018.minusMonths(1).toLocalDate(),
+                periodeTom = stønadTom,
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.SØKER
+            ),
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = barn1AktørId,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = mars2018.minusMonths(1).toLocalDate(),
+                periodeTom = barn1Fødselsdato.plusYears(18),
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.BARN,
+                erDeltBosted = true
+            ),
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = barn2AktørId,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = mars2018.minusMonths(1).toLocalDate(),
+                periodeTom = mars2018.toLocalDate().minusDays(1),
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.BARN
+            ),
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = barn2AktørId,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = mars2018.toLocalDate(),
+                periodeTom = barn2Fødselsdato.plusYears(18),
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.BARN,
+                erDeltBostedSkalIkkeDeles = true
+            )
+        )
+        vilkårsvurderingRepository.save(vilkårsvurdering)
+
+        val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        val restVedtakBarnMap =
+            personopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
+                .associateBy(
+                    { it.personIdent },
+                    { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } }
+                )
+
+        val satsEndringDatoMars2019 =
+            SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1054)!!.toYearMonth()
+        assertEquals(2, restVedtakBarnMap.size)
+
+        // Barn 1
+        val barn1Perioder = restVedtakBarnMap[barn1Fnr]!!.sortedBy { it.stønadFom }
+        assertEquals(485, barn1Perioder[0].beløp)
+        assertEquals(mars2018, barn1Perioder[0].stønadFom)
+        assertEquals(satsEndringDatoMars2019.minusMonths(1), barn1Perioder[0].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn1Perioder[0].ytelseType)
+        assertEquals(527, barn1Perioder[1].beløp)
+        assertEquals(satsEndringDatoMars2019, barn1Perioder[1].stønadFom)
+        assertEquals(barn1Fødselsdato.plusYears(18).minusMonths(1).toYearMonth(), barn1Perioder[1].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn1Perioder[1].ytelseType)
+
+        // Barn 2
+        val barn2Perioder = restVedtakBarnMap[barn2Fnr]!!.sortedBy { it.stønadFom }
+        assertEquals(970, barn2Perioder[0].beløp)
+        assertEquals(mars2018, barn2Perioder[0].stønadFom)
+        assertEquals(mars2018, barn2Perioder[0].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn2Perioder[0].ytelseType)
+        assertEquals(970, barn2Perioder[1].beløp)
+        assertEquals(mars2018.plusMonths(1), barn2Perioder[1].stønadFom)
+        assertEquals(satsEndringDatoMars2019.minusMonths(1), barn2Perioder[1].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn2Perioder[1].ytelseType)
+        assertEquals(1054, barn2Perioder[2].beløp)
+        assertEquals(satsEndringDatoMars2019, barn2Perioder[2].stønadFom)
+        assertTrue(satsEndringDatoMars2019 < barn2Perioder[2].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn2Perioder[2].ytelseType)
+    }
+
+    @Test
     fun `Hent en persons bostedsadresse fra PDL og lagre den i database`() {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
