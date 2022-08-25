@@ -206,4 +206,42 @@ class PersonResultatTest {
         Assertions.assertEquals(september2022, forskjøvedeVedtaksperioder.first().fraOgMed.tilYearMonth())
         Assertions.assertEquals(juli2040, forskjøvedeVedtaksperioder.first().tilOgMed.tilYearMonth())
     }
+
+    @Test
+    fun `Skal håndtere uendelighet`() {
+        val søker = lagPerson()
+
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søkerAktør = søker.aktør,
+            behandling = lagBehandling(),
+            resultat = Resultat.OPPFYLT
+        )
+
+        val personResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = søker.aktør
+        )
+        val vilkårResultater = Vilkår.hentVilkårFor(søker.type)
+            .map {
+                VilkårResultat(
+                    personResultat = personResultat,
+                    periodeFom = null,
+                    periodeTom = null,
+                    vilkårType = it,
+                    resultat = Resultat.OPPFYLT,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    utdypendeVilkårsvurderinger = emptyList()
+                )
+            }
+
+        personResultat.setSortedVilkårResultater(vilkårResultater.toSet())
+
+        val førskjøvetVilkårResultatTidslinjeMap = setOf(personResultat).tilFørskjøvetVilkårResultatTidslinjeMap()
+        Assertions.assertEquals(1, førskjøvetVilkårResultatTidslinjeMap.size)
+
+        val forskjøvedeVedtaksperioder = førskjøvetVilkårResultatTidslinjeMap[søker.aktør]!!.perioder()
+        Assertions.assertEquals(null, forskjøvedeVedtaksperioder.first().fraOgMed.tilYearMonthEllerNull())
+        Assertions.assertEquals(null, forskjøvedeVedtaksperioder.first().tilOgMed.tilYearMonthEllerNull())
+    }
 }
