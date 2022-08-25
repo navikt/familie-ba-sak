@@ -1,17 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.common.del
+import no.nav.familie.ba.sak.common.multipliser
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import java.math.BigDecimal
-import java.math.MathContext
-import java.math.RoundingMode
 
 fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =
     when (this) {
-        Intervall.ÅRLIG -> beløp.divide(12.toBigDecimal(), 10, RoundingMode.HALF_UP)
-        Intervall.KVARTALSVIS -> beløp.divide(3.toBigDecimal(), 10, RoundingMode.HALF_UP)
+        Intervall.ÅRLIG -> beløp.del(12.toBigDecimal(), 10)
+        Intervall.KVARTALSVIS -> beløp.del(3.toBigDecimal(), 10)
         Intervall.MÅNEDLIG -> beløp
-        Intervall.UKENTLIG -> beløp.multiply(4.35.toBigDecimal(), MathContext(10, RoundingMode.HALF_UP))
+        Intervall.UKENTLIG -> beløp.multipliser(4.35.toBigDecimal(), 10)
     }.stripTrailingZeros().toPlainString().toBigDecimal()
 
 /**

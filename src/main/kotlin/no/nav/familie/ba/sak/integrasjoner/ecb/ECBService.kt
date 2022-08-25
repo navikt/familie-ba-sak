@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 
+import no.nav.familie.ba.sak.common.del
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.http.ecb.ECBRestClient
 import no.nav.familie.http.ecb.Frequency
@@ -9,7 +10,6 @@ import no.nav.familie.http.ecb.exception.ECBClientException
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.LocalDate
 import kotlin.jvm.Throws
 
@@ -39,7 +39,7 @@ class ECBService(val ecbClient: ECBRestClient) {
         }
     }
 
-    private fun beregnValutakurs(valutakursUtenlandskValuta: BigDecimal, valutakursNOK: BigDecimal) = valutakursNOK.divide(valutakursUtenlandskValuta, 10, RoundingMode.HALF_UP)
+    private fun beregnValutakurs(valutakursUtenlandskValuta: BigDecimal, valutakursNOK: BigDecimal) = valutakursNOK.del(valutakursUtenlandskValuta, 10)
 
     private fun validateExchangeRates(currency: String, exchangeRateDate: LocalDate, exchangeRates: List<ExchangeRate>) {
         if (currency != ECBConstants.EUR) {

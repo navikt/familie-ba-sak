@@ -72,7 +72,9 @@ class ValutakursController(
     private fun oppdaterValutakursMedKursFraECB(restValutakurs: RestValutakurs, valutakurs: Valutakurs) =
         if (valutakursErEndret(restValutakurs, valutakursService.hentValutakurs(restValutakurs.id))) {
             valutakurs.copy(kurs = ecbService.hentValutakurs(restValutakurs.valutakode!!, restValutakurs.valutakursdato!!))
-        } else valutakurs
+        } else {
+            valutakurs
+        }
 
     /**
      * Sjekker om valuta er Islandske Kroner og kursdato er før 01.02.2018
