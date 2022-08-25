@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -169,7 +170,6 @@ class PersonResultatTest {
         val september2022 = YearMonth.of(2022, 9)
 
         val juli2040 = YearMonth.of(2040, 7)
-        val august2122 = YearMonth.of(2122, 8)
 
         val barn = lagPerson(type = PersonType.BARN)
 
@@ -184,18 +184,28 @@ class PersonResultatTest {
             aktør = barn.aktør
         )
         val vilkårResultater = Vilkår.hentVilkårFor(barn.type)
+            .filter { it != Vilkår.UNDER_18_ÅR }
             .map {
                 VilkårResultat(
                     personResultat = personResultat,
                     periodeFom = august2022.førsteDagIInneværendeMåned(),
-                    periodeTom = august2122.sisteDagIInneværendeMåned(),
+                    periodeTom = null,
                     vilkårType = it,
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
                     behandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger = emptyList()
                 )
-            }
+            } + VilkårResultat(
+            personResultat = personResultat,
+            periodeFom = august2022.førsteDagIInneværendeMåned(),
+            periodeTom = august2022.førsteDagIInneværendeMåned().til18ÅrsVilkårsdato(),
+            vilkårType = Vilkår.UNDER_18_ÅR,
+            resultat = Resultat.OPPFYLT,
+            begrunnelse = "",
+            behandlingId = vilkårsvurdering.behandling.id,
+            utdypendeVilkårsvurderinger = emptyList()
+        )
 
         personResultat.setSortedVilkårResultater(vilkårResultater.toSet())
 
