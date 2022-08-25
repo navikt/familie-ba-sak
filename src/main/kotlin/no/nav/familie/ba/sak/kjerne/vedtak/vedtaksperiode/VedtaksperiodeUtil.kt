@@ -88,8 +88,8 @@ fun hentPerioderMedUtbetaling(
         .perioder()
         .map {
             VedtaksperiodeMedBegrunnelser(
-                fom = it.fraOgMed.tilYearMonth().førsteDagIInneværendeMåned(),
-                tom = it.tilOgMed.tilYearMonth().sisteDagIInneværendeMåned(),
+                fom = it.fraOgMed.tilYearMonthEllerNull()?.førsteDagIInneværendeMåned(),
+                tom = it.tilOgMed.tilYearMonthEllerNull()?.sisteDagIInneværendeMåned(),
                 vedtak = vedtak,
                 type = Vedtaksperiodetype.UTBETALING
             )
