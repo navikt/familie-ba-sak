@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 
-import no.nav.familie.ba.sak.integrasjoner.ecb.domene.ExchangeRate
-import no.nav.familie.ba.sak.integrasjoner.ecb.domene.exchangeRateForCurrency
-import no.nav.familie.ba.sak.integrasjoner.ecb.domene.toExchangeRates
+import no.nav.familie.http.ecb.ECBRestClient
+import no.nav.familie.http.ecb.Frequency
+import no.nav.familie.http.ecb.domene.ExchangeRate
+import no.nav.familie.http.ecb.domene.exchangeRateForCurrency
+import no.nav.familie.http.ecb.exception.ECBClientException
+import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -11,23 +14,29 @@ import java.time.format.DateTimeFormatter
 import kotlin.jvm.Throws
 
 @Service
-class ECBService(val ecbClient: ECBClient) {
+@Import(ECBRestClient::class)
+class ECBService(val ecbClient: ECBRestClient) {
 
     /**
      * @param utenlandskValuta valutaen vi skal konvertere til NOK
      * @param kursDato datoen vi skal hente valutakurser for
      * @return Henter valutakurs for *utenlandskValuta* -> EUR og NOK -> EUR på *kursDato*, og returnerer en beregnet kurs for *utenlandskValuta* -> NOK.
      */
-    @Throws(ECBServiceException::class, ECBClientException::class)
+    @Throws(ECBServiceException::class)
     fun hentValutakurs(utenlandskValuta: String, kursDato: LocalDate): BigDecimal {
-        val exchangeRates = ecbClient.getExchangeRates(utenlandskValuta, kursDato).toExchangeRates()
-        validateExchangeRates(utenlandskValuta, kursDato, exchangeRates)
-        val valutakursNOK = exchangeRates.exchangeRateForCurrency(ECBConstants.NOK)
-        if (utenlandskValuta == ECBConstants.EUR) {
-            return valutakursNOK.exchangeRate
+        try {
+            val exchangeRates =
+                ecbClient.getExchangeRates(Frequency.Daily, listOf(ECBConstants.NOK, utenlandskValuta), kursDato)
+            validateExchangeRates(utenlandskValuta, kursDato, exchangeRates)
+            val valutakursNOK = exchangeRates.exchangeRateForCurrency(ECBConstants.NOK)
+            if (utenlandskValuta == ECBConstants.EUR) {
+                return valutakursNOK!!.exchangeRate
+            }
+            val valutakursUtenlandskValuta = exchangeRates.exchangeRateForCurrency(utenlandskValuta)
+            return beregnValutakurs(valutakursUtenlandskValuta!!.exchangeRate, valutakursNOK!!.exchangeRate)
+        } catch (e: ECBClientException) {
+            throw ECBServiceException(e.message, e)
         }
-        val valutakursUtenlandskValuta = exchangeRates.exchangeRateForCurrency(utenlandskValuta)
-        return beregnValutakurs(valutakursUtenlandskValuta.exchangeRate, valutakursNOK.exchangeRate)
     }
 
     private fun beregnValutakurs(valutakursUtenlandskValuta: BigDecimal, valutakursNOK: BigDecimal): BigDecimal {
@@ -37,10 +46,10 @@ class ECBService(val ecbClient: ECBClient) {
     private fun validateExchangeRates(currency: String, exchangeRateDate: LocalDate, exchangeRates: List<ExchangeRate>) {
         if (currency != ECBConstants.EUR) {
             if (!isValid(exchangeRates, listOf(currency, ECBConstants.NOK), exchangeRateDate, 2)) {
-                throwNotFound(currency, exchangeRateDate)
+                throwValidationException(currency, exchangeRateDate)
             }
         } else if (!isValid(exchangeRates, listOf(ECBConstants.NOK), exchangeRateDate, 1)) {
-            throwNotFound(currency, exchangeRateDate)
+            throwValidationException(currency, exchangeRateDate)
         }
     }
 
@@ -48,9 +57,14 @@ class ECBService(val ecbClient: ECBClient) {
         return exchangeRates.size == expectedSize && exchangeRates.all { it.date == exchangeRateDate } && exchangeRates.map { it.currency }.containsAll(currencies)
     }
 
-    private fun throwNotFound(currency: String, exchangeRateDate: LocalDate) {
+    private fun throwValidationException(currency: String, exchangeRateDate: LocalDate) {
         val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
         val formattedExchangeRateDate = exchangeRateDate.format(dateTimeFormatter)
         throw ECBServiceException("Fant ikke nødvendige valutakurser for valutakursdato $formattedExchangeRateDate for å bestemme valutakursen $currency - NOK")
     }
+}
+
+object ECBConstants {
+    const val NOK = "NOK"
+    const val EUR = "EUR"
 }
