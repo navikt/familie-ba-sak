@@ -339,8 +339,8 @@ fun List<AndelTilkjentYtelse>?.hentTidslinje() =
         } ?: emptyList()
     )
 
-fun List<AndelTilkjentYtelse>.tilTidslinjerPerPerson(): Map<Aktør, AndelTilkjentYtelseTidslinje> =
-    groupBy { it.aktør }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
+fun List<AndelTilkjentYtelse>.tilTidslinjerPerPerson(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
+    groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseTidslinje(
             andelerTilkjentYtelsePåPerson
         )
