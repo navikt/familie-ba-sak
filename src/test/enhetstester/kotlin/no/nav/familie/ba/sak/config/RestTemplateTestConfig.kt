@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.config
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.dataformat.xml.XmlMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -11,7 +8,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
-import org.springframework.http.MediaType
 import org.springframework.http.converter.ByteArrayHttpMessageConverter
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
@@ -95,25 +91,5 @@ class RestTemplateTestConfig {
             .setConnectTimeout(Duration.ofSeconds(5))
             .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
             .setReadTimeout(Duration.ofSeconds(5))
-    }
-
-    @Bean
-    fun xmlMapper(): XmlMapper {
-        val mapper = XmlMapper()
-        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        mapper.registerKotlinModule()
-        return mapper
-    }
-
-    @Bean("ecbRestTemplate")
-    fun xmlRestTemplate(): RestOperations {
-        val converter = MappingJackson2HttpMessageConverter(xmlMapper())
-        val mediaTypes = ArrayList<MediaType>()
-        mediaTypes.addAll(converter.supportedMediaTypes)
-        mediaTypes.add(MediaType.parseMediaType("application/vnd.sdmx.genericdata+xml;version=2.1"))
-        converter.supportedMediaTypes = mediaTypes
-        return RestTemplateBuilder()
-            .additionalMessageConverters(converter)
-            .build()
     }
 }
