@@ -117,13 +117,19 @@ class RegistrerInstitusjonOgVergeStegTest {
 
     @Test
     fun `utførStegOgAngiNeste() skal returnere REGISTRERE_SØKNAD som neste steg`() {
-        val behandling = lagBehandling(fagsak = defaultFagsak().copy(type = FagsakType.INSTITUSJON))
+        val behandling = lagBehandling(
+            fagsak = defaultFagsak().copy(
+                type = FagsakType.INSTITUSJON,
+                institusjon = Institusjon(orgNummer = "12345", tssEksternId = "tss")
+            )
+        )
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
         every { fagsakRepositoryMock.save(any()) } returns behandling.fagsak
         every { vergeRepositoryMock.findByBehandling(any()) } returns null
         every { vergeRepositoryMock.save(any()) } returns Verge(1L, "", behandling)
         every { loggServiceMock.opprettRegistrerVergeLogg(any()) } just runs
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
+        every { institusjonRepositoryMock.findByOrgNummer("12345") } returns behandling.fagsak.institusjon
         every { loggServiceMock.lagre(any()) } returns Logg(
             behandlingId = behandling.id,
             type = LoggType.VERGE_REGISTRERT,

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
@@ -103,7 +104,7 @@ class InnkomendeJournalføringServiceTest(
         assertEquals(FagsakType.BARN_ENSLIG_MINDREÅRIG, behandling!!.fagsak.type)
 
         val request2 = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
-            .copy(erPåInstitusjon = true)
+            .copy(erPåInstitusjon = true, institusjon = InstitusjonInfo("orgnr", tssEksternId = "tss"))
         val fagsakId2 = innkomendeJournalføringService.journalfør(request2, "1234", "mockEnhet", "2")
         val behandling2 = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId2.toLong())
 
