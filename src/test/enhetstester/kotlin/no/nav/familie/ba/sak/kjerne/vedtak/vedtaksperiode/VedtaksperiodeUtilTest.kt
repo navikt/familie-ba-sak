@@ -507,22 +507,30 @@ class VedtaksperiodeUtilTest {
     }
 
     @Test
-    fun `Skal splitte på utdypendeVilkårsvurdering`() {
+    fun `Skal splitte på utdypende vilkårsvurdering når det flytter seg fra ett barn til et annet`() {
         val mars2020 = YearMonth.of(2020, 3)
         val april2020 = YearMonth.of(2020, 4)
         val mai2020 = YearMonth.of(2020, 5)
         val juli2020 = YearMonth.of(2020, 7)
 
         val søker = lagPerson()
-        val barn = lagPerson()
+        val barn1 = lagPerson()
+        val barn2 = lagPerson()
 
         val vedtak = lagVedtak()
 
-        val andelBarnMarsTilJuli = lagAndelTilkjentYtelse(
+        val andelBarn1MarsTilJuli = lagAndelTilkjentYtelse(
             fom = mars2020,
             tom = juli2020,
             beløp = 1000,
-            person = barn
+            person = barn1
+        )
+
+        val andelBarn2MarsTilJuli = lagAndelTilkjentYtelse(
+            fom = mars2020,
+            tom = juli2020,
+            beløp = 2000,
+            person = barn2
         )
 
         val vilkårsvurdering = lagVilkårsvurdering(
@@ -531,27 +539,13 @@ class VedtaksperiodeUtilTest {
             resultat = Resultat.OPPFYLT
         )
 
-        val personResultat = PersonResultat(
+        val personResultatBarn1 = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn.aktør
+            aktør = barn1.aktør
         )
-        val vilkårResultaterUtenomBorMedSøker = Vilkår.hentVilkårFor(PersonType.BARN)
-            .filter { it != Vilkår.BOR_MED_SØKER }
-            .filter { it != Vilkår.UNDER_18_ÅR }
-            .map {
-                VilkårResultat(
-                    personResultat = personResultat,
-                    periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
-                    periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
-                    vilkårType = it,
-                    resultat = Resultat.OPPFYLT,
-                    begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
-                    utdypendeVilkårsvurderinger = emptyList()
-                )
-            }
-        val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurdering = VilkårResultat(
-            personResultat = personResultat,
+
+        val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
+            personResultat = personResultatBarn1,
             periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
             periodeTom = april2020.minusMonths(1).sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
@@ -560,22 +554,58 @@ class VedtaksperiodeUtilTest {
             behandlingId = vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_SØKER)
         )
-        val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurdering = VilkårResultat(
-            personResultat = personResultat,
+        val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
+            personResultat = personResultatBarn1,
             periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = juli2020.sisteDagIInneværendeMåned().minusMonths(1),
+            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
             behandlingId = vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = emptyList()
         )
-        val vilkårResultater = vilkårResultaterUtenomBorMedSøker +
-            vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurdering +
-            vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurdering
+        val vilkårResultaterBarn1 = listOf(
+            vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1,
+            vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1
+        )
 
-        personResultat.setSortedVilkårResultater(
-            vilkårResultater.toSet()
+        personResultatBarn1.setSortedVilkårResultater(
+            vilkårResultaterBarn1.toSet()
+        )
+
+        val personResultatBarn2 = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = barn2.aktør
+        )
+
+        val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn2 = VilkårResultat(
+            personResultat = personResultatBarn2,
+            periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
+            periodeTom = april2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            resultat = Resultat.OPPFYLT,
+            begrunnelse = "",
+            behandlingId = vilkårsvurdering.behandling.id,
+            utdypendeVilkårsvurderinger = emptyList()
+        )
+        val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn2 = VilkårResultat(
+            personResultat = personResultatBarn2,
+            periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
+            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            resultat = Resultat.OPPFYLT,
+            begrunnelse = "",
+            behandlingId = vilkårsvurdering.behandling.id,
+            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_SØKER)
+        )
+
+        val vilkårResultaterBarn2 = listOf(
+            vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn2,
+            vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn2
+        )
+
+        personResultatBarn2.setSortedVilkårResultater(
+            vilkårResultaterBarn2.toSet()
         )
 
         val forventetResultat = listOf(
@@ -596,9 +626,9 @@ class VedtaksperiodeUtilTest {
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
-            listOf(andelBarnMarsTilJuli),
+            listOf(andelBarn1MarsTilJuli, andelBarn2MarsTilJuli),
             vedtak,
-            setOf(personResultat).tilFørskjøvetVilkårResultatTidslinjeMap()
+            setOf(personResultatBarn1, personResultatBarn2).tilFørskjøvetVilkårResultatTidslinjeMap()
         )
 
         Assertions.assertEquals(

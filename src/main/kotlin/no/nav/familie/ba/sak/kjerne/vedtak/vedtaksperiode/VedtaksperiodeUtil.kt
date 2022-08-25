@@ -74,8 +74,8 @@ fun hentPerioderMedUtbetaling(
 ): List<VedtaksperiodeMedBegrunnelser> {
     val utdypendeVilkårsvurderingTidslinje =
         forskjøvetVilkårResultatTidslinjeMap
-            .tilUtdypendeVilkårsvurderingTidslinjeMap().values
-            .kombinerUtenNull { it.flatten().toSet() }
+            .tilUtdypendeVilkårsvurderingTidslinjer()
+            .kombinerUtenNull { it.toMap() }
             .filtrer { !it.isNullOrEmpty() }
             .slåSammenLike()
 
@@ -96,11 +96,14 @@ fun hentPerioderMedUtbetaling(
         }
 }
 
-private fun Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>.tilUtdypendeVilkårsvurderingTidslinjeMap():
-    Map<Aktør, Tidslinje<Set<UtdypendeVilkårsvurdering>, Måned>> = this
-    .mapValues { (_, vilkårsvurderingTidslinje) ->
+private fun Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>.tilUtdypendeVilkårsvurderingTidslinjer():
+    List<Tidslinje<Pair<Aktør, Set<UtdypendeVilkårsvurdering>>, Måned>> =
+    this.map { (aktør, vilkårsvurderingTidslinje) ->
         vilkårsvurderingTidslinje.map { vilkårResultater ->
-            vilkårResultater?.flatMap { it.utdypendeVilkårsvurderinger }?.toSet()
+            Pair(
+                aktør,
+                vilkårResultater?.flatMap { it.utdypendeVilkårsvurderinger }?.toSet() ?: emptySet()
+            )
         }
     }
 
