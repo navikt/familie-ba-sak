@@ -69,13 +69,10 @@ class ValutakursController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    private fun oppdaterValutakursMedKursFraECB(restValutakurs: RestValutakurs, valutakurs: Valutakurs): Valutakurs {
-        val eksisterendeValutakurs = valutakursService.hentValutakurs(restValutakurs.id)
-        if (valutakursErEndret(restValutakurs, eksisterendeValutakurs)) {
-            return valutakurs.copy(kurs = ecbService.hentValutakurs(restValutakurs.valutakode!!, restValutakurs.valutakursdato!!))
-        }
-        return valutakurs
-    }
+    private fun oppdaterValutakursMedKursFraECB(restValutakurs: RestValutakurs, valutakurs: Valutakurs) =
+        if (valutakursErEndret(restValutakurs, valutakursService.hentValutakurs(restValutakurs.id))) {
+            valutakurs.copy(kurs = ecbService.hentValutakurs(restValutakurs.valutakode!!, restValutakurs.valutakursdato!!))
+        } else valutakurs
 
     /**
      * Sjekker om valuta er Islandske Kroner og kursdato er før 01.02.2018
