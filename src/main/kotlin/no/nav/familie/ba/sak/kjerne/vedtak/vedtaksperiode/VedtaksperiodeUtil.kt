@@ -76,7 +76,7 @@ fun hentPerioderMedUtbetaling(
         forskjøvetVilkårResultatTidslinjeMap
             .tilUtdypendeVilkårsvurderingTidslinjeMap().values
             .kombinerUtenNull { it.flatten().toSet() }
-            .filtrer { it != null && it.isNotEmpty() }
+            .filtrer { !it.isNullOrEmpty() }
             .slåSammenLike()
 
     return andelerTilkjentYtelse
@@ -315,7 +315,12 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
         andelerTilkjentYtelse,
         utvidetVedtaksperiodeMedBegrunnelser
     ),
-    ytelserForrigePerioder = andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelser) }
+    ytelserForrigePerioder = andelerTilkjentYtelse.filter {
+        ytelseErFraForrigePeriode(
+            it,
+            utvidetVedtaksperiodeMedBegrunnelser
+        )
+    }
 )
 
 fun hentGyldigeEØSBegrunnelserForPeriode(
@@ -491,4 +496,7 @@ fun hentYtelserForSøkerForrigeMåned(
         ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelser)
 }.map { it.type }
 
-fun ytelseErFraForrigePeriode(ytelse: AndelTilkjentYtelse, utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser) = ytelse.stønadTom.sisteDagIInneværendeMåned().erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)
+fun ytelseErFraForrigePeriode(
+    ytelse: AndelTilkjentYtelse,
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser
+) = ytelse.stønadTom.sisteDagIInneværendeMåned().erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)
