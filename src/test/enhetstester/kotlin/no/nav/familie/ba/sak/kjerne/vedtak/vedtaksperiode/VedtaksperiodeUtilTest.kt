@@ -406,13 +406,13 @@ class VedtaksperiodeUtilTest {
                 tom = juli2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
                 begrunnelser = mutableSetOf()
-            ),
+            )
         )
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
         val personResultater = setOf(
             vilkårsvurdering.lagGodkjentPersonResultatForBarn(person1),
-            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2),
+            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2)
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
@@ -480,13 +480,13 @@ class VedtaksperiodeUtilTest {
                 tom = juli2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
                 begrunnelser = mutableSetOf()
-            ),
+            )
         )
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
         val personResultater = setOf(
             vilkårsvurdering.lagGodkjentPersonResultatForBarn(person1),
-            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2),
+            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2)
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
@@ -592,7 +592,7 @@ class VedtaksperiodeUtilTest {
                 tom = juli2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
                 begrunnelser = mutableSetOf()
-            ),
+            )
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(

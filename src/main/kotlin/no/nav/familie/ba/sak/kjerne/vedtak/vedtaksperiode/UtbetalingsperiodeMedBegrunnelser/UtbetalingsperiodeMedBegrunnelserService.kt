@@ -51,7 +51,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
         } else {
             hentPerioderMedUtbetalingGammel(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
-                vedtak = vedtak,
+                vedtak = vedtak
             )
         }
 

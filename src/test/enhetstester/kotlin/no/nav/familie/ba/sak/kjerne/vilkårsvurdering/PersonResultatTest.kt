@@ -94,7 +94,7 @@ class PersonResultatTest {
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
                 utdypendeVilkårsvurderinger = emptyList()
-            ),
+            )
         )
 
         personResultat.setSortedVilkårResultater(vilkårResultater.toSet())
@@ -144,7 +144,7 @@ class PersonResultatTest {
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
                 utdypendeVilkårsvurderinger = emptyList()
-            ),
+            )
         )
 
         personResultat.setSortedVilkårResultater(vilkårResultater.toSet())
