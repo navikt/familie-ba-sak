@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -48,6 +49,8 @@ class BehandlingsresultatStegTest {
 
     private lateinit var behandling: Behandling
 
+    private val featureToggleService: FeatureToggleService = mockk()
+
     @BeforeEach
     fun init() {
         behandlingsresultatSteg = BehandlingsresultatSteg(
@@ -60,7 +63,8 @@ class BehandlingsresultatStegTest {
             vilkårService,
             persongrunnlagService,
             beregningService,
-            endretUtbetalingAndelService
+            endretUtbetalingAndelService,
+            featureToggleService
         )
 
         behandling = lagBehandling(

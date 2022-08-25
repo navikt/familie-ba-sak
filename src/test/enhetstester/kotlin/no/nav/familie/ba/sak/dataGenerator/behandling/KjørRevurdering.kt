@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.dataGenerator.behandling
 
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
@@ -12,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
@@ -66,8 +69,8 @@ fun kjørStegprosessForBehandling(
     endretUtbetalingAndelService: EndretUtbetalingAndelService,
     fagsakService: FagsakService,
     persongrunnlagService: PersongrunnlagService,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
-
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    featureToggleService: FeatureToggleService
 ): Behandling {
     fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
 
@@ -119,7 +122,8 @@ fun kjørStegprosessForBehandling(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             sanityBegrunnelser = hentBegrunnelser(),
-            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!
+            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!,
+            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
         )
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
@@ -177,7 +181,8 @@ private fun håndterSendtTilBeslutterSteg(
     andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     endretUtbetalingAndelService: EndretUtbetalingAndelService,
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    vilkårsvurdering: Vilkårsvurdering
+    vilkårsvurdering: Vilkårsvurdering,
+    brukFrikobledeAndelerOgEndringer: Boolean
 ): Behandling {
     val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
         behandlingId = behandlingEtterSimuleringSteg.id
@@ -186,17 +191,19 @@ private fun håndterSendtTilBeslutterSteg(
     val persongrunnlag =
         persongrunnlagService.hentAktivThrows(behandlingEtterSimuleringSteg.id)
 
+    val endredeUtbetalingAndeler = endretUtbetalingAndelService.hentEndredeUtbetalingAndeler(
+        behandlingEtterSimuleringSteg.id
+    )
     leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
         behandling = behandlingEtterSimuleringSteg,
         vedtakService = vedtakService,
         vedtaksperiodeService = vedtaksperiodeService,
         personopplysningGrunnlag = persongrunnlag,
         andelerTilkjentYtelse = andelerTilkjentYtelse,
-        endredeUtbetalingAndeler = endretUtbetalingAndelService.hentEndredeUtbetalingAndeler(
-            behandlingEtterSimuleringSteg.id
-        ),
+        endredeUtbetalingAndeler = endredeUtbetalingAndeler,
         sanityBegrunnelser = sanityBegrunnelser,
-        vilkårsvurdering = vilkårsvurdering
+        vilkårsvurdering = vilkårsvurdering,
+        brukFrikobledeAndelerOgEndringer = brukFrikobledeAndelerOgEndringer
     )
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     return behandlingEtterSendTilBeslutter
@@ -346,7 +353,8 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    vilkårsvurdering: Vilkårsvurdering
+    vilkårsvurdering: Vilkårsvurdering,
+    brukFrikobledeAndelerOgEndringer: Boolean
 ) {
     val aktivtVedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
 
@@ -355,9 +363,15 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
 
     val vedtaksperiode = perisisterteVedtaksperioder.first()
 
+    val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalinger(
+        andelerTilkjentYtelse,
+        endredeUtbetalingAndeler,
+        brukFrikobledeAndelerOgEndringer
+    ).lagAndelerMedEndringer()
+
     val utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
         personopplysningGrunnlag = personopplysningGrunnlag,
-        andelerTilkjentYtelse = andelerTilkjentYtelse
+        andelerTilkjentYtelse = andelerMedEndringer
     )
 
     val aktørerMedUtbetaling =
@@ -379,14 +393,14 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
         minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler
             .map { it.tilMinimertEndretUtbetalingAndel() },
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
-            andelerTilkjentYtelse,
+            andelerMedEndringer,
             utvidetVedtaksperiodeMedBegrunnelser.fom
         ),
         ytelserForSøkerForrigeMåned = hentYtelserForSøkerForrigeMåned(
-            andelerTilkjentYtelse,
+            andelerMedEndringer,
             utvidetVedtaksperiodeMedBegrunnelser
         ),
-        ytelserForrigePerioder = andelerTilkjentYtelse.filter {
+        ytelserForrigePerioder = andelerMedEndringer.filter {
             ytelseErFraForrigePeriode(
                 it,
                 utvidetVedtaksperiodeMedBegrunnelser

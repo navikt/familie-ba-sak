@@ -561,7 +561,8 @@ class BehandleSmåbarnstilleggTest(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            featureToggleService = featureToggleService
         )
     }
 }

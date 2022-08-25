@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.hentUtbetalingstidslinjeForSøker
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -33,14 +33,14 @@ data class AndelTilkjentYtelseDataForÅKalkulereEndring(
     val behandlingAlder: BehandlingAlder
 )
 
-fun List<AndelTilkjentYtelse>.hentFørsteEndringstidspunkt(
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentFørsteEndringstidspunkt(
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ): LocalDate? = this.hentPerioderMedEndringerFra(forrigeAndelerTilkjentYtelse)
     .mapNotNull { (_, tidslinjeMedDifferanserPåPerson) -> tidslinjeMedDifferanserPåPerson.minOfOrNull { it.fom } }
     .minOfOrNull { it }
 
-fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentPerioderMedEndringerFra(
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ): Map<AktørId, LocalDateTimeline<Beløpsdifferanse>> {
     val andelerTidslinje = this.hentTidslinjerForPersoner(BehandlingAlder.NY)
     val forrigeAndelerTidslinje =
@@ -118,7 +118,7 @@ private fun List<AndelTilkjentYtelseDataForÅKalkulereEndring>.finnKalkulertBel�
     singleOrNull { it.behandlingAlder == behandlingAlder }
         ?.kalkulertBeløp
 
-private fun List<AndelTilkjentYtelse>.hentTidslinjerForPersoner(behandlingAlder: BehandlingAlder):
+private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentTidslinjerForPersoner(behandlingAlder: BehandlingAlder):
     Map<String, LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring>> {
     return this.groupBy { it.aktør.aktørId }
         .map { (aktørId, andeler) ->
@@ -134,7 +134,7 @@ private fun List<AndelTilkjentYtelse>.hentTidslinjerForPersoner(behandlingAlder:
         }.toMap()
 }
 
-private fun List<AndelTilkjentYtelse>.hentTidslinje(
+private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentTidslinje(
     behandlingAlder: BehandlingAlder
 ): LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring> = LocalDateTimeline(
     map {
@@ -144,15 +144,15 @@ private fun List<AndelTilkjentYtelse>.hentTidslinje(
             AndelTilkjentYtelseDataForÅKalkulereEndring(
                 aktørId = it.aktør.aktørId,
                 kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
-                endretUtbetalingÅrsaker = it.endretUtbetalingAndeler.mapNotNull { endretUtbetalingAndel -> endretUtbetalingAndel.årsak },
-                behandlingAlder = behandlingAlder
+                endretUtbetalingÅrsaker = it.endreteUtbetalinger.mapNotNull { endretUtbetalingAndel -> endretUtbetalingAndel.årsak },
+                behandlingAlder = behandlingAlder,
             )
         )
     }
 )
 
 private fun kombinerOverlappendeAndelerForSøker(
-    andeler: List<AndelTilkjentYtelse>,
+    andeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     behandlingAlder: BehandlingAlder,
     aktørId: AktørId
 ): LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring> {

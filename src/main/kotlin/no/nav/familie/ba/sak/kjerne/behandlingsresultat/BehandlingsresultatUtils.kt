@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -31,8 +31,8 @@ object BehandlingsresultatUtils {
     fun utledBehandlingsresultatDataForPerson(
         person: Person,
         personerFremstiltKravFor: List<Aktør>,
-        andelerFraForrigeTilkjentYtelse: List<AndelTilkjentYtelse>,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        andelerFraForrigeTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         erEksplisittAvslag: Boolean
     ): BehandlingsresultatPerson {
         val aktør = person.aktør
@@ -52,7 +52,7 @@ object BehandlingsresultatUtils {
                             stønadTom = andelTilkjentYtelse.stønadTom,
                             kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
                         )
-                    } ?: emptyList()
+                    }
             },
             andeler = when (person.type) {
                 PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(andelerTilkjentYtelse.filter { it.aktør == aktør })
@@ -213,7 +213,7 @@ private fun validerYtelsePersoner(ytelsePersoner: List<YtelsePerson>) {
     }
 }
 
-private fun kombinerOverlappendeAndelerForSøker(andeler: List<AndelTilkjentYtelse>): List<BehandlingsresultatAndelTilkjentYtelse> {
+private fun kombinerOverlappendeAndelerForSøker(andeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): List<BehandlingsresultatAndelTilkjentYtelse> {
     val utbetalingstidslinjeForSøker = hentUtbetalingstidslinjeForSøker(andeler)
 
     return utbetalingstidslinjeForSøker.toSegments().map { andelTilkjentYtelse ->
@@ -225,7 +225,7 @@ private fun kombinerOverlappendeAndelerForSøker(andeler: List<AndelTilkjentYtel
     }
 }
 
-fun hentUtbetalingstidslinjeForSøker(andeler: List<AndelTilkjentYtelse>): LocalDateTimeline<Int> {
+fun hentUtbetalingstidslinjeForSøker(andeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): LocalDateTimeline<Int> {
     val utvidetTidslinje = LocalDateTimeline(
         andeler.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
             .map {

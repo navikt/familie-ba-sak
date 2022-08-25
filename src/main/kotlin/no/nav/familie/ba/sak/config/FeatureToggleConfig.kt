@@ -100,6 +100,7 @@ class FeatureToggleConfig(
     }
 
     companion object {
+        const val BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER = "familie-ba-sak.frikoble-andeler-og-endringer"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
         const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"

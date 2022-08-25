@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.finnTilOgMedDato
 import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetalingFom
@@ -152,8 +153,8 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    fun validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler: List<EndretUtbetalingAndel>) {
-        if (endretUtbetalingAndeler.any { it.andelTilkjentYtelser.isEmpty() }) {
+    fun validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>) {
+        if (endretUtbetalingAndeler.any { it.andelerTilkjentYtelse.isEmpty() }) {
             throw FunksjonellFeil(
                 melding = "Det er opprettet instanser av EndretUtbetalingandel som ikke er tilknyttet noen andeler. De må enten lagres eller slettes av SB.",
                 frontendFeilmelding = "Du har endrede utbetalingsperioder. Bekreft, slett eller oppdater periodene i listen."
@@ -194,11 +195,11 @@ fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
 }
 
 fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-    endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndel>
+    endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
 ) {
     val endredeUtvidetUtbetalingerAndeler = endretUtbetalingAndelerMedÅrsakDeltBosted
         .filter { endretUtbetaling ->
-            endretUtbetaling.andelTilkjentYtelser.any { it.erUtvidet() }
+            endretUtbetaling.andelerTilkjentYtelse.any { it.erUtvidet() }
         }
 
     endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->

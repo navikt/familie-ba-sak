@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
@@ -102,6 +103,16 @@ class UtvidetBehandlingService(
         val utenlandskePeriodebeløp =
             if (kanBehandleEøs) utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
+        val endreteUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+
+        val brukFrikobledeAndelerOgEndringer =
+            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
+        val endreteUtbetalingerMedAndeler = AndelTilkjentYtelseOgEndreteUtbetalinger(
+            andelerTilkjentYtelse,
+            endreteUtbetalinger,
+            brukFrikobledeAndelerOgEndringer
+        ).lagEndreteUtbetalingMedAndeler()
+
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
             steg = behandling.steg,
@@ -126,8 +137,8 @@ class UtvidetBehandlingService(
             utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
-            endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
-                .map { it.tilRestEndretUtbetalingAndel() },
+            endretUtbetalingAndeler = endreteUtbetalingerMedAndeler
+                .map { it.tilRestEndretUtbetalingAndel(brukFrikobledeAndelerOgEndringer) },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             endringstidspunkt = utledEndringstidpunkt(endringstidspunkt, behandling),
             vedtak = vedtak?.tilRestVedtak(

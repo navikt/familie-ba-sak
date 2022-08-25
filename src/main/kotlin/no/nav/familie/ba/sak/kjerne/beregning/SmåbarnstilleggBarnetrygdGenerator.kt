@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.ba.sak.common.slåSammenSammenhengendePerioder
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -33,17 +34,18 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 
     fun lagSmåbarnstilleggAndeler(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
-        utvidetAndeler: List<AndelTilkjentYtelse>,
-        barnasAndeler: List<AndelTilkjentYtelse>,
+        utvidetAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
-    ): List<AndelTilkjentYtelse> {
+    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         if (perioderMedFullOvergangsstønad.isEmpty() || utvidetAndeler.isEmpty() || barnasAndeler.isEmpty()) return emptyList()
 
         validerUtvidetOgBarnasAndeler(utvidetAndeler = utvidetAndeler, barnasAndeler = barnasAndeler)
 
         val søkerAktør = utvidetAndeler.first().aktør
 
-        val perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad)
+        val perioderMedFullOvergangsstønadTidslinje =
+            InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad)
 
         val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse = utvidetAndeler)
 
@@ -65,9 +67,9 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 
     fun lagSmåbarnstilleggAndelerGammel(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
-    ): List<AndelTilkjentYtelse> {
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
+    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelse.partition { it.erSøkersAndel() }
 
         if (perioderMedFullOvergangsstønad.isEmpty() || søkersAndeler.isEmpty()) return emptyList()
@@ -134,7 +136,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 )
                     .singleOrNull()?.sats
                     ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
-                AndelTilkjentYtelse(
+                val aty = AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
                     aktør = søkerAktør
@@ -147,12 +149,14 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                     sats = ordinærSatsForPeriode,
                     prosent = BigDecimal(100)
                 )
+
+                AndelTilkjentYtelseMedEndreteUtbetalinger(aty, emptyList(), null)
             }
     }
 
     private fun Tidslinje<SmåbarnstilleggPeriode, Måned>.lagSmåbarnstilleggAndeler(
         søkerAktør: Aktør
-    ): List<AndelTilkjentYtelse> {
+    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         return this.perioder().map {
             val stønadFom = it.fraOgMed.tilYearMonth()
             val stønadTom = it.tilOgMed.tilYearMonth()
@@ -161,13 +165,14 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 satstype = SatsType.SMA,
                 stønadFraOgMed = stønadFom,
                 stønadTilOgMed = stønadTom
-            ).singleOrNull()?.sats ?: throw Feil("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
+            ).singleOrNull()?.sats
+                ?: throw Feil("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
 
             val prosentIPeriode = it.innhold?.prosent ?: throw Feil("Skal finnes prosent for gitt periode")
 
             val beløpIPeriode = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosent = prosentIPeriode)
 
-            AndelTilkjentYtelse(
+            val aty = AndelTilkjentYtelse(
                 behandlingId = behandlingId,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = søkerAktør,
@@ -179,12 +184,14 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 sats = ordinærSatsForPeriode,
                 prosent = prosentIPeriode
             )
+
+            AndelTilkjentYtelseMedEndreteUtbetalinger(aty, emptyList(), null)
         }
     }
 
     fun lagPerioderMedBarnSomGirRettTilSmåbarnstilleggGammel(
         barnasAktørOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
-        barnasAndeler: List<AndelTilkjentYtelse>
+        barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ): List<MånedPeriode> {
         return slåSammenOverlappendePerioder(
             barnasAktørOgFødselsdatoer.map { (aktør, fødselsdato) ->

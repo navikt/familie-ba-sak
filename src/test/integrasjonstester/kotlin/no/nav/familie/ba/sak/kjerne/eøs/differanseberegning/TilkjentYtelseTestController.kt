@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.util.DeltBostedBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.tilEndreteUtebetalingAndeler
@@ -48,7 +48,7 @@ class TilkjentYtelseTestController(
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         restDeltBosted.tilEndretUtbetalingAndeler(personopplysningGrunnlag, tilkjentYtelse).forEach {
-            val lagretEndretUtbetalingAndel = endretUtbetalingAndelRepository.saveAndFlush(it)
+            val lagretEndretUtbetalingAndel = endretUtbetalingAndelRepository.saveAndFlush(it.endretUtbetalingAndel)
 
             beregningService.oppdaterBehandlingMedBeregning(
                 behandling,
@@ -64,7 +64,7 @@ class TilkjentYtelseTestController(
 private fun Map<LocalDate, String>.tilEndretUtbetalingAndeler(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     tilkjentYtelse: TilkjentYtelse
-): Collection<EndretUtbetalingAndel> {
+): Collection<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
     return this.map { (dato, tidslinje) ->
         val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }
         DeltBostedBuilder(dato.tilMånedTidspunkt(), tilkjentYtelse)

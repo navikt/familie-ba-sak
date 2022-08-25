@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dataGenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -59,7 +60,10 @@ class VilkårsvurderingFlyttResultaterTest(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 
     @Autowired
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+
+    @Autowired
+    private val featureToggleService: FeatureToggleService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -134,7 +138,8 @@ class VilkårsvurderingFlyttResultaterTest(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            featureToggleService = featureToggleService
         )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
@@ -156,7 +161,8 @@ class VilkårsvurderingFlyttResultaterTest(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            featureToggleService = featureToggleService
         )
 
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret

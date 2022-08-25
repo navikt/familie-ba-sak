@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -60,7 +61,10 @@ internal class StønadsstatistikkServiceTest(
     private val kompetanseService: KompetanseService,
 
     @MockK
-    private val vedtakRepository: VedtakRepository
+    private val vedtakRepository: VedtakRepository,
+
+    @MockK
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
 
     private val stønadsstatistikkService =
@@ -71,7 +75,8 @@ internal class StønadsstatistikkServiceTest(
             vedtakService,
             personopplysningerService,
             vedtakRepository,
-            kompetanseService
+            kompetanseService,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
     private val behandling = lagBehandling()
     private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())

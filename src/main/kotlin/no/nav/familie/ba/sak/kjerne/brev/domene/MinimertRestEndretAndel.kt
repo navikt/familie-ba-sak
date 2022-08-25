@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import java.time.LocalDate
 
@@ -38,7 +38,7 @@ data class MinimertRestEndretAndel(
 fun List<MinimertRestEndretAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
     this.filter { it.erOverlappendeMed(nullableMånedPeriode) }
 
-fun EndretUtbetalingAndel.tilMinimertRestEndretUtbetalingAndel() = MinimertRestEndretAndel(
+fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilMinimertRestEndretUtbetalingAndel() = MinimertRestEndretAndel(
     periode = this.periode,
     personIdent = this.person?.aktør?.aktivFødselsnummer() ?: throw Feil(
         "Har ikke ident på endretUtbetalingsandel ${this.id} " +

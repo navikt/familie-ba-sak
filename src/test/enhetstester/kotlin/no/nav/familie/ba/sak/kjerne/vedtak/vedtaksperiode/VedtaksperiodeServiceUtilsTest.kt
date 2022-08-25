@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagTriggesAv
@@ -86,7 +86,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         val identerMedUtbetaling = listOf(barn1.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer())
         val endredeUtbetalingAndeler = listOf(
-            lagEndretUtbetalingAndel(
+            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 person = barn2,
                 fom = fom.toYearMonth(),
                 tom = tom.toYearMonth()

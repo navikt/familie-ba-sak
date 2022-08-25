@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVilkårResultat
@@ -932,7 +932,7 @@ internal class UtvidetBarnetrygdTest {
         )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2021, 10),
                 tom = YearMonth.of(2022, 2),
                 person = tilfeldigPerson(personType = PersonType.BARN),
@@ -940,7 +940,7 @@ internal class UtvidetBarnetrygdTest {
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 tilkjentYtelse = tilkjentYtelse
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2021, 10),
                 tom = YearMonth.of(2022, 1),
                 person = tilfeldigPerson(personType = PersonType.BARN),
@@ -982,7 +982,7 @@ internal class UtvidetBarnetrygdTest {
         )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2015, 10),
                 tom = YearMonth.of(2022, 2),
                 person = tilfeldigPerson(personType = PersonType.BARN),

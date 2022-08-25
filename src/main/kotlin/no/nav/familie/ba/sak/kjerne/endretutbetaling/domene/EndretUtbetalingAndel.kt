@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -131,10 +132,10 @@ enum class Årsak(val visningsnavn: String) {
     ALLEREDE_UTBETALT("Allerede utbetalt")
 }
 
-fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() =
+fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel(frikobleAndelerOgEndringer: Boolean) =
     RestEndretUtbetalingAndel(
         id = this.id,
-        personIdent = this.person?.aktør?.aktivFødselsnummer(),
+        personIdent = this.aktivtFødselsnummer,
         prosent = this.prosent,
         fom = this.fom,
         tom = this.tom,
@@ -142,7 +143,7 @@ fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() =
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
         søknadstidspunkt = this.søknadstidspunkt,
         begrunnelse = this.begrunnelse,
-        erTilknyttetAndeler = this.andelTilkjentYtelser.isNotEmpty()
+        erTilknyttetAndeler = frikobleAndelerOgEndringer || this.andelerTilkjentYtelse.isNotEmpty()
     )
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
@@ -356,7 +356,7 @@ internal class StandardbegrunnelseTest {
         )
 
         val ytelserForrigeMåned = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(
                     LocalDate.now().minusMonths(1).year,
                     LocalDate.now().minusMonths(1).month
@@ -399,7 +399,7 @@ internal class StandardbegrunnelseTest {
         )
 
         val ytelserForrigeMåned = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(
                     dødsfallDato.minusMonths(5).year,
                     dødsfallDato.minusMonths(5).month
@@ -442,7 +442,7 @@ internal class StandardbegrunnelseTest {
         )
 
         val ytelserForrigeMåned = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(
                     dødsfallDato.plusMonths(5).year,
                     dødsfallDato.plusMonths(5).month
@@ -480,7 +480,7 @@ internal class StandardbegrunnelseTest {
             lagMinimertPerson(dødsfallsdato = dødsfallDatoBarn2, aktivPersonIdent = barn2Fnr)
         )
         var ytelserForrigePeriode = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(
                     dødsfallDatoBarn1.minusMonths(1).year,
                     dødsfallDatoBarn1.minusMonths(1).month
@@ -501,7 +501,7 @@ internal class StandardbegrunnelseTest {
         )
 
         ytelserForrigePeriode = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(
                     dødsfallDatoBarn1.minusMonths(1).year,
                     dødsfallDatoBarn1.minusMonths(1).month
@@ -531,7 +531,7 @@ internal class StandardbegrunnelseTest {
         )
 
         ytelserForrigePeriode = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(
                     dødsfallDatoBarn1.minusMonths(1).year,
                     dødsfallDatoBarn1.minusMonths(1).month
@@ -539,7 +539,7 @@ internal class StandardbegrunnelseTest {
                 tom = YearMonth.of(dødsfallDatoBarn1.year, dødsfallDatoBarn1.month),
                 aktør = Aktør(barn1Fnr + "00").also { it.personidenter.add(Personident(barn1Fnr, it)) }
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(dødsfallDatoBarn2.minusMonths(1).year, dødsfallDatoBarn2.minusMonths(1).month),
                 tom = YearMonth.of(dødsfallDatoBarn2.year, dødsfallDatoBarn2.month),
                 aktør = Aktør(barn2Fnr + "00").also { it.personidenter.add(Personident(barn2Fnr, it)) }

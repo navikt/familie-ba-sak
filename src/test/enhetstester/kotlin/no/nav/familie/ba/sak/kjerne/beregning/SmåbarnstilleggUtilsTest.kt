@@ -4,6 +4,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -42,7 +43,7 @@ class SmåbarnstilleggUtilsTest {
         val barn = lagPerson(fødselsdato = LocalDate.now().minusYears(4), type = PersonType.BARN)
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn.fødselsdato.plusMonths(1).toYearMonth(),
                 tom = YearMonth.now(),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
@@ -68,14 +69,14 @@ class SmåbarnstilleggUtilsTest {
         val brytningstidspunkt = LocalDate.now().minusYears(3)
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn.fødselsdato.plusMonths(1).toYearMonth(),
                 tom = brytningstidspunkt.toYearMonth(),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 person = barn,
                 prosent = BigDecimal.ZERO
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = brytningstidspunkt.plusMonths(1).toYearMonth(),
                 tom = YearMonth.now(),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
@@ -108,33 +109,33 @@ class SmåbarnstilleggUtilsTest {
         val brytningstidspunkt2 = LocalDate.now().minusYears(2)
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn1.fødselsdato.plusMonths(1).toYearMonth(),
                 tom = brytningstidspunkt1.toYearMonth(),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 person = barn1,
                 prosent = BigDecimal.ZERO
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = brytningstidspunkt1.plusMonths(1).toYearMonth(),
                 tom = brytningstidspunkt2.toYearMonth(),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 person = barn1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = brytningstidspunkt2.plusMonths(1).toYearMonth(),
                 tom = YearMonth.now().plusYears(5),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 person = barn1,
                 prosent = BigDecimal.ZERO
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn2.fødselsdato.plusMonths(1).toYearMonth(),
                 tom = YearMonth.now().plusYears(5),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 person = barn2
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn3.fødselsdato.plusMonths(1).toYearMonth(),
                 tom = YearMonth.now(),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
@@ -177,7 +178,7 @@ class SmåbarnstilleggUtilsTest {
         )
 
         val utvidetAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(3),
                 tom = YearMonth.now().plusYears(1),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -224,14 +225,14 @@ class SmåbarnstilleggUtilsTest {
         )
 
         val utvidetAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(4),
                 tom = brytningstidspunkt1,
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 person = søker,
                 prosent = BigDecimal.ZERO
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = brytningstidspunkt1.plusMonths(1),
                 tom = YearMonth.now(),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -289,7 +290,7 @@ class SmåbarnstilleggUtilsTest {
         val barnasIdenterOgFødselsdatoer = listOf(Pair(aktør, LocalDate.now().minusYears(4)))
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusMonths(20),
                 tom = YearMonth.now().plusMonths(6),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -328,7 +329,7 @@ class SmåbarnstilleggUtilsTest {
             )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusMonths(20),
                 tom = YearMonth.now().plusMonths(6),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -362,7 +363,7 @@ class SmåbarnstilleggUtilsTest {
             )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusMonths(15),
                 tom = YearMonth.now().plusMonths(6),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -399,19 +400,19 @@ class SmåbarnstilleggUtilsTest {
                 )
             ),
             forrigeAndelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = tilfeldigPerson(aktør = barnAktør)
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(aktør = tilAktør(personIdent))
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
@@ -442,21 +443,21 @@ class SmåbarnstilleggUtilsTest {
                 )
             ),
             forrigeAndelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = tilfeldigPerson(aktør = barnIdent),
                     aktør = barnIdent
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(aktør = personIdent),
                     aktør = personIdent
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
@@ -493,35 +494,35 @@ class SmåbarnstilleggUtilsTest {
                 )
             ),
             forrigeAndelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = tilfeldigPerson(aktør = barnIdent),
                     aktør = barnIdent
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().minusMonths(6),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(aktør = personIdent),
                     aktør = personIdent
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().minusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
                     person = tilfeldigPerson(aktør = personIdent),
                     aktør = personIdent
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now().plusMonths(2),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(aktør = personIdent),
                     aktør = personIdent
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now().plusMonths(2),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
@@ -558,21 +559,21 @@ class SmåbarnstilleggUtilsTest {
                 )
             ),
             forrigeAndelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(10),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = tilfeldigPerson(aktør = barnIdent),
                     aktør = barnIdent
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(10),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(aktør = personIdent),
                     aktør = personIdent
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
@@ -609,21 +610,21 @@ class SmåbarnstilleggUtilsTest {
                 )
             ),
             forrigeAndelerTilkjentYtelse = listOf(
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(10),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = tilfeldigPerson(aktør = barnIdent),
                     aktør = barnIdent
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(10),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(aktør = personIdent),
                     aktør = personIdent
                 ),
-                lagAndelTilkjentYtelse(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,

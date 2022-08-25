@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import org.springframework.stereotype.Service
@@ -19,7 +21,9 @@ class EndringstidspunktService(
     private val behandlingRepository: BehandlingRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
     fun finnEndringstidpunkForBehandling(behandlingId: Long): LocalDate {
         val nyBehandling = behandlingRepository.finnBehandling(behandlingId)
@@ -28,11 +32,11 @@ class EndringstidspunktService(
         val sistIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
             ?: return TIDENES_MORGEN
 
-        val nyeAndelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
+        val nyeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
 
-        val forrigeAndelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandlingId = sistIverksatteBehandling.id)
+        val forrigeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sistIverksatteBehandling.id)
 
         val førsteEndringstidspunktFraAndelTilkjentYtelse = nyeAndelerTilkjentYtelse.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse
