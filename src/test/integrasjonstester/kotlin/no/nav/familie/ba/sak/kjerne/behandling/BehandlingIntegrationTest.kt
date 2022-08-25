@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toLocalDate
@@ -45,7 +46,11 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
@@ -116,7 +121,10 @@ class BehandlingIntegrationTest(
     private val personidentService: PersonidentService,
 
     @Autowired
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
+
+    @Autowired
+    private val utbetalingsperiodeMedBegrunnelserService: UtbetalingsperiodeMedBegrunnelserService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -515,7 +523,7 @@ class BehandlingIntegrationTest(
     }
 
     @Test
-    fun `Vedtaksperioder skal bevare splitt i vilkårsvurdering`() {
+    fun `Vedtaksperioder skal bevare splitt på vilkårsvurdering med forskjellig utdypende vilkårsvurdering`() {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -549,85 +557,70 @@ class BehandlingIntegrationTest(
 
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
-        vilkårsvurdering.personResultater = setOf(
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = søkerAktørId,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = mars2018.minusMonths(1).toLocalDate(),
-                periodeTom = stønadTom,
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.SØKER
-            ),
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = barn1AktørId,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = mars2018.minusMonths(1).toLocalDate(),
-                periodeTom = barn1Fødselsdato.plusYears(18),
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN,
-                erDeltBosted = true
-            ),
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = barn2AktørId,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = mars2018.minusMonths(1).toLocalDate(),
-                periodeTom = mars2018.toLocalDate().minusDays(1),
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN
-            ),
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = barn2AktørId,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = mars2018.toLocalDate(),
-                periodeTom = barn2Fødselsdato.plusYears(18),
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN,
-                erDeltBostedSkalIkkeDeles = true
-            )
+
+        val personResultatBarn2 = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = barn2AktørId
         )
-        vilkårsvurderingRepository.save(vilkårsvurdering)
 
-        val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        val restVedtakBarnMap =
-            personopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
-                .associateBy(
-                    { it.personIdent },
-                    { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } }
+        personResultatBarn2.setSortedVilkårResultater(
+            Vilkår.hentVilkårFor(PersonType.BARN).map {
+                lagVilkårResultat(
+                    personResultat = personResultatBarn2,
+                    periodeFom = mars2018.minusMonths(1).toLocalDate(),
+                    periodeTom = mars2018.toLocalDate().minusDays(1),
+                    vilkårType = it,
+                    behandlingId = vilkårsvurdering.behandling.id,
                 )
+            }.toSet() + Vilkår.hentVilkårFor(PersonType.BARN).map {
+                lagVilkårResultat(
+                    personResultat = personResultatBarn2,
+                    periodeFom = mars2018.toLocalDate(),
+                    periodeTom = barn2Fødselsdato.plusYears(18),
+                    vilkårType = it,
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    utdypendeVilkårsvurderinger = if (it == Vilkår.BOR_MED_SØKER) {
+                        listOf(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
+                    } else emptyList()
+                )
+            }.toSet()
+        )
 
-        val satsEndringDatoMars2019 =
-            SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1054)!!.toYearMonth()
-        assertEquals(2, restVedtakBarnMap.size)
+        val personResultatBarn1 = lagPersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = barn1AktørId,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = mars2018.minusMonths(1).toLocalDate(),
+            periodeTom = barn1Fødselsdato.plusYears(18),
+            lagFullstendigVilkårResultat = true,
+            personType = PersonType.BARN,
+            erDeltBosted = true
+        )
+        val personResultatSøker = lagPersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = søkerAktørId,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = mars2018.minusMonths(1).toLocalDate(),
+            periodeTom = stønadTom,
+            lagFullstendigVilkårResultat = true,
+            personType = PersonType.SØKER
+        )
+        vilkårsvurdering.personResultater = setOf(
+            personResultatSøker,
+            personResultatBarn1,
+            personResultatBarn2
+        )
+        vilkårsvurdering.personResultater.forEach {
+            personRepository
+        }
 
-        // Barn 1
-        val barn1Perioder = restVedtakBarnMap[barn1Fnr]!!.sortedBy { it.stønadFom }
-        assertEquals(485, barn1Perioder[0].beløp)
-        assertEquals(mars2018, barn1Perioder[0].stønadFom)
-        assertEquals(satsEndringDatoMars2019.minusMonths(1), barn1Perioder[0].stønadTom)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn1Perioder[0].ytelseType)
-        assertEquals(527, barn1Perioder[1].beløp)
-        assertEquals(satsEndringDatoMars2019, barn1Perioder[1].stønadFom)
-        assertEquals(barn1Fødselsdato.plusYears(18).minusMonths(1).toYearMonth(), barn1Perioder[1].stønadTom)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn1Perioder[1].ytelseType)
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        // Barn 2
-        val barn2Perioder = restVedtakBarnMap[barn2Fnr]!!.sortedBy { it.stønadFom }
-        assertEquals(970, barn2Perioder[0].beløp)
-        assertEquals(mars2018, barn2Perioder[0].stønadFom)
-        assertEquals(mars2018, barn2Perioder[0].stønadTom)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn2Perioder[0].ytelseType)
-        assertEquals(970, barn2Perioder[1].beløp)
-        assertEquals(mars2018.plusMonths(1), barn2Perioder[1].stønadFom)
-        assertEquals(satsEndringDatoMars2019.minusMonths(1), barn2Perioder[1].stønadTom)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn2Perioder[1].ytelseType)
-        assertEquals(1054, barn2Perioder[2].beløp)
-        assertEquals(satsEndringDatoMars2019, barn2Perioder[2].stønadFom)
-        assertTrue(satsEndringDatoMars2019 < barn2Perioder[2].stønadTom)
-        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn2Perioder[2].ytelseType)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+        val utbetalingsperioder = utbetalingsperiodeMedBegrunnelserService.hentUtbetalingsperioder(vedtak, emptyList())
+
+        assertTrue(utbetalingsperioder.any { it.fom == LocalDate.of(2018, 4, 1) })
     }
 
     @Test
