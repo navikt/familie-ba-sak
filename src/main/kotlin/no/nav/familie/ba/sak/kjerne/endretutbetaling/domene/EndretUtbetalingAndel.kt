@@ -132,7 +132,7 @@ enum class Årsak(val visningsnavn: String) {
     ALLEREDE_UTBETALT("Allerede utbetalt")
 }
 
-fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel(frikobleAndelerOgEndringer: Boolean) =
+fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
     RestEndretUtbetalingAndel(
         id = this.id,
         personIdent = this.aktivtFødselsnummer,
@@ -143,7 +143,7 @@ fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel(f
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
         søknadstidspunkt = this.søknadstidspunkt,
         begrunnelse = this.begrunnelse,
-        erTilknyttetAndeler = frikobleAndelerOgEndringer || this.andelerTilkjentYtelse.isNotEmpty()
+        erTilknyttetAndeler = this.andelerTilkjentYtelse.isNotEmpty()
     )
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(

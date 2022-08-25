@@ -67,7 +67,7 @@ class EndretUtbetalingAndelServiceTest {
             fom = YearMonth.now().minusMonths(5),
             tom = YearMonth.now().minusMonths(1)
         )
-        val restEndretUtbetalingAndel = endretUtbetalingAndel.tilRestEndretUtbetalingAndel(true)
+        val restEndretUtbetalingAndel = endretUtbetalingAndel.tilRestEndretUtbetalingAndel()
 
         val andelerTilkjentYtelse = listOf<AndelTilkjentYtelse>(
             lagAndelTilkjentYtelse(

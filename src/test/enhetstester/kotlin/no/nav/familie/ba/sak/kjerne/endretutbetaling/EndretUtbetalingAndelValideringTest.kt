@@ -311,7 +311,10 @@ class EndretUtbetalingAndelValideringTest {
         val andelTilkjentYtelse: AndelTilkjentYtelse = mockk()
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(
             listOf(
-                endretUtbetalingAndel1.copy(andeler = mutableListOf(andelTilkjentYtelse))
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                    person = tilfeldigPerson(),
+                    andelTilkjentYtelser = mutableListOf(andelTilkjentYtelse)
+                )
             )
         )
     }
@@ -825,27 +828,20 @@ class EndretUtbetalingAndelValideringTest {
         fomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
         tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1)
     ): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
+        return lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
             id = Random.nextLong(),
             fom = fomUtvidet,
             tom = tomUtvidet,
             person = person,
             årsak = Årsak.DELT_BOSTED,
-            prosent = prosent
-        )
-
-        val andelerTilkjentYtelse = mutableListOf(
-            lagAndelTilkjentYtelse(
-                fom = endretUtbetalingAndel.fom!!,
-                tom = endretUtbetalingAndel.tom!!,
-                ytelseType = ytelsestype
+            prosent = prosent,
+            andelTilkjentYtelser = mutableListOf(
+                lagAndelTilkjentYtelse(
+                    fom = fomUtvidet,
+                    tom = tomUtvidet,
+                    ytelseType = ytelsestype
+                )
             )
-        )
-
-        return EndretUtbetalingAndelMedAndelerTilkjentYtelse(
-            endretUtbetalingAndel,
-            andelerTilkjentYtelse,
-            true
         )
     }
 

@@ -105,12 +105,10 @@ class UtvidetBehandlingService(
 
         val endreteUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        val brukFrikobledeAndelerOgEndringer =
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
         val endreteUtbetalingerMedAndeler = AndelTilkjentYtelseOgEndreteUtbetalinger(
             andelerTilkjentYtelse,
             endreteUtbetalinger,
-            brukFrikobledeAndelerOgEndringer
+            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
         ).lagEndreteUtbetalingMedAndeler()
 
         return RestUtvidetBehandling(
@@ -138,7 +136,7 @@ class UtvidetBehandlingService(
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
             endretUtbetalingAndeler = endreteUtbetalingerMedAndeler
-                .map { it.tilRestEndretUtbetalingAndel(brukFrikobledeAndelerOgEndringer) },
+                .map { it.tilRestEndretUtbetalingAndel() },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             endringstidspunkt = utledEndringstidpunkt(endringstidspunkt, behandling),
             vedtak = vedtak?.tilRestVedtak(
