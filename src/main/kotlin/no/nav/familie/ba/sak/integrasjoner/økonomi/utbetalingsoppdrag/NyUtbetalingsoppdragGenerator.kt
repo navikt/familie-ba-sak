@@ -73,6 +73,7 @@ class NyUtbetalingsoppdragGenerator {
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
+        // Trenger denne sjekken som slipper å sette offset når det ikke finnes andelerTilOpprettelse,dvs nullutbetaling
         val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
             lagUtbetalingsperioderForOpprettelse(
                 andeler = andelerTilOpprettelse,
@@ -85,14 +86,10 @@ class NyUtbetalingsoppdragGenerator {
             emptyList()
         }
         val andelerTilOpphør = andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato)
-        val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty()) {
-            lagUtbetalingsperioderForOpphør(
-                andeler = andelerTilOpphør,
-                vedtak = vedtak
-            )
-        } else {
-            emptyList()
-        }
+        val opphøres: List<Utbetalingsperiode> = lagUtbetalingsperioderForOpphør(
+            andeler = andelerTilOpphør,
+            vedtak = vedtak
+        )
 
         return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
