@@ -265,7 +265,6 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
     prosent: BigDecimal = BigDecimal(100),
     endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
 ): AndelTilkjentYtelseMedEndreteUtbetalinger {
-
     val aty = AndelTilkjentYtelse(
         aktør = aktør,
         behandlingId = behandling.id,

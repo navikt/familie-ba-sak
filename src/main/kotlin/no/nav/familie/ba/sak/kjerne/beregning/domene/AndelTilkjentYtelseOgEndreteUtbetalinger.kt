@@ -31,7 +31,6 @@ class AndelTilkjentYtelseOgEndreteUtbetalinger(
     }
 
     private fun overlapper(aty: AndelTilkjentYtelse, eua: EndretUtbetalingAndel): Boolean {
-
         val euaPeriode = MånedPeriode(eua.fom ?: MIN_MÅNED, eua.tom ?: MAX_MÅNED)
         val atyPeriode = MånedPeriode(aty.stønadFom, aty.stønadTom)
 
@@ -70,12 +69,13 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger(
     val prosent get() = andelTilkjentYtelse.prosent
     val andel get() = andelTilkjentYtelse
     val endreteUtbetalinger
-        get() = if (brukNy == null)
+        get() = if (brukNy == null) {
             emptyList()
-        else if (brukNy)
+        } else if (brukNy) {
             endreteUtbetalingerAndeler
-        else
+        } else {
             andel.endretUtbetalingAndeler
+        }
 }
 
 data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
@@ -98,12 +98,13 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val fom get() = endretUtbetalingAndel.fom
     val tom get() = endretUtbetalingAndel.tom
     val andelerTilkjentYtelse
-        get() = if (brukNy == null)
+        get() = if (brukNy == null) {
             emptyList()
-        else if (brukNy)
+        } else if (brukNy) {
             andeler
-        else
+        } else {
             endretUtbetalingAndel.andelTilkjentYtelser
+        }
 }
 
 @Service

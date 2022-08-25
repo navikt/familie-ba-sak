@@ -36,7 +36,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
     @MockK(relaxed = true)
     private lateinit var featureToggleService: FeatureToggleService
-    
+
     @InjectMockKs
     private lateinit var småbarnstilleggKorrigeringService: SmåbarnstilleggKorrigeringService
 

@@ -49,7 +49,7 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     småbarnstilleggBarnetrygdGenerator: SmåbarnstilleggBarnetrygdGenerator,
     nyePerioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
+    barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
 ): Boolean {
     val (forrigeSøkersSmåbarnstilleggAndeler, forrigeSøkersAndreAndeler) = forrigeAndelerTilkjentYtelse.partition { it.erSmåbarnstillegg() }
 

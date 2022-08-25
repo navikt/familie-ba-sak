@@ -159,8 +159,9 @@ class BeregningService(
         val endreteUtbetalingAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id).filter {
                 // Ved automatiske behandlinger ønsker vi alltid å ta vare på de gamle endrede andelene
-                if (behandling.skalBehandlesAutomatisk) true
-                else if (nyEndretUtbetalingAndel != null) {
+                if (behandling.skalBehandlesAutomatisk) {
+                    true
+                } else if (nyEndretUtbetalingAndel != null) {
                     it.id == nyEndretUtbetalingAndel.id || it.andelerTilkjentYtelse.isNotEmpty()
                 } else {
                     it.andelerTilkjentYtelse.isNotEmpty()

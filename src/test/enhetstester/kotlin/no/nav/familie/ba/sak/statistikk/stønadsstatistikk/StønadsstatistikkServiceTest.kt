@@ -65,7 +65,7 @@ internal class StønadsstatistikkServiceTest(
     private val vedtakRepository: VedtakRepository,
 
     @MockK
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
 
     private val stønadsstatistikkService =

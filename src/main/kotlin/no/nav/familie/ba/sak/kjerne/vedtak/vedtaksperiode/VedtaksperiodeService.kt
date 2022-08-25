@@ -397,7 +397,7 @@ class VedtaksperiodeService(
         val utvidetVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 andelerTilkjentYtelse = andelerMedEndringer,
-                personopplysningGrunnlag = persongrunnlag,
+                personopplysningGrunnlag = persongrunnlag
             )
         }
 
@@ -541,10 +541,12 @@ class VedtaksperiodeService(
             } else {
                 null
             }
-        val forrigeAndelerMedEndringer = if (forrigeIverksatteBehandling != null)
+        val forrigeAndelerMedEndringer = if (forrigeIverksatteBehandling != null) {
             andelerTilkjentYtelseOgEndreteUtbetalingerService
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeIverksatteBehandling.id)
-        else emptyList()
+        } else {
+            emptyList()
+        }
 
         val personopplysningGrunnlag =
             persongrunnlagService.hentAktiv(behandlingId = behandling.id)

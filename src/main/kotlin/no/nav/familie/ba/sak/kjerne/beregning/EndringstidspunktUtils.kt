@@ -34,13 +34,13 @@ data class AndelTilkjentYtelseDataForÅKalkulereEndring(
 )
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentFørsteEndringstidspunkt(
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): LocalDate? = this.hentPerioderMedEndringerFra(forrigeAndelerTilkjentYtelse)
     .mapNotNull { (_, tidslinjeMedDifferanserPåPerson) -> tidslinjeMedDifferanserPåPerson.minOfOrNull { it.fom } }
     .minOfOrNull { it }
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentPerioderMedEndringerFra(
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): Map<AktørId, LocalDateTimeline<Beløpsdifferanse>> {
     val andelerTidslinje = this.hentTidslinjerForPersoner(BehandlingAlder.NY)
     val forrigeAndelerTidslinje =
@@ -145,7 +145,7 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentTidslinje(
                 aktørId = it.aktør.aktørId,
                 kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
                 endretUtbetalingÅrsaker = it.endreteUtbetalinger.mapNotNull { endretUtbetalingAndel -> endretUtbetalingAndel.årsak },
-                behandlingAlder = behandlingAlder,
+                behandlingAlder = behandlingAlder
             )
         )
     }

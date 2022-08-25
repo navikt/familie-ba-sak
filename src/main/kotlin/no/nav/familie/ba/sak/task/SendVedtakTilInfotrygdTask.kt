@@ -48,7 +48,9 @@ class SendVedtakTilInfotrygdTask(
                 .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                 .first()
             førsteUtbetalingsperiode.fom
-        } else error("Finner ikke første utbetalingsperiode")
+        } else {
+            error("Finner ikke første utbetalingsperiode")
+        }
     }
 
     companion object {

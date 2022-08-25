@@ -68,7 +68,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     fun lagSmåbarnstilleggAndelerGammel(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
+        barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelse.partition { it.erSøkersAndel() }
 

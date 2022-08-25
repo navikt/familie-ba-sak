@@ -199,15 +199,17 @@ object TilkjentYtelseUtils {
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
         andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,
-        endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         // Denne bør slettes hvis det ikke har forekommet i prod
         if (andelTilkjentYtelserUtenEndringer.any { it.endretUtbetalingAndeler.size > 0 }) {
             throw IllegalArgumentException("Fikk andeler som inneholdt endringer. Det skulle ikke ha skjedd")
         }
 
-        if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelserUtenEndringer
-            .map { AndelTilkjentYtelseMedEndreteUtbetalinger(it.copy(), emptyList(), null) }
+        if (endretUtbetalingAndeler.isEmpty()) {
+            return andelTilkjentYtelserUtenEndringer
+                .map { AndelTilkjentYtelseMedEndreteUtbetalinger(it.copy(), emptyList(), null) }
+        }
 
         val (andelerUtenSmåbarnstillegg, andelerMedSmåbarnstillegg) = andelTilkjentYtelserUtenEndringer.partition { !it.erSmåbarnstillegg() }
 
@@ -240,7 +242,7 @@ object TilkjentYtelseUtils {
                             stønadTom = månedPeriodeEndret.tom,
                             kalkulertUtbetalingsbeløp = nyttNasjonaltPeriodebeløp,
                             nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
-                            endretUtbetalingAndeler = mutableListOf(endretUtbetalingMedAndeler.endretUtbetalingAndel),
+                            endretUtbetalingAndeler = mutableListOf(endretUtbetalingMedAndeler.endretUtbetalingAndel)
                         )
 
                         AndelTilkjentYtelseMedEndreteUtbetalinger(

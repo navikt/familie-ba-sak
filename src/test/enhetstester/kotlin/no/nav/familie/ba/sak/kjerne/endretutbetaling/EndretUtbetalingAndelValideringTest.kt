@@ -823,7 +823,7 @@ class EndretUtbetalingAndelValideringTest {
         ytelsestype: YtelseType,
         prosent: BigDecimal,
         fomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
-        tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
+        tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1)
     ): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
         val endretUtbetalingAndel = lagEndretUtbetalingAndel(
             id = Random.nextLong(),

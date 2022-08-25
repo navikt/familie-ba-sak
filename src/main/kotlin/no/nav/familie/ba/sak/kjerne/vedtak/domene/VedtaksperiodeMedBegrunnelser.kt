@@ -119,7 +119,7 @@ data class VedtaksperiodeMedBegrunnelser(
 
     fun hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
     ): List<UtbetalingsperiodeDetalj> =
         if (andelerTilkjentYtelse.isEmpty()) {
             emptyList()
@@ -145,7 +145,7 @@ data class VedtaksperiodeMedBegrunnelser(
         }
 
     private fun hentVertikaltSegmentForVedtaksperiode(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ) = andelerTilkjentYtelse
         .utledSegmenter()
         .find { localDateSegment ->

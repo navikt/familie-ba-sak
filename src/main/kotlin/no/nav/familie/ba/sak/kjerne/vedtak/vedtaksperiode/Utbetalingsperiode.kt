@@ -63,7 +63,7 @@ fun hentUtbetalingsperiodeForVedtaksperiode(
 
 fun mapTilUtbetalingsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): List<Utbetalingsperiode> {
     return andelerTilkjentYtelse.lagVertikaleSegmenter().map { (segment, andelerForSegment) ->
         Utbetalingsperiode(
