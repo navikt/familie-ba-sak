@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.http.ecb.ECBRestClient
 import no.nav.familie.http.ecb.Frequency
 import no.nav.familie.http.ecb.domene.ExchangeRate
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import kotlin.jvm.Throws
 
 @Service
@@ -39,9 +39,7 @@ class ECBService(val ecbClient: ECBRestClient) {
         }
     }
 
-    private fun beregnValutakurs(valutakursUtenlandskValuta: BigDecimal, valutakursNOK: BigDecimal): BigDecimal {
-        return valutakursNOK.divide(valutakursUtenlandskValuta, 10, RoundingMode.HALF_UP)
-    }
+    private fun beregnValutakurs(valutakursUtenlandskValuta: BigDecimal, valutakursNOK: BigDecimal) = valutakursNOK.divide(valutakursUtenlandskValuta, 10, RoundingMode.HALF_UP)
 
     private fun validateExchangeRates(currency: String, exchangeRateDate: LocalDate, exchangeRates: List<ExchangeRate>) {
         if (currency != ECBConstants.EUR) {
@@ -53,14 +51,10 @@ class ECBService(val ecbClient: ECBRestClient) {
         }
     }
 
-    private fun isValid(exchangeRates: List<ExchangeRate>, currencies: List<String>, exchangeRateDate: LocalDate, expectedSize: Int): Boolean {
-        return exchangeRates.size == expectedSize && exchangeRates.all { it.date == exchangeRateDate } && exchangeRates.map { it.currency }.containsAll(currencies)
-    }
+    private fun isValid(exchangeRates: List<ExchangeRate>, currencies: List<String>, exchangeRateDate: LocalDate, expectedSize: Int) = exchangeRates.size == expectedSize && exchangeRates.all { it.date == exchangeRateDate } && exchangeRates.map { it.currency }.containsAll(currencies)
 
     private fun throwValidationException(currency: String, exchangeRateDate: LocalDate) {
-        val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-        val formattedExchangeRateDate = exchangeRateDate.format(dateTimeFormatter)
-        throw ECBServiceException("Fant ikke nødvendige valutakurser for valutakursdato $formattedExchangeRateDate for å bestemme valutakursen $currency - NOK")
+        throw ECBServiceException("Fant ikke nødvendige valutakurser for valutakursdato ${exchangeRateDate.tilKortString()} for å bestemme valutakursen $currency - NOK")
     }
 }
 
