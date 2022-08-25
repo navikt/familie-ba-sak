@@ -27,7 +27,7 @@ val konstantAdresse: List<Bostedsadresse> =
                 kommunenummer = "5422",
                 tilleggsnavn = null,
                 postnummer = "9050"
-            ),
+            )
         )
     )
 
@@ -47,7 +47,7 @@ val alternaltivAdresse: List<Bostedsadresse> =
                 postnummer = "9050"
             ),
             matrikkeladresse = null,
-            ukjentBosted = null,
+            ukjentBosted = null
         )
     )
 
@@ -107,7 +107,7 @@ val mockSøkerAutomatiskBehandling = PersonInfo(
             navn = null,
             fødselsdato = null,
             adressebeskyttelseGradering =
-            null,
+            null
         )
     ),
     forelderBarnRelasjonMaskert = emptySet(),
@@ -134,7 +134,7 @@ fun genererAutomatiskTestperson(
                 navn = null,
                 fødselsdato = null,
                 adressebeskyttelseGradering =
-                null,
+                null
             )
         }.toSet(),
         sivilstander = sivilstander,

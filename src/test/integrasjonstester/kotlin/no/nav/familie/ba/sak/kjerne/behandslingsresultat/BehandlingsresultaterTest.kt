@@ -18,7 +18,7 @@ data class BehandlingsresultatPersonTestConfig(
     val uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     val beskrivelse: String,
     val forventetResultat: Behandlingsresultat,
-    val inneværendeMåned: String,
+    val inneværendeMåned: String
 )
 
 class BehandlingsresultaterTest {
@@ -42,7 +42,7 @@ class BehandlingsresultaterTest {
                 YtelsePersonUtils.utledYtelsePersonerMedResultat(
                     behandlingsresultatPersoner = behandlingsresultatPersonTestConfig.personer,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
-                    inneværendeMåned = YearMonth.parse(behandlingsresultatPersonTestConfig.inneværendeMåned),
+                    inneværendeMåned = YearMonth.parse(behandlingsresultatPersonTestConfig.inneværendeMåned)
                 )
 
             val behandlingsresultat =
@@ -54,7 +54,9 @@ class BehandlingsresultaterTest {
                     "${behandlingsresultatPersonTestConfig.beskrivelse}\nForventet ${behandlingsresultatPersonTestConfig.forventetResultat}, men fikk $behandlingsresultat."
                 )
                 acc + 1
-            } else acc
+            } else {
+                acc
+            }
         } ?: 0
 
         assert(antallFeil == 0)

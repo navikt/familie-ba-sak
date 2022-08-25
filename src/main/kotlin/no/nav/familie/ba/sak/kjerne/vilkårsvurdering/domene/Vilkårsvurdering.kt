@@ -49,7 +49,7 @@ data class Vilkårsvurdering(
     var personResultater: Set<PersonResultat> = setOf(),
 
     @Column(name = "ytelse_personer", columnDefinition = "text")
-    var ytelsePersoner: String? = null,
+    var ytelsePersoner: String? = null
 
 ) : BaseEntitet() {
 
@@ -80,7 +80,7 @@ data class Vilkårsvurdering(
     fun kopier(inkluderAndreVurderinger: Boolean = false): Vilkårsvurdering {
         val nyVilkårsvurdering = Vilkårsvurdering(
             behandling = behandling,
-            aktiv = aktiv,
+            aktiv = aktiv
         )
 
         nyVilkårsvurdering.personResultater = personResultater.map {

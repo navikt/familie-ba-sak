@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 class TilgangController(
     private val personopplysningerService: PersonopplysningerService,
     private val personidentService: PersonidentService,
-    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
 ) {
 
     @PostMapping(path = ["tilgang"], produces = [MediaType.APPLICATION_JSON_VALUE])

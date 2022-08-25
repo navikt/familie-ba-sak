@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 import java.time.LocalDate
 
 data class RestPutVedtaksperiodeMedFritekster(
-    val fritekster: List<String> = emptyList(),
+    val fritekster: List<String> = emptyList()
 )
 
 data class RestPutVedtaksperiodeMedStandardbegrunnelser(
-    val standardbegrunnelser: List<String>,
+    val standardbegrunnelser: List<String>
 )
 
 data class RestGenererVedtaksperioderForOverstyrtEndringstidspunkt(

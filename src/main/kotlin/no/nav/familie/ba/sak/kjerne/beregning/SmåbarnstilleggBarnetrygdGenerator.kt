@@ -28,7 +28,7 @@ import java.time.LocalDate
 
 data class SmåbarnstilleggBarnetrygdGenerator(
     val behandlingId: Long,
-    val tilkjentYtelse: TilkjentYtelse,
+    val tilkjentYtelse: TilkjentYtelse
 ) {
 
     fun lagSmåbarnstilleggAndeler(
@@ -66,7 +66,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     fun lagSmåbarnstilleggAndelerGammel(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
+        barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
     ): List<AndelTilkjentYtelse> {
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelse.partition { it.erSøkersAndel() }
 
@@ -218,7 +218,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                         segement.value.containsAll(
                             listOf(
                                 BarnSinRettTilSmåbarnstilleggKombinatorGammel.UTBETALING,
-                                BarnSinRettTilSmåbarnstilleggKombinatorGammel.UNDER_3_ÅR,
+                                BarnSinRettTilSmåbarnstilleggKombinatorGammel.UNDER_3_ÅR
                             )
                         )
                     }.map { segement -> DatoIntervallEntitet(fom = segement.fom, tom = segement.tom) }

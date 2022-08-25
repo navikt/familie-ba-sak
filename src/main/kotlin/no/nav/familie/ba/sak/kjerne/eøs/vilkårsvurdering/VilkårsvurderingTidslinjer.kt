@@ -48,7 +48,7 @@ class VilkårsvurderingTidslinjer(
 
     class SøkersTidslinjer(
         tidslinjer: VilkårsvurderingTidslinjer,
-        aktør: Aktør,
+        aktør: Aktør
     ) {
         val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
 
@@ -63,7 +63,7 @@ class VilkårsvurderingTidslinjer(
 
     class BarnetsTidslinjer(
         tidslinjer: VilkårsvurderingTidslinjer,
-        aktør: Aktør,
+        aktør: Aktør
     ) {
         private val søkersTidslinje = tidslinjer.søkersTidslinje
 

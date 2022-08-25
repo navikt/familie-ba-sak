@@ -62,10 +62,14 @@ class ArbeidsfordelingService(
             arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
 
         val forrigeArbeidsfordelingsenhet =
-            if (aktivArbeidsfordelingPåBehandling != null) Arbeidsfordelingsenhet(
-                enhetId = aktivArbeidsfordelingPåBehandling.behandlendeEnhetId,
-                enhetNavn = aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn
-            ) else null
+            if (aktivArbeidsfordelingPåBehandling != null) {
+                Arbeidsfordelingsenhet(
+                    enhetId = aktivArbeidsfordelingPåBehandling.behandlendeEnhetId,
+                    enhetNavn = aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn
+                )
+            } else {
+                null
+            }
 
         val oppdatertArbeidsfordelingPåBehandling =
             if (behandling.erSatsendring()) {
@@ -91,7 +95,6 @@ class ArbeidsfordelingService(
                         if (!aktivArbeidsfordelingPåBehandling.manueltOverstyrt &&
                             (aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != arbeidsfordelingsenhet.enhetId)
                         ) {
-
                             aktivArbeidsfordelingPåBehandling.also {
                                 it.behandlendeEnhetId = arbeidsfordelingsenhet.enhetId
                                 it.behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn
@@ -107,7 +110,7 @@ class ArbeidsfordelingService(
             behandling = behandling,
             forrigeArbeidsfordelingsenhet = forrigeArbeidsfordelingsenhet,
             oppdatertArbeidsfordelingPåBehandling = oppdatertArbeidsfordelingPåBehandling,
-            manuellOppdatering = false,
+            manuellOppdatering = false
         )
     }
 

@@ -16,7 +16,6 @@ internal class SkjemaTidslinjeTest {
 
     @Test
     fun `skal håndtere to påfølgende perioder i fremtiden, men de komprimeres ikke`() {
-
         val barn = lagPerson(type = PersonType.BARN)
         val kompetanse1 = Kompetanse(
             fom = YearMonth.of(2437, 2),
@@ -37,7 +36,6 @@ internal class SkjemaTidslinjeTest {
 
     @Test
     fun `skal håndtere kompetanse som mangler både fom og tom`() {
-
         val barn = lagPerson(type = PersonType.BARN)
         val kompetanse = Kompetanse(
             fom = null,

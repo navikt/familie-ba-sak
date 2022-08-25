@@ -43,7 +43,7 @@ class SentryConfiguration(
                     "{{ default }}",
                     prosess,
                     event.transaction,
-                    mostSpecificThrowable?.message,
+                    mostSpecificThrowable?.message
                 )
 
                 if (metodeSomFeiler != UKJENT_METODE_SOM_FEILER) {

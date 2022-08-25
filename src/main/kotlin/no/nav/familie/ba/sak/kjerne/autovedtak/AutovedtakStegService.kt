@@ -140,8 +140,9 @@ class AutovedtakStegService(
             behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(it.id)
         }
 
-        return if (åpenBehandling == null) false
-        else if (åpenBehandling.status == BehandlingStatus.UTREDES || åpenBehandling.status == BehandlingStatus.FATTER_VEDTAK) {
+        return if (åpenBehandling == null) {
+            false
+        } else if (åpenBehandling.status == BehandlingStatus.UTREDES || åpenBehandling.status == BehandlingStatus.FATTER_VEDTAK) {
             antallAutovedtakÅpenBehandling[autovedtaktype]?.increment()
 
             oppgaveService.opprettOppgaveForManuellBehandling(

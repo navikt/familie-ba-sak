@@ -10,7 +10,7 @@ import java.time.LocalDate
 
 fun validerIngenVilkårSattEtterSøkersDød(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    vilkårsvurdering: Vilkårsvurdering,
+    vilkårsvurdering: Vilkårsvurdering
 
 ) {
     val vilkårResultaterSøker =
@@ -40,7 +40,7 @@ fun validerIngenVilkårSattEtterSøkersDød(
 
 fun validerIkkeBlandetRegelverk(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    vilkårsvurdering: Vilkårsvurdering,
+    vilkårsvurdering: Vilkårsvurdering
 ) {
     val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(vilkårsvurdering, personopplysningGrunnlag)
     if (vilkårsvurderingTidslinjer.harBlandetRegelverk()) {

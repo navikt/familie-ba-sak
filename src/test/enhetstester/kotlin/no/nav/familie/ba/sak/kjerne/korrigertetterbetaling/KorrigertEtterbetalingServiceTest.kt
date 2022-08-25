@@ -29,7 +29,6 @@ internal class KorrigertEtterbetalingServiceTest {
 
     @Test
     fun `finnAktivtKorrigeringPåBehandling skal hente aktivt korrigering fra repository hvis det finnes`() {
-
         val behandling = lagBehandling()
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 
@@ -47,12 +46,12 @@ internal class KorrigertEtterbetalingServiceTest {
 
     @Test
     fun `finnAlleKorrigeringerPåBehandling skal hente alle korrigering fra repository hvis de finnes`() {
-
         val behandling = lagBehandling()
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 
         every { korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id) } returns listOf(
-            korrigertEtterbetaling, korrigertEtterbetaling
+            korrigertEtterbetaling,
+            korrigertEtterbetaling
         )
 
         val hentetKorrigertEtterbetaling =
@@ -65,7 +64,6 @@ internal class KorrigertEtterbetalingServiceTest {
 
     @Test
     fun `lagreKorrigertEtterbetaling skal lagre korrigering på behandling og logg på dette`() {
-
         val behandling = lagBehandling()
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 

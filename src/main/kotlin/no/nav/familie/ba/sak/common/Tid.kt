@@ -265,7 +265,9 @@ fun List<DatoIntervallEntitet>.slåSammenSammenhengendePerioder(): List<DatoInte
             if (sammenslåttePerioder.lastOrNull()?.tom?.toYearMonth() == nestePeriode.fom?.forrigeMåned()
             ) {
                 sammenslåttePerioder.apply { add(removeLast().copy(tom = nestePeriode.tom)) }
-            } else sammenslåttePerioder.apply { add(nestePeriode) }
+            } else {
+                sammenslåttePerioder.apply { add(nestePeriode) }
+            }
         }
 }
 
@@ -278,12 +280,13 @@ class YearMonthIterator(
     private var gjeldendeMåned = startMåned
 
     override fun hasNext() =
-        if (hoppMåneder > 0)
+        if (hoppMåneder > 0) {
             gjeldendeMåned.plusMonths(hoppMåneder) <= tilOgMedMåned.plusMonths(1)
-        else if (hoppMåneder < 0)
+        } else if (hoppMåneder < 0) {
             gjeldendeMåned.plusMonths(hoppMåneder) >= tilOgMedMåned.plusMonths(-1)
-        else
+        } else {
             throw IllegalStateException("Steglengde kan ikke være null")
+        }
 
     override fun next(): YearMonth {
         val next = gjeldendeMåned

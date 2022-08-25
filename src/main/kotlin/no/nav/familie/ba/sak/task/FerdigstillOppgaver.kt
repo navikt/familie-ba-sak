@@ -22,7 +22,8 @@ class FerdigstillOppgaver(
     override fun doTask(task: Task) {
         val ferdigstillOppgave = objectMapper.readValue(task.payload, FerdigstillOppgaveDTO::class.java)
         oppgaveService.ferdigstillOppgaver(
-            behandlingId = ferdigstillOppgave.behandlingId, oppgavetype = ferdigstillOppgave.oppgavetype
+            behandlingId = ferdigstillOppgave.behandlingId,
+            oppgavetype = ferdigstillOppgave.oppgavetype
         )
     }
 

@@ -73,7 +73,7 @@ class OppgaveControllerTest {
     @Test
     fun `Tilbakestilling av tildeling på oppgave skal returnere OK og sende med Oppgave i respons`() {
         val oppgave = Oppgave(
-            id = 1234,
+            id = 1234
         )
         every { oppgaveService.tilbakestillFordelingPåOppgave(oppgave.id!!) } returns oppgave
 

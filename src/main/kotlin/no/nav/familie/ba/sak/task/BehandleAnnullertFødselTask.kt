@@ -29,7 +29,7 @@ class BehandleAnnullertFødselTask(
     val taskRepository: TaskRepository,
     val behandlingRepository: BehandlingRepository,
     val personRepository: PersonRepository,
-    val taskRepositoryForAnnullertFødsel: TaskRepositoryForAnnullertFødsel,
+    val taskRepositoryForAnnullertFødsel: TaskRepositoryForAnnullertFødsel
 ) :
     AsyncTaskStep {
 
@@ -70,7 +70,7 @@ class BehandleAnnullertFødselTask(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     behandleAnnullerFødselDto
-                ),
+                )
             )
         }
     }

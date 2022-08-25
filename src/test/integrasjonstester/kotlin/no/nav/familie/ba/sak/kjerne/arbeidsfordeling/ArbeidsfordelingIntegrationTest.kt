@@ -394,9 +394,14 @@ class ArbeidsfordelingIntegrationTest(
 
         val søkerBostedsadresse = Bostedsadresse(
             vegadresse = Vegadresse(
-                matrikkelId = 1111, husnummer = null, husbokstav = null,
-                bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
-                tilleggsnavn = null, postnummer = "2222"
+                matrikkelId = 1111,
+                husnummer = null,
+                husbokstav = null,
+                bruksenhetsnummer = null,
+                adressenavn = null,
+                kommunenummer = null,
+                tilleggsnavn = null,
+                postnummer = "2222"
             )
         )
     }

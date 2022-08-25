@@ -52,7 +52,6 @@ class VilkårTilTilkjentYtelseTest {
         barn1Andel3Type: String?,
         erDeltBosted: Boolean?
     ) {
-
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
 
@@ -102,9 +101,8 @@ class VilkårTilTilkjentYtelseTest {
         barn1Vilkår1: String?,
         barn1Andel1Beløp: Int?,
         barn1Andel1Periode: String?,
-        barn1Andel1Type: String?,
+        barn1Andel1Type: String?
     ) {
-
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
 
@@ -127,10 +125,12 @@ class VilkårTilTilkjentYtelseTest {
                     YtelseType.SMÅBARNSTILLEGG.name
                 )
                 .bygg()
-        } else TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
-            .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
-            .medAndelTilkjentYtelse(søker, søkerAndel1Beløp, søkerAndel1Periode, søkerAndel1Type)
-            .bygg()
+        } else {
+            TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
+                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
+                .medAndelTilkjentYtelse(søker, søkerAndel1Beløp, søkerAndel1Periode, søkerAndel1Type)
+                .bygg()
+        }
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
@@ -139,14 +139,17 @@ class VilkårTilTilkjentYtelseTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
         ) { aktør ->
-            if (småbarnstilleggTestPeriode != null)
+            if (småbarnstilleggTestPeriode != null) {
                 listOf(
                     InternPeriodeOvergangsstønad(
                         personIdent = aktør.aktivFødselsnummer(),
                         fomDato = småbarnstilleggTestPeriode.fraOgMed,
-                        tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
+                        tomDato = småbarnstilleggTestPeriode.tilOgMed!!
                     )
-                ) else emptyList()
+                )
+            } else {
+                emptyList()
+            }
         }
 
         Assertions.assertEquals(
@@ -186,7 +189,6 @@ class VilkårTilTilkjentYtelseTest {
         barn2Andel2Periode: String?,
         barn2Andel2Type: String?
     ) {
-
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2020, 2, 1))
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2022, 4, 1))
@@ -238,9 +240,9 @@ class TestVilkårsvurderingBuilder(sakType: String) {
         periode: String?,
         erDeltBosted: Boolean? = null
     ): TestVilkårsvurderingBuilder {
-
-        if (vilkår.isNullOrEmpty() || periode.isNullOrEmpty())
+        if (vilkår.isNullOrEmpty() || periode.isNullOrEmpty()) {
             return this
+        }
 
         val ident = person.aktør.aktivFødselsnummer()
         val aktørId = person.aktør
@@ -293,8 +295,9 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
         periode: String?,
         type: String?
     ): TestTilkjentYtelseBuilder {
-        if (beløp == null || periode.isNullOrEmpty() || type.isNullOrEmpty())
+        if (beløp == null || periode.isNullOrEmpty() || type.isNullOrEmpty()) {
             return this
+        }
 
         val stønadPeriode = TestPeriode.parse(periode)
 
@@ -353,9 +356,13 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
                 val fom = yearMonthMatch.groupValues[1].let { YearMonth.parse(it) }
                 val tom =
                     yearMonthMatch.groupValues[2].let {
-                        if (it.length == 7) YearMonth.parse(it) else YearMonth.from(
-                            LocalDate.MAX
-                        )
+                        if (it.length == 7) {
+                            YearMonth.parse(it)
+                        } else {
+                            YearMonth.from(
+                                LocalDate.MAX
+                            )
+                        }
                     }
 
                 return TestPeriode(fom!!.atDay(1), tom?.atEndOfMonth())
@@ -368,7 +375,6 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
 object TestVilkårParser {
 
     fun parse(s: String): List<Vilkår> {
-
         return s.split(',')
             .map {
                 when (it.replace("""\s*""".toRegex(), "").lowercase()) {

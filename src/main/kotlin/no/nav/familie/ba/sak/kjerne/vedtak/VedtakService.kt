@@ -32,7 +32,6 @@ class VedtakService(
     }
 
     fun oppdater(vedtak: Vedtak): Vedtak {
-
         return if (vedtakRepository.findByIdOrNull(vedtak.id) != null) {
             vedtakRepository.saveAndFlush(vedtak)
         } else {
@@ -41,7 +40,6 @@ class VedtakService(
     }
 
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
-
         return if (vedtak.behandling.erBehandlingMedVedtaksbrevutsending()) {
             val brev = dokumentService.genererBrevForVedtak(vedtak)
             vedtakRepository.save(vedtak.also { it.stønadBrevPdF = brev })

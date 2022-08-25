@@ -10,10 +10,11 @@ data class DagTidspunkt internal constructor(
 ) : Tidspunkt<Dag>(uendelighet) {
 
     init {
-        if (dato < PRAKTISK_TIDLIGSTE_DAG)
+        if (dato < PRAKTISK_TIDLIGSTE_DAG) {
             throw IllegalArgumentException("Kan ikke håndtere så tidlig tidspunkt. Bruk uendeligLengeSiden()")
-        else if (dato > PRAKTISK_SENESTE_DAG)
+        } else if (dato > PRAKTISK_SENESTE_DAG) {
             throw IllegalArgumentException("Kan ikke håndtere så sent tidspunkt. Bruk uendeligLengeTil()")
+        }
     }
 
     override fun tilFørsteDagIMåneden(): DagTidspunkt {
@@ -29,10 +30,11 @@ data class DagTidspunkt internal constructor(
     }
 
     override fun tilLocalDateEllerNull(): LocalDate? {
-        return if (uendelighet != Uendelighet.INGEN)
+        return if (uendelighet != Uendelighet.INGEN) {
             null
-        else
+        } else {
             dato
+        }
     }
 
     override fun tilLocalDate(): LocalDate {
@@ -64,17 +66,19 @@ data class DagTidspunkt internal constructor(
     }
 
     override fun somFraOgMed(): DagTidspunkt {
-        return if (uendelighet == Uendelighet.FREMTID)
+        return if (uendelighet == Uendelighet.FREMTID) {
             somEndelig()
-        else
+        } else {
             this
+        }
     }
 
     override fun somTilOgMed(): DagTidspunkt {
-        return if (uendelighet == Uendelighet.FORTID)
+        return if (uendelighet == Uendelighet.FORTID) {
             somEndelig()
-        else
+        } else {
             this
+        }
     }
 
     override fun toString(): String {

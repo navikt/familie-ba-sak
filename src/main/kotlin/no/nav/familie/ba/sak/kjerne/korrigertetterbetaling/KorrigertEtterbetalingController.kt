@@ -42,7 +42,7 @@ class KorrigertEtterbetalingController(
 
     @GetMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentAlleKorrigerteEtterbetalingPåBehandling(
-        @PathVariable behandlingId: Long,
+        @PathVariable behandlingId: Long
     ): ResponseEntity<Ressurs<List<RestKorrigertEtterbetaling>>> {
         val korrigerteEtterbetalinger = korrigertEtterbetalingService.finnAlleKorrigeringerPåBehandling(behandlingId)
             .map { it.tilRestKorrigertEtterbetaling() }

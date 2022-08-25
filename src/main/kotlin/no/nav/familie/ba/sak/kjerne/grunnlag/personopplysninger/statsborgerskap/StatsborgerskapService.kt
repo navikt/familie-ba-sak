@@ -95,7 +95,6 @@ class StatsborgerskapService(
                 gyldigFraOgMed = idag
             )
         } else {
-
             val alleMedlemskap = hentMedlemskapsperioderUnderStatsborgerskapsperioden(
                 eøsMedlemskapsPerioderForValgtLand,
                 datoFra,

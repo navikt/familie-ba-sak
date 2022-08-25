@@ -20,7 +20,7 @@ data class PdlPersonData(
     val kjoenn: List<PdlKjoenn> = emptyList(),
     val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
     val adressebeskyttelse: List<Adressebeskyttelse> = emptyList(),
-    val sivilstand: List<Sivilstand>,
+    val sivilstand: List<Sivilstand> = emptyList(),
     val bostedsadresse: List<Bostedsadresse>,
     val opphold: List<Opphold> = emptyList(),
     val statsborgerskap: List<Statsborgerskap> = emptyList(),
@@ -29,9 +29,11 @@ data class PdlPersonData(
 ) {
     fun validerOmPersonKanBehandlesIFagsystem() {
         if (foedsel.isEmpty()) throw PdlPersonKanIkkeBehandlesIFagsystem("mangler fødselsdato")
-        if (folkeregisteridentifikator.firstOrNull()?.status == FolkeregisteridentifikatorStatus.OPPHOERT) throw PdlPersonKanIkkeBehandlesIFagsystem(
-            "er opphørt"
-        )
+        if (folkeregisteridentifikator.firstOrNull()?.status == FolkeregisteridentifikatorStatus.OPPHOERT) {
+            throw PdlPersonKanIkkeBehandlesIFagsystem(
+                "er opphørt"
+            )
+        }
     }
 }
 

@@ -34,7 +34,7 @@ class TriggingAvAutobrev6og18ÅrTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
+    @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -48,10 +48,11 @@ class TriggingAvAutobrev6og18ÅrTest(
     }
 
     fun kjørFørstegangsbehandlingOgTriggAutobrev(årMedReduksjonsbegrunnelse: Int) {
-
-        val reduksjonsbegrunnelse = if (årMedReduksjonsbegrunnelse == 6)
-            Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR else
+        val reduksjonsbegrunnelse = if (årMedReduksjonsbegrunnelse == 6) {
+            Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR
+        } else {
             Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR
+        }
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
@@ -102,7 +103,6 @@ class TriggingAvAutobrev6og18ÅrTest(
         // Godkjenner alle vilkår på førstegangsbehandling.
         restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
             restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
-
                 familieBaSakKlient().putVilkår(
                     behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,

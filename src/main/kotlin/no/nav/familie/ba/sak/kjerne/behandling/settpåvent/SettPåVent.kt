@@ -41,9 +41,9 @@ data class SettPåVent(
     var årsak: SettPåVentÅrsak,
 
     @Column(name = "aktiv", nullable = false)
-    var aktiv: Boolean = true,
+    var aktiv: Boolean = true
 ) : BaseEntitet()
 
 enum class SettPåVentÅrsak(val visningsnavn: String) {
-    AVVENTER_DOKUMENTASJON("Avventer dokumentasjon"),
+    AVVENTER_DOKUMENTASJON("Avventer dokumentasjon")
 }

@@ -80,7 +80,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere delt bosted med 1 barn under 6 år`() {
-
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(

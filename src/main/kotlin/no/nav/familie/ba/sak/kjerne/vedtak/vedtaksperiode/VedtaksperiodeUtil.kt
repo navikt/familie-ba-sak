@@ -183,7 +183,7 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
-    aktørerIForrigePersonopplysningGrunnlag: List<Aktør>,
+    aktørerIForrigePersonopplysningGrunnlag: List<Aktør>
 ): List<VedtaksperiodeMedBegrunnelser> {
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
 
@@ -219,7 +219,7 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
                                     utbetalingsperiode.tom == fom.minusDays(1) &&
                                         utbetalingsperiode.hentUtbetalingsperiodeDetaljer(
                                             andelerTilkjentYtelse = andelerTilkjentYtelse,
-                                            personopplysningGrunnlag = personopplysningGrunnlag,
+                                            personopplysningGrunnlag = personopplysningGrunnlag
                                         )
                                             .any {
                                                 it.person.personIdent ==
@@ -235,7 +235,7 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
                         vedtak = vedtak,
                         fom = utledFom(gammeltSegment, overlappendePeriode),
                         tom = utledTom(gammeltSegment, overlappendePeriode),
-                        type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+                        type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
                     )
                 }
             }
@@ -277,11 +277,15 @@ fun hentGyldigeBegrunnelserForPeriode(
         endretUtbetalingAndeler = endretUtbetalingAndeler,
         andelerTilkjentYtelse = andelerTilkjentYtelse
     )
-    val eøsBegrunnelser = if (kanBehandleEØS) hentGyldigeEØSBegrunnelserForPeriode(
-        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-        kompetanserIPeriode = kompetanserIPeriode,
-        kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
-    ) else emptyList()
+    val eøsBegrunnelser = if (kanBehandleEØS) {
+        hentGyldigeEØSBegrunnelserForPeriode(
+            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+            kompetanserIPeriode = kompetanserIPeriode,
+            kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
+        )
+    } else {
+        emptyList()
+    }
 
     return standardbegrunnelser + eøsBegrunnelser
 }
@@ -293,7 +297,7 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
     vilkårsvurdering: Vilkårsvurdering,
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
     sanityBegrunnelser = sanityBegrunnelser,
@@ -362,7 +366,9 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
         }.filter {
             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
                 endretUtbetalingsperiodeBegrunnelser.contains(it)
-            } else true
+            } else {
+                true
+            }
         }
 
     return when (minimertVedtaksperiode.type) {

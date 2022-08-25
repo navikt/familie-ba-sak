@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class CachedSanityKlient(
-    @Value("\${SANITY_DATASET}") private val sanityDatasett: String,
+    @Value("\${SANITY_DATASET}") private val sanityDatasett: String
 ) {
 
     @Cacheable("sanityBegrunnelser", cacheManager = "shortCache")

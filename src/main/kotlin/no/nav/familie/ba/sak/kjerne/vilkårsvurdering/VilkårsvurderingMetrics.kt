@@ -53,8 +53,9 @@ class VilkårsvurderingMetrics(
                 .forEach { (resultat, årsaker) ->
                     årsaker
                         .forEach { årsak ->
-                            if (vilkårUtfallMap[årsak.toString()] != null)
+                            if (vilkårUtfallMap[årsak.toString()] != null) {
                                 error("Årsak $årsak deler navn med minst en annen årsak")
+                            }
 
                             val vilkår = Vilkår.valueOf(årsak.hentIdentifikator())
 

@@ -36,7 +36,7 @@ class BehandlingSatsendringTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService,
+    @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -87,7 +87,7 @@ class BehandlingSatsendringTest(
                                 )
                             )
                         )
-                    ),
+                    )
                 )
             )
         )
@@ -101,7 +101,7 @@ class BehandlingSatsendringTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService,
+            personidentService = personidentService
         )!!
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
@@ -164,7 +164,7 @@ class BehandlingSatsendringTest(
                                 )
                             )
                         )
-                    ),
+                    )
                 )
             )
         )
@@ -178,7 +178,7 @@ class BehandlingSatsendringTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService,
+            personidentService = personidentService
         )!!
 
         // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
@@ -248,7 +248,7 @@ class BehandlingSatsendringTest(
                                 )
                             )
                         )
-                    ),
+                    )
                 )
             )
         )
@@ -262,7 +262,7 @@ class BehandlingSatsendringTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService,
+            personidentService = personidentService
         )!!
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.

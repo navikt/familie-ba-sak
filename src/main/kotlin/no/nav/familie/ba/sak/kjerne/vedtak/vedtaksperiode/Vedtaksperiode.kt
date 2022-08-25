@@ -27,7 +27,7 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
             VedtakBegrunnelseType.REDUKSJON,
             VedtakBegrunnelseType.FORTSATT_INNVILGET,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
-            VedtakBegrunnelseType.ENDRET_UTBETALING,
+            VedtakBegrunnelseType.ENDRET_UTBETALING
         )
     ),
 
@@ -56,13 +56,12 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
     FORTSATT_INNVILGET(listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET)),
 
     @Deprecated("Legacy")
-    ENDRET_UTBETALING(emptyList()),
+    ENDRET_UTBETALING(emptyList())
 }
 
 fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(
-    vedtak: Vedtak,
+    vedtak: Vedtak
 ): VedtaksperiodeMedBegrunnelser {
-
     return VedtaksperiodeMedBegrunnelser(
         fom = this.periodeFom,
         tom = this.periodeTom,

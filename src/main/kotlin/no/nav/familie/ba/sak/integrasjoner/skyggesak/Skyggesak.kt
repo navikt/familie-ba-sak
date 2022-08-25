@@ -25,5 +25,5 @@ data class Skyggesak(
     val fagsakId: Long,
 
     @Column(name = "sendt_tid")
-    var sendtTidspunkt: LocalDateTime? = null,
+    var sendtTidspunkt: LocalDateTime? = null
 )

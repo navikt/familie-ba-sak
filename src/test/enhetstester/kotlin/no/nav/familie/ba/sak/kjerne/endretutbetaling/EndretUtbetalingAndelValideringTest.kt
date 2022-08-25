@@ -131,7 +131,7 @@ class EndretUtbetalingAndelValideringTest {
                 fom = YearMonth.of(2018, 10),
                 tom = YearMonth.of(2021, 10),
                 person = barn2
-            ),
+            )
         )
 
         val endretUtbetalingAndel = EndretUtbetalingAndel(
@@ -704,9 +704,11 @@ class EndretUtbetalingAndelValideringTest {
 
         val deltBostedEndring =
             endretUtbetalingAndel(
-                barn, YtelseType.ORDINÆR_BARNETRYGD, BigDecimal.ZERO,
+                barn,
+                YtelseType.ORDINÆR_BARNETRYGD,
+                BigDecimal.ZERO,
                 fomUtvidet = fom1,
-                tomUtvidet = tom2,
+                tomUtvidet = tom2
             )
 
         Assertions.assertThrows(FunksjonellFeil::class.java) {
@@ -719,7 +721,6 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `skal kaste feil dersom det er en endring på utvidet ytelse uten en endring på delt bosted i samme periode`() {
-
         Assertions.assertThrows(FunksjonellFeil::class.java) {
             validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
                 listOf(endretUtbetalingAndelUtvidetNullutbetaling)
@@ -729,7 +730,6 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `skal kaste feil dersom delt bosted endring krysser utvidet tilkjent ytelse og ikke ellers`() {
-
         val fomUtvidet: YearMonth = inneværendeMåned().minusMonths(4)
         val tomUtvidet: YearMonth = inneværendeMåned().minusMonths(2)
 
@@ -821,7 +821,7 @@ class EndretUtbetalingAndelValideringTest {
         ytelsestype: YtelseType,
         prosent: BigDecimal,
         fomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
-        tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
+        tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1)
     ): EndretUtbetalingAndel {
         return lagEndretUtbetalingAndel(
             id = Random.nextLong(),

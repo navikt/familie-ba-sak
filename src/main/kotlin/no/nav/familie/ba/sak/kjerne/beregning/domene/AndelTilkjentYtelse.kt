@@ -62,7 +62,8 @@ data class AndelTilkjentYtelse(
     @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
     var tilkjentYtelse: TilkjentYtelse,
 
-    @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
 
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
@@ -312,7 +313,7 @@ private fun regelverkavhenigeVilkår(): List<Vilkår> {
     return listOf(
         Vilkår.BOR_MED_SØKER,
         Vilkår.BOSATT_I_RIKET,
-        Vilkår.LOVLIG_OPPHOLD,
+        Vilkår.LOVLIG_OPPHOLD
     )
 }
 

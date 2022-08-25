@@ -54,13 +54,13 @@ class BrevPeriodeService(
     private val personidentService: PersonidentService,
     private val kompetanseService: KompetanseService,
     private val featureToggleService: FeatureToggleService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val integrasjonClient: IntegrasjonClient
 ) {
 
     fun hentBrevperioderData(
         vedtaksperioderId: List<Long>,
         behandlingId: BehandlingId,
-        skalLogge: Boolean = true,
+        skalLogge: Boolean = true
     ): List<BrevperiodeData> {
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId.id)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
@@ -101,7 +101,7 @@ class BrevPeriodeService(
                 skalLogge = skalLogge,
                 kompetanser = kompetanser.toList(),
                 sanityBegrunnelser = sanityBegrunnelser,
-                sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+                sanityEØSBegrunnelser = sanityEØSBegrunnelser
             )
         }
     }
@@ -116,7 +116,7 @@ class BrevPeriodeService(
         sanityBegrunnelser: List<SanityBegrunnelse>,
         sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
 
-        skalLogge: Boolean = true,
+        skalLogge: Boolean = true
     ): BrevperiodeData {
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
@@ -125,7 +125,7 @@ class BrevPeriodeService(
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            andelerTilkjentYtelse = andelerTilkjentYtelse
         )
 
         val ytelserForrigePeriode = andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelse) }
@@ -158,7 +158,7 @@ class BrevPeriodeService(
                 fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
                 tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                landkoderISO2 = landkoderISO2,
+                landkoderISO2 = landkoderISO2
             ),
             minimerteKompetanserSomStopperRettFørPeriode = hentKompetanserSomStopperRettFørPeriode(
                 kompetanser = kompetanser,
@@ -207,13 +207,16 @@ class BrevPeriodeService(
                 val result: LocalDateTimeline<Beløpsdifferanse> = endringerITilkjentYtelsePerBarn.getValue(barn)
                 if (!result.filterValue { beløp -> beløp < 0 }.isEmpty) {
                     personidentService.hentAktør(barn).aktivFødselsnummer()
-                } else null
+                } else {
+                    null
+                }
             }
-        } else emptyList()
+        } else {
+            emptyList()
+        }
     }
 
     fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
-
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 

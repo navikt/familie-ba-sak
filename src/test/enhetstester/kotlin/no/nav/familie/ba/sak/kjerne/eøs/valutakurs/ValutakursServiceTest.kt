@@ -37,7 +37,7 @@ internal class ValutakursServiceTest {
     val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(
         valutakursRepository,
         utenlandskPeriodebeløpRepository,
-        emptyList(),
+        emptyList()
     )
 
     @BeforeEach

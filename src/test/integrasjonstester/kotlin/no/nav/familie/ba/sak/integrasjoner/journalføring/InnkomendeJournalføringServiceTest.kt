@@ -38,12 +38,11 @@ class InnkomendeJournalføringServiceTest(
     private val innkomendeJournalføringService: InnkomendeJournalføringService,
 
     @Autowired
-    private val journalføringRepository: JournalføringRepository,
+    private val journalføringRepository: JournalføringRepository
 ) : AbstractSpringIntegrationTest() {
 
     @Test
     fun `lagrer journalpostreferanse til behandling og fagsak til journalpost`() {
-
         val søkerFnr = randomFnr()
         val søkerAktør = personidentService.hentAktør(søkerFnr)
 

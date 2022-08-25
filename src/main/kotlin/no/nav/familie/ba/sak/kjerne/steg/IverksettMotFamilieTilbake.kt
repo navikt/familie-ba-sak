@@ -22,7 +22,7 @@ class IverksettMotFamilieTilbake(
     private val vedtakService: VedtakService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val tilbakekrevingRepository: TilbakekrevingRepository,
+    private val tilbakekrevingRepository: TilbakekrevingRepository
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: IverksettMotFamilieTilbakeData): StegType {
@@ -36,7 +36,6 @@ class IverksettMotFamilieTilbake(
             tilbakekreving.valg != Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING &&
             !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
         ) {
-
             val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(behandling)
             tilbakekreving.tilbakekrevingsbehandlingId = tilbakekrevingId
 

@@ -21,7 +21,7 @@ import java.time.YearMonth
 @Service
 class VilkårsvurderingService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val sanityService: SanityService,
+    private val sanityService: SanityService
 ) {
 
     fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
