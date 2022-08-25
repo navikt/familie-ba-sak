@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
@@ -253,5 +254,57 @@ class PersonResultatTest {
         val forskjøvedeVedtaksperioder = førskjøvetVilkårResultatTidslinjeMap[søker.aktør]!!.perioder()
         Assertions.assertEquals(null, forskjøvedeVedtaksperioder.first().fraOgMed.tilYearMonthEllerNull())
         Assertions.assertEquals(null, forskjøvedeVedtaksperioder.first().tilOgMed.tilYearMonthEllerNull())
+    }
+
+    @Test
+    fun `Skal beholde split på utdypende vilkårsvurdering`() {
+        val søker = lagPerson()
+
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søkerAktør = søker.aktør,
+            behandling = lagBehandling(),
+            resultat = Resultat.OPPFYLT
+        )
+
+        val personResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = søker.aktør
+        )
+        val vilkårResultater = Vilkår.hentVilkårFor(søker.type)
+            .map {
+                VilkårResultat(
+                    personResultat = personResultat,
+                    periodeFom = mars2020.førsteDagIInneværendeMåned(),
+                    periodeTom = april2020.sisteDagIInneværendeMåned(),
+                    vilkårType = it,
+                    resultat = Resultat.OPPFYLT,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG)
+                )
+            } + Vilkår.hentVilkårFor(søker.type).map {
+            VilkårResultat(
+                personResultat = personResultat,
+                periodeFom = mai2020.førsteDagIInneværendeMåned(),
+                periodeTom = null,
+                vilkårType = it,
+                resultat = Resultat.OPPFYLT,
+                begrunnelse = "",
+                behandlingId = vilkårsvurdering.behandling.id,
+                utdypendeVilkårsvurderinger = emptyList()
+            )
+        }
+
+        personResultat.setSortedVilkårResultater(vilkårResultater.toSet())
+
+        val førskjøvetVilkårResultatTidslinjeMap = setOf(personResultat).tilFørskjøvetVilkårResultatTidslinjeMap()
+        Assertions.assertEquals(1, førskjøvetVilkårResultatTidslinjeMap.size)
+
+        val forskjøvedeVedtaksperioder = førskjøvetVilkårResultatTidslinjeMap[søker.aktør]!!.perioder()
+        Assertions.assertEquals(april2020, forskjøvedeVedtaksperioder.first().fraOgMed.tilYearMonthEllerNull())
+        Assertions.assertEquals(mai2020, forskjøvedeVedtaksperioder.first().tilOgMed.tilYearMonthEllerNull())
+
+        Assertions.assertEquals(juni2020, forskjøvedeVedtaksperioder.elementAt(1).fraOgMed.tilYearMonthEllerNull())
+        Assertions.assertEquals(null, forskjøvedeVedtaksperioder.elementAt(1).tilOgMed.tilYearMonthEllerNull())
     }
 }
