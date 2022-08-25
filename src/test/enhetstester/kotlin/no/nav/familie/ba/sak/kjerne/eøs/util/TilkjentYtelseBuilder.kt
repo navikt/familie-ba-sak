@@ -47,7 +47,6 @@ class TilkjentYtelseBuilder(
         differanse: (Int) -> Int? = { null },
         kalkulert: (Int) -> Int = { it }
     ): TilkjentYtelseBuilder {
-
         val andeler = gjeldendePersoner
             .map { person ->
                 val andelTilkjentYtelseTidslinje = s.tilCharTidslinje(startMåned)

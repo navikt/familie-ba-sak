@@ -22,7 +22,9 @@ fun nesteGyldigeTriggertidForBehandlingIHverdager(
         kl06IdagEllerNesteDag(date)
     } else if (erKlokkenMellom21Og06(date.toLocalTime()) || !date.erHverdag(0)) {
         date.with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(6)
-    } else date
+    } else {
+        date
+    }
 
     when {
         date.dayOfMonth == 1 && date.month == Month.JANUARY -> date = date.plusDays(1)

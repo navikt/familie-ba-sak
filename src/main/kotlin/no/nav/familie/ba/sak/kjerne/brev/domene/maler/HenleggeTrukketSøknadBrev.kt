@@ -7,7 +7,7 @@ data class HenleggeTrukketSøknadBrev(
 
 data class HenleggeTrukketSøknadData(
     override val delmalData: DelmalData,
-    override val flettefelter: FlettefelterForDokumentImpl,
+    override val flettefelter: FlettefelterForDokumentImpl
 ) : BrevData {
 
     data class DelmalData(

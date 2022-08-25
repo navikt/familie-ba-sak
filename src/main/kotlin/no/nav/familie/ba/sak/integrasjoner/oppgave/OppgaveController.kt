@@ -40,7 +40,7 @@ class OppgaveController(
     private val integrasjonClient: IntegrasjonClient,
     private val personopplysningerService: PersonopplysningerService,
     private val tilgangService: TilgangService,
-    private val innkomendeJournalføringService: InnkomendeJournalføringService,
+    private val innkomendeJournalføringService: InnkomendeJournalføringService
 ) {
 
     @PostMapping(
@@ -94,7 +94,6 @@ class OppgaveController(
 
     @GetMapping(path = ["/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<DataForManuellJournalføring>> {
-
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val aktør = oppgave.aktoerId?.let { personidentService.hentAktør(it) }
 
@@ -140,7 +139,8 @@ class OppgaveController(
     @PostMapping(path = ["/{oppgaveId}/ferdigstillOgKnyttjournalpost"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun ferdigstillOppgaveOgKnyttJournalpostTilBehandling(
         @PathVariable oppgaveId: Long,
-        @RequestBody @Valid request: RestFerdigstillOppgaveKnyttJournalpost,
+        @RequestBody @Valid
+        request: RestFerdigstillOppgaveKnyttJournalpost
     ): ResponseEntity<Ressurs<String?>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,

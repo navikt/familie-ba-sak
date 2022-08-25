@@ -41,7 +41,7 @@ class RestFagsakTest(
     private val tilbakekrevingService: TilbakekrevingService,
 
     @Autowired
-    private val vedtaksperiodeService: VedtaksperiodeService,
+    private val vedtaksperiodeService: VedtaksperiodeService
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -64,7 +64,7 @@ class RestFagsakTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService,
+            vedtaksperiodeService
         )
 
         kjørStegprosessForRevurderingÅrligKontroll(

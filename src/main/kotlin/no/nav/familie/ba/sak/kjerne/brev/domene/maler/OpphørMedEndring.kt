@@ -11,7 +11,7 @@ data class OpphørMedEndring(
         vedtakFellesfelter: VedtakFellesfelter,
 
         etterbetaling: Etterbetaling?,
-        erFeilutbetalingPåBehandling: Boolean,
+        erFeilutbetalingPåBehandling: Boolean
     ) :
         this(
             data = OpphørMedEndringData(
@@ -23,13 +23,13 @@ data class OpphørMedEndring(
                     ),
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                     feilutbetaling = erFeilutbetalingPåBehandling,
-                    etterbetaling = etterbetaling,
+                    etterbetaling = etterbetaling
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
                 ),
-                perioder = vedtakFellesfelter.perioder,
+                perioder = vedtakFellesfelter.perioder
             )
         )
 }
@@ -43,6 +43,6 @@ data class OpphørMedEndringData(
         val signaturVedtak: SignaturVedtak,
         val feilutbetaling: Boolean,
         val hjemmeltekst: Hjemmeltekst,
-        val etterbetaling: Etterbetaling?,
+        val etterbetaling: Etterbetaling?
     )
 }

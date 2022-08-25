@@ -80,7 +80,7 @@ class BehandleAnnullerFødselTaskTest : AbstractSpringIntegrationTest() {
                         }
                     )
                 )
-            ),
+            )
         )
 
         behandleAnnullertFødselTask.doTask(

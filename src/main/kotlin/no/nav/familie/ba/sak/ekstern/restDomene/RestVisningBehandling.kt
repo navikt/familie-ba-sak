@@ -19,7 +19,7 @@ class RestVisningBehandling(
     val type: BehandlingType,
     val status: BehandlingStatus,
     val resultat: Behandlingsresultat,
-    val vedtaksdato: LocalDateTime?,
+    val vedtaksdato: LocalDateTime?
 )
 
 fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) = RestVisningBehandling(

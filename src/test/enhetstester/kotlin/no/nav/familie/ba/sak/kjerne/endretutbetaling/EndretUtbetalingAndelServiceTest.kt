@@ -52,7 +52,7 @@ class EndretUtbetalingAndelServiceTest {
             persongrunnlagService = mockPersongrunnlagService,
             andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository,
             sanityService = sanityService,
-            vilkårsvurderingService = mockVilkårsvurderingService,
+            vilkårsvurderingService = mockVilkårsvurderingService
         )
     }
 

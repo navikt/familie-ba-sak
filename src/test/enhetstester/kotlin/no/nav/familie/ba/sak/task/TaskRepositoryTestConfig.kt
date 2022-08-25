@@ -14,7 +14,6 @@ class TaskRepositoryTestConfig {
     @Bean
     @Profile("mock-task-repository")
     fun mockTaskRepository(): TaskRepositoryWrapper {
-
         return clearMockTaskRepository(mockk(relaxed = true))
     }
 
@@ -22,7 +21,6 @@ class TaskRepositoryTestConfig {
     @Profile("mock-task-service")
     @Primary
     fun mockTaskService(): OpprettTaskService {
-
         return clearMockTaskService(mockk(relaxed = true))
     }
 

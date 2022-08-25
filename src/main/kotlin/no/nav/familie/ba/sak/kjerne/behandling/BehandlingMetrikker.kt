@@ -52,8 +52,10 @@ class BehandlingMetrikker(
         Behandlingsresultat.values().associateWith {
             Metrics.counter(
                 "behandling.resultat",
-                "type", it.name,
-                "beskrivelse", it.displayName
+                "type",
+                it.name,
+                "beskrivelse",
+                it.displayName
             )
         }
 
@@ -71,8 +73,10 @@ class BehandlingMetrikker(
 
             Metrics.counter(
                 "eøs-begrunnelse",
-                "type", it.name,
-                "beskrivelse", tittel
+                "type",
+                it.name,
+                "beskrivelse",
+                tittel
             )
         }
 
@@ -87,8 +91,10 @@ class BehandlingMetrikker(
 
             Metrics.counter(
                 "brevbegrunnelse",
-                "type", it.name,
-                "beskrivelse", tittel
+                "type",
+                it.name,
+                "beskrivelse",
+                tittel
             )
         }
     }
@@ -146,7 +152,8 @@ class BehandlingMetrikker(
     private fun initBehandlingTypeMetrikker(type: String): Map<BehandlingType, Counter> {
         return BehandlingType.values().associateWith {
             Metrics.counter(
-                "behandling.opprettet", "type",
+                "behandling.opprettet",
+                "type",
                 it.name,
                 "beskrivelse",
                 it.visningsnavn,

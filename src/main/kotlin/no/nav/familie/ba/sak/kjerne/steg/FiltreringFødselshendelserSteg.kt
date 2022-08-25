@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class FiltreringFødselshendelserSteg(
-    private val filtreringsreglerService: FiltreringsreglerService,
+    private val filtreringsreglerService: FiltreringsreglerService
 ) : BehandlingSteg<NyBehandlingHendelse> {
 
     override fun utførStegOgAngiNeste(
@@ -25,7 +25,9 @@ class FiltreringFødselshendelserSteg(
 
         return if (!fødselshendelsefiltreringResultat.erOppfylt()) {
             StegType.HENLEGG_BEHANDLING
-        } else hentNesteStegForNormalFlyt(behandling)
+        } else {
+            hentNesteStegForNormalFlyt(behandling)
+        }
     }
 
     override fun stegType(): StegType {

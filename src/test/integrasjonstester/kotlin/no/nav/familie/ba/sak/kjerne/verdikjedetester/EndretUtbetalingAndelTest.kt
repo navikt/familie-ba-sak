@@ -24,7 +24,7 @@ import java.time.YearMonth
 
 class EndretUtbetalingAndelTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -43,7 +43,7 @@ class EndretUtbetalingAndelTest(
             årsak = Årsak.DELT_BOSTED, avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true,
+            erTilknyttetAndeler = true
         )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
@@ -59,12 +59,12 @@ class EndretUtbetalingAndelTest(
 
         Assertions.assertEquals(
             endretFom,
-            endretAndeleTilkjentYtelse.stønadFom,
+            endretAndeleTilkjentYtelse.stønadFom
         )
 
         Assertions.assertEquals(
             endretTom,
-            endretAndeleTilkjentYtelse.stønadTom,
+            endretAndeleTilkjentYtelse.stønadTom
         )
 
         val utbetalingAndeleTilkjentYtelse =
@@ -96,7 +96,7 @@ class EndretUtbetalingAndelTest(
             avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true,
+            erTilknyttetAndeler = true
         )
 
         val restUtvidetBehandlingEtterEndretPeriode = familieBaSakKlient().leggTilEndretUtbetalingAndel(
@@ -116,11 +116,11 @@ class EndretUtbetalingAndelTest(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
 
         Assertions.assertNotNull(
-            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.firstOrNull { it.stønadFom == endretFom },
+            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.firstOrNull { it.stønadFom == endretFom }
         )
 
         Assertions.assertNotNull(
-            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.firstOrNull { it.stønadTom == YearMonth.of(2021, 12) },
+            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.firstOrNull { it.stønadTom == YearMonth.of(2021, 12) }
         )
     }
 

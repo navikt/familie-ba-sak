@@ -82,21 +82,23 @@ private fun Map<Aktør, Tidslinje<RegelverkResultat, Måned>>.tilBarnasEøsRegel
     }
 
 private fun <I, T : Tidsenhet> Tidslinje<I, T>.forlengFremtidTilUendelig(nå: Tidspunkt<T>): Tidslinje<I, T> {
-    return if (this.tilOgMed() > nå)
+    return if (this.tilOgMed() > nå) {
         this.flyttTilOgMed(this.tilOgMed().somUendeligLengeTil())
-    else
+    } else {
         this
+    }
 }
 
 private fun <I, T : Tidsenhet> Tidslinje<I, T>.flyttTilOgMed(tilTidspunkt: Tidspunkt<T>): Tidslinje<I, T> {
     val tidslinje = this
 
-    return if (tilTidspunkt < tidslinje.fraOgMed())
+    return if (tilTidspunkt < tidslinje.fraOgMed()) {
         TomTidslinje()
-    else
+    } else {
         object : Tidslinje<I, T>() {
             override fun lagPerioder(): Collection<Periode<I, T>> = tidslinje.perioder()
                 .filter { it.fraOgMed <= tilTidspunkt }
                 .replaceLast { Periode(it.fraOgMed, tilTidspunkt, it.innhold) }
         }
+    }
 }

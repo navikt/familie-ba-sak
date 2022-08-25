@@ -58,7 +58,9 @@ class FamilieIntegrasjonerTilgangskontrollClient(
                 adressebeskyttelseGradering = adressebeskyttelse,
                 harTilgang = false
             )
-        } else null
+        } else {
+            null
+        }
     }
 
     companion object {

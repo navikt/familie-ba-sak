@@ -39,8 +39,9 @@ class ValutakursController(
         @PathVariable behandlingId: Long,
         @RequestBody restValutakurs: RestValutakurs
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
+        }
 
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
 
@@ -59,8 +60,9 @@ class ValutakursController(
         @PathVariable behandlingId: Long,
         @PathVariable valutakursId: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
+        }
 
         valutakursService.slettValutakurs(valutakursId)
 

@@ -53,9 +53,13 @@ fun EndretUtbetalingAndel.tilMinimertRestEndretUtbetalingAndel() = MinimertRestE
             "ved konvertering til minimertRestEndretUtbetalingsandel"
     ),
     avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: (
-        if (this.årsakErDeltBosted()) throw Feil(
-            "Har ikke avtaletidspunktDeltBosted på endretUtbetalingsandel  ${this.id} " +
-                "ved konvertering til minimertRestEndretUtbetalingsandel"
-        ) else null
+        if (this.årsakErDeltBosted()) {
+            throw Feil(
+                "Har ikke avtaletidspunktDeltBosted på endretUtbetalingsandel  ${this.id} " +
+                    "ved konvertering til minimertRestEndretUtbetalingsandel"
+            )
+        } else {
+            null
+        }
         )
 )

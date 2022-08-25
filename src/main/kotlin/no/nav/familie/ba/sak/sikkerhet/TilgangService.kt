@@ -81,7 +81,7 @@ class TilgangService(
         if (!harTilgang) {
             throw RolleTilgangskontrollFeil(
                 "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang til behandling=$behandlingId",
+                    "har ikke tilgang til behandling=$behandlingId"
             )
         }
     }

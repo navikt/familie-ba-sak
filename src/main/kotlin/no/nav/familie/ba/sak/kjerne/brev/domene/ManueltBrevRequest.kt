@@ -85,7 +85,7 @@ fun ManueltBrevRequest.leggTilEnhet(arbeidsfordelingService: ArbeidsfordelingSer
         enhet = Enhet(
             enhetNavn = arbeidsfordelingsenhet.enhetNavn,
             enhetId = arbeidsfordelingsenhet.enhetId
-        ),
+        )
     )
 }
 
@@ -103,7 +103,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 flettefelter = InformasjonsbrevDeltBostedData.Flettefelter(
                     navn = this.mottakerNavn,
                     fodselsnummer = this.mottakerIdent,
-                    barnMedDeltBostedAvtale = this.multiselectVerdier,
+                    barnMedDeltBostedAvtale = this.multiselectVerdier
                 )
             )
         )
@@ -114,7 +114,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 flettefelter = InnhenteOpplysningerData.Flettefelter(
                     navn = this.mottakerNavn,
                     fodselsnummer = this.mottakerIdent,
-                    dokumentliste = this.multiselectVerdier,
+                    dokumentliste = this.multiselectVerdier
                 )
             )
         )
@@ -124,7 +124,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = this.mottakerNavn,
-                    fodselsnummer = this.mottakerIdent,
+                    fodselsnummer = this.mottakerIdent
                 )
             )
         )
@@ -134,7 +134,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             navn = this.mottakerNavn,
             fødselsnummer = this.mottakerIdent,
             varselÅrsaker = this.multiselectVerdier,
-            enhet = this.enhetNavn(),
+            enhet = this.enhetNavn()
         )
     Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 ->
         VarselOmRevurderingDeltBostedParagraf14Brev(
@@ -143,25 +143,28 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 flettefelter = VarselOmRevurderingDeltBostedParagraf14Data.Flettefelter(
                     navn = this.mottakerNavn,
                     fodselsnummer = this.mottakerIdent,
-                    barnMedDeltBostedAvtale = this.multiselectVerdier,
+                    barnMedDeltBostedAvtale = this.multiselectVerdier
                 )
             )
         )
     Brevmal.VARSEL_OM_REVURDERING_SAMBOER ->
-        if (this.datoAvtale == null) throw FunksjonellFeil(
-            frontendFeilmelding = "Du må sette dato for samboerskap for å sende dette brevet.",
-            melding = "Dato er ikke satt for brevtype 'varsel om revurdering samboer'"
-        )
-        else VarselOmRevurderingSamboerBrev(
-            data = VarselOmRevurderingSamboerData(
-                delmalData = VarselOmRevurderingSamboerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
-                flettefelter = VarselOmRevurderingSamboerData.Flettefelter(
-                    navn = this.mottakerNavn,
-                    fodselsnummer = this.mottakerIdent,
-                    datoAvtale = LocalDate.parse(this.datoAvtale).tilDagMånedÅr()
+        if (this.datoAvtale == null) {
+            throw FunksjonellFeil(
+                frontendFeilmelding = "Du må sette dato for samboerskap for å sende dette brevet.",
+                melding = "Dato er ikke satt for brevtype 'varsel om revurdering samboer'"
+            )
+        } else {
+            VarselOmRevurderingSamboerBrev(
+                data = VarselOmRevurderingSamboerData(
+                    delmalData = VarselOmRevurderingSamboerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
+                    flettefelter = VarselOmRevurderingSamboerData.Flettefelter(
+                        navn = this.mottakerNavn,
+                        fodselsnummer = this.mottakerIdent,
+                        datoAvtale = LocalDate.parse(this.datoAvtale).tilDagMånedÅr()
+                    )
                 )
             )
-        )
+        }
     Brevmal.SVARTIDSBREV ->
         Svartidsbrev(
             navn = this.mottakerNavn,
@@ -170,7 +173,9 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             mal = Brevmal.SVARTIDSBREV,
             erEøsBehandling = if (this.behandlingKategori == null) {
                 throw Feil("Trenger å vite om behandling er EØS for å sende ut svartidsbrev.")
-            } else this.behandlingKategori == BehandlingKategori.EØS
+            } else {
+                this.behandlingKategori == BehandlingKategori.EØS
+            }
         )
     Brevmal.FORLENGET_SVARTIDSBREV ->
         ForlengetSvartidsbrev(
@@ -223,7 +228,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             navn = this.mottakerNavn,
             fødselsnummer = this.mottakerIdent,
             varselÅrsaker = this.multiselectVerdier,
-            enhet = this.enhetNavn(),
+            enhet = this.enhetNavn()
         )
     Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED ->
         InnhenteOpplysningerOmBarn(

@@ -167,7 +167,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode.Delingsprosent._0
                     )
                 )
-            ),
+            )
         )
 
         // result from Infotrygd
@@ -197,7 +197,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode.Delingsprosent._0
                     )
                 )
-            ),
+            )
         )
 
         testDataBaSak.forEach {
@@ -207,7 +207,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val result = testDataInfotrygd.flatMap {
             listOf(
                 SkatteetatenPerioder(
-                    it.fnr, it.endretDato,
+                    it.fnr,
+                    it.endretDato,
                     it.perioder.map { p ->
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),
@@ -272,7 +273,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode.Delingsprosent._0
                     )
                 )
-            ),
+            )
         )
 
         // result from Infotrygd
@@ -289,7 +290,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode.Delingsprosent._0
                     )
                 )
-            ),
+            )
         )
 
         testDataBaSak.forEach {
@@ -304,7 +305,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         } returns testDataInfotrygd.flatMap {
             listOf(
                 SkatteetatenPerioder(
-                    it.fnr, it.endretDato,
+                    it.fnr,
+                    it.endretDato,
                     it.perioder.map { p ->
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),
@@ -346,7 +348,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode.Delingsprosent._0
                     )
                 )
-            ),
+            )
         )
 
         // result from Infotrygd
@@ -363,7 +365,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode.Delingsprosent._0
                     )
                 )
-            ),
+            )
         )
 
         testDataBaSak.forEach {
@@ -378,7 +380,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         } returns testDataInfotrygd.flatMap {
             listOf(
                 SkatteetatenPerioder(
-                    it.fnr, it.endretDato,
+                    it.fnr,
+                    it.endretDato,
                     it.perioder.map { p ->
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),
@@ -420,7 +423,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode.Delingsprosent._0
                     )
                 )
-            ),
+            )
         )
 
         // result from Infotrygd
@@ -437,7 +440,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode.Delingsprosent._0
                     )
                 )
-            ),
+            )
         )
 
         testDataBaSak.forEach {
@@ -452,7 +455,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         } returns testDataInfotrygd.flatMap {
             listOf(
                 SkatteetatenPerioder(
-                    it.fnr, it.endretDato,
+                    it.fnr,
+                    it.endretDato,
                     it.perioder.map { p ->
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),
@@ -514,7 +518,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode.Delingsprosent._0
                     )
                 )
-            ),
+            )
         )
 
         testDataBaSak.forEach {
@@ -675,7 +679,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             behandling = behandling,
             opprettetDato = perioderTestData.endretDato.toLocalDate(),
             endretDato = perioderTestData.endretDato.toLocalDate(),
-            utbetalingsoppdrag = "utbetalt",
+            utbetalingsoppdrag = "utbetalt"
         ).also {
             it.andelerTilkjentYtelse.addAll(
                 perioderTestData.perioder.map { p ->
@@ -710,7 +714,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 type = BehandlingType.REVURDERING,
                 opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                 kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.UTVIDET,
+                underkategori = BehandlingUnderkategori.UTVIDET
             )
         )
 
@@ -719,7 +723,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             behandling = behandling,
             opprettetDato = perioderTestData.endretDato.toLocalDate(),
             endretDato = perioderTestData.endretDato.toLocalDate(),
-            utbetalingsoppdrag = "utbetalt",
+            utbetalingsoppdrag = "utbetalt"
         ).also {
             it.andelerTilkjentYtelse.addAll(
                 perioderTestData.perioder.map { p ->

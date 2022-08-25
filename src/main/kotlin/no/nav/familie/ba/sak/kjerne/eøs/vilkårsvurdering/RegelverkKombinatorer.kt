@@ -14,7 +14,6 @@ fun kombinerVilkårResultaterTilRegelverkResultat(
     personType: PersonType,
     alleVilkårResultater: Iterable<VilkårRegelverkResultat>
 ): RegelverkResultat? {
-
     val nødvendigeVilkår = Vilkår.hentVilkårFor(personType)
         .filter { it != Vilkår.UTVIDET_BARNETRYGD }
 

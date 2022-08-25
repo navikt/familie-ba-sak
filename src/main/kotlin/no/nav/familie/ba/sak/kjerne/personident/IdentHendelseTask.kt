@@ -19,7 +19,7 @@ import java.util.Properties
     triggerTidVedFeilISekunder = (60 * 60 * 24).toLong()
 )
 class IdentHendelseTask(
-    private val personidentService: PersonidentService,
+    private val personidentService: PersonidentService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

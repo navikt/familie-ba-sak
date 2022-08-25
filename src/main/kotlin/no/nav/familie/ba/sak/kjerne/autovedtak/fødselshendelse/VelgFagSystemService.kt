@@ -54,11 +54,15 @@ class VelgFagSystemService(
     }
 
     internal fun morHarLøpendeEllerTidligereUtbetalinger(fagsak: Fagsak?): Boolean {
-        return if (fagsak == null) false
-        else if (behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id)
+        return if (fagsak == null) {
+            false
+        } else if (behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id)
             .any { it.status == BehandlingStatus.UTREDES }
-        ) true
-        else behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
+        ) {
+            true
+        } else {
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
+        }
     }
 
     internal fun morHarSakerMenIkkeLøpendeIInfotrygd(morsIdent: String): Boolean {
@@ -155,5 +159,5 @@ enum class FagsystemUtfall(val beskrivelse: String) {
     FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK("Mor har fagsak uten iverksatte behandlinger"),
     SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER("Mor har saker i infotrygd, men ikke løpende utbetalinger"),
     MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING("Mor har ikke gyldig medlemskap for automatisk vurdering"),
-    STØTTET_I_BA_SAK("Person kan automatisk vurderes i ba-sak"),
+    STØTTET_I_BA_SAK("Person kan automatisk vurderes i ba-sak")
 }

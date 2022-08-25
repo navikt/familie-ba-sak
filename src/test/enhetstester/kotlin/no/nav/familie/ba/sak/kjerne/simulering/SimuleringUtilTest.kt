@@ -23,7 +23,7 @@ class SimuleringUtilTest {
         mottakerNummer: String? = randomFnr(),
         mottakerType: MottakerType = MottakerType.BRUKER,
         behandling: Behandling = mockk(relaxed = true),
-        økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = listOf(mockVedtakSimuleringPostering()),
+        økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = listOf(mockVedtakSimuleringPostering())
     ) = ØkonomiSimuleringMottaker(id, mottakerNummer, mottakerType, behandling, økonomiSimuleringPostering)
 
     private fun mockVedtakSimuleringPostering(
@@ -35,7 +35,7 @@ class SimuleringUtilTest {
         betalingType: BetalingType = BetalingType.DEBIT,
         posteringType: PosteringType = PosteringType.YTELSE,
         forfallsdato: LocalDate = LocalDate.now().minusMonths(1),
-        utenInntrekk: Boolean = false,
+        utenInntrekk: Boolean = false
     ) = ØkonomiSimuleringPostering(
         økonomiSimuleringMottaker = økonomiSimuleringMottaker,
         fagOmrådeKode = fagOmrådeKode,
@@ -45,7 +45,7 @@ class SimuleringUtilTest {
         beløp = beløp.toBigDecimal(),
         posteringType = posteringType,
         forfallsdato = forfallsdato,
-        utenInntrekk = utenInntrekk,
+        utenInntrekk = utenInntrekk
     )
 
     fun mockVedtakSimuleringPosteringer(
@@ -75,7 +75,7 @@ class SimuleringUtilTest {
             mockVedtakSimuleringPostering(beløp = 100, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = 100, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
-            mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
+            mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE)
         )
 
         Assertions.assertEquals(BigDecimal.valueOf(200), hentNyttBeløpIPeriode(vedtaksimuleringPosteringer))
@@ -91,7 +91,7 @@ class SimuleringUtilTest {
             mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = 98, posteringType = PosteringType.FEILUTBETALING),
-            mockVedtakSimuleringPostering(beløp = 98, posteringType = PosteringType.FEILUTBETALING),
+            mockVedtakSimuleringPostering(beløp = 98, posteringType = PosteringType.FEILUTBETALING)
         )
 
         Assertions.assertEquals(BigDecimal.valueOf(4), hentNyttBeløpIPeriode(økonomiSimuleringPosteringer))
@@ -107,7 +107,7 @@ class SimuleringUtilTest {
             mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = 98, posteringType = PosteringType.FEILUTBETALING),
-            mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.FEILUTBETALING),
+            mockVedtakSimuleringPostering(beløp = -99, posteringType = PosteringType.FEILUTBETALING)
         )
 
         Assertions.assertEquals(BigDecimal.valueOf(200), hentNyttBeløpIPeriode(økonomiSimuleringPosteringer))
@@ -119,7 +119,7 @@ class SimuleringUtilTest {
         mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.FEILUTBETALING),
         mockVedtakSimuleringPostering(beløp = -2000, posteringType = PosteringType.YTELSE),
         mockVedtakSimuleringPostering(beløp = 3000, posteringType = PosteringType.YTELSE),
-        mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.YTELSE),
+        mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.YTELSE)
     )
 
     @Test
@@ -146,7 +146,7 @@ class SimuleringUtilTest {
             mockVedtakSimuleringPostering(beløp = 500, posteringType = PosteringType.FEILUTBETALING),
             mockVedtakSimuleringPostering(beløp = -2000, posteringType = PosteringType.YTELSE),
             mockVedtakSimuleringPostering(beløp = 3000, posteringType = PosteringType.YTELSE),
-            mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.YTELSE),
+            mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.YTELSE)
         )
 
         val økonomiSimuleringMottaker =
@@ -169,7 +169,7 @@ class SimuleringUtilTest {
                 beløp = 200,
                 posteringType = PosteringType.YTELSE,
                 forfallsdato = LocalDate.now().minusDays(1)
-            ),
+            )
         )
 
         Assertions.assertEquals(
@@ -190,7 +190,6 @@ class SimuleringUtilTest {
  */
     @Test
     fun `ytelse på 10000 korrigert til 2000`() {
-
         val redusertYtelseTil2_000 = listOf(
             mockVedtakSimuleringPostering(
                 beløp = -10_000,
@@ -234,7 +233,6 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse på 2000 korrigert til 3000`() {
-
         val øktYtelseFra2_000Til3_000 = listOf(
             mockVedtakSimuleringPostering(
                 beløp = -2_000,
@@ -278,7 +276,6 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse på 3000 korrigert til 12000`() {
-
         val øktYtelseFra3_000Til12_000 = listOf(
             mockVedtakSimuleringPostering(
                 beløp = -3_000,

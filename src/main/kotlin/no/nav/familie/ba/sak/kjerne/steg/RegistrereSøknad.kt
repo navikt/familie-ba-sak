@@ -21,7 +21,7 @@ class RegistrereSøknad(
     private val persongrunnlagService: PersongrunnlagService,
     private val loggService: LoggService,
     private val vedtakService: VedtakService,
-    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) : BehandlingSteg<RestRegistrerSøknad> {
 
     override fun utførStegOgAngiNeste(

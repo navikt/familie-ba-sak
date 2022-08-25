@@ -29,8 +29,8 @@ import org.springframework.web.client.RestTemplate
         "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
         "rolle.veileder: VEILDER",
         "rolle.saksbehandler: SAKSBEHANDLER",
-        "rolle.beslutter: BESLUTTER",
-    ],
+        "rolle.beslutter: BESLUTTER"
+    ]
 )
 @ExtendWith(SpringExtension::class)
 @EnableMockOAuth2Server

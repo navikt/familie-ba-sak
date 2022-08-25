@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.utenInnholdHeretter
  *
  */
 fun <T : PeriodeOgBarnSkjemaEntitet<T>> T.somInversOppdateringEllersNull(gjeldendeSkjemaer: Collection<T>): T? {
-
     val oppdatering = this
 
     val skjemaetDerPeriodeLukkes = gjeldendeSkjemaer.filter { gjeldende ->

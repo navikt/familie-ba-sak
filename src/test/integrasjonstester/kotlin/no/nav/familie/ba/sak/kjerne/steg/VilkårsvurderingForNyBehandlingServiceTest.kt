@@ -48,7 +48,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
+    private val databaseCleanupService: DatabaseCleanupService
 
 ) : AbstractSpringIntegrationTest() {
     @BeforeAll
@@ -68,12 +68,13 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
+                årsak = BehandlingÅrsak.MIGRERING
             )
         )
         val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             forrigeBehandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             barnetsFødselsdato,
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -118,12 +119,13 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             barnetsFødselsdato,
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -184,12 +186,13 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
+                årsak = BehandlingÅrsak.MIGRERING
             )
         )
         val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             forrigeBehandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             barnetsFødselsdato,
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -276,12 +279,13 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             barnetsFødselsdato,
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -350,7 +354,8 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             barnetsFødselsdato,
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -416,7 +421,8 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
-            fnr, listOf(barnFnr),
+            fnr,
+            listOf(barnFnr),
             barnetsFødselsdato,
             personidentService.hentOgLagreAktør(fnr, true),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)

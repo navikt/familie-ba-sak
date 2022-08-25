@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTids
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 
 open class VedtaksperiodeMedBegrunnelserTidslinje(
-    private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
+    private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>
 ) : Tidslinje<VedtaksperiodeMedBegrunnelser, Dag>() {
 
     override fun lagPerioder(): List<Periode<VedtaksperiodeMedBegrunnelser, Dag>> =

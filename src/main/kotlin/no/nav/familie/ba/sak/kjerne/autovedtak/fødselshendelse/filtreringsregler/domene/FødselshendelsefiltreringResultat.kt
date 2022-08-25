@@ -49,7 +49,7 @@ class FødselshendelsefiltreringResultat(
     val evalueringsårsaker: List<String> = emptyList(),
 
     @Column(name = "regel_input", columnDefinition = "TEXT")
-    val regelInput: String? = null,
+    val regelInput: String? = null
 ) : BaseEntitet() {
 
     override fun toString(): String {
