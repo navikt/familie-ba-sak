@@ -296,7 +296,7 @@ fun lagTestPersonopplysningGrunnlag(
     behandlingId: Long,
     søkerPersonIdent: String,
     barnasIdenter: List<String>,
-    barnasFødselsdatoer: List<LocalDate> = listOf<LocalDate>(LocalDate.of(2019, 1, 1)),
+    barnasFødselsdatoer: List<LocalDate> = barnasIdenter.map { LocalDate.of(2019, 1, 1) },
     søkerAktør: Aktør = tilAktør(søkerPersonIdent).also {
         it.personidenter.add(
             Personident(
