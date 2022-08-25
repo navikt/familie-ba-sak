@@ -516,7 +516,6 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Vedtaksperioder skal bevare splitt i vilkårsvurdering`() {
-
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
