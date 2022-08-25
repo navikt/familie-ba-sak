@@ -1,10 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import org.springframework.stereotype.Service
 
 class AndelTilkjentYtelseOgEndreteUtbetalinger(
@@ -28,9 +31,12 @@ class AndelTilkjentYtelseOgEndreteUtbetalinger(
     }
 
     private fun overlapper(aty: AndelTilkjentYtelse, eua: EndretUtbetalingAndel): Boolean {
+
+        val euaPeriode = MånedPeriode(eua.fom ?: MIN_MÅNED, eua.tom ?: MAX_MÅNED)
+        val atyPeriode = MånedPeriode(aty.stønadFom, aty.stønadTom)
+
         return aty.aktør.aktørId == eua.person?.aktør?.aktørId &&
-            (eua.fom == null || eua.fom!! <= aty.stønadTom) &&
-            (eua.tom == null || eua.tom!! >= aty.stønadFom)
+            euaPeriode.overlapperHeltEllerDelvisMed(atyPeriode)
     }
 
     fun lagAndelerMedEndringer(): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {

@@ -9,9 +9,11 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
@@ -29,6 +31,12 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
     @MockK(relaxed = true)
     private lateinit var loggService: LoggService
 
+    @MockK(relaxed = true)
+    private lateinit var endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
+
+    @MockK(relaxed = true)
+    private lateinit var featureToggleService: FeatureToggleService
+    
     @InjectMockKs
     private lateinit var småbarnstilleggKorrigeringService: SmåbarnstilleggKorrigeringService
 
