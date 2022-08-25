@@ -111,7 +111,7 @@ internal class SaksstatistikkServiceTest(
     private val featureToggleService: FeatureToggleService,
 
     @MockK
-    private val settPåVentService: SettPåVentService,
+    private val settPåVentService: SettPåVentService
 ) {
 
     private val sakstatistikkService = SaksstatistikkService(
@@ -124,7 +124,7 @@ internal class SaksstatistikkServiceTest(
         personopplysningerService,
         persongrunnlagService,
         vedtaksperiodeService,
-        settPåVentService,
+        settPåVentService
     )
 
     @BeforeAll
@@ -402,7 +402,6 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Enum-verdier brukt i behandlingDVH skal validere mot json schema`() {
-
         val enumVerdier = listOf(
             BehandlingType.values(),
             BehandlingStatus.values(),
@@ -418,7 +417,6 @@ internal class SaksstatistikkServiceTest(
         }
 
         for (i in 0..enumVerdier.maxOf { it.size }) {
-
             val enumI = enumVerdier.map { it.getOrElse(i) { _ -> it.first() } }
             val behandlingType = enumI[0] as BehandlingType
             val behandlingStatus = enumI[1].name
@@ -465,7 +463,7 @@ internal class SaksstatistikkServiceTest(
                     frist = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
                     tidSattPaaVent = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
                     aarsak = settPåVentÅrsak
-                ),
+                )
             )
             try {
                 validerJsonMotSchema(
@@ -494,7 +492,7 @@ internal class SaksstatistikkServiceTest(
                 sakStatus = it.name,
                 avsender = "familie-ba-sak",
                 versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
-                bostedsland = "NO",
+                bostedsland = "NO"
             )
             try {
                 validerJsonMotSchema(

@@ -172,7 +172,8 @@ class FagsakControllerTest(
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
-                personIdent = aktørId.aktivFødselsnummer(), aktørId = aktørId.aktørId
+                personIdent = aktørId.aktivFødselsnummer(),
+                aktørId = aktørId.aktørId
             )
         )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)

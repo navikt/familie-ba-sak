@@ -33,7 +33,7 @@ class ValutakursRepositoryTest(
 
         val valutakurs = valutakursRepository.save(
             lagValutakurs(
-                barnAktører = setOf(barn1, barn2),
+                barnAktører = setOf(barn1, barn2)
             ).also { it.behandlingId = behandling.id }
         )
 

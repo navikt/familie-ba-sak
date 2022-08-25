@@ -27,12 +27,13 @@ data class TidspunktClosedRange<T : Tidsenhet>(
                 val next = gjeldendeTidspunkt
                 gjeldendeTidspunkt = gjeldendeTidspunkt.neste()
 
-                return if (next == tilOgMedTidspunkt.somEndelig())
+                return if (next == tilOgMedTidspunkt.somEndelig()) {
                     tilOgMedTidspunkt
-                else if (next == startTidspunkt.somEndelig())
+                } else if (next == startTidspunkt.somEndelig()) {
                     startTidspunkt
-                else
+                } else {
                     next
+                }
             }
         }
     }

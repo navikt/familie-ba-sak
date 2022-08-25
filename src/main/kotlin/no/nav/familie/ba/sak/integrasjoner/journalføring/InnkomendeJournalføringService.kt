@@ -47,7 +47,7 @@ class InnkomendeJournalføringService(
     private val journalføringRepository: JournalføringRepository,
     private val loggService: LoggService,
     private val stegService: StegService,
-    private val journalføringMetrikk: JournalføringMetrikk,
+    private val journalføringMetrikk: JournalføringMetrikk
 ) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
@@ -75,7 +75,6 @@ class InnkomendeJournalføringService(
         behandlendeEnhet: String,
         oppgaveId: String
     ): String {
-
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(
             request.tilknyttedeBehandlingIder,
             journalpostId
@@ -147,7 +146,6 @@ class InnkomendeJournalføringService(
         behandlendeEnhet: String,
         oppgaveId: String
     ): String {
-
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
 
         if (request.opprettOgKnyttTilNyBehandling) {
@@ -216,7 +214,6 @@ class InnkomendeJournalføringService(
         tilknyttedeBehandlingIder: List<String>,
         journalpostId: String
     ): Pair<Sak, List<Behandling>> {
-
         val behandlinger = tilknyttedeBehandlingIder.map {
             behandlingHentOgPersisterService.hent(it.toLong())
         }

@@ -15,7 +15,7 @@ class SanityBegrunnelseTest {
         )
         Assertions.assertEquals(
             listOf(
-                ØvrigTrigger.BARN_MED_6_ÅRS_DAG,
+                ØvrigTrigger.BARN_MED_6_ÅRS_DAG
             ),
             restSanityBegrunnelse.tilSanityBegrunnelse().ovrigeTriggere?.toList()
         )

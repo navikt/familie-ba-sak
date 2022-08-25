@@ -22,7 +22,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class EndretUtbetalingAndelMedUtvidetAndelTest(
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -105,7 +105,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true,
+            erTilknyttetAndeler = true
         )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
@@ -123,7 +123,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true,
+            erTilknyttetAndeler = true
         )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(

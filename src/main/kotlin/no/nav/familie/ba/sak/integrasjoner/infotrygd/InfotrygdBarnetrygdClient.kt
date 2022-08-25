@@ -138,7 +138,8 @@ class InfotrygdBarnetrygdClient(
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/brev")
         return try {
             postForEntity(
-                uri, SendtBrevRequest(søkersIdenter, brevkoder.map { it.kode })
+                uri,
+                SendtBrevRequest(søkersIdenter, brevkoder.map { it.kode })
             )
         } catch (ex: Exception) {
             loggFeil(ex, uri)

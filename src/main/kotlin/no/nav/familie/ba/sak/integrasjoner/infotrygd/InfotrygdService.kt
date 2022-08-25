@@ -32,7 +32,9 @@ class InfotrygdService(
                 adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør),
                 harTilgang = false
             )
-        } else null
+        } else {
+            null
+        }
     }
 
     fun hentInfotrygdstønaderForSøker(ident: String, historikk: Boolean = false): InfotrygdSøkResponse<Stønad> {
@@ -52,7 +54,9 @@ class InfotrygdService(
                 ),
                 harTilgang = false
             )
-        } else null
+        } else {
+            null
+        }
     }
 
     fun harÅpenSakIInfotrygd(søkerIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {

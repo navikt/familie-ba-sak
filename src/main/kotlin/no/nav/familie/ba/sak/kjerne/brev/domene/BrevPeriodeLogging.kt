@@ -24,7 +24,7 @@ data class BrevPeriodeForLogging(
 
     val uregistrerteBarn: List<MinimertUregistrertBarn>,
     val erFørsteVedtaksperiodePåFagsak: Boolean = false,
-    val brevMålform: Målform,
+    val brevMålform: Målform
 )
 
 data class BrevPeriodePersonForLogging(
@@ -34,19 +34,19 @@ data class BrevPeriodePersonForLogging(
     val andreVurderinger: List<MinimertAnnenVurdering>,
     val endredeUtbetalinger: List<EndretUtbetalingAndelPåPersonForLogging>,
     val utbetalinger: List<UtbetalingPåPersonForLogging>,
-    val harReduksjonFraForrigeBehandling: Boolean,
+    val harReduksjonFraForrigeBehandling: Boolean
 )
 
 data class UtbetalingPåPersonForLogging(
     val ytelseType: YtelseType,
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean,
-    val prosent: BigDecimal,
+    val prosent: BigDecimal
 )
 
 data class EndretUtbetalingAndelPåPersonForLogging(
     val periode: MånedPeriode,
-    val årsak: Årsak,
+    val årsak: Årsak
 )
 
 @JsonTypeInfo(
@@ -67,9 +67,9 @@ data class BegrunnelseDataForLogging(
     val maanedOgAarBegrunnelsenGjelderFor: String?,
     val maalform: String,
     val apiNavn: String,
-    val belop: Int,
+    val belop: Int
 ) : TestBegrunnelse
 
 data class BrevBegrunnelseGrunnlagForLogging(
-    val standardbegrunnelse: Standardbegrunnelse,
+    val standardbegrunnelse: Standardbegrunnelse
 )

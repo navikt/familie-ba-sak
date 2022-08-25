@@ -53,9 +53,11 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     private val vedtakV2Counter = Metrics.counter(COUNTER_NAME, "type", "vedtakV2")
     private val saksstatistikkSakDvhCounter = Metrics.counter(COUNTER_NAME, "type", "sak")
     private val saksstatistikkBehandlingDvhCounter = Metrics.counter(COUNTER_NAME, "type", "behandling")
+
     @Autowired
     @Qualifier("kafkaObjectMapper")
     lateinit var kafkaObjectMapper: ObjectMapper
+
     @Autowired
     lateinit var kafkaTemplate: KafkaTemplate<String, Any>
 

@@ -49,10 +49,10 @@ enum class YtelsePersonResultat(val displayName: String) {
     FORTSATT_OPPHØRT(displayName = "Fortsatt Opphørt"),
     IKKE_VURDERT(displayName = "Ikke vurdert"),
     ENDRET_UTBETALING(displayName = "Endret utbetaling"),
-    ENDRET_UTEN_UTBETALING(displayName = "Endret, uten utbetaling"),
+    ENDRET_UTEN_UTBETALING(displayName = "Endret, uten utbetaling")
 }
 
 enum class KravOpprinnelse(val displayName: String) {
     INNEVÆRENDE(displayName = "Krav framstilt i inneværende behandling"),
-    TIDLIGERE(displayName = "Krav framstilt tidligere behandling"),
+    TIDLIGERE(displayName = "Krav framstilt tidligere behandling")
 }

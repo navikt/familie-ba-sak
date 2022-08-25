@@ -51,7 +51,9 @@ class TilkjentYtelseTestController(
             val lagretEndretUtbetalingAndel = endretUtbetalingAndelRepository.saveAndFlush(it)
 
             beregningService.oppdaterBehandlingMedBeregning(
-                behandling, personopplysningGrunnlag, lagretEndretUtbetalingAndel
+                behandling,
+                personopplysningGrunnlag,
+                lagretEndretUtbetalingAndel
             )
         }
 

@@ -23,7 +23,7 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
     val eøsBegrunnelser: List<EØSBegrunnelse>,
     val fritekster: List<String> = emptyList(),
     val gyldigeBegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
-    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
+    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList()
 ) {
     fun hentMånedPeriode() = MånedPeriode(
         (this.fom ?: TIDENES_MORGEN).toYearMonth(),
@@ -38,12 +38,11 @@ fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperi
 
 fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ): UtvidetVedtaksperiodeMedBegrunnelser {
-
     val utbetalingsperiodeDetaljer = hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse = andelerTilkjentYtelse,
-        personopplysningGrunnlag = personopplysningGrunnlag,
+        personopplysningGrunnlag = personopplysningGrunnlag
     )
 
     return UtvidetVedtaksperiodeMedBegrunnelser(

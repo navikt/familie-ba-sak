@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 data class RestPersonResultat(
     val personIdent: String,
     val vilkårResultater: List<RestVilkårResultat>,
-    val andreVurderinger: List<RestAnnenVurdering> = emptyList(),
+    val andreVurderinger: List<RestAnnenVurdering> = emptyList()
 )
 
 data class RestVilkårResultat(

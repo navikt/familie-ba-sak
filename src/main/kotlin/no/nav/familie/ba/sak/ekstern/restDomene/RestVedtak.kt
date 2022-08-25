@@ -21,7 +21,7 @@ data class RestVedtakBegrunnelseTilknyttetVilkår(
 
 fun Vedtak.tilRestVedtak(
     vedtaksperioderMedBegrunnelser: List<RestUtvidetVedtaksperiodeMedBegrunnelser>,
-    skalMinimeres: Boolean,
+    skalMinimeres: Boolean
 ) =
     RestVedtak(
         aktiv = this.aktiv,
@@ -33,5 +33,5 @@ fun Vedtak.tilRestVedtak(
                 .map { it.copy(gyldigeBegrunnelser = emptyList()) }
         } else {
             vedtaksperioderMedBegrunnelser
-        },
+        }
     )

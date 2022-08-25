@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 
 abstract class TidslinjeSomStykkerOppTiden<I, T : Tidsenhet>(
-    avhengigheter: Collection<Tidslinje<*, T>>,
+    avhengigheter: Collection<Tidslinje<*, T>>
 ) : TidslinjeMedAvhengigheter<I, T>(avhengigheter) {
     constructor(vararg avhengighet: Tidslinje<*, T>) :
         this(avhengighet.asList())

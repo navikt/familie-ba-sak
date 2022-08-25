@@ -50,7 +50,7 @@ class StegService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
-    private val settPåVentService: SettPåVentService,
+    private val settPåVentService: SettPåVentService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -63,7 +63,7 @@ class StegService(
         val behandling = håndterNyBehandling(nyBehandling)
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
             infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(
-                behandling.fagsak.aktør,
+                behandling.fagsak.aktør
             )
         }
         return behandling
@@ -149,9 +149,11 @@ class StegService(
         return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
-                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE)
+                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE) {
                     BehandlingType.REVURDERING
-                else BehandlingType.FØRSTEGANGSBEHANDLING,
+                } else {
+                    BehandlingType.FØRSTEGANGSBEHANDLING
+                },
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = nyBehandlingHendelse.barnasIdenter,
@@ -224,7 +226,9 @@ class StegService(
 
         return if (behandlingEtterVilkårsvurdering.skalBehandlesAutomatisk) {
             håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
-        } else behandlingEtterVilkårsvurdering
+        } else {
+            behandlingEtterVilkårsvurdering
+        }
     }
 
     @Transactional
@@ -242,7 +246,9 @@ class StegService(
             håndterVurderTilbakekreving(
                 behandling = behandlingEtterBehandlingsresultatSteg
             )
-        } else behandlingEtterBehandlingsresultatSteg
+        } else {
+            behandlingEtterBehandlingsresultatSteg
+        }
     }
 
     @Transactional

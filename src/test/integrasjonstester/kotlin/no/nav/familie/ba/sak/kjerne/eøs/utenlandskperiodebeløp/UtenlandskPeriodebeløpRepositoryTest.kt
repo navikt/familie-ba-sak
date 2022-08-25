@@ -33,7 +33,7 @@ class UtenlandskPeriodebeløpRepositoryTest(
 
         val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.save(
             lagUtenlandskPeriodebeløp(
-                barnAktører = setOf(barn1, barn2),
+                barnAktører = setOf(barn1, barn2)
             ).also { it.behandlingId = behandling.id }
         )
 

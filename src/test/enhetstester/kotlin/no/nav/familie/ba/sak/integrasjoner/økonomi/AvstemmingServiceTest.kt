@@ -123,7 +123,7 @@ class AvstemmingServiceTest {
             økonomiKlient.konsistensavstemOppdragData(
                 avstemmingsdato,
                 emptyList(),
-                transaksjonsId,
+                transaksjonsId
             )
         } returns ""
 
@@ -131,7 +131,7 @@ class AvstemmingServiceTest {
             avstemmingsdato = avstemmingsdato,
             transaksjonsId = transaksjonsId,
             chunkNr = 1,
-            perioderTilAvstemming = emptyList(),
+            perioderTilAvstemming = emptyList()
         )
 
         val dataChunkSlot = slot<DataChunk>()

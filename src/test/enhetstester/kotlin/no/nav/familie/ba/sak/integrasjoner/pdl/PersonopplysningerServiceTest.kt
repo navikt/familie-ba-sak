@@ -47,14 +47,13 @@ internal class PersonopplysningerServiceTest(
                     restTemplate,
                     mockPersonidentService
                 ),
-                mockFamilieIntegrasjonerTilgangskontrollClient,
+                mockFamilieIntegrasjonerTilgangskontrollClient
             )
         lagMockForPersoner()
     }
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
-
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
         } returns Tilgang(true, null)
@@ -94,7 +93,6 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
-
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
         } returns Tilgang(true, null)
@@ -216,67 +214,80 @@ internal class PersonopplysningerServiceTest(
         )
 
         lagMockForPdl(
-            "hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
+            "hentperson-enkel.graphql",
+            "PdlIntegrasjon/gyldigRequestForBarn.json",
             readfile("PdlIntegrasjon/personinfoResponseForBarn.json")
         )
 
         lagMockForPdl(
-            "hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarnUtenFødselsdato.json",
+            "hentperson-enkel.graphql",
+            "PdlIntegrasjon/gyldigRequestForBarnUtenFødselsdato.json",
             readfile("PdlIntegrasjon/personinfoResponseForBarnUtenFødselsdato.json")
         )
 
         lagMockForPdl(
-            "hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarnMedOpphørtStatus.json",
+            "hentperson-enkel.graphql",
+            "PdlIntegrasjon/gyldigRequestForBarnMedOpphørtStatus.json",
             readfile("PdlIntegrasjon/personinfoResponseForBarnMedOpphørtStatus.json")
         )
 
         lagMockForPdl(
-            "hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn2.json",
+            "hentperson-enkel.graphql",
+            "PdlIntegrasjon/gyldigRequestForBarn2.json",
             readfile("PdlIntegrasjon/personinfoResponseForBarnMedAdressebeskyttelse.json")
         )
 
         lagMockForPdl(
-            "hentperson-med-relasjoner-og-registerinformasjon.graphql", "PdlIntegrasjon/gyldigRequestForDødMor.json",
+            "hentperson-med-relasjoner-og-registerinformasjon.graphql",
+            "PdlIntegrasjon/gyldigRequestForDødMor.json",
             readfile("PdlIntegrasjon/personinfoResponseForDødMor.json")
         )
 
         lagMockForPdl(
-            "statsborgerskap-uten-historikk.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
+            "statsborgerskap-uten-historikk.graphql",
+            "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
             readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json")
         )
 
         lagMockForPdl(
-            "opphold-uten-historikk.graphql", "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
+            "opphold-uten-historikk.graphql",
+            "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
             readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json")
         )
 
         lagMockForPdl(
-            "bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
+            "bostedsadresse-utenlandsk.graphql",
+            "PdlIntegrasjon/gyldigRequestForBostedsadresseperioder.json",
             readfile("PdlIntegrasjon/utenlandskAdresseResponse.json")
         )
 
         lagMockForPdl(
-            "bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForBarn.json",
+            "bostedsadresse-utenlandsk.graphql",
+            "PdlIntegrasjon/gyldigRequestForBarn.json",
             readfile("PdlIntegrasjon/personinfoResponseForBarn.json")
         )
 
         lagMockForPdl(
-            "bostedsadresse-utenlandsk.graphql", "PdlIntegrasjon/gyldigRequestForMorMedTomBostedsadresse.json",
+            "bostedsadresse-utenlandsk.graphql",
+            "PdlIntegrasjon/gyldigRequestForMorMedTomBostedsadresse.json",
             readfile("PdlIntegrasjon/tomBostedsadresseResponse.json")
         )
 
         lagMockForPdl(
-            "hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse.json",
+            "hent-adressebeskyttelse.graphql",
+            "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse.json",
             readfile("pdlAdressebeskyttelseResponse.json")
         )
 
         lagMockForPdl(
-            "hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse2.json",
+            "hent-adressebeskyttelse.graphql",
+            "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse2.json",
             readfile("pdlAdressebeskyttelseResponse.json")
         )
 
         lagMockForPdl(
-            "hent-adressebeskyttelse.graphql", "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse3.json",
+            "hent-adressebeskyttelse.graphql",
+            "PdlIntegrasjon/gyldigRequestForAdressebeskyttelse3.json",
             readfile("PdlIntegrasjon/pdlAdressebeskyttelseMedTomListeResponse.json")
         )
     }

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 class DistribuerVedtaksbrev(
     private val dokumentService: DokumentService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val personidentService: PersonidentService,
+    private val personidentService: PersonidentService
 ) : BehandlingSteg<DistribuerDokumentDTO> {
 
     override fun utførStegOgAngiNeste(

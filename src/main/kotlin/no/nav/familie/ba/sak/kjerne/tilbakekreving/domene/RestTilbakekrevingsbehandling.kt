@@ -15,5 +15,5 @@ class RestTilbakekrevingsbehandling(
     val type: Behandlingstype,
     val status: Behandlingsstatus,
     val resultat: Behandlingsresultatstype?,
-    val vedtaksdato: LocalDateTime?,
+    val vedtaksdato: LocalDateTime?
 )

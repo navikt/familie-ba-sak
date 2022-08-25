@@ -24,7 +24,8 @@ class IverksettMotFamilieTilbakeTask(
     override fun doTask(task: Task) {
         val iverksettMotFamilieTilbake = objectMapper.readValue(task.payload, IverksettMotFamilieTilbakeDTO::class.java)
         stegService.håndterIverksettMotFamilieTilbake(
-            behandling = behandlingHentOgPersisterService.hent(iverksettMotFamilieTilbake.behandlingsId), task.metadata
+            behandling = behandlingHentOgPersisterService.hent(iverksettMotFamilieTilbake.behandlingsId),
+            task.metadata
         )
     }
 
