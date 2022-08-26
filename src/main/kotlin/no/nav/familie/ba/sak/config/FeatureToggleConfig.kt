@@ -116,6 +116,8 @@ class FeatureToggleConfig(
         const val SPLIT_VEDTAK_PÅ_UTDYPENDE_VILKÅRSVURDERING =
             "familie-ba-sak.feature.split-vedtak-paa-utdypende-vilkaarsvurdering"
 
+        const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"
+
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
 }

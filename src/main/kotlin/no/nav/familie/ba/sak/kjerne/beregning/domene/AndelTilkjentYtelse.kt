@@ -213,6 +213,10 @@ data class AndelTilkjentYtelse(
             }
     }
 
+    fun erAndelSomharNullutbetaling() = this.kalkulertUtbetalingsbeløp == 0 &&
+        this.differanseberegnetPeriodebeløp != null &&
+        this.differanseberegnetPeriodebeløp <= 0
+
     fun harEndringsutbetalingIPerioden(fom: YearMonth?, tom: YearMonth?) =
         endretUtbetalingAndeler.any { it.fom == fom && it.tom == tom }
 
