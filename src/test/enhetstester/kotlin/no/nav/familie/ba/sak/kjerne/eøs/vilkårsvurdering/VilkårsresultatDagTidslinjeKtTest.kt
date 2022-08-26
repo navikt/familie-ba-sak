@@ -15,36 +15,28 @@ internal class VilkårsresultatDagTidslinjeKtTest {
     @Test
     fun `kan ha to overlappende perioder hvis det er bor med søker-vilkåret`() {
         val personAktørId = randomAktør()
-        val behandling = lagBehandling()
-        val vilkårsvurdering = lagVilkårsvurdering(personAktørId, behandling, Resultat.OPPFYLT)
-
         val personResultat = PersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
+            vilkårsvurdering = lagVilkårsvurdering(personAktørId, lagBehandling(), Resultat.OPPFYLT),
             aktør = personAktørId
         )
 
         val vilkårResultat = setOf(
-            VilkårResultat(
-                personResultat = personResultat,
-                resultat = Resultat.OPPFYLT,
-                vilkårType = Vilkår.BOR_MED_SØKER,
-                periodeFom = LocalDate.of(2020, 3, 31),
-                periodeTom = null,
-                begrunnelse = "",
-                behandlingId = personResultat.vilkårsvurdering.behandling.id
-            ),
-            VilkårResultat(
-                personResultat = personResultat,
-                resultat = Resultat.IKKE_OPPFYLT,
-                vilkårType = Vilkår.BOR_MED_SØKER,
-                periodeFom = null,
-                periodeTom = null,
-                begrunnelse = "",
-                behandlingId = personResultat.vilkårsvurdering.behandling.id
-            )
+            lagVilkårResultat(personResultat, Resultat.OPPFYLT, fom = LocalDate.of(2020, 3, 31)),
+            lagVilkårResultat(personResultat, Resultat.IKKE_OPPFYLT, fom = null)
         )
 
         val tidslinje = vilkårResultat.tilVilkårRegelverkResultatTidslinje()
         tidslinje.perioder()
     }
+
+    private fun lagVilkårResultat(personResultat: PersonResultat, resultat: Resultat, fom: LocalDate?) =
+        VilkårResultat(
+            personResultat = personResultat,
+            resultat = resultat,
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            periodeFom = fom,
+            periodeTom = null,
+            begrunnelse = "",
+            behandlingId = personResultat.vilkårsvurdering.behandling.id
+        )
 }
