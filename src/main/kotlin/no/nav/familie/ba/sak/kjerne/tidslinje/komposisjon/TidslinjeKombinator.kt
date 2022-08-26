@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 
 /**
  * Extension-metode for å kombinere to tidslinjer
@@ -67,6 +68,7 @@ fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerUtenNullMed(
 fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNull(
     listeKombinator: (Iterable<I>) -> R?
 ): Tidslinje<R, T> {
+    if (this.isEmpty()) return tidslinje { emptyList() }
     val tidslinjer = this
     return object : TidslinjeSomStykkerOppTiden<R, T>(tidslinjer) {
         override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -212,6 +213,10 @@ data class AndelTilkjentYtelse(
             }
     }
 
+    fun erAndelSomharNullutbetaling() = this.kalkulertUtbetalingsbeløp == 0 &&
+        this.differanseberegnetPeriodebeløp != null &&
+        this.differanseberegnetPeriodebeløp <= 0
+
     fun harEndringsutbetalingIPerioden(fom: YearMonth?, tom: YearMonth?) =
         endretUtbetalingAndeler.any { it.fom == fom && it.tom == tom }
 
@@ -337,3 +342,10 @@ fun List<AndelTilkjentYtelse>?.hentTidslinje() =
             )
         } ?: emptyList()
     )
+
+fun List<AndelTilkjentYtelse>.tilTidslinjerPerPerson(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
+    groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
+        AndelTilkjentYtelseTidslinje(
+            andelerTilkjentYtelsePåPerson
+        )
+    }
