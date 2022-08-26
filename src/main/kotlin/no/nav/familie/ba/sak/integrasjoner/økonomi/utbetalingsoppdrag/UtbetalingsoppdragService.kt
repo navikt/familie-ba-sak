@@ -117,11 +117,16 @@ class UtbetalingsoppdragService(
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
+            val harForrigeBehandlingNullUtbetaling =
+                beregningService.hentTilkjentYtelseForBehandling(forrigeBehandling.id)
+                    .andelerTilkjentYtelse.all { it.erAndelSomharNullutbetaling() }
+
             if (oppdatertTilstand.isNotEmpty()) {
                 oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
                 val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
                 // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
             }
+            val sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
 
             val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
@@ -129,7 +134,8 @@ class UtbetalingsoppdragService(
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                 forrigeKjeder = forrigeKjeder,
                 sisteOffsetPerIdent = hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id),
-                sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(behandling = oppdatertBehandling),
+                // setter default offset 0 når siste behandling har null utbetaling
+                sisteOffsetPåFagsak = if (sisteOffsetPåFagsak == null && harForrigeBehandlingNullUtbetaling) 0 else sisteOffsetPåFagsak,
                 oppdaterteKjeder = oppdaterteKjeder,
                 erSimulering = erSimulering,
                 endretMigreringsDato = beregnOmMigreringsDatoErEndret(
@@ -174,7 +180,6 @@ class UtbetalingsoppdragService(
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
         behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
             .mapNotNull { iverksattBehandling ->
-
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
                     .takeIf { it.isNotEmpty() }
                     ?.let { andelerTilkjentYtelse ->
