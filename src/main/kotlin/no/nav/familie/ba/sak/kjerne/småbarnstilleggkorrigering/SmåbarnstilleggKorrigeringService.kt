@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalingerKombinator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -38,7 +38,7 @@ class SmåbarnstilleggKorrigeringService(
         val andelTilkjentYtelser = tilkjentYtelse.andelerTilkjentYtelse
         val endreteUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalinger(
+        val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             andelTilkjentYtelser,
             endreteUtbetalinger,
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
@@ -65,7 +65,7 @@ class SmåbarnstilleggKorrigeringService(
         val andelTilkjentYtelser = tilkjentYtelse.andelerTilkjentYtelse
         val endreteUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalinger(
+        val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             andelTilkjentYtelser,
             endreteUtbetalinger,
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)

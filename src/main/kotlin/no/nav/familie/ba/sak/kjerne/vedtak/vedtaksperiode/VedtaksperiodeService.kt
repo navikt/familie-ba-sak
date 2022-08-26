@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalingerKombinator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -385,7 +385,7 @@ class VedtaksperiodeService(
 
         val endreteUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalinger(
+        val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             andelerTilkjentYtelse,
             endreteUtbetalinger,
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
@@ -431,7 +431,7 @@ class VedtaksperiodeService(
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
         val kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id)
 
-        val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalinger(
+        val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             andelerTilkjentYtelse,
             endretUtbetalingAndeler,
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)

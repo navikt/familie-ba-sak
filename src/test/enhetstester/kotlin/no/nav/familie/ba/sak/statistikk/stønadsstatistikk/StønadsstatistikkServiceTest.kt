@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalingerKombinator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
@@ -146,7 +146,11 @@ internal class StønadsstatistikkServiceTest(
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(any()) } returns
-            AndelTilkjentYtelseOgEndreteUtbetalinger(andelerTilkjentYtelse, emptyList(), true).lagAndelerMedEndringer()
+            AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
+                andelerTilkjentYtelse,
+                emptyList(),
+                true
+            ).lagAndelerMedEndringer()
     }
 
     @Test

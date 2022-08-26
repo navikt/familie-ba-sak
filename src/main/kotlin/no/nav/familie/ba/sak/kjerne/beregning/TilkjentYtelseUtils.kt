@@ -245,11 +245,7 @@ object TilkjentYtelseUtils {
                             endretUtbetalingAndeler = mutableListOf(endretUtbetalingMedAndeler.endretUtbetalingAndel)
                         )
 
-                        AndelTilkjentYtelseMedEndreteUtbetalinger(
-                            aty,
-                            listOf(endretUtbetalingMedAndeler.endretUtbetalingAndel),
-                            endretUtbetalingMedAndeler.brukNy
-                        )
+                        AndelTilkjentYtelseMedEndreteUtbetalinger(aty, endretUtbetalingMedAndeler)
                     }
                 )
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
@@ -307,11 +303,7 @@ object TilkjentYtelseUtils {
                     skalAndelerSlåsSammen(andel, nesteAndel)
 
                 if (andelerSkalSlåsSammen) {
-                    val nyAndel = AndelTilkjentYtelseMedEndreteUtbetalinger(
-                        periodenViSerPå.andel.copy(stønadTom = nesteAndel.stønadTom),
-                        periodenViSerPå.endreteUtbetalinger,
-                        periodenViSerPå.brukNy
-                    )
+                    val nyAndel = periodenViSerPå.medTom(nesteAndel.stønadTom)
                     nyAndel
                 } else {
                     oppdatertListeMedAndeler.add(periodenViSerPå)

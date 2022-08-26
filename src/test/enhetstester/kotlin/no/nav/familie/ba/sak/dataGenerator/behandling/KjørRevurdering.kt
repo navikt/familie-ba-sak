@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalingerKombinator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
@@ -363,7 +363,7 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
 
     val vedtaksperiode = perisisterteVedtaksperioder.first()
 
-    val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalinger(
+    val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
         andelerTilkjentYtelse,
         endredeUtbetalingAndeler,
         brukFrikobledeAndelerOgEndringer

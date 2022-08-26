@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalingerKombinator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
@@ -105,7 +105,7 @@ class UtvidetBehandlingService(
 
         val endreteUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        val endreteUtbetalingerMedAndeler = AndelTilkjentYtelseOgEndreteUtbetalinger(
+        val endreteUtbetalingerMedAndeler = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             andelerTilkjentYtelse,
             endreteUtbetalinger,
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)

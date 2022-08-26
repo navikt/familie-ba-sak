@@ -9,8 +9,9 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import org.springframework.stereotype.Service
+import java.time.YearMonth
 
-class AndelTilkjentYtelseOgEndreteUtbetalinger(
+class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
     private val andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     private val endretUtbetalingAndeler: Collection<EndretUtbetalingAndel>,
     private val brukNy: Boolean?
@@ -34,7 +35,7 @@ class AndelTilkjentYtelseOgEndreteUtbetalinger(
         val euaPeriode = MånedPeriode(eua.fom ?: MIN_MÅNED, eua.tom ?: MAX_MÅNED)
         val atyPeriode = MånedPeriode(aty.stønadFom, aty.stønadTom)
 
-        return aty.aktør.aktørId == eua.person?.aktør?.aktørId &&
+        return aty.aktør == eua.person?.aktør &&
             euaPeriode.overlapperHeltEllerDelvisMed(atyPeriode)
     }
 
@@ -50,8 +51,16 @@ class AndelTilkjentYtelseOgEndreteUtbetalinger(
 data class AndelTilkjentYtelseMedEndreteUtbetalinger(
     private val andelTilkjentYtelse: AndelTilkjentYtelse,
     private val endreteUtbetalingerAndeler: Collection<EndretUtbetalingAndel>,
-    internal val brukNy: Boolean?
+    private val brukNy: Boolean?
 ) {
+    constructor(
+        andelTilkjentYtelse: AndelTilkjentYtelse,
+        endretUtbetalingAndelMedAndelerTilkjentYtelse: EndretUtbetalingAndelMedAndelerTilkjentYtelse
+    ) : this(
+        andelTilkjentYtelse,
+        listOf(endretUtbetalingAndelMedAndelerTilkjentYtelse.endretUtbetalingAndel),
+        endretUtbetalingAndelMedAndelerTilkjentYtelse.brukNy
+    )
 
     val periodeOffset get() = andelTilkjentYtelse.periodeOffset
     val sats get() = andelTilkjentYtelse.sats
@@ -63,6 +72,13 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger(
     fun erUtvidet(): Boolean = andelTilkjentYtelse.erUtvidet()
     fun erAndelSomSkalSendesTilOppdrag() = andelTilkjentYtelse.erAndelSomSkalSendesTilOppdrag()
     fun overlapperPeriode(månedPeriode: MånedPeriode) = andelTilkjentYtelse.overlapperPeriode(månedPeriode)
+    fun medTom(tom: YearMonth): AndelTilkjentYtelseMedEndreteUtbetalinger {
+        return AndelTilkjentYtelseMedEndreteUtbetalinger(
+            andelTilkjentYtelse.copy(stønadTom = tom),
+            endreteUtbetalinger,
+            brukNy
+        )
+    }
 
     val stønadFom get() = andelTilkjentYtelse.stønadFom
     val stønadTom get() = andelTilkjentYtelse.stønadTom
@@ -114,14 +130,14 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
     private val featureToggleService: FeatureToggleService
 ) {
     fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: Long) =
-        AndelTilkjentYtelseOgEndreteUtbetalinger(
+        AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId),
             endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
         ).lagAndelerMedEndringer()
 
     fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long) =
-        AndelTilkjentYtelseOgEndreteUtbetalinger(
+        AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId),
             endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
