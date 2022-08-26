@@ -35,7 +35,7 @@ class StatusFraOppdrag(
         val statusFraOppdragDTO = data.statusFraOppdragDTO
         val task = data.task
 
-        val oppdragStatus = økonomiService.hentStatus(statusFraOppdragDTO.oppdragId)
+        val oppdragStatus = økonomiService.hentStatus(statusFraOppdragDTO.oppdragId, statusFraOppdragDTO.behandlingsId)
         logger.debug("Mottok status '$oppdragStatus' fra oppdrag")
         if (oppdragStatus != OppdragStatus.KVITTERT_OK) {
             if (oppdragStatus == OppdragStatus.LAGT_PÅ_KØ) {

@@ -182,7 +182,7 @@ class UtgjørendePersonerTest {
                 behandling.id,
                 søkerFnr,
                 listOf(barnFnr, barn2Fnr),
-                barnFødselsdato = LocalDate.of(2010, 12, 24)
+                barnasFødselsdatoer = listOf(LocalDate.of(2010, 12, 24), LocalDate.of(2010, 12, 24))
             )
 
         val vilkårsvurdering = Vilkårsvurdering(

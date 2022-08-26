@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erDagenFør
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -10,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPerson
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -21,7 +23,15 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -38,11 +48,14 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
-fun hentPerioderMedUtbetaling(
+@Deprecated("Skal utfases. Bruk hentPerioderMedUtbetaling")
+fun hentPerioderMedUtbetalingGammel(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak
 ) = andelerTilkjentYtelse.lagVertikaleSegmenter()
@@ -53,6 +66,48 @@ fun hentPerioderMedUtbetaling(
             vedtak = vedtak,
             type = Vedtaksperiodetype.UTBETALING
         )
+    }
+
+fun hentPerioderMedUtbetaling(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    vedtak: Vedtak,
+    forskjøvetVilkårResultatTidslinjeMap: Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>
+): List<VedtaksperiodeMedBegrunnelser> {
+    val utdypendeVilkårsvurderingTidslinje =
+        forskjøvetVilkårResultatTidslinjeMap
+            .tilUtdypendeVilkårsvurderingTidslinjer()
+            .kombinerUtenNull { it.toMap() }
+            .filtrer { !it.isNullOrEmpty() }
+            .slåSammenLike()
+
+    return andelerTilkjentYtelse
+        .tilTidslinjerPerPerson().values
+        .kombinerUtenNull { it }
+        .filtrer { !it?.toList().isNullOrEmpty() }
+        .leftJoin(utdypendeVilkårsvurderingTidslinje) { andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode ->
+            Pair(andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode)
+        }
+        .filtrerIkkeNull()
+        .perioder()
+        .map {
+            VedtaksperiodeMedBegrunnelser(
+                fom = it.fraOgMed.tilYearMonthEllerNull()?.førsteDagIInneværendeMåned(),
+                tom = it.tilOgMed.tilYearMonthEllerNull()?.sisteDagIInneværendeMåned(),
+                vedtak = vedtak,
+                type = Vedtaksperiodetype.UTBETALING
+            )
+        }
+}
+
+private fun Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>.tilUtdypendeVilkårsvurderingTidslinjer():
+    List<Tidslinje<Pair<Aktør, Set<UtdypendeVilkårsvurdering>>, Måned>> =
+    this.map { (aktør, vilkårsvurderingTidslinje) ->
+        vilkårsvurderingTidslinje.map { vilkårResultater ->
+            Pair(
+                aktør,
+                vilkårResultater?.flatMap { it.utdypendeVilkårsvurderinger }?.toSet() ?: emptySet()
+            )
+        }
     }
 
 fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
@@ -266,7 +321,12 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
         andelerTilkjentYtelse,
         utvidetVedtaksperiodeMedBegrunnelser
     ),
-    ytelserForrigePerioder = andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelser) }
+    ytelserForrigePerioder = andelerTilkjentYtelse.filter {
+        ytelseErFraForrigePeriode(
+            it,
+            utvidetVedtaksperiodeMedBegrunnelser
+        )
+    }
 )
 
 fun hentGyldigeEØSBegrunnelserForPeriode(
@@ -442,4 +502,7 @@ fun hentYtelserForSøkerForrigeMåned(
         ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelser)
 }.map { it.type }
 
-fun ytelseErFraForrigePeriode(ytelse: AndelTilkjentYtelse, utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser) = ytelse.stønadTom.sisteDagIInneværendeMåned().erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)
+fun ytelseErFraForrigePeriode(
+    ytelse: AndelTilkjentYtelse,
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser
+) = ytelse.stønadTom.sisteDagIInneværendeMåned().erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)
