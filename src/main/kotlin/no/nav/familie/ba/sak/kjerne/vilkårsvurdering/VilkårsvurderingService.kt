@@ -28,6 +28,9 @@ class VilkårsvurderingService(
         return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
+    fun hentAktivForBehandlingThrows(behandlingId: Long): Vilkårsvurdering = hentAktivForBehandling(behandlingId)
+        ?: throw Feil("Fant ikke vilkårsvurdering knyttet til behandling=$behandlingId")
+
     fun finnBarnMedEksplisittAvslagPåBehandling(behandlingId: Long): List<Aktør> {
         val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
         return eksplisistteAvslagPåBehandling
