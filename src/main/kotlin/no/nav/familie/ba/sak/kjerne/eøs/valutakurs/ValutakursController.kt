@@ -45,12 +45,13 @@ class ValutakursController(
 
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
 
-        if (skalManueltSetteValutakurs(restValutakurs)) {
-            valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), restValutakurs.tilValutakurs(barnAktører))
+        val valutaKurs = if (skalManueltSetteValutakurs(restValutakurs)) {
+            restValutakurs.tilValutakurs(barnAktører)
         } else {
-            val valutakurs = oppdaterValutakursMedKursFraECB(restValutakurs, restValutakurs.tilValutakurs(barnAktører = barnAktører))
-            valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutakurs)
+            oppdaterValutakursMedKursFraECB(restValutakurs, restValutakurs.tilValutakurs(barnAktører = barnAktører))
         }
+
+        valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutaKurs)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

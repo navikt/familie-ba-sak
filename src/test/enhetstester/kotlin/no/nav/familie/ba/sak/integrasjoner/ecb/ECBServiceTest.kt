@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 import io.mockk.every
-import io.mockk.mockk
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import no.nav.familie.http.ecb.ECBRestClient
 import no.nav.familie.http.ecb.Frequency
 import no.nav.familie.http.ecb.domene.ECBExchangeRate
@@ -14,15 +16,21 @@ import no.nav.familie.http.ecb.domene.toExchangeRates
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
 
+@ExtendWith(MockKExtension::class)
 class ECBServiceTest {
+
+    @MockK
+    private lateinit var ecbClient: ECBRestClient
+
+    @InjectMockKs
+    private lateinit var ecbService: ECBService
 
     @Test
     fun `Hent valutakurs for utenlandsk valuta til NOK og sjekk at beregning av kurs er riktig`() {
-        val ecbClient = mockk<ECBRestClient>()
-        val ecbService = ECBService(ecbClient)
         val valutakursDato = LocalDate.of(2022, 6, 28)
         val ecbExchangeRatesData = createECBResponse(Frequency.Daily, listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))), valutakursDato.toString())
         every { ecbClient.getExchangeRates(Frequency.Daily, listOf("NOK", "SEK"), valutakursDato) } returns ecbExchangeRatesData.toExchangeRates()
@@ -32,8 +40,6 @@ class ECBServiceTest {
 
     @Test
     fun `Test at ECBService kaster ESBServiceException dersom de returnerte kursene ikke inneholder kurs for forespurt valuta`() {
-        val ecbClient = mockk<ECBRestClient>()
-        val ecbService = ECBService(ecbClient)
         val valutakursDato = LocalDate.of(2022, 7, 22)
         val ecbExchangeRatesData = createECBResponse(Frequency.Daily, listOf(Pair("NOK", BigDecimal.valueOf(10.337))), valutakursDato.toString())
         every { ecbClient.getExchangeRates(Frequency.Daily, listOf("NOK", "SEK"), valutakursDato) } returns ecbExchangeRatesData.toExchangeRates()
@@ -42,8 +48,6 @@ class ECBServiceTest {
 
     @Test
     fun `Test at ECBService kaster ESBServiceException dersom de returnerte kursene ikke inneholder kurser med forespurt dato`() {
-        val ecbClient = mockk<ECBRestClient>()
-        val ecbService = ECBService(ecbClient)
         val valutakursDato = LocalDate.of(2022, 7, 20)
         val ecbExchangeRatesData = createECBResponse(Frequency.Daily, listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))), valutakursDato.minusDays(1).toString())
         every { ecbClient.getExchangeRates(Frequency.Daily, listOf("NOK", "SEK"), valutakursDato) } returns ecbExchangeRatesData.toExchangeRates()
@@ -52,8 +56,6 @@ class ECBServiceTest {
 
     @Test
     fun `Test at ECBService returnerer NOK til EUR dersom den forespurte valutaen er EUR`() {
-        val ecbClient = mockk<ECBRestClient>()
-        val ecbService = ECBService(ecbClient)
         val nokTilEur = BigDecimal.valueOf(9.4567)
         val valutakursDato = LocalDate.of(2022, 7, 20)
         val ecbExchangeRatesData = createECBResponse(Frequency.Daily, listOf(Pair("NOK", BigDecimal.valueOf(9.4567))), valutakursDato.toString())
