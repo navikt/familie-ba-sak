@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_BEHANDLE_EØS
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SPLIT_VEDTAK_PÅ_UTDYPENDE_VILKÅRSVURDERING
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -11,8 +12,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentPerioderMedUtbetaling
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentPerioderMedUtbetalingGammel
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.identifiserReduksjonsperioderFraSistIverksatteBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
 import org.springframework.stereotype.Service
 
 @Service
@@ -21,7 +25,8 @@ class UtbetalingsperiodeMedBegrunnelserService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val kompetanseRepository: KompetanseRepository
+    private val kompetanseRepository: KompetanseRepository,
+    private val vilkårsvurderingService: VilkårsvurderingService
 ) {
 
     fun hentUtbetalingsperioder(
@@ -31,10 +36,24 @@ class UtbetalingsperiodeMedBegrunnelserService(
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
 
-        val utbetalingsperioder = hentPerioderMedUtbetaling(
-            andelerTilkjentYtelse,
-            vedtak
-        )
+        val utbetalingsperioder = if (featureToggleService.isEnabled(SPLIT_VEDTAK_PÅ_UTDYPENDE_VILKÅRSVURDERING)) {
+            val vilkårsvurdering =
+                vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = vedtak.behandling.id)
+
+            val forskjøvetVilkårResultatTidslinjeMap =
+                vilkårsvurdering.personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
+
+            hentPerioderMedUtbetaling(
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                vedtak = vedtak,
+                forskjøvetVilkårResultatTidslinjeMap = forskjøvetVilkårResultatTidslinjeMap
+            )
+        } else {
+            hentPerioderMedUtbetalingGammel(
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                vedtak = vedtak
+            )
+        }
 
         val perioderMedReduksjonFraSistIverksatteBehandling =
             hentReduksjonsperioderFraInnvilgelsesTidspunkt(
@@ -60,7 +79,6 @@ class UtbetalingsperiodeMedBegrunnelserService(
             utbetalingsperioderMedReduksjon
         }
     }
-
     fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
         vedtak: Vedtak,
         utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
