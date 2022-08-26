@@ -136,8 +136,8 @@ class ØkonomiService(
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                 forrigeKjeder = forrigeKjeder,
                 sisteOffsetPerIdent = sisteOffsetPerIdent,
-                // setter default offset 0 når siste behandling har null utbetaling
-                sisteOffsetPåFagsak = if (sisteOffsetPåFagsak == null && harForrigeBehandlingNullUtbetaling) 0 else sisteOffsetPåFagsak,
+                // setter default offset -1 når siste behandling har null utbetaling
+                sisteOffsetPåFagsak = if (sisteOffsetPåFagsak == null && harForrigeBehandlingNullUtbetaling) -1 else sisteOffsetPåFagsak,
                 oppdaterteKjeder = oppdaterteKjeder,
                 erSimulering = erSimulering,
                 endretMigreringsDato = beregnOmMigreringsDatoErEndret(
