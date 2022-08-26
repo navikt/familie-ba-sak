@@ -117,16 +117,11 @@ class UtbetalingsoppdragService(
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
-            val harForrigeBehandlingNullUtbetaling =
-                beregningService.hentTilkjentYtelseForBehandling(forrigeBehandling.id)
-                    .andelerTilkjentYtelse.all { it.erAndelSomharNullutbetaling() }
-
             if (oppdatertTilstand.isNotEmpty()) {
                 oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
                 val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
                 // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
             }
-            val sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
 
             val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
@@ -134,8 +129,7 @@ class UtbetalingsoppdragService(
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                 forrigeKjeder = forrigeKjeder,
                 sisteOffsetPerIdent = hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id),
-                // setter default offset -1 når siste behandling har null utbetaling
-                sisteOffsetPåFagsak = if (sisteOffsetPåFagsak == null && harForrigeBehandlingNullUtbetaling) -1 else sisteOffsetPåFagsak,
+                sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(behandling = oppdatertBehandling),
                 oppdaterteKjeder = oppdaterteKjeder,
                 erSimulering = erSimulering,
                 endretMigreringsDato = beregnOmMigreringsDatoErEndret(

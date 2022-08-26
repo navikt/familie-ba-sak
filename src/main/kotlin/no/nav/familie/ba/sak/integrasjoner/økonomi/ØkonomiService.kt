@@ -116,10 +116,6 @@ class ØkonomiService(
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
-            val harForrigeBehandlingNullUtbetaling =
-                beregningService.hentTilkjentYtelseForBehandling(forrigeBehandling.id)
-                    .andelerTilkjentYtelse.all { it.erAndelSomharNullutbetaling() }
-
             val sisteOffsetPerIdent = hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id)
 
             val sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
@@ -136,8 +132,7 @@ class ØkonomiService(
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                 forrigeKjeder = forrigeKjeder,
                 sisteOffsetPerIdent = sisteOffsetPerIdent,
-                // setter default offset -1 når siste behandling har null utbetaling
-                sisteOffsetPåFagsak = if (sisteOffsetPåFagsak == null && harForrigeBehandlingNullUtbetaling) -1 else sisteOffsetPåFagsak,
+                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 oppdaterteKjeder = oppdaterteKjeder,
                 erSimulering = erSimulering,
                 endretMigreringsDato = beregnOmMigreringsDatoErEndret(

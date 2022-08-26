@@ -77,7 +77,9 @@ class BeregningService(
         return iverksatteBehandlinger.mapNotNull {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
                 it.id
-            )
+            )?.takeIf { tilkjentYtelse ->
+                tilkjentYtelse.andelerTilkjentYtelse.any { aty -> aty.erAndelSomSkalSendesTilOppdrag() }
+            }
         }
     }
 
