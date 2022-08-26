@@ -150,7 +150,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                     prosent = BigDecimal(100)
                 )
 
-                AndelTilkjentYtelseMedEndreteUtbetalinger(aty, emptyList(), null)
+                AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(aty)
             }
     }
 
@@ -185,7 +185,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 prosent = prosentIPeriode
             )
 
-            AndelTilkjentYtelseMedEndreteUtbetalinger(aty, emptyList(), null)
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(aty)
         }
     }
 

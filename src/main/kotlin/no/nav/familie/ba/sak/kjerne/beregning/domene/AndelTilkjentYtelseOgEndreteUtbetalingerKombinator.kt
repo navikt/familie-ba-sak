@@ -48,7 +48,7 @@ class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
     }
 }
 
-data class AndelTilkjentYtelseMedEndreteUtbetalinger(
+data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     private val andelTilkjentYtelse: AndelTilkjentYtelse,
     private val endreteUtbetalingerAndeler: Collection<EndretUtbetalingAndel>,
     private val brukNy: Boolean?
@@ -60,6 +60,15 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger(
         andelTilkjentYtelse,
         listOf(endretUtbetalingAndelMedAndelerTilkjentYtelse.endretUtbetalingAndel),
         endretUtbetalingAndelMedAndelerTilkjentYtelse.brukNy
+    )
+
+    constructor(
+        andelTilkjentYtelse: AndelTilkjentYtelse,
+        endreteUtbetalingerAndeler: Collection<EndretUtbetalingAndel>
+    ) : this(
+        andelTilkjentYtelse,
+        endreteUtbetalingerAndeler,
+        true
     )
 
     val periodeOffset get() = andelTilkjentYtelse.periodeOffset
@@ -92,6 +101,15 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger(
         } else {
             andel.endretUtbetalingAndeler
         }
+
+    companion object {
+        fun utenEndringer(andelTilkjentYtelse: AndelTilkjentYtelse) =
+            AndelTilkjentYtelseMedEndreteUtbetalinger(
+                andelTilkjentYtelse,
+                emptyList(),
+                null
+            )
+    }
 }
 
 data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(

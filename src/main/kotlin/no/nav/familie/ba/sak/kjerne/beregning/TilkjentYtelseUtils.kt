@@ -208,7 +208,7 @@ object TilkjentYtelseUtils {
 
         if (endretUtbetalingAndeler.isEmpty()) {
             return andelTilkjentYtelserUtenEndringer
-                .map { AndelTilkjentYtelseMedEndreteUtbetalinger(it.copy(), emptyList(), null) }
+                .map { AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it.copy()) }
         }
 
         val (andelerUtenSmåbarnstillegg, andelerMedSmåbarnstillegg) = andelTilkjentYtelserUtenEndringer.partition { !it.erSmåbarnstillegg() }
@@ -255,7 +255,7 @@ object TilkjentYtelseUtils {
                             stønadFom = månedPeriodeUendret.fom,
                             stønadTom = månedPeriodeUendret.tom
                         )
-                        AndelTilkjentYtelseMedEndreteUtbetalinger(aty, emptyList(), null)
+                        AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(aty)
                     }
                 )
             }
@@ -272,7 +272,7 @@ object TilkjentYtelseUtils {
         // Ettersom vi aldri ønsker å overstyre småbarnstillegg perioder fjerner vi dem og legger dem til igjen her
         nyeAndelTilkjentYtelse.addAll(
             andelerMedSmåbarnstillegg.map {
-                AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList(), null)
+                AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it)
             }
         )
 

@@ -101,7 +101,7 @@ data class UtvidetBarnetrygdGenerator(
                 prosent = prosentForPeriode
             )
 
-            AndelTilkjentYtelseMedEndreteUtbetalinger(aty, emptyList(), null)
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(aty)
         }
     }
 
