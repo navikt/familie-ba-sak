@@ -83,6 +83,7 @@ fun hentPerioderMedUtbetaling(
     return andelerTilkjentYtelse
         .tilTidslinjerPerPerson().values
         .kombinerUtenNull { it }
+        .filtrer { !it?.toList().isNullOrEmpty() }
         .leftJoin(utdypendeVilkårsvurderingTidslinje) { andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode ->
             Pair(andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode)
         }

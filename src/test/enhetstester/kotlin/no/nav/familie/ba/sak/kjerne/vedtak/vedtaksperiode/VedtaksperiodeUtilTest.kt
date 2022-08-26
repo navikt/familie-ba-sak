@@ -641,6 +641,61 @@ class VedtaksperiodeUtilTest {
             faktiskResultat.map { it.type }.toSet()
         )
     }
+
+    @Test
+    fun `Skal få med opphør i andel tilkjent ytelse`() {
+        val mars2020 = YearMonth.of(2020, 3)
+        val april2020 = YearMonth.of(2020, 4)
+        val juli2020 = YearMonth.of(2020, 7)
+        val barn1 = lagPerson()
+        val vedtak = lagVedtak()
+
+        val andelBarn1MarsTilApril = lagAndelTilkjentYtelse(
+            fom = mars2020,
+            tom = april2020,
+            beløp = 1000,
+            person = barn1
+        )
+        val andelBarn1JuliTilJuli = lagAndelTilkjentYtelse(
+            fom = juli2020,
+            tom = juli2020,
+            beløp = 1000,
+            person = barn1
+        )
+
+        val faktiskResultat = hentPerioderMedUtbetaling(
+            listOf(andelBarn1MarsTilApril, andelBarn1JuliTilJuli),
+            vedtak,
+            emptyMap()
+        )
+
+        val forventetResultat = listOf(
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = mars2020.førsteDagIInneværendeMåned(),
+                tom = april2020.sisteDagIInneværendeMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+                begrunnelser = mutableSetOf()
+            ),
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = juli2020.førsteDagIInneværendeMåned(),
+                tom = juli2020.sisteDagIInneværendeMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+                begrunnelser = mutableSetOf()
+            )
+        )
+
+        Assertions.assertEquals(
+            forventetResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
+            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) }
+        )
+
+        Assertions.assertEquals(
+            forventetResultat.map { it.type }.toSet(),
+            faktiskResultat.map { it.type }.toSet()
+        )
+    }
 }
 
 private fun Vilkårsvurdering.lagGodkjentPersonResultatForBarn(person: Person) = lagPersonResultat(
