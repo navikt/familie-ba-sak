@@ -59,7 +59,7 @@ object EndretUtbetalingAndelValidering {
 
     fun validerPeriodeInnenforTilkjentytelse(
         endretUtbetalingAndel: EndretUtbetalingAndel,
-        andelTilkjentYtelser: List<AndelTilkjentYtelse>
+        andelTilkjentYtelser: Collection<AndelTilkjentYtelse>
     ) {
         endretUtbetalingAndel.validerUtfyltEndring()
         val minsteDatoForTilkjentYtelse = andelTilkjentYtelser.filter {
@@ -83,6 +83,17 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
+    fun validerPeriodeInnenforTilkjentytelse(
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+        andelTilkjentYtelser: Collection<AndelTilkjentYtelse>
+    ) = endretUtbetalingAndeler.forEach { validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser) }
+
+    fun validerÅrsak(
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+        vilkårsvurdering: Vilkårsvurdering?
+    ) =
+        endretUtbetalingAndeler.forEach { validerÅrsak(it.årsak, it, vilkårsvurdering) }
+
     fun validerÅrsak(
         årsak: Årsak?,
         endretUtbetalingAndel: EndretUtbetalingAndel,
@@ -102,7 +113,7 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    fun validerEtterbetaling3År(
+    private fun validerEtterbetaling3År(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         kravDato: LocalDateTime
     ) {
@@ -119,7 +130,7 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    fun validerDeltBosted(
+    internal fun validerDeltBosted(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         deltBostedPerioder: List<MånedPeriode>
     ) {
@@ -165,10 +176,10 @@ object EndretUtbetalingAndelValidering {
 
 fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>
 ) {
     fun EndretUtbetalingAndel.finnKryssendeUtvidetYtelse(
-        andelTilkjentYtelser: List<AndelTilkjentYtelse>
+        andelTilkjentYtelser: Collection<AndelTilkjentYtelse>
     ): AndelTilkjentYtelse? =
         andelTilkjentYtelser
             .filter { it.type == YtelseType.UTVIDET_BARNETRYGD }

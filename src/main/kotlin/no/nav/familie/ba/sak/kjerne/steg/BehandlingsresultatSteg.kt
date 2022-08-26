@@ -16,9 +16,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndret
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -60,18 +63,37 @@ class BehandlingsresultatSteg(
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
+        val endreteUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
+        val toggleFrikobleAndelerOgEndringer =
+            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
+
         val endreteUtbetalingerMedAndeler = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             tilkjentYtelse.andelerTilkjentYtelse,
-            endretUtbetalingAndeler,
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
+            endreteUtbetalingAndeler,
+            toggleFrikobleAndelerOgEndringer
         ).lagEndreteUtbetalingMedAndeler()
 
-        validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
+        validerAtAlleOpprettedeEndringerErUtfylt(endreteUtbetalingAndeler)
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endreteUtbetalingerMedAndeler)
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
             endretUtbetalingAndelerMedÅrsakDeltBosted = endreteUtbetalingerMedAndeler.filter { it.årsak == Årsak.DELT_BOSTED }
         )
+
+        if (toggleFrikobleAndelerOgEndringer) {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endreteUtbetalingAndeler,
+                tilkjentYtelse.andelerTilkjentYtelse
+            )
+            validerPeriodeInnenforTilkjentytelse(
+                endreteUtbetalingAndeler,
+                tilkjentYtelse.andelerTilkjentYtelse
+            )
+
+            validerÅrsak(
+                endreteUtbetalingAndeler,
+                vilkårService.hentVilkårsvurdering(behandling.id)
+            )
+        }
     }
 
     @Transactional
