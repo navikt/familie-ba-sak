@@ -128,6 +128,7 @@ object TilkjentYtelseUtils {
         return innvilgedePeriodeResultatBarna
             .flatMap { periodeResultatBarn: PeriodeResultat ->
                 relevanteSøkerPerioder
+                    .filter { it.overlapper(periodeResultatBarn) }
                     .flatMap { overlappendePerioderesultatSøker ->
                         val person = identBarnMap[periodeResultatBarn.aktør.aktørId]
                             ?: error("Finner ikke barn på map over barna i behandlingen")
