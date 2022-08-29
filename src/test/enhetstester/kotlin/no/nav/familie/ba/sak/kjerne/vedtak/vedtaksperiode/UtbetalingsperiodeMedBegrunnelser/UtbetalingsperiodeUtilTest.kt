@@ -370,7 +370,7 @@ class UtbetalingsperiodeUtilTest {
     }
 
     @Test
-    fun `Skal lage splitt i vedatksperioder med der ulikt regelverk er brukt`() {
+    fun `Skal lage splitt i vedtaksperioder med der ulikt regelverk er brukt`() {
         val mars2020 = YearMonth.of(2020, 3)
         val april2020 = YearMonth.of(2020, 4)
         val mai2020 = YearMonth.of(2020, 5)
