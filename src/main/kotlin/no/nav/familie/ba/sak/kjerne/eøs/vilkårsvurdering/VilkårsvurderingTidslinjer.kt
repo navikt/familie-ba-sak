@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 
 class VilkårsvurderingTidslinjer(
@@ -29,7 +30,7 @@ class VilkårsvurderingTidslinjer(
 
     private val vilkårsresultaterTidslinjeMap = aktørTilPersonResultater
         .entries.associate { (aktør, personResultat) ->
-            aktør to personResultat.vilkårResultater.groupBy { it.vilkårType }
+            aktør to personResultat.vilkårResultater.groupBy { if (it.vilkårType != Vilkår.BOR_MED_SØKER) it.vilkårType else it.id }
                 .map { it.value.tilVilkårRegelverkResultatTidslinje() }
         }
 
