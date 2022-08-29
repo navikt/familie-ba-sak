@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
+import io.mockk.MockKException
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -59,7 +60,6 @@ class ValutakursControllerTest {
         every { personidentService.hentAktør(any()) } returns tilAktør(barnId)
         every { valutakursService.hentValutakurs(any()) } returns restValutakurs.tilValutakurs(listOf(tilAktør(barnId)))
         every { ecbService.hentValutakurs(any(), any()) } returns BigDecimal.valueOf(0.95)
-        every { utvidetBehandlingService.lagRestUtvidetBehandling(any()) } throws Exception("Stopp prosessering")
     }
 
     @AfterAll
@@ -71,7 +71,7 @@ class ValutakursControllerTest {
     fun `Test at valutakurs hentes fra ECB dersom dato og valuta er satt`() {
         val valutakursDato = LocalDate.of(2022, 1, 1)
         val valuta = "SEK"
-        assertThrows<Exception> {
+        assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
                 restValutakurs.copy(valutakursdato = valutakursDato, valutakode = valuta)
@@ -84,7 +84,12 @@ class ValutakursControllerTest {
     @Test
     fun `Test at valutakurs ikke hentes fra ECB dersom dato ikke er satt`() {
         val valutakursDato = LocalDate.of(2022, 1, 1)
-        assertThrows<Exception> { valutakursController.oppdaterValutakurs(1, restValutakurs.copy(valutakode = "SEK")) }
+        assertThrows<MockKException> {
+            valutakursController.oppdaterValutakurs(
+                1,
+                restValutakurs.copy(valutakode = "SEK")
+            )
+        }
         verify(exactly = 0) { ecbService.hentValutakurs("SEK", valutakursDato) }
         verify(exactly = 1) { valutakursService.oppdaterValutakurs(any(), any()) }
     }
@@ -92,7 +97,7 @@ class ValutakursControllerTest {
     @Test
     fun `Test at valutakurs ikke hentes fra ECB dersom valuta ikke er satt`() {
         val valutakursDato = LocalDate.of(2022, 1, 1)
-        assertThrows<Exception> {
+        assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
                 restValutakurs.copy(valutakursdato = valutakursDato)
@@ -105,7 +110,7 @@ class ValutakursControllerTest {
     @Test
     fun `Test at valutakurs ikke hentes fra ECB dersom ISK og før 1 feb 2018`() {
         val valutakursDato = LocalDate.of(2018, 1, 31)
-        assertThrows<Exception> {
+        assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
                 restValutakurs.copy(valutakursdato = valutakursDato, valutakode = "ISK")
@@ -118,7 +123,7 @@ class ValutakursControllerTest {
     @Test
     fun `Test at valutakurs hentes fra ECB dersom ISK og etter 1 feb 2018`() {
         val valutakursDato = LocalDate.of(2018, 2, 1)
-        assertThrows<Exception> {
+        assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
                 restValutakurs.copy(valutakursdato = valutakursDato, valutakode = "ISK")
