@@ -147,7 +147,7 @@ class ØkonomiService(
                     ).resultat == Behandlingsresultat.OPPHØRT
                 )
             ) {
-                validerOpphørsoppdrag(utbetalingsoppdrag)
+                utbetalingsoppdrag.validerOpphørsoppdrag()
             }
 
             utbetalingsoppdrag
@@ -193,16 +193,6 @@ class ØkonomiService(
                         andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
                     }
             }.maxByOrNull { it }
-
-    fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
-        if (utbetalingsoppdrag.harLøpendeUtbetaling()) {
-            error("Generert utbetalingsoppdrag for opphør inneholder oppdragsperioder med løpende utbetaling.")
-        }
-
-        if (utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.none { it.opphør != null }) {
-            error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
-        }
-    }
 
     private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
         val erMigrertSak =

@@ -5,13 +5,17 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -21,7 +25,8 @@ internal class UtbetalingsoppdragServiceTest {
         every { iverksettOppdrag(any()) } returns ""
     }
     val beregningService = mockk<BeregningService> {
-        every { populerTilkjentYtelse(any(), any()) } returns mockk()
+        every { hentTilkjentYtelseForBehandling(any()) } returns mockk()
+        every { hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(any()) } returns mockk()
     }
     val service = spyk(UtbetalingsoppdragService(mockk(), økonomiKlient, beregningService, mockk(), mockk(), mockk()))
 
@@ -33,7 +38,7 @@ internal class UtbetalingsoppdragServiceTest {
                 any(),
                 any()
             )
-        } returns utbetalingsoppdrag
+        } returns lagTilkjentYtelse(utbetalingsoppdrag)
         val vedtak = mockk<Vedtak> {
             every { behandling } returns mockk {
                 every { id } returns 1L
@@ -52,7 +57,7 @@ internal class UtbetalingsoppdragServiceTest {
                 any(),
                 any()
             )
-        } returns utbetalingsoppdrag
+        } returns lagTilkjentYtelse(utbetalingsoppdrag)
         val vedtak = mockk<Vedtak> {
             every { behandling } returns mockk {
                 every { id } returns 1L
@@ -71,4 +76,12 @@ internal class UtbetalingsoppdragServiceTest {
         LocalDateTime.now(),
         utbetalingsperiode = utbetalingsperiode
     )
+
+    private fun lagTilkjentYtelse(utbetalingsoppdrag: Utbetalingsoppdrag) =
+        TilkjentYtelse(
+            utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag),
+            behandling = lagBehandling(),
+            opprettetDato = LocalDate.now(),
+            endretDato = LocalDate.now()
+        )
 }

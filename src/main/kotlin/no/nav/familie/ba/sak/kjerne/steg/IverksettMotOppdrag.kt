@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 
 @Service
@@ -31,7 +32,6 @@ class IverksettMotOppdrag(
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) : BehandlingSteg<IverksettingTaskDTO> {
     private val iverksattOppdrag = Metrics.counter("familie.ba.sak.oppdrag.iverksatt")
-    private val iverksettingForskjellNyGammel = Metrics.counter("familie.ba.sak.oppdrag.iverksett.forskjell")
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         tilkjentYtelseValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling)
@@ -67,16 +67,13 @@ class IverksettMotOppdrag(
         )
         iverksattOppdrag.increment()
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
-            val generertUtbetalingsoppdrag =
-                utbetalingsoppdragService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
-                    vedtak = vedtakService.hent(data.vedtaksId),
-                    saksbehandlerId = data.saksbehandlerId
-                )
-            if (utbetalingsoppdrag != generertUtbetalingsoppdrag) {
-                iverksettingForskjellNyGammel.increment()
-                secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på gamle måte=$utbetalingsoppdrag")
-                secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på ny måte=$generertUtbetalingsoppdrag")
-            }
+            val tilkjentYtelse = utbetalingsoppdragService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+                vedtak = vedtakService.hent(data.vedtaksId),
+                saksbehandlerId = data.saksbehandlerId
+            )
+            val gammelUtbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
+            secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på gamle måte=$gammelUtbetalingsoppdrag")
+            secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på ny måte=${tilkjentYtelse.utbetalingsoppdrag}")
         }
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)

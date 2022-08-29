@@ -43,9 +43,7 @@ internal class ØkonomiServiceTest {
         )
 
         // Test at validering ikke feiler.
-        økonomiService.validerOpphørsoppdrag(
-            lagEksternUtbetalingsoppdrag(utbetalingsPeriode)
-        )
+        lagEksternUtbetalingsoppdrag(utbetalingsPeriode).validerOpphørsoppdrag()
     }
 
     @Test
@@ -70,9 +68,7 @@ internal class ØkonomiServiceTest {
             )
         )
         assertThrows<IllegalStateException> {
-            økonomiService.validerOpphørsoppdrag(
-                lagEksternUtbetalingsoppdrag(utbetalingsPeriode)
-            )
+            lagEksternUtbetalingsoppdrag(utbetalingsPeriode).validerOpphørsoppdrag()
         }
     }
 

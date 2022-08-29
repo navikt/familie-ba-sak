@@ -266,7 +266,7 @@ class BeregningService(
                 }.isNotEmpty()
             } ?: emptyList()
 
-    fun populerTilkjentYtelse(
+    private fun populerTilkjentYtelse(
         behandling: Behandling,
         utbetalingsoppdrag: Utbetalingsoppdrag
     ): TilkjentYtelse {
