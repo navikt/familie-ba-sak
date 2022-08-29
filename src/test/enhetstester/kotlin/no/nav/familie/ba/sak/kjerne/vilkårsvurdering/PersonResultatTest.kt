@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.YearMonth
 
 class PersonResultatTest {
@@ -306,5 +307,46 @@ class PersonResultatTest {
 
         Assertions.assertEquals(juni2020, forskjøvedeVedtaksperioder.elementAt(1).fraOgMed.tilYearMonthEllerNull())
         Assertions.assertEquals(null, forskjøvedeVedtaksperioder.elementAt(1).tilOgMed.tilYearMonthEllerNull())
+    }
+
+    @Test
+    fun `skal håndtere bor med søker-overlapp`() {
+        val søker = lagPerson()
+
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søkerAktør = søker.aktør,
+            behandling = lagBehandling(),
+            resultat = Resultat.OPPFYLT
+        )
+
+        val personResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = søker.aktør
+        ).also {
+            it.setSortedVilkårResultater(
+                setOf(
+                    VilkårResultat(
+                        personResultat = it,
+                        periodeFom = mars2020.førsteDagIInneværendeMåned(),
+                        periodeTom = null,
+                        vilkårType = Vilkår.BOR_MED_SØKER,
+                        resultat = Resultat.OPPFYLT,
+                        begrunnelse = "",
+                        behandlingId = vilkårsvurdering.behandling.id
+                    ),
+                    VilkårResultat(
+                        personResultat = it,
+                        periodeFom = null,
+                        periodeTom = null,
+                        vilkårType = Vilkår.BOR_MED_SØKER,
+                        resultat = Resultat.IKKE_OPPFYLT,
+                        begrunnelse = "",
+                        behandlingId = vilkårsvurdering.behandling.id,
+                        erEksplisittAvslagPåSøknad = true
+                    )
+                )
+            )
+        }
+        assertDoesNotThrow { setOf(personResultat).tilFørskjøvetVilkårResultatTidslinjeMap() }
     }
 }
