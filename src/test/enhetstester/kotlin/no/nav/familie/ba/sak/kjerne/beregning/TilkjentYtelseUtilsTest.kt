@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -39,12 +38,15 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.empty
+import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+import org.hamcrest.CoreMatchers.`is` as Is
 
 internal class TilkjentYtelseUtilsTest {
 
@@ -797,15 +799,13 @@ internal class TilkjentYtelseUtilsTest {
     val november2022 = YearMonth.of(2022, 11)
     val desember2022 = YearMonth.of(2022, 12)
 
-    // Scenario: Far søker om delt bosted. Mor har tidligere mottatt fult utvidet og ordinær barnetrygd
+    // Scenario: Far søker om delt bosted - Mor har tidligere mottatt fult utvidet og ordinær barnetrygd
     @Test
     fun `Skal støtte endret utbetaling som delvis overlapper delt bosted på søker og barn og småbarnstillegg på søker`() {
-        val relevantPeriode = MånedPeriode(januar2022, desember2022)
-        val relevantEndringsPeriode = MånedPeriode(april2022, juli2022)
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val barn18ÅrMånedMinusEn = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
-        val barnFyller6ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
 
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             endretAndeler = listOf(
@@ -813,15 +813,15 @@ internal class TilkjentYtelseUtilsTest {
                     person = søker,
                     skalUtbetales = false,
                     årsak = Årsak.DELT_BOSTED,
-                    fom = relevantEndringsPeriode.fom,
-                    tom = relevantEndringsPeriode.tom
+                    fom = april2022,
+                    tom = juli2022
                 ),
                 EndretAndel(
                     person = barnFødtAugust2019,
                     skalUtbetales = false,
                     årsak = Årsak.DELT_BOSTED,
-                    fom = relevantEndringsPeriode.fom,
-                    tom = relevantEndringsPeriode.tom
+                    fom = april2022,
+                    tom = juli2022
                 )
             ),
             atypiskeVilkårBarna = listOf(
@@ -836,7 +836,7 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantPeriode.tom) }
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(6, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -845,72 +845,43 @@ internal class TilkjentYtelseUtilsTest {
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
 
         assertEquals(2, utvidetAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2022,
-                tom = juli2022,
-                prosent = BigDecimal.ZERO,
-                knyttetTilEndringsperiode = true
-            ),
-            faktiskAndel = utvidetAndeler.first()
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2022,
-                tom = barn18ÅrMånedMinusEn,
-                prosent = BigDecimal(50)
-            ),
-            faktiskAndel = utvidetAndeler.last()
-        )
+        assertThat(utvidetAndeler[0].stønadFom, Is(april2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(juli2022))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal.ZERO))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(utvidetAndeler[1].stønadFom, Is(august2022))
+        assertThat(utvidetAndeler[1].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(50)))
+        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(2, småbarnstilleggAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2022,
-                tom = juli2022,
-                prosent = BigDecimal.ZERO
-            ),
-            faktiskAndel = småbarnstilleggAndeler.first()
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2022,
-                tom = barnFyller3ÅrDato,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = småbarnstilleggAndeler.last()
-        )
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juli2022))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal.ZERO))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(småbarnstilleggAndeler[1].stønadFom, Is(august2022))
+        assertThat(småbarnstilleggAndeler[1].stønadTom, Is(barnFyller3ÅrDato))
+        assertThat(småbarnstilleggAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
-        // BARN
         assertEquals(2, barnasAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = relevantEndringsPeriode.fom,
-                tom = relevantEndringsPeriode.tom,
-                prosent = BigDecimal.ZERO,
-                knyttetTilEndringsperiode = true
-            ),
-            faktiskAndel = barnasAndeler.first()
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2022,
-                tom = barnFyller6ÅrDato,
-                prosent = BigDecimal(50)
-            ),
-            faktiskAndel = barnasAndeler.last()
-        )
+        assertThat(barnasAndeler[0].stønadFom, Is(april2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(juli2022))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal.ZERO))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barnasAndeler[1].stønadFom, Is(august2022))
+        assertThat(barnasAndeler[1].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[1].prosent, Is(BigDecimal(50)))
+        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Far søker om delt bosted. Mor har tidligere mottatt fult, men har ikke mottatt utvidet.
+    // Scenario: Far søker om delt bosted - Mor har tidligere mottatt fult, men har ikke mottatt utvidet
     @Test
     fun `Skal støtte endret utbetaling som kun gjelder barn på delt bosted utbetaling`() {
-        val relevantPeriode = MånedPeriode(januar2022, desember2022)
-        val relevantEndringsPeriode = MånedPeriode(april2022, juli2022)
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val barn18ÅrMånedMinusEn = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
-        val barnFyller6ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
 
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             endretAndeler = listOf(
@@ -918,8 +889,8 @@ internal class TilkjentYtelseUtilsTest {
                     person = barnFødtAugust2019,
                     skalUtbetales = false,
                     årsak = Årsak.DELT_BOSTED,
-                    fom = relevantEndringsPeriode.fom,
-                    tom = relevantEndringsPeriode.tom
+                    fom = april2022,
+                    tom = juli2022
                 )
             ),
             atypiskeVilkårBarna = listOf(
@@ -934,7 +905,7 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantPeriode.tom) }
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(4, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -943,55 +914,36 @@ internal class TilkjentYtelseUtilsTest {
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
 
         assertEquals(1, utvidetAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2022,
-                tom = barn18ÅrMånedMinusEn,
-                prosent = BigDecimal(50)
-            ),
-            faktiskAndel = utvidetAndeler.single()
-        )
+        assertThat(utvidetAndeler[0].stønadFom, Is(april2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(50)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2022,
-                tom = barnFyller3ÅrDato,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = småbarnstilleggAndeler.single()
-        )
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(barnFyller3ÅrDato))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         // BARN
         assertEquals(2, barnasAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2022,
-                tom = juli2022,
-                prosent = BigDecimal.ZERO,
-                knyttetTilEndringsperiode = true
-            ),
-            faktiskAndel = barnasAndeler.first()
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2022,
-                tom = barnFyller6ÅrDato,
-                prosent = BigDecimal(50)
-            ),
-            faktiskAndel = barnasAndeler.last()
-        )
+        assertThat(barnasAndeler[0].stønadFom, Is(april2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(juli2022))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal.ZERO))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barnasAndeler[1].stønadFom, Is(august2022))
+        assertThat(barnasAndeler[1].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[1].prosent, Is(BigDecimal(50)))
+        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Mor har tidligere mottatt barnetrygden. Far har nå søkt om delt bosted og mors barnetrygd skal også deles.
+    // Scenario: Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles
     @Test
     fun `Skal gi riktig resultat når barnetrygden går over til å være delt, kun småbarnstillegg og utvidet blir delt i første periode`() {
-        val relevantPeriode = MånedPeriode(januar2022, desember2022)
-        val relevantEndringsPeriode = MånedPeriode(juni2022, juli2022)
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val barn18ÅrMånedMinusEn = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
-        val barnFyller6ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
 
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             endretAndeler = listOf(
@@ -999,8 +951,8 @@ internal class TilkjentYtelseUtilsTest {
                     person = barnFødtAugust2019,
                     skalUtbetales = true,
                     årsak = Årsak.DELT_BOSTED,
-                    fom = relevantEndringsPeriode.fom,
-                    tom = relevantEndringsPeriode.tom
+                    fom = juni2022,
+                    tom = juli2022
                 )
             ),
             atypiskeVilkårBarna = listOf(
@@ -1028,7 +980,7 @@ internal class TilkjentYtelseUtilsTest {
             barna = listOf(barnFødtAugust2019)
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantPeriode.tom) }
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(5, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -1037,63 +989,40 @@ internal class TilkjentYtelseUtilsTest {
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
 
         assertEquals(1, utvidetAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = juni2022,
-                tom = barn18ÅrMånedMinusEn,
-                prosent = BigDecimal(50)
-            ),
-            faktiskAndel = utvidetAndeler.single()
-        )
+        assertThat(utvidetAndeler[0].stønadFom, Is(juni2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(50)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = juni2022,
-                tom = barnFyller3ÅrDato,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = småbarnstilleggAndeler.single()
-        )
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(juni2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(barnFyller3ÅrDato))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         // BARN
         assertEquals(3, barnasAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2022,
-                tom = mai2022,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = barnasAndeler[0]
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = juni2022,
-                tom = juli2022,
-                prosent = BigDecimal(100),
-                knyttetTilEndringsperiode = true
-            ),
-            faktiskAndel = barnasAndeler[1]
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2022,
-                tom = barnFyller6ÅrDato,
-                prosent = BigDecimal(50)
-            ),
-            faktiskAndel = barnasAndeler[2]
-        )
+        assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(mai2022))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(barnasAndeler[1].stønadFom, Is(juni2022))
+        assertThat(barnasAndeler[1].stønadTom, Is(juli2022))
+        assertThat(barnasAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barnasAndeler[2].stønadFom, Is(august2022))
+        assertThat(barnasAndeler[2].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[2].prosent, Is(BigDecimal(50)))
+        assertThat(barnasAndeler[2].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Mor har tidligere mottatt barnetrygden. Far har nå søkt om delt bosted og mors barnetrygd skal også deles 2.
+    // Scenario: Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles 2
     @Test
     fun `Delt, utvidet og ordinær barnetrygd deles fra juni, men skal utbetales fult fra juni til og med juli - deles som vanlig fra August`() {
-        val relevantPeriode = MånedPeriode(januar2022, desember2022)
-        val relevantEndringsPeriode = MånedPeriode(juni2022, juli2022)
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val barn18ÅrMånedMinusEn = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
-        val barnFyller6ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
 
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             endretAndeler = listOf(
@@ -1101,15 +1030,15 @@ internal class TilkjentYtelseUtilsTest {
                     person = barnFødtAugust2019,
                     skalUtbetales = true,
                     årsak = Årsak.DELT_BOSTED,
-                    fom = relevantEndringsPeriode.fom,
-                    tom = relevantEndringsPeriode.tom
+                    fom = juni2022,
+                    tom = juli2022
                 ),
                 EndretAndel(
                     person = søker,
                     skalUtbetales = true,
                     årsak = Årsak.DELT_BOSTED,
-                    fom = relevantEndringsPeriode.fom,
-                    tom = relevantEndringsPeriode.tom
+                    fom = juni2022,
+                    tom = juli2022
                 )
             ),
             atypiskeVilkårBarna = listOf(
@@ -1137,88 +1066,52 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantPeriode.tom) }
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(7, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
-
-        // SØKER
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
-        assertEquals(3, utvidetAndeler.size)
 
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2022,
-                tom = mai2022,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = utvidetAndeler[0]
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = juni2022,
-                tom = juli2022,
-                prosent = BigDecimal(100),
-                knyttetTilEndringsperiode = true
-            ),
-            faktiskAndel = utvidetAndeler[1]
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2022,
-                tom = barn18ÅrMånedMinusEn,
-                prosent = BigDecimal(50)
-            ),
-            faktiskAndel = utvidetAndeler[2]
-        )
+        assertEquals(3, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(mai2022))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(utvidetAndeler[1].stønadFom, Is(juni2022))
+        assertThat(utvidetAndeler[1].stønadTom, Is(juli2022))
+        assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(utvidetAndeler[2].stønadFom, Is(august2022))
+        assertThat(utvidetAndeler[2].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[2].prosent, Is(BigDecimal(50)))
+        assertThat(utvidetAndeler[2].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2022,
-                tom = barnFyller3ÅrDato,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = småbarnstilleggAndeler.single()
-        )
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(mars2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(barnFyller3ÅrDato))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
-        // BARN
         assertEquals(3, barnasAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2022,
-                tom = mai2022,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = barnasAndeler[0]
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = juni2022,
-                tom = juli2022,
-                prosent = BigDecimal(100),
-                knyttetTilEndringsperiode = true
-            ),
-            faktiskAndel = barnasAndeler[1]
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2022,
-                tom = barnFyller6ÅrDato,
-                prosent = BigDecimal(50)
-            ),
-            faktiskAndel = barnasAndeler[2]
-        )
+        assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(mai2022))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(barnasAndeler[1].stønadFom, Is(juni2022))
+        assertThat(barnasAndeler[1].stønadTom, Is(juli2022))
+        assertThat(barnasAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barnasAndeler[2].stønadFom, Is(august2022))
+        assertThat(barnasAndeler[2].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[2].prosent, Is(BigDecimal(50)))
+        assertThat(barnasAndeler[2].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Far søker om utvidet barnetrygd. Har full overgangsstønad, men søker sent og får ikke etterbetalt mer enn 3år.
+    // Scenario: Far søker om utvidet barnetrygd - Har full overgangsstønad, men søker sent og får ikke etterbetalt mer enn 3år
     @Test
     fun `Småbarnstillleg, utvidet og ordinær barnetrygd fra april, men skal ikke utbetales før august på grunn av etterbetaling 3 år`() {
-        val relevantPeriode = MånedPeriode(januar2019, desember2019)
-        val relevantEndringsPeriode = MånedPeriode(april2019, juli2019)
-        val overgangsstønadPeriode = MånedPeriode(januar2019, desember2019)
         val barnFødtAugust2016 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 8, 15))
-        val barn18ÅrMånedMinusEn = barnFødtAugust2016.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 = barnFødtAugust2016.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
 
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             endretAndeler = listOf(
@@ -1226,15 +1119,15 @@ internal class TilkjentYtelseUtilsTest {
                     person = barnFødtAugust2016,
                     skalUtbetales = false,
                     årsak = Årsak.ETTERBETALING_3ÅR,
-                    fom = relevantEndringsPeriode.fom,
-                    tom = relevantEndringsPeriode.tom
+                    fom = april2019,
+                    tom = juli2019
                 ),
                 EndretAndel(
                     person = søker,
                     skalUtbetales = false,
                     årsak = Årsak.ETTERBETALING_3ÅR,
-                    fom = relevantEndringsPeriode.fom,
-                    tom = relevantEndringsPeriode.tom
+                    fom = april2019,
+                    tom = juli2019
                 )
             ),
             atypiskeVilkårBarna = listOf(
@@ -1249,92 +1142,60 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(januar2019, november2019))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantPeriode.tom) }
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2019) }
         assertEquals(6, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
-
-        // SØKER
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
-        assertEquals(2, utvidetAndeler.size)
 
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2019,
-                tom = juli2019,
-                prosent = BigDecimal(0),
-                knyttetTilEndringsperiode = true
-            ),
-            faktiskAndel = utvidetAndeler[0]
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2019,
-                tom = barn18ÅrMånedMinusEn,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = utvidetAndeler[1]
-        )
+        assertEquals(2, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(april2019))
+        assertThat(utvidetAndeler[0].stønadTom, Is(juli2019))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(0)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(utvidetAndeler[1].stønadFom, Is(august2019))
+        assertThat(utvidetAndeler[1].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(2, småbarnstilleggAndeler.size)
-
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2019,
-                tom = juli2019,
-                prosent = BigDecimal(0)
-            ),
-            faktiskAndel = småbarnstilleggAndeler[0]
-        )
-
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2019,
-                tom = august2019,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = småbarnstilleggAndeler[1]
-        )
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2019))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juli2019))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(0)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(småbarnstilleggAndeler[1].stønadFom, Is(august2019))
+        assertThat(småbarnstilleggAndeler[1].stønadTom, Is(august2019))
+        assertThat(småbarnstilleggAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
         // BARN
         assertEquals(2, barnasAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2019,
-                tom = juli2019,
-                prosent = BigDecimal(0),
-                knyttetTilEndringsperiode = true
-            ),
-            faktiskAndel = barnasAndeler.first()
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2019,
-                tom = august2020,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = barnasAndeler.last()
-        )
+        assertThat(barnasAndeler[0].stønadFom, Is(april2019))
+        assertThat(barnasAndeler[0].stønadTom, Is(juli2019))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(0)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barnasAndeler[1].stønadFom, Is(august2019))
+        assertThat(barnasAndeler[1].stønadTom, Is(august2020))
+        assertThat(barnasAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Far har mottatt delt utvidet barnetrygd for barn 12år. Søker nå om barnetrygd for barn som flyttet til han for over 3år siden
+    // Scenario: Far har mottatt delt utvidet barnetrygd for barn 12år - Søker nå om barnetrygd for barn som flyttet til han for over 3 år siden
     @Test
     fun `Det er småbarnstillegg på søker og ordinær barnetrygd på barn 1 fra april, men det skal ikke utbetales før august på grunn av etterbetaling 3 år - Søker og barn 2 har utbetalinger fra tidligere behandlinger som ikke skal overstyres`() {
         val barnFødtAugust2016 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 8, 15))
-        val barnFødtAugust2016Fyller18ÅrsDatoMinusEnMåned = barnFødtAugust2016.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnFødtAugust2016Blir18 = barnFødtAugust2016.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
         val barnFødtDesember2006 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2006, 12, 1))
-        val barnFødtDesember2006Fyller18ÅrsDatoMinusEnMåned = barnFødtDesember2006.fødselsdato.til18ÅrsVilkårsdato().toYearMonth()
-        val relevantPeriode = MånedPeriode(januar2019, desember2019)
-        val relevantEndringsPeriode = MånedPeriode(april2019, juli2019)
+        val månedFørBarnFødtDesember2006Blir18 = barnFødtDesember2006.fødselsdato.til18ÅrsVilkårsdato().toYearMonth()
+
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
-            barna = listOf(barnFødtAugust2016, barnFødtDesember2006),
             endretAndeler = listOf(
                 EndretAndel(
                     person = barnFødtAugust2016,
                     skalUtbetales = false,
                     årsak = Årsak.ETTERBETALING_3ÅR,
-                    fom = relevantEndringsPeriode.fom,
-                    tom = relevantEndringsPeriode.tom
+                    fom = april2019,
+                    tom = juli2019
                 )
             ),
             atypiskeVilkårBarna = listOf(
@@ -1345,7 +1206,7 @@ internal class TilkjentYtelseUtilsTest {
                     aktør = barnFødtAugust2016.aktør
                 ),
                 AtypiskVilkår(
-                    fom = relevantPeriode.fom.førsteDagIInneværendeMåned(),
+                    fom = januar2019.toLocalDate(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtDesember2006.aktør,
@@ -1360,10 +1221,11 @@ internal class TilkjentYtelseUtilsTest {
                     aktør = søker.aktør
                 )
             ),
+            barna = listOf(barnFødtAugust2016, barnFødtDesember2006),
             overgangsstønadPerioder = listOf(MånedPeriode(januar2019, november2019))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantPeriode.tom) }
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2019) }
         assertEquals(8, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -1371,90 +1233,53 @@ internal class TilkjentYtelseUtilsTest {
         // SØKER
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
         assertEquals(2, utvidetAndeler.size)
-
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2019,
-                tom = juli2019,
-                prosent = BigDecimal(50)
-            ),
-            faktiskAndel = utvidetAndeler.first()
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2019,
-                tom = barnFødtAugust2016Fyller18ÅrsDatoMinusEnMåned,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = utvidetAndeler.last()
-        )
+        assertThat(utvidetAndeler[0].stønadFom, Is(mars2019))
+        assertThat(utvidetAndeler[0].stønadTom, Is(juli2019))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(50)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(utvidetAndeler[1].stønadFom, Is(august2019))
+        assertThat(utvidetAndeler[1].stønadTom, Is(månedFørBarnFødtAugust2016Blir18))
+        assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(2, småbarnstilleggAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2019,
-                tom = juli2019,
-                prosent = BigDecimal(0)
-            ),
-            faktiskAndel = småbarnstilleggAndeler.first()
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2019,
-                tom = august2019,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = småbarnstilleggAndeler.last()
-        )
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2019))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juli2019))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(0)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(småbarnstilleggAndeler[1].stønadFom, Is(august2019))
+        assertThat(småbarnstilleggAndeler[1].stønadTom, Is(august2019))
+        assertThat(småbarnstilleggAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
         // BARN
         val (barn1Andeler, barn2Andeler) = barnasAndeler.partition { it.aktør == barnFødtAugust2016.aktør }
         assertEquals(2, barn1Andeler.size)
-
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2019,
-                tom = juli2019,
-                prosent = BigDecimal(0),
-                knyttetTilEndringsperiode = true
-            ),
-            faktiskAndel = barn1Andeler.first()
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = august2019,
-                tom = august2020,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = barn1Andeler.last()
-        )
+        assertThat(barn1Andeler[0].stønadFom, Is(april2019))
+        assertThat(barn1Andeler[0].stønadTom, Is(juli2019))
+        assertThat(barn1Andeler[0].prosent, Is(BigDecimal(0)))
+        assertThat(barn1Andeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barn1Andeler[1].stønadFom, Is(august2019))
+        assertThat(barn1Andeler[1].stønadTom, Is(august2020))
+        assertThat(barn1Andeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(barn1Andeler[1].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(2, barn2Andeler.size)
-
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = februar2019,
-                tom = februar2019,
-                prosent = BigDecimal(50)
-            ),
-            faktiskAndel = barn2Andeler.first()
-        )
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2019,
-                tom = barnFødtDesember2006Fyller18ÅrsDatoMinusEnMåned,
-                prosent = BigDecimal(50)
-            ),
-            faktiskAndel = barn2Andeler.last()
-        )
+        assertThat(barn2Andeler[0].stønadFom, Is(februar2019))
+        assertThat(barn2Andeler[0].stønadTom, Is(februar2019))
+        assertThat(barn2Andeler[0].prosent, Is(BigDecimal(50)))
+        assertThat(barn2Andeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(barn2Andeler[1].stønadFom, Is(mars2019))
+        assertThat(barn2Andeler[1].stønadTom, Is(månedFørBarnFødtDesember2006Blir18))
+        assertThat(barn2Andeler[1].prosent, Is(BigDecimal(50)))
+        assertThat(barn2Andeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
     // Scenario: Far søker om utvidet barnetrygd for barn under 3 år - han har full overgangsstlnad for bare deler av perioden
     @Test
     fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen`() {
-        val relevantPeriode = MånedPeriode(januar2022, desember2022)
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val barnFyller6ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
 
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             atypiskeVilkårBarna = listOf(
@@ -1467,7 +1292,7 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
-                    fom = relevantPeriode.fom.førsteDagIInneværendeMåned(),
+                    fom = januar2022.toLocalDate(),
                     tom = august2022.toLocalDate(),
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                     aktør = søker.aktør
@@ -1477,53 +1302,36 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(april2022, juni2022))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantPeriode.tom) }
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(3, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
-
-        // SØKER
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
-        assertEquals(1, utvidetAndeler.size)
 
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2022,
-                tom = august2022,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = utvidetAndeler.single()
-        )
+        assertEquals(1, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(august2022))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juni2022))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2022,
-                tom = juni2022,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = småbarnstilleggAndeler.single()
-        )
-
-        // BARN
         assertEquals(1, barnasAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2022,
-                tom = barnFyller6ÅrDato,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = barnasAndeler.single()
-        )
+        assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Far søker om utvidet barnetrygd for barn under 3år, men oppfyller vilkårene kun tilbake i tid
+    // Scenario: Far søker om utvidet barnetrygd for barn under 3år, men oppfyller vilkårene kun tilbake i tid
     @Test
     fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen - Overgangsstønaden stopper før barn fyller 3 år fordi søker ikke lenger har rett til utvidet barnetrygd`() {
-        val relevantPeriode = MånedPeriode(januar2022, desember2022)
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val barnFyller6ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
 
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             atypiskeVilkårBarna = listOf(
@@ -1546,53 +1354,38 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(april2022, august2022))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantPeriode.tom) }
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(3, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
 
-        // SØKER
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
 
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2022,
-                tom = juni2022,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = utvidetAndeler.single()
-        )
+        assertEquals(1, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(juni2022))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juni2022))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2022,
-                tom = juni2022,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = småbarnstilleggAndeler.single()
-        )
-
-        // BARN
         assertEquals(1, barnasAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2022,
-                tom = barnFyller6ÅrDato,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = barnasAndeler.first()
-        )
+        assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
     }
 
     // Scenario: Far søker om utvidet barnetrygd for barn under 3 år - Har full overgangsstønad som opphører når barnet fyller 3 år
     @Test
     fun `Skal gi riktig resultat når søker har rett på ordinær og utvidet barnetrygd fra mars og rett på overgangsstønad fra April`() {
-        val relevantPeriode = MånedPeriode(januar2022, desember2022)
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val barnFyller6ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
-        val barnFyller18ÅrDato = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
 
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             atypiskeVilkårBarna = listOf(
@@ -1607,7 +1400,7 @@ internal class TilkjentYtelseUtilsTest {
             barna = listOf(barnFødtAugust2019)
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(relevantPeriode.tom) }
+        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
 
         assertEquals(3, andelerTilkjentYtelseITidsrom.size)
 
@@ -1617,55 +1410,22 @@ internal class TilkjentYtelseUtilsTest {
         val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
 
         assertEquals(1, utvidetAndeler.size)
-
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2022,
-                tom = barnFyller18ÅrDato,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = utvidetAndeler.single()
-        )
+        assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(august2022))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = april2022,
-                tom = august2022,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = småbarnstilleggAndeler.single()
-        )
-
-        // BARN
         assertEquals(1, barnasAndeler.size)
-        testAtAndelErSomForventet(
-            forventetAndel = ForventetAndel(
-                fom = mars2022,
-                tom = barnFyller6ÅrDato,
-                prosent = BigDecimal(100)
-            ),
-            faktiskAndel = barnasAndeler.single()
-        )
-    }
-
-    private data class ForventetAndel(
-        val fom: YearMonth,
-        val tom: YearMonth,
-        val prosent: BigDecimal,
-        val knyttetTilEndringsperiode: Boolean = false
-    )
-
-    private fun testAtAndelErSomForventet(forventetAndel: ForventetAndel, faktiskAndel: AndelTilkjentYtelse) {
-        assertEquals(forventetAndel.fom, faktiskAndel.stønadFom)
-        assertEquals(forventetAndel.tom, faktiskAndel.stønadTom)
-        assertEquals(forventetAndel.prosent, faktiskAndel.prosent)
-        if (forventetAndel.knyttetTilEndringsperiode) {
-            assertTrue(faktiskAndel.endretUtbetalingAndeler.isNotEmpty())
-        } else {
-            assertTrue(faktiskAndel.endretUtbetalingAndeler.isEmpty())
-        }
+        assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
     }
 
     private data class EndretAndel(
