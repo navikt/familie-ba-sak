@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
 import no.nav.familie.ba.sak.integrasjoner.økonomi.valider
 import no.nav.familie.ba.sak.integrasjoner.økonomi.validerOpphørsoppdrag
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
@@ -123,11 +122,11 @@ class NyUtbetalingsoppdragGenerator {
      */
     internal fun lagTilkjentYtelseMedUtbetalingsoppdrag(
         tilkjentYtelseMetaData: TilkjentYtelseMetaData,
-        forrigeTilkjentYtelser: List<TilkjentYtelse>
+        forrigeTilkjentYtelse: TilkjentYtelse? = null
     ): TilkjentYtelse {
         val tilkjentYtelse = tilkjentYtelseMetaData.tilkjentYtelse
         val vedtak = tilkjentYtelseMetaData.vedtak
-        val erFørsteBehandlingPåFagsak = forrigeTilkjentYtelser.isEmpty()
+        val erFørsteBehandlingPåFagsak = forrigeTilkjentYtelse == null
         // Filtrer kun andeler som kan sendes til oppdrag
         val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
 
@@ -137,8 +136,9 @@ class NyUtbetalingsoppdragGenerator {
 
         // grupperer forrige andeler basert på personIdent.
         // Markerte Småbarnstilegg med spesielt suffix SMÅBARNSTILLEGG_SUFFIX
-        val forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> =
-            kjedeinndelteAndeler(forrigeTilkjentYtelser.flatMap { it.andelerTilkjentYtelse })
+        val forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.erAndelSomSkalSendesTilOppdrag() }
+            ?: emptyList()
+        val forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = kjedeinndelteAndeler(forrigeAndeler)
 
         val erEndretMigreringsDato = tilkjentYtelseMetaData.endretMigreringsdato != null
         // Generer et komplett nytt eller bare endringer på et eksisterende betalingsoppdrag.
@@ -162,8 +162,8 @@ class NyUtbetalingsoppdragGenerator {
                 andeler = andelerTilOpprettelse,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                 vedtak = vedtak,
-                sisteOffsetIKjedeOversikt = hentSisteOffsetPerIdent(forrigeTilkjentYtelser),
-                sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(forrigeTilkjentYtelser)
+                sisteOffsetIKjedeOversikt = tilkjentYtelseMetaData.sisteOffsetPerIdent,
+                sisteOffsetPåFagsak = tilkjentYtelseMetaData.sisteOffsetPåFagsak
             )
             // oppdater andeler i tilkjentYtelse
             tilkjentYtelse.andelerTilkjentYtelse.clear()
@@ -216,21 +216,6 @@ class NyUtbetalingsoppdragGenerator {
             utbetalingsoppdrag = utbetalingsoppdrag
         )
     }
-
-    private fun hentSisteOffsetPerIdent(forrigeTilkjentYtelser: List<TilkjentYtelse>): Map<String, Int> {
-        val alleAndelerTilkjentYtelserIverksattMotØkonomi = forrigeTilkjentYtelser
-            .flatMap { it.andelerTilkjentYtelse }
-        val alleTideligereKjederIverksattMotØkonomi =
-            kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
-
-        return ØkonomiUtils.gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
-    }
-
-    fun hentSisteOffsetPåFagsak(forrigeTilkjentYtelser: List<TilkjentYtelse>): Int? =
-        forrigeTilkjentYtelser.flatMap { it.andelerTilkjentYtelse }
-            .takeIf { it.isNotEmpty() }?.let { andelerTilkjentYtelse ->
-                andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-            }
 
     private fun lagUtbetalingsperioderForOpphør(
         andeler: List<Pair<AndelTilkjentYtelse, YearMonth>>,

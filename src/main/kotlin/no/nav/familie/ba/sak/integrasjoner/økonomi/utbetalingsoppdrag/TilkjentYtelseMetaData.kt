@@ -9,6 +9,8 @@ data class TilkjentYtelseMetaData(
     val tilkjentYtelse: TilkjentYtelse,
     val vedtak: Vedtak,
     val saksbehandlerId: String,
+    val sisteOffsetPerIdent: Map<String, Int> = emptyMap(),
+    val sisteOffsetPåFagsak: Int? = null,
     val erSimulering: Boolean,
     val endretMigreringsdato: YearMonth? = null,
     val kompetanser: List<Kompetanse>

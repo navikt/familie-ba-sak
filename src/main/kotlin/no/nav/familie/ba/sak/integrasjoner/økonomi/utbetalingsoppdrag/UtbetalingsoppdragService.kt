@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -85,18 +86,23 @@ class UtbetalingsoppdragService(
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
 
         // Henter tilkjentYtelse som har utbetalingsoppdrag og var sendt til oppdrag fra forrige iverksatt behandling
-        val forrigeTilkjentYtelser =
-            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(behandling.fagsak.id)
-        val forrigeAndeler = forrigeTilkjentYtelser.flatMap { it.andelerTilkjentYtelse }
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
+        val forrigeTilkjentYtelse = forrigeBehandling?.let { beregningService.hentTilkjentYtelseForBehandling(it.id) }
+        val forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.erAndelSomSkalSendesTilOppdrag() }
 
         val endretMigreringsdato =
-            beregnOmMigreringsDatoErEndret(behandling, forrigeAndeler.minByOrNull { it.stønadFom }?.stønadFom)
+            beregnOmMigreringsDatoErEndret(behandling, forrigeAndeler?.minByOrNull { it.stønadFom }?.stønadFom)
         val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId)
+
+        val sisteOffsetPerIdent = hentSisteOffsetPerIdent(behandling.fagsak.id)
+        val sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(behandling)
 
         val tilkjentYtelseMetaData = TilkjentYtelseMetaData(
             tilkjentYtelse = tilkjentYtelse,
             vedtak = vedtak,
             saksbehandlerId = saksbehandlerId,
+            sisteOffsetPerIdent = sisteOffsetPerIdent,
+            sisteOffsetPåFagsak = sisteOffsetPåFagsak,
             erSimulering = erSimulering,
             endretMigreringsdato = endretMigreringsdato,
             kompetanser = kompetanser.toList()
@@ -104,9 +110,30 @@ class UtbetalingsoppdragService(
 
         return utbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
             tilkjentYtelseMetaData = tilkjentYtelseMetaData,
-            forrigeTilkjentYtelser = forrigeTilkjentYtelser
+            forrigeTilkjentYtelse = forrigeTilkjentYtelse
         )
     }
+
+    private fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
+        val alleAndelerTilkjentYtelserIverksattMotØkonomi =
+            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
+                .flatMap { it.andelerTilkjentYtelse }
+                .filter { it.erAndelSomSkalSendesTilOppdrag() }
+        val alleTideligereKjederIverksattMotØkonomi =
+            ØkonomiUtils.kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
+
+        return ØkonomiUtils.gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
+    }
+
+    fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
+        behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
+            .mapNotNull { iverksattBehandling ->
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { andelerTilkjentYtelse ->
+                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
+                    }
+            }.maxByOrNull { it }
 
     private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
         val erMigrertSak =
