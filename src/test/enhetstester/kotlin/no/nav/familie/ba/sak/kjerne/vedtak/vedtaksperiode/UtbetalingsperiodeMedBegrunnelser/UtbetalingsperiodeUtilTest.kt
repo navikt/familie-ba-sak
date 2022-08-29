@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -355,6 +356,101 @@ class UtbetalingsperiodeUtilTest {
                 type = Vedtaksperiodetype.UTBETALING,
                 begrunnelser = mutableSetOf()
             )
+        )
+
+        Assertions.assertEquals(
+            forventetResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
+            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) }
+        )
+
+        Assertions.assertEquals(
+            forventetResultat.map { it.type }.toSet(),
+            faktiskResultat.map { it.type }.toSet()
+        )
+    }
+
+    @Test
+    fun `Skal lage splitt i vedatksperioder med der ulikt regelverk er brukt`() {
+        val mars2020 = YearMonth.of(2020, 3)
+        val april2020 = YearMonth.of(2020, 4)
+        val mai2020 = YearMonth.of(2020, 5)
+        val juli2020 = YearMonth.of(2020, 7)
+
+        val søker = lagPerson()
+        val barn = lagPerson()
+
+        val vedtak = lagVedtak()
+
+        val andelBarnMarsTilJuli = lagAndelTilkjentYtelse(
+            fom = mars2020,
+            tom = juli2020,
+            beløp = 1000,
+            person = barn
+        )
+
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søkerAktør = søker.aktør,
+            behandling = lagBehandling(),
+            resultat = Resultat.OPPFYLT
+        )
+
+        val personResultatBarn = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = barn.aktør
+        )
+
+        val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
+            personResultat = personResultatBarn,
+            periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
+            periodeTom = april2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            resultat = Resultat.OPPFYLT,
+            begrunnelse = "",
+            behandlingId = vilkårsvurdering.behandling.id,
+            utdypendeVilkårsvurderinger = emptyList(),
+            vurderesEtter = Regelverk.NASJONALE_REGLER
+        )
+        val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
+            personResultat = personResultatBarn,
+            periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
+            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            resultat = Resultat.OPPFYLT,
+            begrunnelse = "",
+            behandlingId = vilkårsvurdering.behandling.id,
+            utdypendeVilkårsvurderinger = emptyList(),
+            vurderesEtter = Regelverk.EØS_FORORDNINGEN
+        )
+        val vilkårResultaterBarn1 = listOf(
+            vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1,
+            vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1
+        )
+
+        personResultatBarn.setSortedVilkårResultater(
+            vilkårResultaterBarn1.toSet()
+        )
+
+        val forventetResultat = listOf(
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = mars2020.førsteDagIInneværendeMåned(),
+                tom = april2020.sisteDagIInneværendeMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+                begrunnelser = mutableSetOf()
+            ),
+            lagVedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = mai2020.førsteDagIInneværendeMåned(),
+                tom = juli2020.sisteDagIInneværendeMåned(),
+                type = Vedtaksperiodetype.UTBETALING,
+                begrunnelser = mutableSetOf()
+            )
+        )
+
+        val faktiskResultat = hentPerioderMedUtbetaling(
+            listOf(andelBarnMarsTilJuli),
+            vedtak,
+            setOf(personResultatBarn).tilFørskjøvetVilkårResultatTidslinjeMap()
         )
 
         Assertions.assertEquals(

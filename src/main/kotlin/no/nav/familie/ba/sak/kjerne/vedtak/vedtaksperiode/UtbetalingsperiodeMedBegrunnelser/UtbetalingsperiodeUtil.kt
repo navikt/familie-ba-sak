@@ -1,4 +1,4 @@
-
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
@@ -41,7 +42,7 @@ fun hentPerioderMedUtbetaling(
     val utdypendeVilkårsvurderingTidslinje =
         forskjøvetVilkårResultatTidslinjeMap
             .tilUtdypendeVilkårsvurderingTidslinjer()
-            .kombinerUtenNull { it.toMap() }
+            .kombinerUtenNull { it.filterNotNull().toMap() }
             .filtrer { !it.isNullOrEmpty() }
             .slåSammenLike()
 
@@ -64,13 +65,38 @@ fun hentPerioderMedUtbetaling(
         }
 }
 
+private data class VilkårResultaterKombinertForÅSplittePåVedtaksperiode(
+    val utdypendeVilkårsvurderinger: Set<UtdypendeVilkårsvurdering>,
+    val regelverk: Regelverk?
+)
+
 private fun Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>.tilUtdypendeVilkårsvurderingTidslinjer():
-    List<Tidslinje<Pair<Aktør, Set<UtdypendeVilkårsvurdering>>, Måned>> =
+    List<Tidslinje<Pair<Aktør, VilkårResultaterKombinertForÅSplittePåVedtaksperiode>?, Måned>> =
     this.map { (aktør, vilkårsvurderingTidslinje) ->
         vilkårsvurderingTidslinje.map { vilkårResultater ->
-            Pair(
-                aktør,
-                vilkårResultater?.flatMap { it.utdypendeVilkårsvurderinger }?.toSet() ?: emptySet()
-            )
+            vilkårResultater?.let {
+                Pair(
+                    aktør,
+                    VilkårResultaterKombinertForÅSplittePåVedtaksperiode(
+                        utdypendeVilkårsvurderinger = hentSetAvVilkårsVurderinger(vilkårResultater),
+                        regelverk = hentRegelverkPersonErVurdertEtterIPeriode(vilkårResultater)
+                    )
+                )
+            }
         }
     }
+
+private fun hentSetAvVilkårsVurderinger(vilkårResultater: Iterable<VilkårResultat>) =
+    vilkårResultater.flatMap { it.utdypendeVilkårsvurderinger }.toSet()
+
+private fun hentRegelverkPersonErVurdertEtterIPeriode(vilkårResultater: Iterable<VilkårResultat>) =
+    vilkårResultater
+        .map { it.vurderesEtter }
+        .reduce { acc, regelverk ->
+            when {
+                acc == null -> regelverk
+                regelverk == null -> acc
+                regelverk != acc -> throw Feil("Mer enn ett regelverk på person i periode")
+                else -> acc
+            }
+        }
