@@ -171,11 +171,11 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
         )
     }
 
-private fun håndterMuligBorMedSøkerOverlapp(entry: Map.Entry<Vilkår, MutableList<VilkårResultat>>): Map.Entry<Vilkår, MutableList<VilkårResultat>> {
-    if (entry.value.any { !it.erAvslagUtenPeriode() }) {
-        entry.value.removeAll { it.erAvslagUtenPeriode() }
+private fun håndterMuligBorMedSøkerOverlapp(vilkårOgResultater: Map.Entry<Vilkår, MutableList<VilkårResultat>>): Map.Entry<Vilkår, List<VilkårResultat>> {
+    if (vilkårOgResultater.value.any { !it.erAvslagUtenPeriode() }) {
+        vilkårOgResultater.value.removeAll { it.erAvslagUtenPeriode() }
     }
-    return entry
+    return vilkårOgResultater
 }
 
 private fun Tidslinje<Iterable<VilkårResultat>, Måned>.beskjærPå18årVilkåretOmDetFinnes(
