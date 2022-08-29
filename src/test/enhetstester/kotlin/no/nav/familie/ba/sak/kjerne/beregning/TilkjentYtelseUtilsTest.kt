@@ -783,8 +783,9 @@ internal class TilkjentYtelseUtilsTest {
     val langEndringsperiode = MånedPeriode(fom = YearMonth.now().minusMonths(4), tom = YearMonth.now().minusMonths(1))
     val kortEndringsperiode = MånedPeriode(fom = YearMonth.now().minusMonths(2), tom = YearMonth.now().minusMonths(1))
 
+    // Scenario: Far søker om delt bosted. Mor har tidligere mottatt fult utvidet og ordinær barnetrygd
     @Test
-    fun `Delt bosted - case 1`() {
+    fun `Skal støtte endret utbetaling som delvis overlapper delt bosted på søker og barn og småbarnstillegg på søker`() {
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             endretAndeler = listOf(
                 EndretAndel(
@@ -878,8 +879,9 @@ internal class TilkjentYtelseUtilsTest {
         )
     }
 
+    // Scenario: Far søker om delt bosted. Mor har tidligere mottatt fult, men har ikke mottatt utvidet.
     @Test
-    fun `Delt bosted - case 2`() {
+    fun `Skal støtte endret utbetaling som kun gjelder barn på delt bosted utbetaling`() {
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             endretAndeler = listOf(
                 EndretAndel(
@@ -949,8 +951,9 @@ internal class TilkjentYtelseUtilsTest {
         )
     }
 
+    // Scenario: Mor har tidligere mottatt barnetrygden. Far har nå søkt om delt bosted og mors barnetrygd skal også deles.
     @Test
-    fun `Delt bosted - case 3`() {
+    fun `Skal gi riktig resultat når barnetrygden går over til å være delt, kun småbarnstillegg og utvidet blir delt i første periode`() {
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             endretAndeler = listOf(
                 EndretAndel(
@@ -1041,8 +1044,9 @@ internal class TilkjentYtelseUtilsTest {
         )
     }
 
+    // Scenario: Mor har tidligere mottatt barnetrygden. Far har nå søkt om delt bosted og mors barnetrygd skal også deles.
     @Test
-    fun `Delt bosted - case 4`() {
+    fun `Delt, utvidet og ordinær barnetrygd deles fra juni, men skal utbetales fult fra juni til og med juli - deles som vanlig fra August`() {
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             endretAndeler = listOf(
                 EndretAndel(
@@ -1149,8 +1153,9 @@ internal class TilkjentYtelseUtilsTest {
         )
     }
 
+    // Scenario: Far søker om utvidet barnetrygd. Har full overgangsstønad, men søker sent og får ikke etterbetalt mer enn 3år.
     @Test
-    fun `Etterbetaling 3 år - case 1`() {
+    fun `Småbarnstillleg, utvidet og ordinær barnetrygd fra april, men skal ikke utbetales før august på grunn av etterbetaling 3 år`() {
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             endretAndeler = listOf(
                 EndretAndel(
@@ -1230,8 +1235,9 @@ internal class TilkjentYtelseUtilsTest {
         assertTrue(barnetsAndel2.endretUtbetalingAndeler.isEmpty())
     }
 
+    // Scenario: Far har mottatt delt utvidet barnetrygd for barn 12år. Søker nå om barnetrygd for barn som flyttet til han for over 3år siden
     @Test
-    fun `Etterbetaling 3 år - case 2`() {
+    fun `Det er småbarnstillegg på søker og ordinær barnetrygd på barn 1 fra april, men det skal ikke utbetales før august på grunn av etterbetaling 3 år - Søker og barn 2 har utbetalinger fra tidligere behandlinger som ikke skal overstyres`() {
         val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(12))
         val utvidetVilkårStart = LocalDate.now().minusMonths(6)
 
@@ -1331,8 +1337,9 @@ internal class TilkjentYtelseUtilsTest {
         assertTrue(barn2andel.endretUtbetalingAndeler.isEmpty())
     }
 
+    // TODO: Må dobbelsjekkes om scenariotekst er riktig
     @Test
-    fun `Småbarnstillegg - case 1`() {
+    fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen`() {
         val overgangsstønadPeriode = MånedPeriode(fom = YearMonth.now().minusMonths(4), tom = YearMonth.now().minusMonths(2))
         val borMedSøkerStart = LocalDate.now().minusMonths(6)
 
@@ -1391,7 +1398,7 @@ internal class TilkjentYtelseUtilsTest {
     }
 
     @Test
-    fun `Småbarnstillegg - case 2`() {
+    fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen - Overgangsstønaden stopper før barn fyller 3 år fordi søker ikke lenger har rett til utvidet barnetrygd`() {
         val overgangsstønadPeriode = MånedPeriode(fom = YearMonth.now().minusMonths(4), tom = YearMonth.now())
         val borMedSøkerStart = LocalDate.now().minusMonths(6)
 
@@ -1450,7 +1457,7 @@ internal class TilkjentYtelseUtilsTest {
     }
 
     @Test
-    fun `Småbarnstillegg - case 3`() {
+    fun `Skal gi riktig resultat når søker har rett på ordinær og utvidet barnetrygd fra mars og rett på overgangsstønad fra April`() {
         val overgangsstønadPeriode = MånedPeriode(fom = YearMonth.now().minusMonths(4), tom = YearMonth.now().plusMonths(4))
         val borMedSøkerStart = LocalDate.now().minusMonths(6)
 
