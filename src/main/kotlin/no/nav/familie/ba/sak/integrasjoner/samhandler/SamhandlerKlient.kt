@@ -30,7 +30,7 @@ class SamhandlerKlient(
         }
     }
 
-    fun søkSamhandlere(navn: String, side: Int): SøkSamhandlerInfo {
+    fun søkSamhandlere(navn: String?, postnummer: String?, område: String?, side: Int): SøkSamhandlerInfo {
         val uri = URI.create("$familieOppdragUri/tss/navn")
 
         return kallEksternTjenesteRessurs(
@@ -38,7 +38,7 @@ class SamhandlerKlient(
             uri = uri,
             formål = "Søk samhandler fra TSS"
         ) {
-            postForEntity(uri = uri, SøkSamhandlerInfoRequest(navn, side))
+            postForEntity(uri = uri, SøkSamhandlerInfoRequest(navn, side, postnummer, område))
         }
     }
 }

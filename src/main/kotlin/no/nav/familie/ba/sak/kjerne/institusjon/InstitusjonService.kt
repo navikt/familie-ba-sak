@@ -29,11 +29,11 @@ class InstitusjonService(
         return samhandlerKlient.hentSamhandler(orgNummer)
     }
 
-    fun søkSamhandlere(navn: String): List<SamhandlerInfo> {
+    fun søkSamhandlere(navn: String?, postnummer: String?, område: String?): List<SamhandlerInfo> {
         val komplettSamhandlerListe = mutableListOf<SamhandlerInfo>()
         var side = 0
         do {
-            val søkeresultat = samhandlerKlient.søkSamhandlere(navn, side)
+            val søkeresultat = samhandlerKlient.søkSamhandlere(navn, postnummer, område, side)
             side++
             komplettSamhandlerListe.addAll(søkeresultat.samhandlere)
         } while (søkeresultat.finnesMerInfo)
