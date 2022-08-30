@@ -91,7 +91,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         val andelerTilkjentYtelserEtterEUA =
             TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-                (andelTilkjentytelseForBarn1 + andelTilkjentytelseForBarn2),
+                (andelTilkjentytelseForBarn1.toMutableSet() + andelTilkjentytelseForBarn2.toMutableSet()).toMutableSet(),
                 endretUtbetalingerForBarn1 + endretUtbetalingerForBarn2
             )
 
