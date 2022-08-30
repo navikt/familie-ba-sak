@@ -142,7 +142,7 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = søkerFnr,
             barnasIdenter = listOf(barn1Fnr),
-            barnFødselsdato = LocalDate.of(2002, 7, 1)
+            barnasFødselsdatoer = listOf(LocalDate.of(2002, 7, 1))
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -518,8 +518,7 @@ class BeregningServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barn1Fnr, barn2Fnr),
-            barnFødselsdato = barnFødselsdato
+            barnasIdenter = listOf(barn1Fnr, barn2Fnr)
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -925,7 +924,7 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = søkerFnr,
             barnasIdenter = listOf(barn1Fnr),
-            barnFødselsdato = barnFødselsdato
+            barnasFødselsdatoer = listOf(barnFødselsdato)
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -996,11 +995,7 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = barn1Fnr,
             barnasIdenter = listOf(barn1Fnr),
-            barnFødselsdato = LocalDate.of(
-                2002,
-                7,
-                1
-            )
+            barnasFødselsdatoer = listOf(LocalDate.of(2002, 7, 1))
         )
 
         val periodeFom = LocalDate.now().toYearMonth().minusMonths(1)
