@@ -799,7 +799,7 @@ internal class TilkjentYtelseUtilsTest {
     val november2022 = YearMonth.of(2022, 11)
     val desember2022 = YearMonth.of(2022, 12)
 
-    // Scenario: Far søker om delt bosted - Mor har tidligere mottatt fult utvidet og ordinær barnetrygd
+    // src/test/resources/scenario/Far søker om delt bosted - Mor har tidligere mottatt fult utvidet og ordinær barnetrygd
     @Test
     fun `Skal støtte endret utbetaling som delvis overlapper delt bosted på søker og barn og småbarnstillegg på søker`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
@@ -826,7 +826,7 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
-                    fom = mars2022.toLocalDate(),
+                    fom = mars2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED,
                     aktør = barnFødtAugust2019.aktør
@@ -875,7 +875,7 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Far søker om delt bosted - Mor har tidligere mottatt fult, men har ikke mottatt utvidet
+    // src/test/resources/scenario/Far søker om delt bosted - Mor har tidligere mottatt fult, men har ikke mottatt utvidet
     @Test
     fun `Skal støtte endret utbetaling som kun gjelder barn på delt bosted utbetaling`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
@@ -895,7 +895,7 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
-                    fom = mars2022.toLocalDate(),
+                    fom = mars2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED,
                     aktør = barnFødtAugust2019.aktør
@@ -937,7 +937,7 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles
+    // src/test/resources/scenario/Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles
     @Test
     fun `Skal gi riktig resultat når barnetrygden går over til å være delt, kun småbarnstillegg og utvidet blir delt i første periode`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
@@ -957,13 +957,13 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
-                    fom = februar2022.toLocalDate(),
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = april2022.toLocalDate().sisteDagIMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtAugust2019.aktør
                 ),
                 AtypiskVilkår(
-                    fom = mai2022.toLocalDate(),
+                    fom = mai2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtAugust2019.aktør,
                     utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED
@@ -971,7 +971,7 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
-                    fom = mai2022.toLocalDate(),
+                    fom = mai2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                     aktør = søker.aktør
                 )
@@ -1016,7 +1016,7 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(barnasAndeler[2].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles 2
+    // src/test/resources/scenario/Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles 2
     @Test
     fun `Delt, utvidet og ordinær barnetrygd deles fra juni, men skal utbetales fult fra juni til og med juli - deles som vanlig fra August`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
@@ -1043,13 +1043,13 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
-                    fom = februar2022.toLocalDate(),
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = april2022.toLocalDate().sisteDagIMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtAugust2019.aktør
                 ),
                 AtypiskVilkår(
-                    fom = mai2022.toLocalDate(),
+                    fom = mai2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtAugust2019.aktør,
                     utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED
@@ -1057,7 +1057,7 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
-                    fom = februar2022.toLocalDate(),
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                     aktør = søker.aktør
                 )
@@ -1107,7 +1107,7 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(barnasAndeler[2].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Far søker om utvidet barnetrygd - Har full overgangsstønad, men søker sent og får ikke etterbetalt mer enn 3år
+    // src/test/resources/scenario/Far søker om utvidet barnetrygd - Har full overgangsstønad, men søker sent og får ikke etterbetalt mer enn 3år
     @Test
     fun `Småbarnstillleg, utvidet og ordinær barnetrygd fra april, men skal ikke utbetales før august på grunn av etterbetaling 3 år`() {
         val barnFødtAugust2016 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 8, 15))
@@ -1132,7 +1132,7 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
-                    fom = mars2019.toLocalDate(),
+                    fom = mars2019.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtAugust2016.aktør
@@ -1180,7 +1180,7 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Far har mottatt delt utvidet barnetrygd for barn 12år - Søker nå om barnetrygd for barn som flyttet til han for over 3 år siden
+    // src/test/resources/scenario/Far har mottatt delt utvidet barnetrygd for barn 12år - Søker nå om barnetrygd for barn som flyttet til han for over 3 år siden
     @Test
     fun `Det er småbarnstillegg på søker og ordinær barnetrygd på barn 1 fra april, men det skal ikke utbetales før august på grunn av etterbetaling 3 år - Søker og barn 2 har utbetalinger fra tidligere behandlinger som ikke skal overstyres`() {
         val barnFødtAugust2016 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 8, 15))
@@ -1200,13 +1200,13 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
-                    fom = mars2019.toLocalDate(),
+                    fom = mars2019.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtAugust2016.aktør
                 ),
                 AtypiskVilkår(
-                    fom = januar2019.toLocalDate(),
+                    fom = januar2019.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtDesember2006.aktør,
@@ -1215,7 +1215,7 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
-                    fom = februar2019.toLocalDate(),
+                    fom = februar2019.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                     aktør = søker.aktør
@@ -1275,7 +1275,7 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(barn2Andeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Far søker om utvidet barnetrygd for barn under 3 år - han har full overgangsstlnad for bare deler av perioden
+    // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3 år - han har full overgangsstlnad for bare deler av perioden
     @Test
     fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
@@ -1284,7 +1284,7 @@ internal class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
-                    fom = februar2022.toLocalDate(),
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtAugust2019.aktør
@@ -1292,8 +1292,8 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
-                    fom = januar2022.toLocalDate(),
-                    tom = august2022.toLocalDate(),
+                    fom = januar2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = august2022.toLocalDate().sisteDagIMåned(),
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                     aktør = søker.aktør
                 )
@@ -1327,7 +1327,7 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Far søker om utvidet barnetrygd for barn under 3år, men oppfyller vilkårene kun tilbake i tid
+    // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3år, men oppfyller vilkårene kun tilbake i tid
     @Test
     fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen - Overgangsstønaden stopper før barn fyller 3 år fordi søker ikke lenger har rett til utvidet barnetrygd`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
@@ -1336,7 +1336,7 @@ internal class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
-                    fom = februar2022.toLocalDate(),
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtAugust2019.aktør
@@ -1344,7 +1344,7 @@ internal class TilkjentYtelseUtilsTest {
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
-                    fom = januar2022.toLocalDate(),
+                    fom = januar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = juni2022.toLocalDate().sisteDagIMåned(),
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                     aktør = søker.aktør
@@ -1380,7 +1380,7 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
     }
 
-    // Scenario: Far søker om utvidet barnetrygd for barn under 3 år - Har full overgangsstønad som opphører når barnet fyller 3 år
+    // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3 år - Har full overgangsstønad som opphører når barnet fyller 3 år
     @Test
     fun `Skal gi riktig resultat når søker har rett på ordinær og utvidet barnetrygd fra mars og rett på overgangsstønad fra April`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
@@ -1390,7 +1390,7 @@ internal class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
-                    fom = februar2022.toLocalDate(),
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtAugust2019.aktør
