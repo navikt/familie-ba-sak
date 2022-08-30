@@ -23,7 +23,7 @@ data class MinimertVedtaksperiode(
 
     val ytelseTyperForPeriode = minimerteUtbetalingsperiodeDetaljer.map { it.ytelseType }.toSet()
     fun finnEndredeAndelerISammePeriode(
-        endretUtbetalingAndeler: List<MinimertEndretAndel>,
+        endretUtbetalingAndeler: List<MinimertEndretAndel>
     ) = endretUtbetalingAndeler.filter {
         it.erOverlappendeMed(
             NullableMånedPeriode(

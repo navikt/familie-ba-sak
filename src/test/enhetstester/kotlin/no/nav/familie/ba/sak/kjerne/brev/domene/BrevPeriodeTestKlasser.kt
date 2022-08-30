@@ -231,29 +231,33 @@ data class EØSBegrunnelseTestConfig(
             this.barnetsBostedsland != null &&
             this.annenForeldersAktivitetsland != null &&
             this.sokersAktivitet != null
-        ) EØSBegrunnelseMedKompetanseData(
-            apiNavn = this.apiNavn,
-            annenForeldersAktivitet = this.annenForeldersAktivitet,
-            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
-            barnetsBostedsland = this.barnetsBostedsland,
-            barnasFodselsdatoer = this.barnasFodselsdatoer,
-            antallBarn = this.antallBarn,
-            maalform = this.maalform,
-            vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
-                .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
-                ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
-            sokersAktivitet = this.sokersAktivitet,
-            gjelderSøker = this.gjelderSoker
-        ) else EØSBegrunnelseData(
-            apiNavn = this.apiNavn,
-            barnasFodselsdatoer = this.barnasFodselsdatoer,
-            antallBarn = this.antallBarn,
-            maalform = this.maalform,
-            vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
-                .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
-                ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
-            gjelderSøker = this.gjelderSoker
-        )
+        ) {
+            EØSBegrunnelseMedKompetanseData(
+                apiNavn = this.apiNavn,
+                annenForeldersAktivitet = this.annenForeldersAktivitet,
+                annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
+                barnetsBostedsland = this.barnetsBostedsland,
+                barnasFodselsdatoer = this.barnasFodselsdatoer,
+                antallBarn = this.antallBarn,
+                maalform = this.maalform,
+                vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
+                    .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
+                    ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
+                sokersAktivitet = this.sokersAktivitet,
+                gjelderSøker = this.gjelderSoker
+            )
+        } else {
+            EØSBegrunnelseData(
+                apiNavn = this.apiNavn,
+                barnasFodselsdatoer = this.barnasFodselsdatoer,
+                antallBarn = this.antallBarn,
+                maalform = this.maalform,
+                vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
+                    .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
+                    ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
+                gjelderSøker = this.gjelderSoker
+            )
+        }
 }
 
 data class BrevPeriodeOutput(

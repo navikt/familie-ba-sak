@@ -89,13 +89,15 @@ class BrevPeriodeGenerator(
                         val barnIbegrunnelse =
                             if (eøsBegrunnelseMedTriggere.sanityEØSBegrunnelse.skalBrukeVilkårData()) {
                                 barnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode.intersect(kompetanse.personer.toSet())
-                            } else kompetanse.personer
+                            } else {
+                                kompetanse.personer
+                            }
 
                         hentEøsBegrunnelseMedKompetanseData(
                             eøsBegrunnelse = eøsBegrunnelseMedTriggere.eøsBegrunnelse,
                             barnIbegrunnelse = barnIbegrunnelse,
                             gjelderSøker = gjelderSøker,
-                            kompetanse = kompetanse,
+                            kompetanse = kompetanse
                         )
                     }
                 }
@@ -258,7 +260,7 @@ class BrevPeriodeGenerator(
     }
 
     fun hentKompetanserForBegrunnelse(
-        eøsBegrunnelseMedTriggere: EØSBegrunnelseMedTriggere,
+        eøsBegrunnelseMedTriggere: EØSBegrunnelseMedTriggere
     ): List<MinimertKompetanse> {
         val relevanteKompetanser = when (eøsBegrunnelseMedTriggere.eøsBegrunnelse.vedtakBegrunnelseType) {
             VedtakBegrunnelseType.EØS_INNVILGET -> minimerteKompetanserForPeriode
@@ -286,7 +288,7 @@ class BrevPeriodeGenerator(
         eøsBegrunnelse: EØSStandardbegrunnelse,
         barnIbegrunnelse: Collection<MinimertRestPerson>,
         gjelderSøker: Boolean,
-        kompetanse: MinimertKompetanse,
+        kompetanse: MinimertKompetanse
     ) = EØSBegrunnelseMedKompetanseData(
         vedtakBegrunnelseType = eøsBegrunnelse.vedtakBegrunnelseType,
         apiNavn = eøsBegrunnelse.sanityApiNavn,
@@ -310,7 +312,7 @@ class BrevPeriodeGenerator(
         barnasFodselsdatoer = Utils.slåSammen(barnIbegrunnelse.map { it.fødselsdato.tilKortString() }),
         antallBarn = barnIbegrunnelse.size,
         maalform = brevMålform.tilSanityFormat(),
-        gjelderSøker = gjelderSøker,
+        gjelderSøker = gjelderSøker
     )
 
     private fun hentBarnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode(eøsBegrunnelseMedTriggere: EØSBegrunnelseMedTriggere): List<MinimertRestPerson> {

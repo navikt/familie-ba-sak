@@ -55,7 +55,7 @@ fun hentBarnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode(
     eøsBegrunnelse: EØSBegrunnelseMedTriggere,
     minimertePersonResultater: List<MinimertRestPersonResultat>,
     personerPåBehandling: List<MinimertRestPerson>,
-    minimertVedtaksperiode: MinimertVedtaksperiode,
+    minimertVedtaksperiode: MinimertVedtaksperiode
 ): List<MinimertRestPerson> {
     val relevantePersonResultaterForBegrunnelseOgPeriode =
         minimertePersonResultater.filter {
@@ -74,7 +74,7 @@ fun hentBarnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode(
 
 fun MinimertRestPersonResultat.hentVilkårResultaterPasserMedBegrunnelseOgPeriode(
     begrunnelse: SanityEØSBegrunnelse,
-    vedtaksperiode: MinimertVedtaksperiode,
+    vedtaksperiode: MinimertVedtaksperiode
 ): List<MinimertVilkårResultat> {
     val vilkårResultaterSomErRelevanteForVedtaksperiode = when (vedtaksperiode.type) {
         Vedtaksperiodetype.UTBETALING -> emptyList()

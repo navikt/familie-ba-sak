@@ -80,5 +80,5 @@ fun List<SanityEØSBegrunnelse>.finnBegrunnelse(eøsBegrunnelse: EØSStandardbeg
 
 enum class EØSTriggerType {
     KOMPETANSE,
-    VILKÅRSVURDERING,
+    VILKÅRSVURDERING
 }

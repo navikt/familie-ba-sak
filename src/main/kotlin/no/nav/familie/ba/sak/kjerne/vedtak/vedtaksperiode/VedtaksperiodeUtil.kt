@@ -287,17 +287,21 @@ fun hentGyldigeBegrunnelserForPeriode(
         andelerTilkjentYtelse = andelerTilkjentYtelse
     )
 
-    val eøsBegrunnelser = if (kanBehandleEØS) hentGyldigeEØSBegrunnelserForPeriode(
-        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-        kompetanserIPeriode = kompetanserIPeriode,
-        kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
-        minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-        minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
-            sanityBegrunnelser = sanityBegrunnelser,
-            sanityEØSBegrunnelser = sanityEØSBegrunnelser
-        ),
-        personerPåBehandling = persongrunnlag.søkerOgBarn.map { it.tilMinimertPerson() },
-    ) else emptyList()
+    val eøsBegrunnelser = if (kanBehandleEØS) {
+        hentGyldigeEØSBegrunnelserForPeriode(
+            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+            kompetanserIPeriode = kompetanserIPeriode,
+            kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
+            minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+            minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
+                sanityBegrunnelser = sanityBegrunnelser,
+                sanityEØSBegrunnelser = sanityEØSBegrunnelser
+            ),
+            personerPåBehandling = persongrunnlag.søkerOgBarn.map { it.tilMinimertPerson() }
+        )
+    } else {
+        emptyList()
+    }
 
     return standardbegrunnelser + eøsBegrunnelser
 }
@@ -344,7 +348,7 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
     kompetanserSomStopperRettFørPeriode: List<Kompetanse>,
     minimertePersonResultater: List<MinimertRestPersonResultat>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
-    personerPåBehandling: List<MinimertRestPerson>,
+    personerPåBehandling: List<MinimertRestPerson>
 ) = EØSStandardbegrunnelse.values()
     .mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }
     .filter { begrunnelse ->
@@ -359,7 +363,7 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
                 begrunnelse,
                 minimertePersonResultater,
                 personerPåBehandling,
-                minimertVedtaksperiode,
+                minimertVedtaksperiode
             ).isNotEmpty()
 
         val skalBrukeKompetanseData = begrunnelse.sanityEØSBegrunnelse.skalBrukeKompetanseData()

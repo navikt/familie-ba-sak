@@ -14,7 +14,7 @@ fun lagMinimertVedtaksperiode(
     begrunnelser: List<BegrunnelseMedTriggere> = emptyList(),
     eøsBegrunnelser: List<EØSBegrunnelseMedTriggere> = emptyList(),
     fritekster: List<String> = emptyList(),
-    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList(),
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList()
 ) = MinimertVedtaksperiode(
     fom = fom,
     tom = tom,
@@ -22,5 +22,5 @@ fun lagMinimertVedtaksperiode(
     begrunnelser = begrunnelser,
     eøsBegrunnelser = eøsBegrunnelser,
     fritekster = fritekster,
-    minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+    minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer
 )
