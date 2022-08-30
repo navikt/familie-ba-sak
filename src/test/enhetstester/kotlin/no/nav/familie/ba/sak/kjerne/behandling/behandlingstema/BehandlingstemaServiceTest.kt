@@ -50,7 +50,7 @@ class BehandlingstemaServiceTest {
         oppgaveService = oppgaveService,
         vilkårsvurderingTidslinjeService = tidslinjeService,
         vilkårsvurderingRepository = vilkårsvurderingRepository,
-        featureToggleService = featureToggleService,
+        featureToggleService = featureToggleService
     )
     val defaultFagsak = defaultFagsak()
     val defaultBehandling = lagBehandling(defaultFagsak)
@@ -65,7 +65,7 @@ class BehandlingstemaServiceTest {
     fun `Skal utlede EØS dersom minst ett vilkår i har blitt behandlet i inneværende behandling`() {
         val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling,
+            behandling = defaultBehandling
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -95,7 +95,7 @@ class BehandlingstemaServiceTest {
     fun `Skal utlede NASJONAL dersom EØS vilkåret ble behandlet i annen behandling`() {
         val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling,
+            behandling = defaultBehandling
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -124,7 +124,7 @@ class BehandlingstemaServiceTest {
     @Test
     fun `Skal utlede UTVIDET dersom minst ett vilkår i har blitt behandlet i inneværende behandling`() {
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling,
+            behandling = defaultBehandling
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -152,7 +152,7 @@ class BehandlingstemaServiceTest {
     fun `Skal utlede ORDINÆR dersom UTVIDET vilkåret ble behandlet i annen behandling`() {
         val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling,
+            behandling = defaultBehandling
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -162,7 +162,7 @@ class BehandlingstemaServiceTest {
                     vilkår = Vilkår.UTVIDET_BARNETRYGD,
                     vilkårRegelverk = Regelverk.NASJONALE_REGLER,
                     behandlingId = 0L
-                ),
+                )
             )
         )
         vilkårsvurdering.personResultater = setOf(personResultat)

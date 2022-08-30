@@ -18,7 +18,8 @@ fun VilkårResultat.tilPeriode(): Periode<VilkårRegelverkResultat, Dag> {
     val fom = periodeFom.tilTidspunktEllerTidligereEnn(periodeTom)
     val tom = periodeTom.tilTidspunktEllerSenereEnn(periodeFom)
     return Periode(
-        fom, tom,
+        fom,
+        tom,
         VilkårRegelverkResultat(
             vilkår = vilkårType,
             regelverkResultat = this.tilRegelverkResultat()

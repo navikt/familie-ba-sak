@@ -54,7 +54,7 @@ internal class Autobrev6og18ÅrServiceTest {
         vedtakService = vedtakService,
         infotrygdService = infotrygdService,
         vedtaksperiodeService = vedtaksperiodeService,
-        taskRepository = taskRepository,
+        taskRepository = taskRepository
     )
 
     private val autobrev6og18ÅrService = Autobrev6og18ÅrService(
@@ -200,8 +200,10 @@ internal class Autobrev6og18ÅrServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
-            barnFødselsdato = LocalDate.now()
-                .minusYears(alder)
+            barnasFødselsdatoer = listOf(
+                LocalDate.now()
+                    .minusYears(alder)
+            )
         )
     }
 }

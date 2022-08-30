@@ -72,7 +72,9 @@ class IntegrasjonClientMock {
              */
             if (isMockKMock(mockIntegrasjonClient)) {
                 clearMocks(mockIntegrasjonClient)
-            } else return
+            } else {
+                return
+            }
 
             every { mockIntegrasjonClient.hentJournalpost(any()) } returns lagTestJournalpost(
                 søkerFnr[0],
@@ -171,10 +173,11 @@ class IntegrasjonClientMock {
             every {
                 mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(capture(idSlot))
             } answers {
-                if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR))
+                if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)) {
                     Tilgang(false, null)
-                else
+                } else {
                     Tilgang(true, null)
+                }
             }
         }
 
@@ -212,7 +215,7 @@ class IntegrasjonClientMock {
 
         data class LandkodeISO2(
             val code: String,
-            val name: String,
+            val name: String
         )
 
         fun hentLandkoderISO2(): Map<String, String> {

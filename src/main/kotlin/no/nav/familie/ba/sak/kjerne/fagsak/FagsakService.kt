@@ -60,7 +60,7 @@ class FagsakService(
     private val skyggesakService: SkyggesakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
-    private val taskRepository: TaskRepository,
+    private val taskRepository: TaskRepository
 ) {
 
     private val antallFagsakerOpprettetFraManuell =
@@ -69,12 +69,13 @@ class FagsakService(
         Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "automatisk")
 
     @Transactional
-    fun oppdaterLøpendeStatusPåFagsaker() {
+    fun oppdaterLøpendeStatusPåFagsaker(): Int {
         val fagsaker = fagsakRepository.finnFagsakerSomSkalAvsluttes()
         for (fagsakId in fagsaker) {
             val fagsak = fagsakRepository.getById(fagsakId)
             oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
         }
+        return fagsaker.size
     }
 
     @Transactional
@@ -96,12 +97,11 @@ class FagsakService(
     fun hentEllerOpprettFagsak(
         personIdent: String,
         fraAutomatiskBehandling: Boolean = false,
-        type: FagsakType = FagsakType.NORMAL,
+        type: FagsakType = FagsakType.NORMAL
     ): Fagsak {
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
         var fagsak = fagsakRepository.finnFagsakForAktør(aktør, type)
         if (fagsak == null) {
-
             fagsak = lagre(Fagsak(aktør = aktør, type = type))
             if (fraAutomatiskBehandling) {
                 antallFagsakerOpprettetFraAutomatisk.increment()
@@ -138,18 +138,29 @@ class FagsakService(
         lagre(fagsak)
     }
 
-    fun hentMinimalFagsakForPerson(aktør: Aktør, fagsakType: FagsakType = FagsakType.NORMAL): Ressurs<RestMinimalFagsak> {
+    fun hentMinimalFagsakForPerson(
+        aktør: Aktør,
+        fagsakType: FagsakType = FagsakType.NORMAL
+    ): Ressurs<RestMinimalFagsak> {
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør, fagsakType)
-        return if (fagsak != null) Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id)) else Ressurs.failure(
-            errorMessage = "Fant ikke fagsak på person"
-        )
+        return if (fagsak != null) {
+            Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id))
+        } else {
+            Ressurs.failure(
+                errorMessage = "Fant ikke fagsak på person"
+            )
+        }
     }
 
     fun hentMinimalFagsakerForPerson(aktør: Aktør): Ressurs<List<RestMinimalFagsak>> {
         val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør)
-        return if (!fagsaker.isEmpty()) Ressurs.success(data = lagRestMinimalFagsaker(fagsaker)) else Ressurs.failure(
-            errorMessage = "Fant ikke fagsaker på person"
-        )
+        return if (!fagsaker.isEmpty()) {
+            Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
+        } else {
+            Ressurs.failure(
+                errorMessage = "Fant ikke fagsaker på person"
+            )
+        }
     }
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
@@ -211,10 +222,11 @@ class FagsakService(
             søkerFødselsnummer = fagsak.aktør.aktivFødselsnummer(),
             status = fagsak.status,
             underBehandling =
-            if (aktivBehandling == null)
+            if (aktivBehandling == null) {
                 false
-            else
-                aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET),
+            } else {
+                aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET)
+            },
             løpendeKategori = behandlingstemaService.hentLøpendeKategori(fagsakId = fagsakId),
             løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsakId),
             gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
@@ -276,9 +288,9 @@ class FagsakService(
 
         val erBarn = Period.between(personInfoMedRelasjoner.fødselsdato, LocalDate.now()).years < 18
 
-        if (assosierteFagsakDeltagere.find { it.ident == aktør.aktivFødselsnummer() } == null) {
-            val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).ifEmpty { listOf(null) }
-            fagsaker.forEach { fagsak ->
+        val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).ifEmpty { listOf(null) }
+        fagsaker.forEach { fagsak ->
+            if (assosierteFagsakDeltagere.find { it.ident == aktør.aktivFødselsnummer() && it.fagsakId == fagsak?.id } == null) {
                 assosierteFagsakDeltagere.add(
                     RestFagsakDeltager(
                         navn = personInfoMedRelasjoner.navn,
@@ -308,7 +320,6 @@ class FagsakService(
                     if (maskertForelder != null) {
                         assosierteFagsakDeltagere.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
                     } else {
-
                         val forelderInfo = runCatching {
                             personopplysningerService.hentPersoninfoEnkel(relasjon.aktør)
                         }.fold(
@@ -368,7 +379,12 @@ class FagsakService(
                         assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
                             navn = personInfoMedRelasjoner.navn,
                             ident = behandling.fagsak.aktør.aktivFødselsnummer(),
-                            rolle = FagsakDeltagerRolle.FORELDER,
+                            rolle =
+                            if (behandling.fagsak.type == FagsakType.NORMAL) {
+                                FagsakDeltagerRolle.FORELDER
+                            } else {
+                                FagsakDeltagerRolle.UKJENT
+                            },
                             kjønn = personInfoMedRelasjoner.kjønn,
                             fagsakId = behandling.fagsak.id,
                             fagsakType = behandling.fagsak.type
@@ -378,7 +394,10 @@ class FagsakService(
                             hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.aktør)
                         if (maskertForelder != null) {
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] =
-                                maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER, fagsakType = behandling.fagsak.type)
+                                maskertForelder.copy(
+                                    rolle = FagsakDeltagerRolle.FORELDER,
+                                    fagsakType = behandling.fagsak.type
+                                )
                         } else {
                             val personinfo =
                                 runCatching {
@@ -418,7 +437,9 @@ class FagsakService(
                 adressebeskyttelseGradering = adressebeskyttelse,
                 harTilgang = false
             )
-        } else null
+        } else {
+            null
+        }
     }
 
     fun oppgiFagsakdeltagere(aktør: Aktør, barnasAktørId: List<Aktør>): List<RestFagsakDeltager> {

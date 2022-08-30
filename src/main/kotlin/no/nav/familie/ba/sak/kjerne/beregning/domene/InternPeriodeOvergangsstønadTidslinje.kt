@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTids
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
 
 open class InternPeriodeOvergangsstønadTidslinje(
-    private val internePeriodeOvergangsstønader: List<InternPeriodeOvergangsstønad>,
+    private val internePeriodeOvergangsstønader: List<InternPeriodeOvergangsstønad>
 ) : Tidslinje<InternPeriodeOvergangsstønad, Dag>() {
 
     override fun lagPerioder(): List<Periode<InternPeriodeOvergangsstønad, Dag>> {

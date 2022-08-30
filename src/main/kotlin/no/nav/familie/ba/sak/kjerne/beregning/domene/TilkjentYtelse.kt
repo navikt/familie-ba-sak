@@ -39,7 +39,8 @@ data class TilkjentYtelse(
     )
     val id: Long = 0,
 
-    @OneToOne(optional = false) @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
 
     @Column(name = "stonad_fom", nullable = true, columnDefinition = "DATE")

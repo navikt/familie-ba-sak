@@ -17,7 +17,6 @@ abstract class Tidslinje<I, T : Tidsenhet> {
     protected abstract fun lagPerioder(): Collection<Periode<I, T>>
 
     protected open fun valider(perioder: List<Periode<I, T>>) {
-
         val feilInnenforPerioder = perioder.map {
             when {
                 it.fraOgMed > it.tilOgMed ->
@@ -61,8 +60,9 @@ abstract class Tidslinje<I, T : Tidsenhet> {
     override fun equals(other: Any?): Boolean {
         return if (other is Tidslinje<*, *>) {
             perioder() == other.perioder()
-        } else
+        } else {
             false
+        }
     }
 
     override fun toString(): String =
@@ -72,14 +72,14 @@ abstract class Tidslinje<I, T : Tidsenhet> {
         data class TidslinjeFeil(
             val type: TidslinjeFeilType,
             val periode: Periode<*, *>,
-            val tidslinje: Tidslinje<*, *>,
+            val tidslinje: Tidslinje<*, *>
         )
 
         enum class TidslinjeFeilType {
             UENDELIG_FORTID_ETTER_FØRSTE_PERIODE,
             UENDELIG_FREMTID_FØR_SISTE_PERIODE,
             TOM_ER_FØR_FOM,
-            OVERLAPPER_ETTERFØLGENDE_PERIODE,
+            OVERLAPPER_ETTERFØLGENDE_PERIODE
         }
 
         data class TidslinjeFeilException(val tidslinjeFeil: Collection<TidslinjeFeil>) :

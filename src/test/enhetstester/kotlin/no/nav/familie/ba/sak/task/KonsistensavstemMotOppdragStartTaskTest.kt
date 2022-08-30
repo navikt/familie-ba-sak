@@ -25,7 +25,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         val payload = objectMapper.writeValueAsString(
             KonsistensavstemmingStartTaskDTO(
                 batchId = batchId,
-                avstemmingdato = avstemmingdato,
+                avstemmingdato = avstemmingdato
             )
         )
         val task = Task(payload = payload, type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE)

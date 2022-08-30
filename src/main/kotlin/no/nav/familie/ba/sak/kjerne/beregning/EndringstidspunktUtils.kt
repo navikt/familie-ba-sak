@@ -20,7 +20,7 @@ import java.time.YearMonth
 
 enum class BehandlingAlder {
     NY,
-    GAMMEL,
+    GAMMEL
 }
 
 typealias Beløpsdifferanse = Int
@@ -30,17 +30,17 @@ data class AndelTilkjentYtelseDataForÅKalkulereEndring(
     val aktørId: AktørId,
     val kalkulertBeløp: Int,
     val endretUtbetalingÅrsaker: List<Årsak>,
-    val behandlingAlder: BehandlingAlder,
+    val behandlingAlder: BehandlingAlder
 )
 
 fun List<AndelTilkjentYtelse>.hentFørsteEndringstidspunkt(
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ): LocalDate? = this.hentPerioderMedEndringerFra(forrigeAndelerTilkjentYtelse)
     .mapNotNull { (_, tidslinjeMedDifferanserPåPerson) -> tidslinjeMedDifferanserPåPerson.minOfOrNull { it.fom } }
     .minOfOrNull { it }
 
 fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ): Map<AktørId, LocalDateTimeline<Beløpsdifferanse>> {
     val andelerTidslinje = this.hentTidslinjerForPersoner(BehandlingAlder.NY)
     val forrigeAndelerTidslinje =
@@ -90,7 +90,9 @@ private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>
             this.localDateInterval,
             hentBeløpsendringPåPersonISegment(this.value)
         )
-    } else null
+    } else {
+        null
+    }
 }
 
 private fun erEndringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet: List<AndelTilkjentYtelseDataForÅKalkulereEndring>): Boolean {
@@ -118,7 +120,6 @@ private fun List<AndelTilkjentYtelseDataForÅKalkulereEndring>.finnKalkulertBel�
 
 private fun List<AndelTilkjentYtelse>.hentTidslinjerForPersoner(behandlingAlder: BehandlingAlder):
     Map<String, LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring>> {
-
     return this.groupBy { it.aktør.aktørId }
         .map { (aktørId, andeler) ->
             if (andeler.any { it.erSøkersAndel() }) {
@@ -127,7 +128,9 @@ private fun List<AndelTilkjentYtelse>.hentTidslinjerForPersoner(behandlingAlder:
                     behandlingAlder = behandlingAlder,
                     aktørId = aktørId
                 )
-            } else aktørId to andeler.hentTidslinje(behandlingAlder)
+            } else {
+                aktørId to andeler.hentTidslinje(behandlingAlder)
+            }
         }.toMap()
 }
 
@@ -142,7 +145,7 @@ private fun List<AndelTilkjentYtelse>.hentTidslinje(
                 aktørId = it.aktør.aktørId,
                 kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
                 endretUtbetalingÅrsaker = it.endretUtbetalingAndeler.mapNotNull { endretUtbetalingAndel -> endretUtbetalingAndel.årsak },
-                behandlingAlder = behandlingAlder,
+                behandlingAlder = behandlingAlder
             )
         )
     }

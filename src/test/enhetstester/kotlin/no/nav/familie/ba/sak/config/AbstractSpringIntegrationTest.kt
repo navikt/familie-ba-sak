@@ -13,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration
 @SpringBootTest
 @ActiveProfiles(
     "postgres",
+    "integrasjonstest",
     "mock-økonomi",
     "mock-pdl",
     "mock-ident-client",
@@ -22,7 +23,7 @@ import org.springframework.test.context.ContextConfiguration
     "mock-brev-klient",
     "mock-infotrygd-feed",
     "mock-oauth",
-    "mock-rest-template-config",
+    "mock-rest-template-config"
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

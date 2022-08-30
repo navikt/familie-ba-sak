@@ -19,7 +19,7 @@ import java.time.YearMonth
  */
 data class UtbetalingsperiodeMal(
     val vedtak: Vedtak,
-    val erEndringPåEksisterendePeriode: Boolean = false,
+    val erEndringPåEksisterendePeriode: Boolean = false
 ) {
 
     /**
@@ -42,10 +42,14 @@ data class UtbetalingsperiodeMal(
     ): Utbetalingsperiode =
         Utbetalingsperiode(
             erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
-            opphør = if (erEndringPåEksisterendePeriode) Opphør(
-                opphørKjedeFom?.førsteDagIInneværendeMåned()
-                    ?: error("Mangler opphørsdato for kjede")
-            ) else null,
+            opphør = if (erEndringPåEksisterendePeriode) {
+                Opphør(
+                    opphørKjedeFom?.førsteDagIInneværendeMåned()
+                        ?: error("Mangler opphørsdato for kjede")
+                )
+            } else {
+                null
+            },
             forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() },
             periodeId = periodeIdOffset.toLong(),
             datoForVedtak = vedtak.vedtaksdato?.toLocalDate() ?: now(),

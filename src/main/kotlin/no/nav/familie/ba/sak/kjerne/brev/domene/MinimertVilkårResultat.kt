@@ -16,7 +16,7 @@ data class MinimertVilkårResultat(
     val periodeTom: LocalDate?,
     val resultat: Resultat,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
-    val erEksplisittAvslagPåSøknad: Boolean?,
+    val erEksplisittAvslagPåSøknad: Boolean?
 ) {
 
     fun toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
@@ -61,5 +61,5 @@ fun VilkårResultat.tilMinimertVilkårResultat() =
         periodeTom = this.periodeTom,
         resultat = this.resultat,
         utdypendeVilkårsvurderinger = this.utdypendeVilkårsvurderinger,
-        erEksplisittAvslagPåSøknad = this.erEksplisittAvslagPåSøknad,
+        erEksplisittAvslagPåSøknad = this.erEksplisittAvslagPåSøknad
     )

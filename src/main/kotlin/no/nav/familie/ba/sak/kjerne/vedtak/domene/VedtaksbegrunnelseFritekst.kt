@@ -27,17 +27,18 @@ class VedtaksbegrunnelseFritekst(
     val id: Long = 0,
 
     @JsonIgnore
-    @ManyToOne @JoinColumn(name = "fk_vedtaksperiode_id")
+    @ManyToOne
+    @JoinColumn(name = "fk_vedtaksperiode_id")
     val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
 
     @Column(name = "fritekst", updatable = false)
-    val fritekst: String,
+    val fritekst: String
 ) {
 
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksbegrunnelseFritekst =
         VedtaksbegrunnelseFritekst(
             vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-            fritekst = this.fritekst,
+            fritekst = this.fritekst
         )
 
     override fun toString(): String {

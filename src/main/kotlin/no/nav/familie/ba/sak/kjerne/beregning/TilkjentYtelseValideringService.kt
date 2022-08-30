@@ -37,7 +37,7 @@ class TilkjentYtelseValideringService(
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
                 barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-                personopplysningGrunnlag = personopplysningGrunnlag,
+                personopplysningGrunnlag = personopplysningGrunnlag
             )
         }
     }
@@ -52,7 +52,6 @@ class TilkjentYtelseValideringService(
     fun finnAktørerMedUgyldigEtterbetalingsperiode(
         behandlingId: Long
     ): List<Aktør> {
-
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
         val forrigeBehandling =

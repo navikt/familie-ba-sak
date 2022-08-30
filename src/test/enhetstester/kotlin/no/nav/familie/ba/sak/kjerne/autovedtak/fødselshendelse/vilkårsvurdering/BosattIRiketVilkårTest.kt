@@ -92,7 +92,7 @@ class BosattIRiketVilkårTest {
                         angittFlyttedato = LocalDate.parse("2020-06-08")
                     ),
                     søker
-                ),
+                )
             )
         }
 
@@ -119,10 +119,10 @@ class BosattIRiketVilkårTest {
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.parse("2011-06-02"),
+                        angittFlyttedato = LocalDate.parse("2011-06-02")
                     ),
                     søker
-                ),
+                )
             )
         }
 
@@ -143,16 +143,16 @@ class BosattIRiketVilkårTest {
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
                         angittFlyttedato = LocalDate.now().minusMonths(3),
-                        gyldigTilOgMed = LocalDate.now().minusMonths(2),
+                        gyldigTilOgMed = LocalDate.now().minusMonths(2)
                     ),
                     søker
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.now().minusMonths(1),
+                        angittFlyttedato = LocalDate.now().minusMonths(1)
                     ),
                     søker
-                ),
+                )
             )
         }
 
@@ -172,10 +172,10 @@ class BosattIRiketVilkårTest {
             bostedsadresser = mutableListOf(
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.now().minusMonths(3),
+                        angittFlyttedato = LocalDate.now().minusMonths(3)
                     ),
                     søker
-                ),
+                )
             )
         }
 
@@ -196,10 +196,10 @@ class BosattIRiketVilkårTest {
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
                         angittFlyttedato = LocalDate.now().minusMonths(7),
-                        gyldigTilOgMed = LocalDate.now().minusMonths(2),
+                        gyldigTilOgMed = LocalDate.now().minusMonths(2)
                     ),
                     søker
-                ),
+                )
             )
         }
 
@@ -219,16 +219,16 @@ class BosattIRiketVilkårTest {
             bostedsadresser = mutableListOf(
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = null,
+                        angittFlyttedato = null
                     ),
                     søker
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.now().minusMonths(7),
+                        angittFlyttedato = LocalDate.now().minusMonths(7)
                     ),
                     søker
-                ),
+                )
             )
         }
 
@@ -248,7 +248,7 @@ class BosattIRiketVilkårTest {
             bostedsadresser = mutableListOf(
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = null,
+                        angittFlyttedato = null
                     ),
                     søker
                 )
@@ -272,22 +272,22 @@ class BosattIRiketVilkårTest {
             bostedsadresser = mutableListOf(
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = null,
+                        angittFlyttedato = null
                     ),
                     søker
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = null,
+                        angittFlyttedato = null
                     ),
                     søker
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.now().minusMonths(3),
+                        angittFlyttedato = LocalDate.now().minusMonths(3)
                     ),
                     søker
-                ),
+                )
             )
         }
 

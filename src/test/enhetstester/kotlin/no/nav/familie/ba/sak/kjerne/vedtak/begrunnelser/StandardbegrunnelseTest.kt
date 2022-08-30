@@ -44,7 +44,7 @@ internal class StandardbegrunnelseTest {
     private val barn = tilfeldigPerson(personType = PersonType.BARN)
     private val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
         type = Vedtaksperiodetype.UTBETALING,
-        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
+        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
     )
     private val vilkårsvurdering =
         lagVilkårsvurdering(søker.aktør, lagBehandling(), Resultat.OPPFYLT)
@@ -122,7 +122,7 @@ internal class StandardbegrunnelseTest {
         val minimertePersoner =
             listOf(
                 lagMinimertPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(6)),
-                lagMinimertPerson(type = PersonType.SØKER),
+                lagMinimertPerson(type = PersonType.SØKER)
             )
 
         assertTrue(
@@ -149,7 +149,7 @@ internal class StandardbegrunnelseTest {
         val vedtaksperiodeMedBegrunnelserSatsEndring = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.of(2021, 9, 1),
             type = Vedtaksperiodetype.UTBETALING,
-            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
         )
 
         assertTrue(
@@ -176,7 +176,7 @@ internal class StandardbegrunnelseTest {
         val vedtaksperiodeMedBegrunnelserSatsEndring = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.of(2021, 8, 1),
             type = Vedtaksperiodetype.UTBETALING,
-            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
         )
 
         assertFalse(
@@ -465,7 +465,7 @@ internal class StandardbegrunnelseTest {
         var dødsfallDatoBarn2 = LocalDate.of(2022, 7, 2)
         var barnIBehandling = listOf(lagMinimertPerson(dødsfallsdato = dødsfallDatoBarn1, aktivPersonIdent = barn1Fnr), lagMinimertPerson(dødsfallsdato = dødsfallDatoBarn2, aktivPersonIdent = barn2Fnr))
         var ytelserForrigePeriode = listOf(
-            lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDatoBarn1.minusMonths(1).year, dødsfallDatoBarn1.minusMonths(1).month), tom = YearMonth.of(dødsfallDatoBarn1.year, dødsfallDatoBarn1.month), aktør = Aktør(barn1Fnr + "00").also { it.personidenter.add(Personident(barn1Fnr, it)) }),
+            lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDatoBarn1.minusMonths(1).year, dødsfallDatoBarn1.minusMonths(1).month), tom = YearMonth.of(dødsfallDatoBarn1.year, dødsfallDatoBarn1.month), aktør = Aktør(barn1Fnr + "00").also { it.personidenter.add(Personident(barn1Fnr, it)) })
         )
 
         var dødeBarnForrigePeriode = dødeBarnForrigePeriode(ytelserForrigePeriode, barnIBehandling)
@@ -479,7 +479,7 @@ internal class StandardbegrunnelseTest {
         )
 
         ytelserForrigePeriode = listOf(
-            lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDatoBarn1.minusMonths(1).year, dødsfallDatoBarn1.minusMonths(1).month), tom = YearMonth.of(dødsfallDatoBarn2.year, dødsfallDatoBarn2.month), aktør = Aktør(barn2Fnr + "00").also { it.personidenter.add(Personident(barn2Fnr, it)) }),
+            lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDatoBarn1.minusMonths(1).year, dødsfallDatoBarn1.minusMonths(1).month), tom = YearMonth.of(dødsfallDatoBarn2.year, dødsfallDatoBarn2.month), aktør = Aktør(barn2Fnr + "00").also { it.personidenter.add(Personident(barn2Fnr, it)) })
         )
 
         dødeBarnForrigePeriode = dødeBarnForrigePeriode(ytelserForrigePeriode, barnIBehandling)
@@ -501,7 +501,9 @@ internal class StandardbegrunnelseTest {
         ytelserForrigePeriode = listOf(
             lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDatoBarn1.minusMonths(1).year, dødsfallDatoBarn1.minusMonths(1).month), tom = YearMonth.of(dødsfallDatoBarn1.year, dødsfallDatoBarn1.month), aktør = Aktør(barn1Fnr + "00").also { it.personidenter.add(Personident(barn1Fnr, it)) }),
             lagAndelTilkjentYtelse(
-                fom = YearMonth.of(dødsfallDatoBarn2.minusMonths(1).year, dødsfallDatoBarn2.minusMonths(1).month), tom = YearMonth.of(dødsfallDatoBarn2.year, dødsfallDatoBarn2.month), aktør = Aktør(barn2Fnr + "00").also { it.personidenter.add(Personident(barn2Fnr, it)) }
+                fom = YearMonth.of(dødsfallDatoBarn2.minusMonths(1).year, dødsfallDatoBarn2.minusMonths(1).month),
+                tom = YearMonth.of(dødsfallDatoBarn2.year, dødsfallDatoBarn2.month),
+                aktør = Aktør(barn2Fnr + "00").also { it.personidenter.add(Personident(barn2Fnr, it)) }
             )
         )
 

@@ -49,7 +49,7 @@ data class Fagsak(
     val type: FagsakType = FagsakType.NORMAL,
 
     @Column(name = "arkivert", nullable = false)
-    var arkivert: Boolean = false,
+    var arkivert: Boolean = false
 ) : BaseEntitet() {
 
     override fun hashCode(): Int {
@@ -81,5 +81,5 @@ enum class FagsakStatus {
 enum class FagsakType {
     NORMAL,
     BARN_ENSLIG_MINDREÅRIG,
-    INSTITUSJON,
+    INSTITUSJON
 }

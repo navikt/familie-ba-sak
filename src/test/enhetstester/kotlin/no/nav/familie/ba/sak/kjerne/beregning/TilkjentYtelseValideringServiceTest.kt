@@ -108,7 +108,7 @@ class TilkjentYtelseValideringServiceTest {
                     tom = inneværendeMåned(),
                     beløp = 2108,
                     person = person2
-                ),
+                )
             )
         )
 
@@ -130,7 +130,7 @@ class TilkjentYtelseValideringServiceTest {
                     tom = inneværendeMåned(),
                     beløp = 1054,
                     person = person2
-                ),
+                )
             )
         )
 

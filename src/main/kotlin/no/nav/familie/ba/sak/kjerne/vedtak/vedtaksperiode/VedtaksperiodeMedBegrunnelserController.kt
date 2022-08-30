@@ -40,7 +40,7 @@ class VedtaksperiodeMedBegrunnelserController(
     private val tilgangService: TilgangService,
     private val brevKlient: BrevKlient,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val brevPeriodeService: BrevPeriodeService,
+    private val brevPeriodeService: BrevPeriodeService
 ) {
 
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")

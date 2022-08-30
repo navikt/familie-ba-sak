@@ -59,9 +59,11 @@ class BrevPeriodeGenerator(
         if (begrunnelserOgFritekster.isEmpty()) return null
 
         val tomDato =
-            if (minimertVedtaksperiode.tom?.erSenereEnnInneværendeMåned() == false)
+            if (minimertVedtaksperiode.tom?.erSenereEnnInneværendeMåned() == false) {
                 minimertVedtaksperiode.tom.tilDagMånedÅr()
-            else null
+            } else {
+                null
+            }
 
         val identerIBegrunnelene = begrunnelseGrunnlagMedPersoner
             .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
@@ -190,7 +192,7 @@ class BrevPeriodeGenerator(
             antallBarnMedUtbetaling = barnMedUtbetaling.size.toString(),
             antallBarnMedNullutbetaling = barnMedNullutbetaling.size.toString(),
             fodselsdagerBarnMedUtbetaling = barnMedUtbetaling.tilBarnasFødselsdatoer(),
-            fodselsdagerBarnMedNullutbetaling = barnMedNullutbetaling.tilBarnasFødselsdatoer(),
+            fodselsdagerBarnMedNullutbetaling = barnMedNullutbetaling.tilBarnasFødselsdatoer()
         )
     }
 
@@ -210,7 +212,7 @@ class BrevPeriodeGenerator(
     private fun hentPeriodetype(
         fom: LocalDate?,
         barnMedUtbetaling: List<MinimertRestPerson>,
-        utbetalingsbeløp: Int,
+        utbetalingsbeløp: Int
     ) = when (minimertVedtaksperiode.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET
         Vedtaksperiodetype.UTBETALING -> when {
@@ -241,7 +243,7 @@ class BrevPeriodeGenerator(
     private fun hentFomtekstFortsattInnvilget(
         målform: Målform,
         fom: LocalDate?,
-        begrunnelser: List<Standardbegrunnelse>,
+        begrunnelser: List<Standardbegrunnelse>
     ): String? {
         val erAutobrev = begrunnelser.any {
             it == Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ||
@@ -250,7 +252,9 @@ class BrevPeriodeGenerator(
         return if (erAutobrev && fom != null) {
             val fra = if (målform == Målform.NB) "Fra" else "Frå"
             "$fra ${fom.tilDagMånedÅr()} får du:"
-        } else null
+        } else {
+            null
+        }
     }
 
     fun hentKompetanserForBegrunnelse(

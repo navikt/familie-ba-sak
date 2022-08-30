@@ -36,7 +36,6 @@ class IverksettMotOppdragTask(
     }
 
     override fun onCompletion(task: Task) {
-
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         val personIdent = personidentService.hentAktør(iverksettingTask.personIdent).aktivFødselsnummer()
         val statusFraOppdragTask = Task(
@@ -66,7 +65,6 @@ class IverksettMotOppdragTask(
         const val TASK_STEP_TYPE = "iverksettMotOppdrag"
 
         fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String): Task {
-
             return opprettTask(
                 behandling.fagsak.aktør,
                 behandling.id,

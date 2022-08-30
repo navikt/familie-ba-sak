@@ -54,7 +54,7 @@ data class SaksstatistikkMellomlagring(
     var sendtTidspunkt: LocalDateTime? = null,
 
     @Column(name = "type_id")
-    var typeId: Long? = null,
+    var typeId: Long? = null
 ) {
     fun jsonToSakDVH(): SakDVH {
         return sakstatistikkObjectMapper.readValue(json, SakDVH::class.java)

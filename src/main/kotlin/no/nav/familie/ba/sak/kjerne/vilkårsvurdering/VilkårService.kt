@@ -55,7 +55,6 @@ class VilkårService(
         vilkårId: Long,
         restPersonResultat: RestPersonResultat
     ): List<RestPersonResultat> {
-
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) &&
             restPersonResultat.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
         ) {
@@ -118,7 +117,7 @@ class VilkårService(
                 melding = "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
                     "for behandling $behandlingId",
                 frontendFeilmelding = "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
-                    "for behandling $behandlingId",
+                    "for behandling $behandlingId"
             )
         }
 
@@ -128,7 +127,7 @@ class VilkårService(
         if (restSlettVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
             behandlingstemaService.oppdaterBehandlingstema(
                 behandling = behandling,
-                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR
             )
         }
 
@@ -146,7 +145,7 @@ class VilkårService(
 
             behandlingstemaService.oppdaterBehandlingstema(
                 behandling = behandling,
-                overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
+                overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET
             )
         }
 
@@ -168,7 +167,7 @@ class VilkårService(
                 melding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
                     "med behandlingType ${behandling.type.visningsnavn}",
                 frontendFeilmelding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til " +
-                    "for behandling ${behandling.id} med behandlingType ${behandling.type.visningsnavn}",
+                    "for behandling ${behandling.id} med behandlingType ${behandling.type.visningsnavn}"
             )
         }
 
@@ -178,7 +177,7 @@ class VilkårService(
         ) {
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
-                frontendFeilmelding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
+                frontendFeilmelding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN"
             )
         }
     }

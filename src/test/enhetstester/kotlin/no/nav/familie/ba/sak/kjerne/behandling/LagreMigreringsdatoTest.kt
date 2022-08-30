@@ -72,7 +72,7 @@ class LagreMigreringsdatoTest {
         personidentService,
         featureToggleService,
         taskRepository,
-        vilkårsvurderingService,
+        vilkårsvurderingService
     )
 
     @Test

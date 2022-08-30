@@ -35,7 +35,7 @@ class BehandlingsresultatSteg(
     private val vilkårService: VilkårService,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -66,7 +66,6 @@ class BehandlingsresultatSteg(
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-
         val behandlingMedOppdatertBehandlingsresultat =
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)

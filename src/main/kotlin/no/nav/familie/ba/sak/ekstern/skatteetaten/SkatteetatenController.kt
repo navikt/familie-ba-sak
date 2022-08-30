@@ -37,7 +37,9 @@ class SkatteetatenController(
         produces = ["application/json;charset=UTF-8"]
     )
     fun finnPersonerMedUtvidetBarnetrygd(
-        @NotNull @RequestParam(value = "aar", required = true) aar: String
+        @NotNull
+        @RequestParam(value = "aar", required = true)
+        aar: String
     ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
         logger.info("Treff på finnPersonerMedUtvidetBarnetrygd")
         val respons = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_EKTE_DATA)) {
@@ -56,7 +58,9 @@ class SkatteetatenController(
         produces = ["application/json;charset=UTF-8"]
     )
     fun finnPersonerMedUtvidetBarnetrygdTest(
-        @NotNull @RequestParam(value = "aar", required = true) aar: String
+        @NotNull
+        @RequestParam(value = "aar", required = true)
+        aar: String
     ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
         logger.info("Treff på finnPersonerMedUtvidetBarnetrygdTest")
         val respons = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar)
@@ -69,7 +73,8 @@ class SkatteetatenController(
         consumes = ["application/json"]
     )
     fun hentPerioderMedUtvidetBarnetrygd(
-        @Valid @RequestBody perioderRequest: SkatteetatenPerioderRequest
+        @Valid @RequestBody
+        perioderRequest: SkatteetatenPerioderRequest
     ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
         logger.info("Treff på hentPerioderMedUtvidetBarnetrygd")
         val response = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_EKTE_DATA)) {
@@ -89,7 +94,8 @@ class SkatteetatenController(
         consumes = ["application/json"]
     )
     fun hentPerioderMedUtvidetBarnetrygdForMidlertidigTest(
-        @Valid @RequestBody perioderRequest: SkatteetatenPerioderRequest
+        @Valid @RequestBody
+        perioderRequest: SkatteetatenPerioderRequest
     ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
         logger.info("Treff på hentPerioderMedUtvidetBarnetrygdForMidlertidigTest")
         val response =
@@ -105,7 +111,8 @@ class SkatteetatenController(
         val fraMaaned = "2021-02"
         return listOf(
             SkatteetatenPerioder(
-                "01838398495", LocalDateTime.of(2021, 1, 1, 0, 0),
+                "01838398495",
+                LocalDateTime.of(2021, 1, 1, 0, 0),
                 perioder = listOf(
                     SkatteetatenPeriode(fraMaaned, Delingsprosent._50, tomMaaned = "2022-12")
 
@@ -113,7 +120,8 @@ class SkatteetatenController(
             ),
 
             SkatteetatenPerioder(
-                "09919094319", LocalDateTime.of(2021, 1, 1, 0, 0),
+                "09919094319",
+                LocalDateTime.of(2021, 1, 1, 0, 0),
                 perioder = listOf(
                     SkatteetatenPeriode(fraMaaned, Delingsprosent._0, tomMaaned = "2024-12")
 
@@ -121,7 +129,8 @@ class SkatteetatenController(
             ),
 
             SkatteetatenPerioder(
-                "15830699233", LocalDateTime.of(2021, 1, 1, 0, 0),
+                "15830699233",
+                LocalDateTime.of(2021, 1, 1, 0, 0),
                 perioder = listOf(
                     SkatteetatenPeriode(fraMaaned, Delingsprosent.usikker, tomMaaned = "2024-12")
 
@@ -129,7 +138,8 @@ class SkatteetatenController(
             ),
 
             SkatteetatenPerioder(
-                "01828499633", LocalDateTime.of(2021, 2, 1, 0, 0),
+                "01828499633",
+                LocalDateTime.of(2021, 2, 1, 0, 0),
                 perioder = listOf(
                     SkatteetatenPeriode(fraMaaned, Delingsprosent._50, tomMaaned = null)
 
@@ -137,7 +147,8 @@ class SkatteetatenController(
             ),
 
             SkatteetatenPerioder(
-                "27903249671", LocalDateTime.of(2021, 1, 1, 0, 0),
+                "27903249671",
+                LocalDateTime.of(2021, 1, 1, 0, 0),
                 perioder = listOf(
                     SkatteetatenPeriode("2021-01", Delingsprosent._50, tomMaaned = "2021-03"),
                     SkatteetatenPeriode("2021-04", Delingsprosent._0, tomMaaned = "2021-08"),
@@ -146,7 +157,8 @@ class SkatteetatenController(
             ),
 
             SkatteetatenPerioder(
-                "24835498561", LocalDateTime.of(2020, 1, 3, 0, 0),
+                "24835498561",
+                LocalDateTime.of(2020, 1, 3, 0, 0),
                 perioder = listOf(
                     SkatteetatenPeriode("2020-01", Delingsprosent._50, tomMaaned = "2020-12")
 
@@ -154,12 +166,13 @@ class SkatteetatenController(
             ),
 
             SkatteetatenPerioder(
-                "02889197172", LocalDateTime.of(2019, 2, 1, 0, 0),
+                "02889197172",
+                LocalDateTime.of(2019, 2, 1, 0, 0),
                 perioder = listOf(
                     SkatteetatenPeriode("2019-02", Delingsprosent._0, tomMaaned = "2019-09")
 
                 )
-            ),
+            )
         )
     }
 

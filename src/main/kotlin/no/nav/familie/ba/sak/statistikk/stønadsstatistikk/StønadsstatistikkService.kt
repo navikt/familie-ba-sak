@@ -18,25 +18,17 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.eksterne.kontrakter.AnnenForeldersAktivitet
-import no.nav.familie.eksterne.kontrakter.BehandlingOpprinnelse
-import no.nav.familie.eksterne.kontrakter.BehandlingType
 import no.nav.familie.eksterne.kontrakter.BehandlingTypeV2
-import no.nav.familie.eksterne.kontrakter.BehandlingÅrsak
 import no.nav.familie.eksterne.kontrakter.BehandlingÅrsakV2
-import no.nav.familie.eksterne.kontrakter.Kategori
 import no.nav.familie.eksterne.kontrakter.KategoriV2
 import no.nav.familie.eksterne.kontrakter.Kompetanse
 import no.nav.familie.eksterne.kontrakter.KompetanseResultat
 import no.nav.familie.eksterne.kontrakter.PersonDVH
 import no.nav.familie.eksterne.kontrakter.PersonDVHV2
 import no.nav.familie.eksterne.kontrakter.SøkersAktivitet
-import no.nav.familie.eksterne.kontrakter.Underkategori
 import no.nav.familie.eksterne.kontrakter.UnderkategoriV2
-import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVH
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVHV2
-import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVH
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
-import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -57,7 +49,6 @@ class StønadsstatistikkService(
 ) {
 
     fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
-
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
@@ -105,56 +96,13 @@ class StønadsstatistikkService(
         }
     }
 
-    @Deprecated("Kan fjernes når vi slutter å publisere på kafka onprem")
-    fun hentVedtak(behandlingId: Long): VedtakDVH {
-
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
-        // DVH ønsker tidspunkt med klokkeslett
-
-        var datoVedtak = vedtak?.vedtaksdato
-
-        if (datoVedtak == null) {
-            datoVedtak = vedtakRepository.finnVedtakForBehandling(behandlingId).singleOrNull()?.vedtaksdato
-                ?: error("Fant ikke vedtaksdato for behandling $behandlingId")
-        }
-
-        val tidspunktVedtak = datoVedtak
-
-        return VedtakDVH(
-            fagsakId = behandling.fagsak.id.toString(),
-            behandlingsId = behandlingId.toString(),
-            tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
-            person = hentSøker(behandlingId),
-            ensligForsørger = utledEnsligForsørger(behandlingId), // TODO implementere støtte for dette
-            kategori = Kategori.valueOf(behandling.kategori.name),
-            underkategori = Underkategori.valueOf(behandling.underkategori.name),
-            behandlingType = BehandlingType.valueOf(behandling.type.name),
-            behandlingOpprinnelse = when (behandling.opprettetÅrsak) {
-                no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.SØKNAD -> BehandlingOpprinnelse.MANUELL
-                no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE -> BehandlingOpprinnelse.AUTOMATISK_VED_FØDSELSHENDELSE
-                else -> BehandlingOpprinnelse.MANUELL
-            },
-            utbetalingsperioder = hentUtbetalingsperioder(behandlingId),
-            funksjonellId = UUID.randomUUID().toString(),
-            behandlingÅrsak = BehandlingÅrsak.valueOf(behandling.opprettetÅrsak.name)
-        )
-    }
-
     private fun hentSøkerV2(behandlingId: Long): PersonDVHV2 {
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
         val søker = persongrunnlag.søker
         return lagPersonDVHV2(søker)
     }
 
-    private fun hentSøker(behandlingId: Long): PersonDVH {
-        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
-        val søker = persongrunnlag.søker
-        return lagPersonDVH(søker)
-    }
-
     private fun hentUtbetalingsperioderV2(behandlingId: Long): List<UtbetalingsperiodeDVHV2> {
-
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
 
@@ -182,38 +130,7 @@ class StønadsstatistikkService(
             }
     }
 
-    @Deprecated("kan fjernes når vi ikke lenger publiserer hendelser til kafka onprem")
-    private fun hentUtbetalingsperioder(behandlingId: Long): List<UtbetalingsperiodeDVH> {
-
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
-        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
-
-        if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return emptyList()
-
-        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelse.andelerTilkjentYtelse)
-
-        return utbetalingsPerioder.toSegments()
-            .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-            .map { segment ->
-                val andelerForSegment = tilkjentYtelse.andelerTilkjentYtelse.filter {
-                    segment.localDateInterval.overlaps(
-                        LocalDateInterval(
-                            it.stønadFom.førsteDagIInneværendeMåned(),
-                            it.stønadTom.sisteDagIInneværendeMåned()
-                        )
-                    )
-                }
-                mapTilUtbetalingsperiode(
-                    segment,
-                    andelerForSegment,
-                    tilkjentYtelse.behandling,
-                    persongrunnlag
-                )
-            }
-    }
-
     private fun utledEnsligForsørger(behandlingId: Long): Boolean {
-
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
         if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return false
 
@@ -275,43 +192,19 @@ class StønadsstatistikkService(
         )
     }
 
-    @Deprecated("kan fjernes når vi ikke lenger publiserer hendelser til kafka onprem")
-    private fun mapTilUtbetalingsperiode(
-        segment: LocalDateSegment<Int>,
-        andelerForSegment: List<AndelTilkjentYtelse>,
-        behandling: Behandling,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
-    ): UtbetalingsperiodeDVH {
-        return UtbetalingsperiodeDVH(
-            hjemmel = "Ikke implementert",
-            stønadFom = segment.fom,
-            stønadTom = segment.tom,
-            utbetaltPerMnd = segment.value,
-            utbetalingsDetaljer = andelerForSegment.filter { it.erAndelSomSkalSendesTilOppdrag() }.map { andel ->
-                val personForAndel =
-                    personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }
-                        ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
-                UtbetalingsDetaljDVH(
-                    person = lagPersonDVH(
-                        personForAndel,
-                        andel.prosent.intValueExact()
-                    ),
-                    klassekode = andel.type.klassifisering,
-                    utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
-                    delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
-                )
-            }
-        )
-    }
-
     private fun hentStatsborgerskap(person: Person): List<String> {
-        return if (person.statsborgerskap.isNotEmpty()) person.statsborgerskap.filtrerGjeldendeNå().map { it.landkode }
-        else listOf(personopplysningerService.hentGjeldendeStatsborgerskap(person.aktør).land)
+        return if (person.statsborgerskap.isNotEmpty()) {
+            person.statsborgerskap.filtrerGjeldendeNå().map { it.landkode }
+        } else {
+            listOf(personopplysningerService.hentGjeldendeStatsborgerskap(person.aktør).land)
+        }
     }
 
-    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.isNotEmpty()) "NO"
-    else if (personopplysningerService.hentPersoninfoEnkel(person.aktør).bostedsadresser.isNotEmpty()) "NO" else {
-
+    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.isNotEmpty()) {
+        "NO"
+    } else if (personopplysningerService.hentPersoninfoEnkel(person.aktør).bostedsadresser.isNotEmpty()) {
+        "NO"
+    } else {
         val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(person.aktør)
 
         if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {

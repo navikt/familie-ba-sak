@@ -328,8 +328,11 @@ class FagsakServiceTest(
 
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingMor.id, mor, listOf(barnFnr),
-            søkerAktør = fagsakMor.aktør, barnAktør = barnAktør
+            behandlingMor.id,
+            mor,
+            listOf(barnFnr),
+            søkerAktør = fagsakMor.aktør,
+            barnAktør = barnAktør
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
@@ -339,8 +342,11 @@ class FagsakServiceTest(
         val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakFar))
 
         val personopplysningGrunnlagFar = lagTestPersonopplysningGrunnlag(
-            behandlingFar.id, far, listOf(barnFnr),
-            søkerAktør = fagsakFar.aktør, barnAktør = barnAktør
+            behandlingFar.id,
+            far,
+            listOf(barnFnr),
+            søkerAktør = fagsakFar.aktør,
+            barnAktør = barnAktør
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagFar)
 
@@ -348,8 +354,8 @@ class FagsakServiceTest(
         assertEquals(2, fagsaker.size)
     }
 
-    @Test
     // Satte XX for at dette testet skal kjøre sist.
+    @Test
     fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())

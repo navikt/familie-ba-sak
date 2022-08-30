@@ -70,16 +70,19 @@ data class NullTidspunkt<T : Tidsenhet> internal constructor(private val uendeli
     override fun sammenliknMed(tidspunkt: Tidspunkt<T>): Int {
         return if (tidspunkt is NullTidspunkt) {
             val nullTidspunkt: NullTidspunkt<T> = tidspunkt // Burde kunne smart cast'es, men det funker ikke
-            if (this.uendelighet == nullTidspunkt.uendelighet)
+            if (this.uendelighet == nullTidspunkt.uendelighet) {
                 0
-            else if (this.uendelighet == Uendelighet.FORTID) {
+            } else if (this.uendelighet == Uendelighet.FORTID) {
                 -1
-            } else
+            } else {
                 1
-        } else when (uendelighet) {
-            Uendelighet.FREMTID -> 1 // Dette skal alltid være det seneste tidspunktet i alle sammenlikninger
-            Uendelighet.FORTID -> -1 // Dette skal alltid være det tidligste tidspunktet i alle sammenlikninger
-            else -> throw nullTidspunktException // Skal ikke inntreffe
+            }
+        } else {
+            when (uendelighet) {
+                Uendelighet.FREMTID -> 1 // Dette skal alltid være det seneste tidspunktet i alle sammenlikninger
+                Uendelighet.FORTID -> -1 // Dette skal alltid være det tidligste tidspunktet i alle sammenlikninger
+                else -> throw nullTidspunktException // Skal ikke inntreffe
+            }
         }
     }
 }

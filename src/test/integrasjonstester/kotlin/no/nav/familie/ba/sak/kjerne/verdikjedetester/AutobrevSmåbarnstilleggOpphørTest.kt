@@ -36,11 +36,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 import java.time.YearMonth
 
-@DirtiesContext
 class AutobrevSmåbarnstilleggOpphørTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val fagsakRepository: FagsakRepository,
@@ -56,23 +54,22 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
     @Test
     fun `Plukk riktige behandlinger - skal være nyeste, løpende med opphør i småbarnstillegg for valgt måned`() {
-
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
         val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
         fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
         val fagsak1behandling2: Behandling = fullførRevurderingMedOvergangstonad(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
         startEnRevurderingNyeOpplysningerMenIkkeFullfør(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
 
         val personScenario2: RestScenario = lagScenario(barnFødselsdato)
@@ -80,12 +77,12 @@ class AutobrevSmåbarnstilleggOpphørTest(
         fullførBehandling(
             fagsak = fagsak2,
             personScenario = personScenario2,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
         val fagsak2behandling2: Behandling = fullførRevurderingMedOvergangstonad(
             fagsak = fagsak2,
             personScenario = personScenario2,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
 
         val andelerForSmåbarnstilleggFagsak1Behandling2 =
@@ -100,7 +97,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
         val fagsaker: List<Long> =
             fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
-                iverksatteLøpendeBehandlinger = listOf(fagsak1behandling2.id, fagsak2behandling2.id),
+                iverksatteLøpendeBehandlinger = listOf(fagsak1behandling2.id, fagsak2behandling2.id)
             )
 
         assertTrue(fagsaker.containsAll(listOf(fagsak2.id)))
@@ -128,9 +125,8 @@ class AutobrevSmåbarnstilleggOpphørTest(
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
+        barnFødselsdato: LocalDate
     ): Behandling {
-
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = emptyList()
@@ -168,9 +164,8 @@ class AutobrevSmåbarnstilleggOpphørTest(
     fun fullførRevurderingMedOvergangstonad(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
+        barnFødselsdato: LocalDate
     ): Behandling {
-
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 

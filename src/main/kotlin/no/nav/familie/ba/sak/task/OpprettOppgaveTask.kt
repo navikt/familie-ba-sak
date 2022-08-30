@@ -40,7 +40,7 @@ class OpprettOppgaveTask(
             oppgavetype: Oppgavetype,
             fristForFerdigstillelse: LocalDate,
             tilordnetRessurs: String? = null,
-            beskrivelse: String? = null,
+            beskrivelse: String? = null
         ): Task {
             return Task(
                 type = TASK_STEP_TYPE,

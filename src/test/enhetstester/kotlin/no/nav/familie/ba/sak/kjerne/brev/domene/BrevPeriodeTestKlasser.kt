@@ -56,7 +56,7 @@ data class BrevPeriodeTestConfig(
     val kompetanser: List<BrevPeriodeTestKompetanse>? = null,
     val kompetanserSomStopperRettFørPeriode: List<BrevPeriodeTestKompetanse>? = null,
 
-    val forventetOutput: BrevPeriodeOutput?,
+    val forventetOutput: BrevPeriodeOutput?
 ) {
     fun hentPersonerMedReduksjonFraForrigeBehandling(): List<BrevPeriodeTestPerson> =
         this.personerPåBehandling.filter { it.harReduksjonFraForrigeBehandling }
@@ -71,7 +71,7 @@ data class BrevPeriodeTestKompetanse(
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String,
     val barnetsBostedsland: String,
-    val resultat: KompetanseResultat,
+    val resultat: KompetanseResultat
 ) {
     fun tilMinimertKompetanse(personer: List<BrevPeriodeTestPerson>): MinimertKompetanse {
         return MinimertKompetanse(
@@ -80,7 +80,7 @@ data class BrevPeriodeTestKompetanse(
             annenForeldersAktivitetslandNavn = LandNavn(this.annenForeldersAktivitetsland),
             barnetsBostedslandNavn = LandNavn(this.barnetsBostedsland),
             resultat = this.resultat,
-            personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() },
+            personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() }
         )
     }
 }
@@ -94,7 +94,7 @@ data class BrevPeriodeTestPerson(
     val endredeUtbetalinger: List<EndretRestUtbetalingAndelPåPerson>,
     val utbetalinger: List<UtbetalingPåPerson>,
     val harReduksjonFraForrigeBehandling: Boolean = false,
-    val kompetanseIder: List<String>? = null,
+    val kompetanseIder: List<String>? = null
 ) {
     fun tilMinimertPerson() = MinimertRestPerson(personIdent = personIdent, fødselsdato = fødselsdato, type = type)
     fun tilUtbetalingsperiodeDetaljer() = utbetalinger.map {
@@ -108,7 +108,7 @@ data class BrevPeriodeTestPerson(
         return MinimertRestPersonResultat(
             personIdent = this.personIdent,
             minimerteVilkårResultater = hentVilkårForPerson(),
-            minimerteAndreVurderinger = this.andreVurderinger,
+            minimerteAndreVurderinger = this.andreVurderinger
         )
     }
 
@@ -123,7 +123,7 @@ data class BrevPeriodeTestPerson(
                         periodeTom = null,
                         resultat = Resultat.OPPFYLT,
                         utdypendeVilkårsvurderinger = emptyList(),
-                        erEksplisittAvslagPåSøknad = false,
+                        erEksplisittAvslagPåSøknad = false
                     )
                 }
 }
@@ -132,7 +132,7 @@ data class UtbetalingPåPerson(
     val ytelseType: YtelseType,
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean = false,
-    val prosent: BigDecimal = BigDecimal(100),
+    val prosent: BigDecimal = BigDecimal(100)
 ) {
     fun tilMinimertUtbetalingsperiodeDetalj(minimertRestPerson: MinimertRestPerson) =
         MinimertUtbetalingsperiodeDetalj(
@@ -190,7 +190,7 @@ data class BegrunnelseDataTestConfig(
     val belop: Int,
     val soknadstidspunkt: String?,
     val avtaletidspunktDeltBosted: String?,
-    val sokersRettTilUtvidet: String?,
+    val sokersRettTilUtvidet: String?
 ) : TestBegrunnelse {
 
     fun tilBegrunnelseData() = BegrunnelseData(
@@ -224,7 +224,7 @@ data class EØSBegrunnelseTestConfig(
     val annenForeldersAktivitetsland: String?,
     val barnetsBostedsland: String?,
     val barnasFodselsdatoer: String,
-    val sokersAktivitet: SøkersAktivitet?,
+    val sokersAktivitet: SøkersAktivitet?
 ) : TestBegrunnelse {
     fun tilEØSBegrunnelseData(): IEØSBegrunnelseData =
         if (this.annenForeldersAktivitet != null &&
@@ -263,11 +263,11 @@ data class BrevPeriodeOutput(
     val antallBarn: String?,
     val barnasFodselsdager: String?,
     val begrunnelser: List<TestBegrunnelse>,
-    val type: String,
+    val type: String
 )
 
 data class BrevBegrunnelseGrunnlagConfig(
-    val standardbegrunnelse: Standardbegrunnelse,
+    val standardbegrunnelse: Standardbegrunnelse
 ) {
     fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BegrunnelseMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,

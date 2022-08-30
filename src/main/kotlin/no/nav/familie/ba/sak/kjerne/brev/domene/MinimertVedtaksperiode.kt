@@ -18,7 +18,7 @@ data class MinimertVedtaksperiode(
     val begrunnelser: List<BegrunnelseMedTriggere>,
     val eøsBegrunnelser: List<EØSBegrunnelseMedTriggere>,
     val fritekster: List<String> = emptyList(),
-    val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList(),
+    val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList()
 ) {
 
     val ytelseTyperForPeriode = minimerteUtbetalingsperiodeDetaljer.map { it.ytelseType }.toSet()
@@ -58,9 +58,8 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean = false,
     brevMålform: Målform,
-    barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
+    barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList()
 ): BrevPeriodeForLogging {
-
     return BrevPeriodeForLogging(
         fom = this.fom,
         tom = this.tom,
@@ -76,6 +75,6 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
         },
         uregistrerteBarn = uregistrerteBarn.map { it.copy(personIdent = "", navn = "") },
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-        brevMålform = brevMålform,
+        brevMålform = brevMålform
     )
 }

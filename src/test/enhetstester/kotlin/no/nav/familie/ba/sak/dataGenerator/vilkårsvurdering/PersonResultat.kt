@@ -12,7 +12,7 @@ import java.time.LocalDate
 fun lagPersonResultatAvOverstyrteResultater(
     person: Person,
     overstyrendeVilkårResultater: List<VilkårResultat>,
-    vilkårsvurdering: Vilkårsvurdering,
+    vilkårsvurdering: Vilkårsvurdering
 
 ): PersonResultat {
     val personResultat = PersonResultat(
@@ -30,10 +30,14 @@ fun lagPersonResultatAvOverstyrteResultater(
             .find { it.vilkårType == vilkårType }
             ?: VilkårResultat(
                 personResultat = personResultat,
-                periodeFom = if (vilkårType == Vilkår.UNDER_18_ÅR) person.fødselsdato else maxOf(
-                    person.fødselsdato,
-                    LocalDate.now().minusYears(3)
-                ),
+                periodeFom = if (vilkårType == Vilkår.UNDER_18_ÅR) {
+                    person.fødselsdato
+                } else {
+                    maxOf(
+                        person.fødselsdato,
+                        LocalDate.now().minusYears(3)
+                    )
+                },
                 periodeTom = if (vilkårType == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null,
                 vilkårType = vilkårType,
                 resultat = Resultat.OPPFYLT,

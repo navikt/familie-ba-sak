@@ -82,6 +82,7 @@ class InternPeriodeOvergangsstønadTest {
 
         assertThrows<Feil> { nyePerioder.splitFramtidigePerioderFraForrigeBehandling(overgangsstønadPerioderFraForrigeBehandling = gamlePerioder, søkerAktør = aktør2) }
     }
+
     @Test
     fun `Skal ikke kaste feil hvis OS-perioder har forskjellige personidenter, men er knyttet til samme aktør`() {
         val ident1 = "12345678910"

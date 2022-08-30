@@ -36,15 +36,17 @@ fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører: List<Ak
 )
 
 fun RestUtenlandskPeriodebeløp.tilKalkulertMånedligBeløp(): BigDecimal? {
-    if (this.beløp == null || this.intervall == null)
+    if (this.beløp == null || this.intervall == null) {
         return null
+    }
 
     return this.intervall.konverterBeløpTilMånedlig(this.beløp)
 }
 
 fun UtenlandskPeriodebeløp.tilKalkulertMånedligBeløp(): BigDecimal? {
-    if (this.beløp == null || this.intervall == null)
+    if (this.beløp == null || this.intervall == null) {
         return null
+    }
 
     return this.intervall.konverterBeløpTilMånedlig(this.beløp)
 }

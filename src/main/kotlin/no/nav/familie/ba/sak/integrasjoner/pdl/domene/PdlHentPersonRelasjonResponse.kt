@@ -7,5 +7,5 @@ class PdlHentPersonRelasjonerResponse(val person: PdlPersonRelasjonData?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlPersonRelasjonData(
-    val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
+    val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList()
 )

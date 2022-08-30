@@ -8,7 +8,7 @@ data class Avslag(
 ) : Vedtaksbrev {
 
     constructor(
-        vedtakFellesfelter: VedtakFellesfelter,
+        vedtakFellesfelter: VedtakFellesfelter
     ) :
         this(
             data = AvslagData(
@@ -37,6 +37,6 @@ data class AvslagData(
 
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
-        val hjemmeltekst: Hjemmeltekst,
+        val hjemmeltekst: Hjemmeltekst
     )
 }

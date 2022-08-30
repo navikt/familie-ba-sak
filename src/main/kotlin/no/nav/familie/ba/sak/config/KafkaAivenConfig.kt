@@ -77,7 +77,7 @@ class KafkaAivenConfig(val environment: Environment) {
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.GROUP_ID_CONFIG to "familie-ba-sak",
             ConsumerConfig.CLIENT_ID_CONFIG to "consumer-familie-ba-sak-1",
-            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
+            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest"
         )
         if (environment.activeProfiles.none { it.contains("dev") || it.contains("postgres") }) {
             return consumerConfigs + securityConfig()

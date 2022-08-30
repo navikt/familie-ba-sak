@@ -68,15 +68,16 @@ class BeregningServiceTest {
         val fagsakService = mockk<FagsakService>()
 
         beregningService = BeregningService(
-            andelTilkjentYtelseRepository,
-            fagsakService,
-            behandlingHentOgPersisterService,
-            tilkjentYtelseRepository,
-            vilkårsvurderingRepository,
-            behandlingRepository,
-            personopplysningGrunnlagRepository,
-            endretUtbetalingAndelRepository,
-            småbarnstilleggService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            behandlingRepository = behandlingRepository,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+            endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
+            småbarnstilleggService = småbarnstilleggService,
+            featureToggleService = featureToggleService
         )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
@@ -130,7 +131,7 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = søkerFnr,
             barnasIdenter = listOf(barn1Fnr),
-            barnFødselsdato = LocalDate.of(2002, 7, 1)
+            barnasFødselsdatoer = listOf(LocalDate.of(2002, 7, 1))
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -506,8 +507,7 @@ class BeregningServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barn1Fnr, barn2Fnr),
-            barnFødselsdato = barnFødselsdato
+            barnasIdenter = listOf(barn1Fnr, barn2Fnr)
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -682,7 +682,7 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = søkerFnr,
             barnasIdenter = listOf(barn1Fnr),
-            barnFødselsdato = barnFødselsdato
+            barnasFødselsdatoer = listOf(barnFødselsdato)
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -753,9 +753,7 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = barn1Fnr,
             barnasIdenter = listOf(barn1Fnr),
-            barnFødselsdato = LocalDate.of(
-                2002, 7, 1,
-            )
+            barnasFødselsdatoer = listOf(LocalDate.of(2002, 7, 1))
         )
 
         val periodeFom = LocalDate.now().toYearMonth().minusMonths(1)
@@ -788,7 +786,7 @@ class BeregningServiceTest {
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
 
         return beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(
-            behandling = behandling,
+            behandling = behandling
         )
     }
 }

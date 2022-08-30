@@ -42,7 +42,7 @@ fun hentKompetanserGyldigeForEØSBegrunnelse(
 fun EØSBegrunnelseMedTriggere.erGyldigForKompetanseMedData(
     annenForeldersAktivitetFraKompetanse: AnnenForeldersAktivitet,
     barnetsBostedslandFraKompetanse: BarnetsBostedsland,
-    resultatFraKompetanse: KompetanseResultat,
+    resultatFraKompetanse: KompetanseResultat
 ): Boolean = sanityEØSBegrunnelse.annenForeldersAktivitet
     .contains(annenForeldersAktivitetFraKompetanse) &&
     sanityEØSBegrunnelse.barnetsBostedsland
