@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.institusjon
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.kontrakter.ba.tss.SamhandlerInfo
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -23,17 +25,31 @@ class SamhandlerController(
     fun hentSamhandlerDataForOrganisasjon(
         @PathVariable("orgnr") orgNummer: String
     ): Ressurs<SamhandlerInfo> {
-        return Ressurs.success(institusjonService.hentSamhandler(orgNummer))
+        return Ressurs.success(institusjonService.hentSamhandler(orgNummer).copy(orgNummer = orgNummer))
     }
 
     @PostMapping(path = ["/navn"])
     fun søkSamhandlerinfoFraNavn(
         @RequestBody request: SøkSamhandlerInfoRequest
     ): Ressurs<List<SamhandlerInfo>> {
-        return Ressurs.success(institusjonService.søkSamhandlere(request.navn.uppercase()))
+        if (request.navn == null && request.postnummer == null && request.område == null) {
+            throw FunksjonellFeil(
+                "Påkrevd variabel for søk er navn, postnummer eller område",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
+        }
+        return Ressurs.success(
+            institusjonService.søkSamhandlere(
+                request.navn?.uppercase(),
+                request.postnummer,
+                request.område
+            )
+        )
     }
 }
 
 data class SøkSamhandlerInfoRequest(
-    val navn: String
+    val navn: String?,
+    val postnummer: String?,
+    val område: String?
 )
