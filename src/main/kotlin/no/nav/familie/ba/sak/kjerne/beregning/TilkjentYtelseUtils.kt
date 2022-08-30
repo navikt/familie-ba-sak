@@ -236,7 +236,7 @@ object TilkjentYtelseUtils {
                         val nyttNasjonaltPeriodebeløp = andelForPerson.sats
                             .avrundetHeltallAvProsent(endretUtbetalingMedAndeler.prosent!!)
 
-                        val aty = andelForPerson.copy(
+                        val andelTilkjentYtelse = andelForPerson.copy(
                             prosent = endretUtbetalingMedAndeler.prosent!!,
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
@@ -245,17 +245,17 @@ object TilkjentYtelseUtils {
                             endretUtbetalingAndeler = mutableListOf(endretUtbetalingMedAndeler.endretUtbetalingAndel)
                         )
 
-                        AndelTilkjentYtelseMedEndreteUtbetalinger(aty, endretUtbetalingMedAndeler)
+                        AndelTilkjentYtelseMedEndreteUtbetalinger(andelTilkjentYtelse, endretUtbetalingMedAndeler)
                     }
                 )
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
                 nyeAndelerForPerson.addAll(
                     perioderUtenEndring.map { månedPeriodeUendret ->
-                        val aty = andelForPerson.copy(
+                        val andelTilkjentYtelse = andelForPerson.copy(
                             stønadFom = månedPeriodeUendret.fom,
                             stønadTom = månedPeriodeUendret.tom
                         )
-                        AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(aty)
+                        AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
                     }
                 )
             }

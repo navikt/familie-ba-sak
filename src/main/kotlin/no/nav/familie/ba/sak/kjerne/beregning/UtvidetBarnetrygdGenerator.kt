@@ -88,7 +88,7 @@ data class UtvidetBarnetrygdGenerator(
 
         return ordinæreSatserForPeriode.map { satsperiode ->
             val nasjonaltPeriodebeløp = satsperiode.sats.avrundetHeltallAvProsent(prosentForPeriode)
-            val aty = AndelTilkjentYtelse(
+            val andelTilkjentYtelse = AndelTilkjentYtelse(
                 behandlingId = behandlingId,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = søkerAktør,
@@ -101,7 +101,7 @@ data class UtvidetBarnetrygdGenerator(
                 prosent = prosentForPeriode
             )
 
-            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(aty)
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
         }
     }
 

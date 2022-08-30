@@ -14,21 +14,36 @@ import java.time.YearMonth
 class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
     private val andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     private val endretUtbetalingAndeler: Collection<EndretUtbetalingAndel>,
-    private val brukNy: Boolean?
+    private val brukFrikobleteAndelerOgEndringer: Boolean?
 ) {
+    fun lagAndelerMedEndringer(): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
+        return andelerTilkjentYtelse.map { lagAndelMedEndringer(it) }
+    }
+
+    fun lagEndreteUtbetalingMedAndeler(): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
+        return endretUtbetalingAndeler.map { lagEndringMedAndeler(it) }
+    }
 
     private fun lagAndelMedEndringer(andelTilkjentYtelse: AndelTilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
         val endreteUtbetalinger = endretUtbetalingAndeler
             .filter { overlapper(andelTilkjentYtelse, it) }
 
-        return AndelTilkjentYtelseMedEndreteUtbetalinger(andelTilkjentYtelse, endreteUtbetalinger, brukNy)
+        return AndelTilkjentYtelseMedEndreteUtbetalinger(
+            andelTilkjentYtelse,
+            endreteUtbetalinger,
+            brukFrikobleteAndelerOgEndringer
+        )
     }
 
     private fun lagEndringMedAndeler(endretUtbetalingAndel: EndretUtbetalingAndel): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
         val andeler = andelerTilkjentYtelse
             .filter { overlapper(it, endretUtbetalingAndel) }
 
-        return EndretUtbetalingAndelMedAndelerTilkjentYtelse(endretUtbetalingAndel, andeler, brukNy)
+        return EndretUtbetalingAndelMedAndelerTilkjentYtelse(
+            endretUtbetalingAndel,
+            andeler,
+            brukFrikobleteAndelerOgEndringer
+        )
     }
 
     private fun overlapper(aty: AndelTilkjentYtelse, eua: EndretUtbetalingAndel): Boolean {
@@ -38,20 +53,12 @@ class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
         return aty.aktør == eua.person?.aktør &&
             euaPeriode.overlapperHeltEllerDelvisMed(atyPeriode)
     }
-
-    fun lagAndelerMedEndringer(): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
-        return andelerTilkjentYtelse.map { lagAndelMedEndringer(it) }
-    }
-
-    fun lagEndreteUtbetalingMedAndeler(): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
-        return endretUtbetalingAndeler.map { lagEndringMedAndeler(it) }
-    }
 }
 
 data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     private val andelTilkjentYtelse: AndelTilkjentYtelse,
     private val endreteUtbetalingerAndeler: Collection<EndretUtbetalingAndel>,
-    private val brukNy: Boolean?
+    private val brukFrikobleteAndelerOgEndringer: Boolean?
 ) {
     constructor(
         andelTilkjentYtelse: AndelTilkjentYtelse,
@@ -59,7 +66,7 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     ) : this(
         andelTilkjentYtelse,
         listOf(endretUtbetalingAndelMedAndelerTilkjentYtelse.endretUtbetalingAndel),
-        endretUtbetalingAndelMedAndelerTilkjentYtelse.brukNy
+        endretUtbetalingAndelMedAndelerTilkjentYtelse.brukFrikobleteAndelerOgEndringer
     )
 
     constructor(
@@ -85,7 +92,7 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
         return AndelTilkjentYtelseMedEndreteUtbetalinger(
             andelTilkjentYtelse.copy(stønadTom = tom),
             endreteUtbetalinger,
-            brukNy
+            brukFrikobleteAndelerOgEndringer
         )
     }
 
@@ -94,9 +101,9 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     val prosent get() = andelTilkjentYtelse.prosent
     val andel get() = andelTilkjentYtelse
     val endreteUtbetalinger
-        get() = if (brukNy == null) {
+        get() = if (brukFrikobleteAndelerOgEndringer == null) {
             emptyList()
-        } else if (brukNy) {
+        } else if (brukFrikobleteAndelerOgEndringer) {
             endreteUtbetalingerAndeler
         } else {
             andel.endretUtbetalingAndeler
@@ -115,7 +122,7 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
 data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val endretUtbetalingAndel: EndretUtbetalingAndel,
     private val andeler: List<AndelTilkjentYtelse>,
-    val brukNy: Boolean?
+    val brukFrikobleteAndelerOgEndringer: Boolean?
 ) {
     fun overlapperMed(månedPeriode: MånedPeriode) = endretUtbetalingAndel.overlapperMed(månedPeriode)
     fun årsakErDeltBosted() = endretUtbetalingAndel.årsakErDeltBosted()
@@ -132,9 +139,9 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val fom get() = endretUtbetalingAndel.fom
     val tom get() = endretUtbetalingAndel.tom
     val andelerTilkjentYtelse
-        get() = if (brukNy == null) {
+        get() = if (brukFrikobleteAndelerOgEndringer == null) {
             emptyList()
-        } else if (brukNy) {
+        } else if (brukFrikobleteAndelerOgEndringer) {
             andeler
         } else {
             endretUtbetalingAndel.andelTilkjentYtelser

@@ -136,7 +136,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 )
                     .singleOrNull()?.sats
                     ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
-                val aty = AndelTilkjentYtelse(
+                val andelTilkjentYtelse = AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
                     aktør = søkerAktør
@@ -150,7 +150,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                     prosent = BigDecimal(100)
                 )
 
-                AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(aty)
+                AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
             }
     }
 
@@ -172,7 +172,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 
             val beløpIPeriode = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosent = prosentIPeriode)
 
-            val aty = AndelTilkjentYtelse(
+            val andelTilkjentYtelse = AndelTilkjentYtelse(
                 behandlingId = behandlingId,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = søkerAktør,
@@ -185,7 +185,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 prosent = prosentIPeriode
             )
 
-            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(aty)
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
         }
     }
 
