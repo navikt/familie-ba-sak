@@ -208,7 +208,7 @@ class ClientMocks {
             every {
                 mockFeatureToggleService.isEnabled(capture(featureSlot))
             } answers {
-                true
+                false
             }
         }
 
