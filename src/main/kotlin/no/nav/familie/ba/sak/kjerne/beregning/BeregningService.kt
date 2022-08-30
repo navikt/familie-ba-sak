@@ -202,7 +202,8 @@ class BeregningService(
             )
             tilkjentYtelse.andelerTilkjentYtelse.clear()
             tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
-            return tilkjentYtelse
+
+            tilkjentYtelse
         }
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
