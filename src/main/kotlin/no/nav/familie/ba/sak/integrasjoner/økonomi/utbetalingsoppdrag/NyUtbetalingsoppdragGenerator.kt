@@ -166,7 +166,6 @@ class NyUtbetalingsoppdragGenerator {
                 sisteOffsetPåFagsak = tilkjentYtelseMetaData.sisteOffsetPåFagsak
             )
             // oppdater andeler i tilkjentYtelse
-            tilkjentYtelse.andelerTilkjentYtelse.clear()
             tilkjentYtelse.andelerTilkjentYtelse.addAll(opprettelsePeriodeMedAndeler.first)
             opprettelsePeriodeMedAndeler.second
         } else {
