@@ -39,21 +39,18 @@ fun hentPerioderMedUtbetaling(
     vedtak: Vedtak,
     forskjøvetVilkårResultatTidslinjeMap: Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>
 ): List<VedtaksperiodeMedBegrunnelser> {
-    val utdypendeVilkårsvurderingTidslinje =
+    val splittkriterierForVedtaksperiodeTidslinje =
         forskjøvetVilkårResultatTidslinjeMap
-            // Slår sammen vilkårResultatene og beholder kun dataene vi trenger
-            .tilVilkårResulaterKombinertPerAktørTidslinjer()
-            // Slår sammen tidslinjene til en tidslijne med map av aktør til VilkårResulaterKombinert
+            .tilSplittkriterierForVedtaksperiodeTidslinjer()
             .kombinerUtenNull { it.filterNotNull().toMap() }
             .filtrer { !it.isNullOrEmpty() }
-            // Slår sammen like perioder
             .slåSammenLike()
 
     return andelerTilkjentYtelse
         .tilTidslinjerPerPerson().values
         .kombinerUtenNull { it }
         .filtrer { !it?.toList().isNullOrEmpty() }
-        .leftJoin(utdypendeVilkårsvurderingTidslinje) { andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode ->
+        .leftJoin(splittkriterierForVedtaksperiodeTidslinje) { andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode ->
             Pair(andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode)
         }
         .filtrerIkkeNull()
@@ -68,19 +65,19 @@ fun hentPerioderMedUtbetaling(
         }
 }
 
-private data class VilkårResulaterKombinert(
+private data class SplittkriterierForVedtaksperiode(
     val utdypendeVilkårsvurderinger: Set<UtdypendeVilkårsvurdering>,
     val regelverk: Regelverk?
 )
 
-private fun Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>.tilVilkårResulaterKombinertPerAktørTidslinjer():
-    List<Tidslinje<Pair<Aktør, VilkårResulaterKombinert>?, Måned>> =
+private fun Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>.tilSplittkriterierForVedtaksperiodeTidslinjer():
+    List<Tidslinje<Pair<Aktør, SplittkriterierForVedtaksperiode>?, Måned>> =
     this.map { (aktør, vilkårsvurderingTidslinje) ->
         vilkårsvurderingTidslinje.map { vilkårResultater ->
             vilkårResultater?.let {
                 Pair(
                     aktør,
-                    VilkårResulaterKombinert(
+                    SplittkriterierForVedtaksperiode(
                         utdypendeVilkårsvurderinger = hentSetAvVilkårsVurderinger(vilkårResultater),
                         regelverk = hentRegelverkPersonErVurdertEtterIPeriode(vilkårResultater)
                     )
