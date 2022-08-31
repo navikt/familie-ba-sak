@@ -314,12 +314,11 @@ class BrevPeriodeGenerator(
         gjelderSøker = gjelderSøker
     )
 
-    private fun hentBarnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode(eøsBegrunnelseMedTriggere: EØSBegrunnelseMedTriggere): List<MinimertRestPerson> {
-        return hentBarnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode(
+    private fun hentBarnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode(eøsBegrunnelseMedTriggere: EØSBegrunnelseMedTriggere): List<MinimertRestPerson> =
+        hentBarnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode(
             eøsBegrunnelseMedTriggere,
             restBehandlingsgrunnlagForBrev.minimertePersonResultater,
             restBehandlingsgrunnlagForBrev.personerPåBehandling,
             minimertVedtaksperiode
         )
-    }
 }
