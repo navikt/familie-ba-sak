@@ -85,26 +85,17 @@ class BrevPeriodeGenerator(
 
             when {
                 eøsBegrunnelseMedTriggere.sanityEØSBegrunnelse.skalBrukeKompetanseData() -> {
-                    kompetanserSomPasserMedBegrunnelse.map { kompetanse ->
-                        val barnIbegrunnelse =
-                            if (eøsBegrunnelseMedTriggere.sanityEØSBegrunnelse.skalBrukeVilkårData()) {
-                                barnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode.intersect(kompetanse.personer.toSet())
-                            } else {
-                                kompetanse.personer
-                            }
-
-                        hentEøsBegrunnelseMedKompetanseData(
-                            eøsBegrunnelse = eøsBegrunnelseMedTriggere.eøsBegrunnelse,
-                            barnIbegrunnelse = barnIbegrunnelse,
-                            gjelderSøker = gjelderSøker,
-                            kompetanse = kompetanse
+                    kompetanserSomPasserMedBegrunnelse.map {
+                        it.tilEøsBegrunnelseMedKompetanse(
+                            eøsBegrunnelseMedTriggere = eøsBegrunnelseMedTriggere,
+                            barnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode = barnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode,
+                            gjelderSøker = gjelderSøker
                         )
                     }
                 }
                 eøsBegrunnelseMedTriggere.sanityEØSBegrunnelse.skalBrukeVilkårData() -> {
                     listOf(
-                        hentEøsBegrunnelseData(
-                            eøsBegrunnelse = eøsBegrunnelseMedTriggere.eøsBegrunnelse,
+                        eøsBegrunnelseMedTriggere.eøsBegrunnelse.tilEøsBegrunnelseData(
                             barnIbegrunnelse = barnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode,
                             gjelderSøker = gjelderSøker
                         )
@@ -284,31 +275,39 @@ class BrevPeriodeGenerator(
             }
         }
 
-    private fun hentEøsBegrunnelseMedKompetanseData(
-        eøsBegrunnelse: EØSStandardbegrunnelse,
-        barnIbegrunnelse: Collection<MinimertRestPerson>,
-        gjelderSøker: Boolean,
-        kompetanse: MinimertKompetanse
-    ) = EØSBegrunnelseMedKompetanseData(
-        vedtakBegrunnelseType = eøsBegrunnelse.vedtakBegrunnelseType,
-        apiNavn = eøsBegrunnelse.sanityApiNavn,
-        annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
-        annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetslandNavn?.navn,
-        barnetsBostedsland = kompetanse.barnetsBostedslandNavn.navn,
-        barnasFodselsdatoer = Utils.slåSammen(barnIbegrunnelse.map { it.fødselsdato.tilKortString() }),
-        antallBarn = barnIbegrunnelse.size,
-        maalform = brevMålform.tilSanityFormat(),
-        sokersAktivitet = kompetanse.søkersAktivitet,
-        gjelderSøker = gjelderSøker
-    )
+    private fun MinimertKompetanse.tilEøsBegrunnelseMedKompetanse(
+        eøsBegrunnelseMedTriggere: EØSBegrunnelseMedTriggere,
+        barnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode: List<MinimertRestPerson>,
+        gjelderSøker: Boolean
+    ): EØSBegrunnelseMedKompetanseData {
+        val barnIbegrunnelse =
+            if (eøsBegrunnelseMedTriggere.sanityEØSBegrunnelse.skalBrukeVilkårData()) {
+                barnFraVilkårResultaterSomPasserMedBegrunnelseOgPeriode.intersect(this.personer.toSet())
+            } else {
+                this.personer
+            }
 
-    private fun hentEøsBegrunnelseData(
-        eøsBegrunnelse: EØSStandardbegrunnelse,
+        return EØSBegrunnelseMedKompetanseData(
+            vedtakBegrunnelseType = eøsBegrunnelseMedTriggere.eøsBegrunnelse.vedtakBegrunnelseType,
+            apiNavn = eøsBegrunnelseMedTriggere.eøsBegrunnelse.sanityApiNavn,
+            annenForeldersAktivitet = this
+                .annenForeldersAktivitet,
+            annenForeldersAktivitetsland = this.annenForeldersAktivitetslandNavn?.navn,
+            barnetsBostedsland = this.barnetsBostedslandNavn.navn,
+            barnasFodselsdatoer = Utils.slåSammen(barnIbegrunnelse.map { it.fødselsdato.tilKortString() }),
+            antallBarn = barnIbegrunnelse.size,
+            maalform = brevMålform.tilSanityFormat(),
+            sokersAktivitet = this.søkersAktivitet,
+            gjelderSøker = gjelderSøker
+        )
+    }
+
+    private fun EØSStandardbegrunnelse.tilEøsBegrunnelseData(
         barnIbegrunnelse: List<MinimertRestPerson>,
         gjelderSøker: Boolean
     ) = EØSBegrunnelseData(
-        vedtakBegrunnelseType = eøsBegrunnelse.vedtakBegrunnelseType,
-        apiNavn = eøsBegrunnelse.sanityApiNavn,
+        vedtakBegrunnelseType = this.vedtakBegrunnelseType,
+        apiNavn = this.sanityApiNavn,
         barnasFodselsdatoer = Utils.slåSammen(barnIbegrunnelse.map { it.fødselsdato.tilKortString() }),
         antallBarn = barnIbegrunnelse.size,
         maalform = brevMålform.tilSanityFormat(),
