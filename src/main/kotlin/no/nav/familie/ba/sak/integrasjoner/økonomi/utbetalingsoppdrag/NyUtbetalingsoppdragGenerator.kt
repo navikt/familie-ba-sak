@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
 import no.nav.familie.ba.sak.integrasjoner.økonomi.valider
 import no.nav.familie.ba.sak.integrasjoner.økonomi.validerOpphørsoppdrag
@@ -10,7 +9,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOppr
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteAndelPerKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -23,7 +21,6 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 import java.time.YearMonth
 
 @Component
@@ -209,10 +206,9 @@ class NyUtbetalingsoppdragGenerator {
         }
 
         // oppdater tilkjentYtlese med andelerTilkjentYTelser og utbetalingsoppdrag
-        return oppdaterTilkjentYtelse(
+        return tilkjentYtelse.copy(
             behandling = vedtak.behandling,
-            tilkjentYtelse = tilkjentYtelse,
-            utbetalingsoppdrag = utbetalingsoppdrag
+            utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
         )
     }
 
@@ -239,13 +235,12 @@ class NyUtbetalingsoppdragGenerator {
         sisteOffsetIKjedeOversikt: Map<String, Int>,
         sisteOffsetPåFagsak: Int? = null
     ): Pair<List<AndelTilkjentYtelse>, List<Utbetalingsperiode>> {
-        var offset =
-            if (!erFørsteBehandlingPåFagsak) {
-                sisteOffsetPåFagsak?.plus(1)
-                    ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
-            } else {
-                0
-            }
+        var offset = if (!erFørsteBehandlingPåFagsak) {
+            sisteOffsetPåFagsak?.plus(1)
+                ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
+        } else {
+            0
+        }
 
         val utbetalingsperiode = andeler.filter { kjede -> kjede.isNotEmpty() }
             .flatMap { kjede: List<AndelTilkjentYtelse> ->
@@ -266,41 +261,12 @@ class NyUtbetalingsoppdragGenerator {
                     ).lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
                         andel.periodeOffset = offset.toLong()
                         andel.forrigePeriodeOffset = forrigeOffset?.toLong()
-                        andel.kildeBehandlingId =
-                            andel.behandlingId // Trengs for å finne tilbake ved konsistensavstemming
+                        // Trengs for å finne tilbake ved konsistensavstemming
+                        andel.kildeBehandlingId = andel.behandlingId
                         offset++
                     }
                 }
             }
         return andeler.flatten() to utbetalingsperiode
-    }
-
-    internal fun oppdaterTilkjentYtelse(
-        behandling: Behandling,
-        tilkjentYtelse: TilkjentYtelse,
-        utbetalingsoppdrag: Utbetalingsoppdrag
-    ): TilkjentYtelse {
-        val erRentOpphør =
-            utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
-        var opphørsdato: LocalDate? = null
-        if (erRentOpphør) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.minOf { it.opphør!!.opphørDatoFom }
-        }
-
-        if (behandling.type == BehandlingType.REVURDERING) {
-            val opphørPåRevurdering = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
-            if (opphørPåRevurdering.isNotEmpty()) {
-                opphørsdato = opphørPåRevurdering.maxByOrNull { it.opphør!!.opphørDatoFom }!!.opphør!!.opphørDatoFom
-            }
-        }
-
-        return tilkjentYtelse.apply {
-            this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-            this.stønadTom = tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
-            this.stønadFom =
-                if (erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
-            this.endretDato = LocalDate.now()
-            this.opphørFom = opphørsdato?.toYearMonth()
-        }
     }
 }
