@@ -96,7 +96,7 @@ fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer(
     VilkårsvurderingTidslinjer(this.byggVilkårsvurdering(), this.byggPersonopplysningGrunnlag())
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
-    TilkjentYtelseUtils.beregnTilkjentYtelse(
+    TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
         vilkårsvurdering = this.byggVilkårsvurdering(),
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
         behandling = behandling
