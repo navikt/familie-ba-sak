@@ -107,7 +107,7 @@ class EndretUtbetalingAndelValideringTest {
         )
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel,
-            listOf(endretUtbetalingAndel.copy(årsak = Årsak.EØS_SEKUNDÆRLAND))
+            listOf(endretUtbetalingAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT))
         )
     }
 

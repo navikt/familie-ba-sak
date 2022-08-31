@@ -72,6 +72,7 @@ class NyUtbetalingsoppdragGenerator {
 
         // Trenger denne sjekken som slipper å sette offset når det ikke finnes andelerTilOpprettelse,dvs nullutbetaling
         val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
+            // lager utbetalingsperioder og oppdaterer andelerTilkjentYtelse
             val opprettelsePeriodeMedAndeler = lagUtbetalingsperioderForOpprettelse(
                 andeler = andelerTilOpprettelse,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
@@ -117,7 +118,8 @@ class NyUtbetalingsoppdragGenerator {
                 behandlingsresultat = vedtak.behandling.resultat,
                 behandlingskategori = vedtak.behandling.kategori,
                 kompetanser = tilkjentYtelseMetaData.kompetanser.toList(),
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                // her må vi sende alle andeler slik at det valideres for nullutbetalinger også
+                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
                 erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             )
         }
