@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonne
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -98,7 +99,7 @@ class TilpassDifferanseberegningEtterValutakursService(
  */
 fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
     tilkjentYtelse: TilkjentYtelse,
-    oppdaterteAndeler: List<AndelTilkjentYtelse>
+    oppdaterteAndeler: Collection<AndelTilkjentYtelse>
 ) {
     if (tilkjentYtelse.andelerTilkjentYtelse.erIPraksisLik(oppdaterteAndeler)) {
         return
@@ -119,12 +120,27 @@ fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
     tilkjentYtelse.andelerTilkjentYtelse.clear()
     tilkjentYtelse.andelerTilkjentYtelse.addAll(skalBeholdes + skalLeggesTil)
 
-    // Ekstra forsikring: Bygger tidslinjene på nytt for å sjekke at det ikke er introdusert feil
-    // Krasjer med TidslinjeException hvis det forekommer perioder (per barn) som overlapper
+    // Ekstra forsikring: Bygger tidslinjene på nytt for å sjekke at det ikke er introdusert duplikater
+    // Krasjer med Exception hvis det forekommer perioder per aktør og ytelsetype som overlapper
     // Bør fjernes hvis det ikke forekommer feil
-    tilkjentYtelse.andelerTilkjentYtelse.tilSeparateTidslinjerForBarna()
+    tilkjentYtelse.andelerTilkjentYtelse.sjekkForDuplikater()
 
     this.saveAndFlush(tilkjentYtelse)
+}
+
+@Deprecated("Brukes som sikkerhetsnett for å sjekke at det ikke oppstår duplikater. Burde være unødvendig")
+internal fun Iterable<AndelTilkjentYtelse>.sjekkForDuplikater() {
+    try {
+        // Det skal ikke være overlapp i andeler for en gitt ytelsestype og aktør
+        this.groupBy { it.aktør.aktørId + it.type }
+            .mapValues { (_, andeler) -> tidslinje { andeler.map { it.tilPeriode() } } }
+            .values.forEach { it.perioder() }
+    } catch (throwable: Throwable) {
+        throw IllegalStateException(
+            "Endring av andeler tilkjent ytelse i differanseberegning holder på å introdusere duplikater",
+            throwable
+        )
+    }
 }
 
 fun FeatureToggleService.kanHåndtereEøsUtenomPrimærland() =
