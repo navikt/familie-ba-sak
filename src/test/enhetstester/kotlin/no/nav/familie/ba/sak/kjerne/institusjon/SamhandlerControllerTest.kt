@@ -34,36 +34,38 @@ internal class SamhandlerControllerTest {
 
     @Test
     fun `Søk etter samhandlere skal returnere samhandlere på navn og ikke hente flere hvis det ikke finnes flere samhandlere`() {
-        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", 0) } returns SøkSamhandlerInfo(
+        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 0) } returns SøkSamhandlerInfo(
             false,
             samhandlereInfoMock
         )
 
-        val samhandlerInfo = samhandlerController.søkSamhandlerinfoFraNavn(SøkSamhandlerInfoRequest("Bufetat"))
+        val samhandlerInfo =
+            samhandlerController.søkSamhandlerinfoFraNavn(SøkSamhandlerInfoRequest("Bufetat", null, null))
         assertThat(samhandlerInfo.data).isNotNull()
         assertThat(samhandlerInfo.data).hasSize(2)
         assertThat(samhandlerInfo.data?.get(0)?.tssEksternId).isEqualTo("80000999999")
         assertThat(samhandlerInfo.data?.get(1)?.tssEksternId).isEqualTo("80000888888")
-        verify(exactly = 1) { samhandlerKlientMock.søkSamhandlere(any(), any()) }
+        verify(exactly = 1) { samhandlerKlientMock.søkSamhandlere(any(), any(), any(), any()) }
     }
 
     @Test
     fun `Søk etter samhandlere skal returnere samhandlere på navn og slå sammen resultatene fra alle sidene ved mer enn 1 side`() {
-        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", 0) } returns SøkSamhandlerInfo(
+        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 0) } returns SøkSamhandlerInfo(
             true,
             listOf(samhandlereInfoMock.get(0))
         )
 
-        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", 1) } returns SøkSamhandlerInfo(
+        every { samhandlerKlientMock.søkSamhandlere("BUFETAT", null, null, 1) } returns SøkSamhandlerInfo(
             false,
             listOf(samhandlereInfoMock.get(1))
         )
 
-        val samhandlerInfo = samhandlerController.søkSamhandlerinfoFraNavn(SøkSamhandlerInfoRequest("Bufetat"))
+        val samhandlerInfo =
+            samhandlerController.søkSamhandlerinfoFraNavn(SøkSamhandlerInfoRequest("Bufetat", null, null))
         assertThat(samhandlerInfo.data).isNotNull()
         assertThat(samhandlerInfo.data).hasSize(2)
         assertThat(samhandlerInfo.data?.get(0)?.tssEksternId).isEqualTo("80000999999")
         assertThat(samhandlerInfo.data?.get(1)?.tssEksternId).isEqualTo("80000888888")
-        verify(exactly = 2) { samhandlerKlientMock.søkSamhandlere(any(), any()) }
+        verify(exactly = 2) { samhandlerKlientMock.søkSamhandlere(any(), any(), any(), any()) }
     }
 }
