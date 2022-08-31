@@ -24,7 +24,6 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
 
     @Test
     fun `skal kaste exception hvis tilkjent ytelse oppdateres med overlappende andel tilkjent ytelse for et barn`() {
-
         val behandling = lagBehandling()
 
         val forrigeTilkjentYtelse = TilkjentYtelseBuilder(startMåned, behandling).bygg()
@@ -45,7 +44,6 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
 
     @Test
     fun `skal kaste exception hvis tilkjent ytelse oppdateres med overlappende andel tilkjent ytelse for søker`() {
-
         val behandling = lagBehandling()
 
         val forrigeTilkjentYtelse = TilkjentYtelseBuilder(startMåned, behandling).bygg()
@@ -66,7 +64,6 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
 
     @Test
     fun `skal ikke kaste exception hvis tilkjent ytelse oppdateres med gyldige andeler`() {
-
         val behandling = lagBehandling()
 
         val forrigeTilkjentYtelse = TilkjentYtelseBuilder(startMåned, behandling)

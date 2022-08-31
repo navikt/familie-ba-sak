@@ -130,7 +130,6 @@ fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
 
 @Deprecated("Brukes som sikkerhetsnett for å sjekke at det ikke oppstår duplikater. Burde være unødvendig")
 internal fun Iterable<AndelTilkjentYtelse>.sjekkForDuplikater() {
-
     try {
         // Det skal ikke være overlapp i andeler for en gitt ytelsestype og aktør
         this.groupBy { it.aktør.aktørId + it.type }
