@@ -2,20 +2,19 @@ package no.nav.familie.ba.sak.integrasjoner.ecb
 
 import no.nav.familie.ba.sak.common.del
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.http.ecb.ECBRestClient
-import no.nav.familie.http.ecb.Frequency
-import no.nav.familie.http.ecb.domene.ExchangeRate
-import no.nav.familie.http.ecb.domene.exchangeRateForCurrency
-import no.nav.familie.http.ecb.exception.ECBClientException
+import no.nav.familie.valutakurs.Frequency
+import no.nav.familie.valutakurs.ValutakursRestClient
+import no.nav.familie.valutakurs.domene.ExchangeRate
+import no.nav.familie.valutakurs.domene.exchangeRateForCurrency
+import no.nav.familie.valutakurs.exception.ValutakursClientException
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
-import kotlin.jvm.Throws
 
 @Service
-@Import(ECBRestClient::class)
-class ECBService(private val ecbClient: ECBRestClient) {
+@Import(ValutakursRestClient::class)
+class ECBService(private val ecbClient: ValutakursRestClient) {
 
     /**
      * @param utenlandskValuta valutaen vi skal konvertere til NOK
@@ -26,7 +25,7 @@ class ECBService(private val ecbClient: ECBRestClient) {
     fun hentValutakurs(utenlandskValuta: String, kursDato: LocalDate): BigDecimal {
         try {
             val exchangeRates =
-                ecbClient.getExchangeRates(Frequency.Daily, listOf(ECBConstants.NOK, utenlandskValuta), kursDato)
+                ecbClient.hentValutakurs(Frequency.Daily, listOf(ECBConstants.NOK, utenlandskValuta), kursDato)
             validateExchangeRates(utenlandskValuta, kursDato, exchangeRates)
             val valutakursNOK = exchangeRates.exchangeRateForCurrency(ECBConstants.NOK)!!
             if (utenlandskValuta == ECBConstants.EUR) {
@@ -34,23 +33,34 @@ class ECBService(private val ecbClient: ECBRestClient) {
             }
             val valutakursUtenlandskValuta = exchangeRates.exchangeRateForCurrency(utenlandskValuta)!!
             return beregnValutakurs(valutakursUtenlandskValuta.exchangeRate, valutakursNOK.exchangeRate)
-        } catch (e: ECBClientException) {
+        } catch (e: ValutakursClientException) {
             throw ECBServiceException(e.message, e)
         }
     }
 
-    private fun beregnValutakurs(valutakursUtenlandskValuta: BigDecimal, valutakursNOK: BigDecimal) = valutakursNOK.del(valutakursUtenlandskValuta, 10)
+    private fun beregnValutakurs(valutakursUtenlandskValuta: BigDecimal, valutakursNOK: BigDecimal) =
+        valutakursNOK.del(valutakursUtenlandskValuta, 10)
 
-    private fun validateExchangeRates(currency: String, exchangeRateDate: LocalDate, exchangeRates: List<ExchangeRate>) {
+    private fun validateExchangeRates(
+        currency: String,
+        exchangeRateDate: LocalDate,
+        exchangeRates: List<ExchangeRate>
+    ) {
         val expectedSize = if (currency != ECBConstants.EUR) 2 else 1
-        val currencies = if (currency != ECBConstants.EUR) listOf(currency, ECBConstants.NOK) else listOf(ECBConstants.NOK)
+        val currencies =
+            if (currency != ECBConstants.EUR) listOf(currency, ECBConstants.NOK) else listOf(ECBConstants.NOK)
 
         if (!isValid(exchangeRates, currencies, exchangeRateDate, expectedSize)) {
             throwValidationException(currency, exchangeRateDate)
         }
     }
 
-    private fun isValid(exchangeRates: List<ExchangeRate>, currencies: List<String>, exchangeRateDate: LocalDate, expectedSize: Int) =
+    private fun isValid(
+        exchangeRates: List<ExchangeRate>,
+        currencies: List<String>,
+        exchangeRateDate: LocalDate,
+        expectedSize: Int
+    ) =
         exchangeRates.size == expectedSize &&
             exchangeRates.all { it.date == exchangeRateDate } &&
             exchangeRates.map { it.currency }.containsAll(currencies)
