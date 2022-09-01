@@ -5,6 +5,7 @@ on:
       - 'master'
 env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
+  IMAGE_ID: ghcr.io/navikt/familie-ba-sak:${{ github.run_id }}
   IMAGE_LATEST: ghcr.io/navikt/familie-ba-sak:latest
 jobs:
   deploy-to-prod:
@@ -26,7 +27,7 @@ jobs:
         run: mvn -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 -B --no-transfer-progress package --settings .m2/maven-settings.xml --file pom.xml
       - name: Bygg Docker image
         run: |
-          docker build -t ${IMAGE} -t ${IMAGE_LATEST} .
+          docker build -t ${IMAGE} -t ${IMAGE_LATEST} -t ${IMAGE_ID} .
       - name: Login to GitHub Container Registry
         uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
         with:
@@ -34,15 +35,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Legg på git-tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.0
+        uses: actions/github-script@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ${{ github.sha }}
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ github.run_id}}',
+              sha: context.sha
+            })
       - name: Push Docker image med versjonstag
         run: docker push ${IMAGE}
       - name: Push Docker image med 'latest' tag
         run: docker push ${IMAGE_LATEST}
+      - name: Push Docker image med id
+        run: docker push ${IMAGE_ID}
       - name: Deploy til dev-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
