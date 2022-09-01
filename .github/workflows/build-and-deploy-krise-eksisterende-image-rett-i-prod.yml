@@ -1,0 +1,18 @@
+name: Build-Deploy-KRISE-RETT-I-PROD
+on:
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/navikt/familie-bygg-eksperimentering:${{ github.ref_name }}
+jobs:
+  deploy-to-prod:
+    name: Deploy eksisterende image til prod-gcp (MÅ KUN BRUKES VED KRISE)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy til prod-gcp
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: prod-gcp
+          RESOURCE: .deploy/nais/app-prod.yaml
+          VAR: image=${{ env.IMAGE }}

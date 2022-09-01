@@ -33,6 +33,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Legg på git-tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ github.sha }}
       - name: Push Docker image med versjonstag
         run: docker push ${IMAGE}
       - name: Push Docker image med 'latest' tag
