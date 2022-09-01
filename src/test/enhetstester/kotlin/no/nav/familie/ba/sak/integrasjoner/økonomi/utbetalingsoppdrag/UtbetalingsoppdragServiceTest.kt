@@ -30,6 +30,7 @@ internal class UtbetalingsoppdragServiceTest {
         every { hentTilkjentYtelseForBehandling(any()) } returns mockk()
         every { hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(any()) } returns mockk()
         every { lagreTilkjentYtelseMedOppdaterteAndeler(any()) } returns mockk()
+        every { populerTilkjentYtelse(any(), any()) } returns mockk()
     }
     val service = spyk(UtbetalingsoppdragService(mockk(), økonomiKlient, beregningService, mockk(), mockk(), mockk()))
 
