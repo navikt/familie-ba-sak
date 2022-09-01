@@ -8,15 +8,14 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVu
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Properties
 
@@ -48,7 +47,7 @@ class BehandleFødselshendelseTask(
             // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
             val dagerSidenBarnetBleFødt =
                 ChronoUnit.DAYS.between(
-                    LocalDate.parse(it.substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy")),
+                    Fødselsnummer(it).fødselsdato,
                     LocalDateTime.now()
                 )
             dagerSidenBarnBleFødt.record(dagerSidenBarnetBleFødt.toDouble())

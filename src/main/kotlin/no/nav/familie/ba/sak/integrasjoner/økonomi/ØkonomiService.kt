@@ -3,6 +3,9 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
@@ -13,6 +16,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -32,18 +37,28 @@ class ØkonomiService(
     private val økonomiKlient: ØkonomiKlient,
     private val beregningService: BeregningService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService,
+    private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
-    fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak: Vedtak, saksbehandlerId: String) {
+    fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak: Vedtak, saksbehandlerId: String): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
-        iverksettOppdrag(utbetalingsoppdrag)
+        iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
+        return utbetalingsoppdrag
     }
 
-    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
+    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, behandlingId: Long) {
+        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
+            UtbetalingsoppdragService.logger.warn(
+                "Iverksetter ikke noe mot oppdrag. " +
+                    "Ingen utbetalingsperioder for behandlingId=$behandlingId"
+            )
+            return
+        }
         try {
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
         } catch (exception: Exception) {
@@ -59,8 +74,13 @@ class ØkonomiService(
         }
     }
 
-    fun hentStatus(oppdragId: OppdragId): OppdragStatus =
-        økonomiKlient.hentStatus(oppdragId)
+    fun hentStatus(oppdragId: OppdragId, behandlingId: Long): OppdragStatus {
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId)
+        if (andelerTilkjentYtelse.any { it.erAndelSomSkalSendesTilOppdrag() }) {
+            return økonomiKlient.hentStatus(oppdragId)
+        }
+        return OppdragStatus.KVITTERT_OK // sendte ikke data til økonomi
+    }
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -135,10 +155,20 @@ class ØkonomiService(
 
         return utbetalingsoppdrag.also {
             if (skalValideres) {
-                it.valider(
-                    behandlingsresultat = vedtak.behandling.resultat,
-                    erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
+                if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
+                    it.valider(
+                        behandlingsresultat = vedtak.behandling.resultat,
+                        behandlingskategori = vedtak.behandling.kategori,
+                        kompetanser = kompetanseRepository.finnFraBehandlingId(vedtak.behandling.id).toList(),
+                        andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id),
+                        erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                    )
+                } else {
+                    it.valider(
+                        behandlingsresultat = vedtak.behandling.resultat,
+                        erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                    )
+                }
             }
         }
     }
@@ -147,6 +177,7 @@ class ØkonomiService(
         val alleAndelerTilkjentYtelserIverksattMotØkonomi =
             beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
                 .flatMap { it.andelerTilkjentYtelse }
+                .filter { it.erAndelSomSkalSendesTilOppdrag() }
         val alleTideligereKjederIverksattMotØkonomi =
             kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
 
@@ -156,7 +187,6 @@ class ØkonomiService(
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
         behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
             .mapNotNull { iverksattBehandling ->
-
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
                     .takeIf { it.isNotEmpty() }
                     ?.let { andelerTilkjentYtelse ->
@@ -169,7 +199,7 @@ class ØkonomiService(
             error("Generert utbetalingsoppdrag for opphør inneholder oppdragsperioder med løpende utbetaling.")
         }
 
-        if (utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }.isEmpty()) {
+        if (utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.none { it.opphør != null }) {
             error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
         }
     }

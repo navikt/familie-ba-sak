@@ -60,6 +60,9 @@ class BeregningService(
         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
+    fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
@@ -74,7 +77,9 @@ class BeregningService(
         return iverksatteBehandlinger.mapNotNull {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
                 it.id
-            )
+            )?.takeIf { tilkjentYtelse ->
+                tilkjentYtelse.andelerTilkjentYtelse.any { aty -> aty.erAndelSomSkalSendesTilOppdrag() }
+            }
         }
     }
 
@@ -166,25 +171,40 @@ class BeregningService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
-        val tilkjentYtelse = TilkjentYtelseUtils
-            .beregnTilkjentYtelse(
+        val tilkjentYtelse = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE)) {
+            TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling,
-                skalBrukeNyMåteÅGenerereAndeler = featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE)
+                endretUtbetalingAndeler = endretUtbetalingAndeler
             ) { søkerAktør ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     søkerAktør = søkerAktør,
                     behandlingId = behandling.id
                 )
             }
+        } else {
+            val tilkjentYtelse = TilkjentYtelseUtils
+                .beregnTilkjentYtelseGammel(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    behandling = behandling
+                ) { søkerAktør ->
+                    småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
+                        søkerAktør = søkerAktør,
+                        behandlingId = behandling.id
+                    )
+                }
 
-        val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            tilkjentYtelse.andelerTilkjentYtelse,
-            endretUtbetalingAndeler
-        )
-        tilkjentYtelse.andelerTilkjentYtelse.clear()
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
+            val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+                tilkjentYtelse.andelerTilkjentYtelse.toList(),
+                endretUtbetalingAndeler
+            )
+            tilkjentYtelse.andelerTilkjentYtelse.clear()
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
+
+            tilkjentYtelse
+        }
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
         tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }
@@ -261,7 +281,7 @@ class BeregningService(
                 }.isNotEmpty()
             } ?: emptyList()
 
-    private fun populerTilkjentYtelse(
+    fun populerTilkjentYtelse(
         behandling: Behandling,
         utbetalingsoppdrag: Utbetalingsoppdrag
     ): TilkjentYtelse {

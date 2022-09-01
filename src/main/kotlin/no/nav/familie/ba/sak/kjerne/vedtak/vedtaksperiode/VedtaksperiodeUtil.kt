@@ -42,19 +42,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
-fun hentPerioderMedUtbetaling(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    vedtak: Vedtak
-) = andelerTilkjentYtelse.lagVertikaleSegmenter()
-    .map { (segmenter, _) ->
-        VedtaksperiodeMedBegrunnelser(
-            fom = segmenter.fom,
-            tom = segmenter.tom,
-            vedtak = vedtak,
-            type = Vedtaksperiodetype.UTBETALING
-        )
-    }
-
 fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
     reduksjonsperioder: List<VedtaksperiodeMedBegrunnelser>
@@ -266,7 +253,12 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
         andelerTilkjentYtelse,
         utvidetVedtaksperiodeMedBegrunnelser
     ),
-    ytelserForrigePerioder = andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelser) }
+    ytelserForrigePerioder = andelerTilkjentYtelse.filter {
+        ytelseErFraForrigePeriode(
+            it,
+            utvidetVedtaksperiodeMedBegrunnelser
+        )
+    }
 )
 
 fun hentGyldigeEØSBegrunnelserForPeriode(
@@ -442,4 +434,7 @@ fun hentYtelserForSøkerForrigeMåned(
         ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelser)
 }.map { it.type }
 
-fun ytelseErFraForrigePeriode(ytelse: AndelTilkjentYtelse, utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser) = ytelse.stønadTom.sisteDagIInneværendeMåned().erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)
+fun ytelseErFraForrigePeriode(
+    ytelse: AndelTilkjentYtelse,
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser
+) = ytelse.stønadTom.sisteDagIInneværendeMåned().erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)
