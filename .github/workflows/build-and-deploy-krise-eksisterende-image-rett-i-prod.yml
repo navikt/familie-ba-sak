@@ -1,9 +1,13 @@
 name: Build-Deploy-KRISE-RETT-I-PROD
 on:
   workflow_dispatch:
-
+    inputs:
+      tag:
+        description: 'Tag for imaget som skal ut. Kun tag, ikkje fullt namn'
+        required: true
+        type: string
 env:
-  IMAGE: ghcr.io/navikt/familie-bygg-eksperimentering:${{ github.ref_name }}
+  IMAGE: ghcr.io/navikt/familie-ba-sak
 jobs:
   deploy-to-prod:
     name: Deploy eksisterende image til prod-gcp (MÅ KUN BRUKES VED KRISE)
@@ -15,4 +19,4 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/app-prod.yaml
-          VAR: image=${{ env.IMAGE }}
+          VAR: image=${{ env.IMAGE }}:${{ inputs.tag }}
