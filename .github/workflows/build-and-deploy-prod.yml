@@ -37,6 +37,8 @@ jobs:
         run: docker push ${IMAGE}
       - name: Push Docker image med 'latest' tag
         run: docker push ${IMAGE_LATEST}
+      - name: Skriv ut docker-taggen
+        run: echo 'Docker-tag er ${{ github.sha }} ' >> $GITHUB_STEP_SUMMARY
       - name: Deploy til dev-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
