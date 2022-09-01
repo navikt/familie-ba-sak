@@ -62,7 +62,7 @@ internal class TilkjentYtelseUtilsTest {
                 under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -95,7 +95,7 @@ internal class TilkjentYtelseUtilsTest {
                 under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -132,7 +132,7 @@ internal class TilkjentYtelseUtilsTest {
                 under18ÅrVilkårOppfyltTom = barnDødsfallsDato
             )
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -164,7 +164,7 @@ internal class TilkjentYtelseUtilsTest {
                 under18ÅrVilkårOppfyltTom = barnDødsfallsDato
             )
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -193,7 +193,7 @@ internal class TilkjentYtelseUtilsTest {
             under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -254,7 +254,7 @@ internal class TilkjentYtelseUtilsTest {
                 under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -295,7 +295,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 8, 18)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -327,7 +327,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 8, 18)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -359,7 +359,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 9, 1)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -391,7 +391,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 9, 1)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -423,7 +423,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 9, 2)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -455,7 +455,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 9, 2)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -487,7 +487,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 8, 31)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -519,7 +519,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 8, 31)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
