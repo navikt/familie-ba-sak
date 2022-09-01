@@ -134,7 +134,15 @@ curl -X POST "http://igroup:itest@localhost:8840/api/v1/topics" -H "Accept: appl
 
 ## Produksjonssetting
 
-Master-branchen blir automatisk bygget ved merge og deployet til prod.
+Master-branchen blir automatisk bygget ved merge og deployet først til preprod og dernest til prod.
+
+### Hastedeploy
+Hvis vi trenger å deploye raskt til prod, har vi egne byggejobber for den biten, som trigges manuelt.
+
+Den ene (krise-rett-i-prod) sjekker ut koden og bygger fra den.
+
+Den andre (krise-eksisterende-image-rett-i-prod) lar deg deploye et tidligere bygd image. Det slår til for eksempel hvis du skal rulle tilbake til forrige versjon.
+Denne tar som parameter taggen til imaget du vil deploye. Denne finner du under actions på GitHub, finn byggejobben du vil gå tilbake til, og kopier taggen derfra.
 
 ### Oppretting av Kafka kø
 
