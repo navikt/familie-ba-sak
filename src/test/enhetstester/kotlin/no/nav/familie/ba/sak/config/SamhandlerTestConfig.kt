@@ -30,7 +30,7 @@ class SamhandlerTestConfig {
         fun clearSamhandlerKlient(samhandlerKlient: SamhandlerKlient) {
             clearMocks(samhandlerKlient)
             every { samhandlerKlient.hentSamhandler(any()) } returns samhandlereInfoMock.first()
-            every { samhandlerKlient.søkSamhandlere(any(), any()) } returns SøkSamhandlerInfo(
+            every { samhandlerKlient.søkSamhandlere(any(), any(), any(), any()) } returns SøkSamhandlerInfo(
                 false,
                 samhandlereInfoMock
             )
