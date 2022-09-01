@@ -61,20 +61,21 @@ class IverksettMotOppdrag(
         behandling: Behandling,
         data: IverksettingTaskDTO
     ): StegType {
-        val utbetalingsoppdrag = økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
-            vedtak = vedtakService.hent(data.vedtaksId),
-            saksbehandlerId = data.saksbehandlerId
-        )
-        iverksattOppdrag.increment()
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
             val tilkjentYtelse = utbetalingsoppdragService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
                 vedtak = vedtakService.hent(data.vedtaksId),
                 saksbehandlerId = data.saksbehandlerId
             )
+            secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på ny måte=${tilkjentYtelse.utbetalingsoppdrag}")
+        } else {
+            val utbetalingsoppdrag = økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+                vedtak = vedtakService.hent(data.vedtaksId),
+                saksbehandlerId = data.saksbehandlerId
+            )
             val gammelUtbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
             secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på gamle måte=$gammelUtbetalingsoppdrag")
-            secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på ny måte=${tilkjentYtelse.utbetalingsoppdrag}")
         }
+        iverksattOppdrag.increment()
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
         if (forrigeIverksatteBehandling == null ||

@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import java.time.YearMonth
 
-data class TilkjentYtelseMetaData(
+data class VedtakMedTilkjentYtelse(
     val tilkjentYtelse: TilkjentYtelse,
     val vedtak: Vedtak,
     val saksbehandlerId: String,

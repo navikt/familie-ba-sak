@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -15,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.http.client.RessursException
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -43,11 +43,13 @@ class UtbetalingsoppdragService(
     ): TilkjentYtelse {
         val oppdatertBehandling = vedtak.behandling
         val tilkjentYtelse = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
+        val utbetalingsoppdrag = objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
 
-        // beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
+        // lagre tilkjent ytelse
+        val oppdatertTilkjentYtelse = beregningService.populerTilkjentYtelse(oppdatertBehandling, utbetalingsoppdrag)
+        beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
 
-        // beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
-        // iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
+        iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
 
         return tilkjentYtelse
     }
@@ -94,10 +96,10 @@ class UtbetalingsoppdragService(
             beregnOmMigreringsDatoErEndret(behandling, forrigeAndeler?.minByOrNull { it.stønadFom }?.stønadFom)
         val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId)
 
-        val sisteOffsetPerIdent = hentSisteOffsetPerIdent(behandling.fagsak.id)
-        val sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(behandling)
+        val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(behandling.fagsak.id)
+        val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling)
 
-        val tilkjentYtelseMetaData = TilkjentYtelseMetaData(
+        val vedtakMedTilkjentYtelse = VedtakMedTilkjentYtelse(
             tilkjentYtelse = tilkjentYtelse,
             vedtak = vedtak,
             saksbehandlerId = saksbehandlerId,
@@ -109,31 +111,10 @@ class UtbetalingsoppdragService(
         )
 
         return utbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
-            tilkjentYtelseMetaData = tilkjentYtelseMetaData,
+            vedtakMedTilkjentYtelse = vedtakMedTilkjentYtelse,
             forrigeTilkjentYtelse = forrigeTilkjentYtelse
         )
     }
-
-    private fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
-        val alleAndelerTilkjentYtelserIverksattMotØkonomi =
-            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
-                .flatMap { it.andelerTilkjentYtelse }
-                .filter { it.erAndelSomSkalSendesTilOppdrag() }
-        val alleTideligereKjederIverksattMotØkonomi =
-            ØkonomiUtils.kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
-
-        return ØkonomiUtils.gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
-    }
-
-    fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-        behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
-            .mapNotNull { iverksattBehandling ->
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { andelerTilkjentYtelse ->
-                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                    }
-            }.maxByOrNull { it }
 
     private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
         val erMigrertSak =

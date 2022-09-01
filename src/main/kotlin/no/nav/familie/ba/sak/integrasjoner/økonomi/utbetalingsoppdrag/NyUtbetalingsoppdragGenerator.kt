@@ -1,17 +1,12 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
-import no.nav.familie.ba.sak.integrasjoner.økonomi.valider
-import no.nav.familie.ba.sak.integrasjoner.økonomi.validerOpphørsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteAndelPerKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -30,16 +25,16 @@ class NyUtbetalingsoppdragGenerator {
      * Lager utbetalingsoppdrag med kjedede perioder av andeler.
      * Ved opphør sendes kun siste utbetalingsperiode (med opphørsdato).
      *
-     * @param[tilkjentYtelseMetaData] tilpasset objekt som inneholder tilkjentytelse,og andre nødvendige felter som trenges for å lage utbetalingsoppdrag
+     * @param[vedtakMedTilkjentYtelse] tilpasset objekt som inneholder tilkjentytelse,og andre nødvendige felter som trenges for å lage utbetalingsoppdrag
      * @param[forrigeTilkjentYtelser] forrige tilkjentYtelser
      * @return oppdatert TilkjentYtelse som inneholder generert utbetalingsoppdrag
      */
     internal fun lagTilkjentYtelseMedUtbetalingsoppdrag(
-        tilkjentYtelseMetaData: TilkjentYtelseMetaData,
+        vedtakMedTilkjentYtelse: VedtakMedTilkjentYtelse,
         forrigeTilkjentYtelse: TilkjentYtelse? = null
     ): TilkjentYtelse {
-        val tilkjentYtelse = tilkjentYtelseMetaData.tilkjentYtelse
-        val vedtak = tilkjentYtelseMetaData.vedtak
+        val tilkjentYtelse = vedtakMedTilkjentYtelse.tilkjentYtelse
+        val vedtak = vedtakMedTilkjentYtelse.vedtak
         val erFørsteBehandlingPåFagsak = forrigeTilkjentYtelse == null
         // Filtrer kun andeler som kan sendes til oppdrag
         val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
@@ -54,9 +49,9 @@ class NyUtbetalingsoppdragGenerator {
             ?: emptyList()
         val forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = kjedeinndelteAndeler(forrigeAndeler)
 
-        val erEndretMigreringsDato = tilkjentYtelseMetaData.endretMigreringsdato != null
+        val erEndretMigreringsDato = vedtakMedTilkjentYtelse.endretMigreringsdato != null
         // Generer et komplett nytt eller bare endringer på et eksisterende betalingsoppdrag.
-        val sisteBeståenAndelIHverKjede = if (tilkjentYtelseMetaData.erSimulering || erEndretMigreringsDato) {
+        val sisteBeståenAndelIHverKjede = if (vedtakMedTilkjentYtelse.erSimulering || erEndretMigreringsDato) {
             // Gjennom å sette andeler til null markeres at alle perioder i kjeden skal opphøres.
             sisteAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
         } else {
@@ -77,8 +72,8 @@ class NyUtbetalingsoppdragGenerator {
                 andeler = andelerTilOpprettelse,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                 vedtak = vedtak,
-                sisteOffsetIKjedeOversikt = tilkjentYtelseMetaData.sisteOffsetPerIdent,
-                sisteOffsetPåFagsak = tilkjentYtelseMetaData.sisteOffsetPåFagsak
+                sisteOffsetIKjedeOversikt = vedtakMedTilkjentYtelse.sisteOffsetPerIdent,
+                sisteOffsetPåFagsak = vedtakMedTilkjentYtelse.sisteOffsetPåFagsak
             )
             // oppdater andeler i tilkjentYtelse
             tilkjentYtelse.andelerTilkjentYtelse.addAll(opprettelsePeriodeMedAndeler.first)
@@ -91,7 +86,7 @@ class NyUtbetalingsoppdragGenerator {
         val andelerTilOpphør = andelerTilOpphørMedDato(
             forrigeKjeder,
             sisteBeståenAndelIHverKjede,
-            tilkjentYtelseMetaData.endretMigreringsdato
+            vedtakMedTilkjentYtelse.endretMigreringsdato
         )
         val opphøres: List<Utbetalingsperiode> = lagUtbetalingsperioderForOpphør(
             andeler = andelerTilOpphør,
@@ -101,28 +96,13 @@ class NyUtbetalingsoppdragGenerator {
         val aksjonskodePåOppdragsnivå =
             if (erFørsteBehandlingPåFagsak) Utbetalingsoppdrag.KodeEndring.NY else Utbetalingsoppdrag.KodeEndring.ENDR
         val utbetalingsoppdrag = Utbetalingsoppdrag(
-            saksbehandlerId = tilkjentYtelseMetaData.saksbehandlerId,
+            saksbehandlerId = vedtakMedTilkjentYtelse.saksbehandlerId,
             kodeEndring = aksjonskodePåOppdragsnivå,
             fagSystem = FAGSYSTEM,
             saksnummer = vedtak.behandling.fagsak.id.toString(),
             aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
             utbetalingsperiode = listOf(opphøres, opprettes).flatten()
         )
-
-        // valider utbetalingsoppdrag
-        val erBehandlingOpphørt = vedtak.behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT ||
-            vedtak.behandling.resultat == Behandlingsresultat.OPPHØRT
-        if (!tilkjentYtelseMetaData.erSimulering && erBehandlingOpphørt) utbetalingsoppdrag.validerOpphørsoppdrag()
-        utbetalingsoppdrag.also {
-            it.valider(
-                behandlingsresultat = vedtak.behandling.resultat,
-                behandlingskategori = vedtak.behandling.kategori,
-                kompetanser = tilkjentYtelseMetaData.kompetanser.toList(),
-                // her må vi sende alle andeler slik at det valideres for nullutbetalinger også
-                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-            )
-        }
 
         // oppdater tilkjentYtlese med andelerTilkjentYTelser og utbetalingsoppdrag
         return tilkjentYtelse.copy(

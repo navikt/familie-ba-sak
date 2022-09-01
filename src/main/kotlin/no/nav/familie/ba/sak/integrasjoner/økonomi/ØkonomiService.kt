@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -116,9 +115,9 @@ class ØkonomiService(
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
-            val sisteOffsetPerIdent = hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id)
+            val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id)
 
-            val sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
+            val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
 
             if (oppdatertTilstand.isNotEmpty()) {
                 oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
@@ -172,27 +171,6 @@ class ØkonomiService(
             }
         }
     }
-
-    private fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
-        val alleAndelerTilkjentYtelserIverksattMotØkonomi =
-            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
-                .flatMap { it.andelerTilkjentYtelse }
-                .filter { it.erAndelSomSkalSendesTilOppdrag() }
-        val alleTideligereKjederIverksattMotØkonomi =
-            kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
-
-        return gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
-    }
-
-    fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-        behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
-            .mapNotNull { iverksattBehandling ->
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { andelerTilkjentYtelse ->
-                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                    }
-            }.maxByOrNull { it }
 
     private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
         val erMigrertSak =
