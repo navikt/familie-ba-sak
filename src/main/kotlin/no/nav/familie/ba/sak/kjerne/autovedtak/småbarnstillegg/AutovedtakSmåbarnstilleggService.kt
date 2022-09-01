@@ -106,6 +106,7 @@ class AutovedtakSmåbarnstilleggService(
         try {
             begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
         } catch (e: VedtaksperiodefinnerSmåbarnstilleggFeil) {
+            logger.warn(e.message, e)
             return kanIkkeBehandleAutomatisk(
                 behandling = behandlingEtterBehandlingsresultat,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
