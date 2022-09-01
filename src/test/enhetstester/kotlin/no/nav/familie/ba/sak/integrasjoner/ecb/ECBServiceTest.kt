@@ -5,16 +5,16 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
-import no.nav.familie.http.ecb.ECBRestClient
-import no.nav.familie.http.ecb.Frequency
-import no.nav.familie.http.ecb.domene.ECBExchangeRate
-import no.nav.familie.http.ecb.domene.ECBExchangeRateDate
-import no.nav.familie.http.ecb.domene.ECBExchangeRateKey
-import no.nav.familie.http.ecb.domene.ECBExchangeRateValue
-import no.nav.familie.http.ecb.domene.ECBExchangeRatesData
-import no.nav.familie.http.ecb.domene.ECBExchangeRatesDataSet
-import no.nav.familie.http.ecb.domene.ECBExchangeRatesForCurrency
-import no.nav.familie.http.ecb.domene.toExchangeRates
+import no.nav.familie.valutakurs.Frequency
+import no.nav.familie.valutakurs.ValutakursRestClient
+import no.nav.familie.valutakurs.domene.ECBExchangeRate
+import no.nav.familie.valutakurs.domene.ECBExchangeRateDate
+import no.nav.familie.valutakurs.domene.ECBExchangeRateKey
+import no.nav.familie.valutakurs.domene.ECBExchangeRateValue
+import no.nav.familie.valutakurs.domene.ECBExchangeRatesData
+import no.nav.familie.valutakurs.domene.ECBExchangeRatesDataSet
+import no.nav.familie.valutakurs.domene.ECBExchangeRatesForCurrency
+import no.nav.familie.valutakurs.domene.toExchangeRates
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -29,7 +29,7 @@ import java.time.LocalDate
 class ECBServiceTest {
 
     @MockK
-    private lateinit var ecbClient: ECBRestClient
+    private lateinit var ecbClient: ValutakursRestClient
 
     @InjectMockKs
     private lateinit var ecbService: ECBService
@@ -48,7 +48,7 @@ class ECBServiceTest {
             valutakursDato.toString()
         )
         every {
-            ecbClient.getExchangeRates(
+            ecbClient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "SEK"),
                 valutakursDato
@@ -67,7 +67,7 @@ class ECBServiceTest {
             valutakursDato.toString()
         )
         every {
-            ecbClient.getExchangeRates(
+            ecbClient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "SEK"),
                 valutakursDato
@@ -85,7 +85,7 @@ class ECBServiceTest {
             valutakursDato.minusDays(1).toString()
         )
         every {
-            ecbClient.getExchangeRates(
+            ecbClient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "SEK"),
                 valutakursDato
@@ -104,7 +104,7 @@ class ECBServiceTest {
             valutakursDato.toString()
         )
         every {
-            ecbClient.getExchangeRates(
+            ecbClient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "EUR"),
                 valutakursDato
