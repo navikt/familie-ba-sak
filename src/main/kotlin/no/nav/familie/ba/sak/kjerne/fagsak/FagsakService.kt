@@ -111,13 +111,13 @@ class FagsakService(
 
         var fagsak = when (type) {
             FagsakType.INSTITUSJON -> {
-                if (institusjon == null) error("Mangler påkrevd variable orgnummer for institusjon")
+                if (institusjon == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
                 val åpenSak = fagsakRepository.finnÅpenFagsakForInstitusjon(aktør)
 
                 if (åpenSak != null && åpenSak.institusjon?.orgNummer != institusjon.orgNummer) {
                     throw FunksjonellFeil(
                         melding = "Kan kun ha en åpen sak av type Institusjon",
-                        frontendFeilmelding = "Det finnes allerede en åpen sak av type Institusjon registrert på en annen orgnummer. Lukk fagsaken med id=${åpenSak?.id} hvis man vil registrere en ny sak på et annet orgnummer"
+                        frontendFeilmelding = "Det finnes allerede en åpen sak av type Institusjon registrert på et annet orgnummer. Lukk fagsaken med id=${åpenSak.id} hvis man vil registrere en ny sak på et annet orgnummer"
                     )
                 }
                 åpenSak
@@ -262,7 +262,13 @@ class FagsakService(
             løpendeKategori = behandlingstemaService.hentLøpendeKategori(fagsakId = fagsakId),
             løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsakId),
             gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
-            fagsakType = fagsak.type
+            fagsakType = fagsak.type,
+            institusjon = fagsak.institusjon?.let {
+                InstitusjonInfo(
+                    orgNummer = it.orgNummer,
+                    tssEksternId = it.tssEksternId
+                )
+            }
         )
     }
 
