@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.lagUtbetalingsoppdrag
 import no.nav.familie.ba.sak.common.nesteBehandlingId
 import no.nav.familie.ba.sak.common.nesteVedtakId
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
@@ -627,7 +628,15 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val testDataBaSak =
             PerioderTestData(
                 fnr = fnr,
-                aktør = tilAktør(fnr).also { it.personidenter.add(Personident(historiskIdent, aktiv = false, aktør = it)) },
+                aktør = tilAktør(fnr).also {
+                    it.personidenter.add(
+                        Personident(
+                            historiskIdent,
+                            aktiv = false,
+                            aktør = it
+                        )
+                    )
+                },
                 endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -679,7 +688,6 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             behandling = behandling,
             opprettetDato = perioderTestData.endretDato.toLocalDate(),
             endretDato = perioderTestData.endretDato.toLocalDate(),
-            utbetalingsoppdrag = "utbetalt"
         ).also {
             it.andelerTilkjentYtelse.addAll(
                 perioderTestData.perioder.map { p ->
@@ -697,6 +705,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 }.toMutableSet()
             )
+            it.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag()
         }
         tilkjentYtelseRepository.saveAndFlush(ty)
     }
@@ -722,8 +731,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             id = nesteVedtakId(),
             behandling = behandling,
             opprettetDato = perioderTestData.endretDato.toLocalDate(),
-            endretDato = perioderTestData.endretDato.toLocalDate(),
-            utbetalingsoppdrag = "utbetalt"
+            endretDato = perioderTestData.endretDato.toLocalDate()
         ).also {
             it.andelerTilkjentYtelse.addAll(
                 perioderTestData.perioder.map { p ->
@@ -741,6 +749,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 }.toMutableSet()
             )
+            it.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag()
         }
         tilkjentYtelseRepository.saveAndFlush(ty)
     }

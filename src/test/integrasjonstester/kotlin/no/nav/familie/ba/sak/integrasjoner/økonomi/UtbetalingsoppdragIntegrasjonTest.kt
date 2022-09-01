@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagUtbetalingsoppdrag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -281,7 +282,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag()
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -426,7 +427,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag()
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -643,7 +644,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
 
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag()
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -808,7 +809,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag()
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -990,7 +991,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerRevurderingsbehandling)
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag()
 
         val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -1041,7 +1042,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
-        tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag()
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -1063,7 +1064,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val andelerRevurdering = emptyList<AndelTilkjentYtelse>()
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
-        tilkjentYtelse2.utbetalingsoppdrag = "Oppdrag"
+        tilkjentYtelse2.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag()
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             "saksbehandler",
@@ -1129,7 +1130,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         førsteTilkjentYtelse.andelerTilkjentYtelse.addAll(førsteAndelerTilkjentYtelse)
-        førsteTilkjentYtelse.utbetalingsoppdrag = "utbetalingsoppdrg"
+        førsteTilkjentYtelse.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag()
         tilkjentYtelseRepository.saveAndFlush(førsteTilkjentYtelse)
 
         økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(førsteVedtak, "Z123")

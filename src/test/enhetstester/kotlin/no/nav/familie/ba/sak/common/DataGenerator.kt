@@ -92,6 +92,7 @@ import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
@@ -1148,3 +1149,12 @@ fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
             else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
         }
     )
+
+fun lagUtbetalingsoppdrag(): Utbetalingsoppdrag = Utbetalingsoppdrag(
+    Utbetalingsoppdrag.KodeEndring.ENDR,
+    fagSystem = "BA",
+    saksnummer = randomFnr(),
+    aktoer = randomAktør().aktørId,
+    saksbehandlerId = "VT",
+    utbetalingsperiode = emptyList()
+)

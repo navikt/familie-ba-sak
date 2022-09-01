@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagUtbetalingsoppdrag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
@@ -119,7 +120,7 @@ class BehandlingServiceTest(
 
         tilkjentYtelseRepository.save(
             lagInitiellTilkjentYtelse(behandling).also {
-                it.utbetalingsoppdrag = "Utbetalingsoppdrag()"
+                it.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag()
             }
         )
         ferdigstillBehandling(behandling)

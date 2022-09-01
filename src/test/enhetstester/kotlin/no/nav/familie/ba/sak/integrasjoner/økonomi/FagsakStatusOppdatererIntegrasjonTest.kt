@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.common.lagUtbetalingsoppdrag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
@@ -117,8 +118,9 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         behandling = behandling,
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
-        utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null
-    )
+    ).also {
+        it.utbetalingsoppdragObjekt = if (erIverksatt) lagUtbetalingsoppdrag() else null
+    }
 
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
     private fun andelPåTilkjentYtelse(

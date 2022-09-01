@@ -76,7 +76,7 @@ class StønadsstatistikkController(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
         return if (tilkjentYtelse != null) {
-            tilkjentYtelse.utbetalingsoppdrag != null
+            tilkjentYtelse.utbetalingsoppdragObjekt != null
         } else {
             false
         }

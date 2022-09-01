@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -62,7 +64,7 @@ data class TilkjentYtelse(
     var endretDato: LocalDate,
 
     @Column(name = "utbetalingsoppdrag", columnDefinition = "TEXT")
-    var utbetalingsoppdrag: String? = null,
+    private var utbetalingsoppdrag: String? = null,
 
     @OneToMany(
         fetch = FetchType.EAGER,
@@ -71,7 +73,24 @@ data class TilkjentYtelse(
         orphanRemoval = true
     )
     val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf()
-)
+) {
+
+    @Transient
+    var utbetalingsoppdragObjekt: Utbetalingsoppdrag? = null
+        get() {
+            return if (field != null) {
+                field
+            } else {
+                field =
+                    utbetalingsoppdrag?.let { objectMapper.readValue(it, Utbetalingsoppdrag::class.java) }
+                field
+            }
+        }
+        set(value) {
+            field = value
+            utbetalingsoppdrag = value?.let { objectMapper.writeValueAsString(it) }
+        }
+}
 
 private fun kombinerAndeler(
     lhs: LocalDateTimeline<List<AndelTilkjentYtelse>>,

@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagUtbetalingsoppdrag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
@@ -91,7 +92,8 @@ internal class BisysServiceTest {
     fun `Skal returnere utvidet barnetrygdperiode fra basak`() {
         val behandling = lagBehandling()
 
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+            .also { it.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag() }
 
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelseUtvidet(
@@ -128,7 +130,8 @@ internal class BisysServiceTest {
     fun `Skal slå sammen resultat fra ba-sak og infotrygd`() {
         val behandling = lagBehandling()
 
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+            .also { it.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag() }
 
         val kalkulertbeløp = 660
         val andelTilkjentYtelse =
@@ -181,7 +184,8 @@ internal class BisysServiceTest {
     fun `Skal slå sammen resultat fra ba-sak og infotrygd når periodene overlapper`() {
         val behandling = lagBehandling()
 
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+            .also { it.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag() }
 
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelseUtvidet(
@@ -233,7 +237,8 @@ internal class BisysServiceTest {
     fun `Skal slå sammen resultat fra ba-sak og infotrygd, typisk rett etter en migrering, hvor tomMåned i infotrygd er null`() {
         val behandling = lagBehandling()
 
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+            .also { it.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag() }
 
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelseUtvidet(
@@ -285,7 +290,8 @@ internal class BisysServiceTest {
     fun `Skal ikke slå sammen resultat fra ba-sak og infotrygd hvis periode er manuelt beregnet i infotrygd`() {
         val behandling = lagBehandling()
 
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+            .also { it.utbetalingsoppdragObjekt = lagUtbetalingsoppdrag() }
 
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelseUtvidet(

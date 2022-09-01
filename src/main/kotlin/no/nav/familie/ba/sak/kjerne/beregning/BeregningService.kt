@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -278,7 +277,7 @@ class BeregningService(
             tilkjentYtelseRepository.findByBehandling(behandling.id)
 
         return tilkjentYtelse.apply {
-            this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
+            this.utbetalingsoppdragObjekt = utbetalingsoppdrag
             this.stønadTom = tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
             this.stønadFom =
                 if (erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
