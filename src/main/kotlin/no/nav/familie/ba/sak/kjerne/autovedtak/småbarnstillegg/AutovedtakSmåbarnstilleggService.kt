@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -102,7 +103,15 @@ class AutovedtakSmåbarnstilleggService(
             )
         }
 
-        begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
+        try {
+            begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
+        } catch (e: VedtaksperiodefinnerSmåbarnstilleggFeil) {
+            return kanIkkeBehandleAutomatisk(
+                behandling = behandlingEtterBehandlingsresultat,
+                metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
+                meldingIOppgave = "Småbarnstillegg: klarer ikke bestemme vedtaksperiode som skal begrunnes, må behandles manuelt"
+            )
+        }
 
         val vedtakEtterTotrinn = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
             behandlingEtterBehandlingsresultat

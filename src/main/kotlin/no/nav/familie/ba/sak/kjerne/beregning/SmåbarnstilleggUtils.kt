@@ -118,6 +118,7 @@ fun kanAutomatiskIverksetteSmåbarnstillegg(
     }
 }
 
+@Throws(VedtaksperiodefinnerSmåbarnstilleggFeil::class)
 fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
     innvilgetMånedPeriode: MånedPeriode?,
     redusertMånedPeriode: MånedPeriode?,
@@ -132,12 +133,14 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
                     Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG
                 )
             }
+
             innvilgetMånedPeriode == null && redusertMånedPeriode != null -> {
                 Pair(
                     vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == redusertMånedPeriode.fom && it.type == Vedtaksperiodetype.UTBETALING },
                     Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
                 )
             }
+
             else -> null
         }
 
@@ -183,17 +186,20 @@ fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
     barnasAndeler: List<AndelTilkjentYtelse>,
     barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
 ): Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned> {
-    val barnasAndelerTidslinjer = barnasAndeler.groupBy { it.aktør }.mapValues { AndelTilkjentYtelseTidslinje(it.value) }
+    val barnasAndelerTidslinjer =
+        barnasAndeler.groupBy { it.aktør }.mapValues { AndelTilkjentYtelseTidslinje(it.value) }
 
     val barnasAndelerUnder3ÅrTidslinje = barnasAndelerTidslinjer.map { (barnAktør, barnTidslinje) ->
-        val barnetsFødselsdato = barnasAktørerOgFødselsdatoer.find { it.first == barnAktør }?.second ?: throw Feil("Kan ikke beregne småbarnstillegg for et barn som ikke har fødselsdato.")
+        val barnetsFødselsdato = barnasAktørerOgFødselsdatoer.find { it.first == barnAktør }?.second
+            ?: throw Feil("Kan ikke beregne småbarnstillegg for et barn som ikke har fødselsdato.")
 
         val erTilOgMed3ÅrTidslinje = erTilogMed3ÅrTidslinje(barnetsFødselsdato)
 
         barnTidslinje.beskjærEtter(erTilOgMed3ÅrTidslinje)
     }
 
-    return barnasAndelerUnder3ÅrTidslinje.kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }.filtrerIkkeNull()
+    return barnasAndelerUnder3ÅrTidslinje.kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }
+        .filtrerIkkeNull()
 }
 
 data class SmåbarnstilleggPeriode(
