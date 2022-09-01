@@ -1,4 +1,4 @@
-name: Build-Deploy-KRISE-RETT-I-PROD
+name: Build-Deploy-KRISE-eksisterende-image-RETT-I-PROD
 on:
   workflow_dispatch:
     inputs:
