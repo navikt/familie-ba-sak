@@ -1,12 +1,17 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
+import no.nav.familie.ba.sak.integrasjoner.økonomi.valider
+import no.nav.familie.ba.sak.integrasjoner.økonomi.validerOpphørsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteAndelPerKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -103,6 +108,20 @@ class NyUtbetalingsoppdragGenerator {
             aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
             utbetalingsperiode = listOf(opphøres, opprettes).flatten()
         )
+
+        // valider utbetalingsoppdrag
+        val erBehandlingOpphørt = vedtak.behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT ||
+            vedtak.behandling.resultat == Behandlingsresultat.OPPHØRT
+        if (!vedtakMedTilkjentYtelse.erSimulering && erBehandlingOpphørt) utbetalingsoppdrag.validerOpphørsoppdrag()
+        utbetalingsoppdrag.also {
+            it.valider(
+                behandlingsresultat = vedtak.behandling.resultat,
+                behandlingskategori = vedtak.behandling.kategori,
+                // her må vi sende alle andeler slik at det valideres for nullutbetalinger også
+                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+                erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+            )
+        }
 
         // oppdater tilkjentYtlese med andelerTilkjentYTelser og utbetalingsoppdrag
         return tilkjentYtelse.copy(

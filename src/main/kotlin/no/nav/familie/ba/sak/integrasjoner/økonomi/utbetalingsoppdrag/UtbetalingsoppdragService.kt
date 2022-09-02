@@ -10,8 +10,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -32,8 +30,7 @@ class UtbetalingsoppdragService(
     private val økonomiKlient: ØkonomiKlient,
     private val beregningService: BeregningService,
     private val utbetalingsoppdragGenerator: NyUtbetalingsoppdragGenerator,
-    private val behandlingService: BehandlingService,
-    private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>
+    private val behandlingService: BehandlingService
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
@@ -94,7 +91,6 @@ class UtbetalingsoppdragService(
 
         val endretMigreringsdato =
             beregnOmMigreringsDatoErEndret(behandling, forrigeAndeler?.minByOrNull { it.stønadFom }?.stønadFom)
-        val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId)
 
         val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(behandling.fagsak.id)
         val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling)
@@ -106,8 +102,7 @@ class UtbetalingsoppdragService(
             sisteOffsetPerIdent = sisteOffsetPerIdent,
             sisteOffsetPåFagsak = sisteOffsetPåFagsak,
             erSimulering = erSimulering,
-            endretMigreringsdato = endretMigreringsdato,
-            kompetanser = kompetanser.toList()
+            endretMigreringsdato = endretMigreringsdato
         )
 
         return utbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
