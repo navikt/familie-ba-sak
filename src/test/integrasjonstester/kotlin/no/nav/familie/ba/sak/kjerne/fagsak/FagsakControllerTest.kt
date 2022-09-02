@@ -237,7 +237,7 @@ class FagsakControllerTest(
     fun `Skal få valideringsfeil ved oppretting av fagsak av type INSTITUSJON uten FagsakInstitusjon satt`() {
         val fnr = randomFnr()
 
-        val exception = assertThrows<java.lang.IllegalStateException> {
+        val exception = assertThrows<FunksjonellFeil> {
             fagsakController.hentEllerOpprettFagsak(
                 FagsakRequest(
                     personIdent = fnr,
@@ -247,7 +247,7 @@ class FagsakControllerTest(
         }
         val fagsak = fagsakService.hent(tilAktør(fnr), FagsakType.INSTITUSJON)
         assertNull(fagsak)
-        assertEquals("Mangler påkrevd variable orgnummer for institusjon", exception.message)
+        assertEquals("Mangler påkrevd variabel orgnummer for institusjon", exception.message)
     }
 
     @Test
