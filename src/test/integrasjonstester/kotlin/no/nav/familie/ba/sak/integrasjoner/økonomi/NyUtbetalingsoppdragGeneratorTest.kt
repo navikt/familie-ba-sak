@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -942,16 +941,14 @@ class NyUtbetalingsoppdragGeneratorTest(
         tilkjentYtelse: TilkjentYtelse,
         sisteOffsetPerIdent: Map<String, Int> = emptyMap(),
         sisteOffsetPåFagsak: Int? = null,
-        erSimulering: Boolean = false,
-        kompetanser: List<Kompetanse> = emptyList()
+        erSimulering: Boolean = false
     ) = VedtakMedTilkjentYtelse(
         tilkjentYtelse = tilkjentYtelse,
         vedtak = vedtak,
         saksbehandlerId = "saksbehandler",
         sisteOffsetPerIdent = sisteOffsetPerIdent,
         sisteOffsetPåFagsak = sisteOffsetPåFagsak,
-        erSimulering = erSimulering,
-        kompetanser = kompetanser
+        erSimulering = erSimulering
     )
 
     private fun konvertTilUtbetalingsoppdrag(utbetalingsoppdragIString: String?) =
