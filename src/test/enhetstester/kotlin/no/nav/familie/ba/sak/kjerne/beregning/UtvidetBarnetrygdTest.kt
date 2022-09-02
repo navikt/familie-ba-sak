@@ -99,7 +99,7 @@ internal class UtvidetBarnetrygdTest {
                 personer.addAll(listOf(søker, barnA, barnB).lagGrunnlagPersoner(this))
             }
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
@@ -189,7 +189,7 @@ internal class UtvidetBarnetrygdTest {
                 personer.addAll(listOf(søker, oppfyltBarn).lagGrunnlagPersoner(this, fødselsdatoUnder6År))
             }
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
@@ -271,7 +271,7 @@ internal class UtvidetBarnetrygdTest {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
@@ -350,7 +350,7 @@ internal class UtvidetBarnetrygdTest {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
@@ -429,7 +429,7 @@ internal class UtvidetBarnetrygdTest {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
@@ -517,7 +517,7 @@ internal class UtvidetBarnetrygdTest {
             .apply {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
@@ -629,7 +629,7 @@ internal class UtvidetBarnetrygdTest {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
@@ -742,7 +742,7 @@ internal class UtvidetBarnetrygdTest {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
@@ -851,7 +851,7 @@ internal class UtvidetBarnetrygdTest {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelseGammel(
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
