@@ -687,7 +687,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val ty = TilkjentYtelse(
             behandling = behandling,
             opprettetDato = perioderTestData.endretDato.toLocalDate(),
-            endretDato = perioderTestData.endretDato.toLocalDate(),
+            endretDato = perioderTestData.endretDato.toLocalDate()
         ).also {
             it.andelerTilkjentYtelse.addAll(
                 perioderTestData.perioder.map { p ->
