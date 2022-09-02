@@ -20,8 +20,6 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
@@ -70,7 +68,6 @@ class BeregningServiceTest {
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     private lateinit var beregningService: BeregningService
 
@@ -87,8 +84,7 @@ class BeregningServiceTest {
             behandlingRepository = behandlingRepository,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
-            småbarnstilleggService = småbarnstilleggService,
-            featureToggleService = featureToggleService
+            småbarnstilleggService = småbarnstilleggService
         )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
@@ -98,7 +94,6 @@ class BeregningServiceTest {
                     .tilRestFagsak(emptyList(), emptyList())
             )
         }
-        every { featureToggleService.isEnabled(any()) } answers { true }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
     }
 
@@ -1166,7 +1161,6 @@ class BeregningServiceTest {
                 )
             )
         }
-        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE) } returns true
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,

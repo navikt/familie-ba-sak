@@ -40,8 +40,7 @@ class BeregningService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val småbarnstilleggService: SmåbarnstilleggService,
-    private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList(),
-    private val featureToggleService: FeatureToggleService
+    private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList()
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
@@ -172,7 +171,7 @@ class BeregningService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
-        val tilkjentYtelse = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE)) {
+        val tilkjentYtelse =
             TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
@@ -184,28 +183,6 @@ class BeregningService(
                     behandlingId = behandling.id
                 )
             }
-        } else {
-            val tilkjentYtelse = TilkjentYtelseUtils
-                .beregnTilkjentYtelseGammel(
-                    vilkårsvurdering = vilkårsvurdering,
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    behandling = behandling
-                ) { søkerAktør ->
-                    småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
-                        søkerAktør = søkerAktør,
-                        behandlingId = behandling.id
-                    )
-                }
-
-            val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-                tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                endretUtbetalingAndeler
-            )
-            tilkjentYtelse.andelerTilkjentYtelse.clear()
-            tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
-
-            tilkjentYtelse
-        }
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
         tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }
