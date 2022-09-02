@@ -653,6 +653,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonSmaabarnstilleggHaddeIkkeFullOvergangsstonad"
     },
+    REDUKSJON_BARN_MED_SAMBOER_FØR_BODD_SAMMEN_12_MND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonBarnMedSamboerForBoddSammen12Mnd"
+    },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagBosattIRiket"
@@ -1343,6 +1347,7 @@ fun Standardbegrunnelse.delOpp(
                 )
             }
         }
+
         else -> throw Feil("Oppdeling av begrunnelse $this er ikke støttet.")
     }
 }
