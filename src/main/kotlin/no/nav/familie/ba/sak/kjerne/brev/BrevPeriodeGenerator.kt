@@ -84,7 +84,8 @@ class BrevPeriodeGenerator(
                     barnasFodselsdatoer = Utils.slåSammen(kompetanse.personer.map { it.fødselsdato.tilKortString() }),
                     antallBarn = kompetanse.personer.size,
                     maalform = brevMålform.tilSanityFormat(),
-                    sokersAktivitet = kompetanse.søkersAktivitet
+                    sokersAktivitet = kompetanse.søkersAktivitet,
+                    sokersAktivitetsland = kompetanse.søkersAktivitetsland?.navn
                 )
             }
         }

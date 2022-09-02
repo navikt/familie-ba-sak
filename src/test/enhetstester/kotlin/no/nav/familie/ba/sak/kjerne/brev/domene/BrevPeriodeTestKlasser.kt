@@ -66,6 +66,7 @@ data class BrevPeriodeTestConfig(
 data class BrevPeriodeTestKompetanse(
     val id: String,
     val søkersAktivitet: SøkersAktivitet,
+    val søkersAktivitetsLand: String?,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String,
     val barnetsBostedsland: String,
@@ -78,7 +79,8 @@ data class BrevPeriodeTestKompetanse(
             annenForeldersAktivitetslandNavn = LandNavn(this.annenForeldersAktivitetsland),
             barnetsBostedslandNavn = LandNavn(this.barnetsBostedsland),
             resultat = this.resultat,
-            personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() }
+            personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() },
+            søkersAktivitetsland = this.søkersAktivitetsLand?.let { LandNavn(this.søkersAktivitetsLand) }
         )
     }
 }
@@ -221,7 +223,8 @@ data class EØSBegrunnelseTestConfig(
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
     val maalform: String,
-    val sokersAktivitet: SøkersAktivitet
+    val sokersAktivitet: SøkersAktivitet,
+    val sokersAktivitetsland: String?
 ) : TestBegrunnelse {
     fun tilEØSBegrunnelseData(): EØSBegrunnelseData = EØSBegrunnelseData(
         apiNavn = this.apiNavn,
@@ -234,7 +237,8 @@ data class EØSBegrunnelseTestConfig(
         vedtakBegrunnelseType = EØSStandardbegrunnelse.values()
             .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
             ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
-        sokersAktivitet = this.sokersAktivitet
+        sokersAktivitet = this.sokersAktivitet,
+        sokersAktivitetsland = this.sokersAktivitetsland
     )
 }
 
