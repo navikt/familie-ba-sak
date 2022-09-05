@@ -19,7 +19,8 @@ class KompetanseUtfyltTest {
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             annenForeldersAktivitetsland = "NORGE",
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER
+            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitetsland = "NO"
         )
 
         val restKompetanse = kompetanse.tilRestKompetanse()
