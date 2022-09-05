@@ -11,20 +11,12 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetPrimarlandBarnetBorINorge"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
-    INNVILGET_TILLEGGSBEGRUNNELSE_REFUSJON {
-        override val sanityApiNavn = "innvilgetTilleggsbegrunnelseRefusjon"
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
-    },
     INNVILGET_PRIMÆRLAND_BARNETRYGD_ALLEREDE_UTBETALT {
         override val sanityApiNavn = "innvilgetPrimarlandBarnetrygdAlleredeUtbetalt"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
     INNVILGET_PRIMÆRLAND_UK_BARNETRYGD_ALLEREDEUTBETALT {
         override val sanityApiNavn = "innvilgetPrimarlandUkBarnetrygdAlleredeUtbetalt"
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
-    },
-    INNVILGET_TILLEGGSBEGRUNNELSE_REFUSJON_UAVKLART {
-        override val sanityApiNavn = "innvilgetTilleggsbegrunnelseRefusjonUavklart"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
     INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE {
@@ -87,11 +79,6 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
         override val sanityApiNavn = "innvilgetSekundaerlandStandard"
     },
-    INNVILGET_SEKUNDÆRLAND_HARD_KODET {
-        override val sanityApiNavn = "innvilgetSekundaerlandHardKodet"
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
-    },
-
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
