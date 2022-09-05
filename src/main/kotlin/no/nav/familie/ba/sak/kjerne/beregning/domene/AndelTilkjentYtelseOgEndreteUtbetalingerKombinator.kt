@@ -181,7 +181,6 @@ class AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService(
     fun finnEndreteUtbetalingerMedValiderteAndelerTilkjentYtelse(
         behandlingId: Long
     ): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
-
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository
             .finnAndelerTilkjentYtelseForBehandling(behandlingId)
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository
