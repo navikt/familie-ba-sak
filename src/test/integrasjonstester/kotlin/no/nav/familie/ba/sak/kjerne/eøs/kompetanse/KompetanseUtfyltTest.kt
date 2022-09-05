@@ -151,4 +151,19 @@ class KompetanseUtfyltTest {
 
         assertEquals(UtfyltStatus.IKKE_UTFYLT, restKompetanse.status)
     }
+
+    @Test
+    fun `Skal sette UtfyltStatus til UFULLSTENDIG dersom alle felter unntatt søkersAktivitetsland er fylt ut`() {
+        val kompetanse = lagKompetanse(
+            annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
+            barnetsBostedsland = BarnetsBostedsland.NORGE.name,
+            annenForeldersAktivitetsland = "NORGE",
+            kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+            søkersAktivitet = SøkersAktivitet.ARBEIDER
+        )
+
+        val restKompetanse = kompetanse.tilRestKompetanse()
+
+        assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
+    }
 }
