@@ -12,8 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalingerKombinator
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
@@ -41,8 +40,8 @@ class BehandlingsresultatSteg(
     private val vilkårService: VilkårService,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val andelerTilkjentYtelseOgValiderteEndreteUtbetalingerService: AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -63,17 +62,13 @@ class BehandlingsresultatSteg(
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        val endreteUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
         val toggleFrikobleAndelerOgEndringer =
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
 
-        val endreteUtbetalingerMedAndeler = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
-            tilkjentYtelse.andelerTilkjentYtelse,
-            endreteUtbetalingAndeler,
-            toggleFrikobleAndelerOgEndringer
-        ).lagEndreteUtbetalingMedAndeler()
+        val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
+            .finnEndreteUtbetalingerMedValiderteAndelerTilkjentYtelse(behandling.id)
 
-        validerAtAlleOpprettedeEndringerErUtfylt(endreteUtbetalingAndeler)
+        validerAtAlleOpprettedeEndringerErUtfylt(endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel })
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endreteUtbetalingerMedAndeler)
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
             endretUtbetalingAndelerMedÅrsakDeltBosted = endreteUtbetalingerMedAndeler.filter { it.årsak == Årsak.DELT_BOSTED }
@@ -81,16 +76,16 @@ class BehandlingsresultatSteg(
 
         if (toggleFrikobleAndelerOgEndringer) {
             validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
-                endreteUtbetalingAndeler,
+                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
                 tilkjentYtelse.andelerTilkjentYtelse
             )
             validerPeriodeInnenforTilkjentytelse(
-                endreteUtbetalingAndeler,
+                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
                 tilkjentYtelse.andelerTilkjentYtelse
             )
 
             validerÅrsak(
-                endreteUtbetalingAndeler,
+                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
                 vilkårService.hentVilkårsvurdering(behandling.id)
             )
         }

@@ -4,10 +4,13 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
@@ -122,7 +125,7 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
 data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val endretUtbetalingAndel: EndretUtbetalingAndel,
     private val andeler: List<AndelTilkjentYtelse>,
-    val brukFrikobleteAndelerOgEndringer: Boolean?
+    internal val brukFrikobleteAndelerOgEndringer: Boolean?
 ) {
     fun overlapperMed(månedPeriode: MånedPeriode) = endretUtbetalingAndel.overlapperMed(månedPeriode)
     fun årsakErDeltBosted() = endretUtbetalingAndel.årsakErDeltBosted()
@@ -155,16 +158,53 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
     private val featureToggleService: FeatureToggleService
 ) {
     fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: Long) =
-        AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId),
-            endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
-        ).lagAndelerMedEndringer()
+        lagKombinator(behandlingId).lagAndelerMedEndringer()
 
     fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long) =
+        lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
+
+    private fun lagKombinator(behandlingId: Long) =
         AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId),
             endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
-        ).lagEndreteUtbetalingMedAndeler()
+        )
+}
+
+@Service
+class AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService(
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val vilkårsvurderingService: VilkårsvurderingService
+) {
+    fun finnEndreteUtbetalingerMedValiderteAndelerTilkjentYtelse(
+        behandlingId: Long
+    ): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
+
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId)
+
+        return andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
+            .map { it.medValiderteAndeler(vilkårsvurdering) }
+    }
+
+    /**
+     * Skal emulere at en endret utbetaling ikke lenger er gyldig og krever en handling av SB
+     * Dette gjenskaper original funksjonalitet der endringer manglet andeler til SB koblet dem.
+     * Hvis forsøket på å koble ikke validerte, så fikk SB en feilmelding
+     * Denne snutten "forutser" feilmeldingen og fjerner andelene for å trigge SB på samme måte
+     */
+    private fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.medValiderteAndeler(vilkårsvurdering: Vilkårsvurdering?) =
+        try {
+            EndretUtbetalingAndelValidering.validerÅrsak(
+                this.årsak,
+                this.endretUtbetalingAndel,
+                vilkårsvurdering
+            )
+            // Validerer, så returner med eventuelle andeler
+            this
+        } catch (e: Throwable) {
+            // Validerer ikke, så fjern andeler slik at SB får beskjed om at noe må gjøres
+            // Merk at dette vil kun ha en effekt når funksjonsbryteren er satt til frikoblet modus
+            this.copy(andeler = emptyList())
+        }
 }

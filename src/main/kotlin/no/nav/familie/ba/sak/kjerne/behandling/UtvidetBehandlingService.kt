@@ -25,9 +25,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalingerKombinator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -59,16 +58,15 @@ class UtvidetBehandlingService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
-    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val settPåVentService: SettPåVentService,
     private val kompetanseRepository: KompetanseRepository,
     private val endringstidspunktService: EndringstidspunktService,
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val featureToggleService: FeatureToggleService,
-    private val korrigertEtterbetalingService: KorrigertEtterbetalingService
+    private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
+    private val andelerTilkjentYtelseOgValiderrwEndreteUtbetalingerService: AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
 ) {
-
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
 
@@ -103,13 +101,8 @@ class UtvidetBehandlingService(
         val utenlandskePeriodebeløp =
             if (kanBehandleEøs) utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
-        val endreteUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
-
-        val endreteUtbetalingerMedAndeler = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
-            andelerTilkjentYtelse,
-            endreteUtbetalinger,
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
-        ).lagEndreteUtbetalingMedAndeler()
+        val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgValiderrwEndreteUtbetalingerService
+            .finnEndreteUtbetalingerMedValiderteAndelerTilkjentYtelse(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
