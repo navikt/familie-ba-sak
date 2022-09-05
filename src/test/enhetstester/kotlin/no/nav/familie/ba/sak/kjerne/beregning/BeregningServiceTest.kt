@@ -105,6 +105,7 @@ class BeregningServiceTest {
         }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } answers { emptyList() }
+        every { featureToggleService.isEnabled(any()) } answers { true }
     }
 
     @Test
