@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -16,8 +15,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -38,8 +35,7 @@ class ØkonomiService(
     private val beregningService: BeregningService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
     private val behandlingService: BehandlingService,
-    private val featureToggleService: FeatureToggleService,
-    private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>
+    private val featureToggleService: FeatureToggleService
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
@@ -116,9 +112,9 @@ class ØkonomiService(
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
-            val sisteOffsetPerIdent = hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id)
+            val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id)
 
-            val sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
+            val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
 
             if (oppdatertTilstand.isNotEmpty()) {
                 oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
@@ -147,7 +143,7 @@ class ØkonomiService(
                     ).resultat == Behandlingsresultat.OPPHØRT
                 )
             ) {
-                validerOpphørsoppdrag(utbetalingsoppdrag)
+                utbetalingsoppdrag.validerOpphørsoppdrag()
             }
 
             utbetalingsoppdrag
@@ -159,7 +155,6 @@ class ØkonomiService(
                     it.valider(
                         behandlingsresultat = vedtak.behandling.resultat,
                         behandlingskategori = vedtak.behandling.kategori,
-                        kompetanser = kompetanseRepository.finnFraBehandlingId(vedtak.behandling.id).toList(),
                         andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id),
                         erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
                     )
@@ -170,37 +165,6 @@ class ØkonomiService(
                     )
                 }
             }
-        }
-    }
-
-    private fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
-        val alleAndelerTilkjentYtelserIverksattMotØkonomi =
-            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
-                .flatMap { it.andelerTilkjentYtelse }
-                .filter { it.erAndelSomSkalSendesTilOppdrag() }
-        val alleTideligereKjederIverksattMotØkonomi =
-            kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
-
-        return gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
-    }
-
-    fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-        behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
-            .mapNotNull { iverksattBehandling ->
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { andelerTilkjentYtelse ->
-                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                    }
-            }.maxByOrNull { it }
-
-    fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
-        if (utbetalingsoppdrag.harLøpendeUtbetaling()) {
-            error("Generert utbetalingsoppdrag for opphør inneholder oppdragsperioder med løpende utbetaling.")
-        }
-
-        if (utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.none { it.opphør != null }) {
-            error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
         }
     }
 
