@@ -267,7 +267,7 @@ class VedtaksperiodeUtilTest {
                     barnetsBostedsland = "SE",
                     kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
 
-                    søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                    søkersAktivitet = SøkersAktivitet.ARBEIDER,
                     annenForeldersAktivitetsland = "SE",
                     barnAktører = setOf(Aktør("1234567891011", mutableSetOf()))
 
@@ -302,7 +302,7 @@ class VedtaksperiodeUtilTest {
                     barnetsBostedsland = "NO",
                     kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
 
-                    søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                    søkersAktivitet = SøkersAktivitet.ARBEIDER,
                     annenForeldersAktivitetsland = "SE",
                     barnAktører = setOf(Aktør("1234567891011", mutableSetOf()))
 

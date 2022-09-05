@@ -113,7 +113,7 @@ internal class StønadsstatistikkServiceTest(
                 fom = YearMonth.now(),
                 tom = null,
                 barnAktører = setOf(barn1.aktør),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
                 annenForeldersAktivitetsland = "PL",
                 barnetsBostedsland = "PL",
@@ -217,8 +217,8 @@ internal class StønadsstatistikkServiceTest(
         val søkersAktivitetFraEksternKontrakt =
             enumValues<no.nav.familie.eksterne.kontrakter.SøkersAktivitet>().map { it.name }
 
-        assertThat(søkersAktivitet).hasSize(søkersAktivitetFraEksternKontrakt.size)
-            .containsAll(søkersAktivitetFraEksternKontrakt)
+        assertThat(søkersAktivitetFraEksternKontrakt)
+            .containsAll(søkersAktivitet)
     }
 
     /**

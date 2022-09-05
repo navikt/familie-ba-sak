@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.dødeBarnForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -76,7 +75,7 @@ class BrevPeriodeUtilTest {
                 fom = periode2.fom,
                 tom = periode2.tom,
                 barnAktører = setOf(barnAktør1),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
+                søkersAktivitet = SøkersAktivitet.ARBEIDER
             )
         val kompetanse3 =
             lagKompetanse(
