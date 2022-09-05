@@ -65,7 +65,7 @@ class UtvidetBehandlingService(
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val featureToggleService: FeatureToggleService,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
-    private val andelerTilkjentYtelseOgValiderrwEndreteUtbetalingerService: AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgValiderteEndreteUtbetalingerService: AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
@@ -101,7 +101,7 @@ class UtvidetBehandlingService(
         val utenlandskePeriodebeløp =
             if (kanBehandleEøs) utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
-        val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgValiderrwEndreteUtbetalingerService
+        val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedValiderteAndelerTilkjentYtelse(behandlingId)
 
         return RestUtvidetBehandling(
