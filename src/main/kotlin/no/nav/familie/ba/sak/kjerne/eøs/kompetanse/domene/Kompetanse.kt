@@ -78,6 +78,7 @@ data class Kompetanse(
 
     override fun utenInnhold() = this.copy(
         søkersAktivitet = null,
+        søkersAktivitetsland = null,
         annenForeldersAktivitet = null,
         annenForeldersAktivitetsland = null,
         barnetsBostedsland = null,
