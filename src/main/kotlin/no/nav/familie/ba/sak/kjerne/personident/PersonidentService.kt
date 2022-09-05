@@ -80,7 +80,12 @@ class PersonidentService(
 
     fun hentOgLagreAktør(ident: String, lagre: Boolean): Aktør {
         // Noter at ident kan være både av typen aktørid eller fødselsnummer (d- og f nummer)
-        val personident = personidentRepository.findByFødselsnummerOrNull(ident)
+        val personident = try {
+            personidentRepository.findByFødselsnummerOrNull(ident)
+        } catch (e: Exception) {
+            secureLogger.info("Feil ved henting av ident=$ident, lagre=$lagre")
+            throw e
+        }
         if (personident != null) {
             return personident.aktør
         }
