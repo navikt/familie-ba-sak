@@ -117,7 +117,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
     private fun tilkjentYtelse(behandling: Behandling, erIverksatt: Boolean) = TilkjentYtelse(
         behandling = behandling,
         opprettetDato = LocalDate.now(),
-        endretDato = LocalDate.now(),
+        endretDato = LocalDate.now()
     ).also {
         it.utbetalingsoppdragObjekt = if (erIverksatt) lagUtbetalingsoppdrag() else null
     }
