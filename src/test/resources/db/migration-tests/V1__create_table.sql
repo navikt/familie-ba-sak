@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.4 (Debian 14.4-1.pgdg110+1)
+-- Dumped from database version 14.5 (Debian 14.5-1.pgdg110+1)
 -- Dumped by pg_dump version 14.5
 
 SET statement_timeout = 0;
@@ -666,7 +666,8 @@ CREATE TABLE public.kompetanse (
     annen_forelderes_aktivitet character varying,
     annen_forelderes_aktivitetsland character varying,
     barnets_bostedsland character varying,
-    resultat character varying
+    resultat character varying,
+    sokers_aktivitetsland text
 );
 
 
@@ -675,6 +676,37 @@ CREATE TABLE public.kompetanse (
 --
 
 CREATE SEQUENCE public.kompetanse_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: korrigert_etterbetaling; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.korrigert_etterbetaling (
+    id bigint NOT NULL,
+    aarsak character varying NOT NULL,
+    begrunnelse character varying,
+    belop bigint NOT NULL,
+    aktiv boolean NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
+);
+
+
+--
+-- Name: korrigert_etterbetaling_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.korrigert_etterbetaling_seq
     START WITH 1000000
     INCREMENT BY 50
     NO MINVALUE
@@ -1548,8 +1580,6 @@ CREATE SEQUENCE public.vedtaksperiode_seq
 
 CREATE TABLE public.verge (
     id bigint NOT NULL,
-    navn character varying NOT NULL,
-    adresse character varying NOT NULL,
     ident character varying,
     fk_behandling_id bigint NOT NULL,
     versjon bigint DEFAULT 0 NOT NULL,
@@ -1877,7 +1907,15 @@ COPY public.journalpost (id, fk_behandling_id, journalpost_id, opprettet_tid, op
 -- Data for Name: kompetanse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.kompetanse (id, fk_behandling_id, fom, tom, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, soekers_aktivitet, annen_forelderes_aktivitet, annen_forelderes_aktivitetsland, barnets_bostedsland, resultat) FROM stdin;
+COPY public.kompetanse (id, fk_behandling_id, fom, tom, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, soekers_aktivitet, annen_forelderes_aktivitet, annen_forelderes_aktivitetsland, barnets_bostedsland, resultat, sokers_aktivitetsland) FROM stdin;
+\.
+
+
+--
+-- Data for Name: korrigert_etterbetaling; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.korrigert_etterbetaling (id, aarsak, begrunnelse, belop, aktiv, fk_behandling_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
 \.
 
 
@@ -2022,8 +2060,8 @@ COPY public.skyggesak (id, fk_fagsak_id, sendt_tid) FROM stdin;
 --
 
 COPY public.task (id, payload, status, versjon, opprettet_tid, type, metadata, trigger_tid, avvikstype) FROM stdin;
-51	1654	FERDIG	4	2022-08-14 22:33:00.552	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-07.01.2022\n	2022-08-14 22:33:00.552228	\N
-1	1654	FERDIG	4	2022-08-14 22:33:00.523	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-06.01.2022\n	2022-08-14 22:33:00.52278	\N
+51	1654	FERDIG	4	2022-09-04 22:01:02.051	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-07.01.2022\n	2022-09-04 22:01:02.050895	\N
+1	1654	FERDIG	4	2022-09-04 22:01:01.532	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-06.01.2022\n	2022-09-04 22:01:01.531917	\N
 \.
 
 
@@ -2032,12 +2070,12 @@ COPY public.task (id, payload, status, versjon, opprettet_tid, type, metadata, t
 --
 
 COPY public.task_logg (id, task_id, type, node, opprettet_tid, melding, endret_av) FROM stdin;
-51	1	PLUKKET	node1	2022-08-14 22:33:34.01	\N	VL
-251	1	BEHANDLER	node1	2022-08-14 22:33:34.255	\N	VL
-301	1	FERDIG	node1	2022-08-14 22:33:34.429	\N	VL
-1	51	PLUKKET	node1	2022-08-14 22:33:34.01	\N	VL
-201	51	BEHANDLER	node1	2022-08-14 22:33:34.257	\N	VL
-351	51	FERDIG	node1	2022-08-14 22:33:34.429	\N	VL
+51	1	PLUKKET	node1	2022-09-04 22:02:04.294	\N	VL
+251	1	BEHANDLER	node1	2022-09-04 22:02:04.589	\N	VL
+351	1	FERDIG	node1	2022-09-04 22:02:04.874	\N	VL
+1	51	PLUKKET	node1	2022-09-04 22:02:04.298	\N	VL
+201	51	BEHANDLER	node1	2022-09-04 22:02:04.588	\N	VL
+301	51	FERDIG	node1	2022-09-04 22:02:04.873	\N	VL
 \.
 
 
@@ -2117,7 +2155,7 @@ COPY public.vedtaksperiode (id, fk_vedtak_id, fom, tom, type, opprettet_av, oppr
 -- Data for Name: verge; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.verge (id, navn, adresse, ident, fk_behandling_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
+COPY public.verge (id, ident, fk_behandling_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
 \.
 
 
@@ -2282,6 +2320,13 @@ SELECT pg_catalog.setval('public.journalpost_seq', 1000000, false);
 --
 
 SELECT pg_catalog.setval('public.kompetanse_seq', 1000000, false);
+
+
+--
+-- Name: korrigert_etterbetaling_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.korrigert_etterbetaling_seq', 1000000, false);
 
 
 --
@@ -2757,6 +2802,14 @@ ALTER TABLE ONLY public.kompetanse
 
 
 --
+-- Name: korrigert_etterbetaling korrigert_etterbetaling_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.korrigert_etterbetaling
+    ADD CONSTRAINT korrigert_etterbetaling_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: logg logg_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3177,6 +3230,13 @@ CREATE INDEX kompetanse_fk_behandling_id_idx ON public.kompetanse USING btree (f
 
 
 --
+-- Name: korrigert_etterbetaling_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX korrigert_etterbetaling_fk_behandling_id_idx ON public.korrigert_etterbetaling USING btree (fk_behandling_id);
+
+
+--
 -- Name: logg_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3419,6 +3479,13 @@ CREATE UNIQUE INDEX uidx_institusjon_tss_ekstern_id ON public.institusjon USING 
 
 
 --
+-- Name: uidx_korrigert_etterbetaling_fk_behandling_id_aktiv; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uidx_korrigert_etterbetaling_fk_behandling_id_aktiv ON public.korrigert_etterbetaling USING btree (fk_behandling_id) WHERE (aktiv = true);
+
+
+--
 -- Name: uidx_personident_aktoer_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3459,20 +3526,6 @@ END));
 --
 
 CREATE UNIQUE INDEX uidx_verge_behandling_id ON public.verge USING btree (fk_behandling_id);
-
-
---
--- Name: uidx_verge_ident; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX uidx_verge_ident ON public.verge USING btree (ident);
-
-
---
--- Name: uidx_verge_navn; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX uidx_verge_navn ON public.verge USING btree (navn);
 
 
 --
@@ -3848,6 +3901,14 @@ ALTER TABLE ONLY public.journalpost
 
 ALTER TABLE ONLY public.kompetanse
     ADD CONSTRAINT kompetanse_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+
+
+--
+-- Name: korrigert_etterbetaling korrigert_etterbetaling_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.korrigert_etterbetaling
+    ADD CONSTRAINT korrigert_etterbetaling_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
 
 
 --
