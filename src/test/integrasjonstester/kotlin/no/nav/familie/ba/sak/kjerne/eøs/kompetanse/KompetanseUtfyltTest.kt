@@ -19,7 +19,7 @@ class KompetanseUtfyltTest {
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             annenForeldersAktivitetsland = "NORGE",
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
+            søkersAktivitet = SøkersAktivitet.ARBEIDER
         )
 
         val restKompetanse = kompetanse.tilRestKompetanse()
@@ -33,7 +33,7 @@ class KompetanseUtfyltTest {
             annenForeldersAktivitet = AnnenForeldersAktivitet.IKKE_AKTUELT,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
+            søkersAktivitet = SøkersAktivitet.ARBEIDER
         )
 
         var restKompetanse = kompetanse.tilRestKompetanse()
@@ -44,7 +44,7 @@ class KompetanseUtfyltTest {
             annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
+            søkersAktivitet = SøkersAktivitet.ARBEIDER
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()
@@ -58,7 +58,7 @@ class KompetanseUtfyltTest {
             annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
+            søkersAktivitet = SøkersAktivitet.ARBEIDER
         )
 
         var restKompetanse = kompetanse.tilRestKompetanse()
@@ -69,7 +69,7 @@ class KompetanseUtfyltTest {
             annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_PENSJON,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
+            søkersAktivitet = SøkersAktivitet.ARBEIDER
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()
@@ -80,7 +80,7 @@ class KompetanseUtfyltTest {
             annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
+            søkersAktivitet = SøkersAktivitet.ARBEIDER
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()
@@ -91,7 +91,7 @@ class KompetanseUtfyltTest {
             annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
+            søkersAktivitet = SøkersAktivitet.ARBEIDER
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()
@@ -132,7 +132,7 @@ class KompetanseUtfyltTest {
             annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
+            søkersAktivitet = SøkersAktivitet.ARBEIDER
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()

@@ -113,7 +113,7 @@ internal class StønadsstatistikkServiceTest(
                 fom = YearMonth.now(),
                 tom = null,
                 barnAktører = setOf(barn1.aktør),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
                 annenForeldersAktivitetsland = "PL",
                 barnetsBostedsland = "PL",
