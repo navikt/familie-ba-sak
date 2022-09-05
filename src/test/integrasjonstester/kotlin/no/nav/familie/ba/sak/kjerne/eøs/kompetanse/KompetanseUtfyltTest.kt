@@ -33,7 +33,8 @@ class KompetanseUtfyltTest {
             annenForeldersAktivitet = AnnenForeldersAktivitet.IKKE_AKTUELT,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER
+            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitetsland = "NO"
         )
 
         var restKompetanse = kompetanse.tilRestKompetanse()
@@ -44,7 +45,8 @@ class KompetanseUtfyltTest {
             annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER
+            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitetsland = "NO"
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()
