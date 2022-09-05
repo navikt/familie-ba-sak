@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 
 data class MinimertKompetanse(
     val søkersAktivitet: SøkersAktivitet,
+    val søkersAktivitetsland: LandNavn?,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetslandNavn: LandNavn?,
     val barnetsBostedslandNavn: LandNavn,
@@ -27,9 +28,11 @@ fun Kompetanse.tilMinimertKompetanse(
 
     val barnetsBostedslandNavn = this.barnetsBostedsland!!.tilLandNavn(landkoderISO2)
     val annenForeldersAktivitetslandNavn = this.annenForeldersAktivitetsland?.tilLandNavn(landkoderISO2)
+    val sokersAktivitetslandNavn = this.søkersAktivitetsland?.tilLandNavn(landkoderISO2)
 
     return MinimertKompetanse(
         søkersAktivitet = this.søkersAktivitet!!,
+        søkersAktivitetsland = sokersAktivitetslandNavn,
         annenForeldersAktivitet = this.annenForeldersAktivitet!!,
         annenForeldersAktivitetslandNavn = annenForeldersAktivitetslandNavn,
         barnetsBostedslandNavn = barnetsBostedslandNavn,

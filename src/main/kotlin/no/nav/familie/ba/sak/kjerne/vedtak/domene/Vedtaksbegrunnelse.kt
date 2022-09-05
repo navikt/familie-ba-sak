@@ -143,7 +143,8 @@ data class EØSBegrunnelseData(
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
     val maalform: String,
-    val sokersAktivitet: SøkersAktivitet
+    val sokersAktivitet: SøkersAktivitet,
+    val sokersAktivitetsland: String?
 ) : BegrunnelseMedData {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
 }
