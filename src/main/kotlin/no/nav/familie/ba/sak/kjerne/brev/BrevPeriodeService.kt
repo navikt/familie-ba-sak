@@ -36,7 +36,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedta
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.ytelseErFraForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -128,9 +127,11 @@ class BrevPeriodeService(
             andelerTilkjentYtelse = andelerTilkjentYtelse
         )
 
-        val ytelserForrigePeriode = andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelse) }
+        val ytelserForrigePeriode =
+            andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelse) }
 
-        val dødeBarnForrigePeriode = dødeBarnForrigePeriode(ytelserForrigePeriode, personopplysningGrunnlag.barna.tilMinimertePersoner())
+        val dødeBarnForrigePeriode =
+            dødeBarnForrigePeriode(ytelserForrigePeriode, personopplysningGrunnlag.barna.tilMinimertePersoner())
 
         val minimertVedtaksperiode =
             utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(
@@ -195,13 +196,7 @@ class BrevPeriodeService(
                 andelerTilkjentYtelse.hentPerioderMedEndringerFra(forrigeAndelTilkjentYtelse)
             endringerITilkjentYtelsePerBarn.keys.filter { barn ->
                 endringerITilkjentYtelsePerBarn.getValue(barn).any {
-                    it.overlapper(
-                        LocalDateSegment(
-                            vedtaksperiodeMedBegrunnelser.fom,
-                            vedtaksperiodeMedBegrunnelser.tom,
-                            null
-                        )
-                    )
+                    it.fom == vedtaksperiodeMedBegrunnelser.fom
                 }
             }.mapNotNull { barn ->
                 val result: LocalDateTimeline<Beløpsdifferanse> = endringerITilkjentYtelsePerBarn.getValue(barn)
