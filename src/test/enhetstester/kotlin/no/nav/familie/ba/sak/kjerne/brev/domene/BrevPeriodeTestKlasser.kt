@@ -66,7 +66,7 @@ data class BrevPeriodeTestConfig(
 data class BrevPeriodeTestKompetanse(
     val id: String,
     val søkersAktivitet: SøkersAktivitet,
-    val søkersAktivitetsLand: String?,
+    val søkersAktivitetsland: String?,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String,
     val barnetsBostedsland: String,
@@ -80,7 +80,7 @@ data class BrevPeriodeTestKompetanse(
             barnetsBostedslandNavn = LandNavn(this.barnetsBostedsland),
             resultat = this.resultat,
             personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() },
-            søkersAktivitetsland = this.søkersAktivitetsLand?.let { LandNavn(this.søkersAktivitetsLand) }
+            søkersAktivitetsland = this.søkersAktivitetsland?.let { LandNavn(this.søkersAktivitetsland) }
         )
     }
 }
