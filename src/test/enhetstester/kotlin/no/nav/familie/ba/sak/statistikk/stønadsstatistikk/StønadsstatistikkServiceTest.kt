@@ -217,8 +217,8 @@ internal class StønadsstatistikkServiceTest(
         val søkersAktivitetFraEksternKontrakt =
             enumValues<no.nav.familie.eksterne.kontrakter.SøkersAktivitet>().map { it.name }
 
-        assertThat(søkersAktivitet).hasSize(søkersAktivitetFraEksternKontrakt.size)
-            .containsAll(søkersAktivitetFraEksternKontrakt)
+        assertThat(søkersAktivitetFraEksternKontrakt)
+            .containsAll(søkersAktivitet)
     }
 
     /**
