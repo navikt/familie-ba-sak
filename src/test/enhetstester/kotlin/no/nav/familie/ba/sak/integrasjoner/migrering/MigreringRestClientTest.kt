@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.migrering
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import junit.framework.Assert.assertEquals
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-internal class MigreringRestClientTest : AbstractSpringIntegrationTestDev() {
+internal class MigreringRestClientTest : AbstractSpringIntegrationTest() {
     lateinit var client: MigreringRestClient
 
     @Autowired
