@@ -83,7 +83,7 @@ class PersonidentService(
         val personident = try {
             personidentRepository.findByFødselsnummerOrNull(ident)
         } catch (e: Exception) {
-            secureLogger.info("Feil ved henting av ident=$ident, lagre=$lagre")
+            secureLogger.info("Feil ved henting av ident=$ident, lagre=$lagre", e)
             throw e
         }
         if (personident != null) {
@@ -151,6 +151,7 @@ class PersonidentService(
     }
 
     private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String, lagre: Boolean): Aktør {
+        secureLogger.info("Oppretter aktør og personIdent. aktørIdStr=$aktørIdStr fødselsnummer=$fødselsnummer lagre=$lagre")
         val aktør = Aktør(aktørId = aktørIdStr).also {
             it.personidenter.add(
                 Personident(fødselsnummer = fødselsnummer, aktør = it)
