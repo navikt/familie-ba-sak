@@ -111,7 +111,7 @@ class FagsakService(
 
         var fagsak = when (type) {
             FagsakType.INSTITUSJON -> {
-                if (institusjon == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
+                if (institusjon?.orgNummer == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
                 val åpenSak = fagsakRepository.finnÅpenFagsakForInstitusjon(aktør)
 
                 if (åpenSak != null && åpenSak.institusjon?.orgNummer != institusjon.orgNummer) {
@@ -134,7 +134,7 @@ class FagsakService(
             }
 
             if (type == FagsakType.INSTITUSJON) {
-                institusjonService.hentEllerOpprettInstitusjon(institusjon!!.orgNummer, institusjon.tssEksternId)
+                institusjonService.hentEllerOpprettInstitusjon(institusjon?.orgNummer!!, institusjon.tssEksternId)
                     .apply {
                         fagsak.institusjon = this
                     }

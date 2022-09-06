@@ -46,7 +46,7 @@ class RegistrerInstitusjonOgVerge(
             )
         }
 
-        if (verge == null && institusjon == null) {
+        if (verge == null && institusjon?.orgNummer == null) {
             throw Feil("Ugyldig DTO for registrer verge")
         }
 
