@@ -270,7 +270,7 @@ class DokumentServiceTest(
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         io.mockk.verify(exactly = 1) {
-            integrasjonClient.journalførDokument(any())
+            integrasjonClient.journalførDokument(match { it.fnr == fnr })
         }
     }
 }
