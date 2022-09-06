@@ -107,7 +107,7 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSekundaerlandUkAleneansvar"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
-    INNVILGET_SEKUNDÆRLAND_UK_OG_UTLAND_STADARD {
+    INNVILGET_SEKUNDÆRLAND_UK_OG_UTLAND_STANDARD {
         override val sanityApiNavn = "innvilgetSekundaerlandUkOgUtlandStandard"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
