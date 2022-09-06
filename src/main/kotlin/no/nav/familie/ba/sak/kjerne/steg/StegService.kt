@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -134,7 +135,7 @@ class StegService(
     @Transactional
     fun opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
         val fagsak = try {
-            fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true)
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true, FagsakType.NORMAL)
         } catch (exception: Exception) {
             if (exception is ConstraintViolationException) {
                 throw RekjørSenereException(

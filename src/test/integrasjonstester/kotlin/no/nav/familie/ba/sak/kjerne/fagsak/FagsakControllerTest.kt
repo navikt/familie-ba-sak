@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
@@ -8,12 +9,14 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.Personident
@@ -26,9 +29,11 @@ import no.nav.familie.log.mdc.MDCConstants
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
@@ -64,7 +69,10 @@ class FagsakControllerTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val skyggesakRepository: SkyggesakRepository
+    private val skyggesakRepository: SkyggesakRepository,
+
+    @Autowired
+    private val institusjonService: InstitusjonService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -81,11 +89,14 @@ class FagsakControllerTest(
 
     @Test
     @Tag("integration")
-    fun `Skal opprette fagsak`() {
+    fun `Skal opprette fagsak av type NORMAL`() {
         val fnr = randomFnr()
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
-        assertEquals(fnr, fagsakService.hent(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
+        val fagsak = fagsakService.hent(tilAktør(fnr))
+        assertEquals(fnr, fagsak?.aktør?.aktivFødselsnummer())
+        assertEquals(FagsakType.NORMAL, fagsak?.type)
+        assertNull(fagsak?.institusjon)
     }
 
     @Test
@@ -219,5 +230,79 @@ class FagsakControllerTest(
                 assertEquals(ClientMocks.barnFnr.toList().subList(0, 1), body!!.data!!.map { it.ident })
                 assertEquals(listOf(FagsakDeltagerRolle.BARN), body!!.data!!.map { it.rolle })
             }
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Skal få valideringsfeil ved oppretting av fagsak av type INSTITUSJON uten FagsakInstitusjon satt`() {
+        val fnr = randomFnr()
+
+        val exception = assertThrows<FunksjonellFeil> {
+            fagsakController.hentEllerOpprettFagsak(
+                FagsakRequest(
+                    personIdent = fnr,
+                    fagsakType = FagsakType.INSTITUSJON
+                )
+            )
+        }
+        val fagsak = fagsakService.hent(tilAktør(fnr), FagsakType.INSTITUSJON)
+        assertNull(fagsak)
+        assertEquals("Mangler påkrevd variabel orgnummer for institusjon", exception.message)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Skal opprette fagsak av type INSTITUSJON hvor FagsakInstitusjon er satt`() {
+        val fnr = randomFnr()
+
+        fagsakController.hentEllerOpprettFagsak(
+            FagsakRequest(
+                personIdent = fnr,
+                fagsakType = FagsakType.INSTITUSJON,
+                institusjon = InstitusjonInfo("orgnr", "tss-id")
+            )
+        )
+        val fagsak = fagsakService.hent(tilAktør(fnr), FagsakType.INSTITUSJON)
+        assertNotNull(fagsak)
+        assertEquals(fnr, fagsak?.aktør?.aktivFødselsnummer())
+        assertEquals(FagsakType.INSTITUSJON, fagsak?.type)
+        println(fagsak)
+        assertNotNull(fagsak?.institusjon)
+        assertEquals("orgnr", fagsak?.institusjon?.orgNummer)
+        assertEquals("tss-id", fagsak?.institusjon?.tssEksternId)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Oppretting av fagsak for institusjone skal feile med funksjonell feil hvis det er 1 åpen fagsak på aktør av type institusjon`() {
+        val fnr = randomFnr()
+
+        fagsakController.hentEllerOpprettFagsak(
+            FagsakRequest(
+                personIdent = fnr,
+                fagsakType = FagsakType.INSTITUSJON,
+                institusjon = InstitusjonInfo("orgnr", "tss-id")
+            )
+        )
+        val fagsak = fagsakService.hent(tilAktør(fnr), FagsakType.INSTITUSJON)
+        assertNotNull(fagsak)
+        assertEquals(fnr, fagsak?.aktør?.aktivFødselsnummer())
+        assertEquals(FagsakType.INSTITUSJON, fagsak?.type)
+        println(fagsak)
+        assertNotNull(fagsak?.institusjon)
+        assertEquals("orgnr", fagsak?.institusjon?.orgNummer)
+        assertEquals("tss-id", fagsak?.institusjon?.tssEksternId)
+
+        val funksjonellFeil =
+            assertThrows<FunksjonellFeil> {
+                fagsakController.hentEllerOpprettFagsak(
+                    FagsakRequest(
+                        personIdent = fnr,
+                        fagsakType = FagsakType.INSTITUSJON,
+                        institusjon = InstitusjonInfo("orgnr2", "tss-id")
+                    )
+                )
+            }
+        assertEquals("Kan kun ha en åpen sak av type Institusjon", funksjonellFeil.message)
     }
 }

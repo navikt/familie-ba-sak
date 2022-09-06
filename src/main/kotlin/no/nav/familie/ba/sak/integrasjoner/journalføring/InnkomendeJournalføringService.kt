@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterJournalpost
@@ -122,9 +123,10 @@ class InnkomendeJournalføringService(
         kategori: BehandlingKategori? = null,
         underkategori: BehandlingUnderkategori? = null,
         søknadMottattDato: LocalDate? = null,
-        fagsakType: FagsakType = FagsakType.NORMAL
+        fagsakType: FagsakType = FagsakType.NORMAL,
+        institusjon: InstitusjonInfo? = null
     ): Behandling {
-        fagsakService.hentEllerOpprettFagsak(personIdent, type = fagsakType)
+        fagsakService.hentEllerOpprettFagsak(personIdent, type = fagsakType, institusjon = institusjon)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 kategori = kategori,
@@ -158,7 +160,8 @@ class InnkomendeJournalføringService(
                     kategori = request.kategori,
                     underkategori = request.underkategori,
                     søknadMottattDato = request.datoMottatt?.toLocalDate(),
-                    fagsakType = request.fagsakType
+                    fagsakType = request.fagsakType,
+                    institusjon = request.institusjon
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
