@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -255,6 +256,27 @@ class BeregningService(
                     aty.kalkulertUtbetalingsbeløp != 0 || aty.endretUtbetalingAndeler.isEmpty()
                 }.isNotEmpty()
             } ?: emptyList()
+
+    fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
+        val alleAndelerTilkjentYtelserIverksattMotØkonomi =
+            hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
+                .flatMap { it.andelerTilkjentYtelse }
+                .filter { it.erAndelSomSkalSendesTilOppdrag() }
+        val alleTideligereKjederIverksattMotØkonomi =
+            ØkonomiUtils.kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
+
+        return ØkonomiUtils.gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
+    }
+
+    fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
+        behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
+            .mapNotNull { iverksattBehandling ->
+                hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { andelerTilkjentYtelse ->
+                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
+                    }
+            }.maxByOrNull { it }
 
     fun populerTilkjentYtelse(
         behandling: Behandling,

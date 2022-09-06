@@ -7,8 +7,6 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.medDifferanseberegning
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.junit.jupiter.api.Test
@@ -28,7 +26,6 @@ internal class UtbetalingsoppdragValidatorTest {
             utbetalingsoppdrag.valider(
                 behandlingsresultat = Behandlingsresultat.INNVILGET,
                 behandlingskategori = BehandlingKategori.NASJONAL,
-                kompetanser = emptyList(),
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
                         fom = inneværendeMåned().minusYears(4),
@@ -48,7 +45,6 @@ internal class UtbetalingsoppdragValidatorTest {
             utbetalingsoppdrag.valider(
                 behandlingsresultat = Behandlingsresultat.INNVILGET,
                 behandlingskategori = BehandlingKategori.EØS,
-                kompetanser = listOf(lagKompetanse(kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND)),
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
                         fom = inneværendeMåned().minusYears(4),
@@ -68,7 +64,6 @@ internal class UtbetalingsoppdragValidatorTest {
             utbetalingsoppdrag.valider(
                 behandlingsresultat = Behandlingsresultat.INNVILGET,
                 behandlingskategori = BehandlingKategori.EØS,
-                kompetanser = listOf(lagKompetanse(kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND)),
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
                         fom = inneværendeMåned().minusYears(4),
@@ -103,7 +98,6 @@ internal class UtbetalingsoppdragValidatorTest {
             utbetalingsoppdrag.valider(
                 behandlingsresultat = Behandlingsresultat.INNVILGET,
                 behandlingskategori = BehandlingKategori.EØS,
-                kompetanser = listOf(lagKompetanse(kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND)),
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
                         fom = inneværendeMåned().minusYears(4),
