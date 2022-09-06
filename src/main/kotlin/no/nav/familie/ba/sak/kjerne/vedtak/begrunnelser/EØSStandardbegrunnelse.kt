@@ -111,11 +111,11 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSekundaerlandUkOgUtlandStandard"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
-    INNVILGET_SEKUNDAERLAND_TO_ARBEIDSLAND_NORGE_UTBETALER {
+    INNVILGET_SEKUNDÆRLAND_TO_ARBEIDSLAND_NORGE_UTBETALER {
         override val sanityApiNavn = "innvilgetSekundaerlandToArbeidslandNorgeUtbetaler"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
-    INNVILGET_SEKUNDAERLAND_UK_TO_ARBEIDSLAND_NORGE_UTBETALER {
+    INNVILGET_SEKUNDÆRLAND_UK_TO_ARBEIDSLAND_NORGE_UTBETALER {
         override val sanityApiNavn = "innvilgetSekundaerlandUkToArbeidslandNorgeUtbetaler"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
