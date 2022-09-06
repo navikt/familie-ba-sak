@@ -15,10 +15,11 @@ internal class SamhandlerControllerTest {
 
     lateinit var samhandlerController: SamhandlerController
     private val samhandlerKlientMock: SamhandlerKlient = mockk()
+    private val institusjonRepository: InstitusjonRepository = mockk()
 
     @BeforeEach
     fun setUp() {
-        val institusjonService = InstitusjonService(mockk(), samhandlerKlientMock)
+        val institusjonService = InstitusjonService(mockk(), samhandlerKlientMock, institusjonRepository)
         samhandlerController = SamhandlerController(institusjonService = institusjonService)
         clearMocks(samhandlerKlientMock)
     }
