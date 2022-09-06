@@ -166,20 +166,18 @@ class PersonidentService(
     }
 
     private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String, lagre: Boolean = true): Aktør {
-        aktør.personidenter.filter { it.aktiv }.map {
-            it.aktiv = false
-            it.gjelderTil = LocalDateTime.now()
+        val eksisterendePersonIdent = aktør.personidenter.find { it.fødselsnummer == fødselsnummer && it.aktiv }
+        if (eksisterendePersonIdent == null) {
+            aktør.personidenter.filter { it.aktiv }.map {
+                it.aktiv = false
+                it.gjelderTil = LocalDateTime.now()
+            }
+            aktør.personidenter.add(
+                Personident(fødselsnummer = fødselsnummer, aktør = aktør)
+            )
+            if (lagre) aktørIdRepository.saveAndFlush(aktør)
         }
-        // Ekstra persistering eller kommer unique constraint feile.
-        if (lagre) aktørIdRepository.saveAndFlush(aktør)
-        aktør.personidenter.add(
-            Personident(fødselsnummer = fødselsnummer, aktør = aktør)
-        )
-        return if (lagre) {
-            aktørIdRepository.saveAndFlush(aktør)
-        } else {
-            aktør
-        }
+        return aktør
     }
 
     private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =
