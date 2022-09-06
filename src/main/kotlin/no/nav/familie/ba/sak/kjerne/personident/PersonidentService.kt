@@ -166,12 +166,15 @@ class PersonidentService(
     }
 
     private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String, lagre: Boolean = true): Aktør {
+        secureLogger.info("Oppretter personIdent. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre")
         val eksisterendePersonIdent = aktør.personidenter.find { it.fødselsnummer == fødselsnummer && it.aktiv }
         if (eksisterendePersonIdent == null) {
             aktør.personidenter.filter { it.aktiv }.map {
                 it.aktiv = false
                 it.gjelderTil = LocalDateTime.now()
             }
+            if (lagre) aktørIdRepository.saveAndFlush(aktør) // Må lagre her fordi unik index er en blanding av aktørid og gjelderTil, og hvis man ikke lagerer før man legger til ny, så feiler det pga indexen.
+
             aktør.personidenter.add(
                 Personident(fødselsnummer = fødselsnummer, aktør = aktør)
             )
