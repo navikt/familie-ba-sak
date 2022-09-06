@@ -20,7 +20,7 @@ internal class KompetanseMappingTest {
             fom = YearMonth.of(2019, 4),
             tom = YearMonth.of(2037, 3),
             barnAktører = barnAktører,
-            søkersAktivitet = SøkersAktivitet.MOTTAR_PENSJON_FRA_NORGE,
+            søkersAktivitet = SøkersAktivitet.MOTTAR_PENSJON,
             annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND,
             annenForeldersAktivitetsland = "pl",
             barnetsBostedsland = "dk",

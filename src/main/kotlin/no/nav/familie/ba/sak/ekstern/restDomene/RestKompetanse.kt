@@ -27,17 +27,17 @@ data class RestKompetanse(
                 this.barnetsBostedsland,
                 this.annenForeldersAktivitetsland,
                 this.resultat,
-                this.søkersAktivitet
+                this.søkersAktivitet,
+                this.søkersAktivitetsland
             )
         )
         if (annenForeldersAktivitetsland == null) {
             antallUtfylteFelter += (annenForeldersAktivitet.let { if (it == AnnenForeldersAktivitet.INAKTIV || it == AnnenForeldersAktivitet.IKKE_AKTUELT) 1 else 0 })
         }
-        /* TODO: Legg til denne valideringen når endringen er kommet med frontend
         if (søkersAktivitetsland == null) {
             antallUtfylteFelter += (søkersAktivitet.let { if (it == SøkersAktivitet.INAKTIV) 1 else 0 })
-        }*/
-        return this.copy(status = utfyltStatus(antallUtfylteFelter, 5))
+        }
+        return this.copy(status = utfyltStatus(antallUtfylteFelter, 6))
     }
 }
 

@@ -60,7 +60,7 @@ class KompetanseRepositoryTest(
                 barnAktører = setOf(barn1),
                 fom = YearMonth.of(2020, 1),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_PENSJON,
                 annenForeldersAktivitetsland = "pl",
                 barnetsBostedsland = "sl"
