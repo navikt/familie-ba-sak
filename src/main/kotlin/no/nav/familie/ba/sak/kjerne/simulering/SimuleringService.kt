@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import org.springframework.stereotype.Service
@@ -41,7 +42,6 @@ class SimuleringService(
     private val behandlingRepository: BehandlingRepository
 ) {
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
-    private val simulertForskjellNyGammel = Metrics.counter("familie.ba.sak.oppdrag.simulert.forskjell")
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET ||
@@ -63,16 +63,14 @@ class SimuleringService(
             erSimulering = true
         )
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
-            val generertUtbetalingsoppdrag = utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            val tilkjentYtelse = utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 vedtak = vedtak,
                 saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
                 erSimulering = true
             )
-            if (utbetalingsoppdrag != generertUtbetalingsoppdrag) {
-                simulertForskjellNyGammel.increment()
-                secureLogger.info("Generert utbetalingsoppdrag på gamle måte=$utbetalingsoppdrag")
-                secureLogger.info("Generert utbetalingsoppdrag på ny måte=$generertUtbetalingsoppdrag")
-            }
+            val gammelUtbetalingsoppdragIString = objectMapper.writeValueAsString(utbetalingsoppdrag)
+            secureLogger.info("Generert utbetalingsoppdrag på gamle måte=$gammelUtbetalingsoppdragIString")
+            secureLogger.info("Generert utbetalingsoppdrag på ny måte=${tilkjentYtelse.utbetalingsoppdrag}")
         }
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
         if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
