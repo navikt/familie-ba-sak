@@ -7,7 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedTaskDto
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -24,7 +24,7 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-class InfotrygdFeedClientTest : AbstractSpringIntegrationTestDev() {
+class InfotrygdFeedClientTest : AbstractSpringIntegrationTest() {
 
     lateinit var client: InfotrygdFeedClient
 
@@ -61,7 +61,7 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTestDev() {
 
         wireMockServer.verify(
             anyRequestedFor(anyUrl())
-                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
                 .withRequestBody(
                     equalToJson(
                         objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedDto(fnrBarn = request.fnrBarn.first()))

@@ -246,11 +246,9 @@ class SøknadGrunnlagTest(
             )
         )
 
-        val error =
-            assertThrows<EmptyResultDataAccessException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
+        assertThrows<EmptyResultDataAccessException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
         val stegEtterNyRegistrering =
             behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
-        assertEquals("Result must not be null!", error.message)
         assertEquals(
             setOf(StegType.REGISTRERE_SØKNAD, StegType.REGISTRERE_PERSONGRUNNLAG, StegType.VILKÅRSVURDERING),
             stegEtterNyRegistrering
