@@ -10,7 +10,7 @@ class VergeService(
 ) {
 
     @Transactional
-    fun OppdaterVergeForBehandling(behandling: Behandling, verge: Verge) {
+    fun oppdaterVergeForBehandling(behandling: Behandling, verge: Verge) {
         val vergeRegistrertFraFør = vergeRepository.findByBehandling(behandling)
         if (vergeRegistrertFraFør != null) {
             vergeRepository.delete(vergeRegistrertFraFør)

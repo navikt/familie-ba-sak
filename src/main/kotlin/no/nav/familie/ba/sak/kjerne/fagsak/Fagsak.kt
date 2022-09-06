@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
@@ -32,11 +33,11 @@ data class Fagsak(
     )
     val aktør: Aktør,
 
-    @OneToOne(optional = true)
+    @ManyToOne(optional = true)
     @JoinColumn(
         name = "fk_institusjon_id",
         nullable = true,
-        updatable = false
+        updatable = true
     )
     var institusjon: Institusjon? = null,
 
