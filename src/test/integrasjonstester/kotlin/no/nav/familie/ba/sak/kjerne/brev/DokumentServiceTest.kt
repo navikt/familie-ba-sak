@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TEST_PDF
@@ -78,7 +78,7 @@ class DokumentServiceTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService
-) : AbstractSpringIntegrationTestDev() {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun setup() {
