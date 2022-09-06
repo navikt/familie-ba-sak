@@ -20,8 +20,8 @@ class VergeServiceTest {
         every { vergeRepositoryMock.findByBehandling(any()) } returns null
         every { vergeRepositoryMock.save(capture(vergeSlot)) } returns Verge(1L, "", behandling)
         val vergeService = VergeService(vergeRepositoryMock)
-        val verge = Verge(1L, "12345678910", behandling)
-        vergeService.OppdaterVergeForBehandling(behandling, verge)
+        val verge = Verge(1L, "verge 1", behandling)
+        vergeService.oppdaterVergeForBehandling(behandling, verge)
         val vergeCaptured = vergeSlot.captured
         assertThat(vergeCaptured.id).isEqualTo(verge.id)
         assertThat(vergeCaptured.ident).isEqualTo(verge.ident)
