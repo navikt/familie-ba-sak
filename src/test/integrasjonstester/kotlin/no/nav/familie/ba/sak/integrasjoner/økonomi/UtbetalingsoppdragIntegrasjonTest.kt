@@ -331,7 +331,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
-        val sisteOffsetPåFagsak = økonomiService.hentSisteOffsetPåFagsak(behandling = behandling2)
+        val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = behandling2)
 
         val utbetalingsoppdrag =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -467,7 +467,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
-        val sisteOffsetPåFagsak = økonomiService.hentSisteOffsetPåFagsak(behandling = behandling2)
+        val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = behandling2)
 
         val utbetalingsoppdrag =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -693,7 +693,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
-        val sisteOffsetPåFagsak = økonomiService.hentSisteOffsetPåFagsak(behandling = behandling2)
+        val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = behandling2)
 
         val utbetalingsoppdrag =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -859,7 +859,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
-        val sisteOffsetPåFagsak = økonomiService.hentSisteOffsetPåFagsak(behandling = behandling2)
+        val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = behandling2)
 
         val utbetalingsoppdrag =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -1091,7 +1091,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
         tilkjentYtelse3.andelerTilkjentYtelse.addAll(andelerRevurdering2)
 
-        assertEquals(0, økonomiService.hentSisteOffsetPåFagsak(behandling = behandling3))
+        assertEquals(0, beregningService.hentSisteOffsetPåFagsak(behandling = behandling3))
     }
 
     @Test

@@ -204,11 +204,13 @@ class ClientMocks {
         ) {
             clearMocks(mockFeatureToggleService)
 
+            val mockFeatureToggleServiceAnswer = System.getProperty("mockFeatureToggleAnswer")?.toBoolean() ?: true
+
             val featureSlot = slot<String>()
             every {
                 mockFeatureToggleService.isEnabled(capture(featureSlot))
             } answers {
-                true
+                mockFeatureToggleServiceAnswer
             }
         }
 

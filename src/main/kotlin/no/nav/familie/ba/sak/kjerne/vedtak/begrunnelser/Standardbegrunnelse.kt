@@ -133,6 +133,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetSokerOgBarnOppholdIUtlandetIkkeMerEnn3Maneder"
     },
+    INNVILGET_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetOppholdIUtlandetIkkeMerEnnTreMaaneder"
+    },
     INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetSokerOgBarnFrivilligMedlem"
@@ -652,6 +656,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     SMÅBARNSTILLEGG_HADDE_IKKE_FULL_OVERGANGSSTØNAD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonSmaabarnstilleggHaddeIkkeFullOvergangsstonad"
+    },
+    REDUKSJON_BARN_MED_SAMBOER_FØR_BODD_SAMMEN_12_MND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonBarnMedSamboerForBoddSammen12Mnd"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
@@ -1343,6 +1351,7 @@ fun Standardbegrunnelse.delOpp(
                 )
             }
         }
+
         else -> throw Feil("Oppdeling av begrunnelse $this er ikke støttet.")
     }
 }

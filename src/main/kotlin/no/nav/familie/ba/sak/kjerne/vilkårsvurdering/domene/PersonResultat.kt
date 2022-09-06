@@ -151,7 +151,9 @@ class PersonResultat(
 
 fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>> =
     this.associate { personResultat ->
-        val vilkårResultaterForAktørMap = personResultat.vilkårResultater.groupBy { it.vilkårType }
+        val vilkårResultaterForAktørMap = personResultat.vilkårResultater
+            .groupByTo(mutableMapOf()) { it.vilkårType }
+            .mapValues { if (it.key != Vilkår.BOR_MED_SØKER) it.value else it.value.fjernAvslagUtenPeriodeHvisDetFinsAndreVilkårResultat() }
 
         val vilkårResultaterKombinertOgForsøvetOgBeskåretTidslinje = vilkårResultaterForAktørMap
             .tilVilkårResultatTidslinjer()
@@ -167,6 +169,9 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
             vilkårResultaterKombinertOgForsøvetOgBeskåretTidslinje
         )
     }
+
+private fun MutableList<VilkårResultat>.fjernAvslagUtenPeriodeHvisDetFinsAndreVilkårResultat(): List<VilkårResultat> =
+    if (this.any { !it.erAvslagUtenPeriode() }) this.filterNot { it.erAvslagUtenPeriode() } else this
 
 private fun Tidslinje<Iterable<VilkårResultat>, Måned>.beskjærPå18årVilkåretOmDetFinnes(
     under18VilkårResultater: List<VilkårResultat>?

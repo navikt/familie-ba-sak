@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -39,8 +38,7 @@ class BeregningService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val småbarnstilleggService: SmåbarnstilleggService,
-    private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList(),
-    private val featureToggleService: FeatureToggleService
+    private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList()
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
@@ -171,25 +169,18 @@ class BeregningService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
-        val tilkjentYtelse = TilkjentYtelseUtils
-            .beregnTilkjentYtelse(
+        val tilkjentYtelse =
+            TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling,
-                skalBrukeNyMåteÅGenerereAndeler = featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE)
+                endretUtbetalingAndeler = endretUtbetalingAndeler
             ) { søkerAktør ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     søkerAktør = søkerAktør,
                     behandlingId = behandling.id
                 )
             }
-
-        val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            tilkjentYtelse.andelerTilkjentYtelse,
-            endretUtbetalingAndeler
-        )
-        tilkjentYtelse.andelerTilkjentYtelse.clear()
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
         tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }
@@ -265,6 +256,27 @@ class BeregningService(
                     aty.kalkulertUtbetalingsbeløp != 0 || aty.endretUtbetalingAndeler.isEmpty()
                 }.isNotEmpty()
             } ?: emptyList()
+
+    fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
+        val alleAndelerTilkjentYtelserIverksattMotØkonomi =
+            hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
+                .flatMap { it.andelerTilkjentYtelse }
+                .filter { it.erAndelSomSkalSendesTilOppdrag() }
+        val alleTideligereKjederIverksattMotØkonomi =
+            ØkonomiUtils.kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
+
+        return ØkonomiUtils.gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
+    }
+
+    fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
+        behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
+            .mapNotNull { iverksattBehandling ->
+                hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { andelerTilkjentYtelse ->
+                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
+                    }
+            }.maxByOrNull { it }
 
     fun populerTilkjentYtelse(
         behandling: Behandling,

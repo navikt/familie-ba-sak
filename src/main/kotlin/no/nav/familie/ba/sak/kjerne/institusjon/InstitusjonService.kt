@@ -1,39 +1,35 @@
 package no.nav.familie.ba.sak.kjerne.institusjon
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.samhandler.SamhandlerKlient
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.kontrakter.ba.tss.SamhandlerInfo
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class InstitusjonService(
     val fagsakRepository: FagsakRepository,
-    val samhandlerKlient: SamhandlerKlient
+    val samhandlerKlient: SamhandlerKlient,
+    val institusjonRepository: InstitusjonRepository
 ) {
 
-    @Transactional
-    fun registrerInstitusjonForFagsak(fagsakId: Long, institusjon: Institusjon) {
-        var fagsak = fagsakRepository.finnFagsak(fagsakId)
-        if (fagsak != null && fagsak.type == FagsakType.INSTITUSJON) {
-            fagsak.institusjon = institusjon
-            fagsakRepository.save((fagsak))
-        } else {
-            throw Feil("Registrer institusjon for fagsak som er ${fagsak?.type}")
-        }
+    fun hentEllerOpprettInstitusjon(orgNummer: String, tssEksternId: String?): Institusjon {
+        return institusjonRepository.findByOrgNummer(orgNummer) ?: institusjonRepository.saveAndFlush(
+            Institusjon(
+                orgNummer = orgNummer,
+                tssEksternId = tssEksternId
+            )
+        )
     }
 
     fun hentSamhandler(orgNummer: String): SamhandlerInfo {
         return samhandlerKlient.hentSamhandler(orgNummer)
     }
 
-    fun søkSamhandlere(navn: String): List<SamhandlerInfo> {
+    fun søkSamhandlere(navn: String?, postnummer: String?, område: String?): List<SamhandlerInfo> {
         val komplettSamhandlerListe = mutableListOf<SamhandlerInfo>()
         var side = 0
         do {
-            val søkeresultat = samhandlerKlient.søkSamhandlere(navn, side)
+            val søkeresultat = samhandlerKlient.søkSamhandlere(navn, postnummer, område, side)
             side++
             komplettSamhandlerListe.addAll(søkeresultat.samhandlere)
         } while (søkeresultat.finnesMerInfo)

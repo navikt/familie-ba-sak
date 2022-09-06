@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
@@ -67,7 +68,7 @@ class AutovedtakFødselshendelseService(
 
     override fun skalAutovedtakBehandles(behandlingsdata: NyBehandlingHendelse): Boolean {
         val morsAktør = personidentService.hentAktør(behandlingsdata.morsIdent)
-        val morsÅpneBehandling = hentÅpenBehandling(aktør = morsAktør)
+        val morsÅpneBehandling = hentÅpenNormalBehandling(aktør = morsAktør)
         val barnsAktører = personidentService.hentAktørIder(behandlingsdata.barnasIdenter)
 
         if (morsÅpneBehandling != null) {
@@ -179,8 +180,8 @@ class AutovedtakFødselshendelseService(
         }
     }
 
-    private fun hentÅpenBehandling(aktør: Aktør): Behandling? {
-        return fagsakService.hent(aktør)?.let {
+    private fun hentÅpenNormalBehandling(aktør: Aktør): Behandling? {
+        return fagsakService.hent(aktør, FagsakType.NORMAL)?.let {
             behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(it.id)
         }
     }
