@@ -91,6 +91,13 @@ class BehandlingsresultatSteg(
             )
         }
 
+        if (behandlingMedOppdatertBehandlingsresultat.erManuellMigreringForEndreMigreringsdato() && behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+            throw FunksjonellFeil(
+                "Fortsatt innvilget er et ugyldig behandlingsresultat når du skal endre migreringsdato. " +
+                    "Henlegg behandlingen. Når du starter en ny endre migreringsdato behandling, må du velge en dato som er tidligere enn gjeldene dato for migrering."
+            )
+        }
+
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
             behandlingService.nullstillEndringstidspunkt(behandling.id)
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
