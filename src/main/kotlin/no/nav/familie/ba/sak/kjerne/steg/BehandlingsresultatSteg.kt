@@ -77,26 +77,7 @@ class BehandlingsresultatSteg(
                 )
             }
 
-        if (behandlingMedOppdatertBehandlingsresultat.erManuellMigrering() &&
-            (
-                behandlingMedOppdatertBehandlingsresultat.resultat.erAvslått() ||
-                    behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.DELVIS_INNVILGET
-                )
-        ) {
-            throw FunksjonellFeil(
-                "Du har fått behandlingsresultatet " +
-                    "${behandlingMedOppdatertBehandlingsresultat.resultat.displayName}. " +
-                    "Dette er ikke støttet på migreringsbehandlinger. " +
-                    "Ta kontakt med Team familie om du er uenig i resultatet."
-            )
-        }
-
-        if (behandlingMedOppdatertBehandlingsresultat.erManuellMigreringForEndreMigreringsdato() && behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
-            throw FunksjonellFeil(
-                "Fortsatt innvilget er et ugyldig behandlingsresultat når du skal endre migreringsdato. " +
-                    "Henlegg behandlingen. Når du starter en ny endre migreringsdato behandling, må du velge en dato som er tidligere enn gjeldene dato for migrering."
-            )
-        }
+        validerBehandlingsresultatErGyldigForÅrsak(behandlingMedOppdatertBehandlingsresultat)
 
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
             behandlingService.nullstillEndringstidspunkt(behandling.id)
@@ -128,6 +109,29 @@ class BehandlingsresultatSteg(
 
     override fun stegType(): StegType {
         return StegType.BEHANDLINGSRESULTAT
+    }
+
+    private fun validerBehandlingsresultatErGyldigForÅrsak(behandlingMedOppdatertBehandlingsresultat: Behandling) {
+        if (behandlingMedOppdatertBehandlingsresultat.erManuellMigrering() &&
+            (
+                behandlingMedOppdatertBehandlingsresultat.resultat.erAvslått() ||
+                    behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.DELVIS_INNVILGET
+                )
+        ) {
+            throw FunksjonellFeil(
+                "Du har fått behandlingsresultatet " +
+                    "${behandlingMedOppdatertBehandlingsresultat.resultat.displayName}. " +
+                    "Dette er ikke støttet på migreringsbehandlinger. " +
+                    "Ta kontakt med Team familie om du er uenig i resultatet."
+            )
+        }
+
+        if (behandlingMedOppdatertBehandlingsresultat.erManuellMigreringForEndreMigreringsdato() && behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+            throw FunksjonellFeil(
+                "Fortsatt innvilget er et ugyldig behandlingsresultat når du skal endre migreringsdato. " +
+                    "Henlegg behandlingen. Når du starter en ny endre migreringsdato behandling, må du velge en dato som er tidligere enn gjeldene dato for migrering."
+            )
+        }
     }
 
     private fun settBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat): Behandling {
