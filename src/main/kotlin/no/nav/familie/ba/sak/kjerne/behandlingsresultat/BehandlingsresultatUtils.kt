@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -32,8 +31,8 @@ object BehandlingsresultatUtils {
     fun utledBehandlingsresultatDataForPerson(
         person: Person,
         personerFremstiltKravFor: List<Aktør>,
-        forrigeTilkjentYtelse: TilkjentYtelse?,
-        tilkjentYtelse: TilkjentYtelse,
+        andelerFraForrigeTilkjentYtelse: List<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         erEksplisittAvslag: Boolean
     ): BehandlingsresultatPerson {
         val aktør = person.aktør
@@ -44,11 +43,10 @@ object BehandlingsresultatUtils {
             søktForPerson = personerFremstiltKravFor.contains(aktør),
             forrigeAndeler = when (person.type) {
                 PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(
-                    forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.aktør == aktør }
-                        ?: emptyList()
+                    andelerFraForrigeTilkjentYtelse.filter { it.aktør == aktør }
                 )
-                else -> forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.aktør == aktør }
-                    ?.map { andelTilkjentYtelse ->
+                else -> andelerFraForrigeTilkjentYtelse.filter { it.aktør == aktør }
+                    .map { andelTilkjentYtelse ->
                         BehandlingsresultatAndelTilkjentYtelse(
                             stønadFom = andelTilkjentYtelse.stønadFom,
                             stønadTom = andelTilkjentYtelse.stønadTom,
@@ -57,8 +55,8 @@ object BehandlingsresultatUtils {
                     } ?: emptyList()
             },
             andeler = when (person.type) {
-                PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør == aktør })
-                else -> tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør == aktør }
+                PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(andelerTilkjentYtelse.filter { it.aktør == aktør })
+                else -> andelerTilkjentYtelse.filter { it.aktør == aktør }
                     .map { andelTilkjentYtelse ->
                         BehandlingsresultatAndelTilkjentYtelse(
                             stønadFom = andelTilkjentYtelse.stønadFom,

@@ -7,7 +7,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
-fun beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse: Set<AndelTilkjentYtelse>): LocalDateTimeline<Int> {
+fun beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>): LocalDateTimeline<Int> {
     return andelerTilkjentYtelse
         .map { personTilTimeline(it) }
         .reduce(::reducer)
@@ -24,7 +24,10 @@ private fun personTilTimeline(it: AndelTilkjentYtelse) =
         )
     )
 
-private fun reducer(sammenlagtTidslinje: LocalDateTimeline<Int>, tidslinje: LocalDateTimeline<Int>): LocalDateTimeline<Int> {
+private fun reducer(
+    sammenlagtTidslinje: LocalDateTimeline<Int>,
+    tidslinje: LocalDateTimeline<Int>
+): LocalDateTimeline<Int> {
     sammenlagtTidslinje.disjoint(tidslinje)
     return sammenlagtTidslinje.combine(
         tidslinje,

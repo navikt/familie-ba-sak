@@ -246,16 +246,19 @@ class BeregningService(
     /**
      * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse som ikke er endret til null i utbetaling.
      */
-    fun finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandlingId: Long): List<Aktør> =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
+    fun finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandlingId: Long): List<Aktør> {
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandlingId)
+
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
             ?.filter { aktør ->
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                    behandlingId,
-                    aktør
-                ).filter { aty ->
-                    aty.kalkulertUtbetalingsbeløp != 0 || aty.endretUtbetalingAndeler.isEmpty()
-                }.isNotEmpty()
+                andelerTilkjentYtelse
+                    .filter { it.aktør == aktør }
+                    .filter { aty ->
+                        aty.kalkulertUtbetalingsbeløp != 0 || aty.endretUtbetalingAndeler.isEmpty()
+                    }.isNotEmpty()
             } ?: emptyList()
+    }
 
     fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
         val alleAndelerTilkjentYtelserIverksattMotØkonomi =

@@ -130,19 +130,18 @@ internal class StønadsstatistikkServiceTest(
             periodeIdOffset = 3
         )
 
+        val andelerTilkjentYtelse = listOf(
+            andelTilkjentYtelseBarn1,
+            andelTilkjentYtelseBarn2PeriodeMed0Beløp,
+            andelTilkjentYtelseSøker
+        )
+
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { kompetanseService.hentKompetanser(any()) } returns kompetanseperioder
-        every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
-            tilkjentYtelse.copy(
-                andelerTilkjentYtelse = mutableSetOf(
-                    andelTilkjentYtelseBarn1,
-                    andelTilkjentYtelseBarn2PeriodeMed0Beløp,
-                    andelTilkjentYtelseSøker
-                )
-            )
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns andelerTilkjentYtelse
     }
 
     @Test
