@@ -386,7 +386,12 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
             andelerTilkjentYtelse,
             utvidetVedtaksperiodeMedBegrunnelser
         ),
-        ytelserForrigePerioder = andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelser) }
+        ytelserForrigePerioder = andelerTilkjentYtelse.filter {
+            ytelseErFraForrigePeriode(
+                it,
+                utvidetVedtaksperiodeMedBegrunnelser
+            )
+        }
     )
 
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(

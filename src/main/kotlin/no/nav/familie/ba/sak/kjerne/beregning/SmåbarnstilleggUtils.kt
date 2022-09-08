@@ -221,9 +221,15 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
             if (overgangsstønad == null || utvidet == null || under3År == null) {
                 null
             } else if (utvidet.prosent > BigDecimal.ZERO && under3År == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_UTBETALING) {
-                SmåbarnstilleggPeriode(overgangsstønad, BigDecimal(100))
+                SmåbarnstilleggPeriode(
+                    overgangsstønad,
+                    BigDecimal(100)
+                )
             } else if (utvidet.prosent == BigDecimal.ZERO || under3År == BarnSinRettTilSmåbarnstillegg.UNDER_3_ÅR_NULLUTBETALING) {
-                SmåbarnstilleggPeriode(overgangsstønad, BigDecimal.ZERO)
+                SmåbarnstilleggPeriode(
+                    overgangsstønad,
+                    BigDecimal.ZERO
+                )
             } else {
                 throw Feil("Ugyldig kombinasjon av overgangsstønad, utvidet og barn under 3 år ved generering av småbarnstillegg.")
             }

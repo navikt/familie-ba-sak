@@ -836,7 +836,8 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(6, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -905,7 +906,8 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(4, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -980,7 +982,8 @@ internal class TilkjentYtelseUtilsTest {
             barna = listOf(barnFødtAugust2019)
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(5, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -1066,7 +1069,8 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(7, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -1142,7 +1146,8 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(januar2019, november2019))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2019) }
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2019) }
         assertEquals(6, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -1184,7 +1189,8 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Det er småbarnstillegg på søker og ordinær barnetrygd på barn 1 fra april, men det skal ikke utbetales før august på grunn av etterbetaling 3 år - Søker og barn 2 har utbetalinger fra tidligere behandlinger som ikke skal overstyres`() {
         val barnFødtAugust2016 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 8, 15))
-        val månedFørBarnFødtAugust2016Blir18 = barnFødtAugust2016.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnFødtAugust2016Blir18 =
+            barnFødtAugust2016.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
         val barnFødtDesember2006 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2006, 12, 1))
         val månedFørBarnFødtDesember2006Blir18 = barnFødtDesember2006.fødselsdato.til18ÅrsVilkårsdato().toYearMonth()
 
@@ -1225,7 +1231,8 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(januar2019, november2019))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2019) }
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2019) }
         assertEquals(8, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -1302,7 +1309,8 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(april2022, juni2022))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(3, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -1354,7 +1362,8 @@ internal class TilkjentYtelseUtilsTest {
             overgangsstønadPerioder = listOf(MånedPeriode(april2022, august2022))
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
         assertEquals(3, andelerTilkjentYtelseITidsrom.size)
 
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
@@ -1400,7 +1409,8 @@ internal class TilkjentYtelseUtilsTest {
             barna = listOf(barnFødtAugust2019)
         )
 
-        val andelerTilkjentYtelseITidsrom = tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
 
         assertEquals(3, andelerTilkjentYtelseITidsrom.size)
 
@@ -1464,11 +1474,17 @@ internal class TilkjentYtelseUtilsTest {
 
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
-            personopplysningGrunnlag = lagPersonopplysningsgrunnlag(personer = barna.plus(søker), behandlingId = vilkårsvurdering.behandling.id),
+            personopplysningGrunnlag = lagPersonopplysningsgrunnlag(
+                personer = barna.plus(søker),
+                behandlingId = vilkårsvurdering.behandling.id
+            ),
             behandling = vilkårsvurdering.behandling,
             endretUtbetalingAndeler = endretUtbetalingAndeler
         ) { (_) ->
-            lagOvergangsstønadPerioder(perioder = overgangsstønadPerioder, søkerIdent = søker.aktør.aktivFødselsnummer())
+            lagOvergangsstønadPerioder(
+                perioder = overgangsstønadPerioder,
+                søkerIdent = søker.aktør.aktivFødselsnummer()
+            )
         }
 
         return tilkjentYtelse
@@ -1481,7 +1497,10 @@ internal class TilkjentYtelseUtilsTest {
         )
     }
 
-    private fun lagOvergangsstønadPerioder(perioder: List<MånedPeriode>, søkerIdent: String): List<InternPeriodeOvergangsstønad> {
+    private fun lagOvergangsstønadPerioder(
+        perioder: List<MånedPeriode>,
+        søkerIdent: String
+    ): List<InternPeriodeOvergangsstønad> {
         return perioder.map {
             InternPeriodeOvergangsstønad(
                 søkerIdent,

@@ -50,10 +50,12 @@ class SmåbarnstilleggKorrigeringService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
         val andelTilkjentYtelser = tilkjentYtelse.andelerTilkjentYtelse
 
-        val småBarnstilleggSomHarOverlappendePeriode = finnOverlappendeSmåbarnstilleggPeriode(andelTilkjentYtelser, årMåned)
-            ?: throw FunksjonellFeil("Det er ikke mulig å fjerne småbarnstillegg for ${årMåned.tilMånedÅr()} fordi det ikke finnes småbarnstillegg for denne perioden")
+        val småBarnstilleggSomHarOverlappendePeriode =
+            finnOverlappendeSmåbarnstilleggPeriode(andelTilkjentYtelser, årMåned)
+                ?: throw FunksjonellFeil("Det er ikke mulig å fjerne småbarnstillegg for ${årMåned.tilMånedÅr()} fordi det ikke finnes småbarnstillegg for denne perioden")
 
-        val eksisterendeSmåBarnstilleggTidslinje = AndelTilkjentYtelseTidslinje(listOf(småBarnstilleggSomHarOverlappendePeriode))
+        val eksisterendeSmåBarnstilleggTidslinje =
+            AndelTilkjentYtelseTidslinje(listOf(småBarnstilleggSomHarOverlappendePeriode))
         val filtrerBortSingelMånedTidslinje = opprettBooleanTidslinje(årMåned, årMåned)
 
         val perioderUtenOverlapp =
@@ -62,7 +64,12 @@ class SmåbarnstilleggKorrigeringService(
                 .filter { it.innhold == null }
 
         val nyOppsplittetSmåbarnstillegg = perioderUtenOverlapp.map {
-            opprettNyttSmåbarnstillegg(behandling, tilkjentYtelse, it.fraOgMed.tilYearMonth(), it.tilOgMed.tilYearMonth())
+            opprettNyttSmåbarnstillegg(
+                behandling,
+                tilkjentYtelse,
+                it.fraOgMed.tilYearMonth(),
+                it.tilOgMed.tilYearMonth()
+            )
         }
 
         andelTilkjentYtelser.remove(småBarnstilleggSomHarOverlappendePeriode)

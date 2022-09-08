@@ -131,18 +131,19 @@ enum class Årsak(val visningsnavn: String) {
     ALLEREDE_UTBETALT("Allerede utbetalt")
 }
 
-fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingAndel(
-    id = this.id,
-    personIdent = this.person?.aktør?.aktivFødselsnummer(),
-    prosent = this.prosent,
-    fom = this.fom,
-    tom = this.tom,
-    årsak = this.årsak,
-    avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
-    søknadstidspunkt = this.søknadstidspunkt,
-    begrunnelse = this.begrunnelse,
-    erTilknyttetAndeler = this.andelTilkjentYtelser.isNotEmpty()
-)
+fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() =
+    RestEndretUtbetalingAndel(
+        id = this.id,
+        personIdent = this.person?.aktør?.aktivFødselsnummer(),
+        prosent = this.prosent,
+        fom = this.fom,
+        tom = this.tom,
+        årsak = this.årsak,
+        avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
+        søknadstidspunkt = this.søknadstidspunkt,
+        begrunnelse = this.begrunnelse,
+        erTilknyttetAndeler = this.andelTilkjentYtelser.isNotEmpty()
+    )
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
