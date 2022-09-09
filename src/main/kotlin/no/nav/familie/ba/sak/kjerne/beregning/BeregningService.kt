@@ -233,15 +233,16 @@ class BeregningService(
     /**
      * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse.
      */
-    fun finnBarnFraBehandlingMedTilkjentYtelse(behandlingId: Long): List<Aktør> =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
+    fun finnBarnFraBehandlingMedTilkjentYtelse(behandlingId: Long): List<Aktør> {
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandlingId)
+
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
             ?.filter {
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                    behandlingId,
-                    it
-                )
-                    .isNotEmpty()
+                andelerTilkjentYtelse
+                    .filter { aty -> aty.aktør == it }.isNotEmpty()
             } ?: emptyList()
+    }
 
     /**
      * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse som ikke er endret til null i utbetaling.
