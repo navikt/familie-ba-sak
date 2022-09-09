@@ -58,45 +58,28 @@ class BrevPeriodeService(
         behandlingId: BehandlingId,
         skalLogge: Boolean = true
     ): List<BrevperiodeData> {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId.id)
-            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
-
-        val endredeUtbetalingAndeler = endretUtbetalingAndelService
-            .hentForBehandling(behandlingId = behandlingId.id)
-
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id)
-
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandlingId.id)
-
-        val uregistrerteBarn =
-            søknadGrunnlagService.hentAktiv(behandlingId = behandlingId.id)?.hentUregistrerteBarn()
-                ?: emptyList()
-
-        val kompetanser =
-            kompetanseService.hentKompetanser(behandlingId = behandlingId)
-
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-        val sanityEØSBegrunnelser =
-            if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) sanityService.hentSanityEØSBegrunnelser() else emptyList()
-
-        val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
-            vilkårsvurdering = vilkårsvurdering,
-            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-            persongrunnlag = personopplysningGrunnlag
-        )
 
         return vedtaksperioderId.map {
             hentBrevperiodeData(
                 vedtaksperiodeId = it,
-                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+                restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
+                    vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId.id)
+                        ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak"),
+                    endredeUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingId = behandlingId.id),
+                    persongrunnlag = personopplysningGrunnlag
+                ),
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                uregistrerteBarn = uregistrerteBarn,
+                andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+                    behandlingId.id
+                ),
+                uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId.id)
+                    ?.hentUregistrerteBarn()
+                    ?: emptyList(),
                 skalLogge = skalLogge,
-                kompetanser = kompetanser.toList(),
-                sanityBegrunnelser = sanityBegrunnelser,
-                sanityEØSBegrunnelser = sanityEØSBegrunnelser
+                kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId).toList(),
+                sanityBegrunnelser = sanityService.hentSanityBegrunnelser(),
+                sanityEØSBegrunnelser = if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) sanityService.hentSanityEØSBegrunnelser() else emptyList()
             )
         }
     }
@@ -115,8 +98,6 @@ class BrevPeriodeService(
     ): BrevperiodeData {
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
-
-        val minimerteUregistrerteBarn = uregistrerteBarn.map { it.tilMinimertUregisrertBarn() }
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -140,7 +121,7 @@ class BrevPeriodeService(
         val brevperiodeData = BrevperiodeData(
             minimertVedtaksperiode = minimertVedtaksperiode,
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-            uregistrerteBarn = minimerteUregistrerteBarn,
+            uregistrerteBarn = uregistrerteBarn.map { it.tilMinimertUregisrertBarn() },
             brevMålform = personopplysningGrunnlag.søker.målform,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
