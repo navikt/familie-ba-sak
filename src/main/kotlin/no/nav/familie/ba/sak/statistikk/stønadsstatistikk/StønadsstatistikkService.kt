@@ -91,7 +91,8 @@ class StønadsstatistikkService(
                 fom = kompetanse.fom!!,
                 tom = kompetanse.tom,
                 resultat = KompetanseResultat.valueOf(kompetanse.resultat!!.name),
-                sokersaktivitet = SøkersAktivitet.valueOf(kompetanse.søkersAktivitet!!.name)
+                sokersaktivitet = SøkersAktivitet.valueOf(kompetanse.søkersAktivitet!!.name),
+                sokersAktivitetsland = kompetanse.søkersAktivitetsland
             )
         }
     }
