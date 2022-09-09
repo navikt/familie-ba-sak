@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
-import no.nav.familie.ba.sak.kjerne.beregning.Beløpsdifferanse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
@@ -35,7 +34,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedta
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.ytelseErFraForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.fpsak.tidsserie.LocalDateTimeline
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -187,23 +185,20 @@ class BrevPeriodeService(
     ): List<String> {
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtaksperiodeMedBegrunnelser.vedtak.behandling)
+
         return if (forrigeBehandling != null) {
             val forrigeAndelTilkjentYtelse = andelTilkjentYtelseRepository
                 .finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
-            val endringerITilkjentYtelsePerBarn =
-                andelerTilkjentYtelse.hentPerioderMedEndringerFra(forrigeAndelTilkjentYtelse)
-            endringerITilkjentYtelsePerBarn.keys.filter { barn ->
-                endringerITilkjentYtelsePerBarn.getValue(barn).any {
-                    it.fom == vedtaksperiodeMedBegrunnelser.fom
+
+            andelerTilkjentYtelse.hentPerioderMedEndringerFra(forrigeAndelTilkjentYtelse)
+                .filter { barn -> barn.value.any { it.fom == vedtaksperiodeMedBegrunnelser.fom } }
+                .mapNotNull {
+                    if (!it.value.filterValue { beløp -> beløp < 0 }.isEmpty) {
+                        personidentService.hentAktør(it.key).aktivFødselsnummer()
+                    } else {
+                        null
+                    }
                 }
-            }.mapNotNull { barn ->
-                val result: LocalDateTimeline<Beløpsdifferanse> = endringerITilkjentYtelsePerBarn.getValue(barn)
-                if (!result.filterValue { beløp -> beløp < 0 }.isEmpty) {
-                    personidentService.hentAktør(barn).aktivFødselsnummer()
-                } else {
-                    null
-                }
-            }
         } else {
             emptyList()
         }
