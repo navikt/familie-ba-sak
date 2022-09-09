@@ -302,9 +302,15 @@ class BehandlingService(
                         )
                     }
 
-        if (behandling.erManuellMigreringForEndreMigreringsdato() &&
-            forrigeMigreringsdato != null &&
+        val nyMigreringsdatoErSenereEnnForrigeMigreringsdato = forrigeMigreringsdato != null &&
             migreringsdato.toYearMonth().isSameOrAfter(forrigeMigreringsdato)
+
+        val nyMigreringsdatoErSenereEnnMuligMigreringdatoNårForrigeMigreringsdatoIkkeErLagretNed = forrigeMigreringsdato == null && migreringsdato.toYearMonth().isSameOrAfter(
+            YearMonth.of(2022, 2)
+        )
+
+        if (behandling.erManuellMigreringForEndreMigreringsdato() &&
+            (nyMigreringsdatoErSenereEnnForrigeMigreringsdato || nyMigreringsdatoErSenereEnnMuligMigreringdatoNårForrigeMigreringsdatoIkkeErLagretNed)
         ) {
             throw FunksjonellFeil("Migreringsdatoen du har lagt inn er lik eller senere enn eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.")
         }
