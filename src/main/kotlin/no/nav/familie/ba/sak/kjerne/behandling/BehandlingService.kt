@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -12,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaSe
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategoriVedOpprettelse
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -98,8 +96,6 @@ class BehandlingService(
                 )
             )
 
-            sjekkEøsToggleOgThrowHvisBrudd(kategori)
-
             val behandling = Behandling(
                 fagsak = fagsak,
                 opprettetÅrsak = nyBehandling.behandlingÅrsak,
@@ -157,17 +153,6 @@ class BehandlingService(
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         behandling.overstyrtEndringstidspunkt = null
         behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
-    }
-
-    private fun sjekkEøsToggleOgThrowHvisBrudd(
-        kategori: BehandlingKategori
-    ) {
-        if (kategori == BehandlingKategori.EØS && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            throw FunksjonellFeil(
-                melding = "EØS er ikke påskrudd",
-                frontendFeilmelding = "Det er ikke støtte for å behandle EØS søknad."
-            )
-        }
     }
 
     @Transactional

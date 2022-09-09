@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
 import hentPerioderMedUtbetaling
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_BEHANDLE_EØS
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -58,16 +57,11 @@ class UtbetalingsperiodeMedBegrunnelserService(
                 reduksjonsperioder = perioderMedReduksjonFraSistIverksatteBehandling
             )
 
-        return if (featureToggleService.isEnabled(KAN_BEHANDLE_EØS)) {
-            val kompetanser = kompetanseRepository.finnFraBehandlingId(vedtak.behandling.id)
-
-            splittUtbetalingsperioderPåKompetanser(
-                utbetalingsperioder = utbetalingsperioderMedReduksjon,
-                kompetanser = kompetanser.toList()
-            )
-        } else {
-            utbetalingsperioderMedReduksjon
-        }
+        val kompetanser = kompetanseRepository.finnFraBehandlingId(vedtak.behandling.id)
+        return splittUtbetalingsperioderPåKompetanser(
+            utbetalingsperioder = utbetalingsperioderMedReduksjon,
+            kompetanser = kompetanser.toList()
+        )
     }
 
     fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(

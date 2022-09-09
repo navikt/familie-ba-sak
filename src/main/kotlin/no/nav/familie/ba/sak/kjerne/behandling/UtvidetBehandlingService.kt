@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
@@ -90,16 +89,11 @@ class UtvidetBehandlingService(
 
         val endringstidspunkt = endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId)
 
-        val kanBehandleEøs = featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)
+        val kompetanser: Collection<Kompetanse> = kompetanseRepository.finnFraBehandlingId(behandlingId)
 
-        val kompetanser: Collection<Kompetanse> =
-            if (kanBehandleEøs) kompetanseRepository.finnFraBehandlingId(behandlingId) else emptyList()
+        val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId)
 
-        val valutakurser =
-            if (kanBehandleEøs) valutakursRepository.finnFraBehandlingId(behandlingId) else emptyList()
-
-        val utenlandskePeriodebeløp =
-            if (kanBehandleEøs) utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId) else emptyList()
+        val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId)
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId)
