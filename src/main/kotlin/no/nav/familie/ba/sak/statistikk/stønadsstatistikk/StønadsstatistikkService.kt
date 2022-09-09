@@ -132,10 +132,12 @@ class StønadsstatistikkService(
     }
 
     private fun utledEnsligForsørger(behandlingId: Long): Boolean {
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
-        if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return false
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId)
+        if (andelerTilkjentYtelse.isEmpty()) {
+            return false
+        }
 
-        return tilkjentYtelse.andelerTilkjentYtelse.find { it.type == YtelseType.UTVIDET_BARNETRYGD } != null
+        return andelerTilkjentYtelse.find { it.type == YtelseType.UTVIDET_BARNETRYGD } != null
     }
 
     private fun mapTilUtbetalingsperiodeV2(

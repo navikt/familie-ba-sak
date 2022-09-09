@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -83,7 +82,6 @@ internal class StønadsstatistikkServiceTest(
     fun init() {
         MockKAnnotations.init(this)
 
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val vedtak = lagVedtak(behandling)
 
         val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(
