@@ -50,7 +50,10 @@ class SmåbarnstilleggUtilsTest {
             )
         )
 
-        val generertePerioder = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(barnasAndeler = barnasAndeler, barnasAktørerOgFødselsdatoer = listOf(Pair(barn.aktør, barn.fødselsdato))).perioder()
+        val generertePerioder = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+            barnasAndeler = barnasAndeler,
+            barnasAktørerOgFødselsdatoer = listOf(Pair(barn.aktør, barn.fødselsdato))
+        ).perioder()
 
         assertEquals(1, generertePerioder.size)
         assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder.single().fraOgMed.tilYearMonth())
@@ -80,7 +83,10 @@ class SmåbarnstilleggUtilsTest {
             )
         )
 
-        val generertePerioder = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(barnasAndeler = barnasAndeler, barnasAktørerOgFødselsdatoer = listOf(Pair(barn.aktør, barn.fødselsdato))).perioder().sortedBy { it.fraOgMed }
+        val generertePerioder = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+            barnasAndeler = barnasAndeler,
+            barnasAktørerOgFødselsdatoer = listOf(Pair(barn.aktør, barn.fødselsdato))
+        ).perioder().sortedBy { it.fraOgMed }
 
         assertEquals(2, generertePerioder.size)
         assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder.first().fraOgMed.tilYearMonth())
@@ -136,7 +142,14 @@ class SmåbarnstilleggUtilsTest {
             )
         )
 
-        val generertePerioder = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(barnasAndeler = barnasAndeler, barnasAktørerOgFødselsdatoer = listOf(Pair(barn1.aktør, barn1.fødselsdato), Pair(barn2.aktør, barn2.fødselsdato), Pair(barn3.aktør, barn3.fødselsdato))).perioder().sortedBy { it.fraOgMed }
+        val generertePerioder = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
+            barnasAndeler = barnasAndeler,
+            barnasAktørerOgFødselsdatoer = listOf(
+                Pair(barn1.aktør, barn1.fødselsdato),
+                Pair(barn2.aktør, barn2.fødselsdato),
+                Pair(barn3.aktør, barn3.fødselsdato)
+            )
+        ).perioder().sortedBy { it.fraOgMed }
 
         assertEquals(3, generertePerioder.size)
         assertEquals(barn2.fødselsdato.plusMonths(1).toYearMonth(), generertePerioder.first().fraOgMed.tilYearMonth())

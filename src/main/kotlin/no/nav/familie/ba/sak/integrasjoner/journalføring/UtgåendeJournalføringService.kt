@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALF
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.BrukerIdType
+import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
@@ -27,10 +28,11 @@ class UtgåendeJournalføringService(
         journalførendeEnhet: String,
         brev: ByteArray,
         dokumenttype: Dokumenttype,
-        førsteside: Førsteside?
+        førsteside: Førsteside?,
+        tilVerge: Boolean = false
     ): String {
         return journalførDokument(
-            fnr = fnr,
+            brukerId = fnr,
             fagsakId = fagsakId,
             journalførendeEnhet = journalførendeEnhet,
             brev = listOf(
@@ -40,30 +42,43 @@ class UtgåendeJournalføringService(
                     dokumenttype = dokumenttype
                 )
             ),
-            førsteside = førsteside
+            førsteside = førsteside,
+            tilVerge = tilVerge
         )
     }
 
     fun journalførDokument(
-        fnr: String,
+        brukerId: String,
         fagsakId: String,
         journalførendeEnhet: String? = null,
         brev: List<Dokument>,
         vedlegg: List<Dokument> = emptyList(),
         førsteside: Førsteside? = null,
-        behandlingId: Long? = null
+        behandlingId: Long? = null,
+        brukersType: BrukerIdType = BrukerIdType.FNR,
+        brukersNavn: String = "",
+        tilVerge: Boolean = false
     ): String {
         if (journalførendeEnhet == DEFAULT_JOURNALFØRENDE_ENHET) {
             logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
         }
 
         val eksternReferanseId =
-            genererEksternReferanseIdForJournalpost(fagsakId, behandlingId)
+            genererEksternReferanseIdForJournalpost(fagsakId, behandlingId, tilVerge)
 
         val journalpostId = try {
             val journalpost = integrasjonClient.journalførDokument(
                 ArkiverDokumentRequest(
-                    fnr = fnr,
+                    fnr = brukerId,
+                    avsenderMottaker = if (brukersType == BrukerIdType.ORGNR) {
+                        AvsenderMottaker(
+                            brukerId,
+                            brukersType,
+                            brukersNavn
+                        )
+                    } else {
+                        null
+                    },
                     forsøkFerdigstill = true,
                     hoveddokumentvarianter = brev,
                     vedleggsdokumenter = vedlegg,
@@ -87,7 +102,7 @@ class UtgåendeJournalføringService(
                             "med eksternReferanseId=$eksternReferanseId. Bruker eksisterende journalpost."
                     )
 
-                    hentEksisterendeJournalpost(eksternReferanseId, fnr)
+                    hentEksisterendeJournalpost(eksternReferanseId, brukerId)
                 }
                 else -> throw ressursException
             }
@@ -106,8 +121,8 @@ class UtgåendeJournalføringService(
         )
     ).single { it.eksternReferanseId == eksternReferanseId }.journalpostId
 
-    fun genererEksternReferanseIdForJournalpost(fagsakId: String, behandlingId: Long?) =
-        "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
+    fun genererEksternReferanseIdForJournalpost(fagsakId: String, behandlingId: Long?, tilVerge: Boolean) =
+        "${fagsakId}_${behandlingId}${if (tilVerge) "_verge" else ""}_${MDCOperations.getCallId()}"
 
     companion object {
 

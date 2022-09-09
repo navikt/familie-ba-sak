@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import org.slf4j.LoggerFactory
@@ -12,8 +11,7 @@ import org.springframework.stereotype.Service
 @Service
 class DistribuerVedtaksbrev(
     private val dokumentService: DokumentService,
-    private val taskRepository: TaskRepositoryWrapper,
-    private val personidentService: PersonidentService
+    private val taskRepository: TaskRepositoryWrapper
 ) : BehandlingSteg<DistribuerDokumentDTO> {
 
     override fun utførStegOgAngiNeste(
@@ -28,10 +26,11 @@ class DistribuerVedtaksbrev(
             loggBehandlerRolle = BehandlerRolle.SYSTEM,
             brevmal = data.brevmal
         )
-        val aktør = personidentService.hentAktør(data.personIdent)
+
+        val søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer()
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
-            søkerPersonIdent = aktør.aktivFødselsnummer(),
+            søkerIdent = søkerIdent,
             behandlingsId = data.behandlingId!!
         )
         taskRepository.save(ferdigstillBehandlingTask)

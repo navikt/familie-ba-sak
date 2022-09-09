@@ -172,7 +172,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
         val journalPostId =
             utgåendeJournalføringService.journalførDokument(
-                fnr = MOCK_FNR,
+                brukerId = MOCK_FNR,
                 fagsakId = vedtak.behandling.fagsak.id.toString(),
                 brev = listOf(
                     Dokument(
