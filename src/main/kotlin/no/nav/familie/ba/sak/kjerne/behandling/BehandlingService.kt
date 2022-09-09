@@ -302,22 +302,35 @@ class BehandlingService(
                         )
                     }
 
-        val nyMigreringsdatoErSenereEnnForrigeMigreringsdato = forrigeMigreringsdato != null &&
-            migreringsdato.toYearMonth().isSameOrAfter(forrigeMigreringsdato)
-
-        val nyMigreringsdatoErSenereEnnMuligMigreringdatoNårForrigeMigreringsdatoIkkeErLagretNed = forrigeMigreringsdato == null && migreringsdato.toYearMonth().isSameOrAfter(
-            YearMonth.of(2022, 2)
+        validerMigreringdato(
+            forrigeMigreringsdato = forrigeMigreringsdato,
+            migreringsdato = migreringsdato,
+            erEndreMigreringsdatoBehandling = behandling.erManuellMigreringForEndreMigreringsdato()
         )
-
-        if (behandling.erManuellMigreringForEndreMigreringsdato() &&
-            (nyMigreringsdatoErSenereEnnForrigeMigreringsdato || nyMigreringsdatoErSenereEnnMuligMigreringdatoNårForrigeMigreringsdatoIkkeErLagretNed)
-        ) {
-            throw FunksjonellFeil("Migreringsdatoen du har lagt inn er lik eller senere enn eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.")
-        }
 
         val behandlingMigreringsinfo =
             BehandlingMigreringsinfo(behandling = behandling, migreringsdato = migreringsdato)
         behandlingMigreringsinfoRepository.save(behandlingMigreringsinfo)
+    }
+
+    private fun validerMigreringdato(
+        forrigeMigreringsdato: YearMonth?,
+        migreringsdato: LocalDate,
+        erEndreMigreringsdatoBehandling: Boolean
+    ) {
+        val nyMigreringsdatoErSenereEnnForrigeMigreringsdato = forrigeMigreringsdato != null &&
+            migreringsdato.toYearMonth().isSameOrAfter(forrigeMigreringsdato)
+
+        val nyMigreringsdatoErSenereEnnMuligMigreringdatoNårForrigeMigreringsdatoIkkeErLagretNed =
+            forrigeMigreringsdato == null && migreringsdato.toYearMonth().isSameOrAfter(
+                YearMonth.of(2022, 2)
+            )
+
+        if (erEndreMigreringsdatoBehandling &&
+            (nyMigreringsdatoErSenereEnnForrigeMigreringsdato || nyMigreringsdatoErSenereEnnMuligMigreringdatoNårForrigeMigreringsdatoIkkeErLagretNed)
+        ) {
+            throw FunksjonellFeil("Migreringsdatoen du har lagt inn er lik eller senere enn eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.")
+        }
     }
 
     fun hentMigreringsdatoIBehandling(behandlingId: Long): LocalDate? {
