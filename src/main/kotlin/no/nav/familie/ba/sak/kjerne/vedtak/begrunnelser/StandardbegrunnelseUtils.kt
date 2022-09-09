@@ -96,7 +96,10 @@ fun Standardbegrunnelse.triggesForPeriode(
             minimertVedtaksperiode = minimertVedtaksperiode
         )
         triggesAv.gjelderFraInnvilgelsestidspunkt -> false
-        triggesAv.barnDød -> dødeBarnForrigePeriode(ytelserForrigePeriode, minimertePersoner.filter { it.type === PersonType.BARN }).any()
+        triggesAv.barnDød -> dødeBarnForrigePeriode(
+            ytelserForrigePeriode,
+            minimertePersoner.filter { it.type === PersonType.BARN }
+        ).any()
         else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
     }
 }

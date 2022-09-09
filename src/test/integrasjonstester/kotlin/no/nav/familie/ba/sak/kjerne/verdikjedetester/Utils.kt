@@ -214,7 +214,7 @@ fun håndterIverksettingAvBehandling(
                     DistribuerDokumentDTO(
                         behandlingId = behandlingEtterJournalførtVedtak.id,
                         journalpostId = "1234",
-                        personIdent = søkerFnr,
+                        personEllerInstitusjonIdent = søkerFnr,
                         brevmal = hentBrevmal(
                             behandlingEtterJournalførtVedtak
                         ),

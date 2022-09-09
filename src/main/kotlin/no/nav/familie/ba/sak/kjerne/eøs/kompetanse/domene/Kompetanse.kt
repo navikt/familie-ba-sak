@@ -53,6 +53,9 @@ data class Kompetanse(
     @Column(name = "annen_forelderes_aktivitetsland")
     val annenForeldersAktivitetsland: String? = null,
 
+    @Column(name = "sokers_aktivitetsland")
+    val søkersAktivitetsland: String? = null,
+
     @Column(name = "barnets_bostedsland")
     val barnetsBostedsland: String? = null,
 
@@ -75,6 +78,7 @@ data class Kompetanse(
 
     override fun utenInnhold() = this.copy(
         søkersAktivitet = null,
+        søkersAktivitetsland = null,
         annenForeldersAktivitet = null,
         annenForeldersAktivitetsland = null,
         barnetsBostedsland = null,
@@ -105,12 +109,12 @@ data class Kompetanse(
 }
 
 enum class SøkersAktivitet {
-    ARBEIDER_I_NORGE,
+    ARBEIDER,
     SELVSTENDIG_NÆRINGSDRIVENDE,
-    MOTTAR_UTBETALING_FRA_NAV_SOM_ERSTATTER_LØNN,
+    MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
     UTSENDT_ARBEIDSTAKER_FRA_NORGE,
-    MOTTAR_UFØRETRYGD_FRA_NORGE,
-    MOTTAR_PENSJON_FRA_NORGE,
+    MOTTAR_UFØRETRYGD,
+    MOTTAR_PENSJON,
     ARBEIDER_PÅ_NORSKREGISTRERT_SKIP,
     ARBEIDER_PÅ_NORSK_SOKKEL,
     ARBEIDER_FOR_ET_NORSK_FLYSELSKAP,

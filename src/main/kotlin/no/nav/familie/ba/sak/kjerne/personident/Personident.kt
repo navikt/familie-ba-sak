@@ -56,6 +56,7 @@ data class Personident(
             return false
         }
         val entitet: Personident = other as Personident
+        if (fødselsnummer != other.fødselsnummer) return false
         return Objects.equals(hashCode(), entitet.hashCode())
     }
 

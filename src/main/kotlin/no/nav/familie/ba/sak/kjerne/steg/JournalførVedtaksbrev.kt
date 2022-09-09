@@ -9,10 +9,15 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilVergeDTO
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilVergeTask
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
@@ -30,7 +35,8 @@ class JournalførVedtaksbrev(
     private val vedtakService: VedtakService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val utgåendeJournalføringService: UtgåendeJournalføringService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
+    private val fagsakRepository: FagsakRepository
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
     override fun utførStegOgAngiNeste(
@@ -38,36 +44,73 @@ class JournalførVedtaksbrev(
         data: JournalførVedtaksbrevDTO
     ): StegType {
         val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
-
-        val fnr = vedtak.behandling.fagsak.aktør.aktivFødselsnummer()
         val fagsakId = "${vedtak.behandling.fagsak.id}"
+        val fagsak = fagsakRepository.finnFagsak(vedtak.behandling.fagsak.id)
+        if (fagsak == null || fagsak.type == FagsakType.INSTITUSJON && fagsak.institusjon == null) {
+            error("Journalfør vedtaksbrev feil: fagsak er null eller institusjon fagsak har ikke institusjonsinformasjon")
+        }
 
         val behanlendeEnhet =
             arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
 
-        val journalpostId = journalførVedtaksbrev(
-            fnr = fnr,
-            fagsakId = fagsakId,
-            vedtak = vedtak,
-            journalførendeEnhet = behanlendeEnhet
-        )
+        val mottaker = if (fagsak?.type == FagsakType.INSTITUSJON) {
+            mutableListOf(MottakerInfo(fagsak.institusjon!!.orgNummer!!, BrukerIdType.ORGNR, false))
+        } else {
+            mutableListOf(MottakerInfo(vedtak.behandling.fagsak.aktør.aktivFødselsnummer(), BrukerIdType.FNR, false))
+        }
+        if (vedtak.behandling.verge != null && vedtak.behandling.verge?.ident != null) {
+            mottaker.add(MottakerInfo(vedtak.behandling.verge!!.ident!!, BrukerIdType.FNR, true))
+        }
 
-        val nyTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
-            distribuerDokumentDTO = DistribuerDokumentDTO(
-                personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
-                behandlingId = vedtak.behandling.id,
-                journalpostId = journalpostId,
-                brevmal = hentBrevmal(behandling),
-                erManueltSendt = false
-            ),
-            properties = data.task.metadata
-        )
-        taskRepository.save(nyTask)
+        val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
+        mottaker.forEach { mottakerInfo ->
+            journalførVedtaksbrev(
+                brukersId = mottakerInfo.brukerId,
+                fagsakId = fagsakId,
+                vedtak = vedtak,
+                journalførendeEnhet = behanlendeEnhet,
+                brukersType = mottakerInfo.brukerIdType,
+                tilVerge = mottakerInfo.erVerge
+            ).also { journalposterTilDistribusjon[it] = mottakerInfo }
+        }
+
+        journalposterTilDistribusjon.forEach {
+            if (it.value.erVerge) {
+                val distribuerTilVergeTask = DistribuerVedtaksbrevTilVergeTask.opprettDistribuerVedtaksbrevTilVergeTask(
+                    distribuerVedtaksbrevTilVergeDTO = DistribuerVedtaksbrevTilVergeDTO(
+                        behandlingId = vedtak.behandling.id,
+                        personIdent = it.value.brukerId,
+                        journalpostId = it.key
+                    ),
+                    properties = data.task.metadata
+                )
+                taskRepository.save(distribuerTilVergeTask)
+            } else {
+                val distribuerTilSøkerTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
+                    distribuerDokumentDTO = DistribuerDokumentDTO(
+                        personEllerInstitusjonIdent = it.value.brukerId,
+                        behandlingId = vedtak.behandling.id,
+                        journalpostId = it.key,
+                        brevmal = hentBrevmal(behandling),
+                        erManueltSendt = false
+                    ),
+                    properties = data.task.metadata
+                )
+                taskRepository.save(distribuerTilSøkerTask)
+            }
+        }
 
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    fun journalførVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak, journalførendeEnhet: String): String {
+    fun journalførVedtaksbrev(
+        brukersId: String,
+        brukersType: BrukerIdType,
+        fagsakId: String,
+        vedtak: Vedtak,
+        journalførendeEnhet: String,
+        tilVerge: Boolean = false
+    ): String {
         val vedleggPdf =
             hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
 
@@ -93,12 +136,14 @@ class JournalførVedtaksbrev(
             )
         )
         return utgåendeJournalføringService.journalførDokument(
-            fnr = fnr,
+            brukerId = brukersId,
             fagsakId = fagsakId,
             journalførendeEnhet = journalførendeEnhet,
             brev = brev,
             vedlegg = vedlegg,
-            behandlingId = vedtak.behandling.id
+            behandlingId = vedtak.behandling.id,
+            brukersType = brukersType,
+            tilVerge = tilVerge
         )
     }
 
@@ -107,6 +152,7 @@ class JournalførVedtaksbrev(
     }
 
     companion object {
+
         val logger = LoggerFactory.getLogger(JournalførVedtaksbrev::class.java)
 
         fun hentVedlegg(vedleggsnavn: String): ByteArray? {
@@ -115,3 +161,9 @@ class JournalførVedtaksbrev(
         }
     }
 }
+
+data class MottakerInfo(
+    val brukerId: String,
+    val brukerIdType: BrukerIdType,
+    val erVerge: Boolean
+)

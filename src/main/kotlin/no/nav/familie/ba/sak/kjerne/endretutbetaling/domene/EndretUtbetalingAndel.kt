@@ -128,24 +128,22 @@ enum class Årsak(val visningsnavn: String) {
     DELT_BOSTED("Delt bosted"),
     ETTERBETALING_3ÅR("Etterbetaling 3 år"),
     ENDRE_MOTTAKER("Foreldrene bor sammen, endret mottaker"),
-    ALLEREDE_UTBETALT("Allerede utbetalt"),
-    EØS_SEKUNDÆRLAND("Eøs sekundærland");
-
-    fun kanGiNullutbetaling() = this == EØS_SEKUNDÆRLAND
+    ALLEREDE_UTBETALT("Allerede utbetalt")
 }
 
-fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingAndel(
-    id = this.id,
-    personIdent = this.person?.aktør?.aktivFødselsnummer(),
-    prosent = this.prosent,
-    fom = this.fom,
-    tom = this.tom,
-    årsak = this.årsak,
-    avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
-    søknadstidspunkt = this.søknadstidspunkt,
-    begrunnelse = this.begrunnelse,
-    erTilknyttetAndeler = this.andelTilkjentYtelser.isNotEmpty()
-)
+fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() =
+    RestEndretUtbetalingAndel(
+        id = this.id,
+        personIdent = this.person?.aktør?.aktivFødselsnummer(),
+        prosent = this.prosent,
+        fom = this.fom,
+        tom = this.tom,
+        årsak = this.årsak,
+        avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
+        søknadstidspunkt = this.søknadstidspunkt,
+        begrunnelse = this.begrunnelse,
+        erTilknyttetAndeler = this.andelTilkjentYtelser.isNotEmpty()
+    )
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     restEndretUtbetalingAndel: RestEndretUtbetalingAndel,

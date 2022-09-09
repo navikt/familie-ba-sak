@@ -64,14 +64,13 @@ class BrevPeriodeService(
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId.id)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-        val endredeUtbetalingAndeler =
-            endretUtbetalingAndelService.hentForBehandling(behandlingId = behandlingId.id)
+        val endredeUtbetalingAndeler = endretUtbetalingAndelService
+            .hentForBehandling(behandlingId = behandlingId.id)
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id)
 
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-            behandlingId.id
-        )
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandlingId.id)
 
         val uregistrerteBarn =
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId.id)?.hentUregistrerteBarn()
@@ -190,8 +189,8 @@ class BrevPeriodeService(
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtaksperiodeMedBegrunnelser.vedtak.behandling)
         return if (forrigeBehandling != null) {
-            val forrigeAndelTilkjentYtelse =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
+            val forrigeAndelTilkjentYtelse = andelTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
             val endringerITilkjentYtelsePerBarn =
                 andelerTilkjentYtelse.hentPerioderMedEndringerFra(forrigeAndelTilkjentYtelse)
             endringerITilkjentYtelsePerBarn.keys.filter { barn ->

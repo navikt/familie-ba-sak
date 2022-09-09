@@ -22,7 +22,8 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
     val barn3 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(4).minusMonths(1))
 
     val behandling = lagBehandling()
-    val tilkjentYtelse = TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
+    val tilkjentYtelse =
+        TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
 
     @Test
     fun `Skal kun få småbarnstillegg når alle tre krav er oppfylt i samme periode`() {
@@ -52,13 +53,14 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             )
         )
 
-        val småbarnstilleggAndeler = SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
-            .lagSmåbarnstilleggAndeler(
-                perioderMedFullOvergangsstønad = overgangsstønadPerioder,
-                utvidetAndeler = utvidetAndeler,
-                barnasAndeler = barnasAndeler,
-                barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato))
-            )
+        val småbarnstilleggAndeler =
+            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+                .lagSmåbarnstilleggAndeler(
+                    perioderMedFullOvergangsstønad = overgangsstønadPerioder,
+                    utvidetAndeler = utvidetAndeler,
+                    barnasAndeler = barnasAndeler,
+                    barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato))
+                )
 
         Assertions.assertEquals(1, småbarnstilleggAndeler.size)
         Assertions.assertEquals(YearMonth.now().minusYears(2), småbarnstilleggAndeler.single().stønadFom)
@@ -114,13 +116,14 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             )
         )
 
-        val småbarnstilleggAndeler = SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
-            .lagSmåbarnstilleggAndeler(
-                perioderMedFullOvergangsstønad = overgangsstønadPerioder,
-                utvidetAndeler = utvidetAndeler,
-                barnasAndeler = barnasAndeler,
-                barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato))
-            )
+        val småbarnstilleggAndeler =
+            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+                .lagSmåbarnstilleggAndeler(
+                    perioderMedFullOvergangsstønad = overgangsstønadPerioder,
+                    utvidetAndeler = utvidetAndeler,
+                    barnasAndeler = barnasAndeler,
+                    barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato))
+                )
 
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)
         Assertions.assertEquals(barn3.fødselsdato.plusMonths(1).toYearMonth(), småbarnstilleggAndeler.first().stønadFom)
@@ -173,13 +176,17 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             )
         )
 
-        val småbarnstilleggAndeler = SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
-            .lagSmåbarnstilleggAndeler(
-                perioderMedFullOvergangsstønad = overgangsstønadPerioder,
-                utvidetAndeler = utvidetAndeler,
-                barnasAndeler = barnasAndeler,
-                barnasAktørerOgFødselsdatoer = listOf(Pair(barn1.aktør, barn1.fødselsdato), Pair(barn2.aktør, barn2.fødselsdato))
-            )
+        val småbarnstilleggAndeler =
+            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+                .lagSmåbarnstilleggAndeler(
+                    perioderMedFullOvergangsstønad = overgangsstønadPerioder,
+                    utvidetAndeler = utvidetAndeler,
+                    barnasAndeler = barnasAndeler,
+                    barnasAktørerOgFødselsdatoer = listOf(
+                        Pair(barn1.aktør, barn1.fødselsdato),
+                        Pair(barn2.aktør, barn2.fødselsdato)
+                    )
+                )
 
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)
         Assertions.assertEquals(barn1.fødselsdato.plusMonths(1).toYearMonth(), småbarnstilleggAndeler.first().stønadFom)
@@ -232,13 +239,17 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             )
         )
 
-        val småbarnstilleggAndeler = SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
-            .lagSmåbarnstilleggAndeler(
-                perioderMedFullOvergangsstønad = overgangsstønadPerioder,
-                utvidetAndeler = utvidetAndeler,
-                barnasAndeler = barnasAndeler,
-                barnasAktørerOgFødselsdatoer = listOf(Pair(barn1.aktør, barn1.fødselsdato), Pair(barn2.aktør, barn2.fødselsdato))
-            )
+        val småbarnstilleggAndeler =
+            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+                .lagSmåbarnstilleggAndeler(
+                    perioderMedFullOvergangsstønad = overgangsstønadPerioder,
+                    utvidetAndeler = utvidetAndeler,
+                    barnasAndeler = barnasAndeler,
+                    barnasAktørerOgFødselsdatoer = listOf(
+                        Pair(barn1.aktør, barn1.fødselsdato),
+                        Pair(barn2.aktør, barn2.fødselsdato)
+                    )
+                )
 
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)
         Assertions.assertEquals(barn1.fødselsdato.plusMonths(1).toYearMonth(), småbarnstilleggAndeler.first().stønadFom)
