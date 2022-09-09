@@ -60,14 +60,25 @@ class EndretUtbetalingAndelService(
             andelTilkjentYtelser = andelTilkjentYtelser
         )
 
-        validerTomDato(tomDato = endretUtbetalingAndel.tom, gyldigTomEtterDagensDato = gyldigTomEtterDagensDato, årsak = endretUtbetalingAndel.årsak)
+        validerTomDato(
+            tomDato = endretUtbetalingAndel.tom,
+            gyldigTomEtterDagensDato = gyldigTomEtterDagensDato,
+            årsak = endretUtbetalingAndel.årsak
+        )
 
         if (endretUtbetalingAndel.tom == null) {
             endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
         }
-        validerÅrsak(årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel, vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id))
+        validerÅrsak(
+            årsak = endretUtbetalingAndel.årsak,
+            endretUtbetalingAndel = endretUtbetalingAndel,
+            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        )
 
-        validerUtbetalingMotÅrsak(årsak = endretUtbetalingAndel.årsak, skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0))
+        validerUtbetalingMotÅrsak(
+            årsak = endretUtbetalingAndel.årsak,
+            skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0)
+        )
 
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel = endretUtbetalingAndel,

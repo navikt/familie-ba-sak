@@ -88,7 +88,10 @@ object EndretUtbetalingAndelValidering {
         vilkårsvurdering: Vilkårsvurdering?
     ) {
         if (årsak == Årsak.DELT_BOSTED) {
-            val deltBostedPerioder = finnDeltBostedPerioder(person = endretUtbetalingAndel.person, vilkårsvurdering = vilkårsvurdering).map { it.tilMånedPeriode() }
+            val deltBostedPerioder = finnDeltBostedPerioder(
+                person = endretUtbetalingAndel.person,
+                vilkårsvurdering = vilkårsvurdering
+            ).map { it.tilMånedPeriode() }
             validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, deltBostedPerioder = deltBostedPerioder)
         } else if (årsak == Årsak.ETTERBETALING_3ÅR) {
             validerEtterbetaling3År(
@@ -193,8 +196,8 @@ fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
 fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
     endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndel>
 ) {
-    val endredeUtvidetUtbetalingerAndeler =
-        endretUtbetalingAndelerMedÅrsakDeltBosted.filter { endretUtbetaling ->
+    val endredeUtvidetUtbetalingerAndeler = endretUtbetalingAndelerMedÅrsakDeltBosted
+        .filter { endretUtbetaling ->
             endretUtbetaling.andelTilkjentYtelser.any { it.erUtvidet() }
         }
 
@@ -226,14 +229,16 @@ fun validerUtbetalingMotÅrsak(årsak: Årsak?, skalUtbetales: Boolean) {
 fun validerTomDato(tomDato: YearMonth?, gyldigTomEtterDagensDato: YearMonth?, årsak: Årsak?) {
     val dagensDato = YearMonth.now()
     if (årsak == Årsak.ALLEREDE_UTBETALT && tomDato?.isAfter(dagensDato) == true) {
-        val feilmelding = "For årsak '${årsak.visningsnavn}' kan du ikke legge inn til og med dato som er i neste måned eller senere."
+        val feilmelding =
+            "For årsak '${årsak.visningsnavn}' kan du ikke legge inn til og med dato som er i neste måned eller senere."
         throw FunksjonellFeil(
             frontendFeilmelding = feilmelding,
             melding = feilmelding
         )
     }
     if (tomDato?.isAfter(dagensDato) == true && tomDato != gyldigTomEtterDagensDato) {
-        val feilmelding = "Du kan ikke legge inn til og med dato som er i neste måned eller senere. Om det gjelder en løpende periode vil systemet legge inn riktig dato for deg."
+        val feilmelding =
+            "Du kan ikke legge inn til og med dato som er i neste måned eller senere. Om det gjelder en løpende periode vil systemet legge inn riktig dato for deg."
         throw FunksjonellFeil(
             frontendFeilmelding = feilmelding,
             melding = feilmelding
@@ -297,9 +302,17 @@ fun finnDeltBostedPerioder(
             }
         }
 
-        val deltBostedPerioder = deltBostedVilkårResultater.groupBy { it.personResultat?.aktør }.flatMap { (_, vilkårResultater) -> vilkårResultater.mapNotNull { it.tilPeriode(vilkår = vilkårResultater) } }
+        val deltBostedPerioder = deltBostedVilkårResultater.groupBy { it.personResultat?.aktør }
+            .flatMap { (_, vilkårResultater) -> vilkårResultater.mapNotNull { it.tilPeriode(vilkår = vilkårResultater) } }
 
-        slåSammenOverlappendePerioder(deltBostedPerioder.map { DatoIntervallEntitet(fom = it.fom, tom = it.tom) }).filter { it.fom != null && it.tom != null }.map {
+        slåSammenOverlappendePerioder(
+            deltBostedPerioder.map {
+                DatoIntervallEntitet(
+                    fom = it.fom,
+                    tom = it.tom
+                )
+            }
+        ).filter { it.fom != null && it.tom != null }.map {
             Periode(
                 fom = it.fom!!,
                 tom = it.tom!!

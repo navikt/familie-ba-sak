@@ -876,7 +876,11 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Skal kaste feil hvis fom og tom er satt i samme måned`() {
-        val utvidetVilkårResultat = lagVilkårResultat(vilkår = Vilkår.UTVIDET_BARNETRYGD, fom = YearMonth.of(2022, 2), tom = YearMonth.of(2022, 2))
+        val utvidetVilkårResultat = lagVilkårResultat(
+            vilkår = Vilkår.UTVIDET_BARNETRYGD,
+            fom = YearMonth.of(2022, 2),
+            tom = YearMonth.of(2022, 2)
+        )
 
         assertThrows<FunksjonellFeil> {
             utvidetVilkårResultat.tilDatoSegment(
@@ -887,11 +891,22 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Skal ikke kaste feil hvis fom og tom er i samme måned, men tom er siste dag i mnd og nytt utvidet-vilkår starter første dag i neste mnd`() {
-        val utvidetVilkårResultat = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 2, 1), periodeTom = LocalDate.of(2022, 2, 28))
+        val utvidetVilkårResultat = lagVilkårResultat(
+            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+            periodeFom = LocalDate.of(2022, 2, 1),
+            periodeTom = LocalDate.of(2022, 2, 28)
+        )
 
         assertDoesNotThrow {
             utvidetVilkårResultat.tilDatoSegment(
-                utvidetVilkår = listOf(utvidetVilkårResultat, lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 3, 1), periodeTom = null))
+                utvidetVilkår = listOf(
+                    utvidetVilkårResultat,
+                    lagVilkårResultat(
+                        vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                        periodeFom = LocalDate.of(2022, 3, 1),
+                        periodeTom = null
+                    )
+                )
             )
         }
     }
@@ -902,7 +917,19 @@ internal class UtvidetBarnetrygdTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
         val søkerAktør = randomAktør()
 
-        val utvidetVilkår = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2018, 2, 1), periodeTom = LocalDate.of(2019, 2, 28), personResultat = PersonResultat(aktør = søkerAktør, vilkårsvurdering = lagVilkårsvurdering(søkerAktør = søkerAktør, behandling = behandling, resultat = Resultat.OPPFYLT)))
+        val utvidetVilkår = lagVilkårResultat(
+            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+            periodeFom = LocalDate.of(2018, 2, 1),
+            periodeTom = LocalDate.of(2019, 2, 28),
+            personResultat = PersonResultat(
+                aktør = søkerAktør,
+                vilkårsvurdering = lagVilkårsvurdering(
+                    søkerAktør = søkerAktør,
+                    behandling = behandling,
+                    resultat = Resultat.OPPFYLT
+                )
+            )
+        )
 
         val barnasAndeler = listOf(
             lagAndelTilkjentYtelse(
@@ -940,7 +967,19 @@ internal class UtvidetBarnetrygdTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
         val søkerAktør = randomAktør()
 
-        val utvidetVilkår = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2016, 2, 1), periodeTom = LocalDate.of(2022, 2, 28), personResultat = PersonResultat(aktør = søkerAktør, vilkårsvurdering = lagVilkårsvurdering(søkerAktør = søkerAktør, behandling = behandling, resultat = Resultat.OPPFYLT)))
+        val utvidetVilkår = lagVilkårResultat(
+            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+            periodeFom = LocalDate.of(2016, 2, 1),
+            periodeTom = LocalDate.of(2022, 2, 28),
+            personResultat = PersonResultat(
+                aktør = søkerAktør,
+                vilkårsvurdering = lagVilkårsvurdering(
+                    søkerAktør = søkerAktør,
+                    behandling = behandling,
+                    resultat = Resultat.OPPFYLT
+                )
+            )
+        )
 
         val barnasAndeler = listOf(
             lagAndelTilkjentYtelse(

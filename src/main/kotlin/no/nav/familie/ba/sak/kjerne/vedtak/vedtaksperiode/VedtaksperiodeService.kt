@@ -142,8 +142,8 @@ class VedtaksperiodeService(
         if (
             standardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING }
         ) {
-            val andelerTilkjentYtelse =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+            val andelerTilkjentYtelse = andelTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
 
             validerEndretUtbetalingsbegrunnelse(vedtaksperiodeMedBegrunnelser, andelerTilkjentYtelse, persongrunnlag)
         }
@@ -426,7 +426,10 @@ class VedtaksperiodeService(
                 tom = utvidetVedtaksperiodeMedBegrunnelser.tom?.toYearMonth()
             ).toList()
 
-            val kompetanserSomStopperRettFørPeriode = hentKompetanserSomStopperRettFørPeriode(kompetanser = kompetanser.toList(), periodeFom = utvidetVedtaksperiodeMedBegrunnelser.fom?.toYearMonth())
+            val kompetanserSomStopperRettFørPeriode = hentKompetanserSomStopperRettFørPeriode(
+                kompetanser = kompetanser.toList(),
+                periodeFom = utvidetVedtaksperiodeMedBegrunnelser.fom?.toYearMonth()
+            )
 
             val aktørIderMedUtbetaling =
                 hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }
@@ -532,8 +535,9 @@ class VedtaksperiodeService(
         val personopplysningGrunnlag =
             persongrunnlagService.hentAktiv(behandlingId = behandling.id)
                 ?: return emptyList()
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
 
         return mapTilOpphørsperioder(
             forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
