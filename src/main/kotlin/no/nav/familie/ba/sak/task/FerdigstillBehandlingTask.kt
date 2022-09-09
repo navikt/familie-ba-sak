@@ -34,17 +34,17 @@ class FerdigstillBehandlingTask(
 
         const val TASK_STEP_TYPE = "ferdigstillBehandling"
 
-        fun opprettTask(søkerPersonIdent: String, behandlingsId: Long): Task {
+        fun opprettTask(søkerIdent: String, behandlingsId: Long): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     FerdigstillBehandlingDTO(
-                        personIdent = søkerPersonIdent,
+                        personIdent = søkerIdent,
                         behandlingsId = behandlingsId
                     )
                 ),
                 properties = Properties().apply {
-                    this["personIdent"] = søkerPersonIdent
+                    this["personIdent"] = søkerIdent
                     this["behandlingsId"] = behandlingsId.toString()
                 }
             )

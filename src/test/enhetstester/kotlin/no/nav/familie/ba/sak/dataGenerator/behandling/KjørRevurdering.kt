@@ -213,7 +213,7 @@ private fun håndterDistribuertVedtakSteg(
             DistribuerDokumentDTO(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
-                personIdent = søkerFnr,
+                personEllerInstitusjonIdent = søkerFnr,
                 brevmal = hentBrevmal(behandling),
                 erManueltSendt = false
             )

@@ -160,7 +160,7 @@ class BeslutteVedtak(
 
     private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
-            søkerPersonIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+            søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
             behandlingsId = behandling.id
         )
         taskRepository.save(ferdigstillBehandlingTask)
