@@ -187,18 +187,11 @@ class BrevPeriodeService(
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtaksperiodeMedBegrunnelser.vedtak.behandling)
 
         return if (forrigeBehandling != null) {
-            val forrigeAndelTilkjentYtelse = andelTilkjentYtelseRepository
-                .finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
-
-            andelerTilkjentYtelse.hentPerioderMedEndringerFra(forrigeAndelTilkjentYtelse)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
+                .let { andelerTilkjentYtelse.hentPerioderMedEndringerFra(it) }
                 .filter { barn -> barn.value.any { it.fom == vedtaksperiodeMedBegrunnelser.fom } }
-                .mapNotNull {
-                    if (!it.value.filterValue { beløp -> beløp < 0 }.isEmpty) {
-                        personidentService.hentAktør(it.key).aktivFødselsnummer()
-                    } else {
-                        null
-                    }
-                }
+                .filter { !it.value.filterValue { beløp -> beløp < 0 }.isEmpty }
+                .mapNotNull { personidentService.hentAktør(it.key).aktivFødselsnummer() }
         } else {
             emptyList()
         }
