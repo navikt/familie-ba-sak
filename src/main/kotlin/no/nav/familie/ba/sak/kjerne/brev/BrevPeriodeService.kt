@@ -182,20 +182,15 @@ class BrevPeriodeService(
     private fun hentBarnsPersonIdentMedRedusertPeriode(
         vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>
-    ): List<String> {
-        val forrigeBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtaksperiodeMedBegrunnelser.vedtak.behandling)
-
-        return if (forrigeBehandling != null) {
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
-                .let { andelerTilkjentYtelse.hentPerioderMedEndringerFra(it) }
-                .filter { barn -> barn.value.any { it.fom == vedtaksperiodeMedBegrunnelser.fom } }
-                .filter { !it.value.filterValue { beløp -> beløp < 0 }.isEmpty }
-                .mapNotNull { personidentService.hentAktør(it.key).aktivFødselsnummer() }
-        } else {
-            emptyList()
-        }
-    }
+    ): List<String> =
+        vedtaksperiodeMedBegrunnelser.vedtak.behandling
+            .let { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(it) }
+            ?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
+            ?.let { andelerTilkjentYtelse.hentPerioderMedEndringerFra(it) }
+            ?.filter { barn -> barn.value.any { it.fom == vedtaksperiodeMedBegrunnelser.fom } }
+            ?.filter { !it.value.filterValue { beløp -> beløp < 0 }.isEmpty }
+            ?.mapNotNull { personidentService.hentAktør(it.key).aktivFødselsnummer() }
+            ?: emptyList()
 
     fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long) = hentBrevperioderData(
         vedtaksperioderId = listOf(vedtaksperiodeId),
