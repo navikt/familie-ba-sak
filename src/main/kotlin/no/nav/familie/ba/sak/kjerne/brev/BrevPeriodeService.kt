@@ -29,7 +29,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.dødeBarnForrigePeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
@@ -210,17 +209,10 @@ class BrevPeriodeService(
         }
     }
 
-    fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
-        val vedtaksperiodeMedBegrunnelser =
-            vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
-
-        val begrunnelseDataForVedtaksperiode =
-            hentBrevperioderData(
-                vedtaksperioderId = listOf(vedtaksperiodeId),
-                behandlingId = BehandlingId(vedtaksperiodeMedBegrunnelser.vedtak.behandling.id)
-            ).single()
-        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
-    }
+    fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long) = hentBrevperioderData(
+        vedtaksperioderId = listOf(vedtaksperiodeId),
+        behandlingId = BehandlingId(vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId).vedtak.behandling.id)
+    ).single().hentBegrunnelserOgFritekster()
 
     companion object {
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
