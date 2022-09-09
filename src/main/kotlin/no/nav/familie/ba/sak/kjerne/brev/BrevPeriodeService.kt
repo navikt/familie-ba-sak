@@ -104,12 +104,6 @@ class BrevPeriodeService(
             andelerTilkjentYtelse = andelerTilkjentYtelse
         )
 
-        val ytelserForrigePeriode =
-            andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelse) }
-
-        val dødeBarnForrigePeriode =
-            dødeBarnForrigePeriode(ytelserForrigePeriode, personopplysningGrunnlag.barna.tilMinimertePersoner())
-
         val minimertVedtaksperiode =
             utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -147,7 +141,10 @@ class BrevPeriodeService(
                     landkoderISO2 = landkoderISO2
                 )
             },
-            dødeBarnForrigePeriode = dødeBarnForrigePeriode
+            dødeBarnForrigePeriode = dødeBarnForrigePeriode(
+                andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelse) },
+                personopplysningGrunnlag.barna.tilMinimertePersoner()
+            )
         )
 
         if (skalLogge) {
