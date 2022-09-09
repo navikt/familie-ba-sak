@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
@@ -23,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -60,7 +62,8 @@ class FagsakService(
     private val skyggesakService: SkyggesakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
+    private val institusjonService: InstitusjonService
 ) {
 
     private val antallFagsakerOpprettetFraManuell =
@@ -89,7 +92,11 @@ class FagsakService(
                 HttpStatus.BAD_REQUEST
             )
         }
-        val fagsak = hentEllerOpprettFagsak(personident, type = fagsakRequest.fagsakType ?: FagsakType.NORMAL)
+        val fagsak = hentEllerOpprettFagsak(
+            personident,
+            type = fagsakRequest.fagsakType ?: FagsakType.NORMAL,
+            institusjon = fagsakRequest.institusjon
+        )
         return hentRestMinimalFagsak(fagsakId = fagsak.id)
     }
 
@@ -97,10 +104,27 @@ class FagsakService(
     fun hentEllerOpprettFagsak(
         personIdent: String,
         fraAutomatiskBehandling: Boolean = false,
-        type: FagsakType = FagsakType.NORMAL
+        type: FagsakType = FagsakType.NORMAL,
+        institusjon: InstitusjonInfo? = null
     ): Fagsak {
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
-        var fagsak = fagsakRepository.finnFagsakForAktør(aktør, type)
+
+        var fagsak = when (type) {
+            FagsakType.INSTITUSJON -> {
+                if (institusjon?.orgNummer == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
+                val åpenSak = fagsakRepository.finnÅpenFagsakForInstitusjon(aktør)
+
+                if (åpenSak != null && åpenSak.institusjon?.orgNummer != institusjon.orgNummer) {
+                    throw FunksjonellFeil(
+                        melding = "Kan kun ha en åpen sak av type Institusjon",
+                        frontendFeilmelding = "Det finnes allerede en åpen sak av type Institusjon registrert på et annet orgnummer. Lukk fagsaken med id=${åpenSak.id} hvis man vil registrere en ny sak på et annet orgnummer"
+                    )
+                }
+                åpenSak
+            }
+            else -> fagsakRepository.finnFagsakForAktør(aktør, type)
+        }
+
         if (fagsak == null) {
             fagsak = lagre(Fagsak(aktør = aktør, type = type))
             if (fraAutomatiskBehandling) {
@@ -108,6 +132,14 @@ class FagsakService(
             } else {
                 antallFagsakerOpprettetFraManuell.increment()
             }
+
+            if (type == FagsakType.INSTITUSJON) {
+                institusjonService.hentEllerOpprettInstitusjon(institusjon?.orgNummer!!, institusjon.tssEksternId)
+                    .apply {
+                        fagsak.institusjon = this
+                    }
+            }
+
             skyggesakService.opprettSkyggesak(fagsak)
         }
         return fagsak
@@ -230,20 +262,36 @@ class FagsakService(
             løpendeKategori = behandlingstemaService.hentLøpendeKategori(fagsakId = fagsakId),
             løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsakId),
             gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
-            fagsakType = fagsak.type
+            fagsakType = fagsak.type,
+            institusjon = fagsak.institusjon?.let {
+                InstitusjonInfo(
+                    orgNummer = it.orgNummer,
+                    tssEksternId = it.tssEksternId
+                )
+            }
         )
     }
 
     fun hentEllerOpprettFagsakForPersonIdent(
         fødselsnummer: String,
         fraAutomatiskBehandling: Boolean = false,
-        fagsakType: FagsakType = FagsakType.NORMAL
+        fagsakType: FagsakType = FagsakType.NORMAL,
+        institusjon: InstitusjonInfo? = null
     ): Fagsak {
-        return hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakType)
+        return hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakType, institusjon)
     }
 
-    fun hent(aktør: Aktør, fagsakType: FagsakType = FagsakType.NORMAL): Fagsak? =
-        fagsakRepository.finnFagsakForAktør(aktør, fagsakType)
+    fun hent(aktør: Aktør, fagsakType: FagsakType = FagsakType.NORMAL): Fagsak? {
+        return when (fagsakType) {
+            FagsakType.NORMAL, FagsakType.BARN_ENSLIG_MINDREÅRIG -> fagsakRepository.finnFagsakForAktør(
+                aktør,
+                fagsakType
+            )
+            FagsakType.INSTITUSJON -> {
+                fagsakRepository.finnÅpenFagsakForInstitusjon(aktør)
+            }
+        }
+    }
 
     fun hentPåFagsakId(fagsakId: Long): Fagsak {
         return fagsakRepository.finnFagsak(fagsakId) ?: throw FunksjonellFeil(

@@ -83,7 +83,7 @@ class PersonidentService(
         val personident = try {
             personidentRepository.findByFødselsnummerOrNull(ident)
         } catch (e: Exception) {
-            secureLogger.info("Feil ved henting av ident=$ident, lagre=$lagre")
+            secureLogger.info("Feil ved henting av ident=$ident, lagre=$lagre", e)
             throw e
         }
         if (personident != null) {
@@ -151,6 +151,7 @@ class PersonidentService(
     }
 
     private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String, lagre: Boolean): Aktør {
+        secureLogger.info("Oppretter aktør og personIdent. aktørIdStr=$aktørIdStr fødselsnummer=$fødselsnummer lagre=$lagre")
         val aktør = Aktør(aktørId = aktørIdStr).also {
             it.personidenter.add(
                 Personident(fødselsnummer = fødselsnummer, aktør = it)
@@ -165,20 +166,21 @@ class PersonidentService(
     }
 
     private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String, lagre: Boolean = true): Aktør {
-        aktør.personidenter.filter { it.aktiv }.map {
-            it.aktiv = false
-            it.gjelderTil = LocalDateTime.now()
+        secureLogger.info("Oppretter personIdent. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre")
+        val eksisterendePersonIdent = aktør.personidenter.find { it.fødselsnummer == fødselsnummer && it.aktiv }
+        if (eksisterendePersonIdent == null) {
+            aktør.personidenter.filter { it.aktiv }.map {
+                it.aktiv = false
+                it.gjelderTil = LocalDateTime.now()
+            }
+            if (lagre) aktørIdRepository.saveAndFlush(aktør) // Må lagre her fordi unik index er en blanding av aktørid og gjelderTil, og hvis man ikke lagerer før man legger til ny, så feiler det pga indexen.
+
+            aktør.personidenter.add(
+                Personident(fødselsnummer = fødselsnummer, aktør = aktør)
+            )
+            if (lagre) aktørIdRepository.saveAndFlush(aktør)
         }
-        // Ekstra persistering eller kommer unique constraint feile.
-        if (lagre) aktørIdRepository.saveAndFlush(aktør)
-        aktør.personidenter.add(
-            Personident(fødselsnummer = fødselsnummer, aktør = aktør)
-        )
-        return if (lagre) {
-            aktørIdRepository.saveAndFlush(aktør)
-        } else {
-            aktør
-        }
+        return aktør
     }
 
     private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =

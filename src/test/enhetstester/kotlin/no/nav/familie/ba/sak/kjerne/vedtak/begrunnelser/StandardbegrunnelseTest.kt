@@ -340,12 +340,31 @@ internal class StandardbegrunnelseTest {
     fun `Dersom dødsfalldato ligger i forrige ytelse-periode skal begrunnelsen begrunnelser med trigger BARN_DØD trigges`() {
         val fnr = "12345678910"
         val dødtBarn = lagPerson(personIdent = PersonIdent(fnr), type = PersonType.BARN)
-        dødtBarn.dødsfall = lagDødsfall(dødtBarn, dødsfallDatoFraPdl = LocalDate.now().minusMonths(1).withDayOfMonth(15).toString(), dødsfallAdresseFraPdl = null)
+        dødtBarn.dødsfall = lagDødsfall(
+            dødtBarn,
+            dødsfallDatoFraPdl = LocalDate.now().minusMonths(1).withDayOfMonth(15).toString(),
+            dødsfallAdresseFraPdl = null
+        )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
 
-        val reduksjonBarnDødBegrunnelse = listOf(SanityBegrunnelse(apiNavn = "reduksjonBarnDod", navnISystem = "barnDød", ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD)))
+        val reduksjonBarnDødBegrunnelse = listOf(
+            SanityBegrunnelse(
+                apiNavn = "reduksjonBarnDod",
+                navnISystem = "barnDød",
+                ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD)
+            )
+        )
 
-        val ytelserForrigeMåned = listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(LocalDate.now().minusMonths(1).year, LocalDate.now().minusMonths(1).month), tom = YearMonth.of(LocalDate.now().year, LocalDate.now().month), aktør = Aktør(fnr + "00").also { it.personidenter.add(Personident(fnr, it)) }))
+        val ytelserForrigeMåned = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(
+                    LocalDate.now().minusMonths(1).year,
+                    LocalDate.now().minusMonths(1).month
+                ),
+                tom = YearMonth.of(LocalDate.now().year, LocalDate.now().month),
+                aktør = Aktør(fnr + "00").also { it.personidenter.add(Personident(fnr, it)) }
+            )
+        )
 
         assertTrue(
             Standardbegrunnelse.REDUKSJON_BARN_DØD
@@ -367,12 +386,28 @@ internal class StandardbegrunnelseTest {
         val fnr = "12345678910"
         val dødtBarn = lagPerson(personIdent = PersonIdent(fnr), type = PersonType.BARN)
         val dødsfallDato = LocalDate.now().minusMonths(1).withDayOfMonth(15)
-        dødtBarn.dødsfall = lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
+        dødtBarn.dødsfall =
+            lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
 
-        val reduksjonBarnDødBegrunnelse = listOf(SanityBegrunnelse(apiNavn = "reduksjonBarnDod", navnISystem = "barnDød", ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD)))
+        val reduksjonBarnDødBegrunnelse = listOf(
+            SanityBegrunnelse(
+                apiNavn = "reduksjonBarnDod",
+                navnISystem = "barnDød",
+                ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD)
+            )
+        )
 
-        val ytelserForrigeMåned = listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDato.minusMonths(5).year, dødsfallDato.minusMonths(5).month), tom = YearMonth.of(dødsfallDato.minusMonths(1).year, dødsfallDato.minusMonths(1).month), aktør = Aktør(fnr + "00").also { it.personidenter.add(Personident(fnr, it)) }))
+        val ytelserForrigeMåned = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(
+                    dødsfallDato.minusMonths(5).year,
+                    dødsfallDato.minusMonths(5).month
+                ),
+                tom = YearMonth.of(dødsfallDato.minusMonths(1).year, dødsfallDato.minusMonths(1).month),
+                aktør = Aktør(fnr + "00").also { it.personidenter.add(Personident(fnr, it)) }
+            )
+        )
 
         assertFalse(
             Standardbegrunnelse.REDUKSJON_BARN_DØD
@@ -394,12 +429,28 @@ internal class StandardbegrunnelseTest {
         val fnr = "12345678910"
         val dødtBarn = lagPerson(personIdent = PersonIdent(fnr), type = PersonType.BARN)
         val dødsfallDato = LocalDate.now().minusMonths(1).withDayOfMonth(15)
-        dødtBarn.dødsfall = lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
+        dødtBarn.dødsfall =
+            lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
 
-        val reduksjonBarnDødBegrunnelse = listOf(SanityBegrunnelse(apiNavn = "reduksjonBarnDod", navnISystem = "barnDød", ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD)))
+        val reduksjonBarnDødBegrunnelse = listOf(
+            SanityBegrunnelse(
+                apiNavn = "reduksjonBarnDod",
+                navnISystem = "barnDød",
+                ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD)
+            )
+        )
 
-        val ytelserForrigeMåned = listOf(lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDato.plusMonths(5).year, dødsfallDato.plusMonths(5).month), tom = YearMonth.of(dødsfallDato.plusMonths(6).year, dødsfallDato.plusMonths(6).month), aktør = Aktør(fnr + "00").also { it.personidenter.add(Personident(fnr, it)) }))
+        val ytelserForrigeMåned = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(
+                    dødsfallDato.plusMonths(5).year,
+                    dødsfallDato.plusMonths(5).month
+                ),
+                tom = YearMonth.of(dødsfallDato.plusMonths(6).year, dødsfallDato.plusMonths(6).month),
+                aktør = Aktør(fnr + "00").also { it.personidenter.add(Personident(fnr, it)) }
+            )
+        )
 
         assertFalse(
             Standardbegrunnelse.REDUKSJON_BARN_DØD
@@ -424,9 +475,19 @@ internal class StandardbegrunnelseTest {
         // Barn1 dør før Barn2.
         var dødsfallDatoBarn1 = LocalDate.of(2022, 5, 12)
         var dødsfallDatoBarn2 = LocalDate.of(2022, 7, 2)
-        var barnIBehandling = listOf(lagMinimertPerson(dødsfallsdato = dødsfallDatoBarn1, aktivPersonIdent = barn1Fnr), lagMinimertPerson(dødsfallsdato = dødsfallDatoBarn2, aktivPersonIdent = barn2Fnr))
+        var barnIBehandling = listOf(
+            lagMinimertPerson(dødsfallsdato = dødsfallDatoBarn1, aktivPersonIdent = barn1Fnr),
+            lagMinimertPerson(dødsfallsdato = dødsfallDatoBarn2, aktivPersonIdent = barn2Fnr)
+        )
         var ytelserForrigePeriode = listOf(
-            lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDatoBarn1.minusMonths(1).year, dødsfallDatoBarn1.minusMonths(1).month), tom = YearMonth.of(dødsfallDatoBarn1.year, dødsfallDatoBarn1.month), aktør = Aktør(barn1Fnr + "00").also { it.personidenter.add(Personident(barn1Fnr, it)) })
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(
+                    dødsfallDatoBarn1.minusMonths(1).year,
+                    dødsfallDatoBarn1.minusMonths(1).month
+                ),
+                tom = YearMonth.of(dødsfallDatoBarn1.year, dødsfallDatoBarn1.month),
+                aktør = Aktør(barn1Fnr + "00").also { it.personidenter.add(Personident(barn1Fnr, it)) }
+            )
         )
 
         var dødeBarnForrigePeriode = dødeBarnForrigePeriode(ytelserForrigePeriode, barnIBehandling)
@@ -440,7 +501,14 @@ internal class StandardbegrunnelseTest {
         )
 
         ytelserForrigePeriode = listOf(
-            lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDatoBarn1.minusMonths(1).year, dødsfallDatoBarn1.minusMonths(1).month), tom = YearMonth.of(dødsfallDatoBarn2.year, dødsfallDatoBarn2.month), aktør = Aktør(barn2Fnr + "00").also { it.personidenter.add(Personident(barn2Fnr, it)) })
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(
+                    dødsfallDatoBarn1.minusMonths(1).year,
+                    dødsfallDatoBarn1.minusMonths(1).month
+                ),
+                tom = YearMonth.of(dødsfallDatoBarn2.year, dødsfallDatoBarn2.month),
+                aktør = Aktør(barn2Fnr + "00").also { it.personidenter.add(Personident(barn2Fnr, it)) }
+            )
         )
 
         dødeBarnForrigePeriode = dødeBarnForrigePeriode(ytelserForrigePeriode, barnIBehandling)
@@ -457,10 +525,20 @@ internal class StandardbegrunnelseTest {
         dødsfallDatoBarn1 = LocalDate.of(2022, 5, 12)
         dødsfallDatoBarn2 = LocalDate.of(2022, 5, 2)
 
-        barnIBehandling = listOf(lagMinimertPerson(dødsfallsdato = dødsfallDatoBarn1, aktivPersonIdent = barn1Fnr), lagMinimertPerson(dødsfallsdato = dødsfallDatoBarn2, aktivPersonIdent = barn2Fnr))
+        barnIBehandling = listOf(
+            lagMinimertPerson(dødsfallsdato = dødsfallDatoBarn1, aktivPersonIdent = barn1Fnr),
+            lagMinimertPerson(dødsfallsdato = dødsfallDatoBarn2, aktivPersonIdent = barn2Fnr)
+        )
 
         ytelserForrigePeriode = listOf(
-            lagAndelTilkjentYtelse(fom = YearMonth.of(dødsfallDatoBarn1.minusMonths(1).year, dødsfallDatoBarn1.minusMonths(1).month), tom = YearMonth.of(dødsfallDatoBarn1.year, dødsfallDatoBarn1.month), aktør = Aktør(barn1Fnr + "00").also { it.personidenter.add(Personident(barn1Fnr, it)) }),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(
+                    dødsfallDatoBarn1.minusMonths(1).year,
+                    dødsfallDatoBarn1.minusMonths(1).month
+                ),
+                tom = YearMonth.of(dødsfallDatoBarn1.year, dødsfallDatoBarn1.month),
+                aktør = Aktør(barn1Fnr + "00").also { it.personidenter.add(Personident(barn1Fnr, it)) }
+            ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(dødsfallDatoBarn2.minusMonths(1).year, dødsfallDatoBarn2.minusMonths(1).month),
                 tom = YearMonth.of(dødsfallDatoBarn2.year, dødsfallDatoBarn2.month),

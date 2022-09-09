@@ -33,8 +33,8 @@ class UtbetalingsperiodeMedBegrunnelserService(
         vedtak: Vedtak,
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
 
         val utbetalingsperioder = if (featureToggleService.isEnabled(SPLIT_VEDTAK_PÅ_UTDYPENDE_VILKÅRSVURDERING)) {
             val vilkårsvurdering =
@@ -79,6 +79,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
             utbetalingsperioderMedReduksjon
         }
     }
+
     fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
         vedtak: Vedtak,
         utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
@@ -94,10 +95,11 @@ class UtbetalingsperiodeMedBegrunnelserService(
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag =
             forrigeIverksatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
 
-        val forrigeAndelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
+        val forrigeAndelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
 
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
 

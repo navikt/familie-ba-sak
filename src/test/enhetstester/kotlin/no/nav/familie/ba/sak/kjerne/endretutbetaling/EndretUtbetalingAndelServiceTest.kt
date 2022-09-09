@@ -101,12 +101,24 @@ class EndretUtbetalingAndelServiceTest {
 
         every { mockEndretUtbetalingAndelRepository.getById(any()) } returns endretUtbetalingAndel
         every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), behandling) } returns listOf(barn)
-        every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, barn)
+        every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(
+            behandling.id,
+            barn
+        )
         every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
         every { mockEndretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id) } returns emptyList()
         every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns vilkårsvurderingUtenDeltBosted
 
-        val feil = assertThrows<FunksjonellFeil> { endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling = behandling, endretUtbetalingAndelId = endretUtbetalingAndel.id, restEndretUtbetalingAndel = restEndretUtbetalingAndel) }
-        Assertions.assertEquals("Du har valgt årsaken 'delt bosted', denne samstemmer ikke med vurderingene gjort på vilkårsvurderingssiden i perioden du har valgt.", feil.frontendFeilmelding)
+        val feil = assertThrows<FunksjonellFeil> {
+            endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+                behandling = behandling,
+                endretUtbetalingAndelId = endretUtbetalingAndel.id,
+                restEndretUtbetalingAndel = restEndretUtbetalingAndel
+            )
+        }
+        Assertions.assertEquals(
+            "Du har valgt årsaken 'delt bosted', denne samstemmer ikke med vurderingene gjort på vilkårsvurderingssiden i perioden du har valgt.",
+            feil.frontendFeilmelding
+        )
     }
 }

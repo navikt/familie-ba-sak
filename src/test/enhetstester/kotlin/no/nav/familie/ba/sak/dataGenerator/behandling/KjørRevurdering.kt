@@ -213,7 +213,7 @@ private fun håndterDistribuertVedtakSteg(
             DistribuerDokumentDTO(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
-                personIdent = søkerFnr,
+                personEllerInstitusjonIdent = søkerFnr,
                 brevmal = hentBrevmal(behandling),
                 erManueltSendt = false
             )
@@ -386,7 +386,12 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
             andelerTilkjentYtelse,
             utvidetVedtaksperiodeMedBegrunnelser
         ),
-        ytelserForrigePerioder = andelerTilkjentYtelse.filter { ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelser) }
+        ytelserForrigePerioder = andelerTilkjentYtelse.filter {
+            ytelseErFraForrigePeriode(
+                it,
+                utvidetVedtaksperiodeMedBegrunnelser
+            )
+        }
     )
 
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(

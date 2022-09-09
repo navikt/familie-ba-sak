@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.statistikk
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.AfterEach
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-internal class StatistikkClientTest : AbstractSpringIntegrationTestDev() {
+internal class StatistikkClientTest : AbstractSpringIntegrationTest() {
     lateinit var client: StatistikkClient
 
     @Autowired

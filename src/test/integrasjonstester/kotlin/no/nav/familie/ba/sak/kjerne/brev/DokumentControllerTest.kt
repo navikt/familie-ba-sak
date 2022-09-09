@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -20,7 +20,7 @@ class DokumentControllerTest(
     private val dokumentService: DokumentService,
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
-) : AbstractSpringIntegrationTestDev() {
+) : AbstractSpringIntegrationTest() {
 
     private val mockDokumentService: DokumentService = mockk()
     private val vedtakService: VedtakService = mockk(relaxed = true)
