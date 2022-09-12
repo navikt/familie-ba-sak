@@ -318,13 +318,13 @@ class BehandlingService(
         migreringsdato: LocalDate,
         erEndreMigreringsdatoBehandling: Boolean
     ) {
+        val datoLagringAvMigreringsdatoBleInnført = LocalDate.of(2022, 2, 14)
+
         val nyMigreringsdatoErSenereEnnForrigeMigreringsdato = forrigeMigreringsdato != null &&
             migreringsdato.toYearMonth().isSameOrAfter(forrigeMigreringsdato)
 
         val nyMigreringsdatoErSenereEnnMuligMigreringdatoNårForrigeMigreringsdatoIkkeErLagretNed =
-            forrigeMigreringsdato == null && migreringsdato.toYearMonth().isSameOrAfter(
-                YearMonth.of(2022, 2)
-            )
+            forrigeMigreringsdato == null && migreringsdato.isSameOrAfter(datoLagringAvMigreringsdatoBleInnført)
 
         if (erEndreMigreringsdatoBehandling &&
             (nyMigreringsdatoErSenereEnnForrigeMigreringsdato || nyMigreringsdatoErSenereEnnMuligMigreringdatoNårForrigeMigreringsdatoIkkeErLagretNed)
