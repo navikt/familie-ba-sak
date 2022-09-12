@@ -157,7 +157,7 @@ class BrevPeriodeService(
         return brevperiodeData
     }
 
-    private fun hentBarnsPersonIdentMedRedusertPeriode(
+    internal fun hentBarnsPersonIdentMedRedusertPeriode(
         vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>
     ): List<String> =
@@ -165,7 +165,7 @@ class BrevPeriodeService(
             .let { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(it) }
             ?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
             ?.let { andelerTilkjentYtelse.hentPerioderMedEndringerFra(it) }
-            ?.filter { barn -> barn.value.any { it.fom == vedtaksperiodeMedBegrunnelser.fom } }
+            ?.filter { barn -> barn.value.any { it.fom.toYearMonth() == vedtaksperiodeMedBegrunnelser.fom?.toYearMonth() } }
             ?.filter { !it.value.filterValue { beløp -> beløp < 0 }.isEmpty }
             ?.mapNotNull { personidentService.hentAktør(it.key).aktivFødselsnummer() }
             ?: emptyList()
