@@ -154,27 +154,4 @@ class LagreMigreringsdatoTest {
             feil.melding
         )
     }
-
-    @Test
-    fun `Lagre tidligere migreringstidspunkt skal ikke kaste feil dersom forrige behandling ikke er migreringsbehandling`() {
-        every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any()) } returns null
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
-            lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING).also {
-                it.status = BehandlingStatus.AVSLUTTET
-                it.resultat = Behandlingsresultat.INNVILGET
-            }
-        every { vilkårsvurderingService.hentTidligsteVilkårsvurderingKnyttetTilMigrering(any()) } returns YearMonth.now()
-
-        every { behandlingMigreringsinfoRepository.save(any()) } returns mockk()
-
-        assertDoesNotThrow {
-            behandlingService.lagreNedMigreringsdato(
-                migreringsdato = LocalDate.now(),
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
-            )
-        }
-    }
 }
