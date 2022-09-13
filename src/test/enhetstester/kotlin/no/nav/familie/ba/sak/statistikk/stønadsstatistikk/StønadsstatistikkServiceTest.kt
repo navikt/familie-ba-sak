@@ -145,6 +145,7 @@ internal class StønadsstatistikkServiceTest(
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns andelerTilkjentYtelse
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(any()) } returns
             AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
                 andelerTilkjentYtelse,

@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
@@ -1016,7 +1017,7 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.now().toYearMonth().plusMonths(1)
         val endreteUtbetalingAndeler = if (endretUtbetaling) {
             listOf(
-                EndretUtbetalingAndel(
+                lagEndretUtbetalingAndel(
                     behandlingId = behandling.id,
                     person = barn1,
                     fom = periodeFom,
