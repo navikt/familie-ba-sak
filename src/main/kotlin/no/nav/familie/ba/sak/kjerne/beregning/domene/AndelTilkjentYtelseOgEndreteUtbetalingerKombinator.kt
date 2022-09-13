@@ -8,8 +8,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
-import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 import java.time.YearMonth
@@ -49,12 +47,13 @@ class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
         )
     }
 
-    private fun overlapper(aty: AndelTilkjentYtelse, eua: EndretUtbetalingAndel): Boolean {
-        val euaPeriode = MånedPeriode(eua.fom ?: MIN_MÅNED, eua.tom ?: MAX_MÅNED)
-        val atyPeriode = MånedPeriode(aty.stønadFom, aty.stønadTom)
+    private fun overlapper(
+        andelTilkjentYtelse: AndelTilkjentYtelse,
+        endretUtbetalingAndel: EndretUtbetalingAndel
+    ): Boolean {
 
-        return aty.aktør == eua.person?.aktør &&
-            euaPeriode.overlapperHeltEllerDelvisMed(atyPeriode)
+        return andelTilkjentYtelse.aktør == endretUtbetalingAndel.person?.aktør &&
+            endretUtbetalingAndel.periode.overlapperHeltEllerDelvisMed(andelTilkjentYtelse.periode)
     }
 }
 
