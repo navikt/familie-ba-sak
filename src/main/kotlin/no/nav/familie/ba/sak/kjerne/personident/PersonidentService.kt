@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.time.LocalDateTime
 
 @Service
@@ -84,6 +85,7 @@ class PersonidentService(
             personidentRepository.findByFødselsnummerOrNull(ident)
         } catch (e: Exception) {
             secureLogger.info("Feil ved henting av ident=$ident, lagre=$lagre", e)
+            secureLogger.info("Synchronizations: ${TransactionSynchronizationManager.getSynchronizations()}, resources: ${TransactionSynchronizationManager.getResourceMap()}")
             throw e
         }
         if (personident != null) {
