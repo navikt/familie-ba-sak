@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -140,7 +141,8 @@ class MigreringService(
                         behandlingÅrsak = BehandlingÅrsak.MIGRERING,
                         skalBehandlesAutomatisk = true,
                         underkategori = underkategori,
-                        barnasIdenter = barnasIdenter
+                        barnasIdenter = barnasIdenter,
+                        kategori = if (erEøsSak(løpendeInfotrygdsak)) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
                     )
                 )
             }.getOrElse { kastOgTellMigreringsFeil(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING, it.message, it) }
@@ -202,6 +204,10 @@ class MigreringService(
             if (e is KanIkkeMigrereException) throw e
             kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT, e.message, e)
         }
+    }
+
+    private fun erEøsSak(løpendeInfotrygdsak: Sak): Boolean {
+        return løpendeInfotrygdsak.undervalg == "EU"
     }
 
     private fun kastFeilVedDobbeltforekomstViaHistoriskIdent(barnasAktør: List<Aktør>, barnasIdenter: List<String>) {
@@ -282,6 +288,11 @@ class MigreringService(
             (sak.valg == "UT" && sak.undervalg in listOf("EF", "MD")) -> {
                 BehandlingUnderkategori.UTVIDET
             }
+
+            (sak.valg == "OR" && sak.undervalg == "EU") -> {
+                BehandlingUnderkategori.ORDINÆR
+            }
+
             else -> {
                 kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
             }

@@ -30,7 +30,10 @@ fun bestemKategoriVedOpprettelse(
                 )
         }
         behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && behandlingÅrsak.erFørstegangMigreringsårsak() -> {
-            BehandlingKategori.NASJONAL
+            overstyrtKategori ?: throw FunksjonellFeil(
+                "Behandling med type ${behandlingType.visningsnavn} " +
+                    "og årsak ${behandlingÅrsak.visningsnavn} $ krever behandlingskategori"
+            )
         }
         else -> {
             kategoriFraLøpendeBehandling
@@ -51,7 +54,8 @@ fun bestemKategori(
     if (kategoriFraSisteIverksattBehandling == BehandlingKategori.EØS) return BehandlingKategori.EØS
 
     // når løpende utbetaling er NASJONAL og inneværende behandling får EØS
-    val oppdatertKategori = listOf(kategoriFraSisteIverksattBehandling, kategoriFraInneværendeBehandling).finnHøyesteKategori()
+    val oppdatertKategori =
+        listOf(kategoriFraSisteIverksattBehandling, kategoriFraInneværendeBehandling).finnHøyesteKategori()
 
     return oppdatertKategori ?: BehandlingKategori.NASJONAL
 }
