@@ -166,9 +166,10 @@ class PersonidentService(
     }
 
     private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String, lagre: Boolean = true): Aktør {
-        secureLogger.info("Oppretter personIdent. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre")
+        secureLogger.info("Oppretter personIdent. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre, personidenter=${aktør.personidenter}")
         val eksisterendePersonIdent = aktør.personidenter.find { it.fødselsnummer == fødselsnummer && it.aktiv }
         if (eksisterendePersonIdent == null) {
+            secureLogger.info("Fins ikke eksisterende personIdent for. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre, personidenter=${aktør.personidenter}, så lager ny")
             aktør.personidenter.filter { it.aktiv }.map {
                 it.aktiv = false
                 it.gjelderTil = LocalDateTime.now()
