@@ -116,10 +116,14 @@ data class AndelTilkjentYtelse(
 
     @Column(name = "differanseberegnet_periodebelop")
     val differanseberegnetPeriodebeløp: Int? = null
+
 ) : BaseEntitet() {
 
     val periode
         get() = MånedPeriode(stønadFom, stønadTom)
+
+    fun endretUtbetalingAndelIder() =
+        (endretUtbetalingAndeler as MutableList<EndretUtbetalingAndel>?)?.map { it.id as Long? }?.filterNotNull()
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
@@ -136,7 +140,8 @@ data class AndelTilkjentYtelse(
             Objects.equals(stønadTom, annen.stønadTom) &&
             Objects.equals(aktør, annen.aktør) &&
             Objects.equals(nasjonaltPeriodebeløp, annen.nasjonaltPeriodebeløp) &&
-            Objects.equals(differanseberegnetPeriodebeløp, annen.differanseberegnetPeriodebeløp)
+            Objects.equals(differanseberegnetPeriodebeløp, annen.differanseberegnetPeriodebeløp) &&
+            Objects.equals(endretUtbetalingAndelIder(), annen.endretUtbetalingAndelIder())
     }
 
     override fun hashCode(): Int {
@@ -149,7 +154,8 @@ data class AndelTilkjentYtelse(
             stønadTom,
             aktør,
             nasjonaltPeriodebeløp,
-            differanseberegnetPeriodebeløp
+            differanseberegnetPeriodebeløp,
+            endretUtbetalingAndelIder()
         )
     }
 
