@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -27,6 +28,8 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
 
     @Transactional
     override fun endretTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) {
+        if (tilkjentYtelse.behandling.kategori == BehandlingKategori.NASJONAL) return
+
         val behandlingId = BehandlingId(tilkjentYtelse.behandling.id)
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
