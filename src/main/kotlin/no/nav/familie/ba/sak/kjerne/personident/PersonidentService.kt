@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.time.LocalDateTime
 
 @Service
@@ -84,6 +85,7 @@ class PersonidentService(
             personidentRepository.findByFødselsnummerOrNull(ident)
         } catch (e: Exception) {
             secureLogger.info("Feil ved henting av ident=$ident, lagre=$lagre", e)
+            secureLogger.info("Synchronizations: ${TransactionSynchronizationManager.getSynchronizations()}, resources: ${TransactionSynchronizationManager.getResourceMap()}")
             throw e
         }
         if (personident != null) {
@@ -167,8 +169,8 @@ class PersonidentService(
 
     private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String, lagre: Boolean = true): Aktør {
         secureLogger.info("Oppretter personIdent. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre, personidenter=${aktør.personidenter}")
-        val eksisterendePersonIdent = aktør.personidenter.find { it.fødselsnummer == fødselsnummer && it.aktiv }
-        if (eksisterendePersonIdent == null) {
+        val eksisterendePersonIdent = aktør.personidenter.filter { it.fødselsnummer == fødselsnummer && it.aktiv }
+        if (eksisterendePersonIdent.isEmpty()) {
             secureLogger.info("Fins ikke eksisterende personIdent for. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre, personidenter=${aktør.personidenter}, så lager ny")
             aktør.personidenter.filter { it.aktiv }.map {
                 it.aktiv = false
