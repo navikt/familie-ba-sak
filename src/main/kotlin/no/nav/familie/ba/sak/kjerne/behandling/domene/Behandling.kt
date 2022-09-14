@@ -105,6 +105,7 @@ data class Behandling(
             "kategori=$kategori, " +
             "underkategori=$underkategori, " +
             "automatisk=$skalBehandlesAutomatisk, " +
+            "opprettetÅrsak=$opprettetÅrsak, " +
             "status=$status, " +
             "resultat=$resultat, " +
             "steg=$steg)"
