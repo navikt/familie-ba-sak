@@ -2,7 +2,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -19,20 +18,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-
-@Deprecated("Skal utfases. Bruk hentPerioderMedUtbetaling")
-fun hentPerioderMedUtbetalingGammel(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    vedtak: Vedtak
-) = andelerTilkjentYtelse.lagVertikaleSegmenter()
-    .map { (segmenter, _) ->
-        VedtaksperiodeMedBegrunnelser(
-            fom = segmenter.fom,
-            tom = segmenter.tom,
-            vedtak = vedtak,
-            type = Vedtaksperiodetype.UTBETALING
-        )
-    }
 
 fun hentPerioderMedUtbetaling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,

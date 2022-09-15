@@ -6,7 +6,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
@@ -25,7 +25,7 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
-class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
+class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
 
     val løpendeBarnetrygdURL = "/api/infotrygd/barnetrygd/lopende-barnetrygd"
     val sakerURL = "/api/infotrygd/barnetrygd/saker"

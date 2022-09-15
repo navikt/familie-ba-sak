@@ -540,7 +540,7 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
@@ -573,7 +573,7 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
@@ -583,7 +583,7 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.MOTTAR_UFØRETRYGD_FRA_NORGE,
+                søkersAktivitet = SøkersAktivitet.MOTTAR_UFØRETRYGD,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
@@ -612,7 +612,7 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
@@ -625,7 +625,7 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
@@ -646,7 +646,7 @@ class EndringstidspunktUtilsTest {
         val forrigeKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             )
@@ -654,13 +654,13 @@ class EndringstidspunktUtilsTest {
         val nyKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør2)
             )
@@ -677,13 +677,13 @@ class EndringstidspunktUtilsTest {
         val forrigeKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør2)
             )
@@ -691,7 +691,7 @@ class EndringstidspunktUtilsTest {
         val nyKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             )
@@ -718,7 +718,7 @@ class EndringstidspunktUtilsTest {
         val forrigeKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             )
@@ -737,7 +737,7 @@ class EndringstidspunktUtilsTest {
         val nyKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             )

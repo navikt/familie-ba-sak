@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
@@ -180,7 +181,8 @@ class FagsakController(
 data class FagsakRequest(
     val personIdent: String?,
     val aktørId: String? = null,
-    val fagsakType: FagsakType? = FagsakType.NORMAL
+    val fagsakType: FagsakType? = FagsakType.NORMAL,
+    val institusjon: InstitusjonInfo? = null
 )
 
 data class RestBeslutningPåVedtak(

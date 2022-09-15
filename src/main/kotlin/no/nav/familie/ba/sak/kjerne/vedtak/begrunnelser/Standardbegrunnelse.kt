@@ -133,6 +133,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetSokerOgBarnOppholdIUtlandetIkkeMerEnn3Maneder"
     },
+    INNVILGET_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetOppholdIUtlandetIkkeMerEnnTreMaaneder"
+    },
     INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetSokerOgBarnFrivilligMedlem"
@@ -396,6 +400,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     INNVILGET_TILLEGGSTEKST_TREDJELANDSBORGER_OPPHOLDSTILLATELSE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstTredjelandsborgerOppholdstillatelse"
+    },
+    INNVILGET_MEDLEM_AV_FOLKETRYGDEN_UTEN_DATO {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetMedlemAvFolketrygdenUtenDato"
     },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON

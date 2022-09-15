@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -83,7 +82,6 @@ internal class StønadsstatistikkServiceTest(
     fun init() {
         MockKAnnotations.init(this)
 
-        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val vedtak = lagVedtak(behandling)
 
         val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(
@@ -113,7 +111,7 @@ internal class StønadsstatistikkServiceTest(
                 fom = YearMonth.now(),
                 tom = null,
                 barnAktører = setOf(barn1.aktør),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
                 annenForeldersAktivitetsland = "PL",
                 barnetsBostedsland = "PL",
@@ -130,19 +128,18 @@ internal class StønadsstatistikkServiceTest(
             periodeIdOffset = 3
         )
 
+        val andelerTilkjentYtelse = listOf(
+            andelTilkjentYtelseBarn1,
+            andelTilkjentYtelseBarn2PeriodeMed0Beløp,
+            andelTilkjentYtelseSøker
+        )
+
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { kompetanseService.hentKompetanser(any()) } returns kompetanseperioder
-        every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
-            tilkjentYtelse.copy(
-                andelerTilkjentYtelse = mutableSetOf(
-                    andelTilkjentYtelseBarn1,
-                    andelTilkjentYtelseBarn2PeriodeMed0Beløp,
-                    andelTilkjentYtelseSøker
-                )
-            )
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns andelerTilkjentYtelse
     }
 
     @Test
@@ -217,8 +214,8 @@ internal class StønadsstatistikkServiceTest(
         val søkersAktivitetFraEksternKontrakt =
             enumValues<no.nav.familie.eksterne.kontrakter.SøkersAktivitet>().map { it.name }
 
-        assertThat(søkersAktivitet).hasSize(søkersAktivitetFraEksternKontrakt.size)
-            .containsAll(søkersAktivitetFraEksternKontrakt)
+        assertThat(søkersAktivitetFraEksternKontrakt)
+            .containsAll(søkersAktivitet)
     }
 
     /**

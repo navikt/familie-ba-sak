@@ -37,7 +37,8 @@ data class RestJournalføring(
     val nyBehandlingstype: BehandlingType,
     val nyBehandlingsårsak: BehandlingÅrsak,
     val erEnsligMindreårig: Boolean = false,
-    val erPåInstitusjon: Boolean = false
+    val erPåInstitusjon: Boolean = false,
+    val institusjon: InstitusjonInfo? = null
 ) {
 
     fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest {

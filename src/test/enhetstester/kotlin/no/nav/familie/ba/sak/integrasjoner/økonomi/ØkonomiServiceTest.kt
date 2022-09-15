@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
@@ -18,7 +17,6 @@ internal class ØkonomiServiceTest {
     val søker = randomFnr()
     val behandling = lagBehandling()
     val vedtakDato = LocalDate.now()
-    val økonomiService = ØkonomiService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
 
     @Test
     fun `valider opphør med lovlige perioder`() {
@@ -43,9 +41,7 @@ internal class ØkonomiServiceTest {
         )
 
         // Test at validering ikke feiler.
-        økonomiService.validerOpphørsoppdrag(
-            lagEksternUtbetalingsoppdrag(utbetalingsPeriode)
-        )
+        lagEksternUtbetalingsoppdrag(utbetalingsPeriode).validerOpphørsoppdrag()
     }
 
     @Test
@@ -70,9 +66,7 @@ internal class ØkonomiServiceTest {
             )
         )
         assertThrows<IllegalStateException> {
-            økonomiService.validerOpphørsoppdrag(
-                lagEksternUtbetalingsoppdrag(utbetalingsPeriode)
-            )
+            lagEksternUtbetalingsoppdrag(utbetalingsPeriode).validerOpphørsoppdrag()
         }
     }
 

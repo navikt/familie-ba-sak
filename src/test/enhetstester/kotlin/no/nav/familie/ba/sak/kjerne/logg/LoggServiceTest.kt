@@ -1,17 +1,25 @@
 package no.nav.familie.ba.sak.kjerne.logg
 
-import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -30,8 +38,17 @@ class LoggServiceTest(
     private val stegService: StegService,
 
     @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService
-) : AbstractSpringIntegrationTestDev() {
+    private val mockPersonopplysningerService: PersonopplysningerService,
+
+    @Autowired
+    private val behandlingRepository: BehandlingRepository,
+
+    @Autowired
+    private val aktørIdRepository: AktørIdRepository,
+
+    @Autowired
+    private val fagsakRepository: FagsakRepository
+) : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal lage noen logginnslag på forskjellige behandlinger og hente dem fra databasen`() {
@@ -245,5 +262,25 @@ class LoggServiceTest(
 
         val logginnslag = loggService.hentLoggForBehandling(behandlingId)
         assertEquals(listOf(nyast.id, mellomst.id, eldst.id), logginnslag.map { it.id })
+    }
+
+    fun lagBehandling(
+        behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD
+    ): Behandling {
+        val aktør = randomAktør().also { aktørIdRepository.save(it) }
+        val fagsak = Fagsak(aktør = aktør).also { fagsakRepository.save(it) }
+
+        return Behandling(
+            fagsak = fagsak,
+            skalBehandlesAutomatisk = false,
+            type = behandlingType,
+            kategori = BehandlingKategori.NASJONAL,
+            underkategori = BehandlingUnderkategori.ORDINÆR,
+            opprettetÅrsak = årsak,
+            resultat = Behandlingsresultat.IKKE_VURDERT
+        ).also {
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
+        }.also { behandlingRepository.save(it) }
     }
 }

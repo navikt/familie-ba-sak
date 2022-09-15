@@ -64,7 +64,7 @@ class DistribuerDokumentTask(
 data class DistribuerDokumentDTO(
     val behandlingId: Long?,
     val journalpostId: String,
-    val personIdent: String,
+    val personEllerInstitusjonIdent: String,
     val brevmal: Brevmal,
     val erManueltSendt: Boolean
 )

@@ -74,7 +74,10 @@ object TilkjentYtelseUtils {
             endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker
         )
 
-        val småbarnstilleggErMulig = erSmåbarnstilleggMulig(utvidetAndeler = andelerTilkjentYtelseUtvidetMedAlleEndringer, barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEndringer)
+        val småbarnstilleggErMulig = erSmåbarnstilleggMulig(
+            utvidetAndeler = andelerTilkjentYtelseUtvidetMedAlleEndringer,
+            barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEndringer
+        )
 
         val andelerTilkjentYtelseSmåbarnstillegg = if (småbarnstilleggErMulig) {
             SmåbarnstilleggBarnetrygdGenerator(
@@ -108,7 +111,10 @@ object TilkjentYtelseUtils {
         return tilkjentYtelse
     }
 
-    fun erSmåbarnstilleggMulig(utvidetAndeler: List<AndelTilkjentYtelse>, barnasAndeler: List<AndelTilkjentYtelse>): Boolean = utvidetAndeler.isNotEmpty() && barnasAndeler.isNotEmpty()
+    fun erSmåbarnstilleggMulig(
+        utvidetAndeler: List<AndelTilkjentYtelse>,
+        barnasAndeler: List<AndelTilkjentYtelse>
+    ): Boolean = utvidetAndeler.isNotEmpty() && barnasAndeler.isNotEmpty()
 
     fun beregnAndelerTilkjentYtelseForBarna(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
@@ -229,7 +235,10 @@ object TilkjentYtelseUtils {
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
                 nyeAndelerForPerson.addAll(
                     perioderUtenEndring.map { månedPeriodeUendret ->
-                        andelForPerson.copy(stønadFom = månedPeriodeUendret.fom, stønadTom = månedPeriodeUendret.tom)
+                        andelForPerson.copy(
+                            stønadFom = månedPeriodeUendret.fom,
+                            stønadTom = månedPeriodeUendret.tom
+                        )
                     }
                 )
             }
@@ -432,7 +441,8 @@ fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair
     val alleMånederMedOverlappstatus = mutableMapOf<YearMonth, Boolean>()
     var nesteMåned = this.fom
     while (nesteMåned <= this.tom) {
-        alleMånederMedOverlappstatus[nesteMåned] = perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) }
+        alleMånederMedOverlappstatus[nesteMåned] =
+            perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) }
         nesteMåned = nesteMåned.plusMonths(1)
     }
 

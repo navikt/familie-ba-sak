@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
 import hentPerioderMedUtbetaling
-import hentPerioderMedUtbetalingGammel
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_BEHANDLE_EØS
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SPLIT_VEDTAK_PÅ_UTDYPENDE_VILKÅRSVURDERING
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -33,27 +31,20 @@ class UtbetalingsperiodeMedBegrunnelserService(
         vedtak: Vedtak,
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
 
-        val utbetalingsperioder = if (featureToggleService.isEnabled(SPLIT_VEDTAK_PÅ_UTDYPENDE_VILKÅRSVURDERING)) {
-            val vilkårsvurdering =
-                vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = vedtak.behandling.id)
+        val vilkårsvurdering =
+            vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = vedtak.behandling.id)
 
-            val forskjøvetVilkårResultatTidslinjeMap =
-                vilkårsvurdering.personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
+        val forskjøvetVilkårResultatTidslinjeMap =
+            vilkårsvurdering.personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
 
-            hentPerioderMedUtbetaling(
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                vedtak = vedtak,
-                forskjøvetVilkårResultatTidslinjeMap = forskjøvetVilkårResultatTidslinjeMap
-            )
-        } else {
-            hentPerioderMedUtbetalingGammel(
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                vedtak = vedtak
-            )
-        }
+        val utbetalingsperioder = hentPerioderMedUtbetaling(
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            vedtak = vedtak,
+            forskjøvetVilkårResultatTidslinjeMap = forskjøvetVilkårResultatTidslinjeMap
+        )
 
         val perioderMedReduksjonFraSistIverksatteBehandling =
             hentReduksjonsperioderFraInnvilgelsesTidspunkt(
@@ -79,6 +70,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
             utbetalingsperioderMedReduksjon
         }
     }
+
     fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
         vedtak: Vedtak,
         utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
@@ -94,10 +86,11 @@ class UtbetalingsperiodeMedBegrunnelserService(
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag =
             forrigeIverksatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
 
-        val forrigeAndelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
+        val forrigeAndelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
 
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
 
