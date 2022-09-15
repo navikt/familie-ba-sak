@@ -545,7 +545,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     IDENT_IKKE_LENGER_AKTIV("Ident ikke lenger aktiv"),
     IDENT_BARN_IKKE_LENGER_AKTIV("Ident barn ikke lenger aktiv"),
     IKKE_GYLDIG_KJØREDATO("Ikke gyldig kjøredato"),
-    IKKE_STØTTET_SAKSTYPE("Kan kun migrere ordinære(OR OS) og utvidet(UT EF) saker"),
+    IKKE_STØTTET_SAKSTYPE("Ikke støttet sakstype. Kan migrere Ordinære(OS, MD, EU) og Utvidet(EF, MD, EU)"),
     INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD("Fant ingen barn med løpende stønad på sak"),
     INGEN_LØPENDE_SAK_INFOTRYGD("Personen har ikke løpende sak i infotrygd"),
     INSTITUSJON("Midlertidig ignoerert fordi det er en institusjon"),
