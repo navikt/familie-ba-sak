@@ -48,7 +48,7 @@ class TilkjentYtelseValideringService(
         val tilkjenteYtelser = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
         if (tilkjenteYtelser.harAndelerTilkjentYtelseMedSammeOffset()) {
-            throw Feil("Behandling $behandlingId har andel tilkjent ytelse med offset lik en annen i fagsaken.")
+            throw Feil("Behandling $behandlingId har andel tilkjent ytelse med offset lik en annen andel i behandlingen.")
         }
     }
 
