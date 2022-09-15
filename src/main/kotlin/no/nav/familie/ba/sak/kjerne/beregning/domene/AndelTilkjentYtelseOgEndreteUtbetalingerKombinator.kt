@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
-class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
+private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
     private val andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     private val endretUtbetalingAndeler: Collection<EndretUtbetalingAndel>,
     private val brukFrikobleteAndelerOgEndringer: Boolean?
@@ -51,7 +51,6 @@ class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
         andelTilkjentYtelse: AndelTilkjentYtelse,
         endretUtbetalingAndel: EndretUtbetalingAndel
     ): Boolean {
-
         return andelTilkjentYtelse.aktør == endretUtbetalingAndel.person?.aktør &&
             endretUtbetalingAndel.periode.overlapperHeltEllerDelvisMed(andelTilkjentYtelse.periode)
     }

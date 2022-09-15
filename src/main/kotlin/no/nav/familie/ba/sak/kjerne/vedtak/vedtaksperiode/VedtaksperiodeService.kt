@@ -21,9 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseOgEndreteUtbetalingerKombinator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -379,24 +377,18 @@ class VedtaksperiodeService(
         val vedtaksperioderMedBegrunnelser = hentPersisterteVedtaksperioder(vedtak)
 
         val behandling = vedtak.behandling
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-            behandlingId = behandling.id
-        )
 
         val endreteUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
 
-        val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
-            andelerTilkjentYtelse,
-            endreteUtbetalinger,
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
-        ).lagAndelerMedEndringer()
+        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
         val persongrunnlag =
             persongrunnlagService.hentAktivThrows(behandling.id)
 
         val utvidetVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
-                andelerTilkjentYtelse = andelerMedEndringer,
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
                 personopplysningGrunnlag = persongrunnlag
             )
         }
@@ -421,7 +413,7 @@ class VedtaksperiodeService(
         behandling: Behandling,
         utvidedeVedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
         persongrunnlag: PersonopplysningGrunnlag,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): List<UtvidetVedtaksperiodeMedBegrunnelser> {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
@@ -430,12 +422,6 @@ class VedtaksperiodeService(
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
         val kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id)
-
-        val andelerMedEndringer = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
-            andelerTilkjentYtelse,
-            endretUtbetalingAndeler,
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
-        ).lagAndelerMedEndringer()
 
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
             val kompetanserIPeriode = kompetanser.hentIPeriode(
@@ -459,7 +445,7 @@ class VedtaksperiodeService(
                     vilkårsvurdering = vilkårsvurdering,
                     aktørIderMedUtbetaling = aktørIderMedUtbetaling,
                     endretUtbetalingAndeler = endretUtbetalingAndeler,
-                    andelerTilkjentYtelse = andelerMedEndringer,
+                    andelerTilkjentYtelse = andelerTilkjentYtelse,
                     sanityEØSBegrunnelser = sanityEØSBegrunnelser,
                     kompetanserIPeriode = kompetanserIPeriode,
                     kanBehandleEØS = featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS),

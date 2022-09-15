@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -41,7 +40,6 @@ import java.util.UUID
 class StønadsstatistikkService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val beregningService: BeregningService,
     private val vedtakService: VedtakService,
     private val personopplysningerService: PersonopplysningerService,
     private val vedtakRepository: VedtakRepository,
@@ -141,7 +139,8 @@ class StønadsstatistikkService(
     }
 
     private fun utledEnsligForsørger(behandlingId: Long): Boolean {
-        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId)
+        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
         if (andelerTilkjentYtelse.isEmpty()) {
             return false
         }
