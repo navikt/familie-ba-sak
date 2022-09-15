@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.finnAktørIderMedUgyldigEtterbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -40,6 +42,21 @@ class TilkjentYtelseValideringService(
                 personopplysningGrunnlag = personopplysningGrunnlag
             )
         }
+    }
+
+    fun validerIngenAndelerTilkjentYtelseMedSammeOffsetIFagsak(fagsakId: Long) {
+        val tilkjenteYtelser = beregningService.hentTilkjentYtelserForFagsak(fagsakId = fagsakId)
+
+        if (tilkjenteYtelser.harAndelerTilkjentYtelseMedSammeOffset()) {
+            throw Feil("Fagsak $fagsakId har andel tilkjent ytelse med offset lik en annen i fagsaken.")
+        }
+    }
+
+    private fun List<TilkjentYtelse>.harAndelerTilkjentYtelseMedSammeOffset(): Boolean {
+        val periodeOffsetForAndelerIFagsak =
+            flatMap { ty -> ty.andelerTilkjentYtelse.map { it.periodeOffset } }
+
+        return periodeOffsetForAndelerIFagsak.size != periodeOffsetForAndelerIFagsak.distinct().size
     }
 
     fun barnetrygdLøperForAnnenForelder(behandling: Behandling, barna: List<Person>): Boolean {

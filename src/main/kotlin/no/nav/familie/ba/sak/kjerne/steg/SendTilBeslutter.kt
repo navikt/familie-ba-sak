@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -31,7 +32,8 @@ class SendTilBeslutter(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vedtakService: VedtakService,
-    private val vedtaksperiodeService: VedtaksperiodeService
+    private val vedtaksperiodeService: VedtaksperiodeService,
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(
@@ -79,6 +81,10 @@ class SendTilBeslutter(
         behandlingService.sendBehandlingTilBeslutter(behandling)
 
         return hentNesteStegForNormalFlyt(behandling)
+    }
+
+    override fun postValiderSteg(behandling: Behandling) {
+        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIFagsak(behandling.fagsak.id)
     }
 
     private fun opprettFerdigstillOppgaveTasker(behandling: Behandling) {

@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.http.client.RessursException
@@ -30,7 +31,8 @@ class UtbetalingsoppdragService(
     private val økonomiKlient: ØkonomiKlient,
     private val beregningService: BeregningService,
     private val utbetalingsoppdragGenerator: NyUtbetalingsoppdragGenerator,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
@@ -46,6 +48,7 @@ class UtbetalingsoppdragService(
         val oppdatertTilkjentYtelse = beregningService.populerTilkjentYtelse(oppdatertBehandling, utbetalingsoppdrag)
         beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
 
+        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIFagsak(fagsakId = vedtak.behandling.fagsak.id)
         iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
 
         return tilkjentYtelse
