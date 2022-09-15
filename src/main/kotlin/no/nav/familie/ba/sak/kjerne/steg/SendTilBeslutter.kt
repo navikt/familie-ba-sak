@@ -84,7 +84,7 @@ class SendTilBeslutter(
     }
 
     override fun postValiderSteg(behandling: Behandling) {
-        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIFagsak(behandling.fagsak.id)
+        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandling.id)
     }
 
     private fun opprettFerdigstillOppgaveTasker(behandling: Behandling) {

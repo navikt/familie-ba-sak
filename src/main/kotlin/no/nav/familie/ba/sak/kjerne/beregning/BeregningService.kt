@@ -67,9 +67,6 @@ class BeregningService(
     fun hentTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandling(behandlingId)
 
-    fun hentTilkjentYtelserForFagsak(fagsakId: Long) =
-        tilkjentYtelseRepository.findByFagsak(fagsakId)
-
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 

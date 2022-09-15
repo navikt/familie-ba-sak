@@ -48,7 +48,7 @@ class UtbetalingsoppdragService(
         val oppdatertTilkjentYtelse = beregningService.populerTilkjentYtelse(oppdatertBehandling, utbetalingsoppdrag)
         beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
 
-        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIFagsak(fagsakId = vedtak.behandling.fagsak.id)
+        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId = vedtak.behandling.id)
         iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
 
         return tilkjentYtelse

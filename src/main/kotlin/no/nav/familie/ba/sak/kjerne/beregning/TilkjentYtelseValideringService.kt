@@ -44,19 +44,18 @@ class TilkjentYtelseValideringService(
         }
     }
 
-    fun validerIngenAndelerTilkjentYtelseMedSammeOffsetIFagsak(fagsakId: Long) {
-        val tilkjenteYtelser = beregningService.hentTilkjentYtelserForFagsak(fagsakId = fagsakId)
+    fun validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId: Long) {
+        val tilkjenteYtelser = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
         if (tilkjenteYtelser.harAndelerTilkjentYtelseMedSammeOffset()) {
-            throw Feil("Fagsak $fagsakId har andel tilkjent ytelse med offset lik en annen i fagsaken.")
+            throw Feil("Behandling $behandlingId har andel tilkjent ytelse med offset lik en annen i fagsaken.")
         }
     }
 
-    private fun List<TilkjentYtelse>.harAndelerTilkjentYtelseMedSammeOffset(): Boolean {
-        val periodeOffsetForAndelerIFagsak =
-            flatMap { ty -> ty.andelerTilkjentYtelse.map { it.periodeOffset } }
+    private fun TilkjentYtelse.harAndelerTilkjentYtelseMedSammeOffset(): Boolean {
+        val periodeOffsetForAndeler = this.andelerTilkjentYtelse.map { it.periodeOffset }
 
-        return periodeOffsetForAndelerIFagsak.size != periodeOffsetForAndelerIFagsak.distinct().size
+        return periodeOffsetForAndeler.size != periodeOffsetForAndeler.distinct().size
     }
 
     fun barnetrygdLøperForAnnenForelder(behandling: Behandling, barna: List<Person>): Boolean {

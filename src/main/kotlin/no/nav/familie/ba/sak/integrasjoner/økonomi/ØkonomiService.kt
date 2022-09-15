@@ -47,7 +47,7 @@ class ØkonomiService(
         val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
 
-        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIFagsak(fagsakId = vedtak.behandling.fagsak.id)
+        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId = vedtak.behandling.id)
         iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
         return utbetalingsoppdrag
     }

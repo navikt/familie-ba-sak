@@ -30,7 +30,7 @@ internal class UtbetalingsoppdragServiceTest {
         every { iverksettOppdrag(any()) } returns ""
     }
     val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService> {
-        every { validerIngenAndelerTilkjentYtelseMedSammeOffsetIFagsak(any()) } just runs
+        every { validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(any()) } just runs
     }
     val beregningService = mockk<BeregningService> {
         every { hentTilkjentYtelseForBehandling(any()) } returns mockk()
