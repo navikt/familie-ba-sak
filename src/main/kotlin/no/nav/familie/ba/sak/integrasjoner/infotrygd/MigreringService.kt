@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -179,18 +178,6 @@ class MigreringService(
 
             if (løpendeInfotrygdsak.undervalg == "EU") {
                 kompetanseService.hentKompetanser(BehandlingId(behandling.id)).forEach { kompetanse ->
-                    val nyKompetanse = Kompetanse(
-                        fom = kompetanse.fom,
-                        tom = kompetanse.tom,
-                        barnAktører = kompetanse.barnAktører,
-                        søkersAktivitet = kompetanse.søkersAktivitet,
-                        søkersAktivitetsland = kompetanse.søkersAktivitetsland,
-                        annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
-                        annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
-                        barnetsBostedsland = kompetanse.barnetsBostedsland,
-                        resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND
-                    )
-
                     kompetanseService.oppdaterKompetanse(
                         BehandlingId(behandling.id),
                         kompetanse.copy(resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND)
