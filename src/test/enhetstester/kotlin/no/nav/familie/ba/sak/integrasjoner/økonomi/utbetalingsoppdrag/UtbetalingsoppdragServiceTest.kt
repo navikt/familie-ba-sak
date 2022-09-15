@@ -61,9 +61,6 @@ internal class UtbetalingsoppdragServiceTest {
         val vedtak = mockk<Vedtak> {
             every { behandling } returns mockk {
                 every { id } returns 1L
-                every { fagsak } returns mockk {
-                    every { id } returns 1L
-                }
             }
         }
         service.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak, "")
@@ -82,9 +79,6 @@ internal class UtbetalingsoppdragServiceTest {
         val vedtak = mockk<Vedtak> {
             every { behandling } returns mockk {
                 every { id } returns 1L
-                every { fagsak } returns mockk {
-                    every { id } returns 1L
-                }
             }
         }
         service.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak, "")
