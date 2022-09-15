@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.KanIkkeMigrereException
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.MigreringService
@@ -10,6 +11,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
@@ -25,7 +28,8 @@ class MigrerFraInfotrygdTest(
     @Autowired private val migreringService: MigreringService,
     @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val featureToggleService: FeatureToggleService,
-    @Autowired private val behandlingRepository: BehandlingRepository
+    @Autowired private val behandlingRepository: BehandlingRepository,
+    @Autowired private val kompetanseRepository: KompetanseRepository
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -84,6 +88,7 @@ class MigrerFraInfotrygdTest(
         val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
         assertThat(behandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
         assertThat(behandling.underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).isEmpty()
     }
 
     @Test
@@ -142,6 +147,7 @@ class MigrerFraInfotrygdTest(
         val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
         assertThat(behandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
         assertThat(behandling.underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).isEmpty()
     }
 
     @Test
@@ -200,6 +206,7 @@ class MigrerFraInfotrygdTest(
         val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
         assertThat(behandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
         assertThat(behandling.underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).isEmpty()
     }
 
     @Test
@@ -268,6 +275,7 @@ class MigrerFraInfotrygdTest(
         val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
         assertThat(behandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
         assertThat(behandling.underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).isEmpty()
     }
 
     @Test
@@ -332,6 +340,7 @@ class MigrerFraInfotrygdTest(
             fagsakStatus = FagsakStatus.OPPRETTET,
             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
         )
+        assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).isEmpty()
     }
 
     @Test
@@ -494,6 +503,7 @@ class MigrerFraInfotrygdTest(
         val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
         assertThat(behandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
         assertThat(behandling.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).isEmpty()
     }
 
     @Test
@@ -611,8 +621,14 @@ class MigrerFraInfotrygdTest(
     }
 
     @Test
-    fun `skal migrere EØS ordinær primærland`() {
+    fun `skal migrere EØS ordinær primærland med 1 barn under 6`() {
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.KAN_MIGRERE_EØS_PRIMÆRLAND_ORDINÆR,
+                false
+            )
+        } returns true
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
@@ -667,6 +683,150 @@ class MigrerFraInfotrygdTest(
             fagsakStatus = FagsakStatus.OPPRETTET,
             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
         )
+
+        assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(1)
+            .extracting("resultat").contains(KompetanseResultat.NORGE_ER_PRIMÆRLAND)
+    }
+
+    @Test
+    fun `skal migrere EØS ordinær primærland med 2 barn over 6 `() {
+        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.KAN_MIGRERE_EØS_PRIMÆRLAND_ORDINÆR,
+                false
+            )
+        } returns true
+
+        val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(
+                    fødselsdato = "1996-01-12",
+                    fornavn = "Mor",
+                    etternavn = "Søker"
+                ),
+                barna = listOf(
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusYears(8).toString(),
+                        fornavn = "barn 1",
+                        etternavn = "Barnesen2"
+                    ),
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusYears(8).toString(),
+                        fornavn = "barn 2",
+                        etternavn = "Barnesen2"
+                    )
+                )
+            )
+        )
+
+        val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(
+                    fødselsdato = "1996-01-12",
+                    fornavn = "Mor",
+                    etternavn = "Søker",
+                    infotrygdSaker = InfotrygdSøkResponse(
+                        bruker = listOf(
+                            lagInfotrygdSak(
+                                HALV_BARNETRYGD_SATS_OVER_6_ÅR * 2 * 2,
+                                barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
+                                "OR",
+                                "EU"
+                            )
+                        ),
+                        barn = emptyList()
+                    )
+                ),
+                barna = emptyList()
+            )
+        )
+
+        val migreringsresponse = migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!)
+
+        val restFagsakEtterBehandlingAvsluttet =
+            familieBaSakKlient().hentFagsak(fagsakId = migreringsresponse.fagsakId)
+
+        val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
+        assertThat(behandling.kategori).isEqualTo(BehandlingKategori.EØS)
+        assertThat(behandling.underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+        )
+
+        assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(1)
+            .extracting("resultat").contains(KompetanseResultat.NORGE_ER_PRIMÆRLAND)
+    }
+
+    @Test
+    fun `skal migrere EØS utvidet primærland`() {
+        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.KAN_MIGRERE_EØS_PRIMÆRLAND_UTVIDET,
+                false
+            )
+        } returns true
+
+        val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(
+                    fødselsdato = "1996-01-12",
+                    fornavn = "Mor",
+                    etternavn = "Søker"
+                ),
+                barna = listOf(
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusYears(8).toString(),
+                        fornavn = "Barn2",
+                        etternavn = "Barnesen2"
+                    )
+                )
+            )
+        )
+
+        val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(
+                    fødselsdato = "1996-01-12",
+                    fornavn = "Mor",
+                    etternavn = "Søker",
+                    infotrygdSaker = InfotrygdSøkResponse(
+                        bruker = listOf(
+                            lagInfotrygdSak(
+                                HALV_UTVIDET_BARNETRYGD_SATS * 2 + HALV_BARNETRYGD_SATS_OVER_6_ÅR * 2,
+                                barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
+                                "UT",
+                                "EU"
+                            )
+                        ),
+                        barn = emptyList()
+                    )
+                ),
+                barna = emptyList()
+            )
+        )
+
+        val migreringsresponse = migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!)
+
+        val restFagsakEtterBehandlingAvsluttet =
+            familieBaSakKlient().hentFagsak(fagsakId = migreringsresponse.fagsakId)
+
+        val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
+        assertThat(behandling.kategori).isEqualTo(BehandlingKategori.EØS)
+        assertThat(behandling.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+        )
+
+        assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(1)
+            .extracting("resultat").contains(KompetanseResultat.NORGE_ER_PRIMÆRLAND)
     }
 
     companion object {
