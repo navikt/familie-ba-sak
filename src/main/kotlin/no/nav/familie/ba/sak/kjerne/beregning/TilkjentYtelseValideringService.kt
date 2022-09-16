@@ -45,9 +45,9 @@ class TilkjentYtelseValideringService(
     }
 
     fun validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId: Long) {
-        val tilkjenteYtelser = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
-        if (tilkjenteYtelser.harAndelerTilkjentYtelseMedSammeOffset()) {
+        if (tilkjentYtelse.harAndelerTilkjentYtelseMedSammeOffset()) {
             throw Feil("Behandling $behandlingId har andel tilkjent ytelse med offset lik en annen andel i behandlingen.")
         }
     }
