@@ -85,7 +85,13 @@ class StønadsstatistikkService(
         return kompetanser.map { kompetanse ->
             Kompetanse(
                 barnsIdenter = kompetanse.barnAktører.map { aktør -> aktør.aktivFødselsnummer() },
-                annenForeldersAktivitet = AnnenForeldersAktivitet.valueOf(kompetanse.annenForeldersAktivitet!!.name),
+                annenForeldersAktivitet = if (kompetanse.annenForeldersAktivitet != null) {
+                    AnnenForeldersAktivitet.valueOf(
+                        kompetanse.annenForeldersAktivitet.name
+                    )
+                } else {
+                    null
+                },
                 annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
                 barnetsBostedsland = kompetanse.barnetsBostedsland,
                 fom = kompetanse.fom!!,

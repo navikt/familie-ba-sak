@@ -212,6 +212,11 @@ class ClientMocks {
             } answers {
                 mockFeatureToggleServiceAnswer
             }
+            every {
+                mockFeatureToggleService.isEnabled(capture(featureSlot), any())
+            } answers {
+                mockFeatureToggleServiceAnswer
+            }
         }
 
         fun clearPdlIdentRestClient(
