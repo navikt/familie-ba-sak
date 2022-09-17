@@ -75,6 +75,7 @@ class BeregningServiceTest {
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService = AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         andelTilkjentYtelseRepository,
         endretUtbetalingAndelRepository,
+        vilkårsvurderingRepository,
         featureToggleService
     )
 

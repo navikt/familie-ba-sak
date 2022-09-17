@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -49,8 +49,8 @@ class BehandlingsresultatStegTest {
 
     private val featureToggleService: FeatureToggleService = mockk()
 
-    private val andelerTilkjentYtelseOgValiderteEndreteUtbetalingerService =
-        mockk<AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService>()
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
+        mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
 
     @BeforeEach
     fun init() {
@@ -65,7 +65,7 @@ class BehandlingsresultatStegTest {
             persongrunnlagService,
             beregningService,
             featureToggleService,
-            andelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
         behandling = lagBehandling(
