@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
@@ -61,24 +61,6 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     private val endreteUtbetalingerAndeler: Collection<EndretUtbetalingAndel>,
     private val brukFrikobleteAndelerOgEndringer: Boolean?
 ) {
-    constructor(
-        andelTilkjentYtelse: AndelTilkjentYtelse,
-        endretUtbetalingAndelMedAndelerTilkjentYtelse: EndretUtbetalingAndelMedAndelerTilkjentYtelse
-    ) : this(
-        andelTilkjentYtelse,
-        listOf(endretUtbetalingAndelMedAndelerTilkjentYtelse.endretUtbetalingAndel),
-        endretUtbetalingAndelMedAndelerTilkjentYtelse.brukFrikobleteAndelerOgEndringer
-    )
-
-    constructor(
-        andelTilkjentYtelse: AndelTilkjentYtelse,
-        endreteUtbetalingerAndeler: Collection<EndretUtbetalingAndel>
-    ) : this(
-        andelTilkjentYtelse,
-        endreteUtbetalingerAndeler,
-        true
-    )
-
     val periodeOffset get() = andelTilkjentYtelse.periodeOffset
     val sats get() = andelTilkjentYtelse.sats
     val type get() = andelTilkjentYtelse.type
@@ -174,7 +156,7 @@ class AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val featureToggleService: FeatureToggleService,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository
 ) {
     fun finnEndreteUtbetalingerMedValiderteAndelerTilkjentYtelse(
         behandlingId: Long
@@ -201,7 +183,7 @@ class AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService(
                         validerÅrsak(
                             it.årsak,
                             it.endretUtbetalingAndel,
-                            vilkårsvurderingService.hentAktivForBehandling(behandlingId)
+                            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
                         )
                     }
                 }
@@ -227,3 +209,11 @@ class AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService(
         this.copy(andeler = emptyList())
     }
 }
+
+fun AndelTilkjentYtelse.medEndring(
+    endretUtbetalingAndelMedAndelerTilkjentYtelse: EndretUtbetalingAndelMedAndelerTilkjentYtelse
+) = AndelTilkjentYtelseMedEndreteUtbetalinger(
+    this,
+    listOf(endretUtbetalingAndelMedAndelerTilkjentYtelse.endretUtbetalingAndel),
+    brukFrikobleteAndelerOgEndringer = endretUtbetalingAndelMedAndelerTilkjentYtelse.brukFrikobleteAndelerOgEndringer
+)

@@ -281,7 +281,7 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList()
     )
 
-    return AndelTilkjentYtelseMedEndreteUtbetalinger(aty, endretUtbetalingAndeler)
+    return AndelTilkjentYtelseMedEndreteUtbetalinger(aty, endretUtbetalingAndeler, true)
 }
 
 fun lagAndelTilkjentYtelseUtvidet(

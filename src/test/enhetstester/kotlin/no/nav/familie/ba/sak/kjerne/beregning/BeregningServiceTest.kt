@@ -332,7 +332,8 @@ class BeregningServiceTest {
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             lagFullstendigVilkårResultat = true,
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
+            erDeltBosted = true
         )
 
         val personResultatSøker = lagPersonResultat(
