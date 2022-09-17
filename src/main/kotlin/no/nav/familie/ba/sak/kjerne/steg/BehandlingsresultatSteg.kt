@@ -66,7 +66,7 @@ class BehandlingsresultatSteg(
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
-            .finnEndreteUtbetalingerMedValiderteAndelerTilkjentYtelse(behandling.id)
+            .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandling.id)
 
         validerAtAlleOpprettedeEndringerErUtfylt(endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel })
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endreteUtbetalingerMedAndeler)

@@ -102,7 +102,7 @@ class UtvidetBehandlingService(
             if (kanBehandleEøs) utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgValiderteEndreteUtbetalingerService
-            .finnEndreteUtbetalingerMedValiderteAndelerTilkjentYtelse(behandlingId)
+            .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,

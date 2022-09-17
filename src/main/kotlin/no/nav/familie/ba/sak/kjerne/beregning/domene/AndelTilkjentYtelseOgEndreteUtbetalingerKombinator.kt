@@ -44,16 +44,21 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             endretUtbetalingAndel,
             andeler,
             brukFrikobleteAndelerOgEndringer
-        )
+        ).utenAndelerVedValideringsfeil {
+            validerPeriodeInnenforTilkjentytelse(
+                endretUtbetalingAndel,
+                andelerTilkjentYtelse
+            )
+        }
     }
+}
 
-    private fun overlapper(
-        andelTilkjentYtelse: AndelTilkjentYtelse,
-        endretUtbetalingAndel: EndretUtbetalingAndel
-    ): Boolean {
-        return andelTilkjentYtelse.aktør == endretUtbetalingAndel.person?.aktør &&
-            endretUtbetalingAndel.periode.overlapperHeltEllerDelvisMed(andelTilkjentYtelse.periode)
-    }
+private fun overlapper(
+    andelTilkjentYtelse: AndelTilkjentYtelse,
+    endretUtbetalingAndel: EndretUtbetalingAndel
+): Boolean {
+    return andelTilkjentYtelse.aktør == endretUtbetalingAndel.person?.aktør &&
+        endretUtbetalingAndel.periode.overlapperHeltEllerDelvisMed(andelTilkjentYtelse.periode)
 }
 
 data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
@@ -153,61 +158,35 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
 
 @Service
 class AndelerTilkjentYtelseOgValiderteEndreteUtbetalingerService(
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val featureToggleService: FeatureToggleService,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository
 ) {
-    fun finnEndreteUtbetalingerMedValiderteAndelerTilkjentYtelse(
+    fun finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(
         behandlingId: Long
-    ): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandlingId)
-        val endretUtbetalingAndeler = endretUtbetalingAndelRepository
-            .findByBehandlingId(behandlingId)
-        val brukFrikobleteAndelerOgEndringer =
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
-
-        val kombinator = AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
-            andelerTilkjentYtelse,
-            endretUtbetalingAndeler,
-            brukFrikobleteAndelerOgEndringer
-        )
-
-        val endreteUtbetalingMedAndeler = kombinator.lagEndreteUtbetalingMedAndeler()
-
-        return if (brukFrikobleteAndelerOgEndringer) {
-            endreteUtbetalingMedAndeler
-                .map {
-                    it.utenAndelerVedValideringsfeil {
-                        validerÅrsak(
-                            it.årsak,
-                            it.endretUtbetalingAndel,
-                            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
-                        )
-                    }
-                }
-                .map {
-                    it.utenAndelerVedValideringsfeil {
-                        validerPeriodeInnenforTilkjentytelse(
-                            it.endretUtbetalingAndel,
-                            andelerTilkjentYtelse
-                        )
-                    }
-                }
-        } else {
-            endreteUtbetalingMedAndeler
+    ): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> = andelerTilkjentYtelseOgEndreteUtbetalingerService
+        .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
+        .map {
+            it.utenAndelerVedValideringsfeil {
+                validerÅrsak(
+                    it.årsak,
+                    it.endretUtbetalingAndel,
+                    vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
+                )
+            }
         }
-    }
+}
 
-    private fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.utenAndelerVedValideringsfeil(
-        validator: () -> Unit
-    ) = try {
+private fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.utenAndelerVedValideringsfeil(
+    validator: () -> Unit
+) = if (brukFrikobleteAndelerOgEndringer == true) {
+    try {
         validator()
         this
     } catch (e: Throwable) {
         this.copy(andeler = emptyList())
     }
+} else {
+    this
 }
 
 fun AndelTilkjentYtelse.medEndring(
