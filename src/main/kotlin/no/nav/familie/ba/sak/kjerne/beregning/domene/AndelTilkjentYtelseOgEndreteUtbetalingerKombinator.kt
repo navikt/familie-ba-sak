@@ -171,7 +171,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         )
 
     internal fun knyttEventueltSammenEndringerOgAndeler(endringer: Collection<EndretUtbetalingAndelMedAndelerTilkjentYtelse>) {
-        if (erFrikobletMedSikkerhetsnett) {
+        if (erFrikobletMedSikkerhetsnett()) {
             val endretUtbetalingerAndeler = endringer.map {
                 it.endretUtbetalingAndel.andelTilkjentYtelser.clear()
                 it.endretUtbetalingAndel.andelTilkjentYtelser.addAll(it.andelerTilkjentYtelse)
@@ -184,7 +184,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
     }
 
     private fun knyttEventueltSammenAndelerOgEndringer(andeler: Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>) {
-        if (erFrikobletMedSikkerhetsnett) {
+        if (erFrikobletMedSikkerhetsnett()) {
             val andelerTilkjentYtelse = andeler.map {
                 it.andel.endretUtbetalingAndeler.clear()
                 it.andel.endretUtbetalingAndeler.addAll(it.endreteUtbetalinger)
@@ -196,7 +196,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         }
     }
 
-    private val erFrikobletMedSikkerhetsnett =
+    private fun erFrikobletMedSikkerhetsnett() =
         featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) &&
             !featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT)
 }
