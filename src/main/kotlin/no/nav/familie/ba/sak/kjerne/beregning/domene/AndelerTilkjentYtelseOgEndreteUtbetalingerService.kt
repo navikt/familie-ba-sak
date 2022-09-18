@@ -12,6 +12,71 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
+@Service
+class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val featureToggleService: FeatureToggleService
+) {
+    fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: Long) =
+        lagKombinator(behandlingId).lagAndelerMedEndringer()
+            .also { knyttEventueltSammenAndelerOgEndringer(it) }
+
+    fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long) =
+        lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
+            .also { knyttEventueltSammenEndringerOgAndeler(it) }
+
+    fun finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId: Long) =
+        lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
+            .map {
+                it.utenAndelerVedValideringsfeil {
+                    validerÅrsak(
+                        it.årsak,
+                        it.endretUtbetalingAndel,
+                        vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
+                    )
+                }
+            }.also { knyttEventueltSammenEndringerOgAndeler(it) }
+
+    private fun lagKombinator(behandlingId: Long) =
+        AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId),
+            endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
+            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
+        )
+
+    internal fun knyttEventueltSammenEndringerOgAndeler(endringer: Collection<EndretUtbetalingAndelMedAndelerTilkjentYtelse>) {
+        if (erFrikobletMedSikkerhetsnett()) {
+            val endretUtbetalingerAndeler = endringer.map {
+                it.endretUtbetalingAndel.andelTilkjentYtelser.clear()
+                it.endretUtbetalingAndel.andelTilkjentYtelser.addAll(it.andelerTilkjentYtelse)
+
+                it.endretUtbetalingAndel
+            }
+
+            endretUtbetalingAndelRepository.saveAllAndFlush(endretUtbetalingerAndeler)
+        }
+    }
+
+    private fun knyttEventueltSammenAndelerOgEndringer(andeler: Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>) {
+        if (erFrikobletMedSikkerhetsnett()) {
+            val andelerTilkjentYtelse = andeler.map {
+                it.andel.endretUtbetalingAndeler.clear()
+                it.andel.endretUtbetalingAndeler.addAll(it.endreteUtbetalinger)
+
+                it.andel
+            }
+
+            andelTilkjentYtelseRepository.saveAllAndFlush(andelerTilkjentYtelse)
+        }
+    }
+
+    private fun erFrikobletMedSikkerhetsnett() =
+        featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) &&
+            !featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT)
+}
+
 private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
     private val andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     private val endretUtbetalingAndeler: Collection<EndretUtbetalingAndel>,
@@ -134,71 +199,6 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
         } else {
             endretUtbetalingAndel.andelTilkjentYtelser
         }
-}
-
-@Service
-class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val featureToggleService: FeatureToggleService
-) {
-    fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: Long) =
-        lagKombinator(behandlingId).lagAndelerMedEndringer()
-            .also { knyttEventueltSammenAndelerOgEndringer(it) }
-
-    fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long) =
-        lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
-            .also { knyttEventueltSammenEndringerOgAndeler(it) }
-
-    fun finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId: Long) =
-        lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
-            .map {
-                it.utenAndelerVedValideringsfeil {
-                    validerÅrsak(
-                        it.årsak,
-                        it.endretUtbetalingAndel,
-                        vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
-                    )
-                }
-            }.also { knyttEventueltSammenEndringerOgAndeler(it) }
-
-    private fun lagKombinator(behandlingId: Long) =
-        AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId),
-            endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
-        )
-
-    internal fun knyttEventueltSammenEndringerOgAndeler(endringer: Collection<EndretUtbetalingAndelMedAndelerTilkjentYtelse>) {
-        if (erFrikobletMedSikkerhetsnett()) {
-            val endretUtbetalingerAndeler = endringer.map {
-                it.endretUtbetalingAndel.andelTilkjentYtelser.clear()
-                it.endretUtbetalingAndel.andelTilkjentYtelser.addAll(it.andelerTilkjentYtelse)
-
-                it.endretUtbetalingAndel
-            }
-
-            endretUtbetalingAndelRepository.saveAllAndFlush(endretUtbetalingerAndeler)
-        }
-    }
-
-    private fun knyttEventueltSammenAndelerOgEndringer(andeler: Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>) {
-        if (erFrikobletMedSikkerhetsnett()) {
-            val andelerTilkjentYtelse = andeler.map {
-                it.andel.endretUtbetalingAndeler.clear()
-                it.andel.endretUtbetalingAndeler.addAll(it.endreteUtbetalinger)
-
-                it.andel
-            }
-
-            andelTilkjentYtelseRepository.saveAllAndFlush(andelerTilkjentYtelse)
-        }
-    }
-
-    private fun erFrikobletMedSikkerhetsnett() =
-        featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) &&
-            !featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT)
 }
 
 private fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.utenAndelerVedValideringsfeil(
