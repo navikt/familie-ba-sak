@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
 
 @Service
@@ -19,16 +20,20 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val featureToggleService: FeatureToggleService
 ) {
+    @Transactional
     fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: Long) =
-        lagKombinator(behandlingId).lagAndelerMedEndringer()
+        lagKombinator(behandlingId)
+            .lagAndelerMedEndringer()
             .also { knyttEventueltSammenAndelerOgEndringer(it) }
 
+    @Transactional
     fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long) =
-        lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
-            .also { knyttEventueltSammenEndringerOgAndeler(it) }
+        lagKombinator(behandlingId)
+            .also { knyttEventueltSammenAndelerOgEndringer(it.lagAndelerMedEndringer()) }
+            .lagEndreteUtbetalingMedAndeler()
 
     fun finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId: Long) =
-        lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
+        finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
             .map {
                 it.utenAndelerVedValideringsfeil {
                     validerÅrsak(
@@ -37,7 +42,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
                         vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
                     )
                 }
-            }.also { knyttEventueltSammenEndringerOgAndeler(it) }
+            } // Fjerner andeler som et signal om at en endring ikke validerer. Trenger ikke å oppdatere sammenknytning
 
     private fun lagKombinator(behandlingId: Long) =
         AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
@@ -46,35 +51,19 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
         )
 
-    internal fun knyttEventueltSammenEndringerOgAndeler(endringer: Collection<EndretUtbetalingAndelMedAndelerTilkjentYtelse>) {
-        if (erFrikobletMedSikkerhetsnett()) {
-            val endretUtbetalingerAndeler = endringer.map {
-                it.endretUtbetalingAndel.andelTilkjentYtelser.clear()
-                it.endretUtbetalingAndel.andelTilkjentYtelser.addAll(it.andelerTilkjentYtelse)
-
-                it.endretUtbetalingAndel
-            }
-
-            endretUtbetalingAndelRepository.saveAllAndFlush(endretUtbetalingerAndeler)
-        }
-    }
-
     private fun knyttEventueltSammenAndelerOgEndringer(andeler: Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>) {
-        if (erFrikobletMedSikkerhetsnett()) {
+        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) &&
+            !featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT)
+        ) {
             val andelerTilkjentYtelse = andeler.map {
                 it.andel.endretUtbetalingAndeler.clear()
                 it.andel.endretUtbetalingAndeler.addAll(it.endreteUtbetalinger)
 
                 it.andel
             }
-
             andelTilkjentYtelseRepository.saveAllAndFlush(andelerTilkjentYtelse)
         }
     }
-
-    private fun erFrikobletMedSikkerhetsnett() =
-        featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) &&
-            !featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT)
 }
 
 private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
