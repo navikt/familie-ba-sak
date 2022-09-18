@@ -21,16 +21,16 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
     private val featureToggleService: FeatureToggleService
 ) {
     @Transactional
-    fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: Long) =
-        lagKombinator(behandlingId)
-            .lagAndelerMedEndringer()
-            .also { knyttEventueltSammenAndelerOgEndringer(it) }
+    fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: Long): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
+        knyttEventueltSammenAndelerOgEndringer(behandlingId)
+        return lagKombinator(behandlingId).lagAndelerMedEndringer()
+    }
 
     @Transactional
-    fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long) =
-        lagKombinator(behandlingId)
-            .also { knyttEventueltSammenAndelerOgEndringer(it.lagAndelerMedEndringer()) }
-            .lagEndreteUtbetalingMedAndeler()
+    fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
+        knyttEventueltSammenAndelerOgEndringer(behandlingId)
+        return lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
+    }
 
     fun finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId: Long) =
         finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
@@ -51,11 +51,11 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
         )
 
-    private fun knyttEventueltSammenAndelerOgEndringer(andeler: Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>) {
+    private fun knyttEventueltSammenAndelerOgEndringer(behandlingId: Long) {
         if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) &&
             !featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT)
         ) {
-            val andelerTilkjentYtelse = andeler.map {
+            val andelerTilkjentYtelse = lagKombinator(behandlingId).lagAndelerMedEndringer().map {
                 it.andel.endretUtbetalingAndeler.clear()
                 it.andel.endretUtbetalingAndeler.addAll(it.endreteUtbetalinger)
 
