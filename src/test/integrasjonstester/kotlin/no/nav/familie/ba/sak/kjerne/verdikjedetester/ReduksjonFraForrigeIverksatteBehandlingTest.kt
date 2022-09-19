@@ -5,22 +5,16 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -30,11 +24,9 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpHeaders
 import java.time.LocalDate
 
 class ReduksjonFraForrigeIverksatteBehandlingTest(
@@ -139,10 +131,16 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 restRegistrerSøknad = restRegistrerSøknad
             )
 
-        return fullførRestenAvBehandlingen(
+        return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
             restUtvidetBehandling = restUtvidetBehandling.data!!,
             personScenario = personScenario,
-            fagsak = fagsak
+            fagsak = fagsak,
+            familieBaSakKlient = familieBaSakKlient(),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            stegService = stegService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            lagToken = ::token
         )
     }
 
@@ -166,96 +164,16 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 behandlingÅrsak = behandlingÅrsak
             )
 
-        return fullførRestenAvBehandlingen(
+        return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
             restUtvidetBehandling = restUtvidetBehandling.data!!,
             personScenario = personScenario,
-            fagsak = fagsak
-        )
-    }
-
-    fun fullførRestenAvBehandlingen(
-        restUtvidetBehandling: RestUtvidetBehandling,
-        personScenario: RestScenario,
-        fagsak: RestMinimalFagsak
-    ): Behandling {
-        settAlleVilkårTilOppfylt(
-            restUtvidetBehandling = restUtvidetBehandling,
-            barnFødselsdato = barnFødselsdato
-        )
-
-        familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.behandlingId
-        )
-
-        val restUtvidetBehandlingEtterBehandlingsResultat =
-            familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = restUtvidetBehandling.behandlingId
-            )
-
-        val restUtvidetBehandlingEtterVurderTilbakekreving =
-            familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
-                restUtvidetBehandlingEtterBehandlingsResultat.data!!.behandlingId,
-                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
-            )
-
-        val utvidetVedtaksperiodeMedBegrunnelser =
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
-                .first()
-
-        familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
-            restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.map { it.toString() }
-            )
-        )
-        val restUtvidetBehandlingEtterSendTilBeslutter =
-            familieBaSakKlient().sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId)
-
-        familieBaSakKlient().iverksettVedtak(
-            behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
-            restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                Beslutning.GODKJENT
-            ),
-            beslutterHeaders = HttpHeaders().apply {
-                setBearerAuth(
-                    token(
-                        mapOf(
-                            "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
-                            "azp" to "azp-test",
-                            "name" to "Mock McMockface Beslutter",
-                            "NAVident" to "Z0000"
-                        )
-                    )
-                )
-            }
-        )
-        return håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)!!,
-            søkerFnr = personScenario.søker.ident!!,
+            fagsak = fagsak,
+            familieBaSakKlient = familieBaSakKlient(),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            lagToken = ::token
         )
-    }
-
-    fun settAlleVilkårTilOppfylt(restUtvidetBehandling: RestUtvidetBehandling, barnFødselsdato: LocalDate) {
-        restUtvidetBehandling.personResultater.forEach { restPersonResultat ->
-            restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
-                familieBaSakKlient().putVilkår(
-                    behandlingId = restUtvidetBehandling.behandlingId,
-                    vilkårId = it.id,
-                    restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = restPersonResultat.personIdent,
-                        vilkårResultater = listOf(
-                            it.copy(
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = barnFødselsdato
-                            )
-                        )
-                    )
-                )
-            }
-        }
     }
 }
