@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
@@ -60,7 +61,7 @@ class IverksettMotOppdrag(
         behandling: Behandling,
         data: IverksettingTaskDTO
     ): StegType {
-        if (false /*featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)*/) {
+        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
             val tilkjentYtelse = utbetalingsoppdragService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
                 vedtak = vedtakService.hent(data.vedtaksId),
                 saksbehandlerId = data.saksbehandlerId
