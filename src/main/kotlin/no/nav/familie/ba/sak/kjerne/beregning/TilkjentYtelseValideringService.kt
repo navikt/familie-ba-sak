@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.finnAktørIderMedUgyldigEtterbetalingsperiode
@@ -48,6 +49,7 @@ class TilkjentYtelseValideringService(
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
         if (tilkjentYtelse.harAndelerTilkjentYtelseMedSammeOffset()) {
+            secureLogger.info("Behandling har flere andeler med likt offset: ${tilkjentYtelse.andelerTilkjentYtelse}")
             throw Feil("Behandling $behandlingId har andel tilkjent ytelse med offset lik en annen andel i behandlingen.")
         }
     }
