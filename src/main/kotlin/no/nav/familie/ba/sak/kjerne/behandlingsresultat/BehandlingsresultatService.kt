@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
@@ -97,7 +98,7 @@ class BehandlingsresultatService(
             } ?: emptyList()
         )
 
-        validerYtelsePersoner(behandlingId = behandling.id, ytelsePersoner = ytelsePersonerMedResultat)
+        validerYtelsePersoner(behandling, ytelsePersoner = ytelsePersonerMedResultat)
 
         vilkårsvurdering.let {
             vilkårsvurderingService.oppdater(vilkårsvurdering)
@@ -112,18 +113,33 @@ class BehandlingsresultatService(
         return behandlingsresultat
     }
 
-    private fun validerYtelsePersoner(behandlingId: Long, ytelsePersoner: List<YtelsePerson>) {
-        val søkerAktør = persongrunnlagService.hentSøker(behandlingId)?.aktør
-            ?: throw Feil("Fant ikke søker på behandling")
-        if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.aktør != søkerAktør }) {
-            throw Feil(
-                "Barn kan ikke ha ytelsetype utvidet"
-            )
-        }
-        if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.aktør == søkerAktør }) {
-            throw Feil(
-                "Søker kan ikke ha ytelsetype ordinær"
-            )
+    private fun validerYtelsePersoner(behandling: Behandling, ytelsePersoner: List<YtelsePerson>) {
+        when (behandling.fagsak.type) {
+            FagsakType.NORMAL -> {
+                val søkerAktør = persongrunnlagService.hentSøker(behandling.id)?.aktør
+                    ?: throw Feil("Fant ikke søker på behandling")
+                if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.aktør != søkerAktør }) {
+                    throw Feil(
+                        "Barn kan ikke ha ytelsetype utvidet"
+                    )
+                }
+                if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.aktør == søkerAktør }) {
+                    throw Feil(
+                        "Søker kan ikke ha ytelsetype ordinær"
+                    )
+                }
+            }
+            FagsakType.INSTITUSJON -> {
+                val ytelseType = ytelsePersoner.single().ytelseType
+                if (ytelseType != YtelseType.ORDINÆR_BARNETRYGD) {
+                    throw Feil(
+                        "Kan ikke ha ytelsetype $ytelseType på fagsaktype INSTITUSJON"
+                    )
+                }
+            }
+            FagsakType.BARN_ENSLIG_MINDREÅRIG -> {
+                ytelsePersoner.single()
+            }
         }
     }
 
