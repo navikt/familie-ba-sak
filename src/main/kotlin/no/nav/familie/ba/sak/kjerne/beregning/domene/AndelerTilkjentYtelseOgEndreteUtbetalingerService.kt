@@ -1,14 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -16,110 +10,26 @@ import java.time.YearMonth
 @Service
 class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val featureToggleService: FeatureToggleService
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
 ) {
     @Transactional
     fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: Long): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
-        knyttEventueltSammenAndelerOgEndringer(behandlingId)
-        return lagKombinator(behandlingId).lagAndelerMedEndringer()
+        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+            .map { AndelTilkjentYtelseMedEndreteUtbetalinger(it) }
     }
 
     @Transactional
     fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
-        knyttEventueltSammenAndelerOgEndringer(behandlingId)
-        return lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
+        return endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
+            .map { EndretUtbetalingAndelMedAndelerTilkjentYtelse(it) }
     }
 
     fun finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId: Long) =
         finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
-            .map {
-                it.utenAndelerVedValideringsfeil {
-                    validerÅrsak(
-                        it.årsak,
-                        it.endretUtbetalingAndel,
-                        vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
-                    )
-                }
-            } // Fjerner andeler som et signal om at en endring ikke validerer. Trenger ikke å oppdatere sammenknytning
-
-    private fun lagKombinator(behandlingId: Long) =
-        AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId),
-            endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
-        )
-
-    private fun knyttEventueltSammenAndelerOgEndringer(behandlingId: Long) {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) &&
-            !featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT)
-        ) {
-            val andelerTilkjentYtelse = lagKombinator(behandlingId).lagAndelerMedEndringer().map {
-                it.andel.endretUtbetalingAndeler.clear()
-                it.andel.endretUtbetalingAndeler.addAll(it.endreteUtbetalinger)
-
-                it.andel
-            }
-            andelTilkjentYtelseRepository.saveAllAndFlush(andelerTilkjentYtelse)
-        }
-    }
-}
-
-private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
-    private val andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
-    private val endretUtbetalingAndeler: Collection<EndretUtbetalingAndel>,
-    private val brukFrikobleteAndelerOgEndringer: Boolean?
-) {
-    fun lagAndelerMedEndringer(): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
-        return andelerTilkjentYtelse.map { lagAndelMedEndringer(it) }
-    }
-
-    fun lagEndreteUtbetalingMedAndeler(): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
-        return endretUtbetalingAndeler.map { lagEndringMedAndeler(it) }
-    }
-
-    private fun lagAndelMedEndringer(andelTilkjentYtelse: AndelTilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
-        val endreteUtbetalinger = endretUtbetalingAndeler
-            .filter { overlapper(andelTilkjentYtelse, it) }
-
-        return AndelTilkjentYtelseMedEndreteUtbetalinger(
-            andelTilkjentYtelse,
-            endreteUtbetalinger,
-            brukFrikobleteAndelerOgEndringer
-        )
-    }
-
-    private fun lagEndringMedAndeler(endretUtbetalingAndel: EndretUtbetalingAndel): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
-        val andeler = andelerTilkjentYtelse
-            .filter { overlapper(it, endretUtbetalingAndel) }
-
-        return EndretUtbetalingAndelMedAndelerTilkjentYtelse(
-            endretUtbetalingAndel,
-            andeler,
-            brukFrikobleteAndelerOgEndringer
-        ).utenAndelerVedValideringsfeil {
-            validerPeriodeInnenforTilkjentytelse(
-                endretUtbetalingAndel,
-                andelerTilkjentYtelse
-            )
-        }
-    }
-
-    private fun overlapper(
-        andelTilkjentYtelse: AndelTilkjentYtelse,
-        endretUtbetalingAndel: EndretUtbetalingAndel
-    ): Boolean {
-        return andelTilkjentYtelse.aktør == endretUtbetalingAndel.person?.aktør &&
-            endretUtbetalingAndel.fom != null && endretUtbetalingAndel.tom != null &&
-            endretUtbetalingAndel.periode.overlapperHeltEllerDelvisMed(andelTilkjentYtelse.periode)
-    }
 }
 
 data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
-    private val andelTilkjentYtelse: AndelTilkjentYtelse,
-    private val endreteUtbetalingerAndeler: Collection<EndretUtbetalingAndel>,
-    private val brukFrikobleteAndelerOgEndringer: Boolean?
+    private val andelTilkjentYtelse: AndelTilkjentYtelse
 ) {
     val periodeOffset get() = andelTilkjentYtelse.periodeOffset
     val sats get() = andelTilkjentYtelse.sats
@@ -133,9 +43,7 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     fun overlapperPeriode(månedPeriode: MånedPeriode) = andelTilkjentYtelse.overlapperPeriode(månedPeriode)
     fun medTom(tom: YearMonth): AndelTilkjentYtelseMedEndreteUtbetalinger {
         return AndelTilkjentYtelseMedEndreteUtbetalinger(
-            andelTilkjentYtelse.copy(stønadTom = tom),
-            endreteUtbetalinger,
-            brukFrikobleteAndelerOgEndringer
+            andelTilkjentYtelse.copy(stønadTom = tom)
         )
     }
 
@@ -144,28 +52,18 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     val prosent get() = andelTilkjentYtelse.prosent
     val andel get() = andelTilkjentYtelse
     val endreteUtbetalinger
-        get() = if (brukFrikobleteAndelerOgEndringer == null) {
-            emptyList()
-        } else if (brukFrikobleteAndelerOgEndringer) {
-            endreteUtbetalingerAndeler
-        } else {
-            andel.endretUtbetalingAndeler
-        }
+        get() = andel.endretUtbetalingAndeler
 
     companion object {
         fun utenEndringer(andelTilkjentYtelse: AndelTilkjentYtelse) =
             AndelTilkjentYtelseMedEndreteUtbetalinger(
-                andelTilkjentYtelse,
-                emptyList(),
-                null
+                andelTilkjentYtelse
             )
     }
 }
 
 data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
-    val endretUtbetalingAndel: EndretUtbetalingAndel,
-    private val andeler: List<AndelTilkjentYtelse>,
-    internal val brukFrikobleteAndelerOgEndringer: Boolean?
+    val endretUtbetalingAndel: EndretUtbetalingAndel
 ) {
     fun overlapperMed(månedPeriode: MånedPeriode) = endretUtbetalingAndel.overlapperMed(månedPeriode)
     fun årsakErDeltBosted() = endretUtbetalingAndel.årsakErDeltBosted()
@@ -182,32 +80,14 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val fom get() = endretUtbetalingAndel.fom
     val tom get() = endretUtbetalingAndel.tom
     val andelerTilkjentYtelse
-        get() = if (brukFrikobleteAndelerOgEndringer == null) {
-            emptyList()
-        } else if (brukFrikobleteAndelerOgEndringer) {
-            andeler
-        } else {
-            endretUtbetalingAndel.andelTilkjentYtelser
-        }
+        get() = endretUtbetalingAndel.andelTilkjentYtelser
 }
 
-private fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.utenAndelerVedValideringsfeil(
-    validator: () -> Unit
-) = if (brukFrikobleteAndelerOgEndringer == true) {
-    try {
-        validator()
-        this
-    } catch (e: Throwable) {
-        this.copy(andeler = emptyList())
-    }
-} else {
-    this
-}
-
+/**
+ * Frempek på en endring som kommer. Men gjør ingenting nå
+ */
 fun AndelTilkjentYtelse.medEndring(
     endretUtbetalingAndelMedAndelerTilkjentYtelse: EndretUtbetalingAndelMedAndelerTilkjentYtelse
 ) = AndelTilkjentYtelseMedEndreteUtbetalinger(
-    this,
-    listOf(endretUtbetalingAndelMedAndelerTilkjentYtelse.endretUtbetalingAndel),
-    brukFrikobleteAndelerOgEndringer = endretUtbetalingAndelMedAndelerTilkjentYtelse.brukFrikobleteAndelerOgEndringer
+    this
 )

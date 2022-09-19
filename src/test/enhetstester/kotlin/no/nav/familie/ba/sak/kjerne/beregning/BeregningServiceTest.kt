@@ -74,9 +74,7 @@ class BeregningServiceTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService = AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         andelTilkjentYtelseRepository,
-        endretUtbetalingAndelRepository,
-        vilkårsvurderingRepository,
-        featureToggleService
+        endretUtbetalingAndelRepository
     )
 
     private lateinit var beregningService: BeregningService
