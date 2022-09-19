@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -38,9 +37,10 @@ class BehandlingsresultatService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
 
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
-        val forrigeTilkjentYtelse: TilkjentYtelse? =
-            forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
+        val forrigeAndelerTillkjentYtelse = forrigeBehandling?.let {
+            beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = it.id)
+        } ?: emptyList()
 
         val barna = persongrunnlagService.hentBarna(behandling)
         val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
@@ -74,8 +74,8 @@ class BehandlingsresultatService(
             BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(
                 person = it,
                 personerFremstiltKravFor = personerFremstiltKravFor,
-                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
-                tilkjentYtelse = tilkjentYtelse,
+                andelerFraForrigeTilkjentYtelse = forrigeAndelerTillkjentYtelse,
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
                 erEksplisittAvslag = vilkårsvurdering.personResultater.find { personResultat -> personResultat.aktør == it.aktør }
                     ?.harEksplisittAvslag()
                     ?: false

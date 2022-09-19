@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import io.mockk.Called
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -10,6 +12,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -26,13 +29,25 @@ internal class UtbetalingsoppdragServiceTest {
     val økonomiKlient = mockk<ØkonomiKlient> {
         every { iverksettOppdrag(any()) } returns ""
     }
+    val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService> {
+        every { validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(any()) } just runs
+    }
     val beregningService = mockk<BeregningService> {
         every { hentTilkjentYtelseForBehandling(any()) } returns mockk()
         every { hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(any()) } returns mockk()
         every { lagreTilkjentYtelseMedOppdaterteAndeler(any()) } returns mockk()
         every { populerTilkjentYtelse(any(), any()) } returns mockk()
     }
-    val service = spyk(UtbetalingsoppdragService(mockk(), økonomiKlient, beregningService, mockk(), mockk()))
+    val service = spyk(
+        UtbetalingsoppdragService(
+            mockk(),
+            økonomiKlient,
+            beregningService,
+            mockk(),
+            mockk(),
+            tilkjentYtelseValideringService
+        )
+    )
 
     @Test
     fun `skal ikke sende til oppdrag hvis det ikke fins utbetalingsperioder`() {

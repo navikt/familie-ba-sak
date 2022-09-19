@@ -165,7 +165,9 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            mockk(),
+            mockk()
         ) // => env.erDev() = env.erE2E() = false
     }
 
@@ -769,7 +771,9 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            mockk(),
+            mockk()
         )
 
         val aktivFnr = randomFnr()
@@ -805,7 +809,9 @@ class MigreringServiceTest(
             vedtakService = mockk(),
             vilkårService = mockk(),
             vilkårsvurderingService = mockk(),
-            migreringRestClient = mockk(relaxed = true)
+            migreringRestClient = mockk(relaxed = true),
+            mockk(),
+            mockk()
         )
 
         val ident = randomFnr()

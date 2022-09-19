@@ -85,13 +85,19 @@ class StønadsstatistikkService(
         return kompetanser.map { kompetanse ->
             Kompetanse(
                 barnsIdenter = kompetanse.barnAktører.map { aktør -> aktør.aktivFødselsnummer() },
-                annenForeldersAktivitet = AnnenForeldersAktivitet.valueOf(kompetanse.annenForeldersAktivitet!!.name),
+                annenForeldersAktivitet = if (kompetanse.annenForeldersAktivitet != null) {
+                    AnnenForeldersAktivitet.valueOf(
+                        kompetanse.annenForeldersAktivitet.name
+                    )
+                } else {
+                    null
+                },
                 annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
                 barnetsBostedsland = kompetanse.barnetsBostedsland,
                 fom = kompetanse.fom!!,
                 tom = kompetanse.tom,
                 resultat = KompetanseResultat.valueOf(kompetanse.resultat!!.name),
-                sokersaktivitet = SøkersAktivitet.valueOf(kompetanse.søkersAktivitet!!.name)
+                sokersaktivitet = if (kompetanse.søkersAktivitet != null) SøkersAktivitet.valueOf(kompetanse.søkersAktivitet.name) else null
             )
         }
     }
@@ -103,17 +109,18 @@ class StønadsstatistikkService(
     }
 
     private fun hentUtbetalingsperioderV2(behandlingId: Long): List<UtbetalingsperiodeDVHV2> {
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
 
-        if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return emptyList()
+        if (andelerTilkjentYtelse.isEmpty()) return emptyList()
 
-        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelse.andelerTilkjentYtelse)
+        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
 
         return utbetalingsPerioder.toSegments()
             .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
             .map { segment ->
-                val andelerForSegment = tilkjentYtelse.andelerTilkjentYtelse.filter {
+                val andelerForSegment = andelerTilkjentYtelse.filter {
                     segment.localDateInterval.overlaps(
                         LocalDateInterval(
                             it.stønadFom.førsteDagIInneværendeMåned(),
@@ -124,17 +131,19 @@ class StønadsstatistikkService(
                 mapTilUtbetalingsperiodeV2(
                     segment,
                     andelerForSegment,
-                    tilkjentYtelse.behandling,
+                    behandling,
                     persongrunnlag
                 )
             }
     }
 
     private fun utledEnsligForsørger(behandlingId: Long): Boolean {
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
-        if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return false
+        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId)
+        if (andelerTilkjentYtelse.isEmpty()) {
+            return false
+        }
 
-        return tilkjentYtelse.andelerTilkjentYtelse.find { it.type == YtelseType.UTVIDET_BARNETRYGD } != null
+        return andelerTilkjentYtelse.find { it.type == YtelseType.UTVIDET_BARNETRYGD } != null
     }
 
     private fun mapTilUtbetalingsperiodeV2(
