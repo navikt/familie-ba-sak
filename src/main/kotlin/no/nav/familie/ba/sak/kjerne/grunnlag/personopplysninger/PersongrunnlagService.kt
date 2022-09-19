@@ -14,6 +14,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
@@ -189,7 +192,10 @@ class PersongrunnlagService(
             aktør = aktør,
             personopplysningGrunnlag = personopplysningGrunnlag,
             målform = målform,
-            personType = PersonType.SØKER,
+            personType = when (behandling.fagsak.type) {
+                NORMAL -> PersonType.SØKER
+                BARN_ENSLIG_MINDREÅRIG, INSTITUSJON -> PersonType.BARN
+            },
             enkelPersonInfo = enkelPersonInfo,
             hentArbeidsforhold = behandling.skalBehandlesAutomatisk
         )
