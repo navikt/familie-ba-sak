@@ -105,14 +105,15 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             )
         }
     }
-}
 
-private fun overlapper(
-    andelTilkjentYtelse: AndelTilkjentYtelse,
-    endretUtbetalingAndel: EndretUtbetalingAndel
-): Boolean {
-    return andelTilkjentYtelse.aktør == endretUtbetalingAndel.person?.aktør &&
-        endretUtbetalingAndel.periode.overlapperHeltEllerDelvisMed(andelTilkjentYtelse.periode)
+    private fun overlapper(
+        andelTilkjentYtelse: AndelTilkjentYtelse,
+        endretUtbetalingAndel: EndretUtbetalingAndel
+    ): Boolean {
+        return andelTilkjentYtelse.aktør == endretUtbetalingAndel.person?.aktør &&
+            endretUtbetalingAndel.fom != null && endretUtbetalingAndel.tom != null &&
+            endretUtbetalingAndel.periode.overlapperHeltEllerDelvisMed(andelTilkjentYtelse.periode)
+    }
 }
 
 data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
