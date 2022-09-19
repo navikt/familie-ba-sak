@@ -37,7 +37,7 @@ class AndelTilkjentYtelseOffsetTest(
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
 
     @Test
-    fun `skal ha riktig offset for andeler når man legger til ny andel`() {
+    fun `Skal ha riktig offset for andeler når man legger til ny andel`() {
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
         val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
         val behandling1 = fullførBehandling(
@@ -56,10 +56,10 @@ class AndelTilkjentYtelseOffsetTest(
         val andelerBehandling1 = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling1.id)
         val offsetBehandling1 = andelerBehandling1.mapNotNull { it.periodeOffset }.map { it.toInt() }.sorted()
 
-        val andelerBehanlding2 = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling2.id)
-        val offsetBehandling2 = andelerBehanlding2.mapNotNull { it.periodeOffset }.map { it.toInt() }.sorted()
+        val andelerBehandling2 = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling2.id)
+        val offsetBehandling2 = andelerBehandling2.mapNotNull { it.periodeOffset }.map { it.toInt() }.sorted()
 
-        val nyAndelIBehandling2 = andelerBehanlding2.single { it.erSmåbarnstillegg() }
+        val nyAndelIBehandling2 = andelerBehandling2.single { it.erSmåbarnstillegg() }
         val forventetOffsetNyAndel = offsetBehandling1.max() + 1
 
         Assertions.assertEquals(forventetOffsetNyAndel, nyAndelIBehandling2.periodeOffset?.toInt())
