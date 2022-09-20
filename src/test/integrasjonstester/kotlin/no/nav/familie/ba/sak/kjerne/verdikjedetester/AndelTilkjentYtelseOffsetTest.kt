@@ -12,8 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -22,76 +21,51 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.time.YearMonth
 
-class AutobrevSmåbarnstilleggOpphørTest(
+class AndelTilkjentYtelseOffsetTest(
     @Autowired private val fagsakService: FagsakService,
-    @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val efSakRestClient: EfSakRestClient,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    @Autowired private val beregningService: BeregningService
 ) : AbstractVerdikjedetest() {
-
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
 
     @Test
-    fun `Plukk riktige behandlinger - skal være nyeste, løpende med opphør i småbarnstillegg for valgt måned`() {
+    fun `Skal ha riktig offset for andeler når man legger til ny andel`() {
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
         val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
-        fullførBehandling(
-            fagsak = fagsak1,
-            personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato
-        )
-        val fagsak1behandling2: Behandling = fullførRevurderingMedOvergangstonad(
-            fagsak = fagsak1,
-            personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato
-        )
-        startEnRevurderingNyeOpplysningerMenIkkeFullfør(
+        val behandling1 = fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato
         )
 
-        val personScenario2: RestScenario = lagScenario(barnFødselsdato)
-        val fagsak2: RestMinimalFagsak = lagFagsak(personScenario = personScenario2)
-        fullførBehandling(
-            fagsak = fagsak2,
-            personScenario = personScenario2,
-            barnFødselsdato = barnFødselsdato
-        )
-        val fagsak2behandling2: Behandling = fullførRevurderingMedOvergangstonad(
-            fagsak = fagsak2,
-            personScenario = personScenario2,
+        // Legger til småbarnstillegg på søker
+        val behandling2: Behandling = fullførRevurderingMedOvergangstonad(
+            fagsak = fagsak1,
+            personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato
         )
 
-        val andelerForSmåbarnstilleggFagsak1Behandling2 =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = fagsak2behandling2.id)
-        val førsteDagIStønadTomMåned = YearMonth.now().minusMonths(1)
-        assertEquals(
-            førsteDagIStønadTomMåned,
-            andelerForSmåbarnstilleggFagsak1Behandling2.maxByOrNull {
-                it.stønadTom == YearMonth.now().minusMonths(1) && it.erSmåbarnstillegg()
-            }?.stønadTom
-        )
+        val andelerBehandling1 = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling1.id)
+        val offsetBehandling1 = andelerBehandling1.mapNotNull { it.periodeOffset }.map { it.toInt() }.sorted()
 
-        val fagsaker: List<Long> =
-            fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
-                iverksatteLøpendeBehandlinger = listOf(fagsak1behandling2.id, fagsak2behandling2.id)
-            )
+        val andelerBehandling2 = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling2.id)
+        val offsetBehandling2 = andelerBehandling2.mapNotNull { it.periodeOffset }.map { it.toInt() }.sorted()
 
-        assertTrue(fagsaker.containsAll(listOf(fagsak2.id)))
-        assertFalse(fagsaker.contains(fagsak1.id))
+        val nyAndelIBehandling2 = andelerBehandling2.single { it.erSmåbarnstillegg() }
+        val forventetOffsetNyAndel = offsetBehandling1.max() + 1
+
+        Assertions.assertEquals(forventetOffsetNyAndel, nyAndelIBehandling2.periodeOffset?.toInt())
+
+        // Ønsker at uendrede andeler skal beholde samme offset
+        Assertions.assertEquals(offsetBehandling1 + forventetOffsetNyAndel, offsetBehandling2)
     }
 
     fun lagScenario(barnFødselsdato: LocalDate): RestScenario = mockServerKlient().lagScenario(
@@ -195,34 +169,5 @@ class AutobrevSmåbarnstilleggOpphørTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             lagToken = ::token
         )
-    }
-
-    private fun startEnRevurderingNyeOpplysningerMenIkkeFullfør(
-        fagsak: RestMinimalFagsak,
-        personScenario: RestScenario,
-        barnFødselsdato: LocalDate
-    ): Behandling {
-        val behandlingType = BehandlingType.REVURDERING
-        val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
-
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
-            perioder = listOf(
-                PeriodeOvergangsstønad(
-                    personIdent = personScenario.søker.ident!!,
-                    fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
-                )
-            )
-        )
-
-        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
-            familieBaSakKlient().opprettBehandling(
-                søkersIdent = fagsak.søkerFødselsnummer,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-                behandlingType = behandlingType,
-                behandlingÅrsak = behandlingÅrsak
-            )
-        return behandlingHentOgPersisterService.hent(restUtvidetBehandling.data!!.behandlingId)
     }
 }

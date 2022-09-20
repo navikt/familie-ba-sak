@@ -3,15 +3,31 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalpostDokument
+import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
+import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.kontrakter.ba.infotrygd.Barn
 import no.nav.familie.kontrakter.ba.infotrygd.Delytelse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import org.springframework.http.HttpHeaders
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -98,4 +114,97 @@ fun lagInfotrygdSakMedSmåbarnstillegg(
         valg = "UT",
         undervalg = "EF"
     )
+}
+
+fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
+    restUtvidetBehandling: RestUtvidetBehandling,
+    personScenario: RestScenario,
+    fagsak: RestMinimalFagsak,
+    familieBaSakKlient: FamilieBaSakKlient,
+    lagToken: (Map<String, Any>) -> String,
+    behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    fagsakService: FagsakService,
+    vedtakService: VedtakService,
+    stegService: StegService
+): Behandling {
+    settAlleVilkårTilOppfylt(
+        restUtvidetBehandling = restUtvidetBehandling,
+        barnFødselsdato = personScenario.barna.maxOf { LocalDate.parse(it.fødselsdato) },
+        familieBaSakKlient = familieBaSakKlient
+    )
+
+    familieBaSakKlient.validerVilkårsvurdering(
+        behandlingId = restUtvidetBehandling.behandlingId
+    )
+
+    val restUtvidetBehandlingEtterBehandlingsResultat =
+        familieBaSakKlient.behandlingsresultatStegOgGåVidereTilNesteSteg(
+            behandlingId = restUtvidetBehandling.behandlingId
+        )
+
+    val restUtvidetBehandlingEtterVurderTilbakekreving =
+        familieBaSakKlient.lagreTilbakekrevingOgGåVidereTilNesteSteg(
+            restUtvidetBehandlingEtterBehandlingsResultat.data!!.behandlingId,
+            RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
+        )
+
+    val utvidetVedtaksperiodeMedBegrunnelser =
+        restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
+            .first()
+
+    familieBaSakKlient.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+        vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
+        restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+            standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.map { it }
+        )
+    )
+    val restUtvidetBehandlingEtterSendTilBeslutter =
+        familieBaSakKlient.sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId)
+
+    familieBaSakKlient.iverksettVedtak(
+        behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
+        restBeslutningPåVedtak = RestBeslutningPåVedtak(
+            Beslutning.GODKJENT
+        ),
+        beslutterHeaders = HttpHeaders().apply {
+            setBearerAuth(
+                lagToken(
+                    mapOf(
+                        "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
+                        "azp" to "azp-test",
+                        "name" to "Mock McMockface Beslutter",
+                        "NAVident" to "Z0000"
+                    )
+                )
+            )
+        }
+    )
+    return håndterIverksettingAvBehandling(
+        behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)!!,
+        søkerFnr = personScenario.søker.ident!!,
+        fagsakService = fagsakService,
+        vedtakService = vedtakService,
+        stegService = stegService
+    )
+}
+
+fun settAlleVilkårTilOppfylt(restUtvidetBehandling: RestUtvidetBehandling, barnFødselsdato: LocalDate, familieBaSakKlient: FamilieBaSakKlient) {
+    restUtvidetBehandling.personResultater.forEach { restPersonResultat ->
+        restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
+            familieBaSakKlient.putVilkår(
+                behandlingId = restUtvidetBehandling.behandlingId,
+                vilkårId = it.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = restPersonResultat.personIdent,
+                    vilkårResultater = listOf(
+                        it.copy(
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = barnFødselsdato
+                        )
+                    )
+                )
+            )
+        }
+    }
 }

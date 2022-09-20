@@ -67,7 +67,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     override fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long {
         val vedtakForDVHV2Melding =
             kafkaObjectMapper.writeValueAsString(vedtakV2)
-        val response = kafkaAivenTemplate.send(VEDTAKV2_TOPIC, vedtakV2.funksjonellId!!, vedtakForDVHV2Melding).get()
+        val response = kafkaAivenTemplate.send(VEDTAKV2_TOPIC, vedtakV2.funksjonellId, vedtakForDVHV2Melding).get()
         logger.info("$VEDTAKV2_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         vedtakV2Counter.increment()
         return response.recordMetadata.offset()
@@ -169,10 +169,10 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 class MockKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) :
     KafkaProducer {
 
-    override fun sendMessageForTopicVedtakV2(vedtak: VedtakDVHV2): Long {
-        logger.info("Skipper sending av vedtakV2 for ${vedtak.behandlingsId} fordi kafka Aiven for DVH V2 ikke er enablet")
+    override fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long {
+        logger.info("Skipper sending av vedtakV2 for ${vedtakV2.behandlingsId} fordi kafka Aiven for DVH V2 ikke er enablet")
 
-        sendteMeldinger["vedtakV2-${vedtak.behandlingsId}"] = vedtak
+        sendteMeldinger["vedtakV2-${vedtakV2.behandlingsId}"] = vedtakV2
         return 0
     }
 

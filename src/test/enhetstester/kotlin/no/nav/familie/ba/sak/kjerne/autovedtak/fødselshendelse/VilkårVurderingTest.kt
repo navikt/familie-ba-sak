@@ -269,7 +269,9 @@ class VilkårVurderingTest(
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 4)
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
+        val feilregistrertSøker = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.KVINNE)
         personopplysningGrunnlag.personer.add(barn)
+        personopplysningGrunnlag.personer.add(feilregistrertSøker)
 
         assertThrows(IllegalStateException::class.java) {
             Vilkår.BOR_MED_SØKER.vurderVilkår(barn, LocalDate.now()).resultat

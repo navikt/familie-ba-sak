@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTids
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,7 +21,6 @@ class TidslinjeController(
 ) {
 
     @GetMapping("/{behandlingId}")
-    @Unprotected
     fun hentTidslinjer(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestTidslinjer>> {
         return ResponseEntity.ok(
             success(
