@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
 import no.nav.familie.ba.sak.integrasjoner.økonomi.valider
 import no.nav.familie.ba.sak.integrasjoner.økonomi.validerOpphørsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
@@ -70,9 +71,20 @@ class NyUtbetalingsoppdragGenerator {
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
+        // Setter offsettet til andeler som ikke er endret i denne behandlingen til
+        // offsettet de hadde i forrige behandling.
+        // NB! Denne funksjonen muterer på tilkjent ytelse i databasen.
+        if (andelerTilkjentYtelse.isNotEmpty() && !forrigeAndeler.isNullOrEmpty()) {
+            ØkonomiUtils.oppdaterBeståendeAndelerMedOffset(
+                oppdaterteKjeder = kjedeinndelteAndeler(andelerTilkjentYtelse),
+                forrigeKjeder = kjedeinndelteAndeler(forrigeAndeler)
+            )
+        }
+
         // Trenger denne sjekken som slipper å sette offset når det ikke finnes andelerTilOpprettelse,dvs nullutbetaling
         val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
             // lager utbetalingsperioder og oppdaterer andelerTilkjentYtelse
+            // NB! Denne funksjonen muterer på tilkjent ytelse i databasen.
             val opprettelsePeriodeMedAndeler = lagUtbetalingsperioderForOpprettelse(
                 andeler = andelerTilOpprettelse,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
@@ -80,8 +92,7 @@ class NyUtbetalingsoppdragGenerator {
                 sisteOffsetIKjedeOversikt = vedtakMedTilkjentYtelse.sisteOffsetPerIdent,
                 sisteOffsetPåFagsak = vedtakMedTilkjentYtelse.sisteOffsetPåFagsak
             )
-            // oppdater andeler i tilkjentYtelse
-            tilkjentYtelse.andelerTilkjentYtelse.addAll(opprettelsePeriodeMedAndeler.first)
+
             opprettelsePeriodeMedAndeler.second
         } else {
             emptyList()
