@@ -1,4 +1,4 @@
-name: Build-Deploy-Preprod-GCP
+name: Build-Deploy-Preprod-GCP-parallell
 on:
   workflow_dispatch:
 
