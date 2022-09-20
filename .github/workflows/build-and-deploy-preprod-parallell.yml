@@ -1,8 +1,6 @@
 name: Build-Deploy-Preprod-GCP-parallell
 on:
-  pull_request:
-    types: [ opened, synchronize, reopened, ready_for_review ]
-
+  workflow_dispatch:
 
 env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
