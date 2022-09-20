@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - 'master'
-      - 'feature/Tea-9597_raskare_bygg'
 env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
   IMAGE_LATEST: ghcr.io/navikt/familie-ba-sak:latest
