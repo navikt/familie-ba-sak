@@ -55,7 +55,7 @@ class TilkjentYtelseValideringService(
     }
 
     private fun TilkjentYtelse.harAndelerTilkjentYtelseMedSammeOffset(): Boolean {
-        val periodeOffsetForAndeler = this.andelerTilkjentYtelse.map { it.periodeOffset }
+        val periodeOffsetForAndeler = this.andelerTilkjentYtelse.mapNotNull { it.periodeOffset }
 
         return periodeOffsetForAndeler.size != periodeOffsetForAndeler.distinct().size
     }

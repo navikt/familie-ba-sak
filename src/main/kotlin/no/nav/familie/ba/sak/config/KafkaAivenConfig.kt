@@ -44,7 +44,7 @@ class KafkaAivenConfig(val environment: Environment) {
         factory.setConcurrency(1)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.consumerFactory = consumerFactory()
-        factory.setErrorHandler(kafkaErrorHandler)
+        factory.setCommonErrorHandler(kafkaErrorHandler)
         return factory
     }
 
