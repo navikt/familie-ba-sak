@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilUtenlandskPeriodebeløp
@@ -25,7 +24,6 @@ import javax.validation.Valid
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class UtenlandskPeriodebeløpController(
-    private val featureToggleService: FeatureToggleService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val personidentService: PersonidentService,

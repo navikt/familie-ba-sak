@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
-import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
@@ -23,17 +21,21 @@ import javax.validation.ConstraintViolationException
 class UtenlandskPeriodebeløpControllerTest {
 
     @Autowired
-    lateinit var featureToggleService: FeatureToggleService
-
-    @Autowired
     lateinit var utenlandskPeriodebeløpController: UtenlandskPeriodebeløpController
 
     @Test
     fun `Skal kaste feil dersom validering av input feiler`() {
-        val exception = assertThrows<ConstraintViolationException> { utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(1, RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null)) }
+        val exception = assertThrows<ConstraintViolationException> {
+            utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
+                1,
+                RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null)
+            )
+        }
 
         val forventedeFelterMedFeil = listOf("beløp")
-        val faktiskeFelterMedFeil = exception.constraintViolations.map { constraintViolation -> constraintViolation.propertyPath.toString().split(".").last() }
+        val faktiskeFelterMedFeil = exception.constraintViolations.map { constraintViolation ->
+            constraintViolation.propertyPath.toString().split(".").last()
+        }
 
         assertEqualsUnordered(forventedeFelterMedFeil, faktiskeFelterMedFeil)
 
@@ -42,19 +44,16 @@ class UtenlandskPeriodebeløpControllerTest {
 
     @Test
     fun `Skal ikke kaste feil dersom validering av input går bra`() {
-        // Stopper videre prosessering etter at validering er gjennomført
-        every { featureToggleService.isEnabled(any()) }.returns(false)
+        val response = utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
+            1,
+            RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null)
+        )
 
-        val response = utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(1, RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null))
-
-        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.statusCode)
+        assertEquals(HttpStatus.OK, response.statusCode)
     }
 }
 
 class TestConfig {
-
-    @Bean
-    fun featureToggleService(): FeatureToggleService = mockk()
 
     @Bean
     fun utenlandskPeriodebeløpService(): UtenlandskPeriodebeløpService = mockk()

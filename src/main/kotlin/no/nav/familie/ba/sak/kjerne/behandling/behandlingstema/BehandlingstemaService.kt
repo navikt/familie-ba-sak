@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling.behandlingstema
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -24,8 +23,7 @@ class BehandlingstemaService(
     private val loggService: LoggService,
     private val oppgaveService: OppgaveService,
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val featureToggleService: FeatureToggleService
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository
 ) {
 
     fun oppdaterBehandlingstema(
