@@ -1,6 +1,5 @@
 name: Build-Deploy-Prod-GCP
 on:
-  workflow_dispatch:
   push:
     branches:
       - 'master'
