@@ -34,11 +34,11 @@
         <token-validation-spring.version>2.1.4</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>1.6.11</springdoc.version>
-        <sentry.version>6.4.1</sentry.version>
+        <sentry.version>6.4.2</sentry.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>0.5.1</mock-oauth2-server.version>
+        <mock-oauth2-server.version>0.5.3</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->

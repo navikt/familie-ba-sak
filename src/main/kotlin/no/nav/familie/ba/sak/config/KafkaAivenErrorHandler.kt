@@ -5,7 +5,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.core.task.SimpleAsyncTaskExecutor
-import org.springframework.kafka.listener.ContainerStoppingErrorHandler
+import org.springframework.kafka.listener.CommonContainerStoppingErrorHandler
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Component
 import java.time.Duration
@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
 @Component
-class KafkaAivenErrorHandler : ContainerStoppingErrorHandler() {
+class KafkaAivenErrorHandler : CommonContainerStoppingErrorHandler() {
 
     val logger: Logger = LoggerFactory.getLogger(KafkaAivenErrorHandler::class.java)
     val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
@@ -22,9 +22,9 @@ class KafkaAivenErrorHandler : ContainerStoppingErrorHandler() {
     private val executor: Executor
     private val teller = AtomicInteger(0)
     private val sisteFeil = AtomicLong(0)
-    override fun handle(
+    override fun handleRemaining(
         e: Exception,
-        records: List<ConsumerRecord<*, *>>?,
+        records: List<ConsumerRecord<*, *>>,
         consumer: Consumer<*, *>,
         container: MessageListenerContainer
     ) {
@@ -57,7 +57,7 @@ class KafkaAivenErrorHandler : ContainerStoppingErrorHandler() {
 
     private fun scheduleRestart(
         e: Exception,
-        records: List<ConsumerRecord<*, *>>? = null,
+        records: List<ConsumerRecord<*, *>>,
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
         topic: String
@@ -79,7 +79,7 @@ class KafkaAivenErrorHandler : ContainerStoppingErrorHandler() {
             }
         }
         logger.warn("Stopper kafka container for $topic i ${Duration.ofMillis(stopTime)}")
-        super.handle(
+        super.handleRemaining(
             Exception("Sjekk securelogs for mer info - ${e::class.java.simpleName}"),
             records,
             consumer,

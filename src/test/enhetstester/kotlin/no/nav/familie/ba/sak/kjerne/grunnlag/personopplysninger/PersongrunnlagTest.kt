@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import org.junit.jupiter.api.Assertions
@@ -38,5 +39,12 @@ class PersongrunnlagTest {
 
         val nye = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
         Assertions.assertEquals(nyttbarn, nye.singleOrNull()!!.aktør.aktivFødselsnummer())
+    }
+
+    @Test
+    fun `Returnerer barnet som "søker" når grunnlag kun består av ett barn (enslig mindreårig eller institusjonsbarn)`() {
+        val barnet = lagPerson(type = PersonType.BARN)
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(1L, barnet)
+        Assertions.assertEquals(barnet, persongrunnlag.søker)
     }
 }
