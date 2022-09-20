@@ -23,7 +23,6 @@ import no.nav.familie.eksterne.kontrakter.BehandlingÅrsakV2
 import no.nav.familie.eksterne.kontrakter.KategoriV2
 import no.nav.familie.eksterne.kontrakter.Kompetanse
 import no.nav.familie.eksterne.kontrakter.KompetanseResultat
-import no.nav.familie.eksterne.kontrakter.PersonDVH
 import no.nav.familie.eksterne.kontrakter.PersonDVHV2
 import no.nav.familie.eksterne.kontrakter.SøkersAktivitet
 import no.nav.familie.eksterne.kontrakter.UnderkategoriV2
@@ -181,23 +180,6 @@ class StønadsstatistikkService(
             statsborgerskap = hentStatsborgerskap(person),
             bostedsland = hentLandkode(person),
             delingsprosentYtelse = if (delingsProsentYtelse == 50) delingsProsentYtelse else 0,
-            personIdent = person.aktør.aktivFødselsnummer()
-        )
-    }
-
-    @Deprecated("kan fjernes når vi ikke lenger publiserer hendelser til kafka onprem")
-    private fun lagPersonDVH(person: Person, delingsProsentYtelse: Int = 0): PersonDVH {
-        return PersonDVH(
-            rolle = person.type.name,
-            statsborgerskap = hentStatsborgerskap(person),
-            bostedsland = hentLandkode(person),
-            primærland = "IKKE IMPLMENTERT", // EØS
-            sekundærland = "IKKE IMPLEMENTERT", // EØS
-            delingsprosentOmsorg = 0, // Kan kanskje fjernes. Diskusjon på slack: Jeg tipper vi ikke trenger å sende den, men at det var noe vi “kladdet ned”, sikkert i en diskusjon om hvorvidt den faktiske delingsprosenten på omsorgen kan være ulik delingsprosenten på ytelsen
-            delingsprosentYtelse = if (delingsProsentYtelse == 50) delingsProsentYtelse else 0,
-            annenpartBostedsland = "Ikke implementert",
-            annenpartPersonident = "ikke implementert",
-            annenpartStatsborgerskap = "ikke implementert",
             personIdent = person.aktør.aktivFødselsnummer()
         )
     }
