@@ -36,19 +36,6 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
         sisteISinFagsak
             .forEach {
-                /**
-                 *
-                 * det vi skal her: rette opp offset i aty for denne behandlinga
-                 * som allereie er sendt til økonomi
-                 * dvs eigentleg finne offsets på nytt for denne, som om han aldri var laga
-                 * kan dermed ikkje utan vidare gjenbruke finn siste offset på fagsak, det må vi jo eigentleg gjera for forrige behandling
-                 *
-                 * får no henta sisteOffsetPåFagsak på bra vis
-                 * men hjelper det?
-                 * cluet er vel å rekne ut offset for alle i denne nye behandlinga
-                 *
-                 */
-
                 val oppdatertTilstand =
                     beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = it.id)
 
@@ -62,12 +49,6 @@ class RettOffsetIAndelTilkjentYtelseTask(
                     beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
                 val forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(forrigeTilstand)
 
-                val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id)
-
-                val sisteOffsetPåFagsak =
-                    beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
-                        .finnSisteOffset()
-
                 if (oppdatertTilstand.isNotEmpty()) {
                     val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
                         oppdaterteKjeder = oppdaterteKjeder,
@@ -75,11 +56,9 @@ class RettOffsetIAndelTilkjentYtelseTask(
                     )
                     beståendeAndelerMedOppdatertOffset.forEach { oppdatering ->
                         oppdatering.oppdater()
+                        secureLogger.info("Oppdaterer andel tilkjent ytelse ${oppdatering.beståendeIOppdatert} med periodeoffset=${oppdatering.periodeOffset}, forrigePeriodeOffset=${oppdatering.forrigePeriodeOffset} og kildeBehandlingId=${oppdatering.kildeBehandlingId}")
                         andelTilkjentYtelseRepository.save(oppdatering.beståendeIOppdatert)
                     }
-                    // TODO: logg alle endringar her
-                    //      val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
-                    //    beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
                 }
             }
 
