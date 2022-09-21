@@ -274,13 +274,12 @@ class BeregningService(
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
         behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
-            .mapNotNull { iverksattBehandling ->
-                hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { andelerTilkjentYtelse ->
-                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                    }
-            }.maxByOrNull { it }
+            .mapNotNull { it.finnSisteOffset() }
+            .maxByOrNull { it }
+
+    fun Behandling.finnSisteOffset() = hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(id)
+        .takeIf { it.isNotEmpty() }
+        ?.let { andelerTilkjentYtelse -> andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt() }
 
     fun populerTilkjentYtelse(
         behandling: Behandling,
