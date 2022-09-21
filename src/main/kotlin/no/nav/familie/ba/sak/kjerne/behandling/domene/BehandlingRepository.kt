@@ -152,4 +152,12 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
             "where b.id in (:behandlingIder) AND p.aktiv=true AND f.status = 'LØPENDE' "
     )
     fun finnAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
+
+    @Query(
+        """select b.id from andel_tilkjent_ytelse aty
+            inner join behandling b on b.id = aty.fk_behandling_id
+            group by(b.id, aty.periode_offset, b.opprettet_tid)
+            having count(aty.periode_offset) > 1"""
+    )
+    fun finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(): List<Long>
 }
