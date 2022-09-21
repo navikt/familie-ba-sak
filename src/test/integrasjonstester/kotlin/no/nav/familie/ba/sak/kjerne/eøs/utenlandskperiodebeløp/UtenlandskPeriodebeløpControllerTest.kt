@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Bean
@@ -20,8 +19,12 @@ import javax.validation.ConstraintViolationException
 @ContextConfiguration(classes = [TestConfig::class, UtenlandskPeriodebeløpController::class, ValidationAutoConfiguration::class])
 class UtenlandskPeriodebeløpControllerTest {
 
-    @Autowired
-    lateinit var utenlandskPeriodebeløpController: UtenlandskPeriodebeløpController
+    val utenlandskPeriodebeløpController = UtenlandskPeriodebeløpController(
+        utenlandskPeriodebeløpService = mockk(relaxed = true),
+        utenlandskPeriodebeløpRepository = mockk(relaxed = true),
+        personidentService = mockk(relaxed = true),
+        utvidetBehandlingService = mockk(relaxed = true)
+    )
 
     @Test
     fun `Skal kaste feil dersom validering av input feiler`() {
