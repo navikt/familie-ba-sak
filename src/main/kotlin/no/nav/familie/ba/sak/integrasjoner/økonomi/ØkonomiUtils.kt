@@ -93,28 +93,25 @@ object ØkonomiUtils {
      * @param[oppdaterteKjeder] nåværende tilstand
      * @return map med personident og oppdaterte kjeder
      */
-    fun oppdaterBeståendeAndelerMedOffset(
+    fun finnBeståendeAndelerMedOppdatertOffset(
         oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
         forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>
-    ): Map<String, List<AndelTilkjentYtelse>> {
-        oppdaterteKjeder
-            .filter { forrigeKjeder.containsKey(it.key) }
-            .forEach { (kjedeIdentifikator, oppdatertKjede) ->
-                val beståendeFraForrige =
-                    beståendeAndelerIKjede(
-                        forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator),
-                        oppdatertKjede = oppdatertKjede
-                    )
-                beståendeFraForrige?.forEach { bestående ->
-                    val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
-                        ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
-                    beståendeIOppdatert.periodeOffset = bestående.periodeOffset
-                    beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
-                    beståendeIOppdatert.kildeBehandlingId = bestående.kildeBehandlingId
-                }
-            }
-        return oppdaterteKjeder
-    }
+    ): List<OffsetOppdatering> = oppdaterteKjeder
+        .filter { forrigeKjeder.containsKey(it.key) }
+        .flatMap { (kjedeIdentifikator, oppdatertKjede) ->
+            beståendeAndelerIKjede(
+                forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator),
+                oppdatertKjede = oppdatertKjede
+            )?.map { bestående ->
+                OffsetOppdatering(
+                    oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
+                        ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand."),
+                    bestående.periodeOffset,
+                    bestående.forrigePeriodeOffset,
+                    bestående.kildeBehandlingId
+                )
+            } ?: listOf()
+        }
 
     /**
      * Tar utgangspunkt i ny tilstand og finner andeler som må bygges opp (nye, endrede og bestående etter første endring)
