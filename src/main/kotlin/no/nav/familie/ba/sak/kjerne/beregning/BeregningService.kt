@@ -274,12 +274,9 @@ class BeregningService(
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
         behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
+            .map { hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(it.id) }
             .mapNotNull { it.finnSisteOffset() }
             .maxByOrNull { it }
-
-    fun Behandling.finnSisteOffset() = hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(id)
-        .takeIf { it.isNotEmpty() }
-        ?.let { andelerTilkjentYtelse -> andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt() }
 
     fun populerTilkjentYtelse(
         behandling: Behandling,
@@ -312,6 +309,9 @@ class BeregningService(
         }
     }
 }
+
+fun List<AndelTilkjentYtelse>.finnSisteOffset() = takeIf { it.isNotEmpty() }
+    ?.let { andelerTilkjentYtelse -> andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt() }
 
 interface TilkjentYtelseEndretAbonnent {
     fun endretTilkjentYtelse(tilkjentYtelse: TilkjentYtelse)
