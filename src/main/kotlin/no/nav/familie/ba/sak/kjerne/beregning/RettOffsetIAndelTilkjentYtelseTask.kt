@@ -39,20 +39,16 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 val oppdatertTilstand =
                     beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = it.id)
 
-                val oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(oppdatertTilstand)
-
-                val forrigeBehandling =
-                    behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = it)
-                        ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
-
-                val forrigeTilstand =
-                    beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
-                val forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(forrigeTilstand)
-
                 if (oppdatertTilstand.isNotEmpty()) {
+                    val forrigeBehandling =
+                        behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = it)
+                            ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
+
                     val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
-                        oppdaterteKjeder = oppdaterteKjeder,
-                        forrigeKjeder = forrigeKjeder
+                        oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(oppdatertTilstand),
+                        forrigeKjeder = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                            forrigeBehandling.id
+                        ).let { ØkonomiUtils.kjedeinndelteAndeler(it) }
                     )
                     beståendeAndelerMedOppdatertOffset.forEach { oppdatering ->
                         oppdatering.oppdater()
