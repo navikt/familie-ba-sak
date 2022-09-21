@@ -63,7 +63,7 @@ object TilkjentYtelseUtils {
         )
 
         val barnasAndelerInkludertEtterbetaling3ÅrEndringer = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            andelTilkjentYtelser = andelerTilkjentYtelseBarnaUtenEndringer,
+            andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
             endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak == Årsak.ETTERBETALING_3ÅR }
         )
 
@@ -102,7 +102,7 @@ object TilkjentYtelseUtils {
         }
 
         val andelerTilkjentYtelseBarnaMedAlleEndringer = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            andelTilkjentYtelser = andelerTilkjentYtelseBarnaUtenEndringer,
+            andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
             endretUtbetalingAndeler = endretUtbetalingAndelerBarna
         )
 
@@ -173,7 +173,10 @@ object TilkjentYtelseUtils {
         tilkjentYtelse: TilkjentYtelse,
         endretUtbetalingAndelerSøker: List<EndretUtbetalingAndel>
     ): List<AndelTilkjentYtelse> {
-        val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
+        // Disse andelene kunne i prinsippet inneholdt endringer fordi
+        // andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer kan inneholde endringer
+        // Men i praksis vil lagUtvidetBarnetrygdAndeler lage nye andeler uten at endringer blir satt
+        val andelerTilkjentYtelseUtvidetUtenEndringer = UtvidetBarnetrygdGenerator(
             behandlingId = tilkjentYtelse.behandling.id,
             tilkjentYtelse = tilkjentYtelse
         )
@@ -183,7 +186,7 @@ object TilkjentYtelseUtils {
             )
 
         return oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            andelTilkjentYtelser = andelerTilkjentYtelseUtvidet,
+            andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidetUtenEndringer,
             endretUtbetalingAndeler = endretUtbetalingAndelerSøker
         )
     }
@@ -194,25 +197,26 @@ object TilkjentYtelseUtils {
             .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT }
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-        andelTilkjentYtelser: List<AndelTilkjentYtelse>,
+        andelTilkjentYtelserUtenEndringer: List<AndelTilkjentYtelse>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): List<AndelTilkjentYtelse> {
-        if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }
+        if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelserUtenEndringer.map { it.copy() }
 
-        val (andelerUtenSmåbarnstillegg, andelerMedSmåbarnstillegg) = andelTilkjentYtelser.partition { !it.erSmåbarnstillegg() }
+        val (andelerUtenSmåbarnstilleggUtenEndringer, andelerMedSmåbarnstilleggUtenEndringer) =
+            andelTilkjentYtelserUtenEndringer.partition { !it.erSmåbarnstillegg() }
 
         val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
 
-        andelerUtenSmåbarnstillegg.groupBy { it.aktør }.forEach { andelerForPerson ->
-            val aktør = andelerForPerson.key
+        andelerUtenSmåbarnstilleggUtenEndringer.groupBy { it.aktør }.forEach { andelerForPersonUtenEndringer ->
+            val aktør = andelerForPersonUtenEndringer.key
             val endringerForPerson =
                 endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
 
             val nyeAndelerForPerson = mutableListOf<AndelTilkjentYtelse>()
 
-            andelerForPerson.value.forEach { andelForPerson ->
+            andelerForPersonUtenEndringer.value.forEach { andelForPersonUtenEndringer ->
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
-                val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode()
+                val (perioderMedEndring, perioderUtenEndring) = andelForPersonUtenEndringer.stønadsPeriode()
                     .perioderMedOgUtenOverlapp(
                         endringerForPerson.map { endringerForPerson -> endringerForPerson.periode }
                     )
@@ -220,22 +224,22 @@ object TilkjentYtelseUtils {
                 nyeAndelerForPerson.addAll(
                     perioderMedEndring.map { månedPeriodeEndret ->
                         val endretUtbetalingAndel = endringerForPerson.single { it.overlapperMed(månedPeriodeEndret) }
-                        val nyttNasjonaltPeriodebeløp = andelForPerson.sats
+                        val nyttNasjonaltPeriodebeløp = andelForPersonUtenEndringer.sats
                             .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!)
-                        andelForPerson.copy(
+                        andelForPersonUtenEndringer.copy(
                             prosent = endretUtbetalingAndel.prosent!!,
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
                             kalkulertUtbetalingsbeløp = nyttNasjonaltPeriodebeløp,
                             nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
-                            endretUtbetalingAndeler = (andelForPerson.endretUtbetalingAndeler + endretUtbetalingAndel).toMutableList()
+                            endretUtbetalingAndeler = mutableListOf(endretUtbetalingAndel)
                         )
                     }
                 )
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
                 nyeAndelerForPerson.addAll(
                     perioderUtenEndring.map { månedPeriodeUendret ->
-                        andelForPerson.copy(
+                        andelForPersonUtenEndringer.copy(
                             stønadFom = månedPeriodeUendret.fom,
                             stønadTom = månedPeriodeUendret.tom
                         )
@@ -253,7 +257,7 @@ object TilkjentYtelseUtils {
         }
 
         // Ettersom vi aldri ønsker å overstyre småbarnstillegg perioder fjerner vi dem og legger dem til igjen her
-        nyeAndelTilkjentYtelse.addAll(andelerMedSmåbarnstillegg)
+        nyeAndelTilkjentYtelse.addAll(andelerMedSmåbarnstilleggUtenEndringer)
 
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
         nyeAndelTilkjentYtelse.sortWith(
