@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -25,6 +24,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.prosessering.domene.Task
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -61,13 +61,17 @@ internal class RettOffsetIAndelTilkjentYtelseTaskTest(
             .also { it[5].periodeOffset = 5 }
             .also { andelTilkjentYtelseRepository.save(it[5]) }
 
+        assertThat(
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling2)
+                .map { it.periodeOffset }
+        ).isEqualTo(listOf(5L, 0L, 1L, 2L, 3L, 5L))
+
         task.doTask(Task(type = "", payload = ""))
 
-        assertEqualsUnordered(
-            expected = listOf(0, 1, 2, 3, 4, 5),
-            actual = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling2)
+        assertThat(
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling2)
                 .map { it.periodeOffset }
-        )
+        ).isEqualTo(listOf(5L, 0L, 1L, 2L, 3L, 4L))
     }
 
     fun lagScenario(barnFødselsdato: LocalDate): RestScenario = mockServerKlient().lagScenario(
