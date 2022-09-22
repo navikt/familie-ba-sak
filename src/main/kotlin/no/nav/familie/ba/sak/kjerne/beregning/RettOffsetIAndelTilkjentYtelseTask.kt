@@ -11,7 +11,6 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 @TaskStepBeskrivelse(
@@ -29,16 +28,8 @@ class RettOffsetIAndelTilkjentYtelseTask(
     override fun doTask(task: Task) {
         val payload =
             objectMapper.readValue(task.payload, RettOffsetIAndelTilkjentYtelseDto::class.java)
-
-        if (payload.simuler) {
-            simuler(payload)
-        } else {
-            køyrTask(payload)
-        }
+        køyrTask(payload)
     }
-
-    @Transactional(readOnly = true)
-    fun simuler(payload: RettOffsetIAndelTilkjentYtelseDto) = køyrTask(payload)
 
     private fun køyrTask(payload: RettOffsetIAndelTilkjentYtelseDto) {
         val behandlingerMedFeilaktigeOffsets =
@@ -75,8 +66,11 @@ class RettOffsetIAndelTilkjentYtelseTask(
                     )
 
                     val logglinjer =
-                        beståendeAndelerMedOppdatertOffset.map { oppdatering -> formaterLogglinje(oppdatering) }
-                            .joinToString(separator = System.lineSeparator())
+                        beståendeAndelerMedOppdatertOffset.joinToString(separator = System.lineSeparator()) { oppdatering ->
+                            formaterLogglinje(
+                                oppdatering
+                            )
+                        }
                     secureLogger.info("Behandling: $it, logglinjer: $logglinjer")
 
                     if (!payload.simuler) {
