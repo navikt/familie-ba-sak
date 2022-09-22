@@ -122,10 +122,7 @@ class ØkonomiService(
             val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
 
             if (oppdatertTilstand.isNotEmpty()) {
-                oppdaterBeståendeAndelerMedOffset(
-                    oppdaterteKjeder = oppdaterteKjeder,
-                    forrigeKjeder = forrigeKjeder
-                )
+                oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
                 val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
                 beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
             }
