@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -122,11 +122,10 @@ class ØkonomiService(
             val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
 
             if (oppdatertTilstand.isNotEmpty()) {
-                val beståendeAndelerMedOppdatertOffset = finnBeståendeAndelerMedOppdatertOffset(
+                oppdaterBeståendeAndelerMedOffset(
                     oppdaterteKjeder = oppdaterteKjeder,
                     forrigeKjeder = forrigeKjeder
                 )
-                beståendeAndelerMedOppdatertOffset.forEach { it.oppdater() }
                 val tilkjentYtelseMedOppdaterteAndeler = oppdatertTilstand.first().tilkjentYtelse
                 beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
             }

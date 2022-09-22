@@ -75,11 +75,10 @@ class NyUtbetalingsoppdragGenerator {
         // offsettet de hadde i forrige behandling.
         // NB! Denne funksjonen muterer på tilkjent ytelse i databasen.
         if (andelerTilkjentYtelse.isNotEmpty() && !forrigeAndeler.isNullOrEmpty()) {
-            val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
+            ØkonomiUtils.oppdaterBeståendeAndelerMedOffset(
                 oppdaterteKjeder = kjedeinndelteAndeler(andelerTilkjentYtelse),
                 forrigeKjeder = kjedeinndelteAndeler(forrigeAndeler)
             )
-            beståendeAndelerMedOppdatertOffset.forEach { it.oppdater() }
         }
 
         // Trenger denne sjekken som slipper å sette offset når det ikke finnes andelerTilOpprettelse,dvs nullutbetaling

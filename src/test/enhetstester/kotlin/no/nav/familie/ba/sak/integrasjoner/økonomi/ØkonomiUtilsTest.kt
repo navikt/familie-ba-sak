@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
@@ -501,15 +501,14 @@ internal class ØkonomiUtilsTest {
         )
 
         val oppdaterte =
-            finnBeståendeAndelerMedOppdatertOffset(
+            oppdaterBeståendeAndelerMedOffset(
                 forrigeKjeder = kjederBehandling1,
                 oppdaterteKjeder = kjederBehandling2
             )
-        oppdaterte.forEach { it.oppdater() }
 
-        assertEquals(1, kjederBehandling2.getValue(person.aktør.aktivFødselsnummer()).first().periodeOffset)
-        assertEquals(0, kjederBehandling2.getValue(person.aktør.aktivFødselsnummer()).first().forrigePeriodeOffset)
-        assertEquals(null, kjederBehandling2.getValue(person2.aktør.aktivFødselsnummer()).first().periodeOffset)
-        assertEquals(null, kjederBehandling2.getValue(person2.aktør.aktivFødselsnummer()).first().forrigePeriodeOffset)
+        assertEquals(1, oppdaterte.getValue(person.aktør.aktivFødselsnummer()).first().periodeOffset)
+        assertEquals(0, oppdaterte.getValue(person.aktør.aktivFødselsnummer()).first().forrigePeriodeOffset)
+        assertEquals(null, oppdaterte.getValue(person2.aktør.aktivFødselsnummer()).first().periodeOffset)
+        assertEquals(null, oppdaterte.getValue(person2.aktør.aktivFødselsnummer()).first().forrigePeriodeOffset)
     }
 }
