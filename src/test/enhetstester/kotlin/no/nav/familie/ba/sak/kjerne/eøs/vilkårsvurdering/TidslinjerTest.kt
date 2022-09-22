@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
@@ -34,7 +33,7 @@ internal class TidslinjerTest {
             .medVilkår("EEEEEEEENNEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
             .medVilkår("EEEEEEEENNEEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
             .byggPerson()
-        val søkerResult = "EEEEEEEENNEEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val søkerResult = " EEEEEEEENNEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
 
         vilkårsvurderingBygger.forPerson(barn1, startMåned)
             .medVilkår("++++++++++++++++     ", Vilkår.UNDER_18_ÅR)
@@ -43,7 +42,7 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = "?????!?!NN!??EEE?????".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val barn1Result = " ???????!NN???EE?????".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
 
         vilkårsvurderingBygger.forPerson(barn2, startMåned)
             .medVilkår("+++++++++>", Vilkår.UNDER_18_ÅR)
@@ -52,7 +51,7 @@ internal class TidslinjerTest {
             .medVilkår("EEEENNEEE>", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++>", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn2Result = "?EEE!!!E!!EEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val barn2Result = " ?EEE!!EE!!EEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
@@ -78,7 +77,7 @@ internal class TidslinjerTest {
             .medVilkår("EEEEEEEEEEEEENNNNNNNN", Vilkår.BOSATT_I_RIKET)
             .medVilkår("EEEEEEEEEEEEENNNNNNNN", Vilkår.LOVLIG_OPPHOLD)
             .byggPerson()
-        val søkerResult = "EEEEEEEEEEEEENNNNNNNN".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val søkerResult = " EEEEEEEEEEEEENNNNNNN".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
 
         vilkårsvurderingBygger.forPerson(barn1, startMåned)
             .medVilkår("++++++++++++++++     ", Vilkår.UNDER_18_ÅR)
@@ -87,7 +86,7 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", Vilkår.BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", Vilkår.GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = "?????!!!!!!EE!!!?????".tilRegelverkResultatTidslinje(startMåned).forskyv(1)
+        val barn1Result = " ?????!!!!!!EE!!?????".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
