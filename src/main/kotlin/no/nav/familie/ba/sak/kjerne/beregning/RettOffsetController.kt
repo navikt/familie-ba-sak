@@ -18,7 +18,7 @@ class RettOffsetController(val task: RettOffsetIAndelTilkjentYtelseTask) {
     @GetMapping("/simuler")
     @Transactional
     fun simuler() {
-        val input = RettOffsetIAndelTilkjentYtelseDto(simuler = true, kunSiste = true)
+        val input = RettOffsetIAndelTilkjentYtelseDto(simuler = true, kunBehandlingerSomErSistePåFagsak = true)
         task.doTask(
             Task(
                 type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,

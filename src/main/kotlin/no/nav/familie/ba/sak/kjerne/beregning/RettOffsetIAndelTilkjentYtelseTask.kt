@@ -36,12 +36,20 @@ class RettOffsetIAndelTilkjentYtelseTask(
             behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse()
                 .map { behandlingRepository.finnBehandling(it) }
 
+        if (behandlingerMedFeilaktigeOffsets.isNotEmpty()) {
+            secureLogger.warn(
+                "Behandlinger med feilaktige offsets: ${
+                behandlingerMedFeilaktigeOffsets.map { it.id }.joinToString(separator = ",")
+                }"
+            )
+        }
+
         val relevanteBehandlinger = behandlingerMedFeilaktigeOffsets
             .map { it.fagsak }
             .map { behandlingRepository.finnBehandlinger(it.id).sortedBy { behandling -> behandling.id } }
             .map { it.last() }
             .filter {
-                if (payload.kunSiste) {
+                if (payload.kunBehandlingerSomErSistePåFagsak) {
                     behandlingerMedFeilaktigeOffsets.contains(it)
                 } else {
                     !behandlingerMedFeilaktigeOffsets.contains(it)
@@ -79,14 +87,14 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 }
             }
 
-        if (payload.kunSiste) {
+        if (payload.kunBehandlingerSomErSistePåFagsak) {
             val diff = behandlingerMedFeilaktigeOffsets.minus(relevanteBehandlinger.toSet())
             if (diff.isNotEmpty()) secureLogger.warn("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling: $diff")
         }
     }
 
     private fun formaterLogglinje(oppdatering: OffsetOppdatering) =
-        "Oppdaterer andel tilkjent ytelse ${oppdatering.beståendeIOppdatert} med periodeoffset=${oppdatering.periodeOffset}, forrigePeriodeOffset=${oppdatering.forrigePeriodeOffset} og kildeBehandlingId=${oppdatering.kildeBehandlingId}"
+        "Oppdaterer andel tilkjent ytelse ${oppdatering.beståendeAndelSomSkalHaOppdatertOffset} med periodeoffset=${oppdatering.periodeOffset}, forrigePeriodeOffset=${oppdatering.forrigePeriodeOffset} og kildeBehandlingId=${oppdatering.kildeBehandlingId}"
 
     companion object {
         const val TASK_STEP_TYPE = "rettOffsetIAndelTilkjentYtelseTask"
@@ -96,5 +104,5 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
 data class RettOffsetIAndelTilkjentYtelseDto(
     val simuler: Boolean,
-    val kunSiste: Boolean
+    val kunBehandlingerSomErSistePåFagsak: Boolean
 )
