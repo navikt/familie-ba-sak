@@ -34,11 +34,14 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
 object TilkjentYtelseUtils {
+
+    private val logger = LoggerFactory.getLogger(TilkjentYtelseUtils::class.java)
 
     fun beregnTilkjentYtelse(
         vilkårsvurdering: Vilkårsvurdering,
@@ -197,6 +200,11 @@ object TilkjentYtelseUtils {
         andelTilkjentYtelser: List<AndelTilkjentYtelse>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): List<AndelTilkjentYtelse> {
+        // Denne bør if'en kan slettes etter noen dager uten warnings i prod
+        if (andelTilkjentYtelser.any { it.endretUtbetalingAndeler.size > 0 }) {
+            logger.warn("andeler tilkjent ytelse inneholder endringer. Forventet at det ikke skulle skje.")
+        }
+
         if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }
 
         val (andelerUtenSmåbarnstillegg, andelerMedSmåbarnstillegg) = andelTilkjentYtelser.partition { !it.erSmåbarnstillegg() }
