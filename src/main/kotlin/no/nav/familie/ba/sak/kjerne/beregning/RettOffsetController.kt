@@ -5,7 +5,8 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -15,10 +16,14 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class RettOffsetController(val task: RettOffsetIAndelTilkjentYtelseTask) {
 
-    @GetMapping("/simuler")
+    @PostMapping("/simuler")
     @Transactional
-    fun simuler() {
-        val input = RettOffsetIAndelTilkjentYtelseDto(simuler = true, kunBehandlingerSomErSistePåFagsak = true)
+    fun simuler(@RequestBody behandlinger: Behandlingider) {
+        val input = RettOffsetIAndelTilkjentYtelseDto(
+            simuler = true,
+            kunBehandlingerSomErSistePåFagsak = true,
+            behandlinger = behandlinger.behandlinger
+        )
         task.doTask(
             Task(
                 type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
@@ -28,3 +33,5 @@ class RettOffsetController(val task: RettOffsetIAndelTilkjentYtelseTask) {
         throw RuntimeException("Kaster exception her for å sikre at ingenting frå transaksjonen blir committa")
     }
 }
+
+data class Behandlingider(val behandlinger: List<Long>)

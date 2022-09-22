@@ -32,9 +32,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
     }
 
     private fun køyrTask(payload: RettOffsetIAndelTilkjentYtelseDto) {
-        val behandlingerMedFeilaktigeOffsets =
-            behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse()
-                .map { behandlingRepository.finnBehandling(it) }
+        val behandlingerMedFeilaktigeOffsets = payload.behandlinger.map { behandlingRepository.finnBehandling(it) }
 
         if (behandlingerMedFeilaktigeOffsets.isNotEmpty()) {
             secureLogger.warn(
@@ -104,5 +102,6 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
 data class RettOffsetIAndelTilkjentYtelseDto(
     val simuler: Boolean,
-    val kunBehandlingerSomErSistePåFagsak: Boolean
+    val kunBehandlingerSomErSistePåFagsak: Boolean,
+    val behandlinger: List<Long>
 )
