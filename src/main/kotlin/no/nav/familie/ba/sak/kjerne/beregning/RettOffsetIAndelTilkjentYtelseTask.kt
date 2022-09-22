@@ -58,8 +58,9 @@ class RettOffsetIAndelTilkjentYtelseTask(
                         ).let { ØkonomiUtils.kjedeinndelteAndeler(it) }
                     )
 
-                    val logglinjer = beståendeAndelerMedOppdatertOffset.map { oppdatering -> formaterLogglinje(oppdatering) }
-                        .joinToString(separator = System.lineSeparator())
+                    val logglinjer =
+                        beståendeAndelerMedOppdatertOffset.map { oppdatering -> formaterLogglinje(oppdatering) }
+                            .joinToString(separator = System.lineSeparator())
                     secureLogger.info("Behandling: $it, logglinjer: $logglinjer")
 
                     if (!payload.simuler) {
