@@ -23,10 +23,13 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDate
 
 internal class RettOffsetIAndelTilkjentYtelseTaskTest(
@@ -36,7 +39,8 @@ internal class RettOffsetIAndelTilkjentYtelseTaskTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val efSakRestClient: EfSakRestClient
+    @Autowired private val efSakRestClient: EfSakRestClient,
+    @Autowired private val transactionManager: PlatformTransactionManager
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -66,7 +70,11 @@ internal class RettOffsetIAndelTilkjentYtelseTaskTest(
                 .map { it.periodeOffset }
         ).isEqualTo(listOf(5L, 0L, 1L, 2L, 3L, 5L))
 
-        task.doTask(Task(type = "", payload = ""))
+        val input = RettOffsetIAndelTilkjentYtelseDto(kunSiste = true, simuler = false)
+
+        TransactionTemplate(transactionManager).execute {
+            task.doTask(Task(type = "", payload = objectMapper.writeValueAsString(input)))
+        }
 
         assertThat(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling2)

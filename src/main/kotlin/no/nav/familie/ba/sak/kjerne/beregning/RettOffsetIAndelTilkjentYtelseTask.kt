@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.integrasjoner.økonomi.OffsetOppdatering
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -24,17 +26,22 @@ class RettOffsetIAndelTilkjentYtelseTask(
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
+        val payload =
+            objectMapper.readValue(task.payload, RettOffsetIAndelTilkjentYtelseDto::class.java)
         val behandlingerMedFeilaktigeOffsets =
             behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse()
                 .map { behandlingRepository.finnBehandling(it) }
 
-        val sisteISinFagsak = behandlingerMedFeilaktigeOffsets
+        val relevanteBehandlinger = behandlingerMedFeilaktigeOffsets
             .map { it.fagsak }
             .map { behandlingRepository.finnBehandlinger(it.id).sortedBy { behandling -> behandling.id } }
             .map { it.last() }
-            .filter { behandlingerMedFeilaktigeOffsets.contains(it) }
+            .filter {
+                if (payload.kunSiste) behandlingerMedFeilaktigeOffsets.contains(it)
+                else !behandlingerMedFeilaktigeOffsets.contains(it)
+            }
 
-        sisteISinFagsak
+        relevanteBehandlinger
             .forEach {
                 val oppdatertTilstand =
                     beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = it.id)
@@ -50,20 +57,33 @@ class RettOffsetIAndelTilkjentYtelseTask(
                             forrigeBehandling.id
                         ).let { ØkonomiUtils.kjedeinndelteAndeler(it) }
                     )
-                    beståendeAndelerMedOppdatertOffset.forEach { oppdatering ->
-                        oppdatering.oppdater()
-                        secureLogger.info("Oppdaterer andel tilkjent ytelse ${oppdatering.beståendeIOppdatert} med periodeoffset=${oppdatering.periodeOffset}, forrigePeriodeOffset=${oppdatering.forrigePeriodeOffset} og kildeBehandlingId=${oppdatering.kildeBehandlingId}")
-                        andelTilkjentYtelseRepository.save(oppdatering.beståendeIOppdatert)
+
+                    val logglinjer = beståendeAndelerMedOppdatertOffset.map { oppdatering -> formaterLogglinje(oppdatering) }
+                        .joinToString(separator = System.lineSeparator())
+                    secureLogger.info("Behandling: $it, logglinjer: $logglinjer")
+
+                    if (!payload.simuler) {
+                        beståendeAndelerMedOppdatertOffset.forEach { oppdatering -> oppdatering.oppdater() }
                     }
                 }
             }
 
-        val diff = behandlingerMedFeilaktigeOffsets.minus(sisteISinFagsak.toSet())
-        if (diff.isNotEmpty()) secureLogger.warn("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling: $diff")
+        if (payload.kunSiste) {
+            val diff = behandlingerMedFeilaktigeOffsets.minus(relevanteBehandlinger.toSet())
+            if (diff.isNotEmpty()) secureLogger.warn("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling: $diff")
+        }
     }
+
+    private fun formaterLogglinje(oppdatering: OffsetOppdatering) =
+        "Oppdaterer andel tilkjent ytelse ${oppdatering.beståendeIOppdatert} med periodeoffset=${oppdatering.periodeOffset}, forrigePeriodeOffset=${oppdatering.forrigePeriodeOffset} og kildeBehandlingId=${oppdatering.kildeBehandlingId}"
 
     companion object {
         const val TASK_STEP_TYPE = "rettOffsetIAndelTilkjentYtelseTask"
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
+
+data class RettOffsetIAndelTilkjentYtelseDto(
+    val simuler: Boolean,
+    val kunSiste: Boolean
+)
