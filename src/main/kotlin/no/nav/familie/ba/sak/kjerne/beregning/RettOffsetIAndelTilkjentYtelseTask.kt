@@ -37,8 +37,11 @@ class RettOffsetIAndelTilkjentYtelseTask(
             .map { behandlingRepository.finnBehandlinger(it.id).sortedBy { behandling -> behandling.id } }
             .map { it.last() }
             .filter {
-                if (payload.kunSiste) behandlingerMedFeilaktigeOffsets.contains(it)
-                else !behandlingerMedFeilaktigeOffsets.contains(it)
+                if (payload.kunSiste) {
+                    behandlingerMedFeilaktigeOffsets.contains(it)
+                } else {
+                    !behandlingerMedFeilaktigeOffsets.contains(it)
+                }
             }
 
         relevanteBehandlinger
