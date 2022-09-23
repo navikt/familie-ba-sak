@@ -61,12 +61,14 @@ class RettOffsetIAndelTilkjentYtelseTask(
             .forEach {
                 val andelerSomSendesTilOppdrag =
                     beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = it.id)
+                val forrigeBehandling =
+                    behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = it)
+                if (forrigeBehandling == null) {
+                    logger.warn("Fant ikke forrige behandling for behandling $it")
+                    return
+                }
 
                 if (andelerSomSendesTilOppdrag.isNotEmpty()) {
-                    val forrigeBehandling =
-                        behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = it)
-                            ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
-
                     val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerSomSendesTilOppdrag),
                         forrigeKjeder = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
@@ -98,6 +100,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
     companion object {
         const val TASK_STEP_TYPE = "rettOffsetIAndelTilkjentYtelseTask"
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
+        private val logger = LoggerFactory.getLogger(RettOffsetIAndelTilkjentYtelseTask::class.java)
     }
 }
 
