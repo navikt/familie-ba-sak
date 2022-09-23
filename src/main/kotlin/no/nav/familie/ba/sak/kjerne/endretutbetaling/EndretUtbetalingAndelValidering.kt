@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.finnTilOgMedDato
 import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetalingFom
@@ -58,7 +59,7 @@ object EndretUtbetalingAndelValidering {
 
     fun validerPeriodeInnenforTilkjentytelse(
         endretUtbetalingAndel: EndretUtbetalingAndel,
-        andelTilkjentYtelser: List<AndelTilkjentYtelse>
+        andelTilkjentYtelser: Collection<AndelTilkjentYtelse>
     ) {
         endretUtbetalingAndel.validerUtfyltEndring()
         val minsteDatoForTilkjentYtelse = andelTilkjentYtelser.filter {
@@ -82,6 +83,17 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
+    fun validerPeriodeInnenforTilkjentytelse(
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+        andelTilkjentYtelser: Collection<AndelTilkjentYtelse>
+    ) = endretUtbetalingAndeler.forEach { validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser) }
+
+    fun validerÅrsak(
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+        vilkårsvurdering: Vilkårsvurdering?
+    ) =
+        endretUtbetalingAndeler.forEach { validerÅrsak(it.årsak, it, vilkårsvurdering) }
+
     fun validerÅrsak(
         årsak: Årsak?,
         endretUtbetalingAndel: EndretUtbetalingAndel,
@@ -101,7 +113,7 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    fun validerEtterbetaling3År(
+    private fun validerEtterbetaling3År(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         kravDato: LocalDateTime
     ) {
@@ -118,7 +130,7 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    fun validerDeltBosted(
+    internal fun validerDeltBosted(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         deltBostedPerioder: List<MånedPeriode>
     ) {
@@ -152,8 +164,8 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    fun validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler: List<EndretUtbetalingAndel>) {
-        if (endretUtbetalingAndeler.any { it.andelTilkjentYtelser.isEmpty() }) {
+    fun validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>) {
+        if (endretUtbetalingAndeler.any { it.andelerTilkjentYtelse.isEmpty() }) {
             throw FunksjonellFeil(
                 melding = "Det er opprettet instanser av EndretUtbetalingandel som ikke er tilknyttet noen andeler. De må enten lagres eller slettes av SB.",
                 frontendFeilmelding = "Du har endrede utbetalingsperioder. Bekreft, slett eller oppdater periodene i listen."
@@ -164,10 +176,10 @@ object EndretUtbetalingAndelValidering {
 
 fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>
 ) {
     fun EndretUtbetalingAndel.finnKryssendeUtvidetYtelse(
-        andelTilkjentYtelser: List<AndelTilkjentYtelse>
+        andelTilkjentYtelser: Collection<AndelTilkjentYtelse>
     ): AndelTilkjentYtelse? =
         andelTilkjentYtelser
             .filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
@@ -194,11 +206,11 @@ fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
 }
 
 fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-    endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndel>
+    endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
 ) {
     val endredeUtvidetUtbetalingerAndeler = endretUtbetalingAndelerMedÅrsakDeltBosted
         .filter { endretUtbetaling ->
-            endretUtbetaling.andelTilkjentYtelser.any { it.erUtvidet() }
+            endretUtbetaling.andelerTilkjentYtelse.any { it.erUtvidet() }
         }
 
     endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->

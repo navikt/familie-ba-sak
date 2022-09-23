@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -11,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -42,11 +43,14 @@ class BehandlingsresultatStegTest {
 
     private val beregningService: BeregningService = mockk()
 
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService = mockk()
-
     private lateinit var behandlingsresultatSteg: BehandlingsresultatSteg
 
     private lateinit var behandling: Behandling
+
+    private val featureToggleService: FeatureToggleService = mockk()
+
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
+        mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
 
     @BeforeEach
     fun init() {
@@ -60,7 +64,8 @@ class BehandlingsresultatStegTest {
             vilkårService,
             persongrunnlagService,
             beregningService,
-            endretUtbetalingAndelService
+            featureToggleService,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
         behandling = lagBehandling(

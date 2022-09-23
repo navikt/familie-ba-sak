@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -698,7 +698,7 @@ internal class TilkjentYtelseUtilsTest {
         val endretProsent = BigDecimal.ZERO
 
         val endretUtbetalingAndeler = listOf(
-            lagEndretUtbetalingAndel(
+            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 person = person,
                 fom = fom,
                 tom = tom,
@@ -714,7 +714,7 @@ internal class TilkjentYtelseUtilsTest {
 
         assertEquals(1, andelerTIlkjentYtelse.size)
         assertEquals(endretProsent, andelerTIlkjentYtelse.single().prosent)
-        assertEquals(1, andelerTIlkjentYtelse.single().endretUtbetalingAndeler.size)
+        assertEquals(1, andelerTIlkjentYtelse.single().endreteUtbetalinger.size)
     }
 
     @Test
@@ -744,7 +744,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val endretProsent = BigDecimal.ZERO
 
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
+        val endretUtbetalingAndel = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
             person = person,
             fom = fom1,
             tom = tom2,
@@ -754,7 +754,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val endretUtbetalingAndeler = listOf(
             endretUtbetalingAndel,
-            lagEndretUtbetalingAndel(
+            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 person = person,
                 fom = tom2.nesteMåned(),
                 prosent = endretProsent,
@@ -769,11 +769,11 @@ internal class TilkjentYtelseUtilsTest {
 
         assertEquals(2, andelerTIlkjentYtelse.size)
         andelerTIlkjentYtelse.forEach { assertEquals(endretProsent, it.prosent) }
-        andelerTIlkjentYtelse.forEach { assertEquals(1, it.endretUtbetalingAndeler.size) }
+        andelerTIlkjentYtelse.forEach { assertEquals(1, it.endreteUtbetalinger.size) }
         andelerTIlkjentYtelse.forEach {
             assertEquals(
                 endretUtbetalingAndel.id,
-                it.endretUtbetalingAndeler.single().id
+                it.endreteUtbetalinger.single().id
             )
         }
     }
@@ -1462,7 +1462,7 @@ internal class TilkjentYtelseUtilsTest {
         )
 
         val endretUtbetalingAndeler = endretAndeler.map {
-            lagEndretUtbetalingAndel(
+            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 behandlingId = vilkårsvurdering.behandling.id,
                 person = it.person,
                 prosent = if (it.skalUtbetales) BigDecimal(100) else BigDecimal.ZERO,

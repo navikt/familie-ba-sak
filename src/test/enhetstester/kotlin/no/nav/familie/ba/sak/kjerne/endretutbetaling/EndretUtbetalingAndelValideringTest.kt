@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.randomAktør
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
@@ -297,7 +299,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `sjekk at alle endrede utbetalingsandeler er tilknyttet andeltilkjentytelser`() {
-        val endretUtbetalingAndel1 = lagEndretUtbetalingAndel(person = tilfeldigPerson())
+        val endretUtbetalingAndel1 = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(person = tilfeldigPerson())
         val feil = assertThrows<FunksjonellFeil> {
             validerAtEndringerErTilknyttetAndelTilkjentYtelse(listOf(endretUtbetalingAndel1))
         }
@@ -309,7 +311,10 @@ class EndretUtbetalingAndelValideringTest {
         val andelTilkjentYtelse: AndelTilkjentYtelse = mockk()
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(
             listOf(
-                endretUtbetalingAndel1.copy(andelTilkjentYtelser = mutableListOf(andelTilkjentYtelse))
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                    person = tilfeldigPerson(),
+                    andelTilkjentYtelser = mutableListOf(andelTilkjentYtelse)
+                )
             )
         )
     }
@@ -693,7 +698,7 @@ class EndretUtbetalingAndelValideringTest {
             )
         )
 
-        val utvidetEndring = lagEndretUtbetalingAndel(
+        val utvidetEndring = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
             fom = fom1,
             tom = tom2,
             person = søker,
@@ -713,7 +718,7 @@ class EndretUtbetalingAndelValideringTest {
 
         Assertions.assertThrows(FunksjonellFeil::class.java) {
             validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
-                listOf(utvidetEndring, deltBostedEndring),
+                listOf(utvidetEndring, deltBostedEndring).map { it.endretUtbetalingAndel },
                 andelTilkjentYtelser
             )
         }
@@ -822,8 +827,8 @@ class EndretUtbetalingAndelValideringTest {
         prosent: BigDecimal,
         fomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
         tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1)
-    ): EndretUtbetalingAndel {
-        return lagEndretUtbetalingAndel(
+    ): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
+        return lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
             id = Random.nextLong(),
             fom = fomUtvidet,
             tom = tomUtvidet,

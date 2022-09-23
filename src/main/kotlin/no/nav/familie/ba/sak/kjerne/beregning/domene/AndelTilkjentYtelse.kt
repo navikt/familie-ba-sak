@@ -287,7 +287,7 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
     return sammenslåtteAndeler
 }
 
-fun List<AndelTilkjentYtelse>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>, List<AndelTilkjentYtelse>> {
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>, List<AndelTilkjentYtelseMedEndreteUtbetalinger>> {
     return this.utledSegmenter()
         .fold(mutableMapOf()) { acc, segment ->
             val andelerForSegment = this.filter {
@@ -303,7 +303,7 @@ fun List<AndelTilkjentYtelse>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>
         }
 }
 
-fun List<AndelTilkjentYtelse>.erUlike(andreAndeler: List<AndelTilkjentYtelse>): Boolean {
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erUlike(andreAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): Boolean {
     return this.hentPerioderMedEndringerFra(andreAndeler).isNotEmpty()
 }
 
@@ -324,7 +324,7 @@ private fun regelverkavhenigeVilkår(): List<Vilkår> {
     )
 }
 
-fun List<AndelTilkjentYtelse>.hentAndelerForSegment(
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentAndelerForSegment(
     vertikaltSegmentForVedtaksperiode: LocalDateSegment<Int>
 ) = this.filter {
     vertikaltSegmentForVedtaksperiode.localDateInterval.overlaps(
@@ -346,7 +346,7 @@ fun List<AndelTilkjentYtelse>?.hentTidslinje() =
         } ?: emptyList()
     )
 
-fun List<AndelTilkjentYtelse>.tilTidslinjerPerPerson(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilTidslinjerPerPerson(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseTidslinje(
             andelerTilkjentYtelsePåPerson

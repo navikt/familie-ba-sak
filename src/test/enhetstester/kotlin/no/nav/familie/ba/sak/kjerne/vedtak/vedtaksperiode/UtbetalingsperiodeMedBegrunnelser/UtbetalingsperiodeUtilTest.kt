@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
@@ -43,21 +43,21 @@ class UtbetalingsperiodeUtilTest {
 
         val vedtak = lagVedtak()
 
-        val andelPerson1MarsTilApril = lagAndelTilkjentYtelse(
+        val andelPerson1MarsTilApril = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = mars2020,
             tom = april2020,
             beløp = 1000,
             person = person1
         )
 
-        val andelPerson1MaiTilJuli = lagAndelTilkjentYtelse(
+        val andelPerson1MaiTilJuli = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = mai2020,
             tom = juli2020,
             beløp = 1000,
             person = person1
         )
 
-        val andelPerson2MarsTilJuli = lagAndelTilkjentYtelse(
+        val andelPerson2MarsTilJuli = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = mars2020,
             tom = juli2020,
             beløp = 1000,
@@ -117,14 +117,14 @@ class UtbetalingsperiodeUtilTest {
 
         val vedtak = lagVedtak()
 
-        val andelPerson1MarsTilMai = lagAndelTilkjentYtelse(
+        val andelPerson1MarsTilMai = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = mars2020,
             tom = mai2020,
             beløp = 1000,
             person = person1
         )
 
-        val andelPerson2MaiTilJuli = lagAndelTilkjentYtelse(
+        val andelPerson2MaiTilJuli = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = mai2020,
             tom = juli2020,
             beløp = 1000,
@@ -191,14 +191,14 @@ class UtbetalingsperiodeUtilTest {
 
         val vedtak = lagVedtak()
 
-        val andelBarn1MarsTilJuli = lagAndelTilkjentYtelse(
+        val andelBarn1MarsTilJuli = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = mars2020,
             tom = juli2020,
             beløp = 1000,
             person = barn1
         )
 
-        val andelBarn2MarsTilJuli = lagAndelTilkjentYtelse(
+        val andelBarn2MarsTilJuli = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = mars2020,
             tom = juli2020,
             beløp = 2000,
@@ -322,13 +322,13 @@ class UtbetalingsperiodeUtilTest {
         val barn1 = lagPerson()
         val vedtak = lagVedtak()
 
-        val andelBarn1MarsTilApril = lagAndelTilkjentYtelse(
+        val andelBarn1MarsTilApril = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = mars2020,
             tom = april2020,
             beløp = 1000,
             person = barn1
         )
-        val andelBarn1JuliTilJuli = lagAndelTilkjentYtelse(
+        val andelBarn1JuliTilJuli = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = juli2020,
             tom = juli2020,
             beløp = 1000,
@@ -381,7 +381,7 @@ class UtbetalingsperiodeUtilTest {
 
         val vedtak = lagVedtak()
 
-        val andelBarnMarsTilJuli = lagAndelTilkjentYtelse(
+        val andelBarnMarsTilJuli = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = mars2020,
             tom = juli2020,
             beløp = 1000,

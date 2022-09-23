@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentAndelerForSegment
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -118,7 +118,7 @@ data class VedtaksperiodeMedBegrunnelser(
     }
 
     fun hentUtbetalingsperiodeDetaljer(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         personopplysningGrunnlag: PersonopplysningGrunnlag
     ): List<UtbetalingsperiodeDetalj> =
         if (andelerTilkjentYtelse.isEmpty()) {
@@ -145,7 +145,7 @@ data class VedtaksperiodeMedBegrunnelser(
         }
 
     private fun hentVertikaltSegmentForVedtaksperiode(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ) = andelerTilkjentYtelse
         .utledSegmenter()
         .find { localDateSegment ->
@@ -163,7 +163,7 @@ fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
     }
 }
 
-private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
+private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): LocalDateSegment<Int> {
     val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
     return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
         ?: sorterteSegmenter.firstOrNull()

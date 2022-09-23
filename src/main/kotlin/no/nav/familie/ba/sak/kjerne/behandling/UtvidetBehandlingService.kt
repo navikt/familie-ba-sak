@@ -26,7 +26,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -58,16 +58,15 @@ class UtvidetBehandlingService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
-    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val settPåVentService: SettPåVentService,
     private val kompetanseRepository: KompetanseRepository,
     private val endringstidspunktService: EndringstidspunktService,
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val featureToggleService: FeatureToggleService,
-    private val korrigertEtterbetalingService: KorrigertEtterbetalingService
+    private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
-
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
 
@@ -102,6 +101,9 @@ class UtvidetBehandlingService(
         val utenlandskePeriodebeløp =
             if (kanBehandleEøs) utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId) else emptyList()
 
+        val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId)
+
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
             steg = behandling.steg,
@@ -126,7 +128,7 @@ class UtvidetBehandlingService(
             utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
-            endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+            endretUtbetalingAndeler = endreteUtbetalingerMedAndeler
                 .map { it.tilRestEndretUtbetalingAndel() },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             endringstidspunkt = utledEndringstidpunkt(endringstidspunkt, behandling),

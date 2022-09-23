@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
@@ -38,7 +38,7 @@ fun Standardbegrunnelse.triggesForPeriode(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
-    ytelserForrigePeriode: List<AndelTilkjentYtelse>
+    ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): Boolean {
     val triggesAv = this.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
 
@@ -105,7 +105,7 @@ fun Standardbegrunnelse.triggesForPeriode(
 }
 
 fun dødeBarnForrigePeriode(
-    ytelserForrigePeriode: List<AndelTilkjentYtelse>,
+    ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     barnIBehandling: List<MinimertPerson>
 ): List<String> {
     return barnIBehandling.filter { barn ->
@@ -115,9 +115,9 @@ fun dødeBarnForrigePeriode(
         var barnDødeForrigePeriode = false
         if (barn.erDød() && ytelserForrigePeriodeForBarn.isNotEmpty()) {
             val fom =
-                ytelserForrigePeriodeForBarn.minOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadFom }
+                ytelserForrigePeriodeForBarn.minOf { it.stønadFom }
             val tom =
-                ytelserForrigePeriodeForBarn.maxOf { andelTilkjentYtelse: AndelTilkjentYtelse -> andelTilkjentYtelse.stønadTom }
+                ytelserForrigePeriodeForBarn.maxOf { it.stønadTom }
             val fomFørDødsfall = fom <= barn.dødsfallsdato!!.toYearMonth()
             val tomEtterDødsfall = tom >= barn.dødsfallsdato.toYearMonth()
             barnDødeForrigePeriode = fomFørDødsfall && tomEtterDødsfall

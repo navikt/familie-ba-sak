@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -258,24 +258,24 @@ class VedtaksperiodeServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr, barn2Fnr))
 
-        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             aktør = barn1
         )
-        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             aktør = barn2
         )
 
-        val andelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 5),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
             aktør = barn1
         )
-        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
@@ -324,30 +324,30 @@ class VedtaksperiodeServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr, barn2Fnr))
 
-        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             aktør = barn1
         )
-        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             aktør = barn2
         )
 
-        val andelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 6),
             behandling = behandling,
             aktør = barn1
         )
-        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 8),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
             aktør = barn1
         )
-        val andelTilkjentYtelse3 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse3 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
@@ -390,36 +390,36 @@ class VedtaksperiodeServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr, barn2Fnr))
 
-        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             aktør = barn1
         )
-        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             aktør = barn2
         )
 
-        val andelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 4),
             behandling = behandling,
             aktør = barn1
         )
-        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 8),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
             aktør = barn1
         )
-        val andelTilkjentYtelse3 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse3 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 4),
             behandling = behandling,
             aktør = barn2
         )
-        val andelTilkjentYtelse4 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse4 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 6),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
@@ -480,30 +480,30 @@ class VedtaksperiodeServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr, barn2Fnr))
 
-        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+        val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             aktør = barn1
         )
-        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+        val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             aktør = barn2
         )
 
-        val andelTilkjentYtelse1 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 4),
             behandling = behandling,
             aktør = barn1
         )
-        val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 8),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
             aktør = barn1
         )
-        val andelTilkjentYtelse3 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelse3 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 6),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,

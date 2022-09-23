@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedTaskDto
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
@@ -25,7 +25,7 @@ import java.util.Properties
 )
 class SendVedtakTilInfotrygdTask(
     private val infotrygdFeedClient: InfotrygdFeedClient,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -40,11 +40,11 @@ class SendVedtakTilInfotrygdTask(
     }
 
     private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDate {
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandlingId)
+        val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
 
-        return if (andelerTilkjentYtelse.isNotEmpty()) {
-            val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
+        return if (andelerMedEndringer.isNotEmpty()) {
+            val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerMedEndringer)
                 .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                 .first()
             førsteUtbetalingsperiode.fom

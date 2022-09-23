@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -32,8 +33,8 @@ data class UtvidetBarnetrygdGenerator(
 
     fun lagUtvidetBarnetrygdAndeler(
         utvidetVilkår: List<VilkårResultat>,
-        andelerBarna: List<AndelTilkjentYtelse>
-    ): List<AndelTilkjentYtelse> {
+        andelerBarna: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         if (utvidetVilkår.isEmpty() || andelerBarna.isEmpty()) return emptyList()
 
         val søkerAktør = utvidetVilkår.first().personResultat?.aktør ?: error("Vilkår mangler PersonResultat")
@@ -51,7 +52,7 @@ data class UtvidetBarnetrygdGenerator(
 
         val sammenslåttTidslinje = kombinerTidslinjer(utvidaTidslinje, barnasTidslinje)
 
-        val utvidetAndeler: List<AndelTilkjentYtelse> = sammenslåttTidslinje.toSegments()
+        val utvidetAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger> = sammenslåttTidslinje.toSegments()
             .filter { segment -> segment.value.any { it.rolle == PersonType.BARN } && segment.value.any { it.rolle == PersonType.SØKER } }
             .flatMap { segment ->
                 lagAndelerForSegmentBasertPåSatsperioder(segment, søkerAktør)
@@ -70,7 +71,7 @@ data class UtvidetBarnetrygdGenerator(
     private fun lagAndelerForSegmentBasertPåSatsperioder(
         segment: LocalDateSegment<List<PeriodeData>>,
         søkerAktør: Aktør
-    ): List<AndelTilkjentYtelse> {
+    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val ordinæreSatserForPeriode = SatsService.hentGyldigSatsFor(
             satstype = SatsType.ORBA,
             stønadFraOgMed = segment.fom.toYearMonth(),
@@ -87,7 +88,7 @@ data class UtvidetBarnetrygdGenerator(
 
         return ordinæreSatserForPeriode.map { satsperiode ->
             val nasjonaltPeriodebeløp = satsperiode.sats.avrundetHeltallAvProsent(prosentForPeriode)
-            AndelTilkjentYtelse(
+            val andelTilkjentYtelse = AndelTilkjentYtelse(
                 behandlingId = behandlingId,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = søkerAktør,
@@ -99,12 +100,14 @@ data class UtvidetBarnetrygdGenerator(
                 sats = satsperiode.sats,
                 prosent = prosentForPeriode
             )
+
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
         }
     }
 
     data class PeriodeData(val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
 
-    private fun utledTidslinjeForBarna(andelerBarna: List<AndelTilkjentYtelse>): LocalDateTimeline<List<PeriodeData>> {
+    private fun utledTidslinjeForBarna(andelerBarna: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): LocalDateTimeline<List<PeriodeData>> {
         val barnasTidslinjer = andelerBarna
             .groupBy { it.aktør }
             .map { lagTidslinjeForBarn(identMedAndeler = it) }
@@ -119,7 +122,7 @@ data class UtvidetBarnetrygdGenerator(
         return LocalDateTimeline(barnasSegmenterSlåttSammenHvisLikProsent)
     }
 
-    private fun lagTidslinjeForBarn(identMedAndeler: Map.Entry<Aktør, List<AndelTilkjentYtelse>>) =
+    private fun lagTidslinjeForBarn(identMedAndeler: Map.Entry<Aktør, List<AndelTilkjentYtelseMedEndreteUtbetalinger>>) =
         LocalDateTimeline(
             identMedAndeler.value.map {
                 lagSegmentMedPeriodeData(
