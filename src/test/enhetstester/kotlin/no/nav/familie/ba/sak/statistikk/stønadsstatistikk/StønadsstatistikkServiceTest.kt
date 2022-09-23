@@ -28,6 +28,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.eksterne.kontrakter.BehandlingTypeV2
+import no.nav.familie.eksterne.kontrakter.BehandlingÅrsakV2
+import no.nav.familie.eksterne.kontrakter.FagsakType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,6 +38,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import java.lang.reflect.Field
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -164,27 +168,31 @@ internal class StønadsstatistikkServiceTest(
     /**
      * Nye årsaker må legges til VedtakDVH i familie-eksterne-kontrakter når det legges til i Behandling
      *
-     * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en årsak, så må man være sikker på at det ikke er sendt
-     * et slik vedtak til stønaddstatistikk.
+     * Endringenen MÅ være BAKOVERKOMPATIBEL. Hvis man f.eks. endrer navn på en BehandlingÅrsak, så må man være sikker på at det ikke er sendt
+     * et slik vedtak til stønaddstatistikk. Den nye kontrakten skal kunne brukes til å lese ALLE meldinger på topic
      *
      * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVH og ikke slette gamle
      *
      */
     @Test
     fun `Skal gi feil hvis det kommer en ny BehandlingÅrsak som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
-        val behandlingsÅrsakIBASak = enumValues<BehandlingÅrsak>().map { it.name }
+        val behandlingsÅrsakIBASak =
+            enumValues<BehandlingÅrsak>()
+                .filter { it != BehandlingÅrsak.TEKNISK_OPPHØR } // IKke i bruk lenger
+                .map { it.name }
         val behandlingsÅrsakFraEksternKontrakt =
-            enumValues<no.nav.familie.eksterne.kontrakter.BehandlingÅrsak>().map { it.name }
+            ikkeAvvikleteEnumverdier<BehandlingÅrsakV2>()
 
-        assertThat(behandlingsÅrsakIBASak).hasSize(behandlingsÅrsakFraEksternKontrakt.size)
+        assertThat(behandlingsÅrsakIBASak)
+            .hasSize(behandlingsÅrsakFraEksternKontrakt.size)
             .containsAll(behandlingsÅrsakFraEksternKontrakt)
     }
 
     /**
      * Nye AnnenForeldersAktivitet må legges til VedtakDVHV2 i familie-eksterne-kontrakter når det legges til i Behandling
      *
-     * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en AnnenForeldersAktivitet, så må man være sikker på at det ikke er sendt
-     * et slik vedtak til stønaddstatistikk.
+     * Endringenen MÅ være BAKOVERKOMPATIBEL. Hvis man f.eks. endrer navn på en AnnenForeldersAktivitet, så må man være sikker på at det ikke er sendt
+     * et slik vedtak til stønaddstatistikk. Den nye kontrakten skal kunne brukes til å lese ALLE meldinger på topic
      *
      * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVHV2 og ikke slette gamle
      *
@@ -193,17 +201,18 @@ internal class StønadsstatistikkServiceTest(
     fun `Skal gi feil hvis det kommer en ny AnnenForeldersAktivitet som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val annenForeldersAktivitet = enumValues<AnnenForeldersAktivitet>().map { it.name }
         val annenForeldersAktivitetFraEksternKontrakt =
-            enumValues<no.nav.familie.eksterne.kontrakter.AnnenForeldersAktivitet>().map { it.name }
+            ikkeAvvikleteEnumverdier<no.nav.familie.eksterne.kontrakter.AnnenForeldersAktivitet>()
 
-        assertThat(annenForeldersAktivitet).hasSize(annenForeldersAktivitetFraEksternKontrakt.size)
+        assertThat(annenForeldersAktivitet)
+            .hasSize(annenForeldersAktivitetFraEksternKontrakt.size)
             .containsAll(annenForeldersAktivitetFraEksternKontrakt)
     }
 
     /**
      * Nye søkersAktivitet må legges til VedtakDVHV2 i familie-eksterne-kontrakter når det legges til i Behandling
      *
-     * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en SøkersAktivitet, så må man være sikker på at det ikke er sendt
-     * et slik vedtak til stønaddstatistikk.
+     * Endringenen MÅ være BAKOVERKOMPATIBEL. Hvis man f.eks. endrer navn på en SøkersAktivitet, så må man være sikker på at det ikke er sendt
+     * et slik vedtak til stønaddstatistikk. Den nye kontrakten skal kunne brukes til å lese ALLE meldinger på topic
      *
      * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVHV2 og ikke slette gamle
      *
@@ -212,17 +221,18 @@ internal class StønadsstatistikkServiceTest(
     fun `Skal gi feil hvis det kommer en ny søkersAktivitet som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val søkersAktivitet = enumValues<SøkersAktivitet>().map { it.name }
         val søkersAktivitetFraEksternKontrakt =
-            enumValues<no.nav.familie.eksterne.kontrakter.SøkersAktivitet>().map { it.name }
+            ikkeAvvikleteEnumverdier<no.nav.familie.eksterne.kontrakter.SøkersAktivitet>()
 
         assertThat(søkersAktivitetFraEksternKontrakt)
-            .containsAll(søkersAktivitet)
+            .hasSize(søkersAktivitet.size)
+            .containsAll(søkersAktivitetFraEksternKontrakt)
     }
 
     /**
      * Nye KompetanseResultat må legges til VedtakDVHV2 i familie-eksterne-kontrakter når det legges til i Behandling
      *
-     * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en KompetanseResultat, så må man være sikker på at det ikke er sendt
-     * et slik vedtak til stønaddstatistikk.
+     * Endringenen MÅ være BAKOVERKOMPATIBEL. Hvis man f.eks. endrer navn på en KompetanseResultat, så må man være sikker på at det ikke er sendt
+     * et slik vedtak til stønaddstatistikk. Den nye kontrakten skal kunne brukes til å lese ALLE meldinger på topic
      *
      * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVHV2 og ikke slette gamle
      *
@@ -231,28 +241,62 @@ internal class StønadsstatistikkServiceTest(
     fun `Skal gi feil hvis det kommer en ny KompetanseResultat som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val kompetanseResultat = enumValues<KompetanseResultat>().map { it.name }
         val kompetanseResultatFraEksternKontrakt =
-            enumValues<no.nav.familie.eksterne.kontrakter.KompetanseResultat>().map { it.name }
+            ikkeAvvikleteEnumverdier<no.nav.familie.eksterne.kontrakter.KompetanseResultat>()
 
-        assertThat(kompetanseResultat).hasSize(kompetanseResultatFraEksternKontrakt.size)
+        assertThat(kompetanseResultat)
+            .hasSize(kompetanseResultatFraEksternKontrakt.size)
             .containsAll(kompetanseResultatFraEksternKontrakt)
     }
 
     /**
-     * Nye behandlingstyper må legges til VedtakDVH i familie-eksterne-kontrakter når det legges til i Behandling
+     * Nye behandlingstyper må legges til VedtakDVH2 i familie-eksterne-kontrakter når det legges til i Behandling
      *
-     * Endringenen må være bakoverkompatibel. Hvis man f.eks. endrer navn på en type, så må man være sikker på at det ikke er sendt
-     * et slik vedtak til stønaddstatistikk.
+     * Endringenen MÅ være BAKOVERKOMPATIBEL. Hvis man f.eks. endrer navn på en BehandlingType, så må man være sikker på at det ikke er sendt
+     * et slik vedtak til stønaddstatistikk. Den nye kontrakten skal kunne brukes til å lese ALLE meldinger på topic
      *
      * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVH og ikke slette gamle
      *
      */
     @Test
-    fun `Skal gi feil hvis det kommer en ny BehandlingType som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk`() {
+    fun `Skal gi feil hvis det kommer en ny BehandlingType som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val behandlingsTypeIBasak = enumValues<BehandlingType>().map { it.name }
-        val behandlingsTypeFraStønadskontrakt =
-            enumValues<no.nav.familie.eksterne.kontrakter.BehandlingType>().map { it.name }
+            .filter { it != BehandlingType.TEKNISK_OPPHØR.name } // TEKNISK_OPPHØR er ikke i bruk
+        val behandlingsTypeFraStønadskontrakt = ikkeAvvikleteEnumverdier<BehandlingTypeV2>()
 
-        assertThat(behandlingsTypeIBasak).hasSize(behandlingsTypeFraStønadskontrakt.size)
+        assertThat(behandlingsTypeIBasak)
+            .hasSize(behandlingsTypeFraStønadskontrakt.size)
             .containsAll(behandlingsTypeFraStønadskontrakt)
+    }
+
+    /**
+     * Nye fagsaktyper må legges til VedtakDVH2 i familie-eksterne-kontrakter når det legges til i Behandling
+     *
+     * Endringenen MÅ være BAKOVERKOMPATIBEL. Hvis man f.eks. endrer navn på en FagsakType, så må man være sikker på at det ikke er sendt
+     * et slik vedtak til stønaddstatistikk. Den nye kontrakten skal kunne brukes til å lese ALLE meldinger på topic
+     *
+     * Hvis det er sendt et slik vedtak, så legger man heller til den nye verdien i VedtakDVH og ikke slette gamle
+     *
+     */
+    @Test
+    fun `Skal gi feil hvis det kommer en ny FagsakType som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
+        val behandlingsTypeIBasak = enumValues<no.nav.familie.ba.sak.kjerne.fagsak.FagsakType>().map { it.name }
+        val behandlingsTypeFraStønadskontrakt = ikkeAvvikleteEnumverdier<FagsakType>()
+
+        assertThat(behandlingsTypeIBasak)
+            .hasSize(behandlingsTypeFraStønadskontrakt.size)
+            .containsAll(behandlingsTypeFraStønadskontrakt)
+    }
+
+    inline fun <reified T : Enum<T>> ikkeAvvikleteEnumverdier(): List<String> {
+        return enumValues<T>().filter { value ->
+            try {
+                val field: Field = T::class.java.getField(value.name)
+                return@filter !field.isAnnotationPresent(Deprecated::class.java)
+            } catch (e: NoSuchFieldException) {
+                return@filter false
+            } catch (e: SecurityException) {
+                return@filter false
+            }
+        }.map { it.name }
     }
 }
