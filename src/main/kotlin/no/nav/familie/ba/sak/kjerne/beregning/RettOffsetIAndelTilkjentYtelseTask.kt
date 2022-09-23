@@ -32,36 +32,35 @@ class RettOffsetIAndelTilkjentYtelseTask(
     private fun køyrTask(payload: RettOffsetIAndelTilkjentYtelseDto) {
         val behandlingerMedFeilaktigeOffsets = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
 
-        if (behandlingerMedFeilaktigeOffsets.isNotEmpty()) {
-            logger.warn(
-                "Behandlinger med feilaktige offsets: ${
-                behandlingerMedFeilaktigeOffsets.map { it.id }.joinToString(separator = ",")
-                }"
-            )
-        }
+        logger.warn(
+            "Behandlinger med feilaktige offsets: ${
+            behandlingerMedFeilaktigeOffsets.map { it.id }.joinToString(separator = ",")
+            }"
+        )
+
 
         val relevanteBehandlinger = finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilaktigeOffsets)
 
         logger.warn(
-            "Behandlinger med duplisert offset:\n ${
-            relevanteBehandlinger.map { it.id }.joinToString(",")
+            "Relevante behandlinger:\n ${
+                relevanteBehandlinger.map { it.id }.joinToString(",")
             }"
         )
+
+        val behandlingIderSomIkkeKanOppdateres = mutableListOf<Long>()
 
         relevanteBehandlinger
             .forEach {
                 val andelerSomSendesTilOppdrag =
                     beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = it.id)
+
                 val forrigeBehandling =
                     behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = it)
-                if (forrigeBehandling == null) {
-                    logger.warn("Fant ikke forrige behandling for behandling $it")
-                    return
-                }
 
-                if (andelerSomSendesTilOppdrag.isNotEmpty()) {
+                if (andelerSomSendesTilOppdrag.isNotEmpty() && forrigeBehandling != null) {
                     val andelerFraForrigeBehandling =
                         beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
+
                     val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerSomSendesTilOppdrag),
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerFraForrigeBehandling)
@@ -78,11 +77,32 @@ class RettOffsetIAndelTilkjentYtelseTask(
                     if (!payload.simuler) {
                         beståendeAndelerMedOppdatertOffset.forEach { oppdatering -> oppdatering.oppdater() }
                     }
+                } else {
+                    if (andelerSomSendesTilOppdrag.isEmpty()) {
+                        logger.warn("Fant ingen andeler som skal sendes til oppdrag for behandling $it")
+                    }
+                    if (forrigeBehandling == null) {
+                        logger.warn("Fant ikke forrige behandling for behandling $it")
+                    }
+                    behandlingIderSomIkkeKanOppdateres.add(it.id)
                 }
             }
 
-        val diff = behandlingerMedFeilaktigeOffsets.minus(relevanteBehandlinger.toSet())
-        if (diff.isNotEmpty()) logger.warn("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling som er avslutta: $diff")
+        val behandlingIderSomFaktiskBleOppdatert = relevanteBehandlinger.map { it.id }.minus(behandlingIderSomIkkeKanOppdateres)
+
+        logger.warn(
+            "Behandlinger som ble oppdatert:\n ${
+                behandlingIderSomFaktiskBleOppdatert.joinToString(",")
+            }"
+        )
+        logger.warn(
+            "Behandlinger som var relevant, men ikke kunne oppdateres:\n ${
+                behandlingIderSomIkkeKanOppdateres.joinToString(",")
+            }"
+        )
+
+        val behandlingerMedNyereBehandlingSomErAvsluttet = behandlingerMedFeilaktigeOffsets.minus(relevanteBehandlinger.toSet())
+        if (behandlingerMedNyereBehandlingSomErAvsluttet.isNotEmpty()) logger.warn("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling som er avslutta: $behandlingerMedNyereBehandlingSomErAvsluttet")
     }
 
     private fun finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilaktigeOffsets: List<Behandling>) =
