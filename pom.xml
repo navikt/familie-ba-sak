@@ -41,6 +41,19 @@
         <mock-oauth2-server.version>0.5.3</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
+        <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
+        <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
+        <postgresql.version>42.4.1</postgresql.version>
+        <testcontainers.postgresql.version>1.17.3</testcontainers.postgresql.version>
+        <httpclient.version>4.5.13</httpclient.version>
+        <httpcore.version>4.4.15</httpcore.version>
+        <unleash.version>4.4.1</unleash.version>
+        <maven.model.version>3.8.6</maven.model.version>
+        <jackson.module.kotlin.version>2.13.4</jackson.module.kotlin.version>
+        <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
+        <fpsak-tidslinje.version>2.6.4</fpsak-tidslinje.version>
+        <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
+
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
@@ -91,7 +104,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
-            <version>2.13.4</version>
+            <version>${jackson.module.kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -116,43 +129,43 @@
         <dependency>
             <groupId>com.papertrailapp</groupId>
             <artifactId>logback-syslog4j</artifactId>
-            <version>1.0.0</version>
+            <version>${logback-syslog4j.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.4.1</version>
+            <version>${postgresql.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.17.3</version>
+            <version>${testcontainers.postgresql.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
+            <version>${httpclient.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.4.15</version>
+            <version>${httpcore.version}</version>
         </dependency>
 
         <dependency>
             <groupId>no.finn.unleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>4.4.1</version>
+            <version>${unleash.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-model</artifactId>
-            <version>3.8.6</version>
+            <version>${maven.model.version}</version>
         </dependency>
 
         <dependency>
@@ -189,7 +202,7 @@
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-test-support</artifactId>
-            <version>2.0.5</version>
+            <version>${token-validation-test-support.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -274,7 +287,7 @@
         <dependency>
             <groupId>no.nav.fpsak.tidsserie</groupId>
             <artifactId>fpsak-tidsserie</artifactId>
-            <version>2.6.4</version>
+            <version>${fpsak-tidslinje.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.eksterne.kontrakter</groupId>
@@ -318,7 +331,7 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility-kotlin</artifactId>
-            <version>4.2.0</version>
+            <version>${awaitility-kotlin.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -335,7 +348,7 @@
         <dependency>
             <groupId>com.worldturner.medeia</groupId>
             <artifactId>medeia-validator-jackson</artifactId>
-            <version>1.1.1</version>
+            <version>${medeia-validator-jackson.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
