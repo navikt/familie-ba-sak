@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.integrasjoner.økonomi.OffsetOppdatering
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -42,8 +43,12 @@ class RettOffsetIAndelTilkjentYtelseTask(
             .map { it.fagsak }
             .map { behandlingHentOgPersisterService.hentBehandlinger(it.id).sortedBy { behandling -> behandling.id } }
             .map { it.last() }
-            .filter { true
-                // todo: ta bort dei som har nyare behandling som ikkje er open
+            .filter {
+                behandlingerMedFeilaktigeOffsets.contains(it) || arrayOf(
+                    BehandlingStatus.OPPRETTET,
+                    BehandlingStatus.UTREDES,
+                    BehandlingStatus.FATTER_VEDTAK
+                ).any { status -> status == it.status }
             }
 
         secureLogger.warn(
@@ -98,6 +103,5 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
 data class RettOffsetIAndelTilkjentYtelseDto(
     val simuler: Boolean,
-    val kunBehandlingerSomErSistePåFagsak: Boolean,
     val behandlinger: List<Long>
 )

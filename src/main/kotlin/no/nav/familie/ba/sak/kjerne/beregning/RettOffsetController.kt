@@ -21,7 +21,6 @@ class RettOffsetController(val task: RettOffsetIAndelTilkjentYtelseTask) {
     fun simuler(@RequestBody behandlinger: Behandlingider) {
         val input = RettOffsetIAndelTilkjentYtelseDto(
             simuler = true,
-            kunBehandlingerSomErSistePåFagsak = true,
             behandlinger = behandlinger.behandlinger
         )
         task.doTask(
