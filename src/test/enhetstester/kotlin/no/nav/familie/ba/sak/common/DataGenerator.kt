@@ -16,10 +16,12 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -163,7 +165,8 @@ fun lagBehandling(
     skalBehandlesAutomatisk: Boolean = false,
     førsteSteg: StegType = FØRSTE_STEG,
     resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
-    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+    status: BehandlingStatus = initStatus(),
 ) =
     Behandling(
         id = nesteBehandlingId(),
@@ -173,7 +176,8 @@ fun lagBehandling(
         kategori = behandlingKategori,
         underkategori = underkategori,
         opprettetÅrsak = årsak,
-        resultat = resultat
+        resultat = resultat,
+        status = status,
     ).also {
         it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
     }

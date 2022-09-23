@@ -96,7 +96,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
         }
     }
 
-    private fun finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilaktigeOffsets: List<Behandling>) =
+    fun finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilaktigeOffsets: List<Behandling>) =
         behandlingerMedFeilaktigeOffsets.filter { behandling ->
             val alleBehandlingerPåFagsak =
                 behandlingHentOgPersisterService.hentBehandlinger(fagsakId = behandling.fagsak.id)
