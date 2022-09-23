@@ -20,7 +20,7 @@ class RettOffsetController(
     val behandlingRepository: BehandlingRepository
 ) {
 
-    @PostMapping("/simuler")
+    @PostMapping("/simuler-offset-fix")
     @Transactional
     fun simuler() {
         val behandlingerMedDuplikateOffset = behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse()
