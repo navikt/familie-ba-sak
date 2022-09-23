@@ -247,7 +247,8 @@ fun lagAndelTilkjentYtelse(
         forrigePeriodeOffset = forrigeperiodeIdOffset,
         sats = beløp,
         prosent = prosent,
-        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList()
+        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList(),
+        kildeBehandlingId = behandling.id
     )
 }
 

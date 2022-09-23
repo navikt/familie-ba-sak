@@ -71,7 +71,7 @@ internal class RettOffsetIAndelTilkjentYtelseTaskTest(
                 .distinct()
         ).hasSize(5)
 
-        val input = RettOffsetIAndelTilkjentYtelseDto(simuler = false, behandlinger = listOf(behandling2))
+        val input = RettOffsetIAndelTilkjentYtelseDto(simuler = false, behandlinger = setOf(behandling2))
 
         TransactionTemplate(transactionManager).execute {
             task.doTask(Task(type = "", payload = objectMapper.writeValueAsString(input)))
