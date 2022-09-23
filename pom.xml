@@ -45,8 +45,6 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <postgresql.version>42.4.1</postgresql.version>
         <testcontainers.postgresql.version>1.17.3</testcontainers.postgresql.version>
-        <httpclient.version>4.5.13</httpclient.version>
-        <httpcore.version>4.4.15</httpcore.version>
         <unleash.version>4.4.1</unleash.version>
         <maven.model.version>3.8.6</maven.model.version>
         <jackson.module.kotlin.version>2.13.4</jackson.module.kotlin.version>
@@ -142,18 +140,6 @@
             <artifactId>postgresql</artifactId>
             <version>${testcontainers.postgresql.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${httpclient.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>${httpcore.version}</version>
         </dependency>
 
         <dependency>
