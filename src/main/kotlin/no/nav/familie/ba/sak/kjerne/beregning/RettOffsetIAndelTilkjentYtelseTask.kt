@@ -91,7 +91,8 @@ class RettOffsetIAndelTilkjentYtelseTask(
         if (behandlingerMedNyereBehandlingSomErAvsluttet.isNotEmpty()) {
             loggBehandlingIder(
                 "Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling som er avslutta",
-                behandlingerMedNyereBehandlingSomErAvsluttet.map { it.id })
+                behandlingerMedNyereBehandlingSomErAvsluttet.map { it.id }
+            )
         }
     }
 
@@ -120,7 +121,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
     private fun loggBehandlingIder(tekst: String, behandlingIder: List<Long>) {
         logger.warn(
             "$tekst: ${
-                behandlingIder.joinToString(separator = ",")
+            behandlingIder.joinToString(separator = ",")
             }"
         )
     }

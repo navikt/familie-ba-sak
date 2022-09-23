@@ -546,9 +546,9 @@ internal class ØkonomiUtilsTest {
                 periodeIdOffset = 0,
                 forrigeperiodeIdOffset = null,
                 behandling = forrigeBehandling
-            ),
-
             )
+
+        )
 
         val andelerIDenneBehandlingen = listOf(
             lagAndelTilkjentYtelse(
@@ -590,7 +590,7 @@ internal class ØkonomiUtilsTest {
                 periodeIdOffset = 3,
                 forrigeperiodeIdOffset = 2,
                 behandling = behandling
-            ),
+            )
         )
 
         val oppdateringer = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
@@ -640,9 +640,9 @@ internal class ØkonomiUtilsTest {
                 periodeIdOffset = 0,
                 forrigeperiodeIdOffset = null,
                 behandling = forrigeBehandling
-            ),
-
             )
+
+        )
 
         val andelerIDenneBehandlingen = listOf(
             lagAndelTilkjentYtelse(
@@ -674,7 +674,7 @@ internal class ØkonomiUtilsTest {
                 periodeIdOffset = 2,
                 forrigeperiodeIdOffset = null,
                 behandling = behandling
-            ),
+            )
         )
 
         val oppdateringer = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
@@ -753,7 +753,7 @@ internal class ØkonomiUtilsTest {
                 periodeIdOffset = 1,
                 forrigeperiodeIdOffset = 0,
                 behandling = forrigeBehandling
-            ),
+            )
         )
 
         val andelerIDenneBehandlingen = listOf(
@@ -796,7 +796,7 @@ internal class ØkonomiUtilsTest {
                 periodeIdOffset = null,
                 forrigeperiodeIdOffset = null,
                 behandling = behandling
-            ),
+            )
         )
 
         val oppdateringer = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
