@@ -79,6 +79,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
         val behandlingIderSomFaktiskBleOppdatert =
             relevanteBehandlinger.map { it.id }.minus(behandlingIderSomIkkeKanOppdateres)
+
         loggBehandlingIder("Behandlinger som ble oppdatert", behandlingIderSomFaktiskBleOppdatert)
         loggBehandlingIder(
             "Behandlinger som var relevant, men ikke kunne oppdateres",
@@ -86,7 +87,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
         )
 
         val behandlingerMedNyereBehandlingSomErAvsluttet =
-            behandlingerMedFeilaktigeOffsets.minus(relevanteBehandlinger.toSet())
+            behandlingerMedFeilaktigeOffsets.minus(relevanteBehandlinger)
         if (behandlingerMedNyereBehandlingSomErAvsluttet.isNotEmpty()) {
             loggBehandlingIder(
                 "Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling som er avslutta",
