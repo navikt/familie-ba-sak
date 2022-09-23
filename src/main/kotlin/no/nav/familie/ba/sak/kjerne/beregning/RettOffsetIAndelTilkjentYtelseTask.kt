@@ -69,11 +69,11 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 }
 
                 if (andelerSomSendesTilOppdrag.isNotEmpty()) {
+                    val andelerFraForrigeBehandling =
+                        beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
                     val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerSomSendesTilOppdrag),
-                        forrigeKjeder = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                            forrigeBehandling.id
-                        ).let { ØkonomiUtils.kjedeinndelteAndeler(it) }
+                        forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerFraForrigeBehandling)
                     )
 
                     val logglinjer =
