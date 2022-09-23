@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.integrasjoner.økonomi.OffsetOppdatering
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -19,10 +17,8 @@ import org.springframework.stereotype.Service
     maxAntallFeil = 1
 )
 class RettOffsetIAndelTilkjentYtelseTask(
-    val behandlingRepository: BehandlingRepository,
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    val beregningService: BeregningService,
-    val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    val beregningService: BeregningService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -32,7 +28,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
     }
 
     private fun køyrTask(payload: RettOffsetIAndelTilkjentYtelseDto) {
-        val behandlingerMedFeilaktigeOffsets = payload.behandlinger.map { behandlingRepository.finnBehandling(it) }
+        val behandlingerMedFeilaktigeOffsets = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
 
         if (behandlingerMedFeilaktigeOffsets.isNotEmpty()) {
             secureLogger.warn(
@@ -44,15 +40,17 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
         val relevanteBehandlinger = behandlingerMedFeilaktigeOffsets
             .map { it.fagsak }
-            .map { behandlingRepository.finnBehandlinger(it.id).sortedBy { behandling -> behandling.id } }
+            .map { behandlingHentOgPersisterService.hentBehandlinger(it.id).sortedBy { behandling -> behandling.id } }
             .map { it.last() }
-            .filter {
-                if (payload.kunBehandlingerSomErSistePåFagsak) {
-                    behandlingerMedFeilaktigeOffsets.contains(it)
-                } else {
-                    !behandlingerMedFeilaktigeOffsets.contains(it)
-                }
+            .filter { true
+                // todo: ta bort dei som har nyare behandling som ikkje er open
             }
+
+        secureLogger.warn(
+            "Behandlinger med duplisert offset:\n ${
+            relevanteBehandlinger.map { it.id }.joinToString(",")
+            }"
+        )
 
         relevanteBehandlinger
             .forEach {
@@ -85,10 +83,8 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 }
             }
 
-        if (payload.kunBehandlingerSomErSistePåFagsak) {
-            val diff = behandlingerMedFeilaktigeOffsets.minus(relevanteBehandlinger.toSet())
-            if (diff.isNotEmpty()) secureLogger.warn("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling: $diff")
-        }
+        val diff = behandlingerMedFeilaktigeOffsets.minus(relevanteBehandlinger.toSet())
+        if (diff.isNotEmpty()) secureLogger.warn("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling som er avslutta: $diff")
     }
 
     private fun formaterLogglinje(oppdatering: OffsetOppdatering) =
