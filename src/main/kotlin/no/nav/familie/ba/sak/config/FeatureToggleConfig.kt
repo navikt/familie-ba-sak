@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.config
 
-import no.finn.unleash.DefaultUnleash
-import no.finn.unleash.UnleashContext
-import no.finn.unleash.UnleashContextProvider
-import no.finn.unleash.strategy.GradualRolloutRandomStrategy
-import no.finn.unleash.strategy.Strategy
-import no.finn.unleash.util.UnleashConfig
+import io.getunleash.DefaultUnleash
+import io.getunleash.UnleashContext
+import io.getunleash.UnleashContextProvider
+import io.getunleash.strategy.GradualRolloutRandomStrategy
+import io.getunleash.strategy.Strategy
+import io.getunleash.util.UnleashConfig
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
