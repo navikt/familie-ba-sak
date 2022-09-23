@@ -168,7 +168,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                 and aty.periodeOffset is null
                 and b.status = 'AVSLUTTET'
                 and b.resultat not in (:ugyldigeResultater)
-                and b.endretTidspunkt > '2022-09-04'"""
+                and aty.endretTidspunkt > '2022-09-04'"""
     )
     fun finnBehandlingerMedFeilNullOffsetsForAndelTilkjentYtelse(ugyldigeResultater: List<Behandlingsresultat>): List<Long>
 }
