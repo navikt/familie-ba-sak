@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.integrasjoner.økonomi.OffsetOppdatering
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -39,17 +40,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
             )
         }
 
-        val relevanteBehandlinger = behandlingerMedFeilaktigeOffsets
-            .map { it.fagsak }
-            .map { behandlingHentOgPersisterService.hentBehandlinger(it.id).sortedBy { behandling -> behandling.id } }
-            .map { it.last() }
-            .filter {
-                behandlingerMedFeilaktigeOffsets.contains(it) || arrayOf(
-                    BehandlingStatus.OPPRETTET,
-                    BehandlingStatus.UTREDES,
-                    BehandlingStatus.FATTER_VEDTAK
-                ).any { status -> status == it.status }
-            }
+        val relevanteBehandlinger = finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilaktigeOffsets)
 
         logger.warn(
             "Behandlinger med duplisert offset:\n ${
@@ -93,6 +84,28 @@ class RettOffsetIAndelTilkjentYtelseTask(
         val diff = behandlingerMedFeilaktigeOffsets.minus(relevanteBehandlinger.toSet())
         if (diff.isNotEmpty()) logger.warn("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling som er avslutta: $diff")
     }
+
+    private fun finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilaktigeOffsets: List<Behandling>) =
+        behandlingerMedFeilaktigeOffsets.filter { behandling ->
+            val alleBehandlingerPåFagsak =
+                behandlingHentOgPersisterService.hentBehandlinger(fagsakId = behandling.fagsak.id)
+
+            val behandlingerOpprettetEtterDenneBehandlingen =
+                alleBehandlingerPåFagsak.filter { it.opprettetTidspunkt.isAfter(behandling.opprettetTidspunkt) }
+
+            val godkjenteStatuserPåSenereBehandling =
+                listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES, BehandlingStatus.FATTER_VEDTAK)
+
+            val finnesUgyldigBehandlingEtterDenne =
+                behandlingerOpprettetEtterDenneBehandlingen.filter { it.status !in godkjenteStatuserPåSenereBehandling }
+                    .isNotEmpty()
+
+            if (finnesUgyldigBehandlingEtterDenne) {
+                secureLogger.warn("Behandling $behandling blir ikke oppdatert fordi det finnes senere behandling som er avsluttet")
+            }
+
+            !finnesUgyldigBehandlingEtterDenne
+        }
 
     private fun formaterLogglinje(oppdatering: OffsetOppdatering) =
         "Oppdaterer andel tilkjent ytelse ${oppdatering.beståendeAndelSomSkalHaOppdatertOffset} med periodeoffset=${oppdatering.periodeOffset}, forrigePeriodeOffset=${oppdatering.forrigePeriodeOffset} og kildeBehandlingId=${oppdatering.kildeBehandlingId}"
