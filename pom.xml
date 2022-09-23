@@ -45,7 +45,7 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <postgresql.version>42.4.1</postgresql.version>
         <testcontainers.postgresql.version>1.17.3</testcontainers.postgresql.version>
-        <unleash.version>4.4.1</unleash.version>
+        <unleash.version>6.0.1</unleash.version>
         <maven.model.version>3.8.6</maven.model.version>
         <jackson.module.kotlin.version>2.13.4</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
@@ -143,7 +143,7 @@
         </dependency>
 
         <dependency>
-            <groupId>no.finn.unleash</groupId>
+            <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
             <version>${unleash.version}</version>
         </dependency>
