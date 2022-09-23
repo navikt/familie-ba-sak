@@ -32,11 +32,20 @@ class RettOffsetIAndelTilkjentYtelseTest {
 
         val behandlingerMedFeilOffset = listOf(behandling1fagsak1, behandling1fagsak2, behandling1fagsak3)
 
-        every { behandlingHentOgPersisterService.hentBehandlinger(fagsak1.id)} returns listOf(behandling1fagsak1)
-        every { behandlingHentOgPersisterService.hentBehandlinger(fagsak2.id)} returns listOf(behandling1fagsak2, behandling2fagsak2)
-        every { behandlingHentOgPersisterService.hentBehandlinger(fagsak3.id)} returns listOf(behandling1fagsak3, behandling2fagsak3)
+        every { behandlingHentOgPersisterService.hentBehandlinger(fagsak1.id) } returns listOf(behandling1fagsak1)
+        every { behandlingHentOgPersisterService.hentBehandlinger(fagsak2.id) } returns listOf(
+            behandling1fagsak2,
+            behandling2fagsak2
+        )
+        every { behandlingHentOgPersisterService.hentBehandlinger(fagsak3.id) } returns listOf(
+            behandling1fagsak3,
+            behandling2fagsak3
+        )
 
-        val relevanteBehandlinger = RettOffsetIAndelTilkjentYtelseTask(behandlingHentOgPersisterService, beregningService).finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilOffset)
+        val relevanteBehandlinger = RettOffsetIAndelTilkjentYtelseTask(
+            behandlingHentOgPersisterService,
+            beregningService
+        ).finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilOffset)
 
         Assertions.assertEquals(2, relevanteBehandlinger.size)
         Assertions.assertEquals(setOf(behandling1fagsak1, behandling1fagsak3), relevanteBehandlinger.toSet())
