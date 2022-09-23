@@ -32,7 +32,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
         val behandlingerMedFeilaktigeOffsets = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
 
         if (behandlingerMedFeilaktigeOffsets.isNotEmpty()) {
-            secureLogger.warn(
+            logger.warn(
                 "Behandlinger med feilaktige offsets: ${
                 behandlingerMedFeilaktigeOffsets.map { it.id }.joinToString(separator = ",")
                 }"
@@ -51,7 +51,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 ).any { status -> status == it.status }
             }
 
-        secureLogger.warn(
+        logger.warn(
             "Behandlinger med duplisert offset:\n ${
             relevanteBehandlinger.map { it.id }.joinToString(",")
             }"
@@ -91,7 +91,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
             }
 
         val diff = behandlingerMedFeilaktigeOffsets.minus(relevanteBehandlinger.toSet())
-        if (diff.isNotEmpty()) secureLogger.warn("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling som er avslutta: $diff")
+        if (diff.isNotEmpty()) logger.warn("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling som er avslutta: $diff")
     }
 
     private fun formaterLogglinje(oppdatering: OffsetOppdatering) =
