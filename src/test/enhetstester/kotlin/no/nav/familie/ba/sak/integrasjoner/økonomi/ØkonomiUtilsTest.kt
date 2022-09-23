@@ -518,7 +518,7 @@ internal class ØkonomiUtilsTest {
     }
 
     @Test
-    fun `Skal returnere offset-oppdatering for andel som er lik som i forrige behandling`(){
+    fun `Skal returnere offset-oppdatering for andel som er lik som i forrige behandling`() {
         val søker = lagPerson(type = PersonType.SØKER)
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
@@ -612,7 +612,7 @@ internal class ØkonomiUtilsTest {
     }
 
     @Test
-    fun `Skal returnere offset-oppdatering for de andelene som er like som i forrige behandling`(){
+    fun `Skal returnere offset-oppdatering for de andelene som er like som i forrige behandling`() {
         val søker = lagPerson(type = PersonType.SØKER)
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
@@ -705,7 +705,7 @@ internal class ØkonomiUtilsTest {
     }
 
     @Test
-    fun `Skal returnere offset-oppdatering for andeler som er like som forrige behandling, men er null nå`(){
+    fun `Skal returnere offset-oppdatering for andeler som er like som forrige behandling, men er null nå`() {
         val søker = lagPerson(type = PersonType.SØKER)
         val barn1 = lagPerson(type = PersonType.BARN)
         val barn2 = lagPerson(type = PersonType.BARN)
@@ -807,7 +807,8 @@ internal class ØkonomiUtilsTest {
         assertEquals(3, oppdateringer.size)
 
         val oppdateringUtvidet = oppdateringer.find { it.beståendeAndelSomSkalHaOppdatertOffset.erUtvidet() }
-        val oppdateringerOrdinær = oppdateringer.filter { !it.beståendeAndelSomSkalHaOppdatertOffset.erUtvidet() }.sortedBy { it.beståendeAndelSomSkalHaOppdatertOffset.stønadFom }
+        val oppdateringerOrdinær = oppdateringer.filter { !it.beståendeAndelSomSkalHaOppdatertOffset.erUtvidet() }
+            .sortedBy { it.beståendeAndelSomSkalHaOppdatertOffset.stønadFom }
 
         assertEquals(null, oppdateringUtvidet!!.beståendeAndelSomSkalHaOppdatertOffset.periodeOffset)
         assertEquals(null, oppdateringUtvidet.beståendeAndelSomSkalHaOppdatertOffset.forrigePeriodeOffset)
