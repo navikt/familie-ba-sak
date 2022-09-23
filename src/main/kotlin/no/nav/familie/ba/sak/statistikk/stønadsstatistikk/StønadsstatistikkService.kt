@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
@@ -40,11 +40,11 @@ import java.util.UUID
 class StønadsstatistikkService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val beregningService: BeregningService,
     private val vedtakService: VedtakService,
     private val personopplysningerService: PersonopplysningerService,
     private val vedtakRepository: VedtakRepository,
-    private val kompetanseService: KompetanseService
+    private val kompetanseService: KompetanseService,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
 
     fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
@@ -109,7 +109,8 @@ class StønadsstatistikkService(
     }
 
     private fun hentUtbetalingsperioderV2(behandlingId: Long): List<UtbetalingsperiodeDVHV2> {
-        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId)
+        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
 
@@ -138,7 +139,8 @@ class StønadsstatistikkService(
     }
 
     private fun utledEnsligForsørger(behandlingId: Long): Boolean {
-        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId)
+        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
         if (andelerTilkjentYtelse.isEmpty()) {
             return false
         }
@@ -148,7 +150,7 @@ class StønadsstatistikkService(
 
     private fun mapTilUtbetalingsperiodeV2(
         segment: LocalDateSegment<Int>,
-        andelerForSegment: List<AndelTilkjentYtelse>,
+        andelerForSegment: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag
     ): UtbetalingsperiodeDVHV2 {

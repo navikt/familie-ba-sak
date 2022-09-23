@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -22,7 +24,8 @@ import javax.transaction.Transactional
 @Service
 class SmåbarnstilleggKorrigeringService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val loggService: LoggService
+    private val loggService: LoggService,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
 
     @Transactional
@@ -30,7 +33,10 @@ class SmåbarnstilleggKorrigeringService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
         val andelTilkjentYtelser = tilkjentYtelse.andelerTilkjentYtelse
 
-        val overlappendePeriodeFinnes = finnOverlappendeSmåbarnstilleggPeriode(andelTilkjentYtelser, årMåned)
+        val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+
+        val overlappendePeriodeFinnes = finnOverlappendeSmåbarnstilleggPeriode(andelerMedEndringer, årMåned)
 
         if (overlappendePeriodeFinnes != null) {
             throw FunksjonellFeil("Det er ikke mulig å legge til småbarnstillegg for ${årMåned.tilMånedÅr()} fordi det allerede finnes småbarnstillegg for denne perioden")
@@ -50,8 +56,11 @@ class SmåbarnstilleggKorrigeringService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
         val andelTilkjentYtelser = tilkjentYtelse.andelerTilkjentYtelse
 
+        val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+
         val småBarnstilleggSomHarOverlappendePeriode =
-            finnOverlappendeSmåbarnstilleggPeriode(andelTilkjentYtelser, årMåned)
+            finnOverlappendeSmåbarnstilleggPeriode(andelerMedEndringer, årMåned)
                 ?: throw FunksjonellFeil("Det er ikke mulig å fjerne småbarnstillegg for ${årMåned.tilMånedÅr()} fordi det ikke finnes småbarnstillegg for denne perioden")
 
         val eksisterendeSmåBarnstilleggTidslinje =
@@ -72,7 +81,7 @@ class SmåbarnstilleggKorrigeringService(
             )
         }
 
-        andelTilkjentYtelser.remove(småBarnstilleggSomHarOverlappendePeriode)
+        andelTilkjentYtelser.remove(småBarnstilleggSomHarOverlappendePeriode.andel)
         andelTilkjentYtelser.addAll(nyOppsplittetSmåbarnstillegg)
 
         loggService.opprettSmåbarnstilleggLogg(behandling, "Småbarnstillegg for ${årMåned.tilMånedÅr()} fjernet")
@@ -107,7 +116,7 @@ class SmåbarnstilleggKorrigeringService(
     }
 
     private fun finnOverlappendeSmåbarnstilleggPeriode(
-        andelTilkjentYtelser: Set<AndelTilkjentYtelse>,
+        andelTilkjentYtelser: Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         årMåned: YearMonth
     ) = andelTilkjentYtelser.firstOrNull {
         it.erSmåbarnstillegg() && it.overlapperPeriode(MånedPeriode(årMåned, årMåned))

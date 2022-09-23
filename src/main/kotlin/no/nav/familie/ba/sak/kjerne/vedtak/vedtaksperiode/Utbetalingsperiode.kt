@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -63,13 +63,13 @@ fun hentUtbetalingsperiodeForVedtaksperiode(
 
 fun mapTilUtbetalingsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): List<Utbetalingsperiode> {
     return andelerTilkjentYtelse.lagVertikaleSegmenter().map { (segment, andelerForSegment) ->
         Utbetalingsperiode(
             periodeFom = segment.fom,
             periodeTom = segment.tom,
-            ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
+            ytelseTyper = andelerForSegment.map(AndelTilkjentYtelseMedEndreteUtbetalinger::type),
             utbetaltPerMnd = segment.value,
             antallBarn = andelerForSegment.count { andel ->
                 personopplysningGrunnlag.barna.any { barn -> barn.aktør == andel.aktør }
@@ -79,7 +79,7 @@ fun mapTilUtbetalingsperioder(
     }
 }
 
-internal fun List<AndelTilkjentYtelse>.utledSegmenter(): List<LocalDateSegment<Int>> {
+internal fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.utledSegmenter(): List<LocalDateSegment<Int>> {
     // Dersom listen er tom så returnerer vi tom liste fordi at reduceren i
     // beregnUtbetalingsperioderUtenKlassifisering ikke takler tomme lister
     if (this.isEmpty()) return emptyList()
@@ -89,7 +89,7 @@ internal fun List<AndelTilkjentYtelse>.utledSegmenter(): List<LocalDateSegment<I
         .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
 }
 
-internal fun List<AndelTilkjentYtelse>.lagUtbetalingsperiodeDetaljer(
+internal fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeDetaljer(
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ): List<UtbetalingsperiodeDetalj> =
     this.map { andel ->
@@ -101,7 +101,7 @@ internal fun List<AndelTilkjentYtelse>.lagUtbetalingsperiodeDetaljer(
             person = personForAndel.tilRestPerson(),
             ytelseType = andel.type,
             utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
-            erPåvirketAvEndring = andel.endretUtbetalingAndeler.isNotEmpty(),
+            erPåvirketAvEndring = andel.endreteUtbetalinger.isNotEmpty(),
             prosent = andel.prosent
         )
     }

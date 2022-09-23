@@ -10,8 +10,9 @@ import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.Beløpsdifferanse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
@@ -54,7 +55,8 @@ class BrevPeriodeService(
     private val personidentService: PersonidentService,
     private val kompetanseService: KompetanseService,
     private val featureToggleService: FeatureToggleService,
-    private val integrasjonClient: IntegrasjonClient
+    private val integrasjonClient: IntegrasjonClient,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
 
     fun hentBrevperioderData(
@@ -65,13 +67,13 @@ class BrevPeriodeService(
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId.id)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-        val endredeUtbetalingAndeler = endretUtbetalingAndelService
-            .hentForBehandling(behandlingId = behandlingId.id)
+        val endredeUtbetalingAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId = behandlingId.id)
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id)
 
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandlingId.id)
+        val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id)
 
         val uregistrerteBarn =
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId.id)?.hentUregistrerteBarn()
@@ -95,7 +97,7 @@ class BrevPeriodeService(
                 vedtaksperiodeId = it,
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                andelerTilkjentYtelse = andelerMedEndringer,
                 uregistrerteBarn = uregistrerteBarn,
                 skalLogge = skalLogge,
                 kompetanser = kompetanser.toList(),
@@ -109,7 +111,7 @@ class BrevPeriodeService(
         vedtaksperiodeId: Long,
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         uregistrerteBarn: List<BarnMedOpplysninger>,
         kompetanser: List<Kompetanse>,
         sanityBegrunnelser: List<SanityBegrunnelse>,
@@ -185,15 +187,15 @@ class BrevPeriodeService(
 
     private fun hentBarnsPersonIdentMedRedusertPeriode(
         vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ): List<String> {
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtaksperiodeMedBegrunnelser.vedtak.behandling)
         return if (forrigeBehandling != null) {
-            val forrigeAndelTilkjentYtelse = andelTilkjentYtelseRepository
-                .finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
+            val forrigeAndelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeBehandling.id)
             val endringerITilkjentYtelsePerBarn =
-                andelerTilkjentYtelse.hentPerioderMedEndringerFra(forrigeAndelTilkjentYtelse)
+                andelerTilkjentYtelse.hentPerioderMedEndringerFra(forrigeAndelerMedEndringer)
             endringerITilkjentYtelsePerBarn.keys.filter { barn ->
                 endringerITilkjentYtelsePerBarn.getValue(barn).any {
                     it.overlapper(

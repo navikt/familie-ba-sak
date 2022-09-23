@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -30,16 +31,20 @@ class BehandlingsresultatService(
     private val personidentService: PersonidentService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
 
     fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
 
-        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
-        val forrigeAndelerTillkjentYtelse = forrigeBehandling?.let {
-            beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = it.id)
+        val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
+
+        val forrigeAndelerMedEndringer = forrigeBehandling?.let {
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(it.id)
         } ?: emptyList()
 
         val barna = persongrunnlagService.hentBarna(behandling)
@@ -74,8 +79,8 @@ class BehandlingsresultatService(
             BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(
                 person = it,
                 personerFremstiltKravFor = personerFremstiltKravFor,
-                andelerFraForrigeTilkjentYtelse = forrigeAndelerTillkjentYtelse,
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                andelerFraForrigeTilkjentYtelse = forrigeAndelerMedEndringer,
+                andelerTilkjentYtelse = andelerMedEndringer,
                 erEksplisittAvslag = vilkårsvurdering.personResultater.find { personResultat -> personResultat.aktør == it.aktør }
                     ?.harEksplisittAvslag()
                     ?: false

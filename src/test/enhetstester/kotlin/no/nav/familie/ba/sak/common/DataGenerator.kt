@@ -22,6 +22,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
@@ -247,6 +249,39 @@ fun lagAndelTilkjentYtelse(
         prosent = prosent,
         endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList()
     )
+}
+
+fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+    fom: YearMonth,
+    tom: YearMonth,
+    ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+    beløp: Int = sats(ytelseType),
+    behandling: Behandling = lagBehandling(),
+    person: Person = tilfeldigPerson(),
+    aktør: Aktør = person.aktør,
+    periodeIdOffset: Long? = null,
+    forrigeperiodeIdOffset: Long? = null,
+    tilkjentYtelse: TilkjentYtelse? = null,
+    prosent: BigDecimal = BigDecimal(100),
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
+): AndelTilkjentYtelseMedEndreteUtbetalinger {
+    val aty = AndelTilkjentYtelse(
+        aktør = aktør,
+        behandlingId = behandling.id,
+        tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
+        kalkulertUtbetalingsbeløp = beløp,
+        nasjonaltPeriodebeløp = beløp,
+        stønadFom = fom,
+        stønadTom = tom,
+        type = ytelseType,
+        periodeOffset = periodeIdOffset,
+        forrigePeriodeOffset = forrigeperiodeIdOffset,
+        sats = beløp,
+        prosent = prosent,
+        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList()
+    )
+
+    return AndelTilkjentYtelseMedEndreteUtbetalinger(aty)
 }
 
 fun lagAndelTilkjentYtelseUtvidet(
@@ -981,10 +1016,51 @@ fun lagEndretUtbetalingAndel(
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
-    standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
-    andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf()
+    standardbegrunnelser: List<Standardbegrunnelse> = emptyList()
 ) =
     EndretUtbetalingAndel(
+        id = id,
+        behandlingId = behandlingId,
+        person = person,
+        prosent = prosent,
+        fom = fom,
+        tom = tom,
+        årsak = årsak,
+        avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
+        søknadstidspunkt = søknadstidspunkt,
+        begrunnelse = "Test",
+        standardbegrunnelser = standardbegrunnelser
+    )
+
+fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+    behandlingId: Long,
+    barn: Person,
+    fom: YearMonth,
+    tom: YearMonth,
+    prosent: Int
+) =
+    lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+        behandlingId = behandlingId,
+        person = barn,
+        fom = fom,
+        tom = tom,
+        prosent = BigDecimal(prosent)
+    )
+
+fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+    id: Long = 0,
+    behandlingId: Long = 0,
+    person: Person,
+    prosent: BigDecimal = BigDecimal.valueOf(100),
+    fom: YearMonth = YearMonth.now().minusMonths(1),
+    tom: YearMonth? = YearMonth.now(),
+    årsak: Årsak = Årsak.DELT_BOSTED,
+    avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
+    søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
+    standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
+    andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf()
+): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
+    val eua = EndretUtbetalingAndel(
         id = id,
         behandlingId = behandlingId,
         person = person,
@@ -998,6 +1074,9 @@ fun lagEndretUtbetalingAndel(
         standardbegrunnelser = standardbegrunnelser,
         andelTilkjentYtelser = andelTilkjentYtelser
     )
+
+    return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua)
+}
 
 fun lagPerson(
     personIdent: PersonIdent = PersonIdent(randomFnr()),
