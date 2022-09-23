@@ -127,5 +127,5 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
 data class RettOffsetIAndelTilkjentYtelseDto(
     val simuler: Boolean,
-    val behandlinger: List<Long>
+    val behandlinger: Set<Long>
 )

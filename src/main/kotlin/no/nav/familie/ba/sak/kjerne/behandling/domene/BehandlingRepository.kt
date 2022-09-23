@@ -160,4 +160,15 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
             having count(aty.periodeOffset) > 1"""
     )
     fun finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(): List<Long>
+
+    @Query(
+        """select distinct b.id from AndelTilkjentYtelse aty
+            inner join Behandling b on aty.behandlingId = b.id
+            where aty.kalkulertUtbetalingsbeløp > 0
+                and aty.periodeOffset is null
+                and b.status = 'AVSLUTTET'
+                and b.resultat not in (:ugyldigeResultater)
+                and b.endretTidspunkt > '2022-09-04'"""
+    )
+    fun finnBehandlingerMedFeilNullOffsetsForAndelTilkjentYtelse(ugyldigeResultater: List<Behandlingsresultat>): List<Long>
 }
