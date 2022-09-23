@@ -166,7 +166,7 @@ fun lagBehandling(
     førsteSteg: StegType = FØRSTE_STEG,
     resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
     underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-    status: BehandlingStatus = initStatus(),
+    status: BehandlingStatus = initStatus()
 ) =
     Behandling(
         id = nesteBehandlingId(),
@@ -177,7 +177,7 @@ fun lagBehandling(
         underkategori = underkategori,
         opprettetÅrsak = årsak,
         resultat = resultat,
-        status = status,
+        status = status
     ).also {
         it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
     }
