@@ -31,21 +31,10 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
     private fun køyrTask(payload: RettOffsetIAndelTilkjentYtelseDto) {
         val behandlingerMedFeilaktigeOffsets = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
-
-        logger.warn(
-            "Behandlinger med feilaktige offsets: ${
-            behandlingerMedFeilaktigeOffsets.map { it.id }.joinToString(separator = ",")
-            }"
-        )
-
+        loggBehandlingIder("Behandlinger med feilaktige offsets", behandlingerMedFeilaktigeOffsets.map { it.id })
 
         val relevanteBehandlinger = finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilaktigeOffsets)
-
-        logger.warn(
-            "Relevante behandlinger:\n ${
-                relevanteBehandlinger.map { it.id }.joinToString(",")
-            }"
-        )
+        loggBehandlingIder("Relevante behandlinger", relevanteBehandlinger.map { it.id })
 
         val behandlingIderSomIkkeKanOppdateres = mutableListOf<Long>()
 
@@ -89,20 +78,11 @@ class RettOffsetIAndelTilkjentYtelseTask(
             }
 
         val behandlingIderSomFaktiskBleOppdatert = relevanteBehandlinger.map { it.id }.minus(behandlingIderSomIkkeKanOppdateres)
-
-        logger.warn(
-            "Behandlinger som ble oppdatert:\n ${
-                behandlingIderSomFaktiskBleOppdatert.joinToString(",")
-            }"
-        )
-        logger.warn(
-            "Behandlinger som var relevant, men ikke kunne oppdateres:\n ${
-                behandlingIderSomIkkeKanOppdateres.joinToString(",")
-            }"
-        )
+        loggBehandlingIder("Behandlinger som ble oppdatert", behandlingIderSomFaktiskBleOppdatert)
+        loggBehandlingIder("Behandlinger som var relevant, men ikke kunne oppdateres", behandlingIderSomIkkeKanOppdateres)
 
         val behandlingerMedNyereBehandlingSomErAvsluttet = behandlingerMedFeilaktigeOffsets.minus(relevanteBehandlinger.toSet())
-        if (behandlingerMedNyereBehandlingSomErAvsluttet.isNotEmpty()) logger.warn("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling som er avslutta: $behandlingerMedNyereBehandlingSomErAvsluttet")
+        if (behandlingerMedNyereBehandlingSomErAvsluttet.isNotEmpty()) loggBehandlingIder("Behandlinger med feilaktige offsets, der fagsaka har fått ei nyere behandling som er avslutta", behandlingerMedNyereBehandlingSomErAvsluttet.map { it.id })
     }
 
     private fun finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilaktigeOffsets: List<Behandling>) =
@@ -126,6 +106,14 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
             !finnesUgyldigBehandlingEtterDenne
         }
+
+    private fun loggBehandlingIder(tekst: String, behandlingIder: List<Long>) {
+        logger.warn(
+            "$tekst: ${
+                behandlingIder.joinToString(separator = ",")
+            }"
+        )
+    }
 
     private fun formaterLogglinje(oppdatering: OffsetOppdatering) =
         "Oppdaterer andel tilkjent ytelse ${oppdatering.beståendeAndelSomSkalHaOppdatertOffset} med periodeoffset=${oppdatering.periodeOffset}, forrigePeriodeOffset=${oppdatering.forrigePeriodeOffset} og kildeBehandlingId=${oppdatering.kildeBehandlingId}"
