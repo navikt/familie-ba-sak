@@ -68,10 +68,10 @@ class RettOffsetIAndelTilkjentYtelseTask(
                     }
                 } else {
                     if (andelerSomSendesTilOppdrag.isEmpty()) {
-                        logger.warn("Fant ingen andeler som skal sendes til oppdrag for behandling $it")
+                        secureLogger.warn("Fant ingen andeler som skal sendes til oppdrag for behandling $it")
                     }
                     if (forrigeBehandling == null) {
-                        logger.warn("Fant ikke forrige behandling for behandling $it")
+                        secureLogger.warn("Fant ikke forrige behandling for behandling $it")
                     }
                     behandlingIderSomIkkeKanOppdateres.add(it.id)
                 }
