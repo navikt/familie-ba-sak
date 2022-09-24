@@ -529,7 +529,7 @@
                             <rules>
                                 <bannedDependencies>
                                     <excludes>
-                                        <exclude>org.junit.jupiter:junit-jupiter-engine:*:jar:compile</exclude>
+                                        <exclude>org.junit.*:*:*:jar:compile</exclude>
                                     </excludes>
                                 </bannedDependencies>
                             </rules>
