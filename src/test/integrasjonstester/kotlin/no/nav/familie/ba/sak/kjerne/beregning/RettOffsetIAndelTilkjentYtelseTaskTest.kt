@@ -62,8 +62,9 @@ internal class RettOffsetIAndelTilkjentYtelseTaskTest(
         ).id
 
         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling2)
-            .also { it[1].periodeOffset = 4 }
-            .also { andelTilkjentYtelseRepository.save(it[1]) }
+            .sortedBy { it.periodeOffset }
+            .also { it[0].periodeOffset = 4 }
+            .also { andelTilkjentYtelseRepository.save(it[0]) }
 
         assertThat(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling2)
