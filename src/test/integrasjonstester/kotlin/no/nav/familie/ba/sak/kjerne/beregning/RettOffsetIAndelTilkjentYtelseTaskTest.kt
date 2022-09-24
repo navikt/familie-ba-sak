@@ -68,8 +68,9 @@ internal class RettOffsetIAndelTilkjentYtelseTaskTest(
 
         assertThat(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling2)
+                .sortedBy { it.periodeOffset }
                 .map { it.periodeOffset }
-        ).isEqualTo(listOf(5L, 4L, 1L, 2L, 3L, 4L))
+        ).isEqualTo(listOf(1L, 2L, 3L, 4L, 4L, 5L))
 
         val input = RettOffsetIAndelTilkjentYtelseDto(simuler = false, behandlinger = setOf(behandling2))
 
@@ -80,8 +81,9 @@ internal class RettOffsetIAndelTilkjentYtelseTaskTest(
         andelTilkjentYtelseRepository.flush()
         assertThat(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling2)
+                .sortedBy { it.periodeOffset }
                 .map { it.periodeOffset }
-        ).isEqualTo(listOf(5L, 0L, 1L, 2L, 3L, 4L))
+        ).isEqualTo(listOf(0L, 1L, 2L, 3L, 4L, 5L))
     }
 
     fun lagScenario(barnFødselsdato: LocalDate): RestScenario = mockServerKlient().lagScenario(
