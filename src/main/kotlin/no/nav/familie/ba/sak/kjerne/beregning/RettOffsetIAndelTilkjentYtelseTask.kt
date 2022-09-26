@@ -63,7 +63,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
                         }
                     secureLogger.info(
                         "Behandling: $it," +
-                        "\nLogglinjer: " +
+                            "\nLogglinjer: " +
                             "\n$logglinjer"
                     )
 
