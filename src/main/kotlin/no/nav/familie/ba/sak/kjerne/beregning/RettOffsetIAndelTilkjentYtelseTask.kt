@@ -124,7 +124,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
     private fun loggBehandlingIder(tekst: String, behandlingIder: List<Long>) {
         logger.warn(
-            "$tekst: ${
+            "$tekst (${behandlingIder.size} stk): ${
             behandlingIder.joinToString(separator = ",")
             }"
         )

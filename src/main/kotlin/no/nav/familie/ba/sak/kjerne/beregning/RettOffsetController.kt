@@ -38,13 +38,13 @@ class RettOffsetController(
         )
 
         logger.warn(
-            "Behandlinger med duplikate offset: ${
+            "Behandlinger med duplikate offset (${behandlingerMedDuplikateOffset.size} stk): ${
             behandlingerMedDuplikateOffset.joinToString(separator = ",")
             }"
         )
 
         logger.warn(
-            "Behandlinger med feilaktig null-offset: ${
+            "Behandlinger med feilaktig null-offset (${behandlingerMedNullOffsets.size} stk): ${
             behandlingerMedNullOffsets.joinToString(separator = ",")
             }"
         )
