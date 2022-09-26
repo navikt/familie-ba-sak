@@ -61,7 +61,11 @@ class RettOffsetIAndelTilkjentYtelseTask(
                                 oppdatering
                             )
                         }
-                    secureLogger.info("Behandling: $it, logglinjer: $logglinjer")
+                    secureLogger.info(
+                        "Behandling: $it," +
+                        "\nLogglinjer: " +
+                            "\n$logglinjer"
+                    )
 
                     if (!payload.simuler) {
                         beståendeAndelerMedOppdatertOffset.forEach { oppdatering -> oppdatering.oppdater() }
