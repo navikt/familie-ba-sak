@@ -24,17 +24,17 @@ class RettOffsetController(
     @PostMapping("/simuler-offset-fix")
     @Transactional
     fun simuler() {
-        val henlagteResultater = listOf(Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+        val ugyldigeResultater = listOf(
+            Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
             Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
             Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
-            Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
+            Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+            Behandlingsresultat.AVSLÅTT,
+            Behandlingsresultat.FORTSATT_INNVILGET
         )
-        val behandlingerMedDuplikateOffset = behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(ugyldigeResultater = henlagteResultater)
+        val behandlingerMedDuplikateOffset = behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(ugyldigeResultater = ugyldigeResultater)
         val behandlingerMedNullOffsets = behandlingRepository.finnBehandlingerMedFeilNullOffsetsForAndelTilkjentYtelse(
-            ugyldigeResultater = henlagteResultater + listOf(
-                Behandlingsresultat.AVSLÅTT,
-                Behandlingsresultat.FORTSATT_INNVILGET,
-            )
+            ugyldigeResultater = ugyldigeResultater
         )
 
         logger.warn(
