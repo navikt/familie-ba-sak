@@ -38,6 +38,20 @@ class RettOffsetController(
         throw RuntimeException("Kaster exception her for å sikre at ingenting frå transaksjonen blir committa")
     }
 
+    @PostMapping("/rett-offset")
+    fun rettOffsetfeil() {
+        val input = RettOffsetIAndelTilkjentYtelseDto(
+            simuler = false,
+            behandlinger = finnBehandlinger()
+        )
+        task.doTask(
+            Task(
+                type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(input)
+            )
+        )
+    }
+
     private fun finnBehandlinger(): Set<Long> {
         val ugyldigeResultater = listOf(
             Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
