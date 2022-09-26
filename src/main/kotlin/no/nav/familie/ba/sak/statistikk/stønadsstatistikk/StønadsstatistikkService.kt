@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.eksterne.kontrakter.AnnenForeldersAktivitet
 import no.nav.familie.eksterne.kontrakter.BehandlingTypeV2
 import no.nav.familie.eksterne.kontrakter.BehandlingÅrsakV2
+import no.nav.familie.eksterne.kontrakter.FagsakType
 import no.nav.familie.eksterne.kontrakter.KategoriV2
 import no.nav.familie.eksterne.kontrakter.Kompetanse
 import no.nav.familie.eksterne.kontrakter.KompetanseResultat
@@ -64,6 +65,7 @@ class StønadsstatistikkService(
 
         return VedtakDVHV2(
             fagsakId = behandling.fagsak.id.toString(),
+            fagsakType = FagsakType.valueOf(behandling.fagsak.type.name),
             behandlingsId = behandlingId.toString(),
             tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
             personV2 = hentSøkerV2(behandlingId),
