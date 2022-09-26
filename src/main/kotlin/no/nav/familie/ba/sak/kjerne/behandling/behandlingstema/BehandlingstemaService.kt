@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling.behandlingstema
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -25,8 +23,7 @@ class BehandlingstemaService(
     private val loggService: LoggService,
     private val oppgaveService: OppgaveService,
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val featureToggleService: FeatureToggleService
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository
 ) {
 
     fun oppdaterBehandlingstema(
@@ -92,38 +89,30 @@ class BehandlingstemaService(
     }
 
     fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori {
-        return if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            val forrigeIverksattBehandling =
-                behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
-                    ?: return BehandlingKategori.NASJONAL
+        val forrigeIverksattBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
+                ?: return BehandlingKategori.NASJONAL
 
-            val barnasTidslinjer =
-                vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(forrigeIverksattBehandling.id))
-                    ?.barnasTidslinjer()
-            utledLøpendeKategori(barnasTidslinjer)
-        } else {
-            BehandlingKategori.NASJONAL
-        }
+        val barnasTidslinjer =
+            vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(forrigeIverksattBehandling.id))
+                ?.barnasTidslinjer()
+        return utledLøpendeKategori(barnasTidslinjer)
     }
 
     fun hentKategoriFraInneværendeBehandling(fagsakId: Long): BehandlingKategori {
-        return if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            val aktivBehandling =
-                behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsakId)
-                    ?: return BehandlingKategori.NASJONAL
-            val vilkårsvurdering =
-                vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
-                    ?: return aktivBehandling.kategori
-            val erVilkårMedEØSRegelverkBehandlet = vilkårsvurdering.personResultater
-                .flatMap { it.vilkårResultater }
-                .filter { it.behandlingId == aktivBehandling.id }
-                .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
+        val aktivBehandling =
+            behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsakId)
+                ?: return BehandlingKategori.NASJONAL
+        val vilkårsvurdering =
+            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
+                ?: return aktivBehandling.kategori
+        val erVilkårMedEØSRegelverkBehandlet = vilkårsvurdering.personResultater
+            .flatMap { it.vilkårResultater }
+            .filter { it.behandlingId == aktivBehandling.id }
+            .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
 
-            return if (erVilkårMedEØSRegelverkBehandlet) {
-                BehandlingKategori.EØS
-            } else {
-                BehandlingKategori.NASJONAL
-            }
+        return if (erVilkårMedEØSRegelverkBehandlet) {
+            BehandlingKategori.EØS
         } else {
             BehandlingKategori.NASJONAL
         }
