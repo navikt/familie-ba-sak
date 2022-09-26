@@ -60,18 +60,6 @@
         <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>no.nav.security</groupId>
-                <artifactId>token-support</artifactId>
-                <version>${token-validation-spring.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -195,6 +183,7 @@
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-client-spring</artifactId>
+            <version>${token-validation-spring.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>
@@ -205,6 +194,7 @@
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-spring-test</artifactId>
+            <version>${token-validation-spring.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
