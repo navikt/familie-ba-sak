@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.tilbakekreving
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.samhandler.SamhandlerKlient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -46,7 +45,6 @@ class TilbakekrevingService(
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
-    private val samhandlerKlient: SamhandlerKlient,
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService
 ) {
@@ -210,14 +208,10 @@ class TilbakekrevingService(
     private fun hentInstitusjon(fagsak: Fagsak): Institusjon? {
         var institusjon: Institusjon? = null
         if (fagsak.type == FagsakType.INSTITUSJON) {
-            institusjon = if (fagsak.institusjon != null) {
-                samhandlerKlient.hentSamhandler(fagsak.institusjon!!.orgNummer)
-                    .let { Institusjon(organisasjonsnummer = fagsak.institusjon!!.orgNummer, navn = it.navn) }
-            } else {
-                throw IllegalStateException(
-                    "Fagsaktype er institusjon, men institusjon finnes ikke på fagsak: ${fagsak.id}"
-                )
-            }
+            requireNotNull(
+                fagsak.institusjon
+            ) { "Fagsaktype er institusjon, men institusjon finnes ikke på fagsak: ${fagsak.id}" }
+            institusjon = Institusjon(organisasjonsnummer = fagsak.institusjon!!.orgNummer)
         }
         return institusjon
     }

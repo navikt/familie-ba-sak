@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
@@ -46,6 +47,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResul
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -630,9 +632,13 @@ fun kjørStegprosessForFGB(
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
     behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-    behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL
+    institusjon: InstitusjonInfo? = null
 ): Behandling {
-    fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+    fagsakService.hentEllerOpprettFagsakForPersonIdent(
+        fødselsnummer = søkerFnr,
+        institusjon = institusjon,
+        fagsakType = if (institusjon != null) FagsakType.INSTITUSJON else FagsakType.NORMAL
+    )
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
             kategori = BehandlingKategori.NASJONAL,
@@ -641,7 +647,8 @@ fun kjørStegprosessForFGB(
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             søkersIdent = søkerFnr,
             barnasIdenter = barnasIdenter,
-            søknadMottattDato = LocalDate.now()
+            søknadMottattDato = LocalDate.now(),
+            fagsakType = if (institusjon != null) FagsakType.INSTITUSJON else FagsakType.NORMAL,
         )
     )
 
