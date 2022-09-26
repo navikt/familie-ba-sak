@@ -201,7 +201,6 @@ fun hentGyldigeBegrunnelserForPeriode(
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    kanBehandleEØS: Boolean,
     sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
     kompetanserIPeriode: List<Kompetanse>,
     kompetanserSomStopperRettFørPeriode: List<Kompetanse>
@@ -215,15 +214,12 @@ fun hentGyldigeBegrunnelserForPeriode(
         endretUtbetalingAndeler = endretUtbetalingAndeler,
         andelerTilkjentYtelse = andelerTilkjentYtelse
     )
-    val eøsBegrunnelser = if (kanBehandleEØS) {
+    val eøsBegrunnelser =
         hentGyldigeEØSBegrunnelserForPeriode(
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = kompetanserIPeriode,
             kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
         )
-    } else {
-        emptyList()
-    }
 
     return standardbegrunnelser + eøsBegrunnelser
 }
