@@ -24,34 +24,10 @@ class RettOffsetController(
     @PostMapping("/simuler-offset-fix")
     @Transactional
     fun simuler() {
-        val ugyldigeResultater = listOf(
-            Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-            Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
-            Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
-            Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
-            Behandlingsresultat.AVSLÅTT,
-            Behandlingsresultat.FORTSATT_INNVILGET
-        )
-        val behandlingerMedDuplikateOffset = behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(ugyldigeResultater = ugyldigeResultater)
-        val behandlingerMedNullOffsets = behandlingRepository.finnBehandlingerMedFeilNullOffsetsForAndelTilkjentYtelse(
-            ugyldigeResultater = ugyldigeResultater
-        )
-
-        logger.warn(
-            "Behandlinger med duplikate offset: ${
-            behandlingerMedDuplikateOffset.joinToString(separator = ",")
-            }"
-        )
-
-        logger.warn(
-            "Behandlinger med feilaktig null-offset: ${
-            behandlingerMedNullOffsets.joinToString(separator = ",")
-            }"
-        )
-
+        val behandlinger = finnBehandlinger()
         val input = RettOffsetIAndelTilkjentYtelseDto(
             simuler = true,
-            behandlinger = (behandlingerMedDuplikateOffset + behandlingerMedNullOffsets).toSet()
+            behandlinger = behandlinger
         )
         task.doTask(
             Task(
@@ -60,6 +36,50 @@ class RettOffsetController(
             )
         )
         throw RuntimeException("Kaster exception her for å sikre at ingenting frå transaksjonen blir committa")
+    }
+
+    @PostMapping("/rett-offset")
+    fun rettOffsetfeil() {
+        val input = RettOffsetIAndelTilkjentYtelseDto(
+            simuler = false,
+            behandlinger = finnBehandlinger()
+        )
+        task.doTask(
+            Task(
+                type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(input)
+            )
+        )
+    }
+
+    private fun finnBehandlinger(): Set<Long> {
+        val ugyldigeResultater = listOf(
+            Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+            Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+            Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+            Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+            Behandlingsresultat.AVSLÅTT,
+            Behandlingsresultat.FORTSATT_INNVILGET
+        )
+        val behandlingerMedDuplikateOffset =
+            behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(ugyldigeResultater = ugyldigeResultater)
+        val behandlingerMedNullOffsets = behandlingRepository.finnBehandlingerMedFeilNullOffsetsForAndelTilkjentYtelse(
+            ugyldigeResultater = ugyldigeResultater
+        )
+
+        logger.warn(
+            "Behandlinger med duplikate offset (${behandlingerMedDuplikateOffset.size} stk): ${
+            behandlingerMedDuplikateOffset.joinToString(separator = ",")
+            }"
+        )
+
+        logger.warn(
+            "Behandlinger med feilaktig null-offset (${behandlingerMedNullOffsets.size} stk): ${
+            behandlingerMedNullOffsets.joinToString(separator = ",")
+            }"
+        )
+
+        return (behandlingerMedDuplikateOffset + behandlingerMedNullOffsets).toSet()
     }
 
     companion object {
