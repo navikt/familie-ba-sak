@@ -108,11 +108,8 @@ class RettOffsetIAndelTilkjentYtelseTask(
             val behandlingerOpprettetEtterDenneBehandlingen =
                 alleBehandlingerPåFagsak.filter { it.opprettetTidspunkt.isAfter(behandling.opprettetTidspunkt) && !it.erHenlagt() }
 
-            val godkjenteStatuserPåSenereBehandling =
-                listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES, BehandlingStatus.FATTER_VEDTAK)
-
             val finnesUgyldigBehandlingEtterDenne =
-                behandlingerOpprettetEtterDenneBehandlingen.filter { it.status !in godkjenteStatuserPåSenereBehandling }
+                behandlingerOpprettetEtterDenneBehandlingen.filter { it.status == BehandlingStatus.AVSLUTTET }
                     .isNotEmpty()
 
             if (finnesUgyldigBehandlingEtterDenne) {
