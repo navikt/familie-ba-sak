@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
@@ -23,7 +23,6 @@ import no.nav.familie.eksterne.kontrakter.BehandlingÅrsakV2
 import no.nav.familie.eksterne.kontrakter.KategoriV2
 import no.nav.familie.eksterne.kontrakter.Kompetanse
 import no.nav.familie.eksterne.kontrakter.KompetanseResultat
-import no.nav.familie.eksterne.kontrakter.PersonDVH
 import no.nav.familie.eksterne.kontrakter.PersonDVHV2
 import no.nav.familie.eksterne.kontrakter.SøkersAktivitet
 import no.nav.familie.eksterne.kontrakter.UnderkategoriV2
@@ -41,11 +40,11 @@ import java.util.UUID
 class StønadsstatistikkService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val beregningService: BeregningService,
     private val vedtakService: VedtakService,
     private val personopplysningerService: PersonopplysningerService,
     private val vedtakRepository: VedtakRepository,
-    private val kompetanseService: KompetanseService
+    private val kompetanseService: KompetanseService,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
 
     fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
@@ -97,7 +96,8 @@ class StønadsstatistikkService(
                 fom = kompetanse.fom!!,
                 tom = kompetanse.tom,
                 resultat = KompetanseResultat.valueOf(kompetanse.resultat!!.name),
-                sokersaktivitet = if (kompetanse.søkersAktivitet != null) SøkersAktivitet.valueOf(kompetanse.søkersAktivitet.name) else null
+                sokersaktivitet = if (kompetanse.søkersAktivitet != null) SøkersAktivitet.valueOf(kompetanse.søkersAktivitet.name) else null,
+                sokersAktivitetsland = kompetanse.søkersAktivitetsland
             )
         }
     }
@@ -109,7 +109,8 @@ class StønadsstatistikkService(
     }
 
     private fun hentUtbetalingsperioderV2(behandlingId: Long): List<UtbetalingsperiodeDVHV2> {
-        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId)
+        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
 
@@ -138,7 +139,8 @@ class StønadsstatistikkService(
     }
 
     private fun utledEnsligForsørger(behandlingId: Long): Boolean {
-        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId)
+        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
         if (andelerTilkjentYtelse.isEmpty()) {
             return false
         }
@@ -148,7 +150,7 @@ class StønadsstatistikkService(
 
     private fun mapTilUtbetalingsperiodeV2(
         segment: LocalDateSegment<Int>,
-        andelerForSegment: List<AndelTilkjentYtelse>,
+        andelerForSegment: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag
     ): UtbetalingsperiodeDVHV2 {
@@ -180,23 +182,6 @@ class StønadsstatistikkService(
             statsborgerskap = hentStatsborgerskap(person),
             bostedsland = hentLandkode(person),
             delingsprosentYtelse = if (delingsProsentYtelse == 50) delingsProsentYtelse else 0,
-            personIdent = person.aktør.aktivFødselsnummer()
-        )
-    }
-
-    @Deprecated("kan fjernes når vi ikke lenger publiserer hendelser til kafka onprem")
-    private fun lagPersonDVH(person: Person, delingsProsentYtelse: Int = 0): PersonDVH {
-        return PersonDVH(
-            rolle = person.type.name,
-            statsborgerskap = hentStatsborgerskap(person),
-            bostedsland = hentLandkode(person),
-            primærland = "IKKE IMPLMENTERT", // EØS
-            sekundærland = "IKKE IMPLEMENTERT", // EØS
-            delingsprosentOmsorg = 0, // Kan kanskje fjernes. Diskusjon på slack: Jeg tipper vi ikke trenger å sende den, men at det var noe vi “kladdet ned”, sikkert i en diskusjon om hvorvidt den faktiske delingsprosenten på omsorgen kan være ulik delingsprosenten på ytelsen
-            delingsprosentYtelse = if (delingsProsentYtelse == 50) delingsProsentYtelse else 0,
-            annenpartBostedsland = "Ikke implementert",
-            annenpartPersonident = "ikke implementert",
-            annenpartStatsborgerskap = "ikke implementert",
             personIdent = person.aktør.aktivFødselsnummer()
         )
     }

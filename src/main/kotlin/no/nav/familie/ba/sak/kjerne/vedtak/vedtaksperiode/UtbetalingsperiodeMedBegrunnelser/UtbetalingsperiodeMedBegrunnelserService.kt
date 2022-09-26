@@ -1,11 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
 import hentPerioderMedUtbetaling
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_BEHANDLE_EØS
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -21,18 +20,17 @@ import org.springframework.stereotype.Service
 class UtbetalingsperiodeMedBegrunnelserService(
     private val featureToggleService: FeatureToggleService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val kompetanseRepository: KompetanseRepository,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
-
     fun hentUtbetalingsperioder(
         vedtak: Vedtak,
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
+        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(vedtak.behandling.id)
 
         val vilkårsvurdering =
             vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = vedtak.behandling.id)
@@ -59,16 +57,11 @@ class UtbetalingsperiodeMedBegrunnelserService(
                 reduksjonsperioder = perioderMedReduksjonFraSistIverksatteBehandling
             )
 
-        return if (featureToggleService.isEnabled(KAN_BEHANDLE_EØS)) {
-            val kompetanser = kompetanseRepository.finnFraBehandlingId(vedtak.behandling.id)
-
-            splittUtbetalingsperioderPåKompetanser(
-                utbetalingsperioder = utbetalingsperioderMedReduksjon,
-                kompetanser = kompetanser.toList()
-            )
-        } else {
-            utbetalingsperioderMedReduksjon
-        }
+        val kompetanser = kompetanseRepository.finnFraBehandlingId(vedtak.behandling.id)
+        return splittUtbetalingsperioderPåKompetanser(
+            utbetalingsperioder = utbetalingsperioderMedReduksjon,
+            kompetanser = kompetanser.toList()
+        )
     }
 
     fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
@@ -86,11 +79,11 @@ class UtbetalingsperiodeMedBegrunnelserService(
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag =
             forrigeIverksatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
 
-        val forrigeAndelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(forrigeIverksatteBehandling.id)
+        val forrigeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeIverksatteBehandling.id)
 
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandling.id)
+        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
 

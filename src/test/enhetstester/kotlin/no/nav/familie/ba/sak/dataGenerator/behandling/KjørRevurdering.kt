@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
@@ -66,8 +66,7 @@ fun kjørStegprosessForBehandling(
     endretUtbetalingAndelService: EndretUtbetalingAndelService,
     fagsakService: FagsakService,
     persongrunnlagService: PersongrunnlagService,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
-
+    andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ): Behandling {
     fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
 
@@ -116,7 +115,7 @@ fun kjørStegprosessForBehandling(
             vedtaksperiodeService = vedtaksperiodeService,
             stegService = stegService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             sanityBegrunnelser = hentBegrunnelser(),
             vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!
@@ -174,27 +173,27 @@ private fun håndterSendtTilBeslutterSteg(
     vedtaksperiodeService: VedtaksperiodeService,
     stegService: StegService,
     persongrunnlagService: PersongrunnlagService,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     endretUtbetalingAndelService: EndretUtbetalingAndelService,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     vilkårsvurdering: Vilkårsvurdering
 ): Behandling {
-    val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-        behandlingId = behandlingEtterSimuleringSteg.id
-    )
+    val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
+        .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId = behandlingEtterSimuleringSteg.id)
 
     val persongrunnlag =
         persongrunnlagService.hentAktivThrows(behandlingEtterSimuleringSteg.id)
 
+    val endredeUtbetalingAndeler = endretUtbetalingAndelService.hentEndredeUtbetalingAndeler(
+        behandlingEtterSimuleringSteg.id
+    )
     leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
         behandling = behandlingEtterSimuleringSteg,
         vedtakService = vedtakService,
         vedtaksperiodeService = vedtaksperiodeService,
         personopplysningGrunnlag = persongrunnlag,
         andelerTilkjentYtelse = andelerTilkjentYtelse,
-        endredeUtbetalingAndeler = endretUtbetalingAndelService.hentEndredeUtbetalingAndeler(
-            behandlingEtterSimuleringSteg.id
-        ),
+        endredeUtbetalingAndeler = endredeUtbetalingAndeler,
         sanityBegrunnelser = sanityBegrunnelser,
         vilkårsvurdering = vilkårsvurdering
     )
@@ -343,7 +342,7 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
     vedtakService: VedtakService,
     vedtaksperiodeService: VedtaksperiodeService,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     vilkårsvurdering: Vilkårsvurdering

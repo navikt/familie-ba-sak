@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -19,7 +19,8 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -48,9 +49,6 @@ internal class StønadsstatistikkServiceTest(
     private val persongrunnlagService: PersongrunnlagService,
 
     @MockK
-    private val beregningService: BeregningService,
-
-    @MockK
     private val vedtakService: VedtakService,
 
     @MockK
@@ -60,18 +58,21 @@ internal class StønadsstatistikkServiceTest(
     private val kompetanseService: KompetanseService,
 
     @MockK
-    private val vedtakRepository: VedtakRepository
+    private val vedtakRepository: VedtakRepository,
+
+    @MockK
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
 
     private val stønadsstatistikkService =
         StønadsstatistikkService(
             behandlingHentOgPersisterService,
             persongrunnlagService,
-            beregningService,
             vedtakService,
             personopplysningerService,
             vedtakRepository,
-            kompetanseService
+            kompetanseService,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
     private val behandling = lagBehandling()
     private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
@@ -84,7 +85,7 @@ internal class StønadsstatistikkServiceTest(
 
         val vedtak = lagVedtak(behandling)
 
-        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             barn1.fødselsdato.nesteMåned(),
             barn1.fødselsdato.plusYears(3).toYearMonth(),
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -94,7 +95,7 @@ internal class StønadsstatistikkServiceTest(
             periodeIdOffset = 1
 
         )
-        val andelTilkjentYtelseBarn2PeriodeMed0Beløp = lagAndelTilkjentYtelse(
+        val andelTilkjentYtelseBarn2PeriodeMed0Beløp = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             barn2.fødselsdato.nesteMåned(),
             barn2.fødselsdato.plusYears(18).forrigeMåned(),
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -131,7 +132,7 @@ internal class StønadsstatistikkServiceTest(
         val andelerTilkjentYtelse = listOf(
             andelTilkjentYtelseBarn1,
             andelTilkjentYtelseBarn2PeriodeMed0Beløp,
-            andelTilkjentYtelseSøker
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelseSøker)
         )
 
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
@@ -139,7 +140,8 @@ internal class StønadsstatistikkServiceTest(
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
-        every { beregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns andelerTilkjentYtelse
+        every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(any()) } returns
+            andelerTilkjentYtelse
     }
 
     @Test

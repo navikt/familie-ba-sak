@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toLocalDate
@@ -29,7 +29,7 @@ class OpphørsperiodeTest {
         val periodeFomAndreAndel = inneværendeMåned().minusYears(1)
         val periodeTomAndreAndel = inneværendeMåned().minusMonths(10)
         val periodeFomSisteAndel = inneværendeMåned().minusMonths(4)
-        val andelBarn1 = lagAndelTilkjentYtelse(
+        val andelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             inneværendeMåned().minusYears(4),
             periodeTomFørsteAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -37,7 +37,7 @@ class OpphørsperiodeTest {
             person = barn1
         )
 
-        val andel2Barn1 = lagAndelTilkjentYtelse(
+        val andel2Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             periodeFomAndreAndel,
             periodeTomAndreAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -45,7 +45,7 @@ class OpphørsperiodeTest {
             person = barn1
         )
 
-        val andel3Barn1 = lagAndelTilkjentYtelse(
+        val andel3Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             periodeFomSisteAndel,
             inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -69,7 +69,7 @@ class OpphørsperiodeTest {
     @Test
     fun `Skal utlede opphørsperiode når siste utbetalingsperiode er før neste måned`() {
         val periodeTomFørsteAndel = inneværendeMåned().minusYears(1)
-        val andelBarn1 = lagAndelTilkjentYtelse(
+        val andelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             inneværendeMåned().minusYears(4),
             periodeTomFørsteAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -90,7 +90,7 @@ class OpphørsperiodeTest {
     @Test
     fun `Skal utlede opphørsperiode fra neste måned når siste utbetalingsperiode er inneværende måned`() {
         val periodeTomFørsteAndel = inneværendeMåned()
-        val andelBarn1 = lagAndelTilkjentYtelse(
+        val andelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             inneværendeMåned().minusYears(4),
             periodeTomFørsteAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -112,7 +112,7 @@ class OpphørsperiodeTest {
     fun `Skal utlede opphørsperiode når ytelsen reduseres i revurdering`() {
         val reduksjonFom = inneværendeMåned().minusYears(5)
         val reduksjonTom = inneværendeMåned().minusYears(3)
-        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             inneværendeMåned().minusYears(5),
             inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -120,7 +120,7 @@ class OpphørsperiodeTest {
             person = barn1
         )
 
-        val andelBarn1 = lagAndelTilkjentYtelse(
+        val andelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             reduksjonTom,
             inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -145,7 +145,7 @@ class OpphørsperiodeTest {
         val reduksjonFom = inneværendeMåned().minusMonths(2)
         val reduksjonTom = inneværendeMåned()
 
-        val forrigeAndel1Barn1 = lagAndelTilkjentYtelse(
+        val forrigeAndel1Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             reduksjonFom,
             reduksjonFom.plusMonths(1),
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -153,7 +153,7 @@ class OpphørsperiodeTest {
             person = barn1
         )
 
-        val forrigeAndel2Barn1 = lagAndelTilkjentYtelse(
+        val forrigeAndel2Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             reduksjonTom.minusMonths(1),
             reduksjonTom,
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -161,7 +161,7 @@ class OpphørsperiodeTest {
             person = barn1
         )
 
-        val andelBarn1 = lagAndelTilkjentYtelse(
+        val andelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             reduksjonTom.plusMonths(1),
             inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -184,7 +184,7 @@ class OpphørsperiodeTest {
     @Test
     fun `Skal utlede opphørsperiode når ytelsen reduseres i revurdering og ytelsen ikke lenger er løpende`() {
         val reduksjonFom = inneværendeMåned()
-        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             inneværendeMåned().minusYears(5),
             inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
@@ -192,7 +192,7 @@ class OpphørsperiodeTest {
             person = barn1
         )
 
-        val andelBarn1 = lagAndelTilkjentYtelse(
+        val andelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             inneværendeMåned().minusYears(5),
             reduksjonFom,
             YtelseType.ORDINÆR_BARNETRYGD,

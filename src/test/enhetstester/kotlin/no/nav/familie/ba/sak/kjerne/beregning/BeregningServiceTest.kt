@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
@@ -20,6 +21,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
@@ -30,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -68,6 +71,11 @@ class BeregningServiceTest {
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService = AndelerTilkjentYtelseOgEndreteUtbetalingerService(
+        andelTilkjentYtelseRepository,
+        endretUtbetalingAndelRepository
+    )
 
     private lateinit var beregningService: BeregningService
 
@@ -83,8 +91,9 @@ class BeregningServiceTest {
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             behandlingRepository = behandlingRepository,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-            endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
-            småbarnstilleggService = småbarnstilleggService
+            småbarnstilleggService = småbarnstilleggService,
+            featureToggleService = featureToggleService,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
@@ -96,6 +105,9 @@ class BeregningServiceTest {
         }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } answers { emptyList() }
+        every { featureToggleService.isEnabled(any()) } answers { true }
+        every { endretUtbetalingAndelRepository.saveAllAndFlush(any<Collection<EndretUtbetalingAndel>>()) } answers { emptyList() }
+        every { andelTilkjentYtelseRepository.saveAllAndFlush(any<Collection<AndelTilkjentYtelse>>()) } answers { emptyList() }
     }
 
     @Test
@@ -321,7 +333,8 @@ class BeregningServiceTest {
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             lagFullstendigVilkårResultat = true,
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
+            erDeltBosted = true
         )
 
         val personResultatSøker = lagPersonResultat(
@@ -1006,7 +1019,7 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.now().toYearMonth().plusMonths(1)
         val endreteUtbetalingAndeler = if (endretUtbetaling) {
             listOf(
-                EndretUtbetalingAndel(
+                lagEndretUtbetalingAndel(
                     behandlingId = behandling.id,
                     person = barn1,
                     fom = periodeFom,

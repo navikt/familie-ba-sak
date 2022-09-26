@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -77,7 +77,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 4))
         )
             .map {
-                lagEndretUtbetalingAndel(behandling.id, barn1, it.fom, it.tom, 50)
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn1, it.fom, it.tom, 50)
             }
 
         val endretUtbetalingerForBarn2 = listOf(
@@ -86,7 +86,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             MånedPeriode(YearMonth.of(2021, 11), YearMonth.of(2021, 12))
         )
             .map {
-                lagEndretUtbetalingAndel(behandling.id, barn2, it.fom, it.tom, 50)
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn2, it.fom, it.tom, 50)
             }
 
         val andelerTilkjentYtelserEtterEUA =
@@ -95,7 +95,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
                 endretUtbetalingerForBarn1 + endretUtbetalingerForBarn2
             )
 
-        val andelerTilkjentYtelserEtterEUAList = andelerTilkjentYtelserEtterEUA.toList()
+        val andelerTilkjentYtelserEtterEUAList = andelerTilkjentYtelserEtterEUA.map { it.andel }.toList()
 
         assertEquals(8, andelerTilkjentYtelserEtterEUAList.size)
 

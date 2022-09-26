@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -56,10 +56,11 @@ class VilkårsvurderingFlyttResultaterTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 
     @Autowired
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -134,7 +135,7 @@ class VilkårsvurderingFlyttResultaterTest(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
@@ -156,7 +157,7 @@ class VilkårsvurderingFlyttResultaterTest(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret

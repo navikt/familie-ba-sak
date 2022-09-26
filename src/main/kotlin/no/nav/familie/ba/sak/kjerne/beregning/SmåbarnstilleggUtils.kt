@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
@@ -47,7 +48,7 @@ class VedtaksperiodefinnerSmåbarnstilleggFeil(
 fun vedtakOmOvergangsstønadPåvirkerFagsak(
     småbarnstilleggBarnetrygdGenerator: SmåbarnstilleggBarnetrygdGenerator,
     nyePerioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
 ): Boolean {
     val (forrigeSøkersSmåbarnstilleggAndeler, forrigeSøkersAndreAndeler) = forrigeAndelerTilkjentYtelse.partition { it.erSmåbarnstillegg() }
@@ -170,7 +171,7 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
 }
 
 fun kombinerBarnasTidslinjerTilUnder3ÅrResultat(
-    alleAndelerForBarnUnder3År: Iterable<AndelTilkjentYtelse>
+    alleAndelerForBarnUnder3År: Iterable<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): BarnSinRettTilSmåbarnstillegg? {
     val høyesteProsentIPeriode = alleAndelerForBarnUnder3År.maxOfOrNull { it.prosent }
 
@@ -183,7 +184,7 @@ fun kombinerBarnasTidslinjerTilUnder3ÅrResultat(
 }
 
 fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
-    barnasAndeler: List<AndelTilkjentYtelse>,
+    barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
 ): Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned> {
     val barnasAndelerTidslinjer =
@@ -258,8 +259,8 @@ enum class BarnSinRettTilSmåbarnstillegg {
 }
 
 fun validerUtvidetOgBarnasAndeler(
-    utvidetAndeler: List<AndelTilkjentYtelse>,
-    barnasAndeler: List<AndelTilkjentYtelse>
+    utvidetAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ) {
     if (utvidetAndeler.any { !it.erUtvidet() }) throw Feil("Det finnes andre ytelser enn utvidet blandt utvidet-andelene")
     if (barnasAndeler.any { it.erSøkersAndel() }) throw Feil("Finner andeler for søker blandt barnas andeler")

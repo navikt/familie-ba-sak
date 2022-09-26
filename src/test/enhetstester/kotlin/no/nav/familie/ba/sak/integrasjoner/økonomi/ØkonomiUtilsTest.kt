@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
@@ -8,8 +11,10 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOppr
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -510,5 +515,328 @@ internal class ØkonomiUtilsTest {
         assertEquals(0, oppdaterte.getValue(person.aktør.aktivFødselsnummer()).first().forrigePeriodeOffset)
         assertEquals(null, oppdaterte.getValue(person2.aktør.aktivFødselsnummer()).first().periodeOffset)
         assertEquals(null, oppdaterte.getValue(person2.aktør.aktivFødselsnummer()).first().forrigePeriodeOffset)
+    }
+
+    @Test
+    fun `Skal returnere offset-oppdatering for andel som er lik som i forrige behandling`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+        val fagsak = defaultFagsak(aktør = søker.aktør)
+        val behandling = lagBehandling(fagsak = fagsak)
+        val forrigeBehandling = lagBehandling(fagsak = fagsak)
+
+        val andelerIForrigeBehandling = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2033, 3),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                aktør = søker.aktør,
+                beløp = 1054,
+                periodeIdOffset = 1,
+                forrigeperiodeIdOffset = null,
+                behandling = forrigeBehandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2033, 3),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn1.aktør,
+                beløp = 1054,
+                periodeIdOffset = 0,
+                forrigeperiodeIdOffset = null,
+                behandling = forrigeBehandling
+            )
+
+        )
+
+        val andelerIDenneBehandlingen = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2022, 9),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                aktør = søker.aktør,
+                beløp = 1054,
+                periodeIdOffset = 4,
+                forrigeperiodeIdOffset = 1,
+                behandling = behandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2033, 3),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn1.aktør,
+                beløp = 1054,
+                periodeIdOffset = 4,
+                forrigeperiodeIdOffset = 0,
+                behandling = behandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 10),
+                tom = YearMonth.of(2028, 8),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn2.aktør,
+                beløp = 1676,
+                periodeIdOffset = 2,
+                forrigeperiodeIdOffset = null,
+                behandling = behandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2028, 9),
+                tom = YearMonth.of(2040, 8),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn2.aktør,
+                beløp = 1054,
+                periodeIdOffset = 3,
+                forrigeperiodeIdOffset = 2,
+                behandling = behandling
+            )
+        )
+
+        val oppdateringer = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
+            forrigeKjeder = kjedeinndelteAndeler(andelerIForrigeBehandling),
+            oppdaterteKjeder = kjedeinndelteAndeler(andelerIDenneBehandlingen)
+        )
+
+        assertEquals(1, oppdateringer.size)
+
+        val oppdatering = oppdateringer.single()
+
+        assertEquals(4, oppdatering.beståendeAndelSomSkalHaOppdatertOffset.periodeOffset)
+        assertEquals(0, oppdatering.beståendeAndelSomSkalHaOppdatertOffset.forrigePeriodeOffset)
+        assertEquals(behandling.id, oppdatering.beståendeAndelSomSkalHaOppdatertOffset.kildeBehandlingId)
+
+        assertEquals(0, oppdatering.periodeOffset)
+        assertEquals(null, oppdatering.forrigePeriodeOffset)
+        assertEquals(forrigeBehandling.id, oppdatering.kildeBehandlingId)
+    }
+
+    @Test
+    fun `Skal returnere offset-oppdatering for de andelene som er like som i forrige behandling`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+        val fagsak = defaultFagsak(aktør = søker.aktør)
+        val behandling = lagBehandling(fagsak = fagsak)
+        val forrigeBehandling = lagBehandling(fagsak = fagsak)
+
+        val andelerIForrigeBehandling = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2033, 3),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                aktør = søker.aktør,
+                beløp = 1054,
+                periodeIdOffset = 1,
+                forrigeperiodeIdOffset = null,
+                behandling = forrigeBehandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2033, 3),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn1.aktør,
+                beløp = 1054,
+                periodeIdOffset = 0,
+                forrigeperiodeIdOffset = null,
+                behandling = forrigeBehandling
+            )
+
+        )
+
+        val andelerIDenneBehandlingen = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2033, 3),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                aktør = søker.aktør,
+                beløp = 1054,
+                periodeIdOffset = 4,
+                forrigeperiodeIdOffset = 1,
+                behandling = behandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2033, 3),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn1.aktør,
+                beløp = 1054,
+                periodeIdOffset = 2,
+                forrigeperiodeIdOffset = 0,
+                behandling = behandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 10),
+                tom = YearMonth.of(2028, 8),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn2.aktør,
+                beløp = 1676,
+                periodeIdOffset = 2,
+                forrigeperiodeIdOffset = null,
+                behandling = behandling
+            )
+        )
+
+        val oppdateringer = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
+            forrigeKjeder = kjedeinndelteAndeler(andelerIForrigeBehandling),
+            oppdaterteKjeder = kjedeinndelteAndeler(andelerIDenneBehandlingen)
+        )
+
+        assertEquals(2, oppdateringer.size)
+
+        val oppdateringUtvidet = oppdateringer.find { it.beståendeAndelSomSkalHaOppdatertOffset.erUtvidet() }
+        val oppdateringOrdinær = oppdateringer.find { !it.beståendeAndelSomSkalHaOppdatertOffset.erUtvidet() }
+
+        assertEquals(4, oppdateringUtvidet!!.beståendeAndelSomSkalHaOppdatertOffset.periodeOffset)
+        assertEquals(1, oppdateringUtvidet.beståendeAndelSomSkalHaOppdatertOffset.forrigePeriodeOffset)
+        assertEquals(behandling.id, oppdateringUtvidet.beståendeAndelSomSkalHaOppdatertOffset.kildeBehandlingId)
+
+        assertEquals(1, oppdateringUtvidet.periodeOffset)
+        assertEquals(null, oppdateringUtvidet.forrigePeriodeOffset)
+        assertEquals(forrigeBehandling.id, oppdateringUtvidet.kildeBehandlingId)
+
+        assertEquals(2, oppdateringOrdinær!!.beståendeAndelSomSkalHaOppdatertOffset.periodeOffset)
+        assertEquals(0, oppdateringOrdinær.beståendeAndelSomSkalHaOppdatertOffset.forrigePeriodeOffset)
+        assertEquals(behandling.id, oppdateringOrdinær.beståendeAndelSomSkalHaOppdatertOffset.kildeBehandlingId)
+
+        assertEquals(0, oppdateringOrdinær.periodeOffset)
+        assertEquals(null, oppdateringOrdinær.forrigePeriodeOffset)
+        assertEquals(forrigeBehandling.id, oppdateringOrdinær.kildeBehandlingId)
+    }
+
+    @Test
+    fun `Skal returnere offset-oppdatering for andeler som er like som forrige behandling, men er null nå`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+        val fagsak = defaultFagsak(aktør = søker.aktør)
+        val behandling = lagBehandling(fagsak = fagsak)
+        val forrigeBehandling = lagBehandling(fagsak = fagsak)
+
+        val andelerIForrigeBehandling = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2033, 3),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                aktør = søker.aktør,
+                beløp = 1054,
+                periodeIdOffset = 2,
+                forrigeperiodeIdOffset = null,
+                behandling = forrigeBehandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2022, 10),
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                aktør = søker.aktør,
+                beløp = 1054,
+                periodeIdOffset = 3,
+                forrigeperiodeIdOffset = null,
+                behandling = forrigeBehandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2028, 3),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn1.aktør,
+                beløp = 1054,
+                periodeIdOffset = 0,
+                forrigeperiodeIdOffset = null,
+                behandling = forrigeBehandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2028, 5),
+                tom = YearMonth.of(2033, 3),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn1.aktør,
+                beløp = 1054,
+                periodeIdOffset = 1,
+                forrigeperiodeIdOffset = 0,
+                behandling = forrigeBehandling
+            )
+        )
+
+        val andelerIDenneBehandlingen = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2033, 3),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                aktør = søker.aktør,
+                beløp = 1054,
+                periodeIdOffset = null,
+                forrigeperiodeIdOffset = null,
+                behandling = behandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2022, 8),
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                aktør = søker.aktør,
+                beløp = 1054,
+                periodeIdOffset = 4,
+                forrigeperiodeIdOffset = 3,
+                behandling = behandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 4),
+                tom = YearMonth.of(2028, 3),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn1.aktør,
+                beløp = 1054,
+                periodeIdOffset = null,
+                forrigeperiodeIdOffset = null,
+                behandling = behandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2028, 5),
+                tom = YearMonth.of(2033, 3),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn1.aktør,
+                beløp = 1054,
+                periodeIdOffset = null,
+                forrigeperiodeIdOffset = null,
+                behandling = behandling
+            )
+        )
+
+        val oppdateringer = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
+            forrigeKjeder = kjedeinndelteAndeler(andelerIForrigeBehandling),
+            oppdaterteKjeder = kjedeinndelteAndeler(andelerIDenneBehandlingen)
+        )
+
+        assertEquals(3, oppdateringer.size)
+
+        val oppdateringUtvidet = oppdateringer.find { it.beståendeAndelSomSkalHaOppdatertOffset.erUtvidet() }
+        val oppdateringerOrdinær = oppdateringer.filter { !it.beståendeAndelSomSkalHaOppdatertOffset.erUtvidet() }
+            .sortedBy { it.beståendeAndelSomSkalHaOppdatertOffset.stønadFom }
+
+        assertEquals(null, oppdateringUtvidet!!.beståendeAndelSomSkalHaOppdatertOffset.periodeOffset)
+        assertEquals(null, oppdateringUtvidet.beståendeAndelSomSkalHaOppdatertOffset.forrigePeriodeOffset)
+        assertEquals(behandling.id, oppdateringUtvidet.beståendeAndelSomSkalHaOppdatertOffset.kildeBehandlingId)
+
+        assertEquals(2, oppdateringUtvidet.periodeOffset)
+        assertEquals(null, oppdateringUtvidet.forrigePeriodeOffset)
+        assertEquals(forrigeBehandling.id, oppdateringUtvidet.kildeBehandlingId)
+
+        assertEquals(2, oppdateringerOrdinær.size)
+
+        val førsteOrdinæreOppdatering = oppdateringerOrdinær.first()
+        val andreOrdinæreOppdatering = oppdateringerOrdinær.last()
+
+        assertEquals(null, førsteOrdinæreOppdatering.beståendeAndelSomSkalHaOppdatertOffset.periodeOffset)
+        assertEquals(null, førsteOrdinæreOppdatering.beståendeAndelSomSkalHaOppdatertOffset.forrigePeriodeOffset)
+        assertEquals(behandling.id, førsteOrdinæreOppdatering.beståendeAndelSomSkalHaOppdatertOffset.kildeBehandlingId)
+
+        assertEquals(0, førsteOrdinæreOppdatering.periodeOffset)
+        assertEquals(null, førsteOrdinæreOppdatering.forrigePeriodeOffset)
+        assertEquals(forrigeBehandling.id, førsteOrdinæreOppdatering.kildeBehandlingId)
+
+        assertEquals(null, andreOrdinæreOppdatering.beståendeAndelSomSkalHaOppdatertOffset.periodeOffset)
+        assertEquals(null, andreOrdinæreOppdatering.beståendeAndelSomSkalHaOppdatertOffset.forrigePeriodeOffset)
+        assertEquals(behandling.id, andreOrdinæreOppdatering.beståendeAndelSomSkalHaOppdatertOffset.kildeBehandlingId)
+
+        assertEquals(1, andreOrdinæreOppdatering.periodeOffset)
+        assertEquals(0, andreOrdinæreOppdatering.forrigePeriodeOffset)
+        assertEquals(forrigeBehandling.id, andreOrdinæreOppdatering.kildeBehandlingId)
     }
 }
