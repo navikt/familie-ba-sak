@@ -111,6 +111,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetTilleggstekstSatsendring"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_TILLEGGSTEKST_VALUTAJUSTERING {
+        override val sanityApiNavn = "innvilgetTilleggstekstValutajustering"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_TILLEGGSTEKST_SATSENDRING_OG_VALUTAJUSTERING {
+        override val sanityApiNavn = "innvilgetTilleggstekstSatsendringOgValutajustering"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
