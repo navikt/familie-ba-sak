@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
@@ -22,7 +23,8 @@ class SmåbarnstilleggService(
     private val efSakRestClient: EfSakRestClient,
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val persongrunnlagService: PersongrunnlagService
+    private val persongrunnlagService: PersongrunnlagService,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
 
     fun hentOgLagrePerioderMedFullOvergangsstønad(
@@ -80,6 +82,9 @@ class SmåbarnstilleggService(
             hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør).map { it.tilInternPeriodeOvergangsstønad() }
                 .slåSammenTidligerePerioder()
 
+        val andelerMedEndringerFraSistIverksatteBehandling = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sistIverksatteBehandling.id)
+
         secureLogger.info("Perioder med overgangsstønad fra EF: ${nyePerioderMedFullOvergangsstønad.map { "Periode(fom=${it.fomDato}, tom=${it.tomDato})" }}")
 
         return vedtakOmOvergangsstønadPåvirkerFagsak(
@@ -88,7 +93,7 @@ class SmåbarnstilleggService(
                 tilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling
             ),
             nyePerioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
-            forrigeAndelerTilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling.andelerTilkjentYtelse.toList(),
+            forrigeAndelerTilkjentYtelse = andelerMedEndringerFraSistIverksatteBehandling,
             barnasAktørerOgFødselsdatoer = persongrunnlagFraSistIverksatteBehandling.barna.map {
                 Pair(
                     it.aktør,

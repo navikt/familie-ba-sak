@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -41,8 +41,8 @@ class RevurderingDødsfall(
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService
+    @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -112,7 +112,7 @@ class RevurderingDødsfall(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
         val restFagsakEtterBehandlingAvsluttet =
@@ -181,7 +181,7 @@ class RevurderingDødsfall(
                 endretUtbetalingAndelService = endretUtbetalingAndelService,
                 fagsakService = fagsakService,
                 persongrunnlagService = persongrunnlagService,
-                andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
             )
         }
     }

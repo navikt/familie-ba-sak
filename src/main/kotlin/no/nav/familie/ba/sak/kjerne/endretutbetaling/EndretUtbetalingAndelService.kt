@@ -87,6 +87,8 @@ class EndretUtbetalingAndelService(
 
         validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, andelTilkjentYtelser)
 
+        endretUtbetalingAndelRepository.saveAndFlush(endretUtbetalingAndel)
+
         beregningService.oppdaterBehandlingMedBeregning(
             behandling,
             personopplysningGrunnlag,
@@ -101,7 +103,7 @@ class EndretUtbetalingAndelService(
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
         endretUtbetalingAndel.andelTilkjentYtelser.forEach { it.endretUtbetalingAndeler.clear() }
-        endretUtbetalingAndelRepository.delete(endretUtbetalingAndel)
+        endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)

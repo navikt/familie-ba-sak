@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -103,9 +102,6 @@ class VedtakServiceTest(
     private val infotrygdService: InfotrygdService,
 
     @Autowired
-    private val featureToggleService: FeatureToggleService,
-
-    @Autowired
     private val beregningService: BeregningService,
 
     @Autowired
@@ -152,7 +148,6 @@ class VedtakServiceTest(
             infotrygdService,
             vedtaksperiodeService,
             personidentService,
-            featureToggleService,
             taskRepository,
             vilkårsvurderingService
         )
