@@ -39,7 +39,7 @@ internal class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest : AbstractS
     }
 
     @Test
-    fun `Skal gjenopprette DB-koblingrr mellom andeler og endringer når sikkerhetsnettet er på`() {
+    fun `Skal gjenopprette DB-koblinger mellom andeler og endringer når sikkerhetsnettet er på`() {
         // Skru PÅ virtuell kobling mellom andeler og endringer
         every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) } returns true
         // Skru PÅ sikkerhetsnettet som skaper DB-koblinger fra virtuelle koblinger (false betyr MED sikkerhetsnett)

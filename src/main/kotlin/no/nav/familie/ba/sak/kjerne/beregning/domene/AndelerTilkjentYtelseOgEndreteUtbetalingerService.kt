@@ -32,6 +32,13 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         return lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
     }
 
+    /**
+     * Spesialvariant som brukes mot frontend og i behandlingsresultatsteget
+     * Sjekker at endringsperiode gir mening ift vilkårsvurderingen
+     * Hvis ikke returnes en tom liste med andel tilkjent ytelse
+     * Det signaliserer at "noe" er feil. I frontend brukes dette for å gi "gul trekant"
+     * I behandlingsresultatsteget brukes det tilsvarende for å validere om det er mulig å gå videre
+     */
     fun finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId: Long) =
         finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
             .map {
@@ -42,7 +49,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
                         vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
                     )
                 }
-            } // Fjerner andeler som et signal om at en endring ikke validerer. Trenger ikke å oppdatere sammenknytning
+            }
 
     private fun lagKombinator(behandlingId: Long) =
         AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
@@ -51,6 +58,12 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
         )
 
+    /**
+     * Oppretter kobling i DB mellom andeler og endringer som et ekstra sikkerhetsnett
+     * hvis BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER-toggle skrus av igjen
+     * Lener seg på at koblingen andel->endring fører til tilsvarende kobling endring->andel
+     * og tilsvarende at fjerning av kobling propageres
+     */
     private fun knyttEventueltSammenAndelerOgEndringer(behandlingId: Long) {
         if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) &&
             !featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT)
@@ -69,7 +82,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
 private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
     private val andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     private val endretUtbetalingAndeler: Collection<EndretUtbetalingAndel>,
-    private val brukFrikobleteAndelerOgEndringer: Boolean?
+    private val brukFrikobleteAndelerOgEndringer: Boolean
 ) {
     fun lagAndelerMedEndringer(): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         return andelerTilkjentYtelse.map { lagAndelMedEndringer(it) }
@@ -98,6 +111,10 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             endretUtbetalingAndel,
             andeler,
             brukFrikobleteAndelerOgEndringer
+            // Sjekker at endringen ikke "stikker utenfor" hele den tilkjente ytelsen.
+            // I motsatt fall er ikke endringen gyldig og skal ikke være koblet til andelen
+            // Et lite hack som utnytter kode som finnes.
+            // Bør skrives om til å gjøre en "ekte" sjekk på om endringen overlapper andeler uten hull
         ).utenAndelerVedValideringsfeil {
             validerPeriodeInnenforTilkjentytelse(
                 endretUtbetalingAndel,
@@ -119,7 +136,7 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
 data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     private val andelTilkjentYtelse: AndelTilkjentYtelse,
     private val endreteUtbetalingerAndeler: Collection<EndretUtbetalingAndel>,
-    private val brukFrikobleteAndelerOgEndringer: Boolean?
+    private val brukFrikobleteAndelerOgEndringer: Boolean
 ) {
     val periodeOffset get() = andelTilkjentYtelse.periodeOffset
     val sats get() = andelTilkjentYtelse.sats
@@ -144,28 +161,33 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     val prosent get() = andelTilkjentYtelse.prosent
     val andel get() = andelTilkjentYtelse
     val endreteUtbetalinger
-        get() = if (brukFrikobleteAndelerOgEndringer == null) {
-            emptyList()
-        } else if (brukFrikobleteAndelerOgEndringer) {
+        get() = if (brukFrikobleteAndelerOgEndringer) {
             endreteUtbetalingerAndeler
         } else {
             andel.endretUtbetalingAndeler
         }
 
     companion object {
-        fun utenEndringer(andelTilkjentYtelse: AndelTilkjentYtelse) =
-            AndelTilkjentYtelseMedEndreteUtbetalinger(
+        fun utenEndringer(andelTilkjentYtelse: AndelTilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
+            if (andelTilkjentYtelse.endretUtbetalingAndeler.size > 0) {
+                throw IllegalArgumentException(
+                    "Skal opprette AndelTilkjentYtelseMedEndreteUtbetalinger uten endringer, men underliggende andel HAR endringer"
+                )
+            }
+
+            return AndelTilkjentYtelseMedEndreteUtbetalinger(
                 andelTilkjentYtelse,
                 emptyList(),
-                null
+                true // Likegyldig hvilken verdi denne har. I begge tilfeller returneres tom liste.
             )
+        }
     }
 }
 
 data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val endretUtbetalingAndel: EndretUtbetalingAndel,
     private val andeler: List<AndelTilkjentYtelse>,
-    internal val brukFrikobleteAndelerOgEndringer: Boolean?
+    internal val brukFrikobleteAndelerOgEndringer: Boolean
 ) {
     fun overlapperMed(månedPeriode: MånedPeriode) = endretUtbetalingAndel.overlapperMed(månedPeriode)
     fun årsakErDeltBosted() = endretUtbetalingAndel.årsakErDeltBosted()
@@ -182,15 +204,18 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val fom get() = endretUtbetalingAndel.fom
     val tom get() = endretUtbetalingAndel.tom
     val andelerTilkjentYtelse
-        get() = if (brukFrikobleteAndelerOgEndringer == null) {
-            emptyList()
-        } else if (brukFrikobleteAndelerOgEndringer) {
+        get() = if (brukFrikobleteAndelerOgEndringer) {
             andeler
         } else {
             endretUtbetalingAndel.andelTilkjentYtelser
         }
 }
 
+/**
+ * Fjerner andelene hvis det funksjonen som sendes inn kaster en exception
+ * Brukes som en wrapper rundt en del valideringsfunksjoner som kaster exception når ting ikke validerer
+ * Manglende andeler brukes et par steder som et signal om at noe er feil
+ */
 private fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.utenAndelerVedValideringsfeil(
     validator: () -> Unit
 ) = if (brukFrikobleteAndelerOgEndringer == true) {
@@ -204,6 +229,11 @@ private fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.utenAndelerVedValideri
     this
 }
 
+/**
+ * Hjelpefunksjon som oppretter AndelTilkjentYtelseMedEndreteUtbetalinger fra AndelTilkjentYtelse og legger til en endring.
+ * Utnytter at <endretUtbetalingAndelMedAndelerTilkjentYtelse> vet om funksjonsbryteren <brukFrikobleteAndelerOgEndringer> er satt
+ * og viderefører den til den opprettede AndelTilkjentYtelseMedEndreteUtbetalinger
+ */
 fun AndelTilkjentYtelse.medEndring(
     endretUtbetalingAndelMedAndelerTilkjentYtelse: EndretUtbetalingAndelMedAndelerTilkjentYtelse
 ) = AndelTilkjentYtelseMedEndreteUtbetalinger(
