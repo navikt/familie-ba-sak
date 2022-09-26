@@ -142,7 +142,7 @@ internal class DokumentServiceEnhetstest {
         personResultat.setAndreVurderinger(emptySet()) // nullstiller andreVurderinger
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns null
         every { vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(any(), any()) } returns
-                vilkårsvurdering
+            vilkårsvurdering
 
         sendBrevInnhenteOpplysninger(vilkårsvurdering.behandling)
 
@@ -163,6 +163,4 @@ internal class DokumentServiceEnhetstest {
             fagsakId = behandling.fagsak.id
         )
     }
-
-
 }
