@@ -106,7 +106,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 behandlingHentOgPersisterService.hentBehandlinger(fagsakId = behandling.fagsak.id)
 
             val behandlingerOpprettetEtterDenneBehandlingen =
-                alleBehandlingerPåFagsak.filter { it.opprettetTidspunkt.isAfter(behandling.opprettetTidspunkt) }
+                alleBehandlingerPåFagsak.filter { it.opprettetTidspunkt.isAfter(behandling.opprettetTidspunkt) && !it.erHenlagt() }
 
             val godkjenteStatuserPåSenereBehandling =
                 listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES, BehandlingStatus.FATTER_VEDTAK)
