@@ -24,6 +24,35 @@ class RettOffsetController(
     @PostMapping("/simuler-offset-fix")
     @Transactional
     fun simuler() {
+        val behandlinger = finnBehandlinger()
+        val input = RettOffsetIAndelTilkjentYtelseDto(
+            simuler = true,
+            behandlinger = behandlinger
+        )
+        task.doTask(
+            Task(
+                type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(input)
+            )
+        )
+        throw RuntimeException("Kaster exception her for å sikre at ingenting frå transaksjonen blir committa")
+    }
+
+    @PostMapping("/rett-offset")
+    fun rettOffsetfeil() {
+        val input = RettOffsetIAndelTilkjentYtelseDto(
+            simuler = false,
+            behandlinger = finnBehandlinger()
+        )
+        task.doTask(
+            Task(
+                type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(input)
+            )
+        )
+    }
+
+    private fun finnBehandlinger(): Set<Long> {
         val ugyldigeResultater = listOf(
             Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
             Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
@@ -32,7 +61,8 @@ class RettOffsetController(
             Behandlingsresultat.AVSLÅTT,
             Behandlingsresultat.FORTSATT_INNVILGET
         )
-        val behandlingerMedDuplikateOffset = behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(ugyldigeResultater = ugyldigeResultater)
+        val behandlingerMedDuplikateOffset =
+            behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(ugyldigeResultater = ugyldigeResultater)
         val behandlingerMedNullOffsets = behandlingRepository.finnBehandlingerMedFeilNullOffsetsForAndelTilkjentYtelse(
             ugyldigeResultater = ugyldigeResultater
         )
@@ -49,17 +79,7 @@ class RettOffsetController(
             }"
         )
 
-        val input = RettOffsetIAndelTilkjentYtelseDto(
-            simuler = true,
-            behandlinger = (behandlingerMedDuplikateOffset + behandlingerMedNullOffsets).toSet()
-        )
-        task.doTask(
-            Task(
-                type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(input)
-            )
-        )
-        throw RuntimeException("Kaster exception her for å sikre at ingenting frå transaksjonen blir committa")
+        return (behandlingerMedDuplikateOffset + behandlingerMedNullOffsets).toSet()
     }
 
     companion object {
