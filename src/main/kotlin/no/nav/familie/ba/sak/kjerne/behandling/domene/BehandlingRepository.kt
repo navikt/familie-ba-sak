@@ -156,10 +156,11 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query(
         """select b.id from AndelTilkjentYtelse aty
             inner join Behandling b on b.id = aty.behandlingId
+            where b.resultat not in (:ugyldigeResultater)
             group by(b.id, aty.periodeOffset)
             having count(aty.periodeOffset) > 1"""
     )
-    fun finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(): List<Long>
+    fun finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(ugyldigeResultater: List<Behandlingsresultat>): List<Long>
 
     @Query(
         """select distinct b.id from AndelTilkjentYtelse aty
