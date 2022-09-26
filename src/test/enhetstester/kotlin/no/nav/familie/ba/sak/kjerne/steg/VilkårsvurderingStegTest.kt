@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -135,7 +134,6 @@ class VilkårsvurderingStegTest {
 
         every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) } returns true
 
         assertDoesNotThrow { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
     }
@@ -162,7 +160,6 @@ class VilkårsvurderingStegTest {
 
         every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) } returns true
 
         val exception = assertThrows<RuntimeException> { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
         assertEquals(

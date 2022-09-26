@@ -144,6 +144,5 @@ internal fun Iterable<AndelTilkjentYtelse>.sjekkForDuplikater() {
 }
 
 fun FeatureToggleService.kanHåndtereEøsUtenomPrimærland() =
-    this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) &&
-        this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_SEKUNDERLAND) &&
+    this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_SEKUNDERLAND) &&
         this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_TO_PRIMERLAND)

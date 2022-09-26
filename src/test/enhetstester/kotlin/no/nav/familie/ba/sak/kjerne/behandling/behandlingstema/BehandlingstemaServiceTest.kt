@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -41,7 +40,6 @@ class BehandlingstemaServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val tidslinjeService = mockk<VilkårsvurderingTidslinjeService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     val behandlingstemaService = BehandlingstemaService(
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -49,15 +47,13 @@ class BehandlingstemaServiceTest {
         loggService = loggService,
         oppgaveService = oppgaveService,
         vilkårsvurderingTidslinjeService = tidslinjeService,
-        vilkårsvurderingRepository = vilkårsvurderingRepository,
-        featureToggleService = featureToggleService
+        vilkårsvurderingRepository = vilkårsvurderingRepository
     )
     val defaultFagsak = defaultFagsak()
     val defaultBehandling = lagBehandling(defaultFagsak)
 
     @BeforeAll
     fun init() {
-        every { featureToggleService.isEnabled(any()) } returns true
         every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(defaultFagsak.id) } returns defaultBehandling
     }
 
@@ -171,12 +167,6 @@ class BehandlingstemaServiceTest {
         val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(defaultFagsak.id)
 
         assertEquals(BehandlingUnderkategori.ORDINÆR, underkategori)
-    }
-
-    @Test
-    fun `skal hente løpende kategori til NASJONAL når toggelen er av`() {
-        every { featureToggleService.isEnabled(any()) } returns false
-        assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }
 
     @Test
