@@ -47,7 +47,7 @@ class UtgåendeJournalføringService(
             førsteside = førsteside,
             brukersType = brukersType,
             brukersNavn = brukersNavn,
-            tilVerge = tilVerge,
+            tilVerge = tilVerge
         )
     }
 

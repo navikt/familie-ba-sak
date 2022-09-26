@@ -64,7 +64,9 @@ fun ManueltBrevRequest.byggMottakerdata(
     val mottakerPerson = if (!erTilInstitusjon) {
         persongrunnlagService.hentPersonerPåBehandling(listOf(this.mottakerIdent), behandling).singleOrNull()
             ?: error("Fant en eller ingen mottakere på behandling")
-    } else null
+    } else {
+        null
+    }
 
     val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id)
     return this.copy(
