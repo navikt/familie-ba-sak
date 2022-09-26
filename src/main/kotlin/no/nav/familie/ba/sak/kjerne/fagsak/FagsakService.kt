@@ -138,6 +138,7 @@ class FagsakService(
                     .apply {
                         fagsak.institusjon = this
                     }
+                fagsakRepository.saveAndFlush(fagsak)
             }
 
             skyggesakService.opprettSkyggesak(fagsak)
