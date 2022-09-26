@@ -154,7 +154,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
 
     @Query(
-        """select b.id from AndelTilkjentYtelse aty
+        """select distinct b.id from AndelTilkjentYtelse aty
             inner join Behandling b on b.id = aty.behandlingId
             where b.resultat not in (:ugyldigeResultater)
             group by(b.id, aty.periodeOffset)
