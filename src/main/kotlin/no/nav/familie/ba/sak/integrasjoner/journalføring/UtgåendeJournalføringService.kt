@@ -23,16 +23,18 @@ class UtgåendeJournalføringService(
 ) {
 
     fun journalførManueltBrev(
-        fnr: String,
+        brukersId: String,
         fagsakId: String,
         journalførendeEnhet: String,
         brev: ByteArray,
         dokumenttype: Dokumenttype,
         førsteside: Førsteside?,
+        brukersType: BrukerIdType = BrukerIdType.FNR,
+        brukersNavn: String = "",
         tilVerge: Boolean = false
     ): String {
         return journalførDokument(
-            brukerId = fnr,
+            brukerId = brukersId,
             fagsakId = fagsakId,
             journalførendeEnhet = journalførendeEnhet,
             brev = listOf(
@@ -43,7 +45,9 @@ class UtgåendeJournalføringService(
                 )
             ),
             førsteside = førsteside,
-            tilVerge = tilVerge
+            brukersType = brukersType,
+            brukersNavn = brukersNavn,
+            tilVerge = tilVerge,
         )
     }
 

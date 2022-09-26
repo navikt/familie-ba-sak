@@ -61,9 +61,10 @@ fun ManueltBrevRequest.byggMottakerdata(
     persongrunnlagService: PersongrunnlagService,
     arbeidsfordelingService: ArbeidsfordelingService
 ): ManueltBrevRequest {
-    val mottaker =
+    val mottakerPerson = if (!erTilInstitusjon) {
         persongrunnlagService.hentPersonerPåBehandling(listOf(this.mottakerIdent), behandling).singleOrNull()
             ?: error("Fant en eller ingen mottakere på behandling")
+    } else null
 
     val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id)
     return this.copy(
@@ -71,8 +72,8 @@ fun ManueltBrevRequest.byggMottakerdata(
             enhetNavn = arbeidsfordelingPåBehandling.behandlendeEnhetNavn,
             enhetId = arbeidsfordelingPåBehandling.behandlendeEnhetId
         ),
-        mottakerMålform = mottaker.målform,
-        mottakerNavn = mottaker.navn
+        mottakerMålform = mottakerPerson?.målform ?: mottakerMålform,
+        mottakerNavn = mottakerPerson?.navn ?: mottakerNavn
     )
 }
 
@@ -266,3 +267,11 @@ private fun List<LocalDate>?.tilFormaterteFødselsdager() = Utils.slåSammen(
     this?.map { it.tilKortString() }
         ?: throw Feil("Fikk ikke med barna sine fødselsdager")
 )
+
+val ManueltBrevRequest.erTilInstitusjon
+    get() = when {
+        erOrgNr(mottakerIdent) -> true
+        else -> false
+    }
+
+private fun erOrgNr(ident: String): Boolean = ident.length == 9 && ident.all { it.isDigit() }

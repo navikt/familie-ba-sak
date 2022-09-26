@@ -28,6 +28,7 @@ internal class DokumentServiceEnhetstest {
             brevKlient = mockk(relaxed = true),
             brevService = mockk(relaxed = true),
             vilkårsvurderingService = mockk(relaxed = true),
+            vilkårsvurderingForNyBehandlingService = mockk(relaxed = true),
             rolleConfig = mockk(relaxed = true),
             settPåVentService = mockk(relaxed = true),
             utgåendeJournalføringService = mockk(relaxed = true)

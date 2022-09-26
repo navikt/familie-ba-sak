@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
+import no.nav.familie.ba.sak.kjerne.brev.domene.erTilInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrev
@@ -23,14 +24,17 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.leggTilBlankAnnenVurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.ba.sak.task.DistribuerDødsfallDokumentPåFagsakTask
 import no.nav.familie.http.client.RessursException
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import org.slf4j.Logger
@@ -51,6 +55,7 @@ class DokumentService(
     private val brevKlient: BrevKlient,
     private val brevService: BrevService,
     private val vilkårsvurderingService: VilkårsvurderingService,
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     private val rolleConfig: RolleConfig,
     private val settPåVentService: SettPåVentService,
     private val utgåendeJournalføringService: UtgåendeJournalføringService
@@ -157,13 +162,15 @@ class DokumentService(
         }
 
         val journalpostId = utgåendeJournalføringService.journalførManueltBrev(
-            fnr = manueltBrevRequest.mottakerIdent,
+            brukersId = manueltBrevRequest.mottakerIdent,
             fagsakId = fagsakId.toString(),
             journalførendeEnhet = manueltBrevRequest.enhet?.enhetId
                 ?: DEFAULT_JOURNALFØRENDE_ENHET,
             brev = generertBrev,
             førsteside = førsteside,
-            dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType()
+            dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
+            brukersType = if (manueltBrevRequest.erTilInstitusjon) BrukerIdType.ORGNR else BrukerIdType.FNR,
+            brukersNavn = manueltBrevRequest.mottakerNavn
         )
 
         if (behandling != null) {
@@ -181,10 +188,7 @@ class DokumentService(
                 manueltBrevRequest.brevmal == Brevmal.VARSEL_OM_REVURDERING
             ) && behandling != null
         ) {
-            vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(
-                annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
-                behandlingId = behandling.id
-            )
+            leggTilOpplysningspliktIVilkårsvurdering(behandling)
         }
 
         DistribuerDokumentTask.opprettDistribuerDokumentTask(
@@ -222,6 +226,13 @@ class DokumentService(
                 årsak = manueltBrevRequest.brevmal.venteårsak()
             )
         }
+    }
+
+    private fun leggTilOpplysningspliktIVilkårsvurdering(behandling: Behandling) {
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
+            ?: vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false)
+        vilkårsvurdering.personResultater.single { it.erSøkersResultater() }
+            .leggTilBlankAnnenVurdering(AnnenVurderingType.OPPLYSNINGSPLIKT)
     }
 
     fun prøvDistribuerBrevOgLoggHendelse(
