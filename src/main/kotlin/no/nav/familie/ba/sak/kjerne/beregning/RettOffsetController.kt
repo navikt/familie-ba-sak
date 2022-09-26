@@ -24,34 +24,10 @@ class RettOffsetController(
     @PostMapping("/simuler-offset-fix")
     @Transactional
     fun simuler() {
-        val ugyldigeResultater = listOf(
-            Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-            Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
-            Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
-            Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
-            Behandlingsresultat.AVSLÅTT,
-            Behandlingsresultat.FORTSATT_INNVILGET
-        )
-        val behandlingerMedDuplikateOffset = behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(ugyldigeResultater = ugyldigeResultater)
-        val behandlingerMedNullOffsets = behandlingRepository.finnBehandlingerMedFeilNullOffsetsForAndelTilkjentYtelse(
-            ugyldigeResultater = ugyldigeResultater
-        )
-
-        logger.warn(
-            "Behandlinger med duplikate offset: ${
-            behandlingerMedDuplikateOffset.joinToString(separator = ",")
-            }"
-        )
-
-        logger.warn(
-            "Behandlinger med feilaktig null-offset: ${
-            behandlingerMedNullOffsets.joinToString(separator = ",")
-            }"
-        )
-
+        val behandlinger = finnBehandlinger()
         val input = RettOffsetIAndelTilkjentYtelseDto(
             simuler = true,
-            behandlinger = (behandlingerMedDuplikateOffset + behandlingerMedNullOffsets).toSet()
+            behandlinger = behandlinger.toSet()
         )
         task.doTask(
             Task(
@@ -60,6 +36,36 @@ class RettOffsetController(
             )
         )
         throw RuntimeException("Kaster exception her for å sikre at ingenting frå transaksjonen blir committa")
+    }
+
+    private fun finnBehandlinger(): List<Long> {
+        val ugyldigeResultater = listOf(
+            Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+            Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+            Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+            Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+            Behandlingsresultat.AVSLÅTT,
+            Behandlingsresultat.FORTSATT_INNVILGET
+        )
+        val behandlingerMedDuplikateOffset =
+            behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(ugyldigeResultater = ugyldigeResultater)
+        val behandlingerMedNullOffsets = behandlingRepository.finnBehandlingerMedFeilNullOffsetsForAndelTilkjentYtelse(
+            ugyldigeResultater = ugyldigeResultater
+        )
+
+        logger.warn(
+            "Behandlinger med duplikate offset: ${
+                behandlingerMedDuplikateOffset.joinToString(separator = ",")
+            }"
+        )
+
+        logger.warn(
+            "Behandlinger med feilaktig null-offset: ${
+                behandlingerMedNullOffsets.joinToString(separator = ",")
+            }"
+        )
+
+        return behandlingerMedDuplikateOffset + behandlingerMedNullOffsets
     }
 
     companion object {
