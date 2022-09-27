@@ -7,10 +7,12 @@ import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -632,12 +634,14 @@ fun kjørStegprosessForFGB(
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
     behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-    institusjon: InstitusjonInfo? = null
+    institusjon: InstitusjonInfo? = null,
+    verge: VergeInfo? = null
 ): Behandling {
+    val fagsakType = utledFagsaktype(institusjon, verge)
     fagsakService.hentEllerOpprettFagsakForPersonIdent(
         fødselsnummer = søkerFnr,
         institusjon = institusjon,
-        fagsakType = if (institusjon != null) FagsakType.INSTITUSJON else FagsakType.NORMAL
+        fagsakType = fagsakType
     )
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
@@ -648,22 +652,25 @@ fun kjørStegprosessForFGB(
             søkersIdent = søkerFnr,
             barnasIdenter = barnasIdenter,
             søknadMottattDato = LocalDate.now(),
-            fagsakType = if (institusjon != null) FagsakType.INSTITUSJON else FagsakType.NORMAL,
+            fagsakType = fagsakType
         )
     )
 
-    val behandlingEtterPersongrunnlagSteg =
-        stegService.håndterSøknad(
-            behandling = behandling,
-            restRegistrerSøknad = RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = søkerFnr,
-                    barnasIdenter = barnasIdenter,
-                    underkategori = behandlingUnderkategori
-                ),
-                bekreftEndringerViaFrontend = true
-            )
+    if (verge != null) {
+        stegService.håndterRegistrerVerge(behandling, RestRegistrerInstitusjonOgVerge(vergeInfo = verge, institusjonInfo = null))
+    }
+
+    val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(
+        behandling = behandling,
+        restRegistrerSøknad = RestRegistrerSøknad(
+            søknad = lagSøknadDTO(
+                søkerIdent = søkerFnr,
+                barnasIdenter = barnasIdenter,
+                underkategori = behandlingUnderkategori
+            ),
+            bekreftEndringerViaFrontend = true
         )
+    )
 
     if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD) {
         return behandlingEtterPersongrunnlagSteg
@@ -769,6 +776,12 @@ fun kjørStegprosessForFGB(
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
+}
+
+private fun utledFagsaktype(institusjon: InstitusjonInfo?, verge: VergeInfo?): FagsakType {
+    return if (institusjon != null) FagsakType.INSTITUSJON
+    else if (verge != null) FagsakType.BARN_ENSLIG_MINDREÅRIG
+    else FagsakType.NORMAL
 }
 
 /**
