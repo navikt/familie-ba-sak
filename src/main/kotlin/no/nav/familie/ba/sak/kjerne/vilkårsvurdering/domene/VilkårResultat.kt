@@ -176,6 +176,8 @@ class VilkårResultat(
         else -> Period.ZERO
     }
 
+    fun erOppfylt() = this.resultat == Resultat.OPPFYLT
+
     companion object {
 
         val VilkårResultatComparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.resultat }, { it.vilkårType })
