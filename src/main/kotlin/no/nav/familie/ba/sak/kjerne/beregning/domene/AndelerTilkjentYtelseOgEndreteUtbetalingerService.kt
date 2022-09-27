@@ -55,7 +55,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId),
             endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
+            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER, false)
         )
 
     /**
@@ -65,8 +65,11 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
      * og tilsvarende at fjerning av kobling propageres
      */
     private fun knyttEventueltSammenAndelerOgEndringer(behandlingId: Long) {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) &&
-            !featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT)
+        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER, false) &&
+            !featureToggleService.isEnabled(
+                    FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT,
+                    false
+                )
         ) {
             val andelerTilkjentYtelse = lagKombinator(behandlingId).lagAndelerMedEndringer().map {
                 it.andel.endretUtbetalingAndeler.clear()
