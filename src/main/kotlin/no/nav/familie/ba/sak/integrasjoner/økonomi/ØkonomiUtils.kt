@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.snittAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import java.time.YearMonth
 
 object ØkonomiUtils {
@@ -199,6 +201,20 @@ object ØkonomiUtils {
                     ?: throw IllegalStateException("Andel i kjede skal ha offset")
                 )
         }.toMap()
+
+    fun hentUtebetalesTil(behandling: Behandling): String {
+        return when (behandling.fagsak.type) {
+            FagsakType.INSTITUSJON -> {
+                if (behandling.fagsak.institusjon == null || behandling.fagsak.institusjon!!.tssEksternId == null) error(
+                    "Fagsak ${behandling.fagsak.id} er av type institusjon og mangler informasjon om institusjonen"
+                ) else behandling.fagsak.institusjon!!.tssEksternId!!
+            }
+
+            else -> {
+                behandling.fagsak.aktør.aktivFødselsnummer()
+            }
+        }
+    }
 
     private fun altIKjedeOpphøres(
         kjedeidentifikator: String,
