@@ -779,9 +779,13 @@ fun kjørStegprosessForFGB(
 }
 
 private fun utledFagsaktype(institusjon: InstitusjonInfo?, verge: VergeInfo?): FagsakType {
-    return if (institusjon != null) FagsakType.INSTITUSJON
-    else if (verge != null) FagsakType.BARN_ENSLIG_MINDREÅRIG
-    else FagsakType.NORMAL
+    return if (institusjon != null) {
+        FagsakType.INSTITUSJON
+    } else if (verge != null) {
+        FagsakType.BARN_ENSLIG_MINDREÅRIG
+    } else {
+        FagsakType.NORMAL
+    }
 }
 
 /**
