@@ -39,6 +39,7 @@ class RettOffsetController(
     }
 
     @PostMapping("/rett-offset")
+    @Transactional
     fun rettOffsetfeil() {
         val input = RettOffsetIAndelTilkjentYtelseDto(
             simuler = false,
