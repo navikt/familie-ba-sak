@@ -96,7 +96,7 @@ fun morHarIkkeVerge(fakta: FiltreringsreglerFakta): Evaluering = if (!fakta.morH
     )
 } else {
     Evaluering.ikkeOppfylt(
-        FiltreringsregelIkkeOppfylt.MOR_ER_UMYNDIG
+        FiltreringsregelIkkeOppfylt.MOR_ER_UNDER_VERGEMÅL
     )
 }
 

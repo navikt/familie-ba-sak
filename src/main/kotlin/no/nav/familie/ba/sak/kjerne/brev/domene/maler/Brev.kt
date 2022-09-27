@@ -58,7 +58,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "informasjonsbrevFodselMindreaarig",
         "Informasjonsbrev fødsel mindreårig"
     ),
-    INFORMASJONSBREV_FØDSEL_UMYNDIG(false, "informasjonsbrevFodselUmyndig", "Informasjonsbrev fødsel umyndig"),
+    INFORMASJONSBREV_FØDSEL_VERGEMÅL(false, "informasjonsbrevFodselVergemaal", "Informasjonsbrev fødsel vergemål"),
     INFORMASJONSBREV_KAN_SØKE(false, "informasjonsbrevKanSoke", "Informasjonsbrev kan søke"),
     INFORMASJONSBREV_KAN_SØKE_EØS(false, "informasjonsbrevKanSokeEOS", "Informasjonsbrev kan søke EØS"),
     INFORMASJONSBREV_FØDSEL_GENERELL(false, "informasjonsbrevFodselGenerell", "Informasjonsbrev fødsel generell"),
@@ -100,7 +100,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             HENLEGGE_TRUKKET_SØKNAD,
             SVARTIDSBREV,
             FORLENGET_SVARTIDSBREV,
-            INFORMASJONSBREV_FØDSEL_UMYNDIG,
+            INFORMASJONSBREV_FØDSEL_VERGEMÅL,
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
             INFORMASJONSBREV_KAN_SØKE,
             INFORMASJONSBREV_FØDSEL_GENERELL,
@@ -130,7 +130,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             HENLEGGE_TRUKKET_SØKNAD -> Dokumenttype.BARNETRYGD_HENLEGGE_TRUKKET_SØKNAD
             SVARTIDSBREV -> Dokumenttype.BARNETRYGD_SVARTIDSBREV
             FORLENGET_SVARTIDSBREV -> Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV
-            INFORMASJONSBREV_FØDSEL_UMYNDIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_UMYNDIG
+            INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_UMYNDIG
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_MINDREÅRIG
             INFORMASJONSBREV_KAN_SØKE -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE
             INFORMASJONSBREV_FØDSEL_GENERELL -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_GENERELL
@@ -167,7 +167,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             SVARTIDSBREV -> Distribusjonstype.ANNET
             FORLENGET_SVARTIDSBREV -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Distribusjonstype.ANNET
-            INFORMASJONSBREV_FØDSEL_UMYNDIG -> Distribusjonstype.ANNET
+            INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Distribusjonstype.ANNET
             INFORMASJONSBREV_KAN_SØKE -> Distribusjonstype.ANNET
             INFORMASJONSBREV_KAN_SØKE_EØS -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_GENERELL -> Distribusjonstype.ANNET
