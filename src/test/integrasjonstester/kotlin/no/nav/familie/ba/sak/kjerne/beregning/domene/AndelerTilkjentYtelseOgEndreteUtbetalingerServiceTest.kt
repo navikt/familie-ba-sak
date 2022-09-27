@@ -41,9 +41,19 @@ internal class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest : AbstractS
     @Test
     fun `Skal gjenopprette DB-koblinger mellom andeler og endringer når sikkerhetsnettet er på`() {
         // Skru PÅ virtuell kobling mellom andeler og endringer
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) } returns true
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER,
+                false
+            )
+        } returns true
         // Skru PÅ sikkerhetsnettet som skaper DB-koblinger fra virtuelle koblinger (false betyr MED sikkerhetsnett)
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT) } returns false
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT,
+                false
+            )
+        } returns false
 
         // Opprett tilkjent ytelse med 3 andeler tilkjent ytelse, hver koblet til en endret utbetaling i databasen
         val behandlingId = opprettTillkjentYtelseMedDeltBosted()
@@ -101,9 +111,19 @@ internal class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest : AbstractS
     @Test
     fun `Virtuelle koblinger mellom andeler og endringer skal fungere uten sikkerhetsnett når frikobling er PÅ`() {
         // Skru PÅ virtuell kobling mellom andeler og endringer
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) } returns true
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER,
+                false
+            )
+        } returns true
         // Skru AV sikkerhetsnettet som skaper DB-koblinger fra virtuelle koblinger (true betyr UTEN sikkerhetsnett)
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT) } returns true
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT,
+                false
+            )
+        } returns true
 
         // Opprett tilkjent ytelse med 3 andeler tilkjent ytelse, hver koblet til en endret utbetaling i databasen
         val behandlingId = opprettTillkjentYtelseMedDeltBosted()
@@ -147,9 +167,19 @@ internal class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest : AbstractS
     @Test
     fun `Når frikobling er AV, vil DB-koblingene brukes`() {
         // Skru AV virtuell kobling mellom andeler og endringer
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER) } returns false
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER,
+                false
+            )
+        } returns false
         // Likegyldig om sikkerhetsnett er av eller på. Setter det til PÅ for å vise at det ikke påvirker ting  (false betyr MED sikkerhetsnett)
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT) } returns false
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT,
+                false
+            )
+        } returns false
 
         // Opprett tilkjent ytelse med 3 andeler tilkjent ytelse, hver koblet til en endret utbetaling i databasen
         val behandlingId = opprettTillkjentYtelseMedDeltBosted()
