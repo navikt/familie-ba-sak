@@ -37,7 +37,7 @@ class EfSakRestClientMock {
                             personIdent = hentPerioderMedFullOvergangsstønadSlot.captured,
                             fomDato = LocalDate.now().minusYears(2),
                             datakilde = PeriodeOvergangsstønad.Datakilde.EF,
-                            tomDato = LocalDate.now().minusMonths(3),
+                            tomDato = LocalDate.now().minusMonths(3)
                         )
                     )
                 )

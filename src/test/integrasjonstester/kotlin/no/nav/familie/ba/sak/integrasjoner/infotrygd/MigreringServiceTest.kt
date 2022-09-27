@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
@@ -34,11 +34,9 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMell
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.sakstatistikkObjectMapper
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.PubliserVedtakTask
 import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
-import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
@@ -59,7 +57,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -72,6 +69,7 @@ import java.time.format.DateTimeFormatter
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles(
     "postgres",
+    "integrasjonstest",
     "mock-økonomi",
     "mock-pdl",
     "mock-pdl-client",
@@ -84,7 +82,6 @@ import java.time.format.DateTimeFormatter
     "mock-rest-template-config"
 )
 @Tag("integration")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class MigreringServiceTest(
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
@@ -108,9 +105,6 @@ class MigreringServiceTest(
     private val sendVedtakTilInfotrygdTask: SendVedtakTilInfotrygdTask,
 
     @Autowired
-    private val publiserVedtakTask: PubliserVedtakTask,
-
-    @Autowired
     private val publiserVedtakV2Task: PubliserVedtakV2Task,
 
     @Autowired
@@ -129,7 +123,7 @@ class MigreringServiceTest(
     private val pdlRestClient: PdlRestClient,
 
     @Autowired
-    private val envService: EnvService,
+    private val envService: EnvService
 
 ) : AbstractMockkSpringRunner() {
 
@@ -172,6 +166,8 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(relaxed = true),
+            mockk(),
+            mockk()
         ) // => env.erDev() = env.erE2E() = false
     }
 
@@ -203,16 +199,10 @@ class MigreringServiceTest(
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)
 
-            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
-            publiserVedtakTask.doTask(task)
-            publiserVedtakTask.onCompletion(task)
-
             val now = LocalDate.now()
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
 
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
@@ -253,17 +243,9 @@ class MigreringServiceTest(
             var task = tasks.find { it.type == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)
-
-            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
-            publiserVedtakTask.doTask(task)
-            publiserVedtakTask.onCompletion(task)
-
             val now = LocalDate.now()
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
-
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
@@ -306,19 +288,10 @@ class MigreringServiceTest(
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)
 
-            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
-            publiserVedtakTask.doTask(task)
-            publiserVedtakTask.onCompletion(task)
-
             val now = LocalDate.now()
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
 
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
-            assertThat(vedtakDVH.utbetalingsperioder.first().utbetaltPerMnd.toDouble()).isEqualTo(
-                SAK_BELØP_2_BARN_1_UNDER_6 / 2
-            )
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
@@ -364,16 +337,10 @@ class MigreringServiceTest(
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)
 
-            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
-            publiserVedtakTask.doTask(task)
-            publiserVedtakTask.onCompletion(task)
-
             val now = LocalDate.now()
             val forventetUtbetalingFom: LocalDate =
                 if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
 
-            val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
-            assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
 
             task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
@@ -425,7 +392,7 @@ class MigreringServiceTest(
                                 tom = null,
                                 beløp = 2048.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J",
+                                typeUtbetaling = "J"
                             )
                         ),
                         opphørsgrunn = "0"
@@ -469,10 +436,10 @@ class MigreringServiceTest(
                                 tom = null,
                                 beløp = 2048.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J",
+                                typeUtbetaling = "J"
                             )
                         ),
-                        opphørsgrunn = "0",
+                        opphørsgrunn = "0"
                     ),
                     status = "FB",
                     valg = "OR",
@@ -508,7 +475,7 @@ class MigreringServiceTest(
                                 fødselsnrBarn,
                                 barnetrygdTom = "000000"
                             ),
-                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
+                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000")
                         ),
                         antallBarn = 1,
                         delytelse = listOf(
@@ -517,7 +484,7 @@ class MigreringServiceTest(
                                 tom = null,
                                 beløp = 1054.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J",
+                                typeUtbetaling = "J"
                             )
                         ),
                         opphørsgrunn = "0"
@@ -551,7 +518,7 @@ class MigreringServiceTest(
                                 fødselsnrBarn,
                                 barnetrygdTom = "000000"
                             ),
-                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
+                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000")
                         ),
                         antallBarn = 2,
                         delytelse = listOf(
@@ -560,7 +527,7 @@ class MigreringServiceTest(
                                 tom = null,
                                 beløp = 1054.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J",
+                                typeUtbetaling = "J"
                             )
                         ),
                         opphørsgrunn = "0"
@@ -804,7 +771,9 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
-            mockk(relaxed = true)
+            mockk(relaxed = true),
+            mockk(),
+            mockk()
         )
 
         val aktivFnr = randomFnr()
@@ -841,6 +810,8 @@ class MigreringServiceTest(
             vilkårService = mockk(),
             vilkårsvurderingService = mockk(),
             migreringRestClient = mockk(relaxed = true),
+            mockk(),
+            mockk()
         )
 
         val ident = randomFnr()
@@ -854,7 +825,7 @@ class MigreringServiceTest(
         every { mockkPersonidentService.hentOgLagreAktørIder(any(), false) } answers { callOriginal() }
 
         every { mockkPersonidentService.hentOgLagreAktør(any(), false) } returns
-            Aktør(randomAktørId().aktørId, personidenter = mutableSetOf())
+            Aktør(randomAktør().aktørId, personidenter = mutableSetOf())
 
         assertThatThrownBy {
             s.migrer(ident)
@@ -863,7 +834,7 @@ class MigreringServiceTest(
 
         // Verifiserer at feiltypen ikke er den samme når vi endrer til unike aktørId'er for barna
         every { mockkPersonidentService.hentOgLagreAktør(any(), false) } answers {
-            Aktør(randomAktørId().aktørId, personidenter = mutableSetOf())
+            Aktør(randomAktør().aktørId, personidenter = mutableSetOf())
         }
         assertThatThrownBy { s.migrer(ident) }
             .extracting("feiltype").isNotEqualTo(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
@@ -882,7 +853,7 @@ class MigreringServiceTest(
                     tom = null,
                     beløp = it,
                     typeDelytelse = "MS",
-                    typeUtbetaling = "J",
+                    typeUtbetaling = "J"
                 )
             },
             opphørsgrunn = "0"
@@ -905,7 +876,7 @@ class MigreringServiceTest(
                     tom = null,
                     beløp = it,
                     typeDelytelse = "MS",
-                    typeUtbetaling = "J",
+                    typeUtbetaling = "J"
                 )
             },
             opphørsgrunn = "0"

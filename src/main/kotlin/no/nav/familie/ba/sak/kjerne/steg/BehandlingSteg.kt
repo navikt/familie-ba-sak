@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLINGSRESULTAT
 import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLING_AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.steg.StegType.BESLUTTE_VEDTAK
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType.HENLEGG_BEHANDLING
 import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_FAMILIE_TILBAKE
 import no.nav.familie.ba.sak.kjerne.steg.StegType.IVERKSETT_MOT_OPPDRAG
 import no.nav.familie.ba.sak.kjerne.steg.StegType.JOURNALFØR_VEDTAKSBREV
+import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_INSTITUSJON_OG_VERGE
 import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_PERSONGRUNNLAG
 import no.nav.familie.ba.sak.kjerne.steg.StegType.REGISTRERE_SØKNAD
 import no.nav.familie.ba.sak.kjerne.steg.StegType.SEND_TIL_BESLUTTER
@@ -61,6 +63,11 @@ enum class StegType(
             BehandlingStatus.UTREDES,
             BehandlingStatus.IVERKSETTER_VEDTAK
         )
+    ),
+    REGISTRERE_INSTITUSJON_OG_VERGE(
+        rekkefølge = 1,
+        tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
     ),
     REGISTRERE_PERSONGRUNNLAG(
         rekkefølge = 1,
@@ -240,7 +247,14 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         }
         BehandlingÅrsak.SØKNAD -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
+                REGISTRERE_PERSONGRUNNLAG -> {
+                    if (behandling.fagsak.type == FagsakType.NORMAL) {
+                        REGISTRERE_SØKNAD
+                    } else {
+                        REGISTRERE_INSTITUSJON_OG_VERGE
+                    }
+                }
+                REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_SØKNAD
                 REGISTRERE_SØKNAD -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
@@ -262,8 +276,9 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> {
-                    if (!behandling.skalBehandlesAutomatisk) VURDER_TILBAKEKREVING
-                    else if (behandling.skalBehandlesAutomatisk && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) IVERKSETT_MOT_OPPDRAG else VURDER_TILBAKEKREVING
+                    if (!behandling.skalBehandlesAutomatisk) {
+                        VURDER_TILBAKEKREVING
+                    } else if (behandling.skalBehandlesAutomatisk && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) IVERKSETT_MOT_OPPDRAG else VURDER_TILBAKEKREVING
                 }
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
@@ -282,9 +297,11 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING)
+                BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING) {
                     IVERKSETT_MOT_OPPDRAG
-                else throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
+                } else {
+                    throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
+                }
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET

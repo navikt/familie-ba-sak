@@ -10,14 +10,14 @@ data class InnhenteOpplysningerBrev(
 
 data class InnhenteOpplysningerData(
     override val delmalData: DelmalData,
-    override val flettefelter: Flettefelter,
+    override val flettefelter: Flettefelter
 ) : BrevData {
 
     data class Flettefelter(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-        val dokumentliste: Flettefelt,
+        val dokumentliste: Flettefelt
     ) : FlettefelterForDokument {
 
         constructor(

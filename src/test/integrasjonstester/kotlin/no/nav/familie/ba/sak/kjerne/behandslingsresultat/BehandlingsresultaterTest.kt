@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -18,7 +18,7 @@ data class BehandlingsresultatPersonTestConfig(
     val uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     val beskrivelse: String,
     val forventetResultat: Behandlingsresultat,
-    val inneværendeMåned: String,
+    val inneværendeMåned: String
 )
 
 class BehandlingsresultaterTest {
@@ -26,7 +26,7 @@ class BehandlingsresultaterTest {
 
     @BeforeEach
     fun init() {
-        every { personidentService.hentAktør(any()) } answers { randomAktørId() }
+        every { personidentService.hentAktør(any()) } answers { randomAktør() }
     }
 
     @Test
@@ -42,7 +42,7 @@ class BehandlingsresultaterTest {
                 YtelsePersonUtils.utledYtelsePersonerMedResultat(
                     behandlingsresultatPersoner = behandlingsresultatPersonTestConfig.personer,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
-                    inneværendeMåned = YearMonth.parse(behandlingsresultatPersonTestConfig.inneværendeMåned),
+                    inneværendeMåned = YearMonth.parse(behandlingsresultatPersonTestConfig.inneværendeMåned)
                 )
 
             val behandlingsresultat =
@@ -54,7 +54,9 @@ class BehandlingsresultaterTest {
                     "${behandlingsresultatPersonTestConfig.beskrivelse}\nForventet ${behandlingsresultatPersonTestConfig.forventetResultat}, men fikk $behandlingsresultat."
                 )
                 acc + 1
-            } else acc
+            } else {
+                acc
+            }
         } ?: 0
 
         assert(antallFeil == 0)

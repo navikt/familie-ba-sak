@@ -16,12 +16,16 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
@@ -43,6 +47,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -108,7 +113,7 @@ fun randomFnr(): String = fødselsnummerGenerator.foedselsnummer().asString
 fun randomPersonident(aktør: Aktør, fnr: String = randomFnr()): Personident =
     Personident(fødselsnummer = fnr, aktør = aktør)
 
-fun randomAktørId(fnr: String = randomFnr()): Aktør =
+fun randomAktør(fnr: String = randomFnr()): Aktør =
     Aktør(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString()).also {
         it.personidenter.add(
             randomPersonident(it, fnr)
@@ -148,7 +153,8 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
 }
 
 fun defaultFagsak(aktør: Aktør = tilAktør(randomFnr())) = Fagsak(
-    1, aktør = aktør
+    1,
+    aktør = aktør
 )
 
 fun lagBehandling(
@@ -159,7 +165,8 @@ fun lagBehandling(
     skalBehandlesAutomatisk: Boolean = false,
     førsteSteg: StegType = FØRSTE_STEG,
     resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
-    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+    status: BehandlingStatus = initStatus()
 ) =
     Behandling(
         id = nesteBehandlingId(),
@@ -169,7 +176,8 @@ fun lagBehandling(
         kategori = behandlingKategori,
         underkategori = underkategori,
         opprettetÅrsak = årsak,
-        resultat = resultat
+        resultat = resultat,
+        status = status
     ).also {
         it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
     }
@@ -178,7 +186,7 @@ fun tilfeldigPerson(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
-    aktør: Aktør = randomAktørId(),
+    aktør: Aktør = randomAktør()
 ) =
     Person(
         id = nestePersonId(),
@@ -195,7 +203,7 @@ fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
-    aktør: Aktør = randomAktørId(),
+    aktør: Aktør = randomAktør()
 ) =
     Person(
         id = nestePersonId(),
@@ -213,7 +221,7 @@ fun lagVedtak(behandling: Behandling = lagBehandling(), stønadBrevPdF: ByteArra
         id = nesteVedtakId(),
         behandling = behandling,
         vedtaksdato = LocalDateTime.now(),
-        stønadBrevPdF = stønadBrevPdF,
+        stønadBrevPdF = stønadBrevPdF
     )
 
 fun lagAndelTilkjentYtelse(
@@ -230,8 +238,39 @@ fun lagAndelTilkjentYtelse(
     prosent: BigDecimal = BigDecimal(100),
     endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
 ): AndelTilkjentYtelse {
-
     return AndelTilkjentYtelse(
+        aktør = aktør,
+        behandlingId = behandling.id,
+        tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
+        kalkulertUtbetalingsbeløp = beløp,
+        nasjonaltPeriodebeløp = beløp,
+        stønadFom = fom,
+        stønadTom = tom,
+        type = ytelseType,
+        periodeOffset = periodeIdOffset,
+        forrigePeriodeOffset = forrigeperiodeIdOffset,
+        sats = beløp,
+        prosent = prosent,
+        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList(),
+        kildeBehandlingId = behandling.id
+    )
+}
+
+fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+    fom: YearMonth,
+    tom: YearMonth,
+    ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+    beløp: Int = sats(ytelseType),
+    behandling: Behandling = lagBehandling(),
+    person: Person = tilfeldigPerson(),
+    aktør: Aktør = person.aktør,
+    periodeIdOffset: Long? = null,
+    forrigeperiodeIdOffset: Long? = null,
+    tilkjentYtelse: TilkjentYtelse? = null,
+    prosent: BigDecimal = BigDecimal(100),
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
+): AndelTilkjentYtelseMedEndreteUtbetalinger {
+    val aty = AndelTilkjentYtelse(
         aktør = aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
@@ -246,6 +285,8 @@ fun lagAndelTilkjentYtelse(
         prosent = prosent,
         endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList()
     )
+
+    return AndelTilkjentYtelseMedEndreteUtbetalinger(aty)
 }
 
 fun lagAndelTilkjentYtelseUtvidet(
@@ -259,7 +300,6 @@ fun lagAndelTilkjentYtelseUtvidet(
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null
 ): AndelTilkjentYtelse {
-
     return AndelTilkjentYtelse(
         aktør = person.aktør,
         behandlingId = behandling.id,
@@ -284,7 +324,6 @@ fun lagTestPersonopplysningGrunnlag(
     behandlingId: Long,
     vararg personer: Person
 ): PersonopplysningGrunnlag {
-
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
 
     personopplysningGrunnlag.personer.addAll(
@@ -297,7 +336,7 @@ fun lagTestPersonopplysningGrunnlag(
     behandlingId: Long,
     søkerPersonIdent: String,
     barnasIdenter: List<String>,
-    barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1),
+    barnasFødselsdatoer: List<LocalDate> = barnasIdenter.map { LocalDate.of(2019, 1, 1) },
     søkerAktør: Aktør = tilAktør(søkerPersonIdent).also {
         it.personidenter.add(
             Personident(
@@ -317,12 +356,15 @@ fun lagTestPersonopplysningGrunnlag(
                 )
             )
         }
-    },
+    }
 ): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
     val bostedsadresse = GrMatrikkeladresse(
-        matrikkelId = null, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
-        postnummer = "0202", kommunenummer = "2231"
+        matrikkelId = null,
+        bruksenhetsnummer = "H301",
+        tilleggsnavn = "navn",
+        postnummer = "0202",
+        kommunenummer = "2231"
     )
 
     val søker = Person(
@@ -331,7 +373,7 @@ fun lagTestPersonopplysningGrunnlag(
         personopplysningGrunnlag = personopplysningGrunnlag,
         fødselsdato = LocalDate.of(2019, 1, 1),
         navn = "",
-        kjønn = Kjønn.KVINNE,
+        kjønn = Kjønn.KVINNE
     ).also { søker ->
         søker.statsborgerskap =
             mutableListOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = søker))
@@ -345,13 +387,13 @@ fun lagTestPersonopplysningGrunnlag(
     }
     personopplysningGrunnlag.personer.add(søker)
 
-    barnAktør.map {
+    barnAktør.mapIndexed { index, aktør ->
         personopplysningGrunnlag.personer.add(
             Person(
-                aktør = it,
+                aktør = aktør,
                 type = PersonType.BARN,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fødselsdato = barnFødselsdato,
+                fødselsdato = barnasFødselsdatoer.get(index),
                 navn = "",
                 kjønn = Kjønn.MANN
             ).also { barn ->
@@ -461,7 +503,8 @@ fun lagPersonResultat(
     lagFullstendigVilkårResultat: Boolean = false,
     personType: PersonType = PersonType.BARN,
     vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
-    erDeltBosted: Boolean = false
+    erDeltBosted: Boolean = false,
+    erDeltBostedSkalIkkeDeles: Boolean = false
 ): PersonResultat {
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
@@ -480,7 +523,11 @@ fun lagPersonResultat(
                     begrunnelse = "",
                     behandlingId = vilkårsvurdering.behandling.id,
                     utdypendeVilkårsvurderinger = listOfNotNull(
-                        if (erDeltBosted && it == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                        when {
+                            erDeltBosted && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED
+                            erDeltBostedSkalIkkeDeles && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+                            else -> null
+                        }
                     )
                 )
             }.toSet()
@@ -611,8 +658,9 @@ fun kjørStegprosessForFGB(
             )
         )
 
-    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD)
+    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD) {
         return behandlingEtterPersongrunnlagSteg
+    }
 
     val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
     persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).personer.forEach { barn ->
@@ -639,7 +687,7 @@ fun kjørStegprosessForFGB(
     leggTilBegrunnelsePåVedtaksperiodeIBehandling(
         behandling = behandlingEtterVurderTilbakekrevingSteg,
         vedtakService = vedtakService,
-        vedtaksperiodeService = vedtaksperiodeService,
+        vedtaksperiodeService = vedtaksperiodeService
     )
 
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterVurderTilbakekrevingSteg
@@ -704,7 +752,7 @@ fun kjørStegprosessForFGB(
             DistribuerDokumentDTO(
                 behandlingId = behandlingEtterJournalførtVedtak.id,
                 journalpostId = "1234",
-                personIdent = søkerFnr,
+                personEllerInstitusjonIdent = søkerFnr,
                 brevmal = hentBrevmal(
                     behandlingEtterJournalførtVedtak
                 ),
@@ -735,7 +783,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
             behandlingType = BehandlingType.REVURDERING,
             behandlingÅrsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
             søkersIdent = søkerFnr,
-            barnasIdenter = barnasIdenter,
+            barnasIdenter = barnasIdenter
         )
     )
 
@@ -749,10 +797,14 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 
     val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
         behandlingEtterBehandlingsresultat,
-        if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) RestTilbakekreving(
-            valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-            begrunnelse = "Begrunnelse"
-        ) else null
+        if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
+            RestTilbakekreving(
+                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                begrunnelse = "Begrunnelse"
+            )
+        } else {
+            null
+        }
     )
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterSimuleringSteg
 
@@ -774,7 +826,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 behandlingsId = behandlingEtterBeslutteVedtak.id,
                 vedtaksId = vedtak!!.id,
                 saksbehandlerId = "System",
-                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer(),
+                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer()
             )
         )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
@@ -815,7 +867,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
             DistribuerDokumentDTO(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
-                personIdent = søkerFnr,
+                personEllerInstitusjonIdent = søkerFnr,
                 brevmal = hentBrevmal(behandling),
                 erManueltSendt = false
             )
@@ -828,7 +880,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
     valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
     varsel = "Varsel",
-    begrunnelse = "Begrunnelse",
+    begrunnelse = "Begrunnelse"
 )
 
 fun lagUtbetalingsperiode(
@@ -838,7 +890,7 @@ fun lagUtbetalingsperiode(
     utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
     ytelseTyper: List<YtelseType> = listOf(YtelseType.ORDINÆR_BARNETRYGD),
     antallBarn: Int = 1,
-    utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
+    utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD)
 ) = Utbetalingsperiode(
     periodeFom,
     periodeTom,
@@ -846,7 +898,7 @@ fun lagUtbetalingsperiode(
     utbetalingsperiodeDetaljer,
     ytelseTyper,
     antallBarn,
-    utbetaltPerMnd,
+    utbetaltPerMnd
 )
 
 fun lagUtbetalingsperiodeDetalj(
@@ -862,14 +914,14 @@ fun lagVedtaksperiodeMedBegrunnelser(
     tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
     type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
     begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
-    fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
+    fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf()
 ) = VedtaksperiodeMedBegrunnelser(
     vedtak = vedtak,
     fom = fom,
     tom = tom,
     type = type,
     begrunnelser = begrunnelser,
-    fritekster = fritekster,
+    fritekster = fritekster
 )
 
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(
@@ -880,7 +932,7 @@ fun lagUtvidetVedtaksperiodeMedBegrunnelser(
     begrunnelser: List<Vedtaksbegrunnelse> = listOf(lagVedtaksbegrunnelse()),
     fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
     utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
-    eøsBegrunnelser: List<EØSBegrunnelse> = emptyList(),
+    eøsBegrunnelser: List<EØSBegrunnelse> = emptyList()
 ) = UtvidetVedtaksperiodeMedBegrunnelser(
     id = id,
     fom = fom,
@@ -889,13 +941,13 @@ fun lagUtvidetVedtaksperiodeMedBegrunnelser(
     begrunnelser = begrunnelser,
     fritekster = fritekster.map { it.fritekst },
     utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer,
-    eøsBegrunnelser = eøsBegrunnelser,
+    eøsBegrunnelser = eøsBegrunnelser
 )
 
 fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
     behandling: Behandling,
     vedtakService: VedtakService,
-    vedtaksperiodeService: VedtaksperiodeService,
+    vedtaksperiodeService: VedtaksperiodeService
 ) {
     val aktivtVedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
 
@@ -905,7 +957,7 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
         standardbegrunnelserFraFrontend = listOf(
-            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
         ),
         eøsStandardbegrunnelserFraFrontend = emptyList()
     )
@@ -969,10 +1021,51 @@ fun lagEndretUtbetalingAndel(
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
-    standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
-    andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf()
+    standardbegrunnelser: List<Standardbegrunnelse> = emptyList()
 ) =
     EndretUtbetalingAndel(
+        id = id,
+        behandlingId = behandlingId,
+        person = person,
+        prosent = prosent,
+        fom = fom,
+        tom = tom,
+        årsak = årsak,
+        avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
+        søknadstidspunkt = søknadstidspunkt,
+        begrunnelse = "Test",
+        standardbegrunnelser = standardbegrunnelser
+    )
+
+fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+    behandlingId: Long,
+    barn: Person,
+    fom: YearMonth,
+    tom: YearMonth,
+    prosent: Int
+) =
+    lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+        behandlingId = behandlingId,
+        person = barn,
+        fom = fom,
+        tom = tom,
+        prosent = BigDecimal(prosent)
+    )
+
+fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+    id: Long = 0,
+    behandlingId: Long = 0,
+    person: Person,
+    prosent: BigDecimal = BigDecimal.valueOf(100),
+    fom: YearMonth = YearMonth.now().minusMonths(1),
+    tom: YearMonth? = YearMonth.now(),
+    årsak: Årsak = Årsak.DELT_BOSTED,
+    avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
+    søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
+    standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
+    andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf()
+): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
+    val eua = EndretUtbetalingAndel(
         id = id,
         behandlingId = behandlingId,
         person = person,
@@ -987,20 +1080,25 @@ fun lagEndretUtbetalingAndel(
         andelTilkjentYtelser = andelTilkjentYtelser
     )
 
+    return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua)
+}
+
 fun lagPerson(
     personIdent: PersonIdent = PersonIdent(randomFnr()),
     aktør: Aktør = tilAktør(personIdent.ident),
     type: PersonType = PersonType.SØKER,
     personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
     fødselsdato: LocalDate = LocalDate.now().minusYears(19),
-    kjønn: Kjønn = Kjønn.KVINNE
+    kjønn: Kjønn = Kjønn.KVINNE,
+    dødsfall: Dødsfall? = null
 ) = Person(
     aktør = aktør,
     type = type,
     personopplysningGrunnlag = personopplysningGrunnlag,
     fødselsdato = fødselsdato,
     navn = type.name,
-    kjønn = kjønn
+    kjønn = kjønn,
+    dødsfall = dødsfall
 )
 
 fun lagRestSanityBegrunnelse(
@@ -1017,7 +1115,7 @@ fun lagRestSanityBegrunnelse(
     hjemler: List<String> = emptyList(),
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: String = "",
-    endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
+    endretUtbetalingsperiodeTriggere: List<String>? = emptyList()
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1032,7 +1130,7 @@ fun lagRestSanityBegrunnelse(
     hjemler = hjemler,
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
-    endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+    endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere
 )
 
 fun lagSanityBegrunnelse(
@@ -1049,7 +1147,7 @@ fun lagSanityBegrunnelse(
     hjemler: List<String> = emptyList(),
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
-    endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
+    endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1064,7 +1162,7 @@ fun lagSanityBegrunnelse(
     hjemler = hjemler,
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
-    endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+    endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere
 )
 
 fun lagSanityEøsBegrunnelse(
@@ -1077,7 +1175,7 @@ fun lagSanityEøsBegrunnelse(
     hjemlerFolketrygdloven: List<String> = emptyList(),
     hjemlerEØSForordningen883: List<String> = emptyList(),
     hjemlerEØSForordningen987: List<String> = emptyList(),
-    hjemlerSeperasjonsavtalenStorbritannina: List<String> = emptyList(),
+    hjemlerSeperasjonsavtalenStorbritannina: List<String> = emptyList()
 ): SanityEØSBegrunnelse = SanityEØSBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1119,6 +1217,10 @@ fun lagTriggesAv(
     etterEndretUtbetaling = etterEndretUtbetaling,
     endretUtbetalingSkalUtbetales = endretUtbetalingSkalUtbetales,
     småbarnstillegg = småbarnstillegg,
+    barnDød = false,
+    deltBostedSkalIkkeDeles = false,
+    gjelderFraInnvilgelsestidspunkt = false,
+    gjelderFørstePeriode = false
 )
 
 fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =

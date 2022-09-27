@@ -48,7 +48,7 @@ class SaksstatistikkTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
 ) : AbstractSpringIntegrationTest() {
 
     private lateinit var saksstatistikkScheduler: SaksstatistikkScheduler

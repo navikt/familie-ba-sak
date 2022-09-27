@@ -51,17 +51,28 @@ class BeslutteVedtak(
             throw FunksjonellFeil("Behandlingen er allerede avsluttet")
         } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV &&
             !featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV)
-        )
+        ) {
             throw FunksjonellFeil(
                 melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV} false",
                 frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer."
             )
+        } else if (behandling.erTekniskBehandling() && !featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING)) {
+            throw FunksjonellFeil(
+                "Du har ikke tilgang til å beslutte en behandling med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer."
+            )
+        }
         val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(
             behandling = behandling,
-            beslutter = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_NAVN else
-                SikkerhetContext.hentSaksbehandlerNavn(),
-            beslutterId = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_FORKORTELSE else
-                SikkerhetContext.hentSaksbehandler(),
+            beslutter = if (behandling.erManuellMigrering()) {
+                SikkerhetContext.SYSTEM_NAVN
+            } else {
+                SikkerhetContext.hentSaksbehandlerNavn()
+            },
+            beslutterId = if (behandling.erManuellMigrering()) {
+                SikkerhetContext.SYSTEM_FORKORTELSE
+            } else {
+                SikkerhetContext.hentSaksbehandler()
+            },
             beslutning = data.beslutning,
             kontrollerteSider = data.kontrollerteSider
         )
@@ -80,15 +91,18 @@ class BeslutteVedtak(
                     opprettTaskIverksettMotOppdrag(behandling, vedtak)
                 }
                 StegType.JOURNALFØR_VEDTAKSBREV -> {
-                    if (!behandling.erBehandlingMedVedtaksbrevutsending())
+                    if (!behandling.erBehandlingMedVedtaksbrevutsending()) {
                         throw Feil("Prøvde å opprette vedtaksbrev for behandling som ikke skal sende ut vedtaksbrev.")
+                    }
 
                     opprettJournalførVedtaksbrevTask(behandling, vedtak)
                 }
                 StegType.FERDIGSTILLE_BEHANDLING -> {
                     if (behandling.type == BehandlingType.TEKNISK_ENDRING) {
                         opprettFerdigstillBehandlingTask(behandling)
-                    } else throw Feil("Neste steg 'ferdigstille behandling' er ikke implementert på 'beslutte vedtak'-steg")
+                    } else {
+                        throw Feil("Neste steg 'ferdigstille behandling' er ikke implementert på 'beslutte vedtak'-steg")
+                    }
                 }
                 else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på 'beslutte vedtak'-steg")
             }
@@ -146,7 +160,7 @@ class BeslutteVedtak(
 
     private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
-            søkerPersonIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+            søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
             behandlingsId = behandling.id
         )
         taskRepository.save(ferdigstillBehandlingTask)

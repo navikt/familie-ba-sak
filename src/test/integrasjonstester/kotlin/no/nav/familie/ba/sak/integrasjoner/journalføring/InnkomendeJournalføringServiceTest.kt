@@ -3,14 +3,15 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakEier
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.lagMockRestJournalføring
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -38,12 +39,11 @@ class InnkomendeJournalføringServiceTest(
     private val innkomendeJournalføringService: InnkomendeJournalføringService,
 
     @Autowired
-    private val journalføringRepository: JournalføringRepository,
+    private val journalføringRepository: JournalføringRepository
 ) : AbstractSpringIntegrationTest() {
 
     @Test
     fun `lagrer journalpostreferanse til behandling og fagsak til journalpost`() {
-
         val søkerFnr = randomFnr()
         val søkerAktør = personidentService.hentAktør(søkerFnr)
 
@@ -101,15 +101,15 @@ class InnkomendeJournalføringServiceTest(
         val behandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId.toLong())
 
         assertNotNull(behandling)
-        assertEquals(FagsakEier.BARN, behandling!!.fagsak.eier)
+        assertEquals(FagsakType.BARN_ENSLIG_MINDREÅRIG, behandling!!.fagsak.type)
 
         val request2 = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
-            .copy(erPåInstitusjon = true)
+            .copy(erPåInstitusjon = true, institusjon = InstitusjonInfo("orgnr", tssEksternId = "tss"))
         val fagsakId2 = innkomendeJournalføringService.journalfør(request2, "1234", "mockEnhet", "2")
         val behandling2 = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId2.toLong())
 
         assertNotNull(behandling2)
-        assertEquals(FagsakEier.BARN, behandling2!!.fagsak.eier)
+        assertEquals(FagsakType.INSTITUSJON, behandling2!!.fagsak.type)
     }
 
     @Test

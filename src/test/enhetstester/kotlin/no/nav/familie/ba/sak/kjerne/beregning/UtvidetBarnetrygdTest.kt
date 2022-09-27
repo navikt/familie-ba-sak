@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -42,7 +42,6 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler får høyeste beløp når det utbetales til flere barn med ulike beløp`() {
-
         val søker =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val barnA =
@@ -138,7 +137,6 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler får høyeste ordinærsats når søker har tillegg for barn under 6 år`() {
-
         val søker =
             OppfyltPeriode(fom = fødselsdatoUnder6År, tom = LocalDate.of(2021, 6, 15))
         val oppfyltBarn =
@@ -375,7 +373,6 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler slutter siste dag i  måneden som vilkår ikke er innfridd lenger`() {
-
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val søkerUtvidet =
@@ -879,22 +876,37 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Skal kaste feil hvis fom og tom er satt i samme måned`() {
-        val utvidetVilkårResultat = lagVilkårResultat(vilkår = Vilkår.UTVIDET_BARNETRYGD, fom = YearMonth.of(2022, 2), tom = YearMonth.of(2022, 2))
+        val utvidetVilkårResultat = lagVilkårResultat(
+            vilkår = Vilkår.UTVIDET_BARNETRYGD,
+            fom = YearMonth.of(2022, 2),
+            tom = YearMonth.of(2022, 2)
+        )
 
         assertThrows<FunksjonellFeil> {
             utvidetVilkårResultat.tilDatoSegment(
-                utvidetVilkår = listOf(utvidetVilkårResultat),
+                utvidetVilkår = listOf(utvidetVilkårResultat)
             )
         }
     }
 
     @Test
     fun `Skal ikke kaste feil hvis fom og tom er i samme måned, men tom er siste dag i mnd og nytt utvidet-vilkår starter første dag i neste mnd`() {
-        val utvidetVilkårResultat = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 2, 1), periodeTom = LocalDate.of(2022, 2, 28))
+        val utvidetVilkårResultat = lagVilkårResultat(
+            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+            periodeFom = LocalDate.of(2022, 2, 1),
+            periodeTom = LocalDate.of(2022, 2, 28)
+        )
 
         assertDoesNotThrow {
             utvidetVilkårResultat.tilDatoSegment(
-                utvidetVilkår = listOf(utvidetVilkårResultat, lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 3, 1), periodeTom = null)),
+                utvidetVilkår = listOf(
+                    utvidetVilkårResultat,
+                    lagVilkårResultat(
+                        vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                        periodeFom = LocalDate.of(2022, 3, 1),
+                        periodeTom = null
+                    )
+                )
             )
         }
     }
@@ -903,12 +915,24 @@ internal class UtvidetBarnetrygdTest {
     fun `Skal kaste feil hvis utvidet-andeler ikke overlapper med noen av barnas andeler`() {
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
-        val søkerAktør = randomAktørId()
+        val søkerAktør = randomAktør()
 
-        val utvidetVilkår = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2018, 2, 1), periodeTom = LocalDate.of(2019, 2, 28), personResultat = PersonResultat(aktør = søkerAktør, vilkårsvurdering = lagVilkårsvurdering(søkerAktør = søkerAktør, behandling = behandling, resultat = Resultat.OPPFYLT)))
+        val utvidetVilkår = lagVilkårResultat(
+            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+            periodeFom = LocalDate.of(2018, 2, 1),
+            periodeTom = LocalDate.of(2019, 2, 28),
+            personResultat = PersonResultat(
+                aktør = søkerAktør,
+                vilkårsvurdering = lagVilkårsvurdering(
+                    søkerAktør = søkerAktør,
+                    behandling = behandling,
+                    resultat = Resultat.OPPFYLT
+                )
+            )
+        )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2021, 10),
                 tom = YearMonth.of(2022, 2),
                 person = tilfeldigPerson(personType = PersonType.BARN),
@@ -916,7 +940,7 @@ internal class UtvidetBarnetrygdTest {
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 tilkjentYtelse = tilkjentYtelse
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2021, 10),
                 tom = YearMonth.of(2022, 1),
                 person = tilfeldigPerson(personType = PersonType.BARN),
@@ -941,12 +965,24 @@ internal class UtvidetBarnetrygdTest {
     fun `Skal dele opp utvidet-segment ved endring i sats`() {
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
-        val søkerAktør = randomAktørId()
+        val søkerAktør = randomAktør()
 
-        val utvidetVilkår = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2016, 2, 1), periodeTom = LocalDate.of(2022, 2, 28), personResultat = PersonResultat(aktør = søkerAktør, vilkårsvurdering = lagVilkårsvurdering(søkerAktør = søkerAktør, behandling = behandling, resultat = Resultat.OPPFYLT)))
+        val utvidetVilkår = lagVilkårResultat(
+            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+            periodeFom = LocalDate.of(2016, 2, 1),
+            periodeTom = LocalDate.of(2022, 2, 28),
+            personResultat = PersonResultat(
+                aktør = søkerAktør,
+                vilkårsvurdering = lagVilkårsvurdering(
+                    søkerAktør = søkerAktør,
+                    behandling = behandling,
+                    resultat = Resultat.OPPFYLT
+                )
+            )
+        )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2015, 10),
                 tom = YearMonth.of(2022, 2),
                 person = tilfeldigPerson(personType = PersonType.BARN),
@@ -997,10 +1033,11 @@ internal class UtvidetBarnetrygdTest {
         erDeltBosted: Boolean = false,
         fødselsdato: LocalDate = fødselsdatoOver6År
     ): Set<VilkårResultat> {
-        val vilkårSomSkalVurderes = if (erUtvidet)
+        val vilkårSomSkalVurderes = if (erUtvidet) {
             listOf(Vilkår.UTVIDET_BARNETRYGD)
-        else
+        } else {
             Vilkår.hentVilkårFor(personType = personType)
+        }
 
         return vilkårSomSkalVurderes.map {
             VilkårResultat(

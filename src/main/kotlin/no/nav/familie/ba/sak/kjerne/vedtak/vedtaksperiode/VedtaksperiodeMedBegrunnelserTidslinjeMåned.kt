@@ -10,7 +10,7 @@ import org.apache.kafka.common.Uuid
 
 // Ønsker ikke å slå sammen like perioder, så legger ved en unikId for å unngå det.
 class VedtaksperioderMedUnikIdTidslinje(
-    private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
+    private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>
 ) : Tidslinje<VedtaksperiodeOgUnikId, Måned>() {
 
     override fun lagPerioder(): List<Periode<VedtaksperiodeOgUnikId, Måned>> =

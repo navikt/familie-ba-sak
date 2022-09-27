@@ -88,7 +88,7 @@ class IntegrasjonClient(
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
     )
-    @Cacheable("behandlendeEnhet", cacheManager = "kodeverkCache")
+    @Cacheable("behandlendeEnhet", cacheManager = "shortCache")
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
         val uri = UriComponentsBuilder.fromUri(integrasjonUri)
             .pathSegment("arbeidsfordeling", "enhet", "BAR")
@@ -215,10 +215,11 @@ class IntegrasjonClient(
 
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String?): OppgaveResponse {
         val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/fordel")
-        val uri = if (saksbehandler == null)
+        val uri = if (saksbehandler == null) {
             baseUri
-        else
+        } else {
             UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
+        }
 
         return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",

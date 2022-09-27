@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterJournalpost
@@ -21,8 +22,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakEier
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
@@ -47,7 +48,7 @@ class InnkomendeJournalføringService(
     private val journalføringRepository: JournalføringRepository,
     private val loggService: LoggService,
     private val stegService: StegService,
-    private val journalføringMetrikk: JournalføringMetrikk,
+    private val journalføringMetrikk: JournalføringMetrikk
 ) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
@@ -75,7 +76,6 @@ class InnkomendeJournalføringService(
         behandlendeEnhet: String,
         oppgaveId: String
     ): String {
-
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(
             request.tilknyttedeBehandlingIder,
             journalpostId
@@ -123,9 +123,10 @@ class InnkomendeJournalføringService(
         kategori: BehandlingKategori? = null,
         underkategori: BehandlingUnderkategori? = null,
         søknadMottattDato: LocalDate? = null,
-        eier: FagsakEier = FagsakEier.OMSORGSPERSON
+        fagsakType: FagsakType = FagsakType.NORMAL,
+        institusjon: InstitusjonInfo? = null
     ): Behandling {
-        fagsakService.hentEllerOpprettFagsak(personIdent, eier = eier)
+        fagsakService.hentEllerOpprettFagsak(personIdent, type = fagsakType, institusjon = institusjon)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 kategori = kategori,
@@ -135,7 +136,7 @@ class InnkomendeJournalføringService(
                 behandlingÅrsak = årsak,
                 navIdent = navIdent,
                 søknadMottattDato = søknadMottattDato,
-                fagsakEier = eier
+                fagsakType = fagsakType
             )
         )
     }
@@ -147,7 +148,6 @@ class InnkomendeJournalføringService(
         behandlendeEnhet: String,
         oppgaveId: String
     ): String {
-
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
 
         if (request.opprettOgKnyttTilNyBehandling) {
@@ -160,7 +160,8 @@ class InnkomendeJournalføringService(
                     kategori = request.kategori,
                     underkategori = request.underkategori,
                     søknadMottattDato = request.datoMottatt?.toLocalDate(),
-                    eier = request.fagsakEier
+                    fagsakType = request.fagsakType,
+                    institusjon = request.institusjon
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
@@ -216,7 +217,6 @@ class InnkomendeJournalføringService(
         tilknyttedeBehandlingIder: List<String>,
         journalpostId: String
     ): Pair<Sak, List<Behandling>> {
-
         val behandlinger = tilknyttedeBehandlingIder.map {
             behandlingHentOgPersisterService.hent(it.toLong())
         }
@@ -341,5 +341,5 @@ class InnkomendeJournalføringService(
     }
 }
 
-private val RestJournalføring.fagsakEier: FagsakEier
-    get() = if (erEnsligMindreårig || erPåInstitusjon) FagsakEier.BARN else FagsakEier.OMSORGSPERSON
+private val RestJournalføring.fagsakType: FagsakType
+    get() = if (erPåInstitusjon) FagsakType.INSTITUSJON else if (erEnsligMindreårig) FagsakType.BARN_ENSLIG_MINDREÅRIG else FagsakType.NORMAL

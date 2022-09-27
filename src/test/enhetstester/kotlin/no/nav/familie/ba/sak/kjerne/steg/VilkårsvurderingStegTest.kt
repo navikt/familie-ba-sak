@@ -8,10 +8,9 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -66,9 +65,9 @@ class VilkårsvurderingStegTest {
         årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
     )
     val søkerPersonIdent = randomFnr()
-    val søkerAktørId = randomAktørId(søkerPersonIdent)
+    val søkerAktørId = randomAktør(søkerPersonIdent)
     val barnIdent = randomFnr()
-    val barnAktørId = randomAktørId(barnIdent)
+    val barnAktørId = randomAktør(barnIdent)
 
     @BeforeEach
     fun setup() {
@@ -117,7 +116,6 @@ class VilkårsvurderingStegTest {
 
     @Test
     fun `skal validere når regelverk er konsistent`() {
-
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
 
@@ -136,14 +134,12 @@ class VilkårsvurderingStegTest {
 
         every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) } returns true
 
         assertDoesNotThrow { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
     }
 
     @Test
     fun `validering skal feile når det er blanding av regelverk på vilkårene for barnet`() {
-
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
 
@@ -164,7 +160,6 @@ class VilkårsvurderingStegTest {
 
         every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) } returns true
 
         val exception = assertThrows<RuntimeException> { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
         assertEquals(

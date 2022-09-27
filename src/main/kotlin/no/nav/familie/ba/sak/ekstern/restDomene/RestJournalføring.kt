@@ -19,7 +19,7 @@ data class RestJournalpostDokument(
     val dokumentInfoId: String,
     val brevkode: String?,
     val logiskeVedlegg: List<LogiskVedlegg>?,
-    val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>?,
+    val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>?
 )
 
 data class RestJournalføring(
@@ -38,6 +38,7 @@ data class RestJournalføring(
     val nyBehandlingsårsak: BehandlingÅrsak,
     val erEnsligMindreårig: Boolean = false,
     val erPåInstitusjon: Boolean = false,
+    val institusjon: InstitusjonInfo? = null
 ) {
 
     fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest {
@@ -62,7 +63,7 @@ data class RestJournalføring(
                     dokumentvarianter = null,
                     logiskeVedlegg = null
                 )
-            },
+            }
         )
     }
 

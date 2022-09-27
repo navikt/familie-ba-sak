@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -111,7 +111,7 @@ internal class SaksstatistikkServiceTest(
     private val featureToggleService: FeatureToggleService,
 
     @MockK
-    private val settPåVentService: SettPåVentService,
+    private val settPåVentService: SettPåVentService
 ) {
 
     private val sakstatistikkService = SaksstatistikkService(
@@ -124,7 +124,7 @@ internal class SaksstatistikkServiceTest(
         personopplysningerService,
         persongrunnlagService,
         vedtaksperiodeService,
-        settPåVentService,
+        settPåVentService
     )
 
     @BeforeAll
@@ -250,7 +250,7 @@ internal class SaksstatistikkServiceTest(
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { persongrunnlagService.hentBarna(any<Behandling>()) } returns listOf(
             tilfeldigPerson()
-                .copy(aktør = randomAktørId("01010000001"))
+                .copy(aktør = randomAktør("01010000001"))
         )
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
@@ -375,7 +375,7 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Skal mappe til sakDVH, aktører har SØKER og BARN`() {
-        val randomAktørId = randomAktørId()
+        val randomAktørId = randomAktør()
         every { fagsakService.hentPåFagsakId(any()) } answers {
             Fagsak(status = FagsakStatus.OPPRETTET, aktør = randomAktørId)
         }
@@ -402,7 +402,6 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Enum-verdier brukt i behandlingDVH skal validere mot json schema`() {
-
         val enumVerdier = listOf(
             BehandlingType.values(),
             BehandlingStatus.values(),
@@ -418,7 +417,6 @@ internal class SaksstatistikkServiceTest(
         }
 
         for (i in 0..enumVerdier.maxOf { it.size }) {
-
             val enumI = enumVerdier.map { it.getOrElse(i) { _ -> it.first() } }
             val behandlingType = enumI[0] as BehandlingType
             val behandlingStatus = enumI[1].name
@@ -465,7 +463,7 @@ internal class SaksstatistikkServiceTest(
                     frist = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
                     tidSattPaaVent = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
                     aarsak = settPåVentÅrsak
-                ),
+                )
             )
             try {
                 validerJsonMotSchema(
@@ -480,7 +478,7 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Enum-verdier brukt i sakDvh skal validere mot json schema`() {
-        val deltagere = PersonType.values().map { personType -> AktørDVH(randomAktørId().aktørId.toLong(), personType.name) }
+        val deltagere = PersonType.values().map { personType -> AktørDVH(randomAktør().aktørId.toLong(), personType.name) }
 
         FagsakStatus.values().forEach {
             val sakDvh = SakDVH(
@@ -494,7 +492,7 @@ internal class SaksstatistikkServiceTest(
                 sakStatus = it.name,
                 avsender = "familie-ba-sak",
                 versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
-                bostedsland = "NO",
+                bostedsland = "NO"
             )
             try {
                 validerJsonMotSchema(

@@ -58,7 +58,7 @@ class RestartAvSmåbarnstilleggTest(
         fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
 
         fullførRevurderingMedOvergangstonad(
@@ -83,7 +83,7 @@ class RestartAvSmåbarnstilleggTest(
         startEnRevurderingNyeOpplysningerMenIkkeFullfør(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
 
         // Fagsak 2 - har restart av småbarnstillegg som ikke er begrunnet og skal være med i listen
@@ -92,7 +92,7 @@ class RestartAvSmåbarnstilleggTest(
         fullførBehandling(
             fagsak = fagsak2,
             personScenario = personScenario2,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
         fullførRevurderingMedOvergangstonad(
             fagsak = fagsak2,
@@ -120,7 +120,7 @@ class RestartAvSmåbarnstilleggTest(
         fullførBehandling(
             fagsak = fagsak3,
             personScenario = personScenario3,
-            barnFødselsdato = barnFødselsdato,
+            barnFødselsdato = barnFødselsdato
         )
         fullførRevurderingMedOvergangstonad(
             fagsak = fagsak3,
@@ -172,9 +172,8 @@ class RestartAvSmåbarnstilleggTest(
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate,
+        barnFødselsdato: LocalDate
     ): Behandling {
-
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = emptyList()
@@ -223,7 +222,6 @@ class RestartAvSmåbarnstilleggTest(
         ),
         skalBegrunneSmåbarnstillegg: Boolean = false
     ): Behandling {
-
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 

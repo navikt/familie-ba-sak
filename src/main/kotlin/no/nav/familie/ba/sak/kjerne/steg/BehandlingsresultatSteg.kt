@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -9,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -34,7 +36,8 @@ class BehandlingsresultatSteg(
     private val vilkårService: VilkårService,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val featureToggleService: FeatureToggleService,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -55,15 +58,18 @@ class BehandlingsresultatSteg(
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
-        validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
-        validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler)
-        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndelerMedÅrsakDeltBosted = endretUtbetalingAndeler.filter { it.årsak == Årsak.DELT_BOSTED })
+        val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandling.id)
+
+        validerAtAlleOpprettedeEndringerErUtfylt(endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel })
+        validerAtEndringerErTilknyttetAndelTilkjentYtelse(endreteUtbetalingerMedAndeler)
+        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
+            endretUtbetalingAndelerMedÅrsakDeltBosted = endreteUtbetalingerMedAndeler.filter { it.årsak == Årsak.DELT_BOSTED }
+        )
     }
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
-
         val behandlingMedOppdatertBehandlingsresultat =
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
@@ -74,6 +80,8 @@ class BehandlingsresultatSteg(
                     resultat = resultat
                 )
             }
+
+        validerBehandlingsresultatErGyldigForÅrsak(behandlingMedOppdatertBehandlingsresultat)
 
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
             behandlingService.nullstillEndringstidspunkt(behandling.id)
@@ -105,6 +113,29 @@ class BehandlingsresultatSteg(
 
     override fun stegType(): StegType {
         return StegType.BEHANDLINGSRESULTAT
+    }
+
+    private fun validerBehandlingsresultatErGyldigForÅrsak(behandlingMedOppdatertBehandlingsresultat: Behandling) {
+        if (behandlingMedOppdatertBehandlingsresultat.erManuellMigrering() &&
+            (
+                behandlingMedOppdatertBehandlingsresultat.resultat.erAvslått() ||
+                    behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.DELVIS_INNVILGET
+                )
+        ) {
+            throw FunksjonellFeil(
+                "Du har fått behandlingsresultatet " +
+                    "${behandlingMedOppdatertBehandlingsresultat.resultat.displayName}. " +
+                    "Dette er ikke støttet på migreringsbehandlinger. " +
+                    "Ta kontakt med Team familie om du er uenig i resultatet."
+            )
+        }
+
+        if (behandlingMedOppdatertBehandlingsresultat.erManuellMigreringForEndreMigreringsdato() && behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+            throw FunksjonellFeil(
+                "Fortsatt innvilget er et ugyldig behandlingsresultat når du skal endre migreringsdato. " +
+                    "Henlegg behandlingen. Når du starter en ny endre migreringsdato behandling, må du velge en dato som er tidligere enn gjeldene dato for migrering."
+            )
+        }
     }
 
     private fun settBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat): Behandling {

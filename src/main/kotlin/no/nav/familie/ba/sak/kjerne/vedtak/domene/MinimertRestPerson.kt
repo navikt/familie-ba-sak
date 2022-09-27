@@ -51,7 +51,7 @@ fun Person.tilMinimertPerson() = MinimertRestPerson(
 fun MinimertRestPerson.tilBrevPeriodeTestPerson(
     brevPeriodeGrunnlag: MinimertVedtaksperiode,
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-    barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
+    barnMedReduksjonFraForrigeBehandlingIdent: List<String>
 ): BrevPeriodePersonForLogging {
     val minimertePersonResultater =
         restBehandlingsgrunnlagForBrev.minimertePersonResultater.firstOrNull { it.personIdent == this.personIdent }!!

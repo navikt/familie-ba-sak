@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.finnTilOgMedDato
 import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetalingFom
@@ -41,7 +42,6 @@ object EndretUtbetalingAndelValidering {
         endretUtbetalingAndel: EndretUtbetalingAndel,
         eksisterendeEndringerPåBehandling: List<EndretUtbetalingAndel>
     ) {
-
         endretUtbetalingAndel.validerUtfyltEndring()
         if (eksisterendeEndringerPåBehandling.any
             {
@@ -59,9 +59,8 @@ object EndretUtbetalingAndelValidering {
 
     fun validerPeriodeInnenforTilkjentytelse(
         endretUtbetalingAndel: EndretUtbetalingAndel,
-        andelTilkjentYtelser: List<AndelTilkjentYtelse>
+        andelTilkjentYtelser: Collection<AndelTilkjentYtelse>
     ) {
-
         endretUtbetalingAndel.validerUtfyltEndring()
         val minsteDatoForTilkjentYtelse = andelTilkjentYtelser.filter {
             it.aktør == endretUtbetalingAndel.person!!.aktør
@@ -84,13 +83,27 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
+    fun validerPeriodeInnenforTilkjentytelse(
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+        andelTilkjentYtelser: Collection<AndelTilkjentYtelse>
+    ) = endretUtbetalingAndeler.forEach { validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser) }
+
+    fun validerÅrsak(
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+        vilkårsvurdering: Vilkårsvurdering?
+    ) =
+        endretUtbetalingAndeler.forEach { validerÅrsak(it.årsak, it, vilkårsvurdering) }
+
     fun validerÅrsak(
         årsak: Årsak?,
         endretUtbetalingAndel: EndretUtbetalingAndel,
         vilkårsvurdering: Vilkårsvurdering?
     ) {
         if (årsak == Årsak.DELT_BOSTED) {
-            val deltBostedPerioder = finnDeltBostedPerioder(person = endretUtbetalingAndel.person, vilkårsvurdering = vilkårsvurdering).map { it.tilMånedPeriode() }
+            val deltBostedPerioder = finnDeltBostedPerioder(
+                person = endretUtbetalingAndel.person,
+                vilkårsvurdering = vilkårsvurdering
+            ).map { it.tilMånedPeriode() }
             validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, deltBostedPerioder = deltBostedPerioder)
         } else if (årsak == Årsak.ETTERBETALING_3ÅR) {
             validerEtterbetaling3År(
@@ -100,7 +113,7 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    fun validerEtterbetaling3År(
+    private fun validerEtterbetaling3År(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         kravDato: LocalDateTime
     ) {
@@ -117,7 +130,7 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    fun validerDeltBosted(
+    internal fun validerDeltBosted(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         deltBostedPerioder: List<MånedPeriode>
     ) {
@@ -151,21 +164,22 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    fun validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler: List<EndretUtbetalingAndel>) {
-        if (endretUtbetalingAndeler.any { it.andelTilkjentYtelser.isEmpty() })
+    fun validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>) {
+        if (endretUtbetalingAndeler.any { it.andelerTilkjentYtelse.isEmpty() }) {
             throw FunksjonellFeil(
                 melding = "Det er opprettet instanser av EndretUtbetalingandel som ikke er tilknyttet noen andeler. De må enten lagres eller slettes av SB.",
                 frontendFeilmelding = "Du har endrede utbetalingsperioder. Bekreft, slett eller oppdater periodene i listen."
             )
+        }
     }
 }
 
 fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>
 ) {
     fun EndretUtbetalingAndel.finnKryssendeUtvidetYtelse(
-        andelTilkjentYtelser: List<AndelTilkjentYtelse>,
+        andelTilkjentYtelser: Collection<AndelTilkjentYtelse>
     ): AndelTilkjentYtelse? =
         andelTilkjentYtelser
             .filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
@@ -192,11 +206,11 @@ fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
 }
 
 fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-    endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndel>
+    endretUtbetalingAndelerMedÅrsakDeltBosted: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
 ) {
-    val endredeUtvidetUtbetalingerAndeler =
-        endretUtbetalingAndelerMedÅrsakDeltBosted.filter { endretUtbetaling ->
-            endretUtbetaling.andelTilkjentYtelser.any { it.erUtvidet() }
+    val endredeUtvidetUtbetalingerAndeler = endretUtbetalingAndelerMedÅrsakDeltBosted
+        .filter { endretUtbetaling ->
+            endretUtbetaling.andelerTilkjentYtelse.any { it.erUtvidet() }
         }
 
     endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
@@ -227,14 +241,16 @@ fun validerUtbetalingMotÅrsak(årsak: Årsak?, skalUtbetales: Boolean) {
 fun validerTomDato(tomDato: YearMonth?, gyldigTomEtterDagensDato: YearMonth?, årsak: Årsak?) {
     val dagensDato = YearMonth.now()
     if (årsak == Årsak.ALLEREDE_UTBETALT && tomDato?.isAfter(dagensDato) == true) {
-        val feilmelding = "For årsak '${årsak.visningsnavn}' kan du ikke legge inn til og med dato som er i neste måned eller senere."
+        val feilmelding =
+            "For årsak '${årsak.visningsnavn}' kan du ikke legge inn til og med dato som er i neste måned eller senere."
         throw FunksjonellFeil(
             frontendFeilmelding = feilmelding,
             melding = feilmelding
         )
     }
     if (tomDato?.isAfter(dagensDato) == true && tomDato != gyldigTomEtterDagensDato) {
-        val feilmelding = "Du kan ikke legge inn til og med dato som er i neste måned eller senere. Om det gjelder en løpende periode vil systemet legge inn riktig dato for deg."
+        val feilmelding =
+            "Du kan ikke legge inn til og med dato som er i neste måned eller senere. Om det gjelder en løpende periode vil systemet legge inn riktig dato for deg."
         throw FunksjonellFeil(
             frontendFeilmelding = feilmelding,
             melding = feilmelding
@@ -243,7 +259,7 @@ fun validerTomDato(tomDato: YearMonth?, gyldigTomEtterDagensDato: YearMonth?, å
 }
 
 private fun slåSammenDeltBostedPerioderSomHengerSammen(
-    perioder: MutableList<Periode>,
+    perioder: MutableList<Periode>
 ): MutableList<Periode> {
     if (perioder.isEmpty()) return mutableListOf()
     val sortertePerioder = perioder.sortedBy { it.fom }.toMutableList()
@@ -298,9 +314,17 @@ fun finnDeltBostedPerioder(
             }
         }
 
-        val deltBostedPerioder = deltBostedVilkårResultater.groupBy { it.personResultat?.aktør }.flatMap { (_, vilkårResultater) -> vilkårResultater.mapNotNull { it.tilPeriode(vilkår = vilkårResultater) } }
+        val deltBostedPerioder = deltBostedVilkårResultater.groupBy { it.personResultat?.aktør }
+            .flatMap { (_, vilkårResultater) -> vilkårResultater.mapNotNull { it.tilPeriode(vilkår = vilkårResultater) } }
 
-        slåSammenOverlappendePerioder(deltBostedPerioder.map { DatoIntervallEntitet(fom = it.fom, tom = it.tom) }).filter { it.fom != null && it.tom != null }.map {
+        slåSammenOverlappendePerioder(
+            deltBostedPerioder.map {
+                DatoIntervallEntitet(
+                    fom = it.fom,
+                    tom = it.tom
+                )
+            }
+        ).filter { it.fom != null && it.tom != null }.map {
             Periode(
                 fom = it.fom!!,
                 tom = it.tom!!

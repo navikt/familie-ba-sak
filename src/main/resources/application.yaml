@@ -31,6 +31,7 @@ spring:
           use_jdbc_metadata_defaults: false
   flyway:
     enabled: true
+    locations: classpath:db/migration,classpath:db/init
   kafka:
     client-id: familie-ba-sak
     properties:
@@ -129,3 +130,5 @@ FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 SANITY_FAMILIE_API_URL: https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query/ba-brev
 FAMILIE_BA_MIGRERING_API_URL: http://familie-ba-migrering/api
+ECB_API_URL: https://sdw-wsrest.ecb.europa.eu/service/data/EXR/
+CRON_FAGSAKSTATUS_SCHEDULER: "0 0 7 1 * *"

@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
@@ -32,28 +33,24 @@ data class Fagsak(
     )
     val aktør: Aktør,
 
-    @OneToOne(optional = true)
+    @ManyToOne(optional = true)
     @JoinColumn(
         name = "fk_institusjon_id",
         nullable = true,
-        updatable = false
+        updatable = true
     )
-    val institusjon: Institusjon? = null,
+    var institusjon: Institusjon? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     var status: FagsakStatus = FagsakStatus.OPPRETTET,
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "eier", nullable = false)
-    val eier: FagsakEier = FagsakEier.OMSORGSPERSON,
-
-    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     val type: FagsakType = FagsakType.NORMAL,
 
     @Column(name = "arkivert", nullable = false)
-    var arkivert: Boolean = false,
+    var arkivert: Boolean = false
 ) : BaseEntitet() {
 
     override fun hashCode(): Int {
@@ -82,13 +79,8 @@ enum class FagsakStatus {
     AVSLUTTET
 }
 
-enum class FagsakEier {
-    OMSORGSPERSON,
-    BARN
-}
-
 enum class FagsakType {
     NORMAL,
-    BARN_ENSLIG_MINDREÅRLIG,
-    INSTITUSJON,
+    BARN_ENSLIG_MINDREÅRIG,
+    INSTITUSJON
 }

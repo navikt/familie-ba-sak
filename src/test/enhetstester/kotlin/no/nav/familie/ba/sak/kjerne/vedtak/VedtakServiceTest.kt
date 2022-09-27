@@ -3,10 +3,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -103,9 +102,6 @@ class VedtakServiceTest(
     private val infotrygdService: InfotrygdService,
 
     @Autowired
-    private val featureToggleService: FeatureToggleService,
-
-    @Autowired
     private val beregningService: BeregningService,
 
     @Autowired
@@ -121,7 +117,7 @@ class VedtakServiceTest(
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
 
     @Autowired
-    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
+    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -152,12 +148,11 @@ class VedtakServiceTest(
             infotrygdService,
             vedtaksperiodeService,
             personidentService,
-            featureToggleService,
             taskRepository,
-            vilkårsvurderingService,
+            vilkårsvurderingService
         )
 
-        val personAktørId = randomAktørId()
+        val personAktørId = randomAktør()
 
         behandling = lagBehandling()
 
@@ -172,19 +167,34 @@ class VedtakServiceTest(
         )
 
         vilkårResultat1 = VilkårResultat(
-            1, personResultat, vilkår, resultat,
-            LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-            "", vilkårsvurdering.behandling.id
+            1,
+            personResultat,
+            vilkår,
+            resultat,
+            LocalDate.of(2010, 1, 1),
+            LocalDate.of(2010, 6, 1),
+            "",
+            vilkårsvurdering.behandling.id
         )
         vilkårResultat2 = VilkårResultat(
-            2, personResultat, vilkår, resultat,
-            LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
-            "", vilkårsvurdering.behandling.id,
+            2,
+            personResultat,
+            vilkår,
+            resultat,
+            LocalDate.of(2010, 6, 2),
+            LocalDate.of(2010, 8, 1),
+            "",
+            vilkårsvurdering.behandling.id
         )
         vilkårResultat3 = VilkårResultat(
-            3, personResultat, vilkår, resultat,
-            LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
-            "", vilkårsvurdering.behandling.id
+            3,
+            personResultat,
+            vilkår,
+            resultat,
+            LocalDate.of(2010, 8, 2),
+            LocalDate.of(2010, 12, 1),
+            "",
+            vilkårsvurdering.behandling.id
         )
         personResultat.setSortedVilkårResultater(
             setOf(

@@ -13,8 +13,10 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
@@ -110,10 +112,12 @@ class PersongrunnlagService(
 
         val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.aktør }
 
-        if (barnIGrunnlag.contains(nyttbarnAktør)) throw FunksjonellFeil(
-            melding = "Forsøker å legge til barn som allerede finnes i personopplysningsgrunnlag ${personopplysningGrunnlag.id}",
-            frontendFeilmelding = "Barn finnes allerede på behandling og er derfor ikke lagt til."
-        )
+        if (barnIGrunnlag.contains(nyttbarnAktør)) {
+            throw FunksjonellFeil(
+                melding = "Forsøker å legge til barn som allerede finnes i personopplysningsgrunnlag ${personopplysningGrunnlag.id}",
+                frontendFeilmelding = "Barn finnes allerede på behandling og er derfor ikke lagt til."
+            )
+        }
 
         val oppdatertGrunnlag = hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = personopplysningGrunnlag.søker.aktør,
@@ -122,7 +126,8 @@ class PersongrunnlagService(
             målform = personopplysningGrunnlag.søker.målform
         )
 
-        oppdatertGrunnlag.barna.singleOrNull { nyttbarnAktør == it.aktør }?.also { loggService.opprettBarnLagtTilLogg(behandling, it) } ?: run {
+        oppdatertGrunnlag.barna.singleOrNull { nyttbarnAktør == it.aktør }
+            ?.also { loggService.opprettBarnLagtTilLogg(behandling, it) } ?: run {
             secureLogger.info("Klarte ikke legge til barn med aktør $nyttbarnAktør på personopplysningsgrunnlag ${personopplysningGrunnlag.id}")
             throw Feil("Nytt barn ikke lagt til i personopplysningsgrunnlag ${personopplysningGrunnlag.id}. Se securelog for mer informasjon.")
         }
@@ -148,32 +153,26 @@ class PersongrunnlagService(
             søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }
                 .map { barn -> personidentService.hentOgLagreAktør(barn.ident, true) }
 
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
-            val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandlingSomErVedtatt.id)
-            val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.aktør }
-                ?.filter {
-                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                        forrigeBehandlingSomErVedtatt.id,
-                        it
-                    ).isNotEmpty()
-                } ?: emptyList()
+        val barnMedTilkjentYtelseIForrigeBehandling =
+            if (skalTaMedBarnFraForrigeBehandling(behandling) && forrigeBehandlingSomErVedtatt != null) {
+                finnBarnMedTilkjentYtelseIBehandling(forrigeBehandlingSomErVedtatt)
+            } else {
+                emptyList()
+            }
 
-            hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = søkerAktør,
-                barnFraInneværendeBehandling = valgteBarnsAktør,
-                barnFraForrigeBehandling = forrigePersongrunnlagBarna,
-                behandling = behandling,
-                målform = søknadDTO.søkerMedOpplysninger.målform,
-            )
-        } else {
-            hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør = søkerAktør,
-                barnFraInneværendeBehandling = valgteBarnsAktør,
-                behandling = behandling,
-                målform = søknadDTO.søkerMedOpplysninger.målform
-            )
-        }
+        hentOgLagreSøkerOgBarnINyttGrunnlag(
+            aktør = søkerAktør,
+            barnFraInneværendeBehandling = valgteBarnsAktør,
+            barnFraForrigeBehandling = barnMedTilkjentYtelseIForrigeBehandling,
+            behandling = behandling,
+            målform = søknadDTO.søkerMedOpplysninger.målform
+        )
     }
+
+    private fun finnBarnMedTilkjentYtelseIBehandling(behandling: Behandling): List<Aktør> =
+        hentAktiv(behandlingId = behandling.id)?.barna?.map { it.aktør }?.filter {
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, it).isNotEmpty()
+        } ?: emptyList()
 
     /**
      * Henter oppdatert registerdata og lagrer i nytt aktivt personopplysningsgrunnlag
@@ -184,7 +183,7 @@ class PersongrunnlagService(
         barnFraInneværendeBehandling: List<Aktør>,
         behandling: Behandling,
         målform: Målform,
-        barnFraForrigeBehandling: List<Aktør> = emptyList(),
+        barnFraForrigeBehandling: List<Aktør> = emptyList()
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
@@ -193,7 +192,10 @@ class PersongrunnlagService(
             aktør = aktør,
             personopplysningGrunnlag = personopplysningGrunnlag,
             målform = målform,
-            personType = PersonType.SØKER,
+            personType = when (behandling.fagsak.type) {
+                NORMAL -> PersonType.SØKER
+                BARN_ENSLIG_MINDREÅRIG, INSTITUSJON -> PersonType.BARN
+            },
             enkelPersonInfo = enkelPersonInfo,
             hentArbeidsforhold = behandling.skalBehandlesAutomatisk
         )
@@ -245,8 +247,11 @@ class PersongrunnlagService(
         hentArbeidsforhold: Boolean = false
     ): Person {
         val personinfo =
-            if (enkelPersonInfo) personopplysningerService.hentPersoninfoEnkel(aktør)
-            else personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+            if (enkelPersonInfo) {
+                personopplysningerService.hentPersoninfoEnkel(aktør)
+            } else {
+                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
+            }
 
         return Person(
             type = personType,
@@ -255,7 +260,7 @@ class PersongrunnlagService(
             aktør = aktør,
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-            målform = målform,
+            målform = målform
         ).also { person ->
             person.opphold =
                 personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) }?.toMutableList() ?: mutableListOf()

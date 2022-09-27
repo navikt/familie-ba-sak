@@ -52,6 +52,11 @@ class BehandlingHentOgPersisterService(
         return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
     }
 
+    fun hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId: Long): Behandling? {
+        val behandling = hent(behandlingId)
+        return hentForrigeBehandlingSomErIverksatt(behandling)
+    }
+
     /**
      * Henter iverksatte behandlinger FØR en gitt behandling.
      * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet

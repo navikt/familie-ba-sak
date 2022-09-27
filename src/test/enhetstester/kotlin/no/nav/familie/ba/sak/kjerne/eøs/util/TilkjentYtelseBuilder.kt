@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.tilAndelerTilkjentY
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
@@ -40,14 +42,51 @@ class TilkjentYtelseBuilder(
         return this
     }
 
+    fun medSmåbarn(
+        s: String,
+        kalkulert: (Int) -> Int = { it }
+    ) = medYtelse(s = s, type = YtelseType.SMÅBARNSTILLEGG, kalkulert = kalkulert) {
+        satstypeTidslinje(SatsType.SMA)
+    }
+        .also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
+
+    fun medUtvidet(
+        s: String,
+        kalkulert: (Int) -> Int = { it }
+    ) = medYtelse(s = s, type = YtelseType.UTVIDET_BARNETRYGD, kalkulert = kalkulert) {
+        satstypeTidslinje(SatsType.ORBA)
+    }
+        .also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
+
     fun medOrdinær(
         s: String,
         prosent: Long = 100,
         nasjonalt: (Int) -> Int? = { null },
         differanse: (Int) -> Int? = { null },
         kalkulert: (Int) -> Int = { it }
-    ): TilkjentYtelseBuilder {
+    ) = medYtelse(
+        s,
+        YtelseType.ORDINÆR_BARNETRYGD,
+        prosent,
+        nasjonalt,
+        differanse,
+        kalkulert
+    ) {
+        val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
+        val tilleggOrbaTidslinje = satstypeTidslinje(SatsType.TILLEGG_ORBA)
+            .filtrerMed(erUnder6ÅrTidslinje(it))
+        orbaTidslinje.kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
+    }
 
+    private fun medYtelse(
+        s: String,
+        type: YtelseType,
+        prosent: Long = 100,
+        nasjonalt: (Int) -> Int? = { null },
+        differanse: (Int) -> Int? = { null },
+        kalkulert: (Int) -> Int = { it },
+        satsTidslinje: (Person) -> Tidslinje<Int, Måned>
+    ): TilkjentYtelseBuilder {
         val andeler = gjeldendePersoner
             .map { person ->
                 val andelTilkjentYtelseTidslinje = s.tilCharTidslinje(startMåned)
@@ -64,16 +103,11 @@ class TilkjentYtelseBuilder(
                             differanseberegnetPeriodebeløp = null, // Overskrives under
                             prosent = BigDecimal.valueOf(prosent),
                             sats = 0, // Overskrives under
-                            type = YtelseType.ORDINÆR_BARNETRYGD
+                            type = type
                         )
                     }
 
-                val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
-                val tilleggOrbaTidslinje = satstypeTidslinje(SatsType.TILLEGG_ORBA)
-                    .filtrerMed(erUnder6ÅrTidslinje(person))
-                val satsTidslinje = orbaTidslinje.kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
-
-                andelTilkjentYtelseTidslinje.kombinerUtenNullMed(satsTidslinje) { aty, sats ->
+                andelTilkjentYtelseTidslinje.kombinerUtenNullMed(satsTidslinje(person)) { aty, sats ->
                     aty.copy(
                         sats = sats,
                         kalkulertUtbetalingsbeløp = kalkulert(sats),

@@ -75,7 +75,9 @@ class BeslutteVedtakTest {
                 any()
             )
         } returns Totrinnskontroll(
-            behandling = lagBehandling(), saksbehandler = "Mock Saksbehandler", saksbehandlerId = "Mock.Saksbehandler"
+            behandling = lagBehandling(),
+            saksbehandler = "Mock Saksbehandler",
+            saksbehandlerId = "Mock.Saksbehandler"
         )
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
@@ -99,7 +101,6 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal ferdigstille Godkjenne vedtak-oppgave ved Godkjent vedtak`() {
-
         val behandling = lagBehandling()
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
@@ -132,7 +133,8 @@ class BeslutteVedtakTest {
                 any(),
                 any(),
                 any(),
-                any(), any()
+                any(),
+                any()
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
@@ -167,7 +169,7 @@ class BeslutteVedtakTest {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
                 any(),
                 any(),
-                any(),
+                any()
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
@@ -179,7 +181,7 @@ class BeslutteVedtakTest {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
                 personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
                 behandlingId = behandling.id,
-                vedtakId = vedtak.id,
+                vedtakId = vedtak.id
             )
         }
         Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, nesteSteg)
@@ -207,8 +209,24 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
-
         val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+        mockkObject(FerdigstillOppgaver.Companion)
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(
+            type = FerdigstillOppgaver.TASK_STEP_TYPE,
+            payload = ""
+        )
+
+        assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
+    }
+
+    @Test
+    fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)

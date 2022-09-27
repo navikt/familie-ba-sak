@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
@@ -67,7 +68,7 @@ class AutovedtakFødselshendelseService(
 
     override fun skalAutovedtakBehandles(behandlingsdata: NyBehandlingHendelse): Boolean {
         val morsAktør = personidentService.hentAktør(behandlingsdata.morsIdent)
-        val morsÅpneBehandling = hentÅpenBehandling(aktør = morsAktør)
+        val morsÅpneBehandling = hentÅpenNormalBehandling(aktør = morsAktør)
         val barnsAktører = personidentService.hentAktørIder(behandlingsdata.barnasIdenter)
 
         if (morsÅpneBehandling != null) {
@@ -128,9 +129,11 @@ class AutovedtakFødselshendelseService(
             henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandlingEtterFiltrering,
                 begrunnelse = filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
-                    .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
+                    .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse
             )
-        } else vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = barnSomSkalBehandlesForMor)
+        } else {
+            vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = barnSomSkalBehandlesForMor)
+        }
     }
 
     private fun vurderVilkår(behandling: Behandling, barnaSomVurderes: List<String>): String {
@@ -177,8 +180,8 @@ class AutovedtakFødselshendelseService(
         }
     }
 
-    private fun hentÅpenBehandling(aktør: Aktør): Behandling? {
-        return fagsakService.hent(aktør)?.let {
+    private fun hentÅpenNormalBehandling(aktør: Aktør): Behandling? {
+        return fagsakService.hent(aktør, FagsakType.NORMAL)?.let {
             behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(it.id)
         }
     }
@@ -193,9 +196,13 @@ class AutovedtakFødselshendelseService(
         ).forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
 
         val barnaSomHarBlittBehandlet =
-            if (fagsak != null) behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).flatMap {
-                persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
-            }.distinct() else emptyList()
+            if (fagsak != null) {
+                behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).flatMap {
+                    persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
+                }.distinct()
+            } else {
+                emptyList()
+            }
 
         return finnBarnSomSkalBehandlesForMor(
             nyBehandlingHendelse = nyBehandlingHendelse,
@@ -207,7 +214,7 @@ class AutovedtakFødselshendelseService(
 
     private fun henleggBehandlingOgOpprettManuellOppgave(
         behandling: Behandling,
-        begrunnelse: String = "",
+        begrunnelse: String = ""
     ): String {
         val begrunnelseForManuellOppgave = if (begrunnelse == "") {
             hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)

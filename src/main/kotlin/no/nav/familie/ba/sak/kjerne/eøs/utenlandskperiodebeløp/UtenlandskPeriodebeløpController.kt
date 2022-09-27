@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilUtenlandskPeriodebeløp
@@ -10,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -27,7 +24,6 @@ import javax.validation.Valid
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class UtenlandskPeriodebeløpController(
-    private val featureToggleService: FeatureToggleService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val personidentService: PersonidentService,
@@ -36,16 +32,15 @@ class UtenlandskPeriodebeløpController(
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterUtenlandskPeriodebeløp(
         @PathVariable behandlingId: Long,
-        @Valid @RequestBody restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp
+        @Valid @RequestBody
+        restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
-
         val barnAktører = restUtenlandskPeriodebeløp.barnIdenter.map { personidentService.hentAktør(it) }
 
         val eksisterendeUtenlandskPeriodeBeløp = utenlandskPeriodebeløpRepository.getById(restUtenlandskPeriodebeløp.id)
 
-        val utenlandskPeriodebeløp = restUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører, eksisterendeUtenlandskPeriodeBeløp)
+        val utenlandskPeriodebeløp =
+            restUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører, eksisterendeUtenlandskPeriodeBeløp)
 
         utenlandskPeriodebeløpService
             .oppdaterUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløp)
@@ -58,9 +53,6 @@ class UtenlandskPeriodebeløpController(
         @PathVariable behandlingId: Long,
         @PathVariable utenlandskPeriodebeløpId: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
-
         utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

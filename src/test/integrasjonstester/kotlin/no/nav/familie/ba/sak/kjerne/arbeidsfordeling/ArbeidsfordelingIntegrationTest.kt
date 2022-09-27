@@ -35,12 +35,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate.now
 
-// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
-// TODO kan kanskje fjerne dirties
-@DirtiesContext
 class ArbeidsfordelingIntegrationTest(
 
     @Autowired
@@ -398,9 +394,14 @@ class ArbeidsfordelingIntegrationTest(
 
         val søkerBostedsadresse = Bostedsadresse(
             vegadresse = Vegadresse(
-                matrikkelId = 1111, husnummer = null, husbokstav = null,
-                bruksenhetsnummer = null, adressenavn = null, kommunenummer = null,
-                tilleggsnavn = null, postnummer = "2222"
+                matrikkelId = 1111,
+                husnummer = null,
+                husbokstav = null,
+                bruksenhetsnummer = null,
+                adressenavn = null,
+                kommunenummer = null,
+                tilleggsnavn = null,
+                postnummer = "2222"
             )
         )
     }

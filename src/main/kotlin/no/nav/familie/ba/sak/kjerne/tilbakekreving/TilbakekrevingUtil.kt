@@ -40,7 +40,6 @@ fun slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder: List<Simule
 
     sortedSimuleringsPerioder.forEach { periode ->
         if (aktuellTom.toYearMonth().plusMonths(1) < periode.fom.toYearMonth()) {
-
             perioder.add(Periode(fom = aktuellFom, tom = aktuellTom))
             aktuellFom = periode.fom
         }
@@ -63,12 +62,14 @@ fun opprettVarsel(tilbakekreving: Tilbakekreving?, simulering: List<ØkonomiSimu
             sumFeilutbetaling = restSimulering.feilutbetaling,
             perioder = slåsammenNærliggendeFeilutbtalingPerioder(restSimulering.perioder)
         )
-    } else null
+    } else {
+        null
+    }
 
 fun hentFaktainfoForTilbakekreving(behandling: Behandling, tilbakekreving: Tilbakekreving): Faktainfo =
     Faktainfo(
         revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
         revurderingsresultat = behandling.resultat.displayName,
         tilbakekrevingsvalg = tilbakekreving.valg,
-        konsekvensForYtelser = emptySet(),
+        konsekvensForYtelser = emptySet()
     )

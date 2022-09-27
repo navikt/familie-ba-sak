@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 
 data class MinimertKompetanse(
     val søkersAktivitet: SøkersAktivitet,
+    val søkersAktivitetsland: LandNavn?,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetslandNavn: LandNavn?,
     val barnetsBostedslandNavn: LandNavn,
@@ -21,16 +22,17 @@ data class MinimertKompetanse(
 
 fun Kompetanse.tilMinimertKompetanse(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    landkoderISO2: Map<String, String>,
+    landkoderISO2: Map<String, String>
 ): MinimertKompetanse {
-
     this.validerFelterErSatt()
 
     val barnetsBostedslandNavn = this.barnetsBostedsland!!.tilLandNavn(landkoderISO2)
     val annenForeldersAktivitetslandNavn = this.annenForeldersAktivitetsland?.tilLandNavn(landkoderISO2)
+    val sokersAktivitetslandNavn = this.søkersAktivitetsland?.tilLandNavn(landkoderISO2)
 
     return MinimertKompetanse(
         søkersAktivitet = this.søkersAktivitet!!,
+        søkersAktivitetsland = sokersAktivitetslandNavn,
         annenForeldersAktivitet = this.annenForeldersAktivitet!!,
         annenForeldersAktivitetslandNavn = annenForeldersAktivitetslandNavn,
         barnetsBostedslandNavn = barnetsBostedslandNavn,
@@ -41,7 +43,7 @@ fun Kompetanse.tilMinimertKompetanse(
             MinimertRestPerson(
                 personIdent = aktør.aktivFødselsnummer(),
                 fødselsdato = fødselsdato,
-                type = PersonType.BARN,
+                type = PersonType.BARN
             )
         }
     )

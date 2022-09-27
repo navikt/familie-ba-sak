@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentAndelerForSegment
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -53,7 +53,8 @@ data class VedtaksperiodeMedBegrunnelser(
     val id: Long = 0,
 
     @JsonIgnore
-    @ManyToOne @JoinColumn(name = "fk_vedtak_id")
+    @ManyToOne
+    @JoinColumn(name = "fk_vedtak_id")
     val vedtak: Vedtak,
 
     @Column(name = "fom", updatable = false)
@@ -117,20 +118,23 @@ data class VedtaksperiodeMedBegrunnelser(
     }
 
     fun hentUtbetalingsperiodeDetaljer(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
     ): List<UtbetalingsperiodeDetalj> =
-        if (andelerTilkjentYtelse.isEmpty()) emptyList()
-        else if (this.type == Vedtaksperiodetype.UTBETALING ||
+        if (andelerTilkjentYtelse.isEmpty()) {
+            emptyList()
+        } else if (this.type == Vedtaksperiodetype.UTBETALING ||
             this.type == Vedtaksperiodetype.FORTSATT_INNVILGET ||
             this.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
         ) {
             val vertikaltSegmentForVedtaksperiode =
-                if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
+                if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
                     hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse)
-                else hentVertikaltSegmentForVedtaksperiode(
-                    andelerTilkjentYtelse = andelerTilkjentYtelse,
-                )
+                } else {
+                    hentVertikaltSegmentForVedtaksperiode(
+                        andelerTilkjentYtelse = andelerTilkjentYtelse
+                    )
+                }
 
             val andelerForSegment =
                 andelerTilkjentYtelse.hentAndelerForSegment(vertikaltSegmentForVedtaksperiode)
@@ -141,7 +145,7 @@ data class VedtaksperiodeMedBegrunnelser(
         }
 
     private fun hentVertikaltSegmentForVedtaksperiode(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ) = andelerTilkjentYtelse
         .utledSegmenter()
         .find { localDateSegment ->
@@ -159,7 +163,7 @@ fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
     }
 }
 
-private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
+private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): LocalDateSegment<Int> {
     val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
     return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
         ?: sorterteSegmenter.firstOrNull()

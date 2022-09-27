@@ -10,10 +10,13 @@ import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -27,7 +30,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -35,9 +41,15 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -60,6 +72,10 @@ class BeregningServiceTest {
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
     private val featureToggleService = mockk<FeatureToggleService>()
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService = AndelerTilkjentYtelseOgEndreteUtbetalingerService(
+        andelTilkjentYtelseRepository,
+        endretUtbetalingAndelRepository
+    )
 
     private lateinit var beregningService: BeregningService
 
@@ -68,15 +84,16 @@ class BeregningServiceTest {
         val fagsakService = mockk<FagsakService>()
 
         beregningService = BeregningService(
-            andelTilkjentYtelseRepository,
-            fagsakService,
-            behandlingHentOgPersisterService,
-            tilkjentYtelseRepository,
-            vilkårsvurderingRepository,
-            behandlingRepository,
-            personopplysningGrunnlagRepository,
-            endretUtbetalingAndelRepository,
-            småbarnstilleggService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            behandlingRepository = behandlingRepository,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+            småbarnstilleggService = småbarnstilleggService,
+            featureToggleService = featureToggleService,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
@@ -86,8 +103,11 @@ class BeregningServiceTest {
                     .tilRestFagsak(emptyList(), emptyList())
             )
         }
-        every { featureToggleService.isEnabled(any()) } answers { true }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } answers { emptyList() }
+        every { featureToggleService.isEnabled(any()) } answers { true }
+        every { endretUtbetalingAndelRepository.saveAllAndFlush(any<Collection<EndretUtbetalingAndel>>()) } answers { emptyList() }
+        every { andelTilkjentYtelseRepository.saveAllAndFlush(any<Collection<AndelTilkjentYtelse>>()) } answers { emptyList() }
     }
 
     @Test
@@ -130,7 +150,7 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = søkerFnr,
             barnasIdenter = listOf(barn1Fnr),
-            barnFødselsdato = LocalDate.of(2002, 7, 1)
+            barnasFødselsdatoer = listOf(LocalDate.of(2002, 7, 1))
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -288,9 +308,8 @@ class BeregningServiceTest {
     @Test
     fun `Skal verifisere at endret utbetaling andel appliseres på en innvilget utbetaling andel`() {
         val behandling = lagBehandling()
-        val barn = tilfeldigPerson(personType = PersonType.BARN)
-        val søkerFnr = randomFnr()
-        val søkerAktør = tilAktør(søkerFnr)
+        val barn = tilfeldigPerson(personType = PersonType.BARN, aktør = tilAktør(randomFnr()))
+        val søkerAktør = tilAktør(randomFnr())
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
 
@@ -301,7 +320,7 @@ class BeregningServiceTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
-            søkerPersonIdent = søkerFnr,
+            søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
             barnAktør = listOf(barn.aktør),
             søkerAktør = søkerAktør
@@ -309,17 +328,18 @@ class BeregningServiceTest {
 
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = personopplysningGrunnlag.barna.first().aktør,
+            aktør = barn.aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             lagFullstendigVilkårResultat = true,
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
+            erDeltBosted = true
         )
 
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = personopplysningGrunnlag.søker.aktør,
+            aktør = søkerAktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -333,29 +353,35 @@ class BeregningServiceTest {
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
-            søkerFnr,
+            søkerAktør.aktivFødselsnummer(),
             listOf(barn.aktør.aktivFødselsnummer())
         )
 
-        every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns
+        val andelTilkjentYtelser = mutableListOf(
+            lagAndelTilkjentYtelse(
+                fom = periodeFom.toYearMonth(),
+                tom = periodeTom.toYearMonth(),
+                person = barn
+            )
+        )
+        every { endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id) } returns
             listOf(
                 EndretUtbetalingAndel(
                     behandlingId = behandling.id,
-                    person = barn, prosent = BigDecimal(50),
+                    person = barn,
+                    prosent = BigDecimal(50),
                     fom = periodeFom.toYearMonth(),
                     tom = periodeTom.toYearMonth(),
                     avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
                     søknadstidspunkt = søkandtidspunkt,
                     årsak = Årsak.DELT_BOSTED,
                     begrunnelse = "En begrunnelse",
-                    andelTilkjentYtelser = mutableListOf(
-                        lagAndelTilkjentYtelse(
-                            fom = periodeFom.toYearMonth(),
-                            tom = periodeTom.toYearMonth()
-                        )
-                    )
+                    andelTilkjentYtelser = andelTilkjentYtelser
                 )
             )
+
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+            andelTilkjentYtelser
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
@@ -506,8 +532,7 @@ class BeregningServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barn1Fnr, barn2Fnr),
-            barnFødselsdato = barnFødselsdato
+            barnasIdenter = listOf(barn1Fnr, barn2Fnr)
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -554,6 +579,238 @@ class BeregningServiceTest {
         Assertions.assertEquals(periode3Fom.nesteMåned(), andelerBarn2[0].stønadFom)
         Assertions.assertEquals(periode3Midt.toYearMonth(), andelerBarn2[0].stønadTom)
         Assertions.assertEquals(1676, andelerBarn2[0].kalkulertUtbetalingsbeløp)
+    }
+
+    @Test
+    fun `Skal ikke oppdatere utvidet andeler basert på endringsperioder med årsak=delt bosted`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(2))
+        val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.now().minusYears(31))
+
+        val fom = LocalDate.now().minusMonths(8)
+        val tom = LocalDate.now().plusYears(3)
+
+        val utvidetFom = LocalDate.now().minusMonths(3)
+        val utvidetTom = LocalDate.now().plusMonths(5)
+
+        val endretUtbetalingAndelFom = utvidetFom.minusMonths(2).toYearMonth()
+        val endretUtbetalingAndelTom = utvidetTom.minusMonths(2).toYearMonth()
+
+        val andelerTilkjentYtelse = genererAndelerTilkjentYtelseForScenario(
+            endretUtbetalingÅrsak = Årsak.DELT_BOSTED,
+            endretUtbetalingProsent = BigDecimal.ZERO,
+            endretUtbetalingFom = endretUtbetalingAndelFom,
+            endretUtbetalingTom = endretUtbetalingAndelTom,
+            endretUtbetalingPerson = barn,
+            generellFom = fom,
+            generellTom = tom,
+            utvidetFom = utvidetFom,
+            utvidetTom = utvidetTom,
+            barna = listOf(barn),
+            søker = søker
+        )
+
+        Assertions.assertEquals(5, andelerTilkjentYtelse.size)
+
+        val (andelerSøker, andelerBarn) = andelerTilkjentYtelse.partition { it.aktør.aktivFødselsnummer() == søker.aktør.aktivFødselsnummer() }
+
+        Assertions.assertEquals(3, andelerBarn.size)
+        // Barn før endringsperiode
+        Assertions.assertEquals(barn.aktør, andelerBarn[0].aktør)
+        Assertions.assertEquals(BigDecimal(50), andelerBarn[0].prosent)
+        Assertions.assertEquals(fom.plusMonths(1).toYearMonth(), andelerBarn[0].stønadFom)
+        Assertions.assertEquals(endretUtbetalingAndelFom.minusMonths(1), andelerBarn[0].stønadTom)
+
+        // Barn under endringsperiode
+        Assertions.assertEquals(barn.aktør, andelerBarn[1].aktør)
+        Assertions.assertEquals(BigDecimal.ZERO, andelerBarn[1].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelFom, andelerBarn[1].stønadFom)
+        Assertions.assertEquals(endretUtbetalingAndelTom, andelerBarn[1].stønadTom)
+
+        // Barn etter endringsperiode
+        Assertions.assertEquals(barn.aktør, andelerBarn[2].aktør)
+        Assertions.assertEquals(BigDecimal(50), andelerBarn[2].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerBarn[2].stønadFom)
+        Assertions.assertEquals(tom.toYearMonth(), andelerBarn[2].stønadTom)
+
+        Assertions.assertEquals(2, andelerSøker.size)
+
+        val (andelerUtvidet, andelerSmåbarnstillegg) = andelerSøker.partition { it.erUtvidet() }
+
+        Assertions.assertEquals(1, andelerUtvidet.size)
+        // Søker - utvidet under og etter endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerUtvidet[0].aktør)
+        Assertions.assertEquals(BigDecimal(50), andelerUtvidet[0].prosent)
+        Assertions.assertEquals(utvidetFom.plusMonths(1).toYearMonth(), andelerUtvidet[0].stønadFom)
+        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerUtvidet[0].stønadTom)
+
+        Assertions.assertEquals(1, andelerSmåbarnstillegg.size)
+        // Søker - småbarnstillegg
+        Assertions.assertEquals(søker.aktør, andelerSmåbarnstillegg[0].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerSmåbarnstillegg[0].prosent)
+        Assertions.assertEquals(utvidetFom.plusMonths(1).toYearMonth(), andelerSmåbarnstillegg[0].stønadFom)
+        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerSmåbarnstillegg[0].stønadTom)
+    }
+
+    @Test
+    fun `Skal oppdatere utvidet andeler og småbarnstillegg med riktig periode og sats ved endringsperiode med årsak=etterbetaling 3år`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(2))
+        val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.now().minusYears(31))
+
+        val fom = LocalDate.now().minusMonths(8)
+        val tom = LocalDate.now().plusYears(3)
+
+        val utvidetFom = LocalDate.now().minusMonths(3)
+        val utvidetTom = LocalDate.now().plusMonths(5)
+
+        val endretUtbetalingAndelFom = utvidetFom.minusMonths(2).toYearMonth()
+        val endretUtbetalingAndelTom = utvidetTom.minusMonths(2).toYearMonth()
+
+        val andelerTilkjentYtelse = genererAndelerTilkjentYtelseForScenario(
+            endretUtbetalingÅrsak = Årsak.ETTERBETALING_3ÅR,
+            endretUtbetalingProsent = BigDecimal.ZERO,
+            endretUtbetalingFom = endretUtbetalingAndelFom,
+            endretUtbetalingTom = endretUtbetalingAndelTom,
+            endretUtbetalingPerson = barn,
+            generellFom = fom,
+            generellTom = tom,
+            utvidetFom = utvidetFom,
+            utvidetTom = utvidetTom,
+            barna = listOf(barn),
+            søker = søker
+        )
+
+        Assertions.assertEquals(7, andelerTilkjentYtelse.size)
+
+        val (andelerSøker, andelerBarn) = andelerTilkjentYtelse.partition { it.aktør.aktivFødselsnummer() == søker.aktør.aktivFødselsnummer() }
+
+        Assertions.assertEquals(3, andelerBarn.size)
+        // Barn før endringsperiode
+        Assertions.assertEquals(barn.aktør, andelerBarn[0].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerBarn[0].prosent)
+        Assertions.assertEquals(fom.plusMonths(1).toYearMonth(), andelerBarn[0].stønadFom)
+        Assertions.assertEquals(endretUtbetalingAndelFom.minusMonths(1), andelerBarn[0].stønadTom)
+
+        // Barn under endringsperiode
+        Assertions.assertEquals(barn.aktør, andelerBarn[1].aktør)
+        Assertions.assertEquals(BigDecimal.ZERO, andelerBarn[1].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelFom, andelerBarn[1].stønadFom)
+        Assertions.assertEquals(endretUtbetalingAndelTom, andelerBarn[1].stønadTom)
+
+        // Barn etter endringsperiode
+        Assertions.assertEquals(barn.aktør, andelerBarn[2].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerBarn[2].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerBarn[2].stønadFom)
+        Assertions.assertEquals(tom.toYearMonth(), andelerBarn[2].stønadTom)
+
+        Assertions.assertEquals(4, andelerSøker.size)
+
+        val (andelerUtvidet, andelerSmåbarnstillegg) = andelerSøker.partition { it.erUtvidet() }
+
+        Assertions.assertEquals(2, andelerUtvidet.size)
+        // Søker - utvidet under endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerUtvidet[0].aktør)
+        Assertions.assertEquals(BigDecimal.ZERO, andelerUtvidet[0].prosent)
+        Assertions.assertEquals(utvidetFom.plusMonths(1).toYearMonth(), andelerUtvidet[0].stønadFom)
+        Assertions.assertEquals(endretUtbetalingAndelTom, andelerUtvidet[0].stønadTom)
+
+        // Søker - utvidet etter endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerUtvidet[1].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerUtvidet[1].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerUtvidet[1].stønadFom)
+        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerUtvidet[1].stønadTom)
+
+        Assertions.assertEquals(2, andelerSmåbarnstillegg.size)
+        // Søker - småbarnstillegg under endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerSmåbarnstillegg[0].aktør)
+        Assertions.assertEquals(BigDecimal.ZERO, andelerSmåbarnstillegg[0].prosent)
+        Assertions.assertEquals(utvidetFom.plusMonths(1).toYearMonth(), andelerSmåbarnstillegg[0].stønadFom)
+        Assertions.assertEquals(endretUtbetalingAndelTom, andelerSmåbarnstillegg[0].stønadTom)
+
+        // Søker - småbarnstillegg etter endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerSmåbarnstillegg[1].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerSmåbarnstillegg[1].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerSmåbarnstillegg[1].stønadFom)
+        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerSmåbarnstillegg[1].stønadTom)
+    }
+
+    @Test
+    fun `Skal få utvidet, men ikke småbarnstillegg hvis to barn, men barn under 3 år har endringsperiode med årsak=etterbetaling 3 år`() {
+        val barnUnder3År = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(2))
+        val barnOver3År = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(7))
+        val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.now().minusYears(31))
+
+        val fom = LocalDate.now().minusMonths(8)
+        val tom = LocalDate.now().plusYears(3)
+
+        val utvidetFom = LocalDate.now().minusMonths(3)
+        val utvidetTom = LocalDate.now().plusMonths(5)
+
+        val endretUtbetalingAndelFom = fom.plusMonths(1).toYearMonth()
+        val endretUtbetalingAndelTom = utvidetTom.minusMonths(2).toYearMonth()
+
+        val andelerTilkjentYtelse = genererAndelerTilkjentYtelseForScenario(
+            endretUtbetalingÅrsak = Årsak.ETTERBETALING_3ÅR,
+            endretUtbetalingProsent = BigDecimal.ZERO,
+            endretUtbetalingFom = endretUtbetalingAndelFom,
+            endretUtbetalingTom = endretUtbetalingAndelTom,
+            endretUtbetalingPerson = barnUnder3År,
+            generellFom = fom,
+            generellTom = tom,
+            utvidetFom = utvidetFom,
+            utvidetTom = utvidetTom,
+            barna = listOf(barnUnder3År, barnOver3År),
+            søker = søker
+        )
+
+        val (andelerSøker, andelerBarn) = andelerTilkjentYtelse.partition { it.aktør.aktivFødselsnummer() == søker.aktør.aktivFødselsnummer() }
+
+        // BARNA
+        val (andelerBarnUnder3År, andelerBarnOver3År) = andelerBarn.partition { it.aktør.aktivFødselsnummer() == barnUnder3År.aktør.aktivFødselsnummer() }
+
+        Assertions.assertEquals(2, andelerBarnUnder3År.size)
+        // Barn (under 3 år) under endringsperiode
+        Assertions.assertEquals(barnUnder3År.aktør, andelerBarnUnder3År[0].aktør)
+        Assertions.assertEquals(BigDecimal.ZERO, andelerBarnUnder3År[0].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelFom, andelerBarnUnder3År[0].stønadFom)
+        Assertions.assertEquals(endretUtbetalingAndelTom, andelerBarnUnder3År[0].stønadTom)
+
+        // Barn (under 3 år) etter endringsperiode
+        Assertions.assertEquals(barnUnder3År.aktør, andelerBarnUnder3År[1].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerBarnUnder3År[1].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerBarnUnder3År[1].stønadFom)
+        Assertions.assertEquals(tom.toYearMonth(), andelerBarnUnder3År[1].stønadTom)
+
+        val andelerBarnOver3ÅrEtterIRelevantPeriode =
+            andelerBarnOver3År.filter { it.stønadTom.isAfter(fom.toYearMonth()) }
+
+        // Barn over 3 år har ingen endringer og derfor bare 1 andel i perioden vi ser på
+        Assertions.assertEquals(1, andelerBarnOver3ÅrEtterIRelevantPeriode.size)
+
+        // SØKER
+        Assertions.assertEquals(3, andelerSøker.size)
+
+        val (andelerUtvidet, andelerSmåbarnstillegg) = andelerSøker.partition { it.erUtvidet() }
+
+        Assertions.assertEquals(1, andelerUtvidet.size)
+
+        // Søker får utvidet hele perioden pga barn over 3 år
+        Assertions.assertEquals(søker.aktør, andelerUtvidet.single().aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerUtvidet.single().prosent)
+        Assertions.assertEquals(utvidetFom.toYearMonth().plusMonths(1), andelerUtvidet.single().stønadFom)
+        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerUtvidet.single().stønadTom)
+
+        Assertions.assertEquals(2, andelerSmåbarnstillegg.size)
+        // Søker - småbarnstillegg under endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerSmåbarnstillegg[0].aktør)
+        Assertions.assertEquals(BigDecimal.ZERO, andelerSmåbarnstillegg[0].prosent)
+        Assertions.assertEquals(utvidetFom.plusMonths(1).toYearMonth(), andelerSmåbarnstillegg[0].stønadFom)
+        Assertions.assertEquals(endretUtbetalingAndelTom, andelerSmåbarnstillegg[0].stønadTom)
+
+        // Søker - småbarnstillegg etter endringsperiode
+        Assertions.assertEquals(søker.aktør, andelerSmåbarnstillegg[1].aktør)
+        Assertions.assertEquals(BigDecimal(100), andelerSmåbarnstillegg[1].prosent)
+        Assertions.assertEquals(endretUtbetalingAndelTom.plusMonths(1), andelerSmåbarnstillegg[1].stønadFom)
+        Assertions.assertEquals(utvidetTom.toYearMonth(), andelerSmåbarnstillegg[1].stønadTom)
     }
 
     @Test
@@ -682,7 +939,7 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = søkerFnr,
             barnasIdenter = listOf(barn1Fnr),
-            barnFødselsdato = barnFødselsdato
+            barnasFødselsdatoer = listOf(barnFødselsdato)
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -746,49 +1003,221 @@ class BeregningServiceTest {
         val behandling = lagBehandling(resultat = behandlinsResultat, underkategori = behandlingUnderkategori)
 
         val barn1Fnr = randomFnr()
+        val barn1Aktør = tilAktør(barn1Fnr)
 
-        val barn1AktørId = tilAktør(barn1Fnr)
+        val barn1 =
+            tilfeldigPerson(fødselsdato = LocalDate.of(2002, 7, 1), personType = PersonType.BARN, aktør = barn1Aktør)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
-            søkerPersonIdent = barn1Fnr,
-            barnasIdenter = listOf(barn1Fnr),
-            barnFødselsdato = LocalDate.of(
-                2002, 7, 1,
-            )
+            søkerPersonIdent = randomFnr(),
+            barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer()),
+            barnasFødselsdatoer = listOf(barn1.fødselsdato)
         )
 
         val periodeFom = LocalDate.now().toYearMonth().minusMonths(1)
         val periodeTom = LocalDate.now().toYearMonth().plusMonths(1)
-        val aty =
-            if (endretUtbetaling) {
-                lagAndelTilkjentYtelse(
+        val endreteUtbetalingAndeler = if (endretUtbetaling) {
+            listOf(
+                lagEndretUtbetalingAndel(
+                    behandlingId = behandling.id,
+                    person = barn1,
                     fom = periodeFom,
-                    tom = periodeTom,
-                    beløp = beløp,
-                    endretUtbetalingAndeler = listOf(
-                        EndretUtbetalingAndel(behandlingId = behandling.id)
-                    )
+                    tom = periodeTom
                 )
-            } else {
-                lagAndelTilkjentYtelse(
-                    fom = periodeFom,
-                    tom = periodeTom,
-                    beløp = beløp,
-                    endretUtbetalingAndeler = emptyList()
-                )
-            }
+            )
+        } else {
+            emptyList()
+        }
+
+        val aty = lagAndelTilkjentYtelse(
+            person = barn1,
+            fom = periodeFom,
+            tom = periodeTom,
+            beløp = beløp,
+            endretUtbetalingAndeler = endreteUtbetalingAndeler
+        )
+
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
         every {
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                behandling.id,
-                barn1AktørId
-            )
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
         } returns listOf(aty)
+
+        every {
+            endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+        } returns endreteUtbetalingAndeler
+
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
 
         return beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(
-            behandling = behandling,
+            behandling = behandling
         )
+    }
+
+    private fun genererAndelerTilkjentYtelseForScenario(
+        endretUtbetalingÅrsak: Årsak,
+        endretUtbetalingProsent: BigDecimal,
+        endretUtbetalingFom: YearMonth,
+        endretUtbetalingTom: YearMonth,
+        endretUtbetalingPerson: Person,
+        generellFom: LocalDate,
+        generellTom: LocalDate,
+        utvidetFom: LocalDate,
+        utvidetTom: LocalDate,
+        barna: List<Person>,
+        søker: Person
+    ): List<AndelTilkjentYtelse> {
+        val behandling = lagBehandling()
+        val vilkårsvurdering =
+            lagVilkårsvurdering(søkerAktør = søker.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
+
+        val søkerPersonResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = søker.aktør
+        )
+
+        søkerPersonResultat.setSortedVilkårResultater(
+            setOf(
+                VilkårResultat(
+                    personResultat = søkerPersonResultat,
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = generellFom,
+                    periodeTom = generellTom,
+                    begrunnelse = "",
+                    behandlingId = behandling.id
+                ),
+                VilkårResultat(
+                    personResultat = søkerPersonResultat,
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = generellFom,
+                    periodeTom = generellTom,
+                    begrunnelse = "",
+                    behandlingId = behandling.id
+                ),
+                VilkårResultat(
+                    personResultat = søkerPersonResultat,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = utvidetFom,
+                    periodeTom = utvidetTom,
+                    begrunnelse = "",
+                    behandlingId = behandling.id
+                )
+            )
+        )
+
+        val personResultatBarna = barna.map { barn ->
+            val barnPersonResultat = PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = barn.aktør
+            )
+
+            barnPersonResultat.setSortedVilkårResultater(
+                setOf(
+                    VilkårResultat(
+                        personResultat = barnPersonResultat,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = generellFom,
+                        periodeTom = generellTom,
+                        begrunnelse = "",
+                        behandlingId = behandling.id
+                    ),
+                    VilkårResultat(
+                        personResultat = barnPersonResultat,
+                        vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = generellFom,
+                        periodeTom = generellTom,
+                        begrunnelse = "",
+                        behandlingId = behandling.id
+                    ),
+                    VilkårResultat(
+                        personResultat = barnPersonResultat,
+                        vilkårType = Vilkår.BOR_MED_SØKER,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = generellFom,
+                        periodeTom = generellTom,
+                        begrunnelse = "",
+                        behandlingId = behandling.id,
+                        utdypendeVilkårsvurderinger = if (endretUtbetalingÅrsak == Årsak.DELT_BOSTED) {
+                            listOf(
+                                UtdypendeVilkårsvurdering.DELT_BOSTED
+                            )
+                        } else {
+                            emptyList()
+                        }
+                    ),
+                    VilkårResultat(
+                        personResultat = barnPersonResultat,
+                        vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = generellFom,
+                        periodeTom = generellTom,
+                        begrunnelse = "",
+                        behandlingId = behandling.id
+                    ),
+                    VilkårResultat(
+                        personResultat = barnPersonResultat,
+                        vilkårType = Vilkår.UNDER_18_ÅR,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = barn.fødselsdato,
+                        periodeTom = barn.fødselsdato.plusYears(18),
+                        begrunnelse = "",
+                        behandlingId = behandling.id
+                    )
+                )
+            )
+            barnPersonResultat
+        }
+
+        vilkårsvurdering.personResultater = personResultatBarna.toSet() + setOf(søkerPersonResultat)
+
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = behandling.id,
+                person = endretUtbetalingPerson,
+                fom = endretUtbetalingFom,
+                tom = endretUtbetalingTom,
+                årsak = endretUtbetalingÅrsak,
+                prosent = endretUtbetalingProsent,
+                avtaletidspunktDeltBosted = LocalDate.now().minusMonths(1),
+                søknadstidspunkt = LocalDate.now(),
+                begrunnelse = "Dette er en begrunnelse"
+            )
+
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            personer = (barna + søker).toMutableSet()
+        )
+
+        val slot = slot<TilkjentYtelse>()
+
+        every { endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id) } answers {
+            listOf(
+                endretUtbetalingAndel
+            )
+        }
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } answers { vilkårsvurdering }
+        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(any(), any()) } answers {
+            listOf(
+                InternPeriodeOvergangsstønad(
+                    personIdent = søker.aktør.aktivFødselsnummer(),
+                    fomDato = utvidetFom,
+                    tomDato = utvidetTom
+                )
+            )
+        }
+
+        beregningService.oppdaterBehandlingMedBeregning(
+            behandling = behandling,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            nyEndretUtbetalingAndel = endretUtbetalingAndel
+        )
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        return slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
     }
 }

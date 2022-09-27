@@ -13,6 +13,7 @@ val TIDENES_MORGEN = LocalDate.MIN
 val TIDENES_ENDE = LocalDate.MAX
 
 fun LocalDate.tilddMMyy() = this.format(DateTimeFormatter.ofPattern("ddMMyy", nbLocale))
+fun LocalDate.tilyyyyMMdd() = this.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", nbLocale))
 fun LocalDate.tilKortString() = this.format(DateTimeFormatter.ofPattern("dd.MM.yy", nbLocale))
 fun YearMonth.tilKortString() = this.format(DateTimeFormatter.ofPattern("MM.yy", nbLocale))
 fun LocalDate.tilDagMånedÅr() = this.format(DateTimeFormatter.ofPattern("d. MMMM yyyy", nbLocale))
@@ -170,12 +171,14 @@ fun lagOgValiderPeriodeFraVilkår(
                 tom = periodeTom ?: TIDENES_ENDE
             )
         }
+
         erEksplisittAvslagPåSøknad == true && periodeTom == null -> {
             Periode(
                 fom = TIDENES_MORGEN,
                 tom = TIDENES_ENDE
             )
         }
+
         else -> {
             throw FunksjonellFeil("Ugyldig periode. Periode må ha t.o.m.-dato eller være et avslag uten datoer.")
         }
@@ -262,7 +265,9 @@ fun List<DatoIntervallEntitet>.slåSammenSammenhengendePerioder(): List<DatoInte
             if (sammenslåttePerioder.lastOrNull()?.tom?.toYearMonth() == nestePeriode.fom?.forrigeMåned()
             ) {
                 sammenslåttePerioder.apply { add(removeLast().copy(tom = nestePeriode.tom)) }
-            } else sammenslåttePerioder.apply { add(nestePeriode) }
+            } else {
+                sammenslåttePerioder.apply { add(nestePeriode) }
+            }
         }
 }
 
@@ -275,12 +280,13 @@ class YearMonthIterator(
     private var gjeldendeMåned = startMåned
 
     override fun hasNext() =
-        if (hoppMåneder > 0)
+        if (hoppMåneder > 0) {
             gjeldendeMåned.plusMonths(hoppMåneder) <= tilOgMedMåned.plusMonths(1)
-        else if (hoppMåneder < 0)
+        } else if (hoppMåneder < 0) {
             gjeldendeMåned.plusMonths(hoppMåneder) >= tilOgMedMåned.plusMonths(-1)
-        else
+        } else {
             throw IllegalStateException("Steglengde kan ikke være null")
+        }
 
     override fun next(): YearMonth {
         val next = gjeldendeMåned

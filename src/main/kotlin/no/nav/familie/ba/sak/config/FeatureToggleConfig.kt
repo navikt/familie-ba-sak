@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.config
 
-import no.finn.unleash.DefaultUnleash
-import no.finn.unleash.UnleashContext
-import no.finn.unleash.UnleashContextProvider
-import no.finn.unleash.strategy.GradualRolloutRandomStrategy
-import no.finn.unleash.strategy.Strategy
-import no.finn.unleash.util.UnleashConfig
+import io.getunleash.DefaultUnleash
+import io.getunleash.UnleashContext
+import io.getunleash.UnleashContextProvider
+import io.getunleash.strategy.GradualRolloutRandomStrategy
+import io.getunleash.strategy.Strategy
+import io.getunleash.util.UnleashConfig
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -29,9 +29,9 @@ class FeatureToggleConfig(
 
     @Bean
     fun featureToggle(): FeatureToggleService =
-        if (enabled)
+        if (enabled) {
             lagUnleashFeatureToggleService()
-        else {
+        } else {
             logger.warn(
                 "Funksjonsbryter-funksjonalitet er skrudd AV. " +
                     "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'"
@@ -102,15 +102,20 @@ class FeatureToggleConfig(
     companion object {
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
-        const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
+        const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
         const val KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED = "familie-ba-sak.manuell-migrering-ikke-delt-bosted"
-        const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING = "familie-ba-sak.endringer.validering.migeringsbehandling"
+        const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING =
+            "familie-ba-sak.endringer.validering.migeringsbehandling"
+        const val NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE = "familie-ba-sak.behandling.generer-andeler-med-ny-metode"
 
-        const val KAN_BEHANDLE_EØS_SEKUNDERLAND = "familie-ba-sak.behandling.eos-sekunderland"
         const val KAN_BEHANDLE_EØS_TO_PRIMERLAND = "familie-ba-sak.behandling.eos-to-primerland"
         const val KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND = "familie-ba-sak.behandling.utvidet-eos-sekunderland"
+
+        const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"
+        const val KAN_MIGRERE_EØS_PRIMÆRLAND_ORDINÆR = "familie-ba-sak.migrer.or-eu"
+        const val KAN_MIGRERE_EØS_PRIMÆRLAND_UTVIDET = "familie-ba-sak.migrer.ut-eu"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

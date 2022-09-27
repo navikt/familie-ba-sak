@@ -12,22 +12,23 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 
 data class TriggesAv(
-    val vilkår: Set<Vilkår> = emptySet(),
-    val personTyper: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
-    val personerManglerOpplysninger: Boolean = false,
-    val satsendring: Boolean = false,
-    val barnMedSeksårsdag: Boolean = false,
-    val vurderingAnnetGrunnlag: Boolean = false,
-    val medlemskap: Boolean = false,
-    val deltbosted: Boolean = false,
-    val deltBostedSkalIkkeDeles: Boolean = false,
-    val valgbar: Boolean = true,
-    val endringsaarsaker: Set<Årsak> = emptySet(),
-    val etterEndretUtbetaling: Boolean = false,
-    val endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere = EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
-    val småbarnstillegg: Boolean = false,
-    val gjelderFørstePeriode: Boolean = false,
-    val gjelderFraInnvilgelsestidspunkt: Boolean = false,
+    val vilkår: Set<Vilkår>,
+    val personTyper: Set<PersonType>,
+    val personerManglerOpplysninger: Boolean,
+    val satsendring: Boolean,
+    val barnMedSeksårsdag: Boolean,
+    val vurderingAnnetGrunnlag: Boolean,
+    val medlemskap: Boolean,
+    val deltbosted: Boolean,
+    val deltBostedSkalIkkeDeles: Boolean,
+    val valgbar: Boolean,
+    val endringsaarsaker: Set<Årsak>,
+    val etterEndretUtbetaling: Boolean,
+    val endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere,
+    val småbarnstillegg: Boolean,
+    val gjelderFørstePeriode: Boolean,
+    val gjelderFraInnvilgelsestidspunkt: Boolean,
+    val barnDød: Boolean
 ) {
     fun erEndret() = endringsaarsaker.isNotEmpty()
 
@@ -42,7 +43,7 @@ data class TriggesAv(
 
     fun erUtdypendeVilkårsvurderingOppfyltReduksjon(
         vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
-        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
+        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?
     ): Boolean {
         return erDeltBostedOppfyltReduksjon(
             vilkårSomAvsluttesRettFørDennePerioden = vilkårSomAvsluttesRettFørDennePerioden,
@@ -83,7 +84,7 @@ data class TriggesAv(
 
     private fun erDeltBostedOppfyltReduksjon(
         vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
-        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
+        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?
     ): Boolean {
         val avsluttetVilkårInneholdtDeltBosted =
             vilkårSomAvsluttesRettFørDennePerioden.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
@@ -101,7 +102,7 @@ data class TriggesAv(
 
 fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
     minimertEndretAndel: MinimertEndretAndel,
-    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
 ): Boolean {
     val hørerTilEtterEndretUtbetaling = this.etterEndretUtbetaling
 
@@ -111,7 +112,7 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
         this.endretUtbetalingSkalUtbetales == EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT ||
             oppfyllerUtvidetScenario(
                 vilkårBegrunnelsenGjelderFor = this.vilkår,
-                minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
+                minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer
             )
 
     val erAvSammeÅrsak = this.endringsaarsaker.contains(minimertEndretAndel.årsak)
@@ -134,7 +135,7 @@ fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
 
 private fun oppfyllerUtvidetScenario(
     vilkårBegrunnelsenGjelderFor: Set<Vilkår>?,
-    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
 ): Boolean {
     val begrunnelseGjelderUtvidet = vilkårBegrunnelsenGjelderFor?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 

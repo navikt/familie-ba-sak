@@ -9,8 +9,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
@@ -31,22 +32,29 @@ class BehandlingsresultatService(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val vilkårsvurderingService: VilkårsvurderingService,
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
 
     fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
 
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
-        val forrigeTilkjentYtelse: TilkjentYtelse? =
-            forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
+        val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
+
+        val forrigeAndelerMedEndringer = forrigeBehandling?.let {
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(it.id)
+        } ?: emptyList()
 
         val barna = persongrunnlagService.hentBarna(behandling)
         val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
-        if (barna.isEmpty() && (søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList()).isEmpty()) throw FunksjonellFeil(
-            melding = "Ingen barn i personopplysningsgrunnlag ved validering av vilkårsvurdering på behandling ${behandling.id}",
-            frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering."
-        )
+        if (barna.isEmpty() && (søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList()).isEmpty()) {
+            throw FunksjonellFeil(
+                melding = "Ingen barn i personopplysningsgrunnlag ved validering av vilkårsvurdering på behandling ${behandling.id}",
+                frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering."
+            )
+        }
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
             ?: throw Feil("Finner ikke aktiv vilkårsvurdering")
@@ -71,8 +79,8 @@ class BehandlingsresultatService(
             BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(
                 person = it,
                 personerFremstiltKravFor = personerFremstiltKravFor,
-                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
-                tilkjentYtelse = tilkjentYtelse,
+                andelerFraForrigeTilkjentYtelse = forrigeAndelerMedEndringer,
+                andelerTilkjentYtelse = andelerMedEndringer,
                 erEksplisittAvslag = vilkårsvurdering.personResultater.find { personResultat -> personResultat.aktør == it.aktør }
                     ?.harEksplisittAvslag()
                     ?: false
@@ -95,7 +103,7 @@ class BehandlingsresultatService(
             } ?: emptyList()
         )
 
-        validerYtelsePersoner(behandlingId = behandling.id, ytelsePersoner = ytelsePersonerMedResultat)
+        validerYtelsePersoner(behandling, ytelsePersoner = ytelsePersonerMedResultat)
 
         vilkårsvurdering.let {
             vilkårsvurderingService.oppdater(vilkårsvurdering)
@@ -110,15 +118,34 @@ class BehandlingsresultatService(
         return behandlingsresultat
     }
 
-    private fun validerYtelsePersoner(behandlingId: Long, ytelsePersoner: List<YtelsePerson>) {
-        val søkerAktør = persongrunnlagService.hentSøker(behandlingId)?.aktør
-            ?: throw Feil("Fant ikke søker på behandling")
-        if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.aktør != søkerAktør }) throw Feil(
-            "Barn kan ikke ha ytelsetype utvidet"
-        )
-        if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.aktør == søkerAktør }) throw Feil(
-            "Søker kan ikke ha ytelsetype ordinær"
-        )
+    private fun validerYtelsePersoner(behandling: Behandling, ytelsePersoner: List<YtelsePerson>) {
+        when (behandling.fagsak.type) {
+            FagsakType.NORMAL -> {
+                val søkerAktør = persongrunnlagService.hentSøker(behandling.id)?.aktør
+                    ?: throw Feil("Fant ikke søker på behandling")
+                if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.aktør != søkerAktør }) {
+                    throw Feil(
+                        "Barn kan ikke ha ytelsetype utvidet"
+                    )
+                }
+                if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.aktør == søkerAktør }) {
+                    throw Feil(
+                        "Søker kan ikke ha ytelsetype ordinær"
+                    )
+                }
+            }
+            FagsakType.INSTITUSJON -> {
+                val ytelseType = ytelsePersoner.single().ytelseType
+                if (ytelseType != YtelseType.ORDINÆR_BARNETRYGD) {
+                    throw Feil(
+                        "Kan ikke ha ytelsetype $ytelseType på fagsaktype INSTITUSJON"
+                    )
+                }
+            }
+            FagsakType.BARN_ENSLIG_MINDREÅRIG -> {
+                ytelsePersoner.single()
+            }
+        }
     }
 
     private fun hentPersonerFramstiltKravFor(
@@ -132,9 +159,11 @@ class BehandlingsresultatService(
             ?: emptyList()
 
         val utvidetBarnetrygdSøker =
-            if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET)
+            if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET) {
                 listOf(behandling.fagsak.aktør)
-            else emptyList()
+            } else {
+                emptyList()
+            }
 
         val nyeBarn = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
             .map { it.aktør }

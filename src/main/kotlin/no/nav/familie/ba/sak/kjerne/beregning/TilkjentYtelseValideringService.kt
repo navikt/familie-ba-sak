@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.finnAktørIderMedUgyldigEtterbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -37,9 +40,24 @@ class TilkjentYtelseValideringService(
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
                 barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-                personopplysningGrunnlag = personopplysningGrunnlag,
+                personopplysningGrunnlag = personopplysningGrunnlag
             )
         }
+    }
+
+    fun validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId: Long) {
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
+
+        if (tilkjentYtelse.harAndelerTilkjentYtelseMedSammeOffset()) {
+            secureLogger.info("Behandling har flere andeler med likt offset: ${tilkjentYtelse.andelerTilkjentYtelse}")
+            throw Feil("Behandling $behandlingId har andel tilkjent ytelse med offset lik en annen andel i behandlingen.")
+        }
+    }
+
+    private fun TilkjentYtelse.harAndelerTilkjentYtelseMedSammeOffset(): Boolean {
+        val periodeOffsetForAndeler = this.andelerTilkjentYtelse.mapNotNull { it.periodeOffset }
+
+        return periodeOffsetForAndeler.size != periodeOffsetForAndeler.distinct().size
     }
 
     fun barnetrygdLøperForAnnenForelder(behandling: Behandling, barna: List<Person>): Boolean {
@@ -52,7 +70,6 @@ class TilkjentYtelseValideringService(
     fun finnAktørerMedUgyldigEtterbetalingsperiode(
         behandlingId: Long
     ): List<Aktør> {
-
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
         val forrigeBehandling =

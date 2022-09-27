@@ -18,9 +18,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
@@ -70,7 +70,7 @@ import java.net.URI
 import java.time.LocalDate
 import kotlin.random.Random
 
-class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
+class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     @Qualifier("jwtBearer")
@@ -114,7 +114,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         wireMockServer.verify(
             anyRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("opprettOppgave"))
-                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
                 .withRequestBody(equalToJson(objectMapper.writeValueAsString(request)))
         )
     }
@@ -172,7 +172,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
 
         val journalPostId =
             utgåendeJournalføringService.journalførDokument(
-                fnr = MOCK_FNR,
+                brukerId = MOCK_FNR,
                 fagsakId = vedtak.behandling.fagsak.id.toString(),
                 brev = listOf(
                     Dokument(
@@ -197,7 +197,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         wireMockServer.verify(
             anyRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("journalfør"))
-                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
                 .withRequestBody(
                     equalToJson(
                         objectMapper.writeValueAsString(
@@ -225,7 +225,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         wireMockServer.verify(
             postRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("distribuerVedtaksbrev"))
-                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
                 .withRequestBody(
                     equalToJson(
                         "{\"journalpostId\":\"123456789\"," +
@@ -304,7 +304,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         wireMockServer.verify(
             patchRequestedFor(urlEqualTo("/api/oppgave/123/ferdigstill"))
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("ferdigstillOppgave"))
-                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
         )
     }
 
@@ -449,7 +449,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
     @Test
     @Tag("integration")
     fun `skal opprette skyggesak for Sak`() {
-        val aktørId = randomAktørId()
+        val aktørId = randomAktør()
 
         wireMockServer.stubFor(post("/api/skyggesak/v1").willReturn(okJson(objectMapper.writeValueAsString(success(null)))))
 
@@ -475,7 +475,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
     @Test
     @Tag("integration")
     fun `skal kaste integrasjonsfeil ved oppretting av skyggesak`() {
-        val aktørId = randomAktørId()
+        val aktørId = randomAktør()
 
         wireMockServer.stubFor(post("/api/skyggesak/v1").willReturn(status(500)))
 

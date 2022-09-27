@@ -47,7 +47,7 @@ class SendStartBehandlingTilInfotrygdTask(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     StartBehandlingDto(
-                        fnrStoenadsmottaker = aktørStoenadsmottaker.aktivFødselsnummer(),
+                        fnrStoenadsmottaker = aktørStoenadsmottaker.aktivFødselsnummer()
                     )
                 ),
                 properties = metadata

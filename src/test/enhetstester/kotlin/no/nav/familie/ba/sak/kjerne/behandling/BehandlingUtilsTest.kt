@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategoriVedOpprettelse
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
@@ -33,7 +33,7 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.ORDINÆR,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                underkategoriFraLøpendeBehandling = null,
+                underkategoriFraLøpendeBehandling = null
             )
         )
     }
@@ -126,7 +126,7 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal returnere utvidet hvis det eksisterer en løpende utvidet-sak`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
 
         val behandling = lagBehandling()
 
@@ -158,7 +158,7 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal returnere ordinær hvis det eksisterer en utvidet-sak som er avsluttet`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
 
         val behandling = lagBehandling()
 
@@ -190,7 +190,7 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal returnere ordinær hvis det eksisterer en løpende ordinær-sak`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
 
         val behandling = lagBehandling()
 
@@ -336,7 +336,20 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingKategori.NASJONAL,
             bestemKategoriVedOpprettelse(
-                overstyrtKategori = null,
+                overstyrtKategori = BehandlingKategori.NASJONAL,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                behandlingÅrsak = BehandlingÅrsak.MIGRERING,
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
+            )
+        )
+    }
+
+    @Test
+    fun `skal få EØS kategori ved opprettelse av automatisk migreringsbehandling `() {
+        assertEquals(
+            BehandlingKategori.EØS,
+            bestemKategoriVedOpprettelse(
+                overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
                 kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi

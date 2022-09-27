@@ -44,7 +44,8 @@ class TeamStatistikkService(
         val rows = månederMedTotalUtbetaling.map {
             MultiGauge.Row.of(
                 Tags.of(
-                    ÅR_MÅNED_TAG, "${it.key.year}-${it.key.month}"
+                    ÅR_MÅNED_TAG,
+                    "${it.key.year}-${it.key.month}"
                 ),
                 it.value
             )
@@ -62,7 +63,8 @@ class TeamStatistikkService(
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
-                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}"
+                    ÅR_MÅNED_TAG,
+                    "${YearMonth.now().year}-${YearMonth.now().month}"
                 ),
                 antallFagsaker
             )
@@ -80,7 +82,8 @@ class TeamStatistikkService(
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
-                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}"
+                    ÅR_MÅNED_TAG,
+                    "${YearMonth.now().year}-${YearMonth.now().month}"
                 ),
                 løpendeFagsaker
             )
@@ -98,7 +101,8 @@ class TeamStatistikkService(
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
-                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}"
+                    ÅR_MÅNED_TAG,
+                    "${YearMonth.now().year}-${YearMonth.now().month}"
                 ),
                 åpneBehandlinger
             )
@@ -122,19 +126,22 @@ class TeamStatistikkService(
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
-                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}-snitt"
+                    ÅR_MÅNED_TAG,
+                    "${YearMonth.now().year}-${YearMonth.now().month}-snitt"
                 ),
                 snitt
             ),
             MultiGauge.Row.of(
                 Tags.of(
-                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}-max"
+                    ÅR_MÅNED_TAG,
+                    "${YearMonth.now().year}-${YearMonth.now().month}-max"
                 ),
                 max
             ),
             MultiGauge.Row.of(
                 Tags.of(
-                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}-min"
+                    ÅR_MÅNED_TAG,
+                    "${YearMonth.now().year}-${YearMonth.now().month}-min"
                 ),
                 min
             )

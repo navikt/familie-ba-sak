@@ -25,7 +25,7 @@ data class StatusFraOppdragMedTask(
 @Service
 class StatusFraOppdrag(
     private val økonomiService: ØkonomiService,
-    private val taskRepository: TaskRepositoryWrapper,
+    private val taskRepository: TaskRepositoryWrapper
 ) : BehandlingSteg<StatusFraOppdragMedTask> {
 
     override fun utførStegOgAngiNeste(
@@ -35,7 +35,7 @@ class StatusFraOppdrag(
         val statusFraOppdragDTO = data.statusFraOppdragDTO
         val task = data.task
 
-        val oppdragStatus = økonomiService.hentStatus(statusFraOppdragDTO.oppdragId)
+        val oppdragStatus = økonomiService.hentStatus(statusFraOppdragDTO.oppdragId, statusFraOppdragDTO.behandlingsId)
         logger.debug("Mottok status '$oppdragStatus' fra oppdrag")
         if (oppdragStatus != OppdragStatus.KVITTERT_OK) {
             if (oppdragStatus == OppdragStatus.LAGT_PÅ_KØ) {
@@ -73,7 +73,7 @@ class StatusFraOppdrag(
 
     private fun opprettFerdigstillBehandling(statusFraOppdragDTO: StatusFraOppdragDTO) {
         val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(
-            søkerPersonIdent = statusFraOppdragDTO.aktørId,
+            søkerIdent = statusFraOppdragDTO.aktørId,
             behandlingsId = statusFraOppdragDTO.behandlingsId
         )
         taskRepository.save(ferdigstillBehandling)
@@ -81,7 +81,8 @@ class StatusFraOppdrag(
 
     private fun opprettTaskIverksettMotTilbake(behandlingsId: Long, metadata: Properties) {
         val ferdigstillBehandling = IverksettMotFamilieTilbakeTask.opprettTask(
-            behandlingsId, metadata
+            behandlingsId,
+            metadata
         )
         taskRepository.save(ferdigstillBehandling)
     }

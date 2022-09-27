@@ -85,7 +85,8 @@ class BrevperiodeTest {
                         it.tilMinimertKompetanse(
                             behandlingsresultatPersonTestConfig.personerPåBehandling
                         )
-                    } ?: emptyList()
+                    } ?: emptyList(),
+                    dødeBarnForrigePeriode = emptyList()
                 ).genererBrevPeriode()
             } catch (e: Exception) {
                 testReporter.publishEntry(
@@ -122,7 +123,6 @@ class BrevperiodeTest {
         forventetOutput: BrevPeriodeOutput?,
         output: BrevPeriode?
     ): List<String> {
-
         val feil = mutableListOf<String>()
 
         fun validerFelt(forventet: String?, faktisk: String?, variabelNavn: String) {
@@ -134,10 +134,12 @@ class BrevperiodeTest {
         }
 
         if (forventetOutput == null || output == null) {
-            if (forventetOutput != null)
+            if (forventetOutput != null) {
                 feil.add("Output er null, men forventet output er $forventetOutput.")
-            if (output != null)
+            }
+            if (output != null) {
                 feil.add("Forventet output er null, men output er $output.")
+            }
         } else {
             validerFelt(forventetOutput.fom, output.fom?.single(), "fom")
             validerFelt(forventetOutput.tom, output.tom?.single(), "tom")
@@ -145,10 +147,13 @@ class BrevperiodeTest {
             validerFelt(forventetOutput.barnasFodselsdager, output.barnasFodselsdager?.single(), "barnasFodselsdager")
             validerFelt(forventetOutput.antallBarn, output.antallBarn?.single(), "antallBarn")
             validerFelt(
-                if (forventetOutput.belop != null)
+                if (forventetOutput.belop != null) {
                     formaterBeløp(forventetOutput.belop)
-                else null,
-                output.belop?.single(), "belop"
+                } else {
+                    null
+                },
+                output.belop?.single(),
+                "belop"
             )
 
             val forventedeBegrunnelser = forventetOutput.begrunnelser.map {

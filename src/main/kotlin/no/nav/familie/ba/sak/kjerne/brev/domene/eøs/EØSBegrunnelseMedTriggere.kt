@@ -5,5 +5,5 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 
 data class EØSBegrunnelseMedTriggere(
     val eøsBegrunnelse: EØSStandardbegrunnelse,
-    val sanityEØSBegrunnelse: SanityEØSBegrunnelse,
+    val sanityEØSBegrunnelse: SanityEØSBegrunnelse
 )

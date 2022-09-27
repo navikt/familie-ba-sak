@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
@@ -31,7 +31,7 @@ class AnnenVurderingServiceTest {
 
         personResultat = lagPersonResultat(
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
-            aktør = randomAktørId(),
+            aktør = randomAktør(),
             resultat = Resultat.OPPFYLT,
             periodeFom = LocalDate.of(2020, 1, 1),
             periodeTom = LocalDate.of(2020, 7, 1)
@@ -40,7 +40,6 @@ class AnnenVurderingServiceTest {
 
     @Test
     fun `Verifiser endreAnnenVurdering`() {
-
         every { annenVurderingRepository.findById(any()) } returns Optional.of(
             AnnenVurdering(
                 resultat = Resultat.OPPFYLT,

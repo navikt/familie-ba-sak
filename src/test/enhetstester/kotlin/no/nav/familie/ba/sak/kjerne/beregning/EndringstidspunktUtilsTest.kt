@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -32,33 +32,33 @@ class EndringstidspunktUtilsTest {
         val person2 = lagPerson()
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 2108,
                 person = person2
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -73,28 +73,28 @@ class EndringstidspunktUtilsTest {
         val person2 = lagPerson(type = PersonType.BARN)
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
@@ -109,7 +109,7 @@ class EndringstidspunktUtilsTest {
                         årsak = Årsak.DELT_BOSTED
                     )
                 )
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -124,13 +124,13 @@ class EndringstidspunktUtilsTest {
         val person2 = lagPerson(type = PersonType.BARN)
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
@@ -145,17 +145,17 @@ class EndringstidspunktUtilsTest {
                         årsak = Årsak.DELT_BOSTED
                     )
                 )
-            ),
+            )
         )
 
         val andeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
@@ -170,7 +170,7 @@ class EndringstidspunktUtilsTest {
                         årsak = Årsak.ALLEREDE_UTBETALT
                     )
                 )
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -185,33 +185,33 @@ class EndringstidspunktUtilsTest {
         val person2 = lagPerson()
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1).minusMonths(2),
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -229,39 +229,39 @@ class EndringstidspunktUtilsTest {
         val person2 = lagPerson()
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusMonths(15),
                 tom = inneværendeMåned().minusMonths(13),
                 beløp = 1054,
                 person = person2
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -276,39 +276,39 @@ class EndringstidspunktUtilsTest {
         val person2 = lagPerson()
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusMonths(15),
                 tom = inneværendeMåned().minusMonths(13),
                 beløp = 1054,
                 person = person2
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -323,33 +323,33 @@ class EndringstidspunktUtilsTest {
         val person2 = lagPerson()
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person1
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -367,33 +367,33 @@ class EndringstidspunktUtilsTest {
         val person2 = lagPerson()
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val andeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
                 person = person1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusMonths(1),
                 beløp = 1054,
                 person = person2
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -406,15 +406,15 @@ class EndringstidspunktUtilsTest {
     fun `Skal finne 0kr endring`() {
         val person1 = lagPerson(type = PersonType.BARN)
 
-        val forrigeAndeler = emptyList<AndelTilkjentYtelse>()
+        val forrigeAndeler = emptyList<AndelTilkjentYtelseMedEndreteUtbetalinger>()
 
         val andeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 0,
                 person = person1
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -430,64 +430,64 @@ class EndringstidspunktUtilsTest {
         val person3 = lagPerson()
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.parse("2021-07"),
                 tom = YearMonth.parse("2029-10"),
                 beløp = 1054,
                 person = person2
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.parse("2022-02"),
                 tom = YearMonth.parse("2029-10"),
                 beløp = 1054,
                 person = person3,
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD
-            ),
+            )
         )
 
         val andeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.parse("2021-11"),
                 tom = YearMonth.parse("2021-12"),
                 beløp = 827,
                 person = person1,
                 prosent = BigDecimal(50)
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.parse("2022-01"),
                 tom = YearMonth.parse("2024-02"),
                 beløp = 838,
                 person = person1,
                 prosent = BigDecimal(50)
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.parse("2024-03"),
                 tom = YearMonth.parse("2036-02"),
                 beløp = 527,
                 person = person1,
                 prosent = BigDecimal(50)
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.parse("2021-07"),
                 tom = YearMonth.parse("2029-10"),
                 beløp = 1054,
                 person = person2
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.parse("2022-02"),
                 tom = YearMonth.parse("2029-10"),
                 beløp = 1054,
                 person = person3,
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.parse("2029-11"),
                 tom = YearMonth.parse("2036-02"),
                 beløp = 527,
                 person = person3,
                 prosent = BigDecimal(50),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD
-            ),
+            )
         )
 
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
@@ -540,7 +540,7 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
@@ -573,7 +573,7 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
@@ -583,7 +583,7 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.MOTTAR_UFØRETRYGD_FRA_NORGE,
+                søkersAktivitet = SøkersAktivitet.MOTTAR_UFØRETRYGD,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
@@ -612,7 +612,7 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
@@ -625,7 +625,7 @@ class EndringstidspunktUtilsTest {
             lagKompetanse(
                 fom = YearMonth.of(2021, 11),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
@@ -646,24 +646,24 @@ class EndringstidspunktUtilsTest {
         val forrigeKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
-            ),
+            )
         )
         val nyKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør2)
-            ),
+            )
         )
         assertEquals(
             YearMonth.of(2022, 6),
@@ -677,24 +677,24 @@ class EndringstidspunktUtilsTest {
         val forrigeKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
             ),
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør2)
-            ),
+            )
         )
         val nyKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
-            ),
+            )
         )
         assertEquals(
             YearMonth.of(2022, 6),
@@ -718,10 +718,10 @@ class EndringstidspunktUtilsTest {
         val forrigeKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
-            ),
+            )
         )
         val nyKompetansePerioder = emptyList<Kompetanse>()
         assertEquals(
@@ -737,10 +737,10 @@ class EndringstidspunktUtilsTest {
         val nyKompetansePerioder = listOf(
             lagKompetanse(
                 fom = YearMonth.of(2022, 6),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = annenForeldersAktivitet,
                 barnAktører = setOf(barnAktør1)
-            ),
+            )
         )
         assertEquals(
             YearMonth.of(2022, 6),

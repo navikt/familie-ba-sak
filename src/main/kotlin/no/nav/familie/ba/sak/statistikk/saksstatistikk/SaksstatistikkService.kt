@@ -99,7 +99,7 @@ class SaksstatistikkService(
             behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
             beslutter = totrinnskontroll?.beslutterId,
             saksbehandler = totrinnskontroll?.saksbehandlerId,
-            settPaaVent = hentSettPåVentDVH(behandlingId),
+            settPaaVent = hentSettPåVentDVH(behandlingId)
         )
     }
 
@@ -130,7 +130,6 @@ class SaksstatistikkService(
                 )
             }
         } else {
-
             landkodeSøker = hentLandkode(fagsak.aktør)
             listOf(AktørDVH(fagsak.aktør.aktørId.toLong(), PersonType.SØKER.name))
         }
@@ -146,12 +145,14 @@ class SaksstatistikkService(
             sakStatus = fagsak.status.name,
             avsender = "familie-ba-sak",
             versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
-            bostedsland = landkodeSøker,
+            bostedsland = landkodeSøker
         )
     }
 
     private fun hentLandkode(person: Person): String {
-        return if (person.bostedsadresser.isNotEmpty()) "NO" else {
+        return if (person.bostedsadresser.isNotEmpty()) {
+            "NO"
+        } else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
                 person.aktør
             )
@@ -161,7 +162,9 @@ class SaksstatistikkService(
     private fun hentLandkode(aktør: Aktør): String {
         val personInfo = personopplysningerService.hentPersoninfoEnkel(aktør)
 
-        return if (personInfo.bostedsadresser.isNotEmpty()) "NO" else {
+        return if (personInfo.bostedsadresser.isNotEmpty()) {
+            "NO"
+        } else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(aktør)
         }
     }
@@ -187,7 +190,7 @@ class SaksstatistikkService(
                             fom = vedtaksperiode.fom,
                             tom = vedtaksperiode.tom,
                             type = it.standardbegrunnelse.vedtakBegrunnelseType.name,
-                            vedtakBegrunnelse = it.standardbegrunnelse.name,
+                            vedtakBegrunnelse = it.standardbegrunnelse.name
                         )
                     }
             }

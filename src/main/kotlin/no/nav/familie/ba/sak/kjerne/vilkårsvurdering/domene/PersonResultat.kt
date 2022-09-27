@@ -3,9 +3,19 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -38,10 +48,12 @@ class PersonResultat(
     val id: Long = 0,
 
     @JsonIgnore
-    @ManyToOne @JoinColumn(name = "fk_vilkaarsvurdering_id", nullable = false, updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "fk_vilkaarsvurdering_id", nullable = false, updatable = false)
     var vilkårsvurdering: Vilkårsvurdering,
 
-    @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
 
     @OneToMany(
@@ -125,7 +137,8 @@ class PersonResultat(
         return nyttPersonResultat
     }
 
-    fun erSøkersResultater() = vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR }
+    fun erSøkersResultater() = vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR } ||
+        vilkårsvurdering.behandling.fagsak.type in listOf(FagsakType.BARN_ENSLIG_MINDREÅRIG, FagsakType.INSTITUSJON)
 
     fun erDeltBosted(segmentFom: LocalDate): Boolean =
         vilkårResultater
@@ -137,3 +150,41 @@ class PersonResultat(
 
     fun harEksplisittAvslag() = vilkårResultater.any { it.erEksplisittAvslagPåSøknad == true }
 }
+
+fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>> =
+    this.associate { personResultat ->
+        val vilkårResultaterForAktørMap = personResultat.vilkårResultater
+            .groupByTo(mutableMapOf()) { it.vilkårType }
+            .mapValues { if (it.key != Vilkår.BOR_MED_SØKER) it.value else it.value.fjernAvslagUtenPeriodeHvisDetFinsAndreVilkårResultat() }
+
+        val vilkårResultaterKombinertOgForsøvetOgBeskåretTidslinje = vilkårResultaterForAktørMap
+            .tilVilkårResultatTidslinjer()
+            .kombinerUtenNull { it }
+            .tilMånedFraSisteDagIMåneden()
+            .filtrer { it != null && it.toList().isNotEmpty() }
+            .forskyv(1)
+            .beskjærPå18årVilkåretOmDetFinnes(vilkårResultaterForAktørMap[Vilkår.UNDER_18_ÅR])
+            .slåSammenLike()
+
+        Pair(
+            personResultat.aktør,
+            vilkårResultaterKombinertOgForsøvetOgBeskåretTidslinje
+        )
+    }
+
+private fun MutableList<VilkårResultat>.fjernAvslagUtenPeriodeHvisDetFinsAndreVilkårResultat(): List<VilkårResultat> =
+    if (this.any { !it.erAvslagUtenPeriode() }) this.filterNot { it.erAvslagUtenPeriode() } else this
+
+private fun Tidslinje<Iterable<VilkårResultat>, Måned>.beskjærPå18årVilkåretOmDetFinnes(
+    under18VilkårResultater: List<VilkårResultat>?
+) = if (under18VilkårResultater == null) {
+    this
+} else {
+    val fødselsdag = under18VilkårResultater
+        .minOf { it.periodeFom ?: throw Feil("Under 18 år vilkår resultat uten fra og med dato") }
+    val erUnder18ÅrVilkårTidslinje = erUnder18ÅrVilkårTidslinje(fødselsdag)
+    beskjærEtter(erUnder18ÅrVilkårTidslinje)
+}
+
+private fun Map<Vilkår, List<VilkårResultat>>.tilVilkårResultatTidslinjer() =
+    this.map { (_, vilkårResultater) -> VilkårResultatTidslinje(vilkårResultater) }

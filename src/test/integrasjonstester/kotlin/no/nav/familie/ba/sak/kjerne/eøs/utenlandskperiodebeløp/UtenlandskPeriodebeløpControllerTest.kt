@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -15,11 +17,13 @@ import org.springframework.boot.autoconfigure.validation.ValidationAutoConfigura
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpStatus
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import javax.validation.ConstraintViolationException
 
 @SpringBootTest
 @ContextConfiguration(classes = [TestConfig::class, UtenlandskPeriodebeløpController::class, ValidationAutoConfiguration::class])
+@ActiveProfiles("postgres", "integrasjonstest")
 class UtenlandskPeriodebeløpControllerTest {
 
     @Autowired
@@ -28,12 +32,28 @@ class UtenlandskPeriodebeløpControllerTest {
     @Autowired
     lateinit var utenlandskPeriodebeløpController: UtenlandskPeriodebeløpController
 
+    @Autowired
+    lateinit var utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository
+
+    @Autowired
+    lateinit var utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService
+
+    @Autowired
+    lateinit var utvidetBehandlingService: UtvidetBehandlingService
+
     @Test
     fun `Skal kaste feil dersom validering av input feiler`() {
-        val exception = assertThrows<ConstraintViolationException> { utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(1, RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null)) }
+        val exception = assertThrows<ConstraintViolationException> {
+            utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
+                1,
+                RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null)
+            )
+        }
 
         val forventedeFelterMedFeil = listOf("beløp")
-        val faktiskeFelterMedFeil = exception.constraintViolations.map { constraintViolation -> constraintViolation.propertyPath.toString().split(".").last() }
+        val faktiskeFelterMedFeil = exception.constraintViolations.map { constraintViolation ->
+            constraintViolation.propertyPath.toString().split(".").last()
+        }
 
         assertEqualsUnordered(forventedeFelterMedFeil, faktiskeFelterMedFeil)
 
@@ -42,13 +62,15 @@ class UtenlandskPeriodebeløpControllerTest {
 
     @Test
     fun `Skal ikke kaste feil dersom validering av input går bra`() {
+        every { utenlandskPeriodebeløpRepository.getById(any()) } returns UtenlandskPeriodebeløp.NULL
+        every { utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(any(), any()) } just runs
 
-        // Stopper videre prosessering etter at validering er gjennomført
-        every { featureToggleService.isEnabled(any()) }.returns(false)
+        val response = utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
+            1,
+            RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null)
+        )
 
-        val response = utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(1, RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null))
-
-        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.statusCode)
+        assertEquals(HttpStatus.OK, response.statusCode)
     }
 }
 
@@ -67,5 +89,5 @@ class TestConfig {
     fun personidentService(): PersonidentService = mockk()
 
     @Bean
-    fun utvidetBehandlingService(): UtvidetBehandlingService = mockk()
+    fun utvidetBehandlingService(): UtvidetBehandlingService = mockk(relaxed = true)
 }

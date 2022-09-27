@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -59,7 +59,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         autovedtakService = autovedtakService,
         vedtakService = vedtakService,
         vedtaksperiodeService = vedtaksperiodeService,
-        taskRepository = taskRepository,
+        taskRepository = taskRepository
     )
 
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(
@@ -72,7 +72,6 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
 
     @Test
     fun `Verifiser at løpende fagsak med småbarnstillegg sender opphørsbrev måneden etter yngste barn ble 3 år`() {
-
         val behandling = lagBehandling()
         val barn3ÅrForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
@@ -154,7 +153,6 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
 
     @Test
     fun `Verifiser at behandling ikke blir opprettet om behandling allerede har kjørt`() {
-
         val behandling = lagBehandling()
         val barn3ÅrForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
@@ -305,7 +303,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     ) = PeriodeOvergangsstønadGrunnlag(
         id = 1,
         behandlingId = 1,
-        aktør = randomAktørId(),
+        aktør = randomAktør(),
         fom = fom,
         tom = tom,
         datakilde = PeriodeOvergangsstønad.Datakilde.EF

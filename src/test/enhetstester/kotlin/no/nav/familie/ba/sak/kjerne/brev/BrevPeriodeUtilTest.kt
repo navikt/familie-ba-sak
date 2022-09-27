@@ -27,7 +27,7 @@ class BrevPeriodeUtilTest {
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(4),
                 tom = null,
-                type = Vedtaksperiodetype.AVSLAG,
+                type = Vedtaksperiodetype.AVSLAG
             ),
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(7),
@@ -75,7 +75,7 @@ class BrevPeriodeUtilTest {
                 fom = periode2.fom,
                 tom = periode2.tom,
                 barnAktører = setOf(barnAktør1),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE
+                søkersAktivitet = SøkersAktivitet.ARBEIDER
             )
         val kompetanse3 =
             lagKompetanse(
@@ -106,10 +106,11 @@ private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtakspe
             fom = fom,
             tom = tom,
             type = type,
-            eøsBegrunnelser = emptyList(),
+            eøsBegrunnelser = emptyList()
         ),
         uregistrerteBarn = emptyList(),
         minimerteKompetanserForPeriode = emptyList(),
-        minimerteKompetanserSomStopperRettFørPeriode = emptyList()
+        minimerteKompetanserSomStopperRettFørPeriode = emptyList(),
+        dødeBarnForrigePeriode = emptyList()
     )
 }

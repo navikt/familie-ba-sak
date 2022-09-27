@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.SISTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.verge.Verge
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
@@ -27,6 +28,7 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 import no.nav.familie.kontrakter.felles.Behandlingstema as OppgaveBehandlingTema
@@ -79,7 +81,10 @@ data class Behandling(
     @Column(name = "status", nullable = false)
     var status: BehandlingStatus = initStatus(),
 
-    var overstyrtEndringstidspunkt: LocalDate? = null
+    var overstyrtEndringstidspunkt: LocalDate? = null,
+
+    @OneToOne(mappedBy = "behandling", optional = true)
+    val verge: Verge? = null
 ) : BaseEntitet() {
 
     val steg: StegType
@@ -100,6 +105,7 @@ data class Behandling(
             "kategori=$kategori, " +
             "underkategori=$underkategori, " +
             "automatisk=$skalBehandlesAutomatisk, " +
+            "opprettetÅrsak=$opprettetÅrsak, " +
             "status=$status, " +
             "resultat=$resultat, " +
             "steg=$steg)"
@@ -116,11 +122,14 @@ data class Behandling(
         ) {
             if (type == BehandlingType.TEKNISK_OPPHØR &&
                 opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
-            )
-                true else throw Feil(
-                "Behandling er teknisk opphør, men årsak $opprettetÅrsak " +
-                    "og type $type samsvarer ikke."
-            )
+            ) {
+                true
+            } else {
+                throw Feil(
+                    "Behandling er teknisk opphør, men årsak $opprettetÅrsak " +
+                        "og type $type samsvarer ikke."
+                )
+            }
         } else {
             false
         }
@@ -139,8 +148,9 @@ data class Behandling(
         ) {
             if (type != BehandlingType.TEKNISK_ENDRING ||
                 opprettetÅrsak != BehandlingÅrsak.TEKNISK_ENDRING
-            )
+            ) {
                 throw Feil("Behandling er teknisk endring, men årsak $opprettetÅrsak og type $type samsvarer ikke.")
+            }
         }
 
         if (type == BehandlingType.REVURDERING && sisteBehandlingSomErVedtatt == null) {
@@ -190,7 +200,8 @@ data class Behandling(
 
     fun skalRettFraBehandlingsresultatTilIverksetting(): Boolean {
         return when {
-            skalBehandlesAutomatisk && erOmregning() && resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
+            skalBehandlesAutomatisk && erOmregning() &&
+                resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
             skalBehandlesAutomatisk && erMigrering() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erSatsendring() && resultat == Behandlingsresultat.ENDRET_UTBETALING -> true
@@ -204,8 +215,11 @@ data class Behandling(
                 BehandlingStegTilstand(
                     behandling = this,
                     behandlingSteg = steg,
-                    behandlingStegStatus = if (steg == SISTE_STEG) BehandlingStegStatus.UTFØRT
-                    else BehandlingStegStatus.IKKE_UTFØRT
+                    behandlingStegStatus = if (steg == SISTE_STEG) {
+                        BehandlingStegStatus.UTFØRT
+                    } else {
+                        BehandlingStegStatus.IKKE_UTFØRT
+                    }
                 )
             )
         }
@@ -253,6 +267,8 @@ data class Behandling(
     fun erManuellMigrering() = erManuellMigreringForEndreMigreringsdato() || erHelmanuellMigrering()
 
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
+
+    fun erTekniskBehandling() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR || erTekniskEndring()
 
     fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
 
@@ -327,6 +343,8 @@ enum class Behandlingsresultat(val displayName: String) {
 
     fun kanIkkeSendesTilOppdrag(): Boolean =
         this in listOf(FORTSATT_INNVILGET, AVSLÅTT, FORTSATT_OPPHØRT, ENDRET_UTEN_UTBETALING)
+
+    fun erAvslått(): Boolean = this in listOf(AVSLÅTT, AVSLÅTT_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT_ENDRET_OG_OPPHØRT)
 }
 
 /**

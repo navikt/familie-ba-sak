@@ -27,7 +27,7 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
             VedtakBegrunnelseType.REDUKSJON,
             VedtakBegrunnelseType.FORTSATT_INNVILGET,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
-            VedtakBegrunnelseType.ENDRET_UTBETALING,
+            VedtakBegrunnelseType.ENDRET_UTBETALING
         )
     ),
 
@@ -36,7 +36,7 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
      *
      * For eksempel: I en behandling har vi to barn med utbetaling fra mai 2020 til januar 2021.
      * I neste behandling endres det ene barne til å ha utbetaling fra juni 2020 til januar 2021.
-     * Da har det vært en reduksjon fra den første behanglingen til den neste i mai 2020,
+     * Da har det vært en reduksjon fra den første behandlingen til den neste i mai 2020,
      * og det blir en utbetaling med reduksjon fra sist iverksatte behandling.
      *
      * Om det ene barnet hadde mistet juli isteden for mai, altså at det fikk utbetalt 1. mai 2020 til 1. juni 2021 og
@@ -51,18 +51,17 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
             VedtakBegrunnelseType.ENDRET_UTBETALING
         )
     ),
-    OPPHØR(listOf(VedtakBegrunnelseType.OPPHØR)),
+    OPPHØR(listOf(VedtakBegrunnelseType.OPPHØR, VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING)),
     AVSLAG(listOf(VedtakBegrunnelseType.AVSLAG)),
     FORTSATT_INNVILGET(listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET)),
 
     @Deprecated("Legacy")
-    ENDRET_UTBETALING(emptyList()),
+    ENDRET_UTBETALING(emptyList())
 }
 
 fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(
-    vedtak: Vedtak,
+    vedtak: Vedtak
 ): VedtaksperiodeMedBegrunnelser {
-
     return VedtaksperiodeMedBegrunnelser(
         fom = this.periodeFom,
         tom = this.periodeTom,

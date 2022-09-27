@@ -61,7 +61,6 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig`() {
-
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
@@ -82,7 +81,9 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(
-                behandling.id, fnr, listOf(barnFnr),
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
@@ -97,7 +98,8 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
                 vilkårService.endreVilkår(
-                    behandlingId = behandling.id, vilkårId = it.id,
+                    behandlingId = behandling.id,
+                    vilkårId = it.id,
                     restPersonResultat =
                     RestPersonResultat(
                         personIdent = personResultat.aktør.aktivFødselsnummer(),
@@ -149,7 +151,8 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         behandlingEtterHåndterBehandlingsresultat.behandlingStegTilstand.add(
             BehandlingStegTilstand(
-                behandling = behandling, behandlingSteg = StegType.BEHANDLING_AVSLUTTET
+                behandling = behandling,
+                behandlingSteg = StegType.BEHANDLING_AVSLUTTET
             )
         )
         val iverksattBehandling =
@@ -159,7 +162,9 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(
-                behandlingRevurdering.id, fnr, listOf(barnFnr),
+                behandlingRevurdering.id,
+                fnr,
+                listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )

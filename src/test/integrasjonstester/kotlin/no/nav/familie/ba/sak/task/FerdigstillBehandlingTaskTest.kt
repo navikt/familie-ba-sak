@@ -26,9 +26,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.annotation.DirtiesContext
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Autowired
@@ -83,7 +81,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
+            vedtaksperiodeService = vedtaksperiodeService
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {
@@ -100,12 +98,13 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
                 behandlingId = behandlingEtterVilkårsvurdering.id,
                 steg = StegType.FERDIGSTILLE_BEHANDLING
             )
-        } else behandling
+        } else {
+            behandling
+        }
     }
 
     @Test
     fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
-
         val behandling = kjørSteg(Resultat.OPPFYLT)
 
         val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandling)
@@ -135,7 +134,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
-
         val behandling = kjørSteg(Resultat.IKKE_OPPFYLT)
 
         val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandling)

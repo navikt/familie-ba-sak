@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -41,8 +41,8 @@ class RevurderingDødsfall(
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -52,13 +52,13 @@ class RevurderingDødsfall(
                 søker = RestScenarioPerson(
                     fødselsdato = "1982-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker",
+                    etternavn = "Søker"
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen",
+                        etternavn = "Barnesen"
                     )
                 )
             )
@@ -74,7 +74,7 @@ class RevurderingDødsfall(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService,
+            personidentService = personidentService
         )
 
         val overstyrendeVilkårResultater =
@@ -86,13 +86,13 @@ class RevurderingDødsfall(
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 periodeFom = LocalDate.parse(scenario.søker.fødselsdato),
                 periodeTom = LocalDate.now().minusMonths(1),
-                personResultat = mockk(relaxed = true),
+                personResultat = mockk(relaxed = true)
             ),
             lagVilkårResultat(
                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
                 periodeFom = LocalDate.parse(scenario.søker.fødselsdato),
                 periodeTom = LocalDate.now().minusMonths(1),
-                personResultat = mockk(relaxed = true),
+                personResultat = mockk(relaxed = true)
             )
         )
 
@@ -112,7 +112,7 @@ class RevurderingDødsfall(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
         val restFagsakEtterBehandlingAvsluttet =
@@ -122,7 +122,7 @@ class RevurderingDødsfall(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.AVSLUTTET,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
-            aktivBehandlingId = behandlingDødsfall.id,
+            aktivBehandlingId = behandlingDødsfall.id
         )
     }
 
@@ -133,13 +133,13 @@ class RevurderingDødsfall(
                 søker = RestScenarioPerson(
                     fødselsdato = "1982-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker",
+                    etternavn = "Søker"
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen",
+                        etternavn = "Barnesen"
                     )
                 )
             )
@@ -155,7 +155,7 @@ class RevurderingDødsfall(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService,
+            personidentService = personidentService
         )
 
         val overstyrendeVilkårResultater =
@@ -181,7 +181,7 @@ class RevurderingDødsfall(
                 endretUtbetalingAndelService = endretUtbetalingAndelService,
                 fagsakService = fagsakService,
                 persongrunnlagService = persongrunnlagService,
-                andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
             )
         }
     }

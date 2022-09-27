@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -36,7 +36,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @BeforeEach
     fun init() {
-        val personAktørId = randomAktørId()
+        val personAktørId = randomAktør()
 
         behandling = lagBehandling()
 
@@ -47,23 +47,38 @@ class VilkårsvurderingStegUtilsTest {
 
         personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = personAktørId,
+            aktør = personAktørId
         )
 
         vilkårResultat1 = VilkårResultat(
-            1, personResultat, vilkår, resultat,
-            LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-            "", vilkårsvurdering.behandling.id
+            1,
+            personResultat,
+            vilkår,
+            resultat,
+            LocalDate.of(2010, 1, 1),
+            LocalDate.of(2010, 6, 1),
+            "",
+            vilkårsvurdering.behandling.id
         )
         vilkårResultat2 = VilkårResultat(
-            2, personResultat, vilkår, resultat,
-            LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
-            "", vilkårsvurdering.behandling.id
+            2,
+            personResultat,
+            vilkår,
+            resultat,
+            LocalDate.of(2010, 6, 2),
+            LocalDate.of(2010, 8, 1),
+            "",
+            vilkårsvurdering.behandling.id
         )
         vilkårResultat3 = VilkårResultat(
-            3, personResultat, vilkår, resultat,
-            LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
-            "", vilkårsvurdering.behandling.id
+            3,
+            personResultat,
+            vilkår,
+            resultat,
+            LocalDate.of(2010, 8, 2),
+            LocalDate.of(2010, 12, 1),
+            "",
+            vilkårsvurdering.behandling.id
         )
         personResultat.setSortedVilkårResultater(
             setOf(
@@ -312,13 +327,18 @@ class VilkårsvurderingStegUtilsTest {
     fun `Skal nullstille periode hvis det kun finnes en periode`() {
         val mockPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = randomAktørId(),
+            aktør = randomAktør()
         )
 
         val mockVilkårResultat = VilkårResultat(
-            1, mockPersonResultat, vilkår, resultat,
-            LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-            "", vilkårsvurdering.behandling.id
+            1,
+            mockPersonResultat,
+            vilkår,
+            resultat,
+            LocalDate.of(2010, 1, 1),
+            LocalDate.of(2010, 6, 1),
+            "",
+            vilkårsvurdering.behandling.id
         )
         mockPersonResultat.setSortedVilkårResultater(setOf(mockVilkårResultat))
 
@@ -376,7 +396,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke bort ikke oppfylte perioder når det gjelder samme behandling`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
 
         val initiellVilkårvurdering =
@@ -405,7 +425,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke oppfylt om oppfylt finnes ved kopiering fra forrige behandling`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
         val behandling2 = lagBehandling()
 
@@ -432,7 +452,7 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke ikke oppfylt om oppfylt ikke finnes`() {
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = randomAktør()
         val behandling = lagBehandling()
 
         val initiellVilkårsvurdering =

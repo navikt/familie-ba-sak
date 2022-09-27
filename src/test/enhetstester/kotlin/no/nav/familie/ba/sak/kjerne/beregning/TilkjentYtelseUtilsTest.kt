@@ -1,65 +1,54 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
+import no.nav.familie.ba.sak.common.tilyyyyMMdd
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.empty
+import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+import org.hamcrest.CoreMatchers.`is` as Is
 
 internal class TilkjentYtelseUtilsTest {
-
-    @Test
-    fun `Barn som er under 6 år hele perioden får tillegg hele perioden`() {
-        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
-        val seksårsdag = LocalDate.of(2023, 1, 1)
-
-        assertEquals(periode, SatsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom))
-    }
-
-    @Test
-    fun `Barn som fyller 6 år i løpet av perioden får tilleggsperiode før seksårsdag`() {
-        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
-        val seksårsdag = LocalDate.of(2021, 1, 1)
-
-        assertEquals(
-            Periode(periode.fom, seksårsdag.sisteDagIForrigeMåned()),
-            SatsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom)
-        )
-    }
-
-    @Test
-    fun `Barn som er over 6 år hele perioden får ingen tillegsperiode`() {
-        val periode = Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2022, 1, 1))
-        val seksårsdag = LocalDate.of(2018, 1, 1)
-
-        assertEquals(null, SatsService.hentPeriodeTil6år(seksårsdag, periode.fom, periode.tom))
-    }
 
     @Test
     fun `Barn som fyller 6 år i det vilkårene er oppfylt får andel måneden etter`() {
@@ -69,10 +58,11 @@ internal class TilkjentYtelseUtilsTest {
         val (vilkårsvurdering, personopplysningGrunnlag) =
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
-                vilkårOppfyltFom = barnSeksårsdag
+                vilkårOppfyltFom = barnSeksårsdag,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -101,10 +91,11 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = vilkårOppfyltFom,
-                vilkårOppfyltTom = vilkårOppfyltTom
+                vilkårOppfyltTom = vilkårOppfyltTom,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
-        val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -128,17 +119,81 @@ internal class TilkjentYtelseUtilsTest {
     }
 
     @Test
+    fun `Det skal utbetales for inneværende måned hvis barn dør minst 1 måned før 18 års datoen`() {
+        val barnFødselsDato = LocalDate.of(2012, 2, 2)
+        val barnDødsfallsDato = LocalDate.of(2030, 1, 1)
+
+        val (vilkårsvurdering, personopplysningGrunnlag) =
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
+                barnFødselsdato = barnFødselsDato,
+                vilkårOppfyltFom = barnFødselsDato,
+                vilkårOppfyltTom = barnDødsfallsDato,
+                barnDødsfallDato = barnDødsfallsDato,
+                under18ÅrVilkårOppfyltTom = barnDødsfallsDato
+            )
+
+        val tilkjentYtelse = beregnTilkjentYtelse(
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            behandling = lagBehandling()
+        )
+
+        assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
+
+        val andelFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
+        val andelEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
+
+        assertEquals(YearMonth.of(2014, 2), andelFør6År.stønadFom)
+        assertEquals(YearMonth.of(2019, 2), andelFør6År.stønadTom)
+
+        assertEquals(YearMonth.of(2019, 3), andelEtter6År.stønadFom)
+        assertEquals(YearMonth.of(2030, 1), andelEtter6År.stønadTom)
+    }
+
+    @Test
+    fun `Det skal ikke utbetales for inneværende måned hvis barn dør samme måned som 18 års datoen`() {
+        val barnFødselsDato = LocalDate.of(2012, 2, 20)
+        val barnDødsfallsDato = LocalDate.of(2030, 2, 2)
+
+        val (vilkårsvurdering, personopplysningGrunnlag) =
+            genererVilkårsvurderingOgPersonopplysningGrunnlag(
+                barnFødselsdato = barnFødselsDato,
+                vilkårOppfyltFom = barnFødselsDato,
+                vilkårOppfyltTom = barnDødsfallsDato,
+                barnDødsfallDato = barnDødsfallsDato,
+                under18ÅrVilkårOppfyltTom = barnDødsfallsDato
+            )
+
+        val tilkjentYtelse = beregnTilkjentYtelse(
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            behandling = lagBehandling()
+        )
+
+        assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
+
+        val andelFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
+        val andelEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
+
+        assertEquals(YearMonth.of(2014, 2), andelFør6År.stønadFom)
+        assertEquals(YearMonth.of(2019, 2), andelFør6År.stønadTom)
+
+        assertEquals(YearMonth.of(2019, 3), andelEtter6År.stønadFom)
+        assertEquals(YearMonth.of(2030, 1), andelEtter6År.stønadTom)
+    }
+
+    @Test
     fun `1 barn får normal utbetaling med satsendring fra september 2020, september 2021 og januar 2022`() {
         val barnFødselsdato = LocalDate.of(2021, 2, 2)
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
 
-        val (vilkårsvurdering, personopplysningGrunnlag) =
-            genererVilkårsvurderingOgPersonopplysningGrunnlag(
-                barnFødselsdato = barnFødselsdato,
-                vilkårOppfyltFom = barnFødselsdato
-            )
+        val (vilkårsvurdering, personopplysningGrunnlag) = genererVilkårsvurderingOgPersonopplysningGrunnlag(
+            barnFødselsdato = barnFødselsdato,
+            vilkårOppfyltFom = barnFødselsdato,
+            under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
+        )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -195,10 +250,11 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
@@ -227,7 +283,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -238,7 +295,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 8, 18)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -258,7 +315,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -269,7 +327,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 8, 18)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -289,7 +347,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -300,7 +359,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 9, 1)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -320,7 +379,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -331,7 +391,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 9, 1)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -351,7 +411,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -362,7 +423,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 9, 2)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -382,7 +443,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -393,7 +455,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 9, 2)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -413,7 +475,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -424,7 +487,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 8, 31)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -444,7 +507,8 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
-                erDeltBosted = true
+                erDeltBosted = true,
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -455,7 +519,7 @@ internal class TilkjentYtelseUtilsTest {
             backToBackFom = LocalDate.of(2019, 8, 31)
         )
 
-        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+        val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
@@ -474,7 +538,6 @@ internal class TilkjentYtelseUtilsTest {
         backToBackTom: LocalDate? = null,
         backToBackFom: LocalDate? = null
     ): Vilkårsvurdering {
-
         personResultat.setSortedVilkårResultater(
             personResultat.vilkårResultater.filter { it.vilkårType != Vilkår.BOSATT_I_RIKET }
                 .toSet() +
@@ -512,7 +575,9 @@ internal class TilkjentYtelseUtilsTest {
         barnFødselsdato: LocalDate,
         vilkårOppfyltFom: LocalDate,
         vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18),
-        erDeltBosted: Boolean = false
+        barnDødsfallDato: LocalDate? = null,
+        erDeltBosted: Boolean = false,
+        under18ÅrVilkårOppfyltTom: LocalDate?
     ): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
@@ -547,7 +612,7 @@ internal class TilkjentYtelseUtilsTest {
                     vilkårType = Vilkår.UNDER_18_ÅR,
                     resultat = Resultat.OPPFYLT,
                     periodeFom = barnFødselsdato,
-                    periodeTom = barnFødselsdato.plusYears(18),
+                    periodeTom = under18ÅrVilkårOppfyltTom,
                     begrunnelse = "",
                     behandlingId = behandling.id
                 ),
@@ -596,7 +661,10 @@ internal class TilkjentYtelseUtilsTest {
             navn = "Barn",
             kjønn = Kjønn.MANN
         )
-            .apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+            .apply {
+                sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
+                barnDødsfallDato?.let { dødsfall = lagDødsfall(this, it.tilyyyyMMdd(), null) }
+            }
         val søker = Person(
             aktør = tilAktør(søkerFnr),
             type = PersonType.SØKER,
@@ -630,23 +698,23 @@ internal class TilkjentYtelseUtilsTest {
         val endretProsent = BigDecimal.ZERO
 
         val endretUtbetalingAndeler = listOf(
-            lagEndretUtbetalingAndel(
+            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 person = person,
                 fom = fom,
                 tom = tom,
                 prosent = endretProsent,
                 behandlingId = behandling.id
-            ),
+            )
         )
 
         val andelerTIlkjentYtelse = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            utbetalinsandeler.toMutableSet(),
+            utbetalinsandeler,
             endretUtbetalingAndeler
         )
 
         assertEquals(1, andelerTIlkjentYtelse.size)
         assertEquals(endretProsent, andelerTIlkjentYtelse.single().prosent)
-        assertEquals(1, andelerTIlkjentYtelse.single().endretUtbetalingAndeler.size)
+        assertEquals(1, andelerTIlkjentYtelse.single().endreteUtbetalinger.size)
     }
 
     @Test
@@ -671,12 +739,12 @@ internal class TilkjentYtelseUtilsTest {
                 tom = tom2,
                 person = person,
                 behandling = behandling
-            ),
+            )
         )
 
         val endretProsent = BigDecimal.ZERO
 
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
+        val endretUtbetalingAndel = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
             person = person,
             fom = fom1,
             tom = tom2,
@@ -686,27 +754,866 @@ internal class TilkjentYtelseUtilsTest {
 
         val endretUtbetalingAndeler = listOf(
             endretUtbetalingAndel,
-            lagEndretUtbetalingAndel(
+            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 person = person,
                 fom = tom2.nesteMåned(),
                 prosent = endretProsent,
                 behandlingId = behandling.id
-            ),
+            )
         )
 
         val andelerTIlkjentYtelse = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            utbetalinsandeler.toMutableSet(),
+            utbetalinsandeler,
             endretUtbetalingAndeler
         )
 
         assertEquals(2, andelerTIlkjentYtelse.size)
         andelerTIlkjentYtelse.forEach { assertEquals(endretProsent, it.prosent) }
-        andelerTIlkjentYtelse.forEach { assertEquals(1, it.endretUtbetalingAndeler.size) }
+        andelerTIlkjentYtelse.forEach { assertEquals(1, it.endreteUtbetalinger.size) }
         andelerTIlkjentYtelse.forEach {
             assertEquals(
                 endretUtbetalingAndel.id,
-                it.endretUtbetalingAndeler.single().id
+                it.endreteUtbetalinger.single().id
             )
         }
+    }
+
+    val søker = lagPerson(type = PersonType.SØKER)
+    val januar2019 = YearMonth.of(2019, 1)
+    val februar2019 = YearMonth.of(2019, 2)
+    val mars2019 = YearMonth.of(2019, 3)
+    val april2019 = YearMonth.of(2019, 4)
+    val juli2019 = YearMonth.of(2019, 7)
+    val august2019 = YearMonth.of(2019, 8)
+    val november2019 = YearMonth.of(2019, 11)
+    val desember2019 = YearMonth.of(2019, 12)
+    val august2020 = YearMonth.of(2020, 8)
+    val januar2022 = YearMonth.of(2022, 1)
+    val februar2022 = YearMonth.of(2022, 2)
+    val mars2022 = YearMonth.of(2022, 3)
+    val april2022 = YearMonth.of(2022, 4)
+    val mai2022 = YearMonth.of(2022, 5)
+    val juni2022 = YearMonth.of(2022, 6)
+    val juli2022 = YearMonth.of(2022, 7)
+    val august2022 = YearMonth.of(2022, 8)
+    val november2022 = YearMonth.of(2022, 11)
+    val desember2022 = YearMonth.of(2022, 12)
+
+    // src/test/resources/scenario/Far søker om delt bosted - Mor har tidligere mottatt fult utvidet og ordinær barnetrygd
+    @Test
+    fun `Skal støtte endret utbetaling som delvis overlapper delt bosted på søker og barn og småbarnstillegg på søker`() {
+        val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
+        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = søker,
+                    skalUtbetales = false,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = april2022,
+                    tom = juli2022
+                ),
+                EndretAndel(
+                    person = barnFødtAugust2019,
+                    skalUtbetales = false,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = april2022,
+                    tom = juli2022
+                )
+            ),
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = mars2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED,
+                    aktør = barnFødtAugust2019.aktør
+                )
+            ),
+            barna = listOf(barnFødtAugust2019),
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
+        )
+
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        assertEquals(6, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+
+        // SØKER
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(2, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(april2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(juli2022))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal.ZERO))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(utvidetAndeler[1].stønadFom, Is(august2022))
+        assertThat(utvidetAndeler[1].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(50)))
+        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(2, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juli2022))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal.ZERO))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(småbarnstilleggAndeler[1].stønadFom, Is(august2022))
+        assertThat(småbarnstilleggAndeler[1].stønadTom, Is(barnFyller3ÅrDato))
+        assertThat(småbarnstilleggAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[1].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(2, barnasAndeler.size)
+        assertThat(barnasAndeler[0].stønadFom, Is(april2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(juli2022))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal.ZERO))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barnasAndeler[1].stønadFom, Is(august2022))
+        assertThat(barnasAndeler[1].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[1].prosent, Is(BigDecimal(50)))
+        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
+    }
+
+    // src/test/resources/scenario/Far søker om delt bosted - Mor har tidligere mottatt fult, men har ikke mottatt utvidet
+    @Test
+    fun `Skal støtte endret utbetaling som kun gjelder barn på delt bosted utbetaling`() {
+        val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
+        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = barnFødtAugust2019,
+                    skalUtbetales = false,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = april2022,
+                    tom = juli2022
+                )
+            ),
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = mars2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED,
+                    aktør = barnFødtAugust2019.aktør
+                )
+            ),
+            barna = listOf(barnFødtAugust2019),
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
+        )
+
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        assertEquals(4, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+
+        // SØKER
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(1, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(april2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(50)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(1, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(barnFyller3ÅrDato))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+
+        // BARN
+        assertEquals(2, barnasAndeler.size)
+        assertThat(barnasAndeler[0].stønadFom, Is(april2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(juli2022))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal.ZERO))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barnasAndeler[1].stønadFom, Is(august2022))
+        assertThat(barnasAndeler[1].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[1].prosent, Is(BigDecimal(50)))
+        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
+    }
+
+    // src/test/resources/scenario/Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles
+    @Test
+    fun `Skal gi riktig resultat når barnetrygden går over til å være delt, kun småbarnstillegg og utvidet blir delt i første periode`() {
+        val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
+        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = barnFødtAugust2019,
+                    skalUtbetales = true,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = juni2022,
+                    tom = juli2022
+                )
+            ),
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = april2022.toLocalDate().sisteDagIMåned(),
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barnFødtAugust2019.aktør
+                ),
+                AtypiskVilkår(
+                    fom = mai2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barnFødtAugust2019.aktør,
+                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED
+                )
+            ),
+            atypiskeVilkårSøker = listOf(
+                AtypiskVilkår(
+                    fom = mai2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    aktør = søker.aktør
+                )
+            ),
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022)),
+            barna = listOf(barnFødtAugust2019)
+        )
+
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        assertEquals(5, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+
+        // SØKER
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(1, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(juni2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(50)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(1, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(juni2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(barnFyller3ÅrDato))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+
+        // BARN
+        assertEquals(3, barnasAndeler.size)
+        assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(mai2022))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(barnasAndeler[1].stønadFom, Is(juni2022))
+        assertThat(barnasAndeler[1].stønadTom, Is(juli2022))
+        assertThat(barnasAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barnasAndeler[2].stønadFom, Is(august2022))
+        assertThat(barnasAndeler[2].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[2].prosent, Is(BigDecimal(50)))
+        assertThat(barnasAndeler[2].endretUtbetalingAndeler, Is((empty())))
+    }
+
+    // src/test/resources/scenario/Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles 2
+    @Test
+    fun `Delt, utvidet og ordinær barnetrygd deles fra juni, men skal utbetales fult fra juni til og med juli - deles som vanlig fra August`() {
+        val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
+        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = barnFødtAugust2019,
+                    skalUtbetales = true,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = juni2022,
+                    tom = juli2022
+                ),
+                EndretAndel(
+                    person = søker,
+                    skalUtbetales = true,
+                    årsak = Årsak.DELT_BOSTED,
+                    fom = juni2022,
+                    tom = juli2022
+                )
+            ),
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = april2022.toLocalDate().sisteDagIMåned(),
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barnFødtAugust2019.aktør
+                ),
+                AtypiskVilkår(
+                    fom = mai2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barnFødtAugust2019.aktør,
+                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED
+                )
+            ),
+            atypiskeVilkårSøker = listOf(
+                AtypiskVilkår(
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    aktør = søker.aktør
+                )
+            ),
+            barna = listOf(barnFødtAugust2019),
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
+        )
+
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        assertEquals(7, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(3, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(mai2022))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(utvidetAndeler[1].stønadFom, Is(juni2022))
+        assertThat(utvidetAndeler[1].stønadTom, Is(juli2022))
+        assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(utvidetAndeler[2].stønadFom, Is(august2022))
+        assertThat(utvidetAndeler[2].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[2].prosent, Is(BigDecimal(50)))
+        assertThat(utvidetAndeler[2].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(1, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(mars2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(barnFyller3ÅrDato))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(3, barnasAndeler.size)
+        assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(mai2022))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(barnasAndeler[1].stønadFom, Is(juni2022))
+        assertThat(barnasAndeler[1].stønadTom, Is(juli2022))
+        assertThat(barnasAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barnasAndeler[2].stønadFom, Is(august2022))
+        assertThat(barnasAndeler[2].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[2].prosent, Is(BigDecimal(50)))
+        assertThat(barnasAndeler[2].endretUtbetalingAndeler, Is((empty())))
+    }
+
+    // src/test/resources/scenario/Far søker om utvidet barnetrygd - Har full overgangsstønad, men søker sent og får ikke etterbetalt mer enn 3år
+    @Test
+    fun `Småbarnstillleg, utvidet og ordinær barnetrygd fra april, men skal ikke utbetales før august på grunn av etterbetaling 3 år`() {
+        val barnFødtAugust2016 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 8, 15))
+        val månedFørBarnBlir18 = barnFødtAugust2016.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = barnFødtAugust2016,
+                    skalUtbetales = false,
+                    årsak = Årsak.ETTERBETALING_3ÅR,
+                    fom = april2019,
+                    tom = juli2019
+                ),
+                EndretAndel(
+                    person = søker,
+                    skalUtbetales = false,
+                    årsak = Årsak.ETTERBETALING_3ÅR,
+                    fom = april2019,
+                    tom = juli2019
+                )
+            ),
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = mars2019.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barnFødtAugust2016.aktør
+                )
+            ),
+            barna = listOf(barnFødtAugust2016),
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2019, november2019))
+        )
+
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2019) }
+        assertEquals(6, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(2, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(april2019))
+        assertThat(utvidetAndeler[0].stønadTom, Is(juli2019))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(0)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(utvidetAndeler[1].stønadFom, Is(august2019))
+        assertThat(utvidetAndeler[1].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(2, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2019))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juli2019))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(0)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(småbarnstilleggAndeler[1].stønadFom, Is(august2019))
+        assertThat(småbarnstilleggAndeler[1].stønadTom, Is(august2019))
+        assertThat(småbarnstilleggAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[1].endretUtbetalingAndeler, Is((empty())))
+
+        // BARN
+        assertEquals(2, barnasAndeler.size)
+        assertThat(barnasAndeler[0].stønadFom, Is(april2019))
+        assertThat(barnasAndeler[0].stønadTom, Is(juli2019))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(0)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barnasAndeler[1].stønadFom, Is(august2019))
+        assertThat(barnasAndeler[1].stønadTom, Is(august2020))
+        assertThat(barnasAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
+    }
+
+    // src/test/resources/scenario/Far har mottatt delt utvidet barnetrygd for barn 12år - Søker nå om barnetrygd for barn som flyttet til han for over 3 år siden
+    @Test
+    fun `Det er småbarnstillegg på søker og ordinær barnetrygd på barn 1 fra april, men det skal ikke utbetales før august på grunn av etterbetaling 3 år - Søker og barn 2 har utbetalinger fra tidligere behandlinger som ikke skal overstyres`() {
+        val barnFødtAugust2016 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 8, 15))
+        val månedFørBarnFødtAugust2016Blir18 =
+            barnFødtAugust2016.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val barnFødtDesember2006 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2006, 12, 1))
+        val månedFørBarnFødtDesember2006Blir18 = barnFødtDesember2006.fødselsdato.til18ÅrsVilkårsdato().toYearMonth()
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            endretAndeler = listOf(
+                EndretAndel(
+                    person = barnFødtAugust2016,
+                    skalUtbetales = false,
+                    årsak = Årsak.ETTERBETALING_3ÅR,
+                    fom = april2019,
+                    tom = juli2019
+                )
+            ),
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = mars2019.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barnFødtAugust2016.aktør
+                ),
+                AtypiskVilkår(
+                    fom = januar2019.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barnFødtDesember2006.aktør,
+                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED
+                )
+            ),
+            atypiskeVilkårSøker = listOf(
+                AtypiskVilkår(
+                    fom = februar2019.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = null,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    aktør = søker.aktør
+                )
+            ),
+            barna = listOf(barnFødtAugust2016, barnFødtDesember2006),
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2019, november2019))
+        )
+
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2019) }
+        assertEquals(8, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+
+        // SØKER
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+        assertEquals(2, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(mars2019))
+        assertThat(utvidetAndeler[0].stønadTom, Is(juli2019))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(50)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(utvidetAndeler[1].stønadFom, Is(august2019))
+        assertThat(utvidetAndeler[1].stønadTom, Is(månedFørBarnFødtAugust2016Blir18))
+        assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(2, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2019))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juli2019))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(0)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(småbarnstilleggAndeler[1].stønadFom, Is(august2019))
+        assertThat(småbarnstilleggAndeler[1].stønadTom, Is(august2019))
+        assertThat(småbarnstilleggAndeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[1].endretUtbetalingAndeler, Is((empty())))
+
+        // BARN
+        val (barn1Andeler, barn2Andeler) = barnasAndeler.partition { it.aktør == barnFødtAugust2016.aktør }
+        assertEquals(2, barn1Andeler.size)
+        assertThat(barn1Andeler[0].stønadFom, Is(april2019))
+        assertThat(barn1Andeler[0].stønadTom, Is(juli2019))
+        assertThat(barn1Andeler[0].prosent, Is(BigDecimal(0)))
+        assertThat(barn1Andeler[0].endretUtbetalingAndeler, Is(not(empty())))
+        assertThat(barn1Andeler[1].stønadFom, Is(august2019))
+        assertThat(barn1Andeler[1].stønadTom, Is(august2020))
+        assertThat(barn1Andeler[1].prosent, Is(BigDecimal(100)))
+        assertThat(barn1Andeler[1].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(2, barn2Andeler.size)
+        assertThat(barn2Andeler[0].stønadFom, Is(februar2019))
+        assertThat(barn2Andeler[0].stønadTom, Is(februar2019))
+        assertThat(barn2Andeler[0].prosent, Is(BigDecimal(50)))
+        assertThat(barn2Andeler[0].endretUtbetalingAndeler, Is((empty())))
+        assertThat(barn2Andeler[1].stønadFom, Is(mars2019))
+        assertThat(barn2Andeler[1].stønadTom, Is(månedFørBarnFødtDesember2006Blir18))
+        assertThat(barn2Andeler[1].prosent, Is(BigDecimal(50)))
+        assertThat(barn2Andeler[1].endretUtbetalingAndeler, Is((empty())))
+    }
+
+    // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3 år - han har full overgangsstlnad for bare deler av perioden
+    @Test
+    fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen`() {
+        val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barnFødtAugust2019.aktør
+                )
+            ),
+            atypiskeVilkårSøker = listOf(
+                AtypiskVilkår(
+                    fom = januar2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = august2022.toLocalDate().sisteDagIMåned(),
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    aktør = søker.aktør
+                )
+            ),
+            barna = listOf(barnFødtAugust2019),
+            overgangsstønadPerioder = listOf(MånedPeriode(april2022, juni2022))
+        )
+
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        assertEquals(3, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(1, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(august2022))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(1, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juni2022))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(1, barnasAndeler.size)
+        assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
+    }
+
+    // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3år, men oppfyller vilkårene kun tilbake i tid
+    @Test
+    fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen - Overgangsstønaden stopper før barn fyller 3 år fordi søker ikke lenger har rett til utvidet barnetrygd`() {
+        val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barnFødtAugust2019.aktør
+                )
+            ),
+            atypiskeVilkårSøker = listOf(
+                AtypiskVilkår(
+                    fom = januar2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = juni2022.toLocalDate().sisteDagIMåned(),
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    aktør = søker.aktør
+                )
+            ),
+            barna = listOf(barnFødtAugust2019),
+            overgangsstønadPerioder = listOf(MånedPeriode(april2022, august2022))
+        )
+
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+        assertEquals(3, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(1, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(juni2022))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(1, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juni2022))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(1, barnasAndeler.size)
+        assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
+    }
+
+    // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3 år - Har full overgangsstønad som opphører når barnet fyller 3 år
+    @Test
+    fun `Skal gi riktig resultat når søker har rett på ordinær og utvidet barnetrygd fra mars og rett på overgangsstønad fra April`() {
+        val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
+        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            atypiskeVilkårBarna = listOf(
+                AtypiskVilkår(
+                    fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    tom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    aktør = barnFødtAugust2019.aktør
+                )
+            ),
+            overgangsstønadPerioder = listOf(MånedPeriode(april2022, desember2022)),
+            barna = listOf(barnFødtAugust2019)
+        )
+
+        val andelerTilkjentYtelseITidsrom =
+            tilkjentYtelse.andelerTilkjentYtelse.filter { it.stønadFom.isSameOrBefore(desember2022) }
+
+        assertEquals(3, andelerTilkjentYtelseITidsrom.size)
+
+        val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelseITidsrom.partition { it.erSøkersAndel() }
+
+        // SØKER
+        val (utvidetAndeler, småbarnstilleggAndeler) = søkersAndeler.partition { it.erUtvidet() }
+
+        assertEquals(1, utvidetAndeler.size)
+        assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
+        assertThat(utvidetAndeler[0].stønadTom, Is(månedFørBarnBlir18))
+        assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(1, småbarnstilleggAndeler.size)
+        assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
+        assertThat(småbarnstilleggAndeler[0].stønadTom, Is(august2022))
+        assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
+
+        assertEquals(1, barnasAndeler.size)
+        assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
+        assertThat(barnasAndeler[0].stønadTom, Is(månedFørBarnBlir6))
+        assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
+        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
+    }
+
+    private data class EndretAndel(
+        val fom: YearMonth,
+        val tom: YearMonth,
+        val person: Person,
+        val årsak: Årsak,
+        val skalUtbetales: Boolean
+    )
+
+    private fun settOppScenarioOgBeregnTilkjentYtelse(
+        endretAndeler: List<EndretAndel> = emptyList(),
+        atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList(),
+        atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList(),
+        barna: List<Person>,
+        overgangsstønadPerioder: List<MånedPeriode>
+    ): TilkjentYtelse {
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søker = søker,
+            barn = barna,
+            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+            atypiskeVilkårBarna = atypiskeVilkårBarna,
+            atypiskeVilkårSøker = atypiskeVilkårSøker
+        )
+
+        val endretUtbetalingAndeler = endretAndeler.map {
+            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                behandlingId = vilkårsvurdering.behandling.id,
+                person = it.person,
+                prosent = if (it.skalUtbetales) BigDecimal(100) else BigDecimal.ZERO,
+                årsak = it.årsak,
+                fom = it.fom,
+                tom = it.tom
+            )
+        }
+
+        val tilkjentYtelse = beregnTilkjentYtelse(
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = lagPersonopplysningsgrunnlag(
+                personer = barna.plus(søker),
+                behandlingId = vilkårsvurdering.behandling.id
+            ),
+            behandling = vilkårsvurdering.behandling,
+            endretUtbetalingAndeler = endretUtbetalingAndeler
+        ) { (_) ->
+            lagOvergangsstønadPerioder(
+                perioder = overgangsstønadPerioder,
+                søkerIdent = søker.aktør.aktivFødselsnummer()
+            )
+        }
+
+        return tilkjentYtelse
+    }
+
+    private fun lagPersonopplysningsgrunnlag(personer: List<Person>, behandlingId: Long): PersonopplysningGrunnlag {
+        return PersonopplysningGrunnlag(
+            personer = personer.toMutableSet(),
+            behandlingId = behandlingId
+        )
+    }
+
+    private fun lagOvergangsstønadPerioder(
+        perioder: List<MånedPeriode>,
+        søkerIdent: String
+    ): List<InternPeriodeOvergangsstønad> {
+        return perioder.map {
+            InternPeriodeOvergangsstønad(
+                søkerIdent,
+                it.fom.førsteDagIInneværendeMåned(),
+                it.tom.sisteDagIInneværendeMåned()
+            )
+        }
+    }
+
+    private data class AtypiskVilkår(
+        val aktør: Aktør,
+        val fom: LocalDate,
+        val tom: LocalDate? = null,
+        val resultat: Resultat = Resultat.OPPFYLT,
+        val vilkårType: Vilkår,
+        val utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering? = null
+    )
+
+    private fun lagVilkårResultat(
+        personResultat: PersonResultat,
+        fom: LocalDate,
+        tom: LocalDate? = null,
+        resultat: Resultat = Resultat.OPPFYLT,
+        vilkårType: Vilkår,
+        utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
+    ): VilkårResultat {
+        return VilkårResultat(
+            personResultat = personResultat,
+            vilkårType = vilkårType,
+            resultat = resultat,
+            periodeFom = fom,
+            periodeTom = tom,
+            begrunnelse = "",
+            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
+        )
+    }
+
+    private fun lagVilkårsvurdering(
+        søker: Person,
+        barn: List<Person>,
+        ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+        atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList(),
+        atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList()
+    ): Vilkårsvurdering {
+        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
+
+        val eldsteBarn = barn.minBy { it.fødselsdato }
+
+        val søkerPersonResultat = lagPersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            person = søker,
+            ytelseType = ytelseType,
+            standardFom = eldsteBarn.fødselsdato,
+            atypiskeVilkår = atypiskeVilkårSøker
+        )
+
+        val barnasPersonResultater = barn.map { barnet ->
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                person = barnet,
+                ytelseType = ytelseType,
+                standardFom = barnet.fødselsdato,
+                atypiskeVilkår = atypiskeVilkårBarna.filter { it.aktør == barnet.aktør }
+            )
+        }
+
+        vilkårsvurdering.personResultater = barnasPersonResultater.toSet().plus(søkerPersonResultat)
+        return vilkårsvurdering
+    }
+
+    private fun lagPersonResultat(
+        vilkårsvurdering: Vilkårsvurdering,
+        person: Person,
+        ytelseType: YtelseType,
+        standardFom: LocalDate,
+        atypiskeVilkår: List<AtypiskVilkår>
+    ): PersonResultat {
+        val personResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = person.aktør
+        )
+
+        val vilkårForPersonType = Vilkår.hentVilkårFor(personType = person.type, ytelseType = ytelseType)
+
+        val ordinæreVilkårResultater = vilkårForPersonType.map { vilkår ->
+            lagVilkårResultat(
+                personResultat = personResultat,
+                vilkårType = vilkår,
+                resultat = Resultat.OPPFYLT,
+                fom = standardFom,
+                tom = if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.til18ÅrsVilkårsdato() else null
+            )
+        }
+
+        val atypiskeVilkårTyper = atypiskeVilkår.map { it.vilkårType }
+
+        val oppdaterteVilkårResultater = ordinæreVilkårResultater
+            .filter { it.vilkårType !in atypiskeVilkårTyper }
+            .plus(
+                atypiskeVilkår.map {
+                    lagVilkårResultat(
+                        personResultat = personResultat,
+                        fom = it.fom,
+                        tom = it.tom,
+                        vilkårType = it.vilkårType,
+                        resultat = it.resultat,
+                        utdypendeVilkårsvurderinger = if (it.utdypendeVilkårsvurdering != null) listOf(it.utdypendeVilkårsvurdering) else emptyList()
+                    )
+                }
+            )
+
+        personResultat.setSortedVilkårResultater(oppdaterteVilkårResultater.toSet())
+        return personResultat
     }
 }

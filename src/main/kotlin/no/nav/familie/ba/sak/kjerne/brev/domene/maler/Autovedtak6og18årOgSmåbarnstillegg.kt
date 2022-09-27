@@ -8,7 +8,7 @@ data class Autovedtak6og18årOgSmåbarnstillegg(
 ) : Vedtaksbrev {
 
     constructor(
-        vedtakFellesfelter: VedtakFellesfelter,
+        vedtakFellesfelter: VedtakFellesfelter
     ) :
         this(
             data = Autovedtak6og18årData(
@@ -35,6 +35,6 @@ data class Autovedtak6og18årData(
 
     data class Delmaler(
         val hjemmeltekst: Hjemmeltekst,
-        val autoUnderskrift: AutoUnderskrift,
+        val autoUnderskrift: AutoUnderskrift
     )
 }

@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -43,8 +43,9 @@ data class DeltBosted(
             barnAktører = barnAktører.map { it.copy() }.toSet(),
             barnPersoner = this.barnPersoner.filter { barnAktører.contains(it.aktør) }
         ).also {
-            if (barnAktører.size != barnPersoner.size)
+            if (barnAktører.size != barnPersoner.size) {
                 throw Error("Ikke samsvar mellom antall aktører og barn lenger")
+            }
         }
 
     override var id: Long = 0
@@ -54,21 +55,21 @@ data class DeltBosted(
 fun DeltBostedBuilder.oppdaterTilkjentYtelse(): TilkjentYtelse {
     val andelerTilkjentYtelserEtterEUA =
         TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            tilkjentYtelse.andelerTilkjentYtelse,
+            tilkjentYtelse.andelerTilkjentYtelse.toList(),
             bygg().tilEndreteUtebetalingAndeler()
         )
 
     tilkjentYtelse.andelerTilkjentYtelse.clear()
-    tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelserEtterEUA)
+    tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelserEtterEUA.map { it.andel })
     return tilkjentYtelse
 }
 
-fun Iterable<DeltBosted>.tilEndreteUtebetalingAndeler(): List<EndretUtbetalingAndel> {
+fun Iterable<DeltBosted>.tilEndreteUtebetalingAndeler(): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
     return this
         .filter { deltBosted -> deltBosted.fom != null && deltBosted.tom != null && deltBosted.prosent != null }
         .flatMap { deltBosted ->
             deltBosted.barnPersoner.map {
-                lagEndretUtbetalingAndel(
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     deltBosted.behandlingId,
                     it,
                     deltBosted.fom!!,

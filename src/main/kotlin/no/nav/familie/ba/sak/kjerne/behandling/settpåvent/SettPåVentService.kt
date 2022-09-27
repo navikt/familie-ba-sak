@@ -69,7 +69,7 @@ class SettPåVentService(
         loggService.opprettOppdaterVentingLogg(
             behandling = behandling,
             endretÅrsak = if (årsak != aktivSettPåVent.årsak) årsak.visningsnavn else null,
-            endretFrist = if (frist != aktivSettPåVent.frist) frist else null,
+            endretFrist = if (frist != aktivSettPåVent.frist) frist else null
         )
         logger.info("Oppdater sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
 

@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -40,7 +41,7 @@ class AutovedtakSmåbarnstilleggService(
     private val beregningService: BeregningService,
     private val autovedtakService: AutovedtakService,
     private val oppgaveService: OppgaveService,
-    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
+    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService
 ) : AutovedtakBehandlingService<Aktør> {
 
     private val antallVedtakOmOvergangsstønad: Counter =
@@ -66,7 +67,7 @@ class AutovedtakSmåbarnstilleggService(
                 "aarsak",
                 it.name,
                 "beskrivelse",
-                it.beskrivelse,
+                it.beskrivelse
             )
         }
 
@@ -102,7 +103,16 @@ class AutovedtakSmåbarnstilleggService(
             )
         }
 
-        begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
+        try {
+            begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
+        } catch (e: VedtaksperiodefinnerSmåbarnstilleggFeil) {
+            logger.warn(e.message, e)
+            return kanIkkeBehandleAutomatisk(
+                behandling = behandlingEtterBehandlingsresultat,
+                metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
+                meldingIOppgave = "Småbarnstillegg: klarer ikke bestemme vedtaksperiode som skal begrunnes, må behandles manuelt"
+            )
+        }
 
         val vedtakEtterTotrinn = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
             behandlingEtterBehandlingsresultat
@@ -124,20 +134,26 @@ class AutovedtakSmåbarnstilleggService(
         val sistIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id)
         val forrigeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) emptyList()
-            else beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = sistIverksatteBehandling.id
-            ).filter { it.erSmåbarnstillegg() }
+            if (sistIverksatteBehandling == null) {
+                emptyList()
+            } else {
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                    behandlingId = sistIverksatteBehandling.id
+                ).filter { it.erSmåbarnstillegg() }
+            }
 
         val nyeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) emptyList()
-            else beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = behandlingEtterBehandlingsresultat.id
-            ).filter { it.erSmåbarnstillegg() }
+            if (sistIverksatteBehandling == null) {
+                emptyList()
+            } else {
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                    behandlingId = behandlingEtterBehandlingsresultat.id
+                ).filter { it.erSmåbarnstillegg() }
+            }
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
             forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
+            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler
         )
 
         vedtaksperiodeHentOgPersisterService.lagre(

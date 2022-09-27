@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
@@ -41,19 +41,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksp
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
-
-fun hentPerioderMedUtbetaling(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    vedtak: Vedtak
-) = andelerTilkjentYtelse.lagVertikaleSegmenter()
-    .map { (segmenter, _) ->
-        VedtaksperiodeMedBegrunnelser(
-            fom = segmenter.fom,
-            tom = segmenter.tom,
-            vedtak = vedtak,
-            type = Vedtaksperiodetype.UTBETALING
-        )
-    }
 
 fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
@@ -119,7 +106,7 @@ fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: Vedtaksp
  * Brukes for opphør som har egen logikk dersom det er første periode.
  */
 fun erFørsteVedtaksperiodePåFagsak(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     periodeFom: LocalDate?
 ): Boolean = !andelerTilkjentYtelse.any {
     it.stønadFom.isBefore(
@@ -128,13 +115,13 @@ fun erFørsteVedtaksperiodePåFagsak(
 }
 
 fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     vedtak: Vedtak,
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
-    aktørerIForrigePersonopplysningGrunnlag: List<Aktør>,
+    aktørerIForrigePersonopplysningGrunnlag: List<Aktør>
 ): List<VedtaksperiodeMedBegrunnelser> {
     val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter()
 
@@ -170,7 +157,7 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
                                     utbetalingsperiode.tom == fom.minusDays(1) &&
                                         utbetalingsperiode.hentUtbetalingsperiodeDetaljer(
                                             andelerTilkjentYtelse = andelerTilkjentYtelse,
-                                            personopplysningGrunnlag = personopplysningGrunnlag,
+                                            personopplysningGrunnlag = personopplysningGrunnlag
                                         )
                                             .any {
                                                 it.person.personIdent ==
@@ -186,7 +173,7 @@ fun identifiserReduksjonsperioderFraSistIverksatteBehandling(
                         vedtak = vedtak,
                         fom = utledFom(gammeltSegment, overlappendePeriode),
                         tom = utledTom(gammeltSegment, overlappendePeriode),
-                        type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+                        type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
                     )
                 }
             }
@@ -213,8 +200,7 @@ fun hentGyldigeBegrunnelserForPeriode(
     vilkårsvurdering: Vilkårsvurdering,
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    kanBehandleEØS: Boolean,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
     kompetanserIPeriode: List<Kompetanse>,
     kompetanserSomStopperRettFørPeriode: List<Kompetanse>
@@ -228,11 +214,12 @@ fun hentGyldigeBegrunnelserForPeriode(
         endretUtbetalingAndeler = endretUtbetalingAndeler,
         andelerTilkjentYtelse = andelerTilkjentYtelse
     )
-    val eøsBegrunnelser = if (kanBehandleEØS) hentGyldigeEØSBegrunnelserForPeriode(
-        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-        kompetanserIPeriode = kompetanserIPeriode,
-        kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
-    ) else emptyList()
+    val eøsBegrunnelser =
+        hentGyldigeEØSBegrunnelserForPeriode(
+            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+            kompetanserIPeriode = kompetanserIPeriode,
+            kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
+        )
 
     return standardbegrunnelser + eøsBegrunnelser
 }
@@ -244,7 +231,7 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
     vilkårsvurdering: Vilkårsvurdering,
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
     sanityBegrunnelser = sanityBegrunnelser,
@@ -261,7 +248,13 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
     ytelserForSøkerForrigeMåned = hentYtelserForSøkerForrigeMåned(
         andelerTilkjentYtelse,
         utvidetVedtaksperiodeMedBegrunnelser
-    )
+    ),
+    ytelserForrigePerioder = andelerTilkjentYtelse.filter {
+        ytelseErFraForrigePeriode(
+            it,
+            utvidetVedtaksperiodeMedBegrunnelser
+        )
+    }
 )
 
 fun hentGyldigeEØSBegrunnelserForPeriode(
@@ -300,7 +293,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     aktørIderMedUtbetaling: List<String>,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    ytelserForSøkerForrigeMåned: List<YtelseType>
+    ytelserForSøkerForrigeMåned: List<YtelseType>,
+    ytelserForrigePerioder: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): List<Standardbegrunnelse> {
     val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.values()
         .filter {
@@ -311,7 +305,9 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
         }.filter {
             if (it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING) {
                 endretUtbetalingsperiodeBegrunnelser.contains(it)
-            } else true
+            } else {
+                true
+            }
         }
 
     return when (minimertVedtaksperiode.type) {
@@ -327,6 +323,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
             minimerteEndredeUtbetalingAndeler,
             erFørsteVedtaksperiodePåFagsak,
             ytelserForSøkerForrigeMåned,
+            ytelserForrigePerioder
         )
         else -> {
             velgUtbetalingsbegrunnelser(
@@ -339,6 +336,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
                 minimerteEndredeUtbetalingAndeler,
                 erFørsteVedtaksperiodePåFagsak,
                 ytelserForSøkerForrigeMåned,
+                ytelserForrigePerioder
             )
         }
     }
@@ -354,6 +352,7 @@ private fun velgRedusertBegrunnelser(
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
+    ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): List<Standardbegrunnelse> {
     val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
         it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
@@ -369,6 +368,7 @@ private fun velgRedusertBegrunnelser(
             minimerteEndredeUtbetalingAndeler,
             erFørsteVedtaksperiodePåFagsak,
             ytelserForSøkerForrigeMåned,
+            ytelserForrigePeriode
         )
         return redusertBegrunnelser + utbetalingsbegrunnelser
     }
@@ -385,6 +385,7 @@ private fun velgUtbetalingsbegrunnelser(
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
+    ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): List<Standardbegrunnelse> {
     val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype
@@ -400,6 +401,7 @@ private fun velgUtbetalingsbegrunnelser(
                         sanityBegrunnelser = sanityBegrunnelser,
                         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                         ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
+                        ytelserForrigePeriode = ytelserForrigePeriode
                     )
                 ) {
                     acc.add(standardBegrunnelse)
@@ -421,10 +423,14 @@ private fun velgUtbetalingsbegrunnelser(
 }
 
 fun hentYtelserForSøkerForrigeMåned(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser
 ) = andelerTilkjentYtelse.filter {
     it.type.erKnyttetTilSøker() &&
-        it.stønadTom.sisteDagIInneværendeMåned()
-            .erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)
+        ytelseErFraForrigePeriode(it, utvidetVedtaksperiodeMedBegrunnelser)
 }.map { it.type }
+
+fun ytelseErFraForrigePeriode(
+    ytelse: AndelTilkjentYtelseMedEndreteUtbetalinger,
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser
+) = ytelse.stønadTom.sisteDagIInneværendeMåned().erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)

@@ -126,7 +126,7 @@ no.nav.security.jwt:
 prosessering.fixedDelayString.in.milliseconds: 2000
 
 credential:
-  username: "srv-ks-sak"
+  username: "srvfamilie-ba-sak"
   password: "not-a-real-password"
 
 logging:
@@ -181,3 +181,4 @@ KAFKA_BROKERS: http://localhost:9092
 
 retry.backoff.delay: 5
 NAIS_APP_NAME: familie-ba-sak
+CRON_FAGSAKSTATUS_SCHEDULER: "0 0/10 * ? * *"

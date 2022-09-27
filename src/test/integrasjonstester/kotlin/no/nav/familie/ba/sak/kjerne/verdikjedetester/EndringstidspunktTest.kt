@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering.lagVilkårsvurderin
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -37,8 +37,8 @@ class EndringstidspunktTest(
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -49,13 +49,13 @@ class EndringstidspunktTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1982-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker",
+                    etternavn = "Søker"
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = barnFødselsdato.toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen",
+                        etternavn = "Barnesen"
                     )
                 )
             )
@@ -85,7 +85,7 @@ class EndringstidspunktTest(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
         val sisteDagUtenDeltBostedOppfylt = barnFødselsdato.plusYears(1).sisteDagIMåned()
@@ -99,7 +99,7 @@ class EndringstidspunktTest(
                         vilkårType = Vilkår.BOR_MED_SØKER,
                         periodeFom = barnFødselsdato,
                         periodeTom = førsteDagMedDeltBostedOppfylt,
-                        personResultat = mockk(relaxed = true),
+                        personResultat = mockk(relaxed = true)
                     ),
                     lagVilkårResultat(
                         vilkårType = Vilkår.BOR_MED_SØKER,
@@ -114,7 +114,7 @@ class EndringstidspunktTest(
                         periodeTom = sisteDagMedDeltBosdet.førsteDagINesteMåned(),
                         personResultat = mockk(relaxed = true),
                         utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
-                    ),
+                    )
                 )
             }.toMutableMap()
 
@@ -139,7 +139,7 @@ class EndringstidspunktTest(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)

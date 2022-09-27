@@ -40,6 +40,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
 
 @ActiveProfiles(
     "postgres",
+    "integrasjonstest",
     "mock-oauth",
     "mock-localdate-service",
     "mock-tilbakekreving-klient",
@@ -64,7 +65,7 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
 
     fun mockServerKlient(): MockserverKlient = MockserverKlient(
         mockServerUrl = "http://localhost:1337",
-        restOperations = restOperations,
+        restOperations = restOperations
     )
 }
 

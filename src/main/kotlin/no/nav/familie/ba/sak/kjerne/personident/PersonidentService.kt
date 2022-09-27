@@ -15,7 +15,7 @@ class PersonidentService(
     private val personidentRepository: PersonidentRepository,
     private val aktørIdRepository: AktørIdRepository,
     private val pdlIdentRestClient: PdlIdentRestClient,
-    private val taskRepository: TaskRepositoryWrapper,
+    private val taskRepository: TaskRepositoryWrapper
 ) {
 
     fun hentIdenter(personIdent: String, historikk: Boolean): List<IdentInformasjon> {
@@ -46,7 +46,9 @@ class PersonidentService(
             logger.info("Legger til ny ident")
             secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
             opprettPersonIdent(aktør, nyIdent.ident)
-        } else aktør
+        } else {
+            aktør
+        }
     }
 
     @Transactional
@@ -78,7 +80,12 @@ class PersonidentService(
 
     fun hentOgLagreAktør(ident: String, lagre: Boolean): Aktør {
         // Noter at ident kan være både av typen aktørid eller fødselsnummer (d- og f nummer)
-        val personident = personidentRepository.findByFødselsnummerOrNull(ident)
+        val personident = try {
+            personidentRepository.findByFødselsnummerOrNull(ident)
+        } catch (e: Exception) {
+            secureLogger.info("Feil ved henting av ident=$ident, lagre=$lagre", e)
+            throw e
+        }
         if (personident != null) {
             return personident.aktør
         }
@@ -144,6 +151,7 @@ class PersonidentService(
     }
 
     private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String, lagre: Boolean): Aktør {
+        secureLogger.info("Oppretter aktør og personIdent. aktørIdStr=$aktørIdStr fødselsnummer=$fødselsnummer lagre=$lagre")
         val aktør = Aktør(aktørId = aktørIdStr).also {
             it.personidenter.add(
                 Personident(fødselsnummer = fødselsnummer, aktør = it)
@@ -158,20 +166,23 @@ class PersonidentService(
     }
 
     private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String, lagre: Boolean = true): Aktør {
-        aktør.personidenter.filter { it.aktiv }.map {
-            it.aktiv = false
-            it.gjelderTil = LocalDateTime.now()
+        secureLogger.info("Oppretter personIdent. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre, personidenter=${aktør.personidenter}")
+        val eksisterendePersonIdent = aktør.personidenter.filter { it.fødselsnummer == fødselsnummer && it.aktiv }
+        secureLogger.info("Aktøren har fødselsnummer ${aktør.personidenter.map { it.fødselsnummer } }")
+        if (eksisterendePersonIdent.isEmpty()) {
+            secureLogger.info("Fins ikke eksisterende personIdent for. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre, personidenter=${aktør.personidenter}, så lager ny")
+            aktør.personidenter.filter { it.aktiv }.map {
+                it.aktiv = false
+                it.gjelderTil = LocalDateTime.now()
+            }
+            if (lagre) aktørIdRepository.saveAndFlush(aktør) // Må lagre her fordi unik index er en blanding av aktørid og gjelderTil, og hvis man ikke lagerer før man legger til ny, så feiler det pga indexen.
+
+            aktør.personidenter.add(
+                Personident(fødselsnummer = fødselsnummer, aktør = aktør)
+            )
+            if (lagre) aktørIdRepository.saveAndFlush(aktør)
         }
-        // Ekstra persistering eller kommer unique constraint feile.
-        if (lagre) aktørIdRepository.saveAndFlush(aktør)
-        aktør.personidenter.add(
-            Personident(fødselsnummer = fødselsnummer, aktør = aktør)
-        )
-        return if (lagre) {
-            aktørIdRepository.saveAndFlush(aktør)
-        } else {
-            aktør
-        }
+        return aktør
     }
 
     private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =

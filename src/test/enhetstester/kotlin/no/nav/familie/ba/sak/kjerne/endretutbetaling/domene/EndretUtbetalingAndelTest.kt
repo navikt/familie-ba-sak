@@ -29,38 +29,6 @@ internal class EndretUtbetalingAndelTest {
     }
 
     @Test
-    fun `Sjekk at fom ikke kan komme etter tom`() {
-        val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = 1)
-        endretUtbetalingAndel.person = tilfeldigPerson()
-        endretUtbetalingAndel.prosent = BigDecimal(0)
-        endretUtbetalingAndel.fom = YearMonth.of(2020, 11)
-        endretUtbetalingAndel.tom = YearMonth.of(2020, 10)
-        endretUtbetalingAndel.årsak = Årsak.EØS_SEKUNDÆRLAND
-        endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
-        endretUtbetalingAndel.begrunnelse = "begrunnelse"
-
-        assertThrows<RuntimeException> {
-            endretUtbetalingAndel.validerUtfyltEndring()
-        }
-    }
-
-    @Test
-    fun `Sjekk validering med ikke tomme felt`() {
-        val behandling = lagBehandling()
-        val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
-
-        endretUtbetalingAndel.person = tilfeldigPerson()
-        endretUtbetalingAndel.prosent = BigDecimal(0)
-        endretUtbetalingAndel.fom = YearMonth.of(2020, 10)
-        endretUtbetalingAndel.tom = YearMonth.of(2020, 10)
-        endretUtbetalingAndel.årsak = Årsak.EØS_SEKUNDÆRLAND
-        endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
-        endretUtbetalingAndel.begrunnelse = "begrunnelse"
-
-        assertTrue(endretUtbetalingAndel.validerUtfyltEndring())
-    }
-
-    @Test
     fun `Sjekk validering for delt bosted med tomt felt avtaletidpunkt`() {
         val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
@@ -104,7 +72,7 @@ internal class EndretUtbetalingAndelTest {
             person = barn,
             fom = YearMonth.now(),
             tom = null,
-            årsak = Årsak.DELT_BOSTED,
+            årsak = Årsak.DELT_BOSTED
         )
 
         val sisteTomPåAndeler = YearMonth.now().plusMonths(10)
@@ -144,7 +112,7 @@ internal class EndretUtbetalingAndelTest {
             person = barn,
             fom = YearMonth.now(),
             tom = null,
-            årsak = Årsak.DELT_BOSTED,
+            årsak = Årsak.DELT_BOSTED
         )
 
         val annenEndretAndel = lagEndretUtbetalingAndel(

@@ -27,7 +27,7 @@ import java.time.LocalDate
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-brev-klient")
+@ActiveProfiles("postgres", "mock-brev-klient", "integrasjonstest")
 @Tag("integration")
 class KonsistensavstemmingSchedulerTest : AbstractMockkSpringRunner() {
 

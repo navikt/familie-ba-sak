@@ -8,13 +8,15 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
@@ -107,7 +109,7 @@ class EndretUtbetalingAndelValideringTest {
         )
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel,
-            listOf(endretUtbetalingAndel.copy(årsak = Årsak.EØS_SEKUNDÆRLAND))
+            listOf(endretUtbetalingAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT))
         )
     }
 
@@ -131,7 +133,7 @@ class EndretUtbetalingAndelValideringTest {
                 fom = YearMonth.of(2018, 10),
                 tom = YearMonth.of(2021, 10),
                 person = barn2
-            ),
+            )
         )
 
         val endretUtbetalingAndel = EndretUtbetalingAndel(
@@ -297,7 +299,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `sjekk at alle endrede utbetalingsandeler er tilknyttet andeltilkjentytelser`() {
-        val endretUtbetalingAndel1 = lagEndretUtbetalingAndel(person = tilfeldigPerson())
+        val endretUtbetalingAndel1 = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(person = tilfeldigPerson())
         val feil = assertThrows<FunksjonellFeil> {
             validerAtEndringerErTilknyttetAndelTilkjentYtelse(listOf(endretUtbetalingAndel1))
         }
@@ -309,7 +311,10 @@ class EndretUtbetalingAndelValideringTest {
         val andelTilkjentYtelse: AndelTilkjentYtelse = mockk()
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(
             listOf(
-                endretUtbetalingAndel1.copy(andelTilkjentYtelser = mutableListOf(andelTilkjentYtelse))
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                    person = tilfeldigPerson(),
+                    andelTilkjentYtelser = mutableListOf(andelTilkjentYtelse)
+                )
             )
         )
     }
@@ -373,7 +378,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktørId(),
+                aktør = randomAktør(),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fom.minusMonths(3),
@@ -451,7 +456,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktørId(),
+                aktør = randomAktør(),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fom1.minusMonths(3),
@@ -536,7 +541,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktørId(),
+                aktør = randomAktør(),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fomBarn2,
@@ -615,7 +620,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktørId(),
+                aktør = randomAktør(),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fomBarn2,
@@ -649,7 +654,7 @@ class EndretUtbetalingAndelValideringTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktørId(),
+                aktør = randomAktør(),
                 periodeFom = LocalDate.now().minusMonths(4),
                 periodeTom = LocalDate.now(),
                 resultat = Resultat.OPPFYLT
@@ -693,7 +698,7 @@ class EndretUtbetalingAndelValideringTest {
             )
         )
 
-        val utvidetEndring = lagEndretUtbetalingAndel(
+        val utvidetEndring = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
             fom = fom1,
             tom = tom2,
             person = søker,
@@ -704,14 +709,16 @@ class EndretUtbetalingAndelValideringTest {
 
         val deltBostedEndring =
             endretUtbetalingAndel(
-                barn, YtelseType.ORDINÆR_BARNETRYGD, BigDecimal.ZERO,
+                barn,
+                YtelseType.ORDINÆR_BARNETRYGD,
+                BigDecimal.ZERO,
                 fomUtvidet = fom1,
-                tomUtvidet = tom2,
+                tomUtvidet = tom2
             )
 
         Assertions.assertThrows(FunksjonellFeil::class.java) {
             validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
-                listOf(utvidetEndring, deltBostedEndring),
+                listOf(utvidetEndring, deltBostedEndring).map { it.endretUtbetalingAndel },
                 andelTilkjentYtelser
             )
         }
@@ -719,7 +726,6 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `skal kaste feil dersom det er en endring på utvidet ytelse uten en endring på delt bosted i samme periode`() {
-
         Assertions.assertThrows(FunksjonellFeil::class.java) {
             validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
                 listOf(endretUtbetalingAndelUtvidetNullutbetaling)
@@ -729,7 +735,6 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `skal kaste feil dersom delt bosted endring krysser utvidet tilkjent ytelse og ikke ellers`() {
-
         val fomUtvidet: YearMonth = inneværendeMåned().minusMonths(4)
         val tomUtvidet: YearMonth = inneværendeMåned().minusMonths(2)
 
@@ -821,9 +826,9 @@ class EndretUtbetalingAndelValideringTest {
         ytelsestype: YtelseType,
         prosent: BigDecimal,
         fomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
-        tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
-    ): EndretUtbetalingAndel {
-        return lagEndretUtbetalingAndel(
+        tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1)
+    ): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
+        return lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
             id = Random.nextLong(),
             fom = fomUtvidet,
             tom = tomUtvidet,

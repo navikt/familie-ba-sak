@@ -27,7 +27,7 @@ class EndretUtbetalingAndelService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val sanityService: SanityService,
-    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val vilkårsvurderingService: VilkårsvurderingService
 ) {
     fun hentEndredeUtbetalingAndeler(behandlingId: Long) =
         endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
@@ -60,14 +60,25 @@ class EndretUtbetalingAndelService(
             andelTilkjentYtelser = andelTilkjentYtelser
         )
 
-        validerTomDato(tomDato = endretUtbetalingAndel.tom, gyldigTomEtterDagensDato = gyldigTomEtterDagensDato, årsak = endretUtbetalingAndel.årsak)
+        validerTomDato(
+            tomDato = endretUtbetalingAndel.tom,
+            gyldigTomEtterDagensDato = gyldigTomEtterDagensDato,
+            årsak = endretUtbetalingAndel.årsak
+        )
 
         if (endretUtbetalingAndel.tom == null) {
             endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
         }
-        validerÅrsak(årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel, vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id))
+        validerÅrsak(
+            årsak = endretUtbetalingAndel.årsak,
+            endretUtbetalingAndel = endretUtbetalingAndel,
+            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        )
 
-        validerUtbetalingMotÅrsak(årsak = endretUtbetalingAndel.årsak, skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0))
+        validerUtbetalingMotÅrsak(
+            årsak = endretUtbetalingAndel.årsak,
+            skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0)
+        )
 
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel = endretUtbetalingAndel,
@@ -76,19 +87,23 @@ class EndretUtbetalingAndelService(
 
         validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, andelTilkjentYtelser)
 
+        endretUtbetalingAndelRepository.saveAndFlush(endretUtbetalingAndel)
+
         beregningService.oppdaterBehandlingMedBeregning(
-            behandling, personopplysningGrunnlag, endretUtbetalingAndel
+            behandling,
+            personopplysningGrunnlag,
+            endretUtbetalingAndel
         )
     }
 
     @Transactional
     fun fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         behandling: Behandling,
-        endretUtbetalingAndelId: Long,
+        endretUtbetalingAndelId: Long
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
         endretUtbetalingAndel.andelTilkjentYtelser.forEach { it.endretUtbetalingAndeler.clear() }
-        endretUtbetalingAndelRepository.delete(endretUtbetalingAndel)
+        endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
@@ -103,7 +118,7 @@ class EndretUtbetalingAndelService(
     ) =
         endretUtbetalingAndelRepository.save(
             EndretUtbetalingAndel(
-                behandlingId = behandling.id,
+                behandlingId = behandling.id
             )
         )
 

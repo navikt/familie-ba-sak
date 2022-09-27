@@ -19,7 +19,7 @@ class BisysService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val fagsakRepository: FagsakRepository,
     private val personidentService: PersonidentService,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) {
     fun hentUtvidetBarnetrygd(personIdent: String, fraDato: LocalDate): BisysUtvidetBarnetrygdResponse {
         val aktør = personidentService.hentAktør(personIdent)
@@ -95,7 +95,9 @@ class BisysService(
                     sammenslåttePerioder.lastOrNull()?.deltBosted == nesteUtbetaling.deltBosted
                 ) {
                     sammenslåttePerioder.apply { add(removeLast().copy(tomMåned = nesteUtbetaling.tomMåned)) }
-                } else sammenslåttePerioder.apply { add(nesteUtbetaling) }
+                } else {
+                    sammenslåttePerioder.apply { add(nesteUtbetaling) }
+                }
             }
     }
 

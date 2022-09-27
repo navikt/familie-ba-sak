@@ -8,9 +8,8 @@ import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -41,7 +40,6 @@ class BehandlingstemaServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val tidslinjeService = mockk<VilkårsvurderingTidslinjeService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     val behandlingstemaService = BehandlingstemaService(
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -49,23 +47,21 @@ class BehandlingstemaServiceTest {
         loggService = loggService,
         oppgaveService = oppgaveService,
         vilkårsvurderingTidslinjeService = tidslinjeService,
-        vilkårsvurderingRepository = vilkårsvurderingRepository,
-        featureToggleService = featureToggleService,
+        vilkårsvurderingRepository = vilkårsvurderingRepository
     )
     val defaultFagsak = defaultFagsak()
     val defaultBehandling = lagBehandling(defaultFagsak)
 
     @BeforeAll
     fun init() {
-        every { featureToggleService.isEnabled(any()) } returns true
         every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(defaultFagsak.id) } returns defaultBehandling
     }
 
     @Test
     fun `Skal utlede EØS dersom minst ett vilkår i har blitt behandlet i inneværende behandling`() {
-        val barn = randomAktørId()
+        val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling,
+            behandling = defaultBehandling
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -93,9 +89,9 @@ class BehandlingstemaServiceTest {
 
     @Test
     fun `Skal utlede NASJONAL dersom EØS vilkåret ble behandlet i annen behandling`() {
-        val barn = randomAktørId()
+        val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling,
+            behandling = defaultBehandling
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -124,7 +120,7 @@ class BehandlingstemaServiceTest {
     @Test
     fun `Skal utlede UTVIDET dersom minst ett vilkår i har blitt behandlet i inneværende behandling`() {
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling,
+            behandling = defaultBehandling
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -150,9 +146,9 @@ class BehandlingstemaServiceTest {
 
     @Test
     fun `Skal utlede ORDINÆR dersom UTVIDET vilkåret ble behandlet i annen behandling`() {
-        val barn = randomAktørId()
+        val barn = randomAktør()
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = defaultBehandling,
+            behandling = defaultBehandling
         )
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -162,7 +158,7 @@ class BehandlingstemaServiceTest {
                     vilkår = Vilkår.UTVIDET_BARNETRYGD,
                     vilkårRegelverk = Regelverk.NASJONALE_REGLER,
                     behandlingId = 0L
-                ),
+                )
             )
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
@@ -171,12 +167,6 @@ class BehandlingstemaServiceTest {
         val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(defaultFagsak.id)
 
         assertEquals(BehandlingUnderkategori.ORDINÆR, underkategori)
-    }
-
-    @Test
-    fun `skal hente løpende kategori til NASJONAL når toggelen er av`() {
-        every { featureToggleService.isEnabled(any()) } returns false
-        assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }
 
     @Test

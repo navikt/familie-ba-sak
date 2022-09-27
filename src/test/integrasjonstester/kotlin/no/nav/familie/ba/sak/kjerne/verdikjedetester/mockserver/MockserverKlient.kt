@@ -8,7 +8,7 @@ import org.springframework.web.client.postForEntity
 
 class MockserverKlient(
     private val mockServerUrl: String,
-    private val restOperations: RestOperations,
+    private val restOperations: RestOperations
 ) {
     fun lagScenario(restScenario: RestScenario): RestScenario {
         val scenario = restOperations.postForEntity<RestScenario>("$mockServerUrl/rest/scenario", restScenario).body

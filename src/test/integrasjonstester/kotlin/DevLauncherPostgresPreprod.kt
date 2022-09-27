@@ -9,11 +9,13 @@ fun main(args: Array<String>) {
         "mock-økonomi",
         "mock-infotrygd-feed",
         "mock-tilbakekreving-klient",
-        "task-scheduling"
+        "task-scheduling",
+        "mock-infotrygd-barnetrygd"
     )
 
-    if (args.contains("--dbcontainer"))
+    if (args.contains("--dbcontainer")) {
         springBuilder.initializers(DbContainerInitializer())
+    }
 
     springBuilder.run(*args)
 }

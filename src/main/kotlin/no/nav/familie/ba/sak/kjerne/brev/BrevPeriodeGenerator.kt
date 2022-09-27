@@ -36,7 +36,8 @@ class BrevPeriodeGenerator(
     private val minimertVedtaksperiode: MinimertVedtaksperiode,
     private val barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
     private val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
-    private val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>
+    private val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>,
+    private val dødeBarnForrigePeriode: List<String>
 ) {
 
     fun genererBrevPeriode(): BrevPeriode? {
@@ -52,9 +53,11 @@ class BrevPeriodeGenerator(
         if (begrunnelserOgFritekster.isEmpty()) return null
 
         val tomDato =
-            if (minimertVedtaksperiode.tom?.erSenereEnnInneværendeMåned() == false)
+            if (minimertVedtaksperiode.tom?.erSenereEnnInneværendeMåned() == false) {
                 minimertVedtaksperiode.tom.tilDagMånedÅr()
-            else null
+            } else {
+                null
+            }
 
         val identerIBegrunnelene = begrunnelseGrunnlagMedPersoner
             .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
@@ -82,6 +85,7 @@ class BrevPeriodeGenerator(
                     antallBarn = kompetanse.personer.size,
                     maalform = brevMålform.tilSanityFormat(),
                     sokersAktivitet = kompetanse.søkersAktivitet,
+                    sokersAktivitetsland = kompetanse.søkersAktivitetsland?.navn
                 )
             }
         }
@@ -113,6 +117,7 @@ class BrevPeriodeGenerator(
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
             erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
             barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
+            dødeBarnForrigePeriode = dødeBarnForrigePeriode
         )
     }
 
@@ -120,7 +125,6 @@ class BrevPeriodeGenerator(
         begrunnelserGrunnlagMedPersoner: List<BrevBegrunnelseGrunnlagMedPersoner>,
         eøsBegrunnelserMedKompetanser: List<EØSBegrunnelseMedKompetanser>
     ): List<Begrunnelse> {
-
         val brevBegrunnelser = begrunnelserGrunnlagMedPersoner
             .map {
                 it.tilBrevBegrunnelse(
@@ -180,7 +184,7 @@ class BrevPeriodeGenerator(
             antallBarnMedUtbetaling = barnMedUtbetaling.size.toString(),
             antallBarnMedNullutbetaling = barnMedNullutbetaling.size.toString(),
             fodselsdagerBarnMedUtbetaling = barnMedUtbetaling.tilBarnasFødselsdatoer(),
-            fodselsdagerBarnMedNullutbetaling = barnMedNullutbetaling.tilBarnasFødselsdatoer(),
+            fodselsdagerBarnMedNullutbetaling = barnMedNullutbetaling.tilBarnasFødselsdatoer()
         )
     }
 
@@ -200,7 +204,7 @@ class BrevPeriodeGenerator(
     private fun hentPeriodetype(
         fom: LocalDate?,
         barnMedUtbetaling: List<MinimertRestPerson>,
-        utbetalingsbeløp: Int,
+        utbetalingsbeløp: Int
     ) = when (minimertVedtaksperiode.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET
         Vedtaksperiodetype.UTBETALING -> when {
@@ -215,7 +219,6 @@ class BrevPeriodeGenerator(
     }
 
     fun finnBarnIUtbetalingPeriode(identerIBegrunnelene: List<String>): List<MinimertRestPerson> {
-
         val identerMedUtbetaling =
             minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer.map { it.person.personIdent }
 
@@ -232,7 +235,7 @@ class BrevPeriodeGenerator(
     private fun hentFomtekstFortsattInnvilget(
         målform: Målform,
         fom: LocalDate?,
-        begrunnelser: List<Standardbegrunnelse>,
+        begrunnelser: List<Standardbegrunnelse>
     ): String? {
         val erAutobrev = begrunnelser.any {
             it == Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ||
@@ -241,6 +244,8 @@ class BrevPeriodeGenerator(
         return if (erAutobrev && fom != null) {
             val fra = if (målform == Målform.NB) "Fra" else "Frå"
             "$fra ${fom.tilDagMånedÅr()} får du:"
-        } else null
+        } else {
+            null
+        }
     }
 }

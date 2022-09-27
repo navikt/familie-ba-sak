@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -24,16 +24,16 @@ class KompetanseRepositoryTest(
 
     @Test
     fun `Skal lagre flere kompetanser med gjenbruk av flere aktører`() {
-        val søker = aktørIdRepository.save(randomAktørId())
-        val barn1 = aktørIdRepository.save(randomAktørId())
-        val barn2 = aktørIdRepository.save(randomAktørId())
+        val søker = aktørIdRepository.save(randomAktør())
+        val barn1 = aktørIdRepository.save(randomAktør())
+        val barn2 = aktørIdRepository.save(randomAktør())
 
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandling(fagsak))
 
         val kompetanse = kompetanseRepository.save(
             lagKompetanse(
-                barnAktører = setOf(barn1, barn2),
+                barnAktører = setOf(barn1, barn2)
             ).also { it.behandlingId = behandling.id }
         )
 
@@ -48,8 +48,8 @@ class KompetanseRepositoryTest(
 
     @Test
     fun `Skal lagre skjema-feltene`() {
-        val søker = aktørIdRepository.save(randomAktørId())
-        val barn1 = aktørIdRepository.save(randomAktørId())
+        val søker = aktørIdRepository.save(randomAktør())
+        val barn1 = aktørIdRepository.save(randomAktør())
 
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
         val behandling = behandlingRepository.save(lagBehandling(fagsak))
@@ -60,7 +60,7 @@ class KompetanseRepositoryTest(
                 barnAktører = setOf(barn1),
                 fom = YearMonth.of(2020, 1),
                 tom = YearMonth.of(2021, 12),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER_I_NORGE,
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_PENSJON,
                 annenForeldersAktivitetsland = "pl",
                 barnetsBostedsland = "sl"

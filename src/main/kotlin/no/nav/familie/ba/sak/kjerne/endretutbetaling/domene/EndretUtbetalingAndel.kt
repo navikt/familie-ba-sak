@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -49,7 +50,8 @@ data class EndretUtbetalingAndel(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
 
-    @ManyToOne @JoinColumn(name = "fk_po_person_id")
+    @ManyToOne
+    @JoinColumn(name = "fk_po_person_id")
     var person: Person? = null,
 
     @Column(name = "prosent")
@@ -106,11 +108,12 @@ data class EndretUtbetalingAndel(
             throw FunksjonellFeil(melding = feilmelding, frontendFeilmelding = feilmelding)
         }
 
-        if (fom!! > tom!!)
+        if (fom!! > tom!!) {
             throw FunksjonellFeil(
                 melding = "fom må være lik eller komme før tom",
-                frontendFeilmelding = "Du kan ikke sette en f.o.m. dato som er etter t.o.m. dato",
+                frontendFeilmelding = "Du kan ikke sette en f.o.m. dato som er etter t.o.m. dato"
             )
+        }
 
         if (årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null) {
             throw FunksjonellFeil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
@@ -126,28 +129,26 @@ enum class Årsak(val visningsnavn: String) {
     DELT_BOSTED("Delt bosted"),
     ETTERBETALING_3ÅR("Etterbetaling 3 år"),
     ENDRE_MOTTAKER("Foreldrene bor sammen, endret mottaker"),
-    ALLEREDE_UTBETALT("Allerede utbetalt"),
-    EØS_SEKUNDÆRLAND("Eøs sekundærland");
-
-    fun kanGiNullutbetaling() = this == EØS_SEKUNDÆRLAND
+    ALLEREDE_UTBETALT("Allerede utbetalt")
 }
 
-fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingAndel(
-    id = this.id,
-    personIdent = this.person?.aktør?.aktivFødselsnummer(),
-    prosent = this.prosent,
-    fom = this.fom,
-    tom = this.tom,
-    årsak = this.årsak,
-    avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
-    søknadstidspunkt = this.søknadstidspunkt,
-    begrunnelse = this.begrunnelse,
-    erTilknyttetAndeler = this.andelTilkjentYtelser.isNotEmpty()
-)
+fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
+    RestEndretUtbetalingAndel(
+        id = this.id,
+        personIdent = this.aktivtFødselsnummer,
+        prosent = this.prosent,
+        fom = this.fom,
+        tom = this.tom,
+        årsak = this.årsak,
+        avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
+        søknadstidspunkt = this.søknadstidspunkt,
+        begrunnelse = this.begrunnelse,
+        erTilknyttetAndeler = this.andelerTilkjentYtelse.isNotEmpty()
+    )
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
-    person: Person,
+    person: Person
 ): EndretUtbetalingAndel {
     this.fom = restEndretUtbetalingAndel.fom
     this.tom = restEndretUtbetalingAndel.tom

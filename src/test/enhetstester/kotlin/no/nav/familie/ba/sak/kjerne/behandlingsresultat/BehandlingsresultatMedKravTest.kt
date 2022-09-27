@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -18,8 +18,8 @@ class BehandlingsresultatMedKravTest {
 
     val søker = tilfeldigPerson()
 
-    private val barn1Aktør = randomAktørId()
-    private val barn2Aktør = randomAktørId()
+    private val barn1Aktør = randomAktør()
+    private val barn2Aktør = randomAktør()
     private val defaultYtelseSluttForLøpende = inneværendeMåned().plusMonths(1)
     private val defaultYtelseSluttForAvslått = TIDENES_MORGEN.toYearMonth()
 
@@ -33,7 +33,7 @@ class BehandlingsresultatMedKravTest {
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET),
-                    ytelseSlutt = defaultYtelseSluttForLøpende,
+                    ytelseSlutt = defaultYtelseSluttForLøpende
                 )
             )
         )
@@ -57,7 +57,7 @@ class BehandlingsresultatMedKravTest {
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET),
-                    ytelseSlutt = defaultYtelseSluttForLøpende,
+                    ytelseSlutt = defaultYtelseSluttForLøpende
                 )
             )
         )
@@ -74,14 +74,14 @@ class BehandlingsresultatMedKravTest {
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(),
-                    ytelseSlutt = defaultYtelseSluttForLøpende,
+                    ytelseSlutt = defaultYtelseSluttForLøpende
                 ),
                 YtelsePerson(
                     aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET),
-                    ytelseSlutt = defaultYtelseSluttForLøpende,
+                    ytelseSlutt = defaultYtelseSluttForLøpende
                 )
             )
         )
@@ -122,7 +122,7 @@ class BehandlingsresultatMedKravTest {
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET),
-                    ytelseSlutt = defaultYtelseSluttForLøpende,
+                    ytelseSlutt = defaultYtelseSluttForLøpende
                 ),
                 YtelsePerson(
                     aktør = barn1Aktør,
@@ -145,7 +145,7 @@ class BehandlingsresultatMedKravTest {
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
-                    ytelseSlutt = inneværendeMåned(),
+                    ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
                     aktør = barn1Aktør,
@@ -193,7 +193,7 @@ class BehandlingsresultatMedKravTest {
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
-                    ytelseSlutt = defaultYtelseSluttForLøpende,
+                    ytelseSlutt = defaultYtelseSluttForLøpende
                 )
             )
         )
@@ -210,14 +210,14 @@ class BehandlingsresultatMedKravTest {
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(),
-                    ytelseSlutt = defaultYtelseSluttForLøpende,
+                    ytelseSlutt = defaultYtelseSluttForLøpende
                 ),
                 YtelsePerson(
                     aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
-                    ytelseSlutt = defaultYtelseSluttForLøpende,
+                    ytelseSlutt = defaultYtelseSluttForLøpende
                 )
             )
         )
@@ -370,7 +370,7 @@ class BehandlingsresultatMedKravTest {
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                     ytelseSlutt = defaultYtelseSluttForAvslått
-                ),
+                )
             )
         )
         assertEquals(Behandlingsresultat.AVSLÅTT, behandlingsresultat)
@@ -393,7 +393,7 @@ class BehandlingsresultatMedKravTest {
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                     ytelseSlutt = defaultYtelseSluttForAvslått
-                ),
+                )
             )
         )
         assertEquals(Behandlingsresultat.AVSLÅTT, behandlingsresultat)
@@ -415,8 +415,8 @@ class BehandlingsresultatMedKravTest {
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                    ytelseSlutt = defaultYtelseSluttForAvslått,
-                ),
+                    ytelseSlutt = defaultYtelseSluttForAvslått
+                )
             )
         )
         assertEquals(Behandlingsresultat.AVSLÅTT_OG_OPPHØRT, behandlingsresultat)
@@ -431,15 +431,15 @@ class BehandlingsresultatMedKravTest {
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING),
-                    ytelseSlutt = defaultYtelseSluttForLøpende,
+                    ytelseSlutt = defaultYtelseSluttForLøpende
                 ),
                 YtelsePerson(
                     aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                    ytelseSlutt = defaultYtelseSluttForAvslått,
-                ),
+                    ytelseSlutt = defaultYtelseSluttForAvslått
+                )
             )
         )
         assertEquals(Behandlingsresultat.AVSLÅTT_OG_ENDRET, behandlingsresultat)
@@ -461,8 +461,8 @@ class BehandlingsresultatMedKravTest {
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                    ytelseSlutt = defaultYtelseSluttForAvslått,
-                ),
+                    ytelseSlutt = defaultYtelseSluttForAvslått
+                )
             )
         )
         assertEquals(Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT, behandlingsresultat)
@@ -478,7 +478,7 @@ class BehandlingsresultatMedKravTest {
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE, KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(),
                     ytelseSlutt = inneværendeMåned()
-                ),
+                )
             )
         )
         assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, behandlingsresultat)

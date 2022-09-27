@@ -30,7 +30,7 @@ data class SanityBegrunnelse(
     val hjemlerFolketrygdloven: List<String> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
-    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
+    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null
 )
 
 data class RestSanityBegrunnelse(
@@ -48,7 +48,7 @@ data class RestSanityBegrunnelse(
     val hjemlerFolketrygdloven: List<String>?,
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: String?,
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
-    val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
+    val utvidetBarnetrygdTriggere: List<String>? = emptyList()
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse {
         return SanityBegrunnelse(
@@ -85,7 +85,7 @@ data class RestSanityBegrunnelse(
             },
             utvidetBarnetrygdTriggere = utvidetBarnetrygdTriggere?.mapNotNull {
                 finnEnumverdi(it, UtvidetBarnetrygdTrigger.values(), apiNavn)
-            },
+            }
         )
     }
 }
@@ -128,7 +128,7 @@ fun VilkårRolle.tilPersonType() =
 
 enum class VilkårRolle {
     SOKER,
-    BARN,
+    BARN
 }
 
 enum class VilkårTrigger {
@@ -147,10 +147,11 @@ enum class ØvrigTrigger {
     ENDRET_UTBETALING,
     GJELDER_FØRSTE_PERIODE,
     GJELDER_FRA_INNVILGELSESTIDSPUNKT,
+    BARN_DØD
 }
 
 enum class EndretUtbetalingsperiodeTrigger {
-    ETTER_ENDRET_UTBETALINGSPERIODE,
+    ETTER_ENDRET_UTBETALINGSPERIODE
 }
 
 enum class EndretUtbetalingsperiodeDeltBostedTriggere {
@@ -160,11 +161,10 @@ enum class EndretUtbetalingsperiodeDeltBostedTriggere {
 }
 
 enum class UtvidetBarnetrygdTrigger {
-    SMÅBARNSTILLEGG,
+    SMÅBARNSTILLEGG
 }
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
-
     return TriggesAv(
         vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
         personTyper = if (this.rolle.isEmpty()) {
@@ -198,7 +198,8 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         endringsaarsaker = this.endringsaarsaker?.toSet() ?: emptySet(),
         småbarnstillegg = this.inneholderUtvidetBarnetrygdTrigger(UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG),
         gjelderFørstePeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FØRSTE_PERIODE),
-        gjelderFraInnvilgelsestidspunkt = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT)
+        gjelderFraInnvilgelsestidspunkt = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT),
+        barnDød = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_DØD)
     )
 }
 

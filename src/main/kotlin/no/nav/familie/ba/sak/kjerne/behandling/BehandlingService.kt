@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -12,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaSe
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategoriVedOpprettelse
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -25,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
@@ -62,16 +60,15 @@ class BehandlingService(
     private val infotrygdService: InfotrygdService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val personidentService: PersonidentService,
-    private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val vilkårsvurderingService: VilkårsvurderingService
 ) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
         val søkersAktør = personidentService.hentAktør(nyBehandling.søkersIdent)
 
-        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør, nyBehandling.fagsakEier)
+        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør, nyBehandling.fagsakType)
             ?: throw FunksjonellFeil(
                 melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
                 frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak"
@@ -82,12 +79,11 @@ class BehandlingService(
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
-
             val kategori = bestemKategoriVedOpprettelse(
                 overstyrtKategori = nyBehandling.kategori,
                 behandlingType = nyBehandling.behandlingType,
                 behandlingÅrsak = nyBehandling.behandlingÅrsak,
-                kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id),
+                kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id)
             )
 
             val underkategori = bestemUnderkategori(
@@ -95,10 +91,8 @@ class BehandlingService(
                 underkategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsak.id),
                 underkategoriFraInneværendeBehandling = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(
                     fagsak.id
-                ),
+                )
             )
-
-            sjekkEøsToggleOgThrowHvisBrudd(kategori)
 
             val behandling = Behandling(
                 fagsak = fagsak,
@@ -121,7 +115,9 @@ class BehandlingService(
             }
             opprettOgInitierNyttVedtakForBehandling(behandling = lagretBehandling)
 
-            loggService.opprettBehandlingLogg(lagretBehandling)
+            loggService.opprettBehandlingLogg(
+                BehandlingLoggRequest(behandling = lagretBehandling, barnasIdenter = nyBehandling.barnasIdenter)
+            )
             if (lagretBehandling.opprettBehandleSakOppgave()) {
                 /**
                  * Oppretter oppgave via task slik at dersom noe feiler i forbindelse med opprettelse
@@ -155,17 +151,6 @@ class BehandlingService(
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         behandling.overstyrtEndringstidspunkt = null
         behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
-    }
-
-    private fun sjekkEøsToggleOgThrowHvisBrudd(
-        kategori: BehandlingKategori,
-    ) {
-        if (kategori == BehandlingKategori.EØS && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            throw FunksjonellFeil(
-                melding = "EØS er ikke påskrudd",
-                frontendFeilmelding = "Det er ikke støtte for å behandle EØS søknad."
-            )
-        }
     }
 
     @Transactional
@@ -283,7 +268,7 @@ class BehandlingService(
         return Behandlingutils.harBehandlingsårsakAlleredeKjørt(
             behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId),
             behandlingÅrsak = behandlingÅrsak,
-            måned = måned,
+            måned = måned
         )
     }
 

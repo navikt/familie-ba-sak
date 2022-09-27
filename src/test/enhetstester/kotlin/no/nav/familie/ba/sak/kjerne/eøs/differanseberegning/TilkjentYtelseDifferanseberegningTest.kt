@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.util.DeltBostedBuilder
@@ -31,7 +32,6 @@ class TilkjentYtelseDifferanseberegningTest {
 
     @Test
     fun `skal gjøre differanseberegning på en tilkjent ytelse med endringsperioder`() {
-
         val barnsFødselsdato = 13.jan(2020)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
@@ -71,7 +71,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(8, tilkjentYtelse.andelerTilkjentYtelse.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDelt.andelerTilkjentYtelse,
-            tilkjentYtelse.andelerTilkjentYtelse
+            tilkjentYtelse.andelerTilkjentYtelse.utenEndringer() // Equals tar hensyn til endringsperioder. Fjerner dem
         )
 
         val utenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(startMåned, behandlingId)
@@ -98,7 +98,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(14, andelerMedDifferanse.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDiff.andelerTilkjentYtelse,
-            andelerMedDifferanse
+            andelerMedDifferanse.utenEndringer() // Equals tar hensyn til endringsperioder. Fjerner dem
         )
     }
 
@@ -156,7 +156,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(6, andelerMedDiff.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDiff.andelerTilkjentYtelse,
-            andelerMedDiff
+            andelerMedDiff.utenEndringer() // Equals tar hensyn til endringsperioder. Fjerner dem
         )
 
         val blanktUtenlandskPeridebeløp = UtenlandskPeriodebeløpBuilder(startMåned, behandlingId)
@@ -181,4 +181,7 @@ class TilkjentYtelseDifferanseberegningTest {
             andelerMedDiffIgjen
         )
     }
+
+    fun Collection<AndelTilkjentYtelse>.utenEndringer() =
+        this.map { it.copy(endretUtbetalingAndeler = mutableListOf()) }
 }

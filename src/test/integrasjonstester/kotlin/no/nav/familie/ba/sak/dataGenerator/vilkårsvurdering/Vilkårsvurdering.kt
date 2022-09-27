@@ -31,20 +31,19 @@ fun lagVilkårsvurderingMedOverstyrendeResultater(
     behandling: Behandling? = null,
     overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>
 ): Vilkårsvurdering {
-
     val vilkårsvurdering = Vilkårsvurdering(behandling = behandling ?: mockk(relaxed = true))
 
     val søkerPersonResultater = lagPersonResultatAvOverstyrteResultater(
         person = søker,
         overstyrendeVilkårResultater = overstyrendeVilkårResultater[søker.aktør.aktørId] ?: emptyList(),
-        vilkårsvurdering = vilkårsvurdering,
+        vilkårsvurdering = vilkårsvurdering
     )
 
     val barnaPersonResultater = barna.map {
         lagPersonResultatAvOverstyrteResultater(
             person = it,
             overstyrendeVilkårResultater = overstyrendeVilkårResultater[it.aktør.aktørId] ?: emptyList(),
-            vilkårsvurdering = vilkårsvurdering,
+            vilkårsvurdering = vilkårsvurdering
         )
     }
 
@@ -111,7 +110,7 @@ fun lagBarnVilkårResultat(
     barnPersonResultat: PersonResultat,
     barnetsFødselsdato: LocalDate,
     behandlingId: Long,
-    forrigeMigreringsdato: LocalDate,
+    periodeFom: LocalDate,
     flytteSak: Boolean = false
 ): Set<VilkårResultat> {
     return setOf(
@@ -135,7 +134,7 @@ fun lagBarnVilkårResultat(
             personResultat = barnPersonResultat,
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
-            periodeFom = forrigeMigreringsdato,
+            periodeFom = periodeFom,
             periodeTom = null,
             behandlingId = behandlingId
         ),
@@ -143,7 +142,7 @@ fun lagBarnVilkårResultat(
             personResultat = barnPersonResultat,
             vilkårType = Vilkår.BOSATT_I_RIKET,
             resultat = Resultat.OPPFYLT,
-            periodeFom = if (flytteSak) barnetsFødselsdato else forrigeMigreringsdato,
+            periodeFom = if (flytteSak) barnetsFødselsdato else periodeFom,
             periodeTom = null,
             behandlingId = behandlingId
         ),
@@ -151,7 +150,7 @@ fun lagBarnVilkårResultat(
             personResultat = barnPersonResultat,
             vilkårType = Vilkår.LOVLIG_OPPHOLD,
             resultat = Resultat.OPPFYLT,
-            periodeFom = if (flytteSak) barnetsFødselsdato else forrigeMigreringsdato,
+            periodeFom = if (flytteSak) barnetsFødselsdato else periodeFom,
             periodeTom = null,
             behandlingId = behandlingId
         )

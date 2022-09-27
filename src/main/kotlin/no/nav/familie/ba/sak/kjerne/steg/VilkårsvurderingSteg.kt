@@ -44,13 +44,11 @@ class VilkårsvurderingSteg(
             )
         }
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            vilkårService.hentVilkårsvurdering(behandling.id)?.apply {
-                validerIkkeBlandetRegelverk(
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    vilkårsvurdering = this
-                )
-            }
+        vilkårService.hentVilkårsvurdering(behandling.id)?.apply {
+            validerIkkeBlandetRegelverk(
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                vilkårsvurdering = this
+            )
         }
     }
 
@@ -97,12 +95,10 @@ class VilkårsvurderingSteg(
         tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
-        }
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
 
         behandlingstemaService.oppdaterBehandlingstema(
-            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
+            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id)
         )
 
         return hentNesteStegForNormalFlyt(behandling)

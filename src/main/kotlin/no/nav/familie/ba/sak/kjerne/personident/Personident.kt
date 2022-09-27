@@ -34,7 +34,7 @@ data class Personident(
     var aktiv: Boolean = true,
 
     @Column(name = "gjelder_til", columnDefinition = "DATE")
-    var gjelderTil: LocalDateTime? = null,
+    var gjelderTil: LocalDateTime? = null
 
 ) : BaseEntitet() {
 
@@ -56,11 +56,11 @@ data class Personident(
             return false
         }
         val entitet: Personident = other as Personident
-        return Objects.equals(hashCode(), entitet.hashCode())
+        return fødselsnummer == entitet.fødselsnummer && aktiv == entitet.aktiv
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(fødselsnummer)
+        return Objects.hash(fødselsnummer, aktiv)
     }
 
     companion object {

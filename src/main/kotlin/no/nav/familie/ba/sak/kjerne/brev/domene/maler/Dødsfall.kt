@@ -10,7 +10,7 @@ data class Dødsfall(
 
 data class DødsfallData(
     override val delmalData: DelmalData,
-    override val flettefelter: Flettefelter,
+    override val flettefelter: Flettefelter
 ) : BrevData {
 
     data class Flettefelter(
@@ -18,7 +18,7 @@ data class DødsfallData(
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
         val virkningstidspunkt: Flettefelt,
-        val navnAvdode: Flettefelt,
+        val navnAvdode: Flettefelt
     ) : FlettefelterForDokument {
 
         constructor(

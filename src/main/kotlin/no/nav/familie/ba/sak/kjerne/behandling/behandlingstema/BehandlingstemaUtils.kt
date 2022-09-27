@@ -26,11 +26,18 @@ fun bestemKategoriVedOpprettelse(
             overstyrtKategori
                 ?: throw FunksjonellFeil(
                     "Behandling med type ${behandlingType.visningsnavn} " +
-                        "og årsak ${behandlingÅrsak.visningsnavn} $ krever behandlingskategori",
+                        "og årsak ${behandlingÅrsak.visningsnavn} $ krever behandlingskategori"
                 )
         }
-        behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && behandlingÅrsak.erFørstegangMigreringsårsak() -> {
+        behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && behandlingÅrsak.erFørstegangMigreringsårsak() && behandlingÅrsak == BehandlingÅrsak.HELMANUELL_MIGRERING -> {
             BehandlingKategori.NASJONAL
+        }
+
+        behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && behandlingÅrsak.erFørstegangMigreringsårsak() && behandlingÅrsak == BehandlingÅrsak.MIGRERING -> {
+            overstyrtKategori ?: throw FunksjonellFeil(
+                "Behandling med type ${behandlingType.visningsnavn} " +
+                    "og årsak ${behandlingÅrsak.visningsnavn} $ krever behandlingskategori"
+            )
         }
         else -> {
             kategoriFraLøpendeBehandling
@@ -42,7 +49,7 @@ fun bestemKategori(
     overstyrtKategori: BehandlingKategori?,
     // kategori fra siste iverksatt behandling eller NASJONAL når det ikke finnes noe
     kategoriFraSisteIverksattBehandling: BehandlingKategori,
-    kategoriFraInneværendeBehandling: BehandlingKategori,
+    kategoriFraInneværendeBehandling: BehandlingKategori
 ): BehandlingKategori {
     // når saksbehandler overstyrer behandlingstema manuelt
     if (overstyrtKategori != null) return overstyrtKategori
@@ -51,7 +58,8 @@ fun bestemKategori(
     if (kategoriFraSisteIverksattBehandling == BehandlingKategori.EØS) return BehandlingKategori.EØS
 
     // når løpende utbetaling er NASJONAL og inneværende behandling får EØS
-    val oppdatertKategori = listOf(kategoriFraSisteIverksattBehandling, kategoriFraInneværendeBehandling).finnHøyesteKategori()
+    val oppdatertKategori =
+        listOf(kategoriFraSisteIverksattBehandling, kategoriFraInneværendeBehandling).finnHøyesteKategori()
 
     return oppdatertKategori ?: BehandlingKategori.NASJONAL
 }
@@ -59,7 +67,7 @@ fun bestemKategori(
 fun bestemUnderkategori(
     overstyrtUnderkategori: BehandlingUnderkategori?,
     underkategoriFraLøpendeBehandling: BehandlingUnderkategori?,
-    underkategoriFraInneværendeBehandling: BehandlingUnderkategori? = null,
+    underkategoriFraInneværendeBehandling: BehandlingUnderkategori? = null
 ): BehandlingUnderkategori {
     if (underkategoriFraLøpendeBehandling == BehandlingUnderkategori.UTVIDET) return BehandlingUnderkategori.UTVIDET
 
@@ -73,7 +81,7 @@ fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUn
 }
 
 fun utledLøpendeKategori(
-    barnasTidslinjer: Map<Aktør, VilkårsvurderingTidslinjer.BarnetsTidslinjer>?,
+    barnasTidslinjer: Map<Aktør, VilkårsvurderingTidslinjer.BarnetsTidslinjer>?
 ): BehandlingKategori {
     if (barnasTidslinjer == null) return BehandlingKategori.NASJONAL
 

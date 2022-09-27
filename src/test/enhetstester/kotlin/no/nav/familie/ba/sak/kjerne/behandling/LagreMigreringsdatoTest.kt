@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -50,7 +49,6 @@ class LagreMigreringsdatoTest {
     val infotrygdService = mockk<InfotrygdService>()
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val personidentService = mockk<PersonidentService>()
-    val featureToggleService = mockk<FeatureToggleService>()
     val taskRepository = mockk<TaskRepositoryWrapper>()
     val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
     val vilkårsvurderingService = mockk<VilkårsvurderingService>()
@@ -70,9 +68,8 @@ class LagreMigreringsdatoTest {
         infotrygdService,
         vedtaksperiodeService,
         personidentService,
-        featureToggleService,
         taskRepository,
-        vilkårsvurderingService,
+        vilkårsvurderingService
     )
 
     @Test

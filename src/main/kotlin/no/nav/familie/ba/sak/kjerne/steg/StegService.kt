@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
@@ -25,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -49,7 +51,7 @@ class StegService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
-    private val settPåVentService: SettPåVentService,
+    private val settPåVentService: SettPåVentService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -62,7 +64,7 @@ class StegService(
         val behandling = håndterNyBehandling(nyBehandling)
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
             infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(
-                behandling.fagsak.aktør,
+                behandling.fagsak.aktør
             )
         }
         return behandling
@@ -133,7 +135,7 @@ class StegService(
     @Transactional
     fun opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
         val fagsak = try {
-            fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true)
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true, FagsakType.NORMAL)
         } catch (exception: Exception) {
             if (exception is ConstraintViolationException) {
                 throw RekjørSenereException(
@@ -148,9 +150,11 @@ class StegService(
         return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
-                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE)
+                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE) {
                     BehandlingType.REVURDERING
-                else BehandlingType.FØRSTEGANGSBEHANDLING,
+                } else {
+                    BehandlingType.FØRSTEGANGSBEHANDLING
+                },
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = nyBehandlingHendelse.barnasIdenter,
@@ -223,7 +227,9 @@ class StegService(
 
         return if (behandlingEtterVilkårsvurdering.skalBehandlesAutomatisk) {
             håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
-        } else behandlingEtterVilkårsvurdering
+        } else {
+            behandlingEtterVilkårsvurdering
+        }
     }
 
     @Transactional
@@ -241,7 +247,9 @@ class StegService(
             håndterVurderTilbakekreving(
                 behandling = behandlingEtterBehandlingsresultatSteg
             )
-        } else behandlingEtterBehandlingsresultatSteg
+        } else {
+            behandlingEtterBehandlingsresultatSteg
+        }
     }
 
     @Transactional
@@ -369,6 +377,16 @@ class StegService(
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
+        }
+    }
+
+    @Transactional
+    fun håndterRegistrerVerge(behandling: Behandling, vergeInfo: RestRegistrerInstitusjonOgVerge): Behandling {
+        val behandlingSteg: RegistrerInstitusjonOgVerge =
+            hentBehandlingSteg(StegType.REGISTRERE_INSTITUSJON_OG_VERGE) as RegistrerInstitusjonOgVerge
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, vergeInfo)
         }
     }
 

@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
@@ -41,9 +41,9 @@ import java.time.LocalDate
 
 class FiltreringsregelForFlereBarnTest {
 
-    val barnAktør0 = randomAktørId()
-    val barnAktør1 = randomAktørId()
-    val gyldigAktør = randomAktørId()
+    val barnAktør0 = randomAktør()
+    val barnAktør1 = randomAktør()
+    val gyldigAktør = randomAktør()
 
     val personopplysningGrunnlagRepositoryMock = mockk<PersonopplysningGrunnlagRepository>()
     val personopplysningerServiceMock = mockk<PersonopplysningerService>()
@@ -59,7 +59,7 @@ class FiltreringsregelForFlereBarnTest {
         localDateService = localDateServiceMock,
         fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
         behandlingService = behandlingServiceMock,
-        tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
+        tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock
     )
 
     init {
@@ -107,12 +107,16 @@ class FiltreringsregelForFlereBarnTest {
                             aktør = gyldigAktør
                         ),
                         genererPerson(
-                            type = PersonType.BARN, personopplysningGrunnlag = this, aktør = barnAktør0,
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør0,
                             fødselsDato = LocalDate.now().minusMonths(1),
                             dødsfallDato = LocalDate.now().toString()
                         ),
                         genererPerson(
-                            type = PersonType.BARN, personopplysningGrunnlag = this, aktør = barnAktør1,
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør1,
                             fødselsDato = LocalDate.now().minusMonths(1)
                         )
                     )
@@ -171,11 +175,15 @@ class FiltreringsregelForFlereBarnTest {
                             aktør = gyldigAktør
                         ),
                         genererPerson(
-                            type = PersonType.BARN, personopplysningGrunnlag = this, aktør = barnAktør0,
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør0,
                             fødselsDato = LocalDate.now().minusMonths(1)
                         ),
                         genererPerson(
-                            type = PersonType.BARN, personopplysningGrunnlag = this, aktør = barnAktør1,
+                            type = PersonType.BARN,
+                            personopplysningGrunnlag = this,
+                            aktør = barnAktør1,
                             fødselsDato = LocalDate.now().minusMonths(1)
                         )
                     )
@@ -231,7 +239,7 @@ class FiltreringsregelForFlereBarnTest {
             fødselsdato = fødselsDato ?: LocalDate.of(1991, 1, 1),
             navn = "navn",
             kjønn = kjønn,
-            bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf(),
+            bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf()
         )
             .apply {
                 this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
@@ -290,7 +298,7 @@ class FiltreringsregelForFlereBarnTest {
             morHarVerge = false,
             dagensDato = LocalDate.now(),
             erFagsakenMigrertEtterBarnFødt = false,
-            løperBarnetrygdForBarnetPåAnnenForelder = false,
+            løperBarnetrygdForBarnetPåAnnenForelder = false
         )
     }
 }

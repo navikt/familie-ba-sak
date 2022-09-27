@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AnnenVurderingService(
-    private val annenVurderingRepository: AnnenVurderingRepository,
+    private val annenVurderingRepository: AnnenVurderingRepository
 ) {
 
     fun hent(personResultat: PersonResultat, annenVurderingType: AnnenVurderingType): AnnenVurdering? =

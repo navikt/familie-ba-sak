@@ -78,8 +78,12 @@ object ØkonomiUtils {
         val forrige = forrigeKjede?.toSet() ?: emptySet()
         val oppdatert = oppdatertKjede?.toSet() ?: emptySet()
         val førsteEndring = forrige.disjunkteAndeler(oppdatert).minByOrNull { it.stønadFom }?.stønadFom
-        return if (førsteEndring != null) forrige.snittAndeler(oppdatert)
-            .filter { it.stønadFom.isBefore(førsteEndring) } else forrigeKjede ?: emptyList()
+        return if (førsteEndring != null) {
+            forrige.snittAndeler(oppdatert)
+                .filter { it.stønadFom.isBefore(førsteEndring) }
+        } else {
+            forrigeKjede ?: emptyList()
+        }
     }
 
     /**
@@ -94,22 +98,50 @@ object ØkonomiUtils {
         forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>
     ): Map<String, List<AndelTilkjentYtelse>> {
         oppdaterteKjeder
+            .filter { forrigeKjeder.containsKey(it.key) }
             .forEach { (kjedeIdentifikator, oppdatertKjede) ->
-                if (forrigeKjeder.containsKey(kjedeIdentifikator)) {
-                    val forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator)
-                    val beståendeFraForrige =
-                        beståendeAndelerIKjede(forrigeKjede = forrigeKjede, oppdatertKjede = oppdatertKjede)
-                    beståendeFraForrige?.forEach { bestående ->
-                        val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
-                            ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
-                        beståendeIOppdatert.periodeOffset = bestående.periodeOffset
-                        beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
-                        beståendeIOppdatert.kildeBehandlingId = bestående.kildeBehandlingId
-                    }
+                val beståendeFraForrige =
+                    beståendeAndelerIKjede(
+                        forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator),
+                        oppdatertKjede = oppdatertKjede
+                    )
+                beståendeFraForrige?.forEach { bestående ->
+                    val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
+                        ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
+                    beståendeIOppdatert.periodeOffset = bestående.periodeOffset
+                    beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
+                    beståendeIOppdatert.kildeBehandlingId = bestående.kildeBehandlingId
                 }
             }
         return oppdaterteKjeder
     }
+
+    /**
+     * Finner eksisterende offset og kilde på andeler som skal bestå
+     *
+     * @param[forrigeKjeder] forrige behandlings tilstand
+     * @param[oppdaterteKjeder] nåværende tilstand
+     * @return liste over oppdateringer som skal utføres
+     */
+    fun finnBeståendeAndelerMedOppdatertOffset(
+        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
+        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>
+    ): List<OffsetOppdatering> = oppdaterteKjeder
+        .filter { forrigeKjeder.containsKey(it.key) }
+        .flatMap { (kjedeIdentifikator, oppdatertKjede) ->
+            beståendeAndelerIKjede(
+                forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator),
+                oppdatertKjede = oppdatertKjede
+            )?.map { bestående ->
+                OffsetOppdatering(
+                    oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
+                        ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand."),
+                    bestående.periodeOffset,
+                    bestående.forrigePeriodeOffset,
+                    bestående.kildeBehandlingId
+                )
+            } ?: listOf()
+        }
 
     /**
      * Tar utgangspunkt i ny tilstand og finner andeler som må bygges opp (nye, endrede og bestående etter første endring)
@@ -123,9 +155,11 @@ object ØkonomiUtils {
         sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>
     ): List<List<AndelTilkjentYtelse>> =
         oppdaterteKjeder.map { (kjedeIdentifikator, oppdatertKjedeTilstand) ->
-            if (sisteBeståendeAndelIHverKjede[kjedeIdentifikator] != null)
+            if (sisteBeståendeAndelIHverKjede[kjedeIdentifikator] != null) {
                 oppdatertKjedeTilstand.filter { it.stønadFom.isAfter(sisteBeståendeAndelIHverKjede[kjedeIdentifikator]!!.stønadTom) }
-            else oppdatertKjedeTilstand
+            } else {
+                oppdatertKjedeTilstand
+            }
         }.filter { it.isNotEmpty() }
 
     /**

@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -15,19 +15,23 @@ import java.time.LocalDate
 data class Opphørsperiode(
     override val periodeFom: LocalDate,
     override val periodeTom: LocalDate?,
-    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR,
+    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
 ) : Vedtaksperiode
 
 fun mapTilOpphørsperioder(
     forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? = null,
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger> = emptyList(),
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): List<Opphørsperiode> {
-    val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) mapTilUtbetalingsperioder(
-        personopplysningGrunnlag = forrigePersonopplysningGrunnlag,
-        andelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
-    ) else emptyList()
+    val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) {
+        mapTilUtbetalingsperioder(
+            personopplysningGrunnlag = forrigePersonopplysningGrunnlag,
+            andelerTilkjentYtelse = forrigeAndelerTilkjentYtelse
+        )
+    } else {
+        emptyList()
+    }
     val utbetalingsperioder =
         mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
 
@@ -38,18 +42,20 @@ fun mapTilOpphørsperioder(
                 periodeTom = forrigeUtbetalingsperioder.maxOf { it.periodeTom }
             )
         )
-    } else if (utbetalingsperioder.isEmpty()) {
-        emptyList()
     } else {
-        listOf(
-            finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
-                forrigeUtbetalingsperioder = forrigeUtbetalingsperioder,
-                utbetalingsperioder = utbetalingsperioder
-            ),
-            finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
-            finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
-        ).flatten()
-    }.sortedBy { it.periodeFom }
+        if (utbetalingsperioder.isEmpty()) {
+            emptyList()
+        } else {
+            listOf(
+                finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
+                    forrigeUtbetalingsperioder = forrigeUtbetalingsperioder,
+                    utbetalingsperioder = utbetalingsperioder
+                ),
+                finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
+                finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
+            ).flatten()
+        }.sortedBy { it.periodeFom }
+    }
 
     return slåSammenOpphørsperioder(alleOpphørsperioder)
 }

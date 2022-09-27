@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
@@ -36,8 +38,8 @@ fun Standardbegrunnelse.triggesForPeriode(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
+    ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): Boolean {
-
     val triggesAv = this.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
 
     val aktuellePersoner = minimertePersoner
@@ -45,7 +47,9 @@ fun Standardbegrunnelse.triggesForPeriode(
         .filter { person ->
             if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
                 aktørIderMedUtbetaling.contains(person.aktørId) || person.type == PersonType.SØKER
-            } else true
+            } else {
+                true
+            }
         }
 
     val ytelseTyperForPeriode = minimertVedtaksperiode.ytelseTyperForPeriode
@@ -59,7 +63,7 @@ fun Standardbegrunnelse.triggesForPeriode(
         oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
         aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
         triggesAv = triggesAv,
-        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
     )
 
     return when {
@@ -89,17 +93,43 @@ fun Standardbegrunnelse.triggesForPeriode(
         triggesAv.erEndret() && !triggesAv.etterEndretUtbetaling -> erEndretTriggerErOppfylt(
             triggesAv = triggesAv,
             minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
-            minimertVedtaksperiode = minimertVedtaksperiode,
+            minimertVedtaksperiode = minimertVedtaksperiode
         )
         triggesAv.gjelderFraInnvilgelsestidspunkt -> false
+        triggesAv.barnDød -> dødeBarnForrigePeriode(
+            ytelserForrigePeriode,
+            minimertePersoner.filter { it.type === PersonType.BARN }
+        ).any()
         else -> hentPersonerForUtgjørendeVilkår().isNotEmpty()
     }
+}
+
+fun dødeBarnForrigePeriode(
+    ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    barnIBehandling: List<MinimertPerson>
+): List<String> {
+    return barnIBehandling.filter { barn ->
+        val ytelserForrigePeriodeForBarn = ytelserForrigePeriode.filter {
+            it.aktør.aktivFødselsnummer() == barn.aktivPersonIdent
+        }
+        var barnDødeForrigePeriode = false
+        if (barn.erDød() && ytelserForrigePeriodeForBarn.isNotEmpty()) {
+            val fom =
+                ytelserForrigePeriodeForBarn.minOf { it.stønadFom }
+            val tom =
+                ytelserForrigePeriodeForBarn.maxOf { it.stønadTom }
+            val fomFørDødsfall = fom <= barn.dødsfallsdato!!.toYearMonth()
+            val tomEtterDødsfall = tom >= barn.dødsfallsdato.toYearMonth()
+            barnDødeForrigePeriode = fomFørDødsfall && tomEtterDødsfall
+        }
+        barnDødeForrigePeriode
+    }.map { it.aktivPersonIdent }
 }
 
 private fun erEndretTriggerErOppfylt(
     triggesAv: TriggesAv,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
-    minimertVedtaksperiode: MinimertVedtaksperiode,
+    minimertVedtaksperiode: MinimertVedtaksperiode
 ): Boolean {
     val endredeAndelerSomOverlapperVedtaksperiode = minimertVedtaksperiode
         .finnEndredeAndelerISammePeriode(minimerteEndredeUtbetalingAndeler)
@@ -150,7 +180,7 @@ fun EØSStandardbegrunnelse.tilSanityEØSBegrunnelse(
 fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
 
 fun Standardbegrunnelse.tilVedtaksbegrunnelse(
-    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser
 ): Vedtaksbegrunnelse {
     if (!vedtaksperiodeMedBegrunnelser
         .type
@@ -165,7 +195,7 @@ fun Standardbegrunnelse.tilVedtaksbegrunnelse(
 
     return Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        standardbegrunnelse = this,
+        standardbegrunnelse = this
     )
 }
 
@@ -184,6 +214,6 @@ fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(
 
 private fun ytelseOppfyltForrigeMåned(
     ytelseType: YtelseType,
-    ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>,
+    ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>
 ) = ytelserGjeldeneForSøkerForrigeMåned
     .any { it == ytelseType }

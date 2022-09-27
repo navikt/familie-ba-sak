@@ -133,12 +133,11 @@ class TilpassKompetanserTilRegelverkTest {
 
     @Test
     fun `tilpass kompetanser til barn med åpne regelverkstidslinjer`() {
-
         val kompetanser: List<Kompetanse> = emptyList()
 
         val barnasRegelverkResultatTidslinjer = mapOf(
             barn1.aktør to "EEEEEEEEE>".tilRegelverkResultatTidslinje(jan2020),
-            barn2.aktør to "  EEEEEEEEE>".tilRegelverkResultatTidslinje(jan2020),
+            barn2.aktør to "  EEEEEEEEE>".tilRegelverkResultatTidslinje(jan2020)
         )
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
