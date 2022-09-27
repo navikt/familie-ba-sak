@@ -24,7 +24,7 @@
         <spring.cloud.version>3.1.4</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
         <prosessering.version>1.20220624132237_7f5ba9c</prosessering.version>
-        <felles.version>1.20220901103347_4819e55</felles.version>
+        <felles.version>1.20220927133157_32b7eda</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20220609214258_f30c3ce</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>2.0_20220926092229_3a3c944</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
@@ -59,6 +59,30 @@
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>no.nav.familie.felles</groupId>
+                <artifactId>felles</artifactId>
+                <version>${felles.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-bom</artifactId>
+                <version>${kotlin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -217,7 +241,6 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>sikkerhet</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie</groupId>
@@ -227,33 +250,27 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>log</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>leader</artifactId>
-            <version>${felles.version}</version>
         </dependency>
 
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>http-client</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>modell</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>util</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>valutakurs-klient</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.kontrakter</groupId>
