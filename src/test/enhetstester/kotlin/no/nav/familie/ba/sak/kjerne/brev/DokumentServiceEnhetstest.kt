@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -21,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.Vilkårsvurderi
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.http.client.RessursException
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import org.assertj.core.api.Assertions.assertThat
@@ -123,13 +125,52 @@ internal class DokumentServiceEnhetstest {
     }
 
     @Test
+    fun `sendManueltBrev skal journalføre med brukerIdType ORGNR hvis brukers id er 9 siffer, og FNR ellers`() {
+        listOf("123456789", "12345678911").forEach { brukerId ->
+            val brukerIdType = slot<BrukerIdType>()
+            val behandling = lagBehandling()
+
+            every {
+                utgåendeJournalføringService.journalførManueltBrev(
+                    brukersId = brukerId,
+                    fagsakId = any(),
+                    journalførendeEnhet = any(),
+                    brev = any(),
+                    førsteside = any(),
+                    dokumenttype = any(),
+                    brukersType = capture(brukerIdType),
+                    brukersNavn = any()
+                )
+            } returns "mockJournalpostId"
+            every { journalføringRepository.save(any()) } returns DbJournalpost(behandling = behandling, journalpostId = "id")
+
+            runCatching {
+                dokumentService.sendManueltBrev(
+                    ManueltBrevRequest(
+                        brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
+                        mottakerIdent = brukerId,
+                        enhet = Enhet("enhet", "enhetNavn")
+                    ),
+                    behandling = behandling,
+                    fagsakId = behandling.fagsak.id
+                )
+            }
+            when (brukerId.length) {
+                9 -> assertThat(brukerIdType.captured).isEqualTo(BrukerIdType.ORGNR)
+                else -> assertThat(brukerIdType.captured).isEqualTo(BrukerIdType.FNR)
+            }
+        }
+    }
+
+    @Test
     fun `sendManueltBrev skal legge til opplysningspliktvilkåret, om så ved å initiere vilkårsvurdering først`() {
         val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, lagBehandling(), Resultat.IKKE_VURDERT)
         val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
 
         // Scenario med eksisterende vilkårsvurdering
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns vilkårsvurdering
-        every { journalføringRepository.save(any()) } returns DbJournalpost(behandling = vilkårsvurdering.behandling, journalpostId = "id")
+        every { journalføringRepository.save(any()) } returns
+            DbJournalpost(behandling = vilkårsvurdering.behandling, journalpostId = "id")
 
         sendBrevInnhenteOpplysninger(vilkårsvurdering.behandling)
 
