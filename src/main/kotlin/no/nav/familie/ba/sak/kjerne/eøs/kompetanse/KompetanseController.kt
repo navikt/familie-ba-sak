@@ -94,12 +94,6 @@ class KompetanseController(
         if (oppdatertKompetanse.barnAktører.isEmpty()) {
             throw FunksjonellFeil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
         }
-        if (oppdatertKompetanse.resultat == KompetanseResultat.TO_PRIMÆRLAND && !featureToggleService.isEnabled(
-                FeatureToggleConfig.KAN_BEHANDLE_EØS_TO_PRIMERLAND
-            )
-        ) {
-            throw FunksjonellFeil("To primærland er ikke støttet", httpStatus = HttpStatus.BAD_REQUEST)
-        }
     }
 
     @Deprecated("Unødvendig med validering av gjeldende kompetanse")
