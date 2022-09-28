@@ -298,6 +298,23 @@ class ClientMocks {
                 when (val id = idSlotForHentPersoninfo.captured.aktivFødselsnummer()) {
                     barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
                     søkerFnr[0], søkerFnr[1] -> personInfo.getValue(id)
+                    "09121079074" -> personInfo.getValue(id)
+                    "10031000033" -> personInfo.getValue(id)
+                    "04068203010" -> personInfo.getValue(id)
+                    else -> personInfo.getValue(INTEGRASJONER_FNR)
+                }
+            }
+
+            val idSlotPersoninfoNavnOgAdresse = slot<Aktør>()
+            every {
+                mockPersonopplysningerService.hentPersoninfoNavnOgAdresse(capture(idSlotPersoninfoNavnOgAdresse))
+            } answers {
+                when (val id = idSlotPersoninfoNavnOgAdresse.captured.aktivFødselsnummer()) {
+                    barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
+                    søkerFnr[0], søkerFnr[1] -> personInfo.getValue(id)
+                    "09121079074" -> personInfo.getValue(id)
+                    "10031000033" -> personInfo.getValue(id)
+                    "04068203010" -> personInfo.getValue(id)
                     else -> personInfo.getValue(INTEGRASJONER_FNR)
                 }
             }
@@ -311,7 +328,8 @@ class ClientMocks {
                         HttpStatus.NOT_FOUND,
                         "Fant ikke forespurte data på person."
                     )
-                    barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
+
+                    barnFnr[0], barnFnr[1], "09121079074", "10031000033", "04068203010" -> personInfo.getValue(id)
 
                     søkerFnr[0] -> personInfo.getValue(id).copy(
                         forelderBarnRelasjon = setOf(
@@ -545,6 +563,30 @@ class ClientMocks {
             mockBarnAutomatiskBehandling2Fnr to mockBarnAutomatiskBehandling2,
             mockSøkerAutomatiskBehandlingFnr to mockSøkerAutomatiskBehandling,
             mockBarnAutomatiskBehandlingSkalFeileFnr to mockBarnAutomatiskBehandlingSkalFeile,
+            "09121079074" to PersonInfo(
+                fødselsdato = LocalDate.of(2010, 12, 9),
+                bostedsadresser = mutableListOf(bostedsadresse),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                kjønn = Kjønn.KVINNE,
+                navn = "Litt eldre barn",
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT
+            ),
+            "10031000033" to PersonInfo(
+                fødselsdato = LocalDate.of(2015, 2, 10),
+                bostedsadresser = mutableListOf(bostedsadresse),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                kjønn = Kjønn.KVINNE,
+                navn = "Jenten 2015",
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT
+            ),
+            "04068203010" to PersonInfo(
+                fødselsdato = LocalDate.of(1982, 6, 4),
+                bostedsadresser = mutableListOf(),
+                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                kjønn = Kjønn.KVINNE,
+                navn = "Moder Jord",
+                adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT
+            ),
             INTEGRASJONER_FNR to PersonInfo(
                 fødselsdato = LocalDate.of(1965, 2, 19),
                 bostedsadresser = mutableListOf(bostedsadresse),
