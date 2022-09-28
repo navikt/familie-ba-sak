@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -19,7 +21,8 @@ import org.springframework.transaction.annotation.Transactional
 class TilpassDifferanseberegningEtterTilkjentYtelseService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val featureToggleService: FeatureToggleService
 ) : TilkjentYtelseEndretAbonnent {
 
     @Transactional
@@ -31,7 +34,8 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
         val oppdaterteAndeler = beregnDifferanse(
             tilkjentYtelse.andelerTilkjentYtelse,
             utenlandskePeriodebeløp,
-            valutakurser
+            valutakurser,
+            featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_NULLUTBETALING, false)
         )
 
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
@@ -41,7 +45,8 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
 @Service
 class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val featureToggleService: FeatureToggleService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     @Transactional
     override fun skjemaerEndret(
@@ -54,7 +59,8 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
         val oppdaterteAndeler = beregnDifferanse(
             tilkjentYtelse.andelerTilkjentYtelse,
             utenlandskePeriodebeløp,
-            valutakurser
+            valutakurser,
+            featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_NULLUTBETALING, false)
         )
 
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
@@ -64,7 +70,8 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
 @Service
 class TilpassDifferanseberegningEtterValutakursService(
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val featureToggleService: FeatureToggleService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
 
     @Transactional
@@ -75,7 +82,8 @@ class TilpassDifferanseberegningEtterValutakursService(
         val oppdaterteAndeler = beregnDifferanse(
             tilkjentYtelse.andelerTilkjentYtelse,
             utenlandskePeriodebeløp,
-            valutakurser
+            valutakurser,
+            featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_NULLUTBETALING, false)
         )
 
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
