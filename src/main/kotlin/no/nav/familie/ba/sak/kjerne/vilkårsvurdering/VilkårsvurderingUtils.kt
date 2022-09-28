@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -203,7 +204,7 @@ object VilkårsvurderingUtils {
         // OBS!! MÅ jobbe på kopier av vilkårsvurderingen her for å ikke oppdatere databasen
         // Viktig at det er vår egen implementasjon av kopier som brukes, da kotlin sin copy-funksjon er en shallow copy
         val initiellVilkårsvurderingKopi = initiellVilkårsvurdering.kopier()
-        val aktivVilkårsvurderingKopi = aktivVilkårsvurdering.kopier()
+        val aktivVilkårsvurderingKopi = aktivVilkårsvurdering.kopier(inkluderAndreVurderinger = true)
 
         // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
         val personResultaterAktivt = aktivVilkårsvurderingKopi.personResultater.toMutableSet()
@@ -252,7 +253,10 @@ object VilkårsvurderingUtils {
         personResultaterAktivt: MutableSet<PersonResultat>
     ) {
         val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
+        val personsAndreVurderingerAktivt = personenSomFinnes.andreVurderinger.toMutableSet()
         val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
+        val personsAndreVurderingerOppdatert = mutableSetOf<AnnenVurdering>()
+
         personFraInit.vilkårResultater.forEach { vilkårFraInit ->
             val vilkårSomFinnes =
                 personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
@@ -275,6 +279,12 @@ object VilkårsvurderingUtils {
                     vilkårSomSkalKopieresOver.map { it.kopierMedParent(personTilOppdatert) }
                 )
                 personsVilkårAktivt.removeAll(vilkårSomSkalKopieresOver)
+            }
+        }
+        if (!kopieringSkjerFraForrigeBehandling) {
+            personenSomFinnes.andreVurderinger.forEach {
+                personsAndreVurderingerOppdatert.add(it.kopierMedParent(personTilOppdatert))
+                personsAndreVurderingerAktivt.remove(it)
             }
         }
         val eksistererUtvidetVilkårPåForrigeBehandling =
@@ -305,6 +315,7 @@ object VilkårsvurderingUtils {
         }
 
         personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
+        personTilOppdatert.setAndreVurderinger(personsAndreVurderingerOppdatert.toSet())
 
         // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
         if (personsVilkårAktivt.isEmpty()) {

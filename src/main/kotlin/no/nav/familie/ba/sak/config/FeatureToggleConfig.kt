@@ -110,7 +110,6 @@ class FeatureToggleConfig(
             "familie-ba-sak.endringer.validering.migeringsbehandling"
         const val NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE = "familie-ba-sak.behandling.generer-andeler-med-ny-metode"
 
-        const val KAN_BEHANDLE_EØS_TO_PRIMERLAND = "familie-ba-sak.behandling.eos-to-primerland"
         const val KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND = "familie-ba-sak.behandling.utvidet-eos-sekunderland"
 
         const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"
