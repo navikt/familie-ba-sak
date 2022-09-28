@@ -362,7 +362,7 @@ internal class FiltreringsregelTest {
     }
 
     @Test
-    fun `Mor er død og er umyndig`() {
+    fun `Mor er død og er under vergemål`() {
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
         val barn1Person =

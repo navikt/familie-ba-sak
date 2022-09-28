@@ -195,12 +195,13 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG
         )
-    Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG ->
+    Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG,
+    Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
-            mal = Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG
+            mal = Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL
         )
     Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL ->
         EnkeltInformasjonsbrev(
