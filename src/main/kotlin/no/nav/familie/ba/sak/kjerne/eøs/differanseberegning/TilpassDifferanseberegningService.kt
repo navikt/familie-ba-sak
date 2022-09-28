@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -21,8 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 class TilpassDifferanseberegningEtterTilkjentYtelseService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val featureToggleService: FeatureToggleService
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) : TilkjentYtelseEndretAbonnent {
 
     @Transactional
@@ -37,17 +34,14 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
             valutakurser
         )
 
-        if (featureToggleService.kanHåndtereEøsUtenomPrimærland()) {
-            tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
-        }
+        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }
 
 @Service
 class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val featureToggleService: FeatureToggleService
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     @Transactional
     override fun skjemaerEndret(
@@ -63,17 +57,14 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
             valutakurser
         )
 
-        if (featureToggleService.kanHåndtereEøsUtenomPrimærland()) {
-            tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
-        }
+        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }
 
 @Service
 class TilpassDifferanseberegningEtterValutakursService(
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val featureToggleService: FeatureToggleService
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
 
     @Transactional
@@ -87,9 +78,7 @@ class TilpassDifferanseberegningEtterValutakursService(
             valutakurser
         )
 
-        if (featureToggleService.kanHåndtereEøsUtenomPrimærland()) {
-            tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
-        }
+        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }
 
@@ -142,7 +131,3 @@ internal fun Iterable<AndelTilkjentYtelse>.sjekkForDuplikater() {
         )
     }
 }
-
-fun FeatureToggleService.kanHåndtereEøsUtenomPrimærland() =
-    this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_SEKUNDERLAND) &&
-        this.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_TO_PRIMERLAND)

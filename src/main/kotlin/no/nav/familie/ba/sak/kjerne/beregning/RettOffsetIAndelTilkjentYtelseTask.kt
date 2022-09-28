@@ -61,7 +61,11 @@ class RettOffsetIAndelTilkjentYtelseTask(
                                 oppdatering
                             )
                         }
-                    secureLogger.info("Behandling: $it, logglinjer: $logglinjer")
+                    secureLogger.info(
+                        "Behandling: $it," +
+                            "\nLogglinjer: " +
+                            "\n$logglinjer"
+                    )
 
                     if (!payload.simuler) {
                         beståendeAndelerMedOppdatertOffset.forEach { oppdatering -> oppdatering.oppdater() }
@@ -102,13 +106,10 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 behandlingHentOgPersisterService.hentBehandlinger(fagsakId = behandling.fagsak.id)
 
             val behandlingerOpprettetEtterDenneBehandlingen =
-                alleBehandlingerPåFagsak.filter { it.opprettetTidspunkt.isAfter(behandling.opprettetTidspunkt) }
-
-            val godkjenteStatuserPåSenereBehandling =
-                listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES, BehandlingStatus.FATTER_VEDTAK)
+                alleBehandlingerPåFagsak.filter { it.opprettetTidspunkt.isAfter(behandling.opprettetTidspunkt) && !it.erHenlagt() }
 
             val finnesUgyldigBehandlingEtterDenne =
-                behandlingerOpprettetEtterDenneBehandlingen.filter { it.status !in godkjenteStatuserPåSenereBehandling }
+                behandlingerOpprettetEtterDenneBehandlingen.filter { it.status == BehandlingStatus.AVSLUTTET }
                     .isNotEmpty()
 
             if (finnesUgyldigBehandlingEtterDenne) {
@@ -120,7 +121,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
     private fun loggBehandlingIder(tekst: String, behandlingIder: List<Long>) {
         logger.warn(
-            "$tekst: ${
+            "$tekst (${behandlingIder.size} stk): ${
             behandlingIder.joinToString(separator = ",")
             }"
         )
