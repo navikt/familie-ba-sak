@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -453,6 +454,35 @@ class OppdaterVilkårsvurderingTest {
             nyInit.personResultater.first().vilkårResultater.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitInneholderIkkeUtvidetVilkår)
+        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+    }
+
+    @Test
+    fun `Skal beholde andreVurderinger lagt til på inneværende behandling`() {
+        val søkerAktørId = randomAktør()
+        val nyBehandling = lagBehandling()
+
+        val initiellVilkårsvurderingUtenAndreVurderinger =
+            lagBasicVilkårsvurdering(
+                behandling = nyBehandling,
+                personer = listOf(
+                    lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
+                    lagPerson(type = PersonType.BARN)
+                )
+            )
+        val aktivVilkårsvurdering = initiellVilkårsvurderingUtenAndreVurderinger.copy()
+        aktivVilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
+            .leggTilBlankAnnenVurdering(AnnenVurderingType.OPPLYSNINGSPLIKT)
+
+        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
+            initiellVilkårsvurdering = initiellVilkårsvurderingUtenAndreVurderinger,
+            aktivVilkårsvurdering = aktivVilkårsvurdering
+        )
+
+        val nyInitInnholderOpplysningspliktVilkår = nyInit.personResultater.find { it.erSøkersResultater() }!!.andreVurderinger
+            .any { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
+
+        Assertions.assertTrue(nyInitInnholderOpplysningspliktVilkår)
         Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
     }
 
