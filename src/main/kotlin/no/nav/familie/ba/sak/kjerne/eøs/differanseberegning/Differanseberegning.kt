@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
@@ -7,7 +8,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 
 /**
  * ADVARSEL: Muterer TilkjentYtelse
@@ -18,7 +21,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 fun beregnDifferanse(
     andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
-    valutakurser: Collection<Valutakurs>
+    valutakurser: Collection<Valutakurs>,
+    kanHåndtereNullUtbetaling: Boolean = true
 ): List<AndelTilkjentYtelse> {
     val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
     val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
@@ -33,6 +37,15 @@ fun beregnDifferanse(
         andelTilkjentYtelseTidslinjer.outerJoin(barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer) { aty, beløp ->
             aty.oppdaterDifferanseberegning(beløp)
         }
+
+    if (!kanHåndtereNullUtbetaling && barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer
+        .innholdMatcher { it.erNegativtDifferanseberegnetPeriodebeløp() }
+    ) {
+        throw Feil(
+            message = "Differanseberegning gav nullutbetaling",
+            frontendFeilmelding = "Nullutbetaling som følge av differanseberegning etter EØS-regelverk er foreløpig ikke støttet"
+        )
+    }
 
     val barnasAndeler = barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
     val søkersAndeler = andelerTilkjentYtelse.filter { it.erSøkersAndel() }
@@ -62,3 +75,12 @@ private fun validarSøkersYtelserMotEventueltNegativeAndelerForBarna(
         )
     }
 }
+
+fun <K, I, T : Tidsenhet> Map<K, Tidslinje<I, T>>.innholdMatcher(predikat: (innhold: I?) -> Boolean) =
+    this.values.any { it.innholdMatcher(predikat) }
+
+fun <I, T : Tidsenhet> Tidslinje<I, T>.innholdMatcher(predikat: (innhold: I?) -> Boolean) =
+    this.perioder().any { predikat(it.innhold) }
+
+fun AndelTilkjentYtelse?.erNegativtDifferanseberegnetPeriodebeløp() =
+    (this?.differanseberegnetPeriodebeløp ?: 0) < 0
