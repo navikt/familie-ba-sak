@@ -101,6 +101,7 @@ data class Behandling(
         return "Behandling(" +
             "id=$id, " +
             "fagsak=${fagsak.id}, " +
+            "fagsakType=${fagsak.type}, " +
             "type=$type, " +
             "kategori=$kategori, " +
             "underkategori=$underkategori, " +
