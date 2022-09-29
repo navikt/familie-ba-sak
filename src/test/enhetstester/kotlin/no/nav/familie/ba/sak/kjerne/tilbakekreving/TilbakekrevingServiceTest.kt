@@ -82,7 +82,7 @@ class TilbakekrevingServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            institusjon = InstitusjonInfo(orgNummer = "998765432", tssEksternId = null)
+            institusjon = InstitusjonInfo(orgNummer = "998765432", tssEksternId = "8000000")
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
