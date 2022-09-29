@@ -9,7 +9,10 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.defaultFagsak
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
@@ -35,9 +38,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -68,6 +74,7 @@ import java.nio.charset.Charset
 import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -111,7 +118,10 @@ internal class SaksstatistikkServiceTest(
     private val featureToggleService: FeatureToggleService,
 
     @MockK
-    private val settPåVentService: SettPåVentService
+    private val settPåVentService: SettPåVentService,
+
+    @MockK(relaxed = true)
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) {
 
     private val sakstatistikkService = SaksstatistikkService(
@@ -124,7 +134,8 @@ internal class SaksstatistikkServiceTest(
         personopplysningerService,
         persongrunnlagService,
         vedtaksperiodeService,
-        settPåVentService
+        settPåVentService,
+        tilkjentYtelseRepository
     )
 
     @BeforeAll
@@ -299,6 +310,31 @@ internal class SaksstatistikkServiceTest(
         assertThat(behandlingDvh?.settPaaVent?.aarsak).isEqualTo(SettPåVentÅrsak.AVVENTER_DOKUMENTASJON.name)
         assertThat(behandlingDvh?.settPaaVent?.frist)
             .isEqualTo(frist.atStartOfDay(SaksstatistikkService.TIMEZONE))
+    }
+
+    @Test
+    fun `skal levere dvh-kodene for småbarnstillegg og sakstype (institusjon, enslig_mindreårig) i behandlingUnderkategori`() {
+        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
+        every { vedtakService.hentAktivForBehandling(any()) } returns null
+
+        listOf(YtelseType.SMÅBARNSTILLEGG, FagsakType.INSTITUSJON, FagsakType.BARN_ENSLIG_MINDREÅRIG, null)
+            .forEach { optinalDvhYtelseKodeNivå3 ->
+                val fagsak = defaultFagsak().copy(type = optinalDvhYtelseKodeNivå3 as? FagsakType ?: FagsakType.NORMAL)
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD, fagsak = fagsak)
+                val tilkjentYtelse = lagInitiellTilkjentYtelse().also {
+                    it.andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(
+                        ytelseType = optinalDvhYtelseKodeNivå3 as? YtelseType ?: YtelseType.ORDINÆR_BARNETRYGD,
+                        fom = YearMonth.now(),
+                        tom = YearMonth.now().plusYears(3)
+                    ))
+                }
+                every { behandlingHentOgPersisterService.hent(any()) } returns behandling
+                every { tilkjentYtelseRepository.findByBehandlingOptional(any()) } returns tilkjentYtelse
+
+                val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
+
+                assertThat("${behandlingDvh?.behandlingUnderkategori}").isSubstringOf("${optinalDvhYtelseKodeNivå3?.name}")
+            }
     }
 
     @Test

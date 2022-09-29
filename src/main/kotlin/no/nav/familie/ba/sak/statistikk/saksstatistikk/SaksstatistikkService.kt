@@ -11,7 +11,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -42,7 +46,8 @@ class SaksstatistikkService(
     private val personopplysningerService: PersonopplysningerService,
     private val persongrunnlagService: PersongrunnlagService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val settPåVentService: SettPåVentService
+    private val settPåVentService: SettPåVentService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) {
 
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
@@ -64,6 +69,9 @@ class SaksstatistikkService(
         val aktivtVedtak = vedtakService.hentAktivForBehandling(behandlingId)
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId)
 
+        val småbarnstilleggOrNull = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse
+            ?.firstOrNull { it.erSmåbarnstillegg() }?.type?.name
+
         val now = ZonedDateTime.now()
 
         return BehandlingDVH(
@@ -77,6 +85,11 @@ class SaksstatistikkService(
             behandlingType = behandling.type.name,
             behandlingStatus = behandling.status.name,
             behandlingKategori = behandling.underkategori.name, // Gjøres pga. tilpasning til DVH-modell
+            behandlingUnderkategori = when (behandling.fagsak.type) { // <-'
+                NORMAL -> småbarnstilleggOrNull
+                BARN_ENSLIG_MINDREÅRIG -> ENSLIG_MINDREÅRIG_KODE
+                INSTITUSJON -> INSTITUSJON.name
+            },
             behandlingAarsak = behandling.opprettetÅrsak.name,
             automatiskBehandlet = behandling.skalBehandlesAutomatisk,
             utenlandstilsnitt = behandling.kategori.name, // Gjøres pga. tilpasning til DVH-modell
@@ -199,5 +212,6 @@ class SaksstatistikkService(
     companion object {
 
         val TIMEZONE: ZoneId = ZoneId.systemDefault()
+        val ENSLIG_MINDREÅRIG_KODE = "ENSLIG_MINDREÅRIG"
     }
 }
