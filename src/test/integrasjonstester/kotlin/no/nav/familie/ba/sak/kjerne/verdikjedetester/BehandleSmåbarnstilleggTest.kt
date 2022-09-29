@@ -519,7 +519,7 @@ class BehandleSmåbarnstilleggTest(
 
         val småbarnstilleggAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
             behandlingId = aktivBehandling.id
-        ).filter { it.erSmåbarnstillegg() }
+        ).filter { it.erSmåbarnstillegg() }.sortedBy { it.id }
 
         assertEquals(2, småbarnstilleggAndeler.size)
         assertEquals(fomDato.toYearMonth(), småbarnstilleggAndeler.first().stønadFom)
