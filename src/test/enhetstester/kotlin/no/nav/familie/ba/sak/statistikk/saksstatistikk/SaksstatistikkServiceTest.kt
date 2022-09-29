@@ -322,11 +322,13 @@ internal class SaksstatistikkServiceTest(
                 val fagsak = defaultFagsak().copy(type = optinalDvhYtelseKodeNivå3 as? FagsakType ?: FagsakType.NORMAL)
                 val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD, fagsak = fagsak)
                 val tilkjentYtelse = lagInitiellTilkjentYtelse().also {
-                    it.andelerTilkjentYtelse.add(lagAndelTilkjentYtelse(
-                        ytelseType = optinalDvhYtelseKodeNivå3 as? YtelseType ?: YtelseType.ORDINÆR_BARNETRYGD,
-                        fom = YearMonth.now(),
-                        tom = YearMonth.now().plusYears(3)
-                    ))
+                    it.andelerTilkjentYtelse.add(
+                        lagAndelTilkjentYtelse(
+                            ytelseType = optinalDvhYtelseKodeNivå3 as? YtelseType ?: YtelseType.ORDINÆR_BARNETRYGD,
+                            fom = YearMonth.now(),
+                            tom = YearMonth.now().plusYears(3)
+                        )
+                    )
                 }
                 every { behandlingHentOgPersisterService.hent(any()) } returns behandling
                 every { tilkjentYtelseRepository.findByBehandlingOptional(any()) } returns tilkjentYtelse
