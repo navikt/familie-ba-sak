@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
@@ -17,7 +16,7 @@ class EøsSkjemaerForNyBehandlingService(
 ) {
 
     fun kopierEøsSkjemaer(behandlingId: BehandlingId, forrigeBehandlingSomErVedtattId: BehandlingId?) {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) && forrigeBehandlingSomErVedtattId != null) {
+        if (forrigeBehandlingSomErVedtattId != null) {
             kompetanseService.kopierOgErstattKompetanser(
                 fraBehandlingId = forrigeBehandlingSomErVedtattId,
                 tilBehandlingId = behandlingId

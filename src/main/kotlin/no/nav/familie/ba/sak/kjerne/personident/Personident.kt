@@ -56,12 +56,11 @@ data class Personident(
             return false
         }
         val entitet: Personident = other as Personident
-        if (fødselsnummer != other.fødselsnummer) return false
-        return Objects.equals(hashCode(), entitet.hashCode())
+        return fødselsnummer == entitet.fødselsnummer && aktiv == entitet.aktiv
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(fødselsnummer)
+        return Objects.hash(fødselsnummer, aktiv)
     }
 
     companion object {

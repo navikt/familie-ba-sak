@@ -5,23 +5,30 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
@@ -42,6 +49,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResul
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -161,7 +169,8 @@ fun lagBehandling(
     skalBehandlesAutomatisk: Boolean = false,
     førsteSteg: StegType = FØRSTE_STEG,
     resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
-    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+    status: BehandlingStatus = initStatus()
 ) =
     Behandling(
         id = nesteBehandlingId(),
@@ -171,7 +180,8 @@ fun lagBehandling(
         kategori = behandlingKategori,
         underkategori = underkategori,
         opprettetÅrsak = årsak,
-        resultat = resultat
+        resultat = resultat,
+        status = status
     ).also {
         it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
     }
@@ -245,8 +255,42 @@ fun lagAndelTilkjentYtelse(
         forrigePeriodeOffset = forrigeperiodeIdOffset,
         sats = beløp,
         prosent = prosent,
+        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList(),
+        kildeBehandlingId = behandling.id
+    )
+}
+
+fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+    fom: YearMonth,
+    tom: YearMonth,
+    ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+    beløp: Int = sats(ytelseType),
+    behandling: Behandling = lagBehandling(),
+    person: Person = tilfeldigPerson(),
+    aktør: Aktør = person.aktør,
+    periodeIdOffset: Long? = null,
+    forrigeperiodeIdOffset: Long? = null,
+    tilkjentYtelse: TilkjentYtelse? = null,
+    prosent: BigDecimal = BigDecimal(100),
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
+): AndelTilkjentYtelseMedEndreteUtbetalinger {
+    val aty = AndelTilkjentYtelse(
+        aktør = aktør,
+        behandlingId = behandling.id,
+        tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
+        kalkulertUtbetalingsbeløp = beløp,
+        nasjonaltPeriodebeløp = beløp,
+        stønadFom = fom,
+        stønadTom = tom,
+        type = ytelseType,
+        periodeOffset = periodeIdOffset,
+        forrigePeriodeOffset = forrigeperiodeIdOffset,
+        sats = beløp,
+        prosent = prosent,
         endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList()
     )
+
+    return AndelTilkjentYtelseMedEndreteUtbetalinger(aty)
 }
 
 fun lagAndelTilkjentYtelseUtvidet(
@@ -590,9 +634,15 @@ fun kjørStegprosessForFGB(
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
     behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-    behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL
+    institusjon: InstitusjonInfo? = null,
+    verge: VergeInfo? = null
 ): Behandling {
-    fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+    val fagsakType = utledFagsaktype(institusjon, verge)
+    fagsakService.hentEllerOpprettFagsakForPersonIdent(
+        fødselsnummer = søkerFnr,
+        institusjon = institusjon,
+        fagsakType = fagsakType
+    )
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
             kategori = BehandlingKategori.NASJONAL,
@@ -601,22 +651,26 @@ fun kjørStegprosessForFGB(
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             søkersIdent = søkerFnr,
             barnasIdenter = barnasIdenter,
-            søknadMottattDato = LocalDate.now()
+            søknadMottattDato = LocalDate.now(),
+            fagsakType = fagsakType
         )
     )
 
-    val behandlingEtterPersongrunnlagSteg =
-        stegService.håndterSøknad(
-            behandling = behandling,
-            restRegistrerSøknad = RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = søkerFnr,
-                    barnasIdenter = barnasIdenter,
-                    underkategori = behandlingUnderkategori
-                ),
-                bekreftEndringerViaFrontend = true
-            )
+    if (verge != null) {
+        stegService.håndterRegistrerVerge(behandling, RestRegistrerInstitusjonOgVerge(vergeInfo = verge, institusjonInfo = null))
+    }
+
+    val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(
+        behandling = behandling,
+        restRegistrerSøknad = RestRegistrerSøknad(
+            søknad = lagSøknadDTO(
+                søkerIdent = søkerFnr,
+                barnasIdenter = barnasIdenter,
+                underkategori = behandlingUnderkategori
+            ),
+            bekreftEndringerViaFrontend = true
         )
+    )
 
     if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD) {
         return behandlingEtterPersongrunnlagSteg
@@ -722,6 +776,16 @@ fun kjørStegprosessForFGB(
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
+}
+
+private fun utledFagsaktype(institusjon: InstitusjonInfo?, verge: VergeInfo?): FagsakType {
+    return if (institusjon != null) {
+        FagsakType.INSTITUSJON
+    } else if (verge != null) {
+        FagsakType.BARN_ENSLIG_MINDREÅRIG
+    } else {
+        FagsakType.NORMAL
+    }
 }
 
 /**
@@ -981,10 +1045,51 @@ fun lagEndretUtbetalingAndel(
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
-    standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
-    andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf()
+    standardbegrunnelser: List<Standardbegrunnelse> = emptyList()
 ) =
     EndretUtbetalingAndel(
+        id = id,
+        behandlingId = behandlingId,
+        person = person,
+        prosent = prosent,
+        fom = fom,
+        tom = tom,
+        årsak = årsak,
+        avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
+        søknadstidspunkt = søknadstidspunkt,
+        begrunnelse = "Test",
+        standardbegrunnelser = standardbegrunnelser
+    )
+
+fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+    behandlingId: Long,
+    barn: Person,
+    fom: YearMonth,
+    tom: YearMonth,
+    prosent: Int
+) =
+    lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+        behandlingId = behandlingId,
+        person = barn,
+        fom = fom,
+        tom = tom,
+        prosent = BigDecimal(prosent)
+    )
+
+fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+    id: Long = 0,
+    behandlingId: Long = 0,
+    person: Person,
+    prosent: BigDecimal = BigDecimal.valueOf(100),
+    fom: YearMonth = YearMonth.now().minusMonths(1),
+    tom: YearMonth? = YearMonth.now(),
+    årsak: Årsak = Årsak.DELT_BOSTED,
+    avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
+    søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
+    standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
+    andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf()
+): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
+    val eua = EndretUtbetalingAndel(
         id = id,
         behandlingId = behandlingId,
         person = person,
@@ -998,6 +1103,9 @@ fun lagEndretUtbetalingAndel(
         standardbegrunnelser = standardbegrunnelser,
         andelTilkjentYtelser = andelTilkjentYtelser
     )
+
+    return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua)
+}
 
 fun lagPerson(
     personIdent: PersonIdent = PersonIdent(randomFnr()),

@@ -2,18 +2,18 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
-fun beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse: Set<AndelTilkjentYtelse>): LocalDateTimeline<Int> {
+fun beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse: Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>): LocalDateTimeline<Int> {
     return andelerTilkjentYtelse
         .map { personTilTimeline(it) }
         .reduce(::reducer)
 }
 
-private fun personTilTimeline(it: AndelTilkjentYtelse) =
+private fun personTilTimeline(it: AndelTilkjentYtelseMedEndreteUtbetalinger) =
     LocalDateTimeline(
         listOf(
             LocalDateSegment(
@@ -24,7 +24,10 @@ private fun personTilTimeline(it: AndelTilkjentYtelse) =
         )
     )
 
-private fun reducer(sammenlagtTidslinje: LocalDateTimeline<Int>, tidslinje: LocalDateTimeline<Int>): LocalDateTimeline<Int> {
+private fun reducer(
+    sammenlagtTidslinje: LocalDateTimeline<Int>,
+    tidslinje: LocalDateTimeline<Int>
+): LocalDateTimeline<Int> {
     sammenlagtTidslinje.disjoint(tidslinje)
     return sammenlagtTidslinje.combine(
         tidslinje,

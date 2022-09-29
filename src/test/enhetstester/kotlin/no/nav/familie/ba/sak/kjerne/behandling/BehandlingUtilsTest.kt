@@ -336,7 +336,20 @@ class BehandlingUtilsTest {
         assertEquals(
             BehandlingKategori.NASJONAL,
             bestemKategoriVedOpprettelse(
-                overstyrtKategori = null,
+                overstyrtKategori = BehandlingKategori.NASJONAL,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                behandlingÅrsak = BehandlingÅrsak.MIGRERING,
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
+            )
+        )
+    }
+
+    @Test
+    fun `skal få EØS kategori ved opprettelse av automatisk migreringsbehandling `() {
+        assertEquals(
+            BehandlingKategori.EØS,
+            bestemKategoriVedOpprettelse(
+                overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
                 kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi

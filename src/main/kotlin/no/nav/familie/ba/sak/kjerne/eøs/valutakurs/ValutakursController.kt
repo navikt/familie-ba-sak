@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
@@ -11,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -39,10 +37,6 @@ class ValutakursController(
         @PathVariable behandlingId: Long,
         @RequestBody restValutakurs: RestValutakurs
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
-        }
-
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
 
         val valutaKurs = if (skalManueltSetteValutakurs(restValutakurs)) {
@@ -61,10 +55,6 @@ class ValutakursController(
         @PathVariable behandlingId: Long,
         @PathVariable valutakursId: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
-        }
-
         valutakursService.slettValutakurs(valutakursId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
@@ -72,7 +62,12 @@ class ValutakursController(
 
     private fun oppdaterValutakursMedKursFraECB(restValutakurs: RestValutakurs, valutakurs: Valutakurs) =
         if (valutakursErEndret(restValutakurs, valutakursService.hentValutakurs(restValutakurs.id))) {
-            valutakurs.copy(kurs = ecbService.hentValutakurs(restValutakurs.valutakode!!, restValutakurs.valutakursdato!!))
+            valutakurs.copy(
+                kurs = ecbService.hentValutakurs(
+                    restValutakurs.valutakode!!,
+                    restValutakurs.valutakursdato!!
+                )
+            )
         } else {
             valutakurs
         }
@@ -81,7 +76,9 @@ class ValutakursController(
      * Sjekker om valuta er Islandske Kroner og kursdato er før 01.02.2018
      */
     private fun skalManueltSetteValutakurs(restValutakurs: RestValutakurs): Boolean {
-        return restValutakurs.valutakursdato != null && restValutakurs.valutakode == "ISK" && restValutakurs.valutakursdato.isBefore(LocalDate.of(2018, 2, 1))
+        return restValutakurs.valutakursdato != null && restValutakurs.valutakode == "ISK" && restValutakurs.valutakursdato.isBefore(
+            LocalDate.of(2018, 2, 1)
+        )
     }
 
     /**

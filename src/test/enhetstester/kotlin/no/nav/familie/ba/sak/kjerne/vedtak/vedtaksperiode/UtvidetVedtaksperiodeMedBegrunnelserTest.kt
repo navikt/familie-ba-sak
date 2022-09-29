@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -46,21 +46,21 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         )
 
         val andelerTilkjentYtelse = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 behandling = behandling,
                 endretUtbetalingAndeler = emptyList(),
                 fom = fom.minusMonths(2),
                 tom = tom,
                 person = barn1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 behandling = behandling,
                 endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
                 fom = fom,
                 tom = tom,
                 person = barn2
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 behandling = behandling,
                 endretUtbetalingAndeler = emptyList(),
                 fom = tom.plusMonths(1),

@@ -116,10 +116,14 @@ data class AndelTilkjentYtelse(
 
     @Column(name = "differanseberegnet_periodebelop")
     val differanseberegnetPeriodebeløp: Int? = null
+
 ) : BaseEntitet() {
 
     val periode
         get() = MånedPeriode(stønadFom, stønadTom)
+
+    fun endretUtbetalingAndelIder() =
+        (endretUtbetalingAndeler as MutableList<EndretUtbetalingAndel>?)?.map { it.id as Long? }?.filterNotNull()
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
@@ -136,7 +140,8 @@ data class AndelTilkjentYtelse(
             Objects.equals(stønadTom, annen.stønadTom) &&
             Objects.equals(aktør, annen.aktør) &&
             Objects.equals(nasjonaltPeriodebeløp, annen.nasjonaltPeriodebeløp) &&
-            Objects.equals(differanseberegnetPeriodebeløp, annen.differanseberegnetPeriodebeløp)
+            Objects.equals(differanseberegnetPeriodebeløp, annen.differanseberegnetPeriodebeløp) &&
+            Objects.equals(endretUtbetalingAndelIder(), annen.endretUtbetalingAndelIder())
     }
 
     override fun hashCode(): Int {
@@ -149,14 +154,15 @@ data class AndelTilkjentYtelse(
             stønadTom,
             aktør,
             nasjonaltPeriodebeløp,
-            differanseberegnetPeriodebeløp
+            differanseberegnetPeriodebeløp,
+            endretUtbetalingAndelIder()
         )
     }
 
     override fun toString(): String {
         return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type = $type, prosent = $prosent," +
-            "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset), " +
-            "nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, differanseberegnetBeløp = $differanseberegnetPeriodebeløp"
+            "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset, " +
+            "forrigePeriodeOffset = $forrigePeriodeOffset, nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, differanseberegnetBeløp = $differanseberegnetPeriodebeløp)"
     }
 
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
@@ -281,7 +287,7 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
     return sammenslåtteAndeler
 }
 
-fun List<AndelTilkjentYtelse>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>, List<AndelTilkjentYtelse>> {
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>, List<AndelTilkjentYtelseMedEndreteUtbetalinger>> {
     return this.utledSegmenter()
         .fold(mutableMapOf()) { acc, segment ->
             val andelerForSegment = this.filter {
@@ -297,7 +303,7 @@ fun List<AndelTilkjentYtelse>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>
         }
 }
 
-fun List<AndelTilkjentYtelse>.erUlike(andreAndeler: List<AndelTilkjentYtelse>): Boolean {
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erUlike(andreAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): Boolean {
     return this.hentPerioderMedEndringerFra(andreAndeler).isNotEmpty()
 }
 
@@ -318,7 +324,7 @@ private fun regelverkavhenigeVilkår(): List<Vilkår> {
     )
 }
 
-fun List<AndelTilkjentYtelse>.hentAndelerForSegment(
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentAndelerForSegment(
     vertikaltSegmentForVedtaksperiode: LocalDateSegment<Int>
 ) = this.filter {
     vertikaltSegmentForVedtaksperiode.localDateInterval.overlaps(
@@ -340,7 +346,7 @@ fun List<AndelTilkjentYtelse>?.hentTidslinje() =
         } ?: emptyList()
     )
 
-fun List<AndelTilkjentYtelse>.tilTidslinjerPerPerson(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilTidslinjerPerPerson(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseTidslinje(
             andelerTilkjentYtelsePåPerson

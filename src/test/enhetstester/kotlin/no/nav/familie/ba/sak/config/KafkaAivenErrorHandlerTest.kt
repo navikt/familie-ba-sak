@@ -30,7 +30,14 @@ class KafkaAivenErrorHandlerTest {
 
     @Test
     fun `handle skal stoppe container hvis man mottar feil med en tom liste med records`() {
-        assertThatThrownBy { errorHandler.handle(RuntimeException("Feil i test"), emptyList(), consumer, container) }
+        assertThatThrownBy {
+            errorHandler.handleRemaining(
+                RuntimeException("Feil i test"),
+                emptyList(),
+                consumer,
+                container
+            )
+        }
             .hasMessageNotContaining("Feil i test")
             .hasMessageContaining("Sjekk securelogs for mer info")
             .hasCauseExactlyInstanceOf(Exception::class.java)
@@ -40,7 +47,7 @@ class KafkaAivenErrorHandlerTest {
     fun `handle skal stoppe container hvis man mottar feil med en liste med records`() {
         val consumerRecord = ConsumerRecord("topic", 1, 1, 1, "record")
         assertThatThrownBy {
-            errorHandler.handle(
+            errorHandler.handleRemaining(
                 RuntimeException("Feil i test"),
                 listOf(consumerRecord),
                 consumer,
@@ -53,8 +60,15 @@ class KafkaAivenErrorHandlerTest {
     }
 
     @Test
-    fun `handle skal stoppe container hvis man mottar feil hvor liste med records er null`() {
-        assertThatThrownBy { errorHandler.handle(RuntimeException("Feil i test"), null, consumer, container) }
+    fun `handle skal stoppe container hvis man mottar feil hvor liste med records er empty`() {
+        assertThatThrownBy {
+            errorHandler.handleRemaining(
+                RuntimeException("Feil i test"),
+                emptyList(),
+                consumer,
+                container
+            )
+        }
             .hasMessageNotContaining("Feil i test")
             .hasMessageContaining("Sjekk securelogs for mer info")
             .hasCauseExactlyInstanceOf(Exception::class.java)

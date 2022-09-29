@@ -9,6 +9,8 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -29,6 +31,9 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
     @MockK(relaxed = true)
     private lateinit var loggService: LoggService
 
+    @MockK(relaxed = true)
+    private lateinit var andelerMedEndringerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+
     @InjectMockKs
     private lateinit var småbarnstilleggKorrigeringService: SmåbarnstilleggKorrigeringService
 
@@ -39,12 +44,17 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelseMock
         every { tilkjentYtelseMock.andelerTilkjentYtelse } returns mutableSetOf()
+        every { andelerMedEndringerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id) } returns listOf()
 
         val småbarnsTillegg =
             småbarnstilleggKorrigeringService.leggTilSmåbarnstilleggPåBehandling(YearMonth.of(2020, 10), behandling)
 
         verify(exactly = 1) { tilkjentYtelseRepository.findByBehandling(behandling.id) }
         verify(exactly = 1) { tilkjentYtelseMock.andelerTilkjentYtelse }
+        verify(exactly = 1) {
+            andelerMedEndringerService
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+        }
         verify(exactly = 1) {
             loggService.opprettSmåbarnstilleggLogg(
                 behandling,
@@ -70,6 +80,9 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelseMock
         every { tilkjentYtelseMock.andelerTilkjentYtelse } returns mutableSetOf(andelTilkjentYtelse)
+        every { andelerMedEndringerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id) } returns listOf(
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
+        )
 
         val feil = assertThrows<FunksjonellFeil> {
             småbarnstilleggKorrigeringService.leggTilSmåbarnstilleggPåBehandling(YearMonth.of(2020, 10), behandling)
@@ -94,6 +107,9 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelseMock
         every { tilkjentYtelseMock.andelerTilkjentYtelse } returns mutableSetOf(andelTilkjentYtelse)
+        every { andelerMedEndringerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id) } returns listOf(
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
+        )
 
         val oppsplittetSmåbarnstillegg =
             småbarnstilleggKorrigeringService.fjernSmåbarnstilleggPåBehandling(YearMonth.of(2020, 5), behandling)
@@ -127,6 +143,12 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelseMock
         every { tilkjentYtelseMock.andelerTilkjentYtelse } returns mutableSetOf(andelTilkjentYtelse)
+        every {
+            andelerMedEndringerService
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+        } returns listOf(
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
+        )
 
         val feil = assertThrows<FunksjonellFeil> {
             småbarnstilleggKorrigeringService.fjernSmåbarnstilleggPåBehandling(YearMonth.of(2025, 5), behandling)

@@ -909,6 +909,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagAvtaleOmDeltBostedFolgesFortsatt"
     },
+    AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeOppholdstillatelseMerEnn12Maaneder"
+    },
     OPPHØR_BARN_FLYTTET_FRA_SØKER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnBorIkkeMedSoker"
@@ -1312,6 +1316,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     },
     ETTER_ENDRET_UTBETALING_ETTERBETALING_UTVIDET {
         override val sanityApiNavn = "etterEndretUtbetalingEtterbetalingTreAarTilbakeITidKunUtvidetDel"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
+    },
+    ETTER_ENDRET_UTBETALING_ETTERBETALING_SED {
+        override val sanityApiNavn = "etterEndretUtbetalingEtterbetalingTreAarTilbakeITidSed"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     };
 

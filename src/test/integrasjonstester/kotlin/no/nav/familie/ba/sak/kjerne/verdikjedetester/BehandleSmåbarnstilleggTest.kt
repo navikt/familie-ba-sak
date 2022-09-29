@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteSmåbarnstilleggS
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteUtvidetSatsTilTester
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.tilleggOrdinærSatsTilTester
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -85,7 +86,8 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val opprettTaskService: OpprettTaskService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
-    @Autowired private val persongrunnlagService: PersongrunnlagService
+    @Autowired private val persongrunnlagService: PersongrunnlagService,
+    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato = LocalDate.now().minusYears(2)
@@ -517,7 +519,7 @@ class BehandleSmåbarnstilleggTest(
 
         val småbarnstilleggAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
             behandlingId = aktivBehandling.id
-        ).filter { it.erSmåbarnstillegg() }
+        ).filter { it.erSmåbarnstillegg() }.sortedBy { it.id }
 
         assertEquals(2, småbarnstilleggAndeler.size)
         assertEquals(fomDato.toYearMonth(), småbarnstilleggAndeler.first().stønadFom)
@@ -561,7 +563,7 @@ class BehandleSmåbarnstilleggTest(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
     }
 }

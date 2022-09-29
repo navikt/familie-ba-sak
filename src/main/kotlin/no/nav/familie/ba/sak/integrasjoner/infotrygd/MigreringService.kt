@@ -7,12 +7,15 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -20,6 +23,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -72,7 +78,9 @@ class MigreringService(
     private val vedtakService: VedtakService,
     private val vilkårService: VilkårService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val migreringRestClient: MigreringRestClient
+    private val migreringRestClient: MigreringRestClient,
+    private val kompetanseService: KompetanseService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
@@ -140,7 +148,8 @@ class MigreringService(
                         behandlingÅrsak = BehandlingÅrsak.MIGRERING,
                         skalBehandlesAutomatisk = true,
                         underkategori = underkategori,
-                        barnasIdenter = barnasIdenter
+                        barnasIdenter = barnasIdenter,
+                        kategori = if (erEøsSak(løpendeInfotrygdsak)) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
                     )
                 )
             }.getOrElse { kastOgTellMigreringsFeil(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING, it.message, it) }
@@ -166,6 +175,15 @@ class MigreringService(
                 personIdent,
                 barnasIdenter
             )
+
+            if (løpendeInfotrygdsak.undervalg == "EU") {
+                kompetanseService.hentKompetanser(BehandlingId(behandling.id)).forEach { kompetanse ->
+                    kompetanseService.oppdaterKompetanse(
+                        BehandlingId(behandling.id),
+                        kompetanse.copy(resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND)
+                    )
+                }
+            }
 
             iverksett(behandlingEtterVilkårsvurdering)
 
@@ -202,6 +220,10 @@ class MigreringService(
             if (e is KanIkkeMigrereException) throw e
             kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT, e.message, e)
         }
+    }
+
+    private fun erEøsSak(løpendeInfotrygdsak: Sak): Boolean {
+        return løpendeInfotrygdsak.undervalg == "EU"
     }
 
     private fun kastFeilVedDobbeltforekomstViaHistoriskIdent(barnasAktør: List<Aktør>, barnasIdenter: List<String>) {
@@ -282,6 +304,25 @@ class MigreringService(
             (sak.valg == "UT" && sak.undervalg in listOf("EF", "MD")) -> {
                 BehandlingUnderkategori.UTVIDET
             }
+
+            (
+                sak.valg == "OR" && sak.undervalg == "EU" && featureToggleService.isEnabled(
+                    FeatureToggleConfig.KAN_MIGRERE_EØS_PRIMÆRLAND_ORDINÆR,
+                    false
+                )
+                ) -> {
+                BehandlingUnderkategori.ORDINÆR
+            }
+
+            (
+                sak.valg == "UT" && sak.undervalg == "EU" && featureToggleService.isEnabled(
+                    FeatureToggleConfig.KAN_MIGRERE_EØS_PRIMÆRLAND_UTVIDET,
+                    false
+                )
+                ) -> {
+                BehandlingUnderkategori.UTVIDET
+            }
+
             else -> {
                 kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
             }
@@ -491,7 +532,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     IDENT_IKKE_LENGER_AKTIV("Ident ikke lenger aktiv"),
     IDENT_BARN_IKKE_LENGER_AKTIV("Ident barn ikke lenger aktiv"),
     IKKE_GYLDIG_KJØREDATO("Ikke gyldig kjøredato"),
-    IKKE_STØTTET_SAKSTYPE("Kan kun migrere ordinære(OR OS) og utvidet(UT EF) saker"),
+    IKKE_STØTTET_SAKSTYPE("Ikke støttet sakstype. Kan migrere Ordinære(OS, MD, EU) og Utvidet(EF, MD, EU)"),
     INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD("Fant ingen barn med løpende stønad på sak"),
     INGEN_LØPENDE_SAK_INFOTRYGD("Personen har ikke løpende sak i infotrygd"),
     INSTITUSJON("Midlertidig ignoerert fordi det er en institusjon"),

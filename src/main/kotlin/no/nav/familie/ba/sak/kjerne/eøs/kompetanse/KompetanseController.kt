@@ -44,10 +44,6 @@ class KompetanseController(
         @PathVariable behandlingId: Long,
         @RequestBody restKompetanse: RestKompetanse
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
-        }
-
         val barnAktører = restKompetanse.barnIdenter.map { personidentService.hentAktør(it) }
         val kompetanse = restKompetanse.tilKompetanse(barnAktører = barnAktører)
 
@@ -66,10 +62,6 @@ class KompetanseController(
         @PathVariable kompetanseId: Long,
         @RequestBody restKompetanse: RestKompetanse
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
-        }
-
         val barnAktører = restKompetanse.barnIdenter.map { personidentService.hentAktør(it) }
         val kompetanse = restKompetanse.tilKompetanse(barnAktører = barnAktører)
 
@@ -87,10 +79,6 @@ class KompetanseController(
         @PathVariable behandlingId: Long,
         @PathVariable kompetanseId: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
-        }
-
         kompetanseService.slettKompetanse(kompetanseId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
@@ -105,18 +93,6 @@ class KompetanseController(
         }
         if (oppdatertKompetanse.barnAktører.isEmpty()) {
             throw FunksjonellFeil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
-        }
-        if (oppdatertKompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND && !featureToggleService.isEnabled(
-                FeatureToggleConfig.KAN_BEHANDLE_EØS_SEKUNDERLAND
-            )
-        ) {
-            throw FunksjonellFeil("Sekundærland er ikke støttet", httpStatus = HttpStatus.BAD_REQUEST)
-        }
-        if (oppdatertKompetanse.resultat == KompetanseResultat.TO_PRIMÆRLAND && !featureToggleService.isEnabled(
-                FeatureToggleConfig.KAN_BEHANDLE_EØS_TO_PRIMERLAND
-            )
-        ) {
-            throw FunksjonellFeil("To primærland er ikke støttet", httpStatus = HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -139,10 +115,19 @@ class KompetanseController(
     }
 
     private fun validerUtvidedEøsOgSekundærland(kompetanse: Kompetanse, behandlingId: Long) {
-        if (kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND)) {
-            val utvidetEllerSmåbarnstillegg = tilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId).any { andelTilkjentYtelse -> andelTilkjentYtelse.erSøkersAndel() }
+        if (kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND && !featureToggleService.isEnabled(
+                FeatureToggleConfig.KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND
+            )
+        ) {
+            val utvidetEllerSmåbarnstillegg =
+                tilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+                    .any { andelTilkjentYtelse -> andelTilkjentYtelse.erSøkersAndel() }
             if (utvidetEllerSmåbarnstillegg) {
-                throw FunksjonellFeil("Støtter foreløpig ikke utvidet barnetrygd og/eller småbarnstillegg i kombinasjon med sekundærland.", "Søker har utvidet barnetrygd og/eller småbarnstillegg. Dette er ikke støttet i sekundærlandssaker enda. Ta kontakt med Team Familie", HttpStatus.BAD_REQUEST)
+                throw FunksjonellFeil(
+                    "Støtter foreløpig ikke utvidet barnetrygd og/eller småbarnstillegg i kombinasjon med sekundærland.",
+                    "Søker har utvidet barnetrygd og/eller småbarnstillegg. Dette er ikke støttet i sekundærlandssaker enda. Ta kontakt med Team Familie",
+                    HttpStatus.BAD_REQUEST
+                )
             }
         }
     }

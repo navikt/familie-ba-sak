@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -60,7 +60,7 @@ class EndretUtbetalingAndelServiceTest {
     fun `Skal kaste feil hvis endringsperiode har årsak delt bosted, men ikke overlapper med delt bosted perioder`() {
         val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
+        val endretUtbetalingAndel = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
             behandlingId = behandling.id,
             person = barn,
             årsak = Årsak.DELT_BOSTED,
@@ -99,7 +99,7 @@ class EndretUtbetalingAndelServiceTest {
             )
         )
 
-        every { mockEndretUtbetalingAndelRepository.getById(any()) } returns endretUtbetalingAndel
+        every { mockEndretUtbetalingAndelRepository.getById(any()) } returns endretUtbetalingAndel.endretUtbetalingAndel
         every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), behandling) } returns listOf(barn)
         every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(
             behandling.id,

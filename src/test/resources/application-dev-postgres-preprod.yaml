@@ -187,7 +187,7 @@ FAMILIE_TILBAKE_API_URL: https://familie-tilbake.dev.intern.nav.no
 FAMILIE_TILBAKE_API_URL_SCOPE: api://dev-gcp.teamfamilie.famillie-tilbake/.default
 FAMILIE_BA_SAK_API_URL: http://localhost:8086/api
 FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.dev.intern.nav.no
-FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.famillie-ba-infotrygd/.default
+FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.default
 FAMILIE_STATISTIKK_URL: https://familie-ba-statistikk.dev.intern.nav.no
 
 FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.dev.intern.nav.no

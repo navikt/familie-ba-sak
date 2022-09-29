@@ -101,10 +101,12 @@ data class Behandling(
         return "Behandling(" +
             "id=$id, " +
             "fagsak=${fagsak.id}, " +
+            "fagsakType=${fagsak.type}, " +
             "type=$type, " +
             "kategori=$kategori, " +
             "underkategori=$underkategori, " +
             "automatisk=$skalBehandlesAutomatisk, " +
+            "opprettetÅrsak=$opprettetÅrsak, " +
             "status=$status, " +
             "resultat=$resultat, " +
             "steg=$steg)"

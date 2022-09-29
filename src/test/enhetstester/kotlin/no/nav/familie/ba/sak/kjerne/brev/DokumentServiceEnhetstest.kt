@@ -2,20 +2,40 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService.Companion.alleredeDistribuertMelding
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.http.client.RessursException
+import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestClientResponseException
 
 internal class DokumentServiceEnhetstest {
     val integrasjonClient = mockk<IntegrasjonClient>(relaxed = true)
+    val vilkårsvurderingService = mockk<VilkårsvurderingService>(relaxed = true)
+    val vilkårsvurderingForNyBehandlingService = mockk<VilkårsvurderingForNyBehandlingService>(relaxed = true)
+    val utgåendeJournalføringService = mockk<UtgåendeJournalføringService>(relaxed = true)
+    val journalføringRepository = mockk<JournalføringRepository>(relaxed = true)
 
     private val dokumentService: DokumentService = spyk(
         DokumentService(
@@ -23,14 +43,15 @@ internal class DokumentServiceEnhetstest {
 
             loggService = mockk(relaxed = true),
             persongrunnlagService = mockk(relaxed = true),
-            journalføringRepository = mockk(relaxed = true),
+            journalføringRepository = journalføringRepository,
             taskRepository = mockk(relaxed = true),
             brevKlient = mockk(relaxed = true),
             brevService = mockk(relaxed = true),
-            vilkårsvurderingService = mockk(relaxed = true),
+            vilkårsvurderingService = vilkårsvurderingService,
+            vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             rolleConfig = mockk(relaxed = true),
             settPåVentService = mockk(relaxed = true),
-            utgåendeJournalføringService = mockk(relaxed = true)
+            utgåendeJournalføringService = utgåendeJournalføringService
         )
     )
 
@@ -101,5 +122,86 @@ internal class DokumentServiceEnhetstest {
         )
 
         verify { dokumentService.logger.warn(alleredeDistribuertMelding(journalpostId, behandlingId)) }
+    }
+
+    @Test
+    fun `sendManueltBrev skal journalføre med brukerIdType ORGNR hvis brukers id er 9 siffer, og FNR ellers`() {
+        listOf("123456789", "12345678911").forEach { brukerId ->
+            val brukerIdType = slot<BrukerIdType>()
+            val behandling = lagBehandling()
+
+            every {
+                utgåendeJournalføringService.journalførManueltBrev(
+                    brukersId = brukerId,
+                    fagsakId = any(),
+                    journalførendeEnhet = any(),
+                    brev = any(),
+                    førsteside = any(),
+                    dokumenttype = any(),
+                    brukersType = capture(brukerIdType),
+                    brukersNavn = any()
+                )
+            } returns "mockJournalpostId"
+            every { journalføringRepository.save(any()) } returns DbJournalpost(behandling = behandling, journalpostId = "id")
+
+            runCatching {
+                dokumentService.sendManueltBrev(
+                    ManueltBrevRequest(
+                        brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
+                        mottakerIdent = brukerId,
+                        enhet = Enhet("enhet", "enhetNavn")
+                    ),
+                    behandling = behandling,
+                    fagsakId = behandling.fagsak.id
+                )
+            }
+            when (brukerId.length) {
+                9 -> assertThat(brukerIdType.captured).isEqualTo(BrukerIdType.ORGNR)
+                else -> assertThat(brukerIdType.captured).isEqualTo(BrukerIdType.FNR)
+            }
+        }
+    }
+
+    @Test
+    fun `sendManueltBrev skal legge til opplysningspliktvilkåret, om så ved å initiere vilkårsvurdering først`() {
+        val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, lagBehandling(), Resultat.IKKE_VURDERT)
+        val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
+
+        // Scenario med eksisterende vilkårsvurdering
+        every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns vilkårsvurdering
+        every { journalføringRepository.save(any()) } returns
+            DbJournalpost(behandling = vilkårsvurdering.behandling, journalpostId = "id")
+
+        sendBrevInnhenteOpplysninger(vilkårsvurdering.behandling)
+
+        assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+        verify(exactly = 0) {
+            vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(any(), any())
+        }
+
+        // Scenario uten eksisterende vilkårsvurdering
+        personResultat.setAndreVurderinger(emptySet()) // nullstiller andreVurderinger
+        every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns null
+        every { vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(any(), any()) } returns
+            vilkårsvurdering
+
+        sendBrevInnhenteOpplysninger(vilkårsvurdering.behandling)
+
+        assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+        verify(exactly = 1) {
+            vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(any(), any())
+        }
+    }
+
+    private fun sendBrevInnhenteOpplysninger(behandling: Behandling) {
+        dokumentService.sendManueltBrev(
+            ManueltBrevRequest(
+                brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
+                mottakerIdent = "123456789",
+                enhet = Enhet("enhet", "enhetNavn")
+            ),
+            behandling = behandling,
+            fagsakId = behandling.fagsak.id
+        )
     }
 }

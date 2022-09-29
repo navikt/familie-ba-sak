@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -36,7 +36,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val utvidetAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(3),
                 tom = YearMonth.now().plusYears(1),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -45,7 +45,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn3.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().plusYears(2),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
@@ -79,20 +79,20 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val utvidetAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(4),
                 tom = YearMonth.now().minusYears(3),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 person = søker
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(3).plusMonths(1),
                 tom = YearMonth.now().minusYears(2),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 person = søker,
                 prosent = BigDecimal.ZERO
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(2).plusMonths(1),
                 tom = YearMonth.now(),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -101,14 +101,14 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn3.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().minusYears(3),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 person = barn3,
                 prosent = BigDecimal.ZERO
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(3).plusMonths(1),
                 tom = YearMonth.now().plusYears(2),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
@@ -146,7 +146,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val utvidetAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(3),
                 tom = YearMonth.now().plusYears(2),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -155,20 +155,20 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn1.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().minusYears(1),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 person = barn1,
                 prosent = BigDecimal.ZERO
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(1).plusMonths(1),
                 tom = YearMonth.now().plusYears(5),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 person = barn1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn2.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().plusYears(6),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
@@ -209,14 +209,14 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val utvidetAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn1.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().minusYears(1),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 person = søker,
                 prosent = BigDecimal.ZERO
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(1).plusMonths(1),
                 tom = YearMonth.now().plusYears(2),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -225,13 +225,13 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn1.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().plusYears(5),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 person = barn1
             ),
-            lagAndelTilkjentYtelse(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn2.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().plusYears(6),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
