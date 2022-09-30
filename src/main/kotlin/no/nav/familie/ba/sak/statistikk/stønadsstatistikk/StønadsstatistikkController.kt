@@ -50,6 +50,15 @@ class StønadsstatistikkController(
         }
     }
 
+    @PostMapping(path = ["/send-til-dvh-manuell"])
+    fun sendTilStønadsstatistikkManuell(@RequestBody(required = true) behandlinger: List<Long>) {
+        behandlinger.forEach {
+            val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(it)
+            val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, it)
+            taskRepository.save(vedtakV2Task)
+        }
+    }
+
     @PostMapping(path = ["/ettersend-manuell-migrering/{dryRun}"])
     fun ettersendManuellMigrereringer(@PathVariable dryRun: Boolean = true) {
         val manuelleMigreringer = behandlingRepository.finnBehandlingIdMedOpprettetÅrsak(
