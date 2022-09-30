@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
@@ -151,6 +152,9 @@ class AvstemmingService(
 
                 relevanteAndeler.groupBy { it.kildeBehandlingId }
                     .map { (kildeBehandlingId, andeler) ->
+                        if (kildeBehandlingId == null) {
+                            secureLogger.warn("Finner ikke behandlingsId for andeler=$andeler")
+                        }
                         PerioderForBehandling(
                             behandlingId = kildeBehandlingId.toString(),
                             aktivFødselsnummer = aktiveFødselsnummere[kildeBehandlingId]
