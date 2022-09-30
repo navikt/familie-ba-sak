@@ -96,7 +96,7 @@ class InnkomendeJournalføringServiceTest(
     @Test
     fun `journalfør skal opprette behandling på fagsak som har BARN som eier hvis enslig mindreårig eller institusjon`() {
         val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
-            .copy(erEnsligMindreårig = true)
+            .copy(fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG)
         val fagsakId = innkomendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
         val behandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId.toLong())
 
@@ -104,7 +104,7 @@ class InnkomendeJournalføringServiceTest(
         assertEquals(FagsakType.BARN_ENSLIG_MINDREÅRIG, behandling!!.fagsak.type)
 
         val request2 = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
-            .copy(erPåInstitusjon = true, institusjon = InstitusjonInfo("orgnr", tssEksternId = "tss"))
+            .copy(fagsakType = FagsakType.INSTITUSJON, institusjon = InstitusjonInfo("orgnr", tssEksternId = "tss"))
         val fagsakId2 = innkomendeJournalføringService.journalfør(request2, "1234", "mockEnhet", "2")
         val behandling2 = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId2.toLong())
 

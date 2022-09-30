@@ -340,6 +340,3 @@ class InnkomendeJournalføringService(
         private val logger = LoggerFactory.getLogger(InnkomendeJournalføringService::class.java)
     }
 }
-
-private val RestJournalføring.fagsakType: FagsakType
-    get() = if (erPåInstitusjon) FagsakType.INSTITUSJON else if (erEnsligMindreårig) FagsakType.BARN_ENSLIG_MINDREÅRIG else FagsakType.NORMAL
