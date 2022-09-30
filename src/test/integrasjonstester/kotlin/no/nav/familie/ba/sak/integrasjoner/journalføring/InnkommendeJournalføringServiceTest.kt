@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 
-class InnkomendeJournalføringServiceTest(
+class InnkommendeJournalføringServiceTest(
 
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -36,7 +36,7 @@ class InnkomendeJournalføringServiceTest(
     private val personidentService: PersonidentService,
 
     @Autowired
-    private val innkomendeJournalføringService: InnkomendeJournalføringService,
+    private val innkommendeJournalføringService: InnkommendeJournalføringService,
 
     @Autowired
     private val journalføringRepository: JournalføringRepository
@@ -50,7 +50,7 @@ class InnkomendeJournalføringServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
 
-        val (sak, behandlinger) = innkomendeJournalføringService
+        val (sak, behandlinger) = innkommendeJournalføringService
             .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
 
         val journalposter = journalføringRepository.findByBehandlingId(behandlingId = behandling.id)
@@ -69,7 +69,7 @@ class InnkomendeJournalføringServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
 
-        val (sak, behandlinger) = innkomendeJournalføringService
+        val (sak, behandlinger) = innkommendeJournalføringService
             .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")
 
         assertNull(sak.fagsakId)
@@ -81,7 +81,7 @@ class InnkomendeJournalføringServiceTest(
     fun `journalfør skal opprette en førstegangsbehandling fra journalføring`() {
         val søkerFnr = randomFnr()
         val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr))
-        val fagsakId = innkomendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
+        val fagsakId = innkommendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
 
         val behandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId.toLong())
         assertNotNull(behandling)
@@ -96,16 +96,16 @@ class InnkomendeJournalføringServiceTest(
     @Test
     fun `journalfør skal opprette behandling på fagsak som har BARN som eier hvis enslig mindreårig eller institusjon`() {
         val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
-            .copy(erEnsligMindreårig = true)
-        val fagsakId = innkomendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
+            .copy(fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG)
+        val fagsakId = innkommendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
         val behandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId.toLong())
 
         assertNotNull(behandling)
         assertEquals(FagsakType.BARN_ENSLIG_MINDREÅRIG, behandling!!.fagsak.type)
 
         val request2 = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
-            .copy(erPåInstitusjon = true, institusjon = InstitusjonInfo("orgnr", tssEksternId = "tss"))
-        val fagsakId2 = innkomendeJournalføringService.journalfør(request2, "1234", "mockEnhet", "2")
+            .copy(fagsakType = FagsakType.INSTITUSJON, institusjon = InstitusjonInfo("orgnr", tssEksternId = "tss"))
+        val fagsakId2 = innkommendeJournalføringService.journalfør(request2, "1234", "mockEnhet", "2")
         val behandling2 = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId2.toLong())
 
         assertNotNull(behandling2)
@@ -118,7 +118,7 @@ class InnkomendeJournalføringServiceTest(
         val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr)).copy(datoMottatt = null)
 
         val exception = assertThrows<RuntimeException> {
-            innkomendeJournalføringService.journalfør(
+            innkommendeJournalføringService.journalfør(
                 request,
                 "123",
                 "mockEnhet",
