@@ -98,20 +98,20 @@ class EndringstidspunktTest(
             scenario.barna.associate {
                 it.aktørId!! to listOf(
                     lagVilkårResultat(
-                        vilkårType = Vilkår.BOR_MED_SØKER,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
                         periodeFom = barnFødselsdato,
                         periodeTom = førsteDagMedDeltBostedOppfylt,
                         personResultat = mockk(relaxed = true)
                     ),
                     lagVilkårResultat(
-                        vilkårType = Vilkår.BOR_MED_SØKER,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
                         periodeFom = førsteDagMedDeltBostedOppfylt,
                         periodeTom = sisteDagMedDeltBosdet,
                         personResultat = mockk(relaxed = true),
                         utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
                     ),
                     lagVilkårResultat(
-                        vilkårType = Vilkår.BOR_MED_SØKER,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
                         periodeFom = førsteDagMedDeltBostedOppfylt,
                         periodeTom = sisteDagMedDeltBosdet.førsteDagINesteMåned(),
                         personResultat = mockk(relaxed = true),
