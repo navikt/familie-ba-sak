@@ -8,9 +8,7 @@ import io.mockk.just
 import io.mockk.runs
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
-import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -33,9 +31,6 @@ class OppgaveControllerTest {
     lateinit var oppgaveService: OppgaveService
 
     @MockK
-    lateinit var personopplysningerService: PersonopplysningerService
-
-    @MockK
     lateinit var personidentService: PersonidentService
 
     @MockK
@@ -43,9 +38,6 @@ class OppgaveControllerTest {
 
     @MockK
     lateinit var fagsakService: FagsakService
-
-    @MockK
-    lateinit var innkommendeJournalføringService: InnkommendeJournalføringService
 
     @MockK
     lateinit var tilgangService: TilgangService
