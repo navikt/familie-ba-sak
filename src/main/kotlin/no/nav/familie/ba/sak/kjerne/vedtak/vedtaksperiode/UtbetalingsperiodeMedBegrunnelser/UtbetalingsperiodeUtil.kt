@@ -1,4 +1,3 @@
-
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -82,9 +81,7 @@ private fun hentRegelverkPersonErVurdertEtterIPeriode(vilkårResultater: Iterabl
             when {
                 acc == null -> regelverk
                 regelverk == null -> acc
-                regelverk != acc -> {
-                    throw Feil("Mer enn ett regelverk på person i periode: $regelverk, $acc")
-                }
+                regelverk != acc -> throw Feil("Mer enn ett regelverk på person i periode: $regelverk, $acc")
                 else -> acc
             }
         }
