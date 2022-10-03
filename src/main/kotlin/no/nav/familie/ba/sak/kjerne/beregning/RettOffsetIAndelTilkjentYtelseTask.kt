@@ -34,7 +34,14 @@ class RettOffsetIAndelTilkjentYtelseTask(
         val behandlingerMedFeilaktigeOffsets = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
         loggBehandlingIder("Behandlinger med feilaktige offsets", behandlingerMedFeilaktigeOffsets.map { it.id })
 
-        val relevanteBehandlinger = finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilaktigeOffsets)
+        val relevanteBehandlinger =
+            if (payload.ignorerValidering) {
+                behandlingerMedFeilaktigeOffsets
+            } else {
+                finnRelevanteBehandlingerForOppdateringAvOffset(
+                    behandlingerMedFeilaktigeOffsets
+                )
+            }
         loggBehandlingIder("Relevante behandlinger", relevanteBehandlinger.map { it.id })
 
         val behandlingIderSomIkkeKanOppdateres = mutableListOf<Long>()
@@ -140,5 +147,6 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
 data class RettOffsetIAndelTilkjentYtelseDto(
     val simuler: Boolean,
-    val behandlinger: Set<Long>
+    val behandlinger: Set<Long>,
+    val ignorerValidering: Boolean = false
 )
