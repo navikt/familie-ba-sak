@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -57,6 +59,18 @@ class BehandlingsresultatSteg(
             tilkjentYtelse = tilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag
         )
+
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS_NULLUTBETALING, false)) {
+            val andelerTilkjentYtelse =
+                andelerTilkjentYtelseOgEndreteUtbetalingerService
+                    .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+            if (andelerTilkjentYtelse.map { it.andel }.any { (it.differanseberegnetPeriodebeløp ?: 0) < 0 }) {
+                throw Feil(
+                    message = "Differanseberegning gav nullutbetaling",
+                    frontendFeilmelding = "Nullutbetaling som følge av differanseberegning etter EØS-regelverk er foreløpig ikke støttet"
+                )
+            }
+        }
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandling.id)

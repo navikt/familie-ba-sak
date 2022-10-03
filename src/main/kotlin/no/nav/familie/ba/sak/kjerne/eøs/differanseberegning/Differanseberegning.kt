@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
@@ -21,8 +20,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 fun beregnDifferanse(
     andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
-    valutakurser: Collection<Valutakurs>,
-    kanHåndtereNullUtbetaling: Boolean = true
+    valutakurser: Collection<Valutakurs>
 ): List<AndelTilkjentYtelse> {
     val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
     val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
@@ -37,15 +35,6 @@ fun beregnDifferanse(
         andelTilkjentYtelseTidslinjer.outerJoin(barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer) { aty, beløp ->
             aty.oppdaterDifferanseberegning(beløp)
         }
-
-    if (!kanHåndtereNullUtbetaling && barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer
-        .innholdMatcher { it.erNegativtDifferanseberegnetPeriodebeløp() }
-    ) {
-        throw Feil(
-            message = "Differanseberegning gav nullutbetaling",
-            frontendFeilmelding = "Nullutbetaling som følge av differanseberegning etter EØS-regelverk er foreløpig ikke støttet"
-        )
-    }
 
     val barnasAndeler = barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
     val søkersAndeler = andelerTilkjentYtelse.filter { it.erSøkersAndel() }
