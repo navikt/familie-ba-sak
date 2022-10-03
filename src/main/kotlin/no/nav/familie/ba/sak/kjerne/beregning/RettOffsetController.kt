@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -44,6 +45,21 @@ class RettOffsetController(
         val input = RettOffsetIAndelTilkjentYtelseDto(
             simuler = false,
             behandlinger = finnBehandlinger()
+        )
+        task.doTask(
+            Task(
+                type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(input)
+            )
+        )
+    }
+
+    @PostMapping("/rett-offset-for-behandling")
+    @Transactional
+    fun rettOffsetfeilForBehandlinger(@RequestBody(required = true) behandlinger: List<Long>) {
+        val input = RettOffsetIAndelTilkjentYtelseDto(
+            simuler = false,
+            behandlinger = behandlinger.toSet()
         )
         task.doTask(
             Task(
