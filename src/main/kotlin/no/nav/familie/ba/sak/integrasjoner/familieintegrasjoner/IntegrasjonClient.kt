@@ -23,7 +23,6 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
-import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -401,7 +400,13 @@ class IntegrasjonClient(
             .pathSegment("organisasjon", organisasjonsnummer, "valider")
             .build()
             .toUri()
-        return getForEntity<Ressurs<Organisasjon>>(uri).getDataOrThrow()
+        return kallEksternTjenesteRessurs(
+            tjeneste = "organisasjon",
+            uri = uri,
+            formål = "Hent organisasjon $organisasjonsnummer"
+        ) {
+            getForEntity(uri)
+        }
     }
 
     companion object {

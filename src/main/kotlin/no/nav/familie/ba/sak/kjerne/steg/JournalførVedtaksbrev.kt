@@ -72,7 +72,7 @@ class JournalførVedtaksbrev(
         val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
         mottaker.forEach { mottakerInfo ->
             journalførVedtaksbrev(
-                fnr = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
+                fnr = fagsak.aktør.aktivFødselsnummer(),
                 fagsakId = fagsakId,
                 vedtak = vedtak,
                 journalførendeEnhet = behanlendeEnhet,

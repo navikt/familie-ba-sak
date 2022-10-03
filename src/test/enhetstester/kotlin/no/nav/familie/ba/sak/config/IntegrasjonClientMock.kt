@@ -27,6 +27,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -160,6 +161,13 @@ class IntegrasjonClientMock {
             every { mockIntegrasjonClient.hentAlleEØSLand() } returns hentKodeverkLand()
 
             every { mockIntegrasjonClient.oppdaterOppgave(any(), any()) } just runs
+
+            every { mockIntegrasjonClient.hentOrganisasjon(any()) } answers {
+                Organisasjon(
+                    "998765432",
+                    "Testinstitusjon"
+                )
+            }
         }
 
         fun clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient) {

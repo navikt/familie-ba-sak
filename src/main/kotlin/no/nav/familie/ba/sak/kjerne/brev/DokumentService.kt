@@ -174,11 +174,7 @@ class DokumentService(
             brev = generertBrev,
             førsteside = førsteside,
             dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
-            avsenderMottaker = if (manueltBrevRequest.erTilInstitusjon) AvsenderMottaker(
-                idType = BrukerIdType.ORGNR,
-                id = manueltBrevRequest.mottakerIdent,
-                navn = manueltBrevRequest.mottakerNavn
-            ) else null
+            avsenderMottaker = utledAvsenderMottaker(manueltBrevRequest)
         )
 
         if (behandling != null) {
@@ -233,6 +229,18 @@ class DokumentService(
                     ),
                 årsak = manueltBrevRequest.brevmal.venteårsak()
             )
+        }
+    }
+
+    private fun utledAvsenderMottaker(manueltBrevRequest: ManueltBrevRequest): AvsenderMottaker? {
+        return if (manueltBrevRequest.erTilInstitusjon) {
+            AvsenderMottaker(
+                idType = BrukerIdType.ORGNR,
+                id = manueltBrevRequest.mottakerIdent,
+                navn = manueltBrevRequest.mottakerNavn
+            )
+        } else {
+            null
         }
     }
 
