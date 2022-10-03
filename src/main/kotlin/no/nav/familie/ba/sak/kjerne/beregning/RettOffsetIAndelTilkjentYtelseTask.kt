@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -33,7 +34,14 @@ class RettOffsetIAndelTilkjentYtelseTask(
         val behandlingerMedFeilaktigeOffsets = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
         loggBehandlingIder("Behandlinger med feilaktige offsets", behandlingerMedFeilaktigeOffsets.map { it.id })
 
-        val relevanteBehandlinger = finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilaktigeOffsets)
+        val relevanteBehandlinger =
+            if (payload.ignorerValidering) {
+                behandlingerMedFeilaktigeOffsets
+            } else {
+                finnRelevanteBehandlingerForOppdateringAvOffset(
+                    behandlingerMedFeilaktigeOffsets
+                )
+            }
         loggBehandlingIder("Relevante behandlinger", relevanteBehandlinger.map { it.id })
 
         val behandlingIderSomIkkeKanOppdateres = mutableListOf<Long>()
@@ -109,7 +117,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 alleBehandlingerPåFagsak.filter { it.opprettetTidspunkt.isAfter(behandling.opprettetTidspunkt) && !it.erHenlagt() }
 
             val finnesUgyldigBehandlingEtterDenne =
-                behandlingerOpprettetEtterDenneBehandlingen.filter { it.status == BehandlingStatus.AVSLUTTET }
+                behandlingerOpprettetEtterDenneBehandlingen.filter { it.status == BehandlingStatus.AVSLUTTET && it.resultat != Behandlingsresultat.FORTSATT_INNVILGET }
                     .isNotEmpty()
 
             if (finnesUgyldigBehandlingEtterDenne) {
@@ -139,5 +147,6 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
 data class RettOffsetIAndelTilkjentYtelseDto(
     val simuler: Boolean,
-    val behandlinger: Set<Long>
+    val behandlinger: Set<Long>,
+    val ignorerValidering: Boolean = false
 )
