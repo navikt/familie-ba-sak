@@ -5,12 +5,15 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.tilDokumenttype
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
+import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -18,6 +21,7 @@ import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilVergeDTO
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilVergeTask
 import no.nav.familie.kontrakter.felles.BrukerIdType
+import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
@@ -36,7 +40,10 @@ class JournalførVedtaksbrev(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val utgåendeJournalføringService: UtgåendeJournalføringService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
+    private val organisasjonService: OrganisasjonService,
+    private val personidentService: PersonidentService,
+    private val personopplysningerService: PersonopplysningerService
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
     override fun utførStegOgAngiNeste(
@@ -53,24 +60,23 @@ class JournalførVedtaksbrev(
         val behanlendeEnhet =
             arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
 
-        val mottaker = if (fagsak?.type == FagsakType.INSTITUSJON) {
-            mutableListOf(MottakerInfo(fagsak.institusjon!!.orgNummer!!, BrukerIdType.ORGNR, false))
+        val mottaker = if (fagsak.type == FagsakType.INSTITUSJON) {
+            mutableListOf(MottakerInfo(fagsak.institusjon!!.orgNummer, BrukerIdType.ORGNR, false))
         } else {
             mutableListOf(MottakerInfo(vedtak.behandling.fagsak.aktør.aktivFødselsnummer(), BrukerIdType.FNR, false))
         }
-        if (vedtak.behandling.verge != null && vedtak.behandling.verge?.ident != null) {
-            mottaker.add(MottakerInfo(vedtak.behandling.verge!!.ident!!, BrukerIdType.FNR, true))
+        if (vedtak.behandling.verge?.ident != null) {
+            mottaker.add(MottakerInfo(vedtak.behandling.verge.ident, BrukerIdType.FNR, true))
         }
 
         val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
         mottaker.forEach { mottakerInfo ->
             journalførVedtaksbrev(
-                brukersId = mottakerInfo.brukerId,
+                fnr = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
                 fagsakId = fagsakId,
                 vedtak = vedtak,
                 journalførendeEnhet = behanlendeEnhet,
-                brukersType = mottakerInfo.brukerIdType,
-                tilVerge = mottakerInfo.erVerge
+                mottakerInfo = mottakerInfo
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
 
@@ -104,12 +110,11 @@ class JournalførVedtaksbrev(
     }
 
     fun journalførVedtaksbrev(
-        brukersId: String,
-        brukersType: BrukerIdType,
+        fnr: String,
         fagsakId: String,
         vedtak: Vedtak,
         journalførendeEnhet: String,
-        tilVerge: Boolean = false
+        mottakerInfo: MottakerInfo
     ): String {
         val vedleggPdf =
             hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
@@ -136,15 +141,40 @@ class JournalførVedtaksbrev(
             )
         )
         return utgåendeJournalføringService.journalførDokument(
-            brukerId = brukersId,
+            fnr = fnr,
             fagsakId = fagsakId,
             journalførendeEnhet = journalførendeEnhet,
             brev = brev,
             vedlegg = vedlegg,
             behandlingId = vedtak.behandling.id,
-            brukersType = brukersType,
-            tilVerge = tilVerge
+            avsenderMottaker = utledAvsenderMottaker(mottakerInfo),
+            tilVerge = mottakerInfo.erVerge
         )
+    }
+
+    private fun utledAvsenderMottaker(mottakerInfo: MottakerInfo): AvsenderMottaker? {
+        return if (mottakerInfo.brukerIdType == BrukerIdType.ORGNR) {
+            AvsenderMottaker(
+                idType = mottakerInfo.brukerIdType,
+                id = mottakerInfo.brukerId,
+                navn = organisasjonService.hentOrganisasjon(mottakerInfo.brukerId).navn
+            )
+        } else if (mottakerInfo.erVerge) {
+            AvsenderMottaker(
+                idType = mottakerInfo.brukerIdType,
+                id = mottakerInfo.brukerId,
+                navn = hentVergenavn(mottakerInfo.brukerId)
+            )
+        } else {
+            null
+        }
+    }
+
+    private fun hentVergenavn(vergeIdent: String): String {
+        val aktør = personidentService.hentAktør(vergeIdent)
+        return personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).let {
+            it.navn!!
+        }
     }
 
     override fun stegType(): StegType {

@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.erTilInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrev
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -36,6 +37,7 @@ import no.nav.familie.ba.sak.task.DistribuerDødsfallDokumentPåFagsakTask
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -58,7 +60,8 @@ class DokumentService(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     private val rolleConfig: RolleConfig,
     private val settPåVentService: SettPåVentService,
-    private val utgåendeJournalføringService: UtgåendeJournalføringService
+    private val utgåendeJournalføringService: UtgåendeJournalføringService,
+    private val fagsakRepository: FagsakRepository
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -161,16 +164,21 @@ class DokumentService(
             null
         }
 
+        val fagsak = fagsakRepository.finnFagsak(fagsakId)
+
         val journalpostId = utgåendeJournalføringService.journalførManueltBrev(
-            brukersId = manueltBrevRequest.mottakerIdent,
+            fnr = fagsak!!.aktør.aktivFødselsnummer(),
             fagsakId = fagsakId.toString(),
             journalførendeEnhet = manueltBrevRequest.enhet?.enhetId
                 ?: DEFAULT_JOURNALFØRENDE_ENHET,
             brev = generertBrev,
             førsteside = førsteside,
             dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
-            brukersType = if (manueltBrevRequest.erTilInstitusjon) BrukerIdType.ORGNR else BrukerIdType.FNR,
-            brukersNavn = manueltBrevRequest.mottakerNavn
+            avsenderMottaker = if (manueltBrevRequest.erTilInstitusjon) AvsenderMottaker(
+                idType = BrukerIdType.ORGNR,
+                id = manueltBrevRequest.mottakerIdent,
+                navn = manueltBrevRequest.mottakerNavn
+            ) else null
         )
 
         if (behandling != null) {

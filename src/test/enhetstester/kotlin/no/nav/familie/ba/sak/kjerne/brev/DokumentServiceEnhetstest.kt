@@ -17,6 +17,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService.Companion.alleredeDistribuertMelding
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -25,6 +28,7 @@ import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
+import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
@@ -36,6 +40,7 @@ internal class DokumentServiceEnhetstest {
     val vilkårsvurderingForNyBehandlingService = mockk<VilkårsvurderingForNyBehandlingService>(relaxed = true)
     val utgåendeJournalføringService = mockk<UtgåendeJournalføringService>(relaxed = true)
     val journalføringRepository = mockk<JournalføringRepository>(relaxed = true)
+    val fagsakRepository = mockk<FagsakRepository>(relaxed = true)
 
     private val dokumentService: DokumentService = spyk(
         DokumentService(
@@ -51,7 +56,8 @@ internal class DokumentServiceEnhetstest {
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             rolleConfig = mockk(relaxed = true),
             settPåVentService = mockk(relaxed = true),
-            utgåendeJournalføringService = utgåendeJournalføringService
+            utgåendeJournalføringService = utgåendeJournalføringService,
+            fagsakRepository = fagsakRepository
         )
     )
 
@@ -127,22 +133,30 @@ internal class DokumentServiceEnhetstest {
     @Test
     fun `sendManueltBrev skal journalføre med brukerIdType ORGNR hvis brukers id er 9 siffer, og FNR ellers`() {
         listOf("123456789", "12345678911").forEach { brukerId ->
-            val brukerIdType = slot<BrukerIdType>()
+            val avsenderMottaker = slot<AvsenderMottaker>()
             val behandling = lagBehandling()
+
+            val aktør = mockk<Aktør>()
+            every { aktør.aktivFødselsnummer() } returns "12345678911"
+            val fagsak = mockk<Fagsak>()
+            every { fagsak.aktør } returns aktør
+            every { fagsakRepository.finnFagsak(any()) } returns fagsak
 
             every {
                 utgåendeJournalføringService.journalførManueltBrev(
-                    brukersId = brukerId,
+                    fnr = any(),
                     fagsakId = any(),
                     journalførendeEnhet = any(),
                     brev = any(),
                     førsteside = any(),
                     dokumenttype = any(),
-                    brukersType = capture(brukerIdType),
-                    brukersNavn = any()
+                    avsenderMottaker = capture(avsenderMottaker)
                 )
             } returns "mockJournalpostId"
-            every { journalføringRepository.save(any()) } returns DbJournalpost(behandling = behandling, journalpostId = "id")
+            every { journalføringRepository.save(any()) } returns DbJournalpost(
+                behandling = behandling,
+                journalpostId = "id"
+            )
 
             runCatching {
                 dokumentService.sendManueltBrev(
@@ -156,8 +170,12 @@ internal class DokumentServiceEnhetstest {
                 )
             }
             when (brukerId.length) {
-                9 -> assertThat(brukerIdType.captured).isEqualTo(BrukerIdType.ORGNR)
-                else -> assertThat(brukerIdType.captured).isEqualTo(BrukerIdType.FNR)
+                9 -> {
+                    assert(avsenderMottaker.isCaptured) { "AvsenderMottaker skal være fanget" }
+                    assertThat(avsenderMottaker.captured.idType).isEqualTo(BrukerIdType.ORGNR)
+                }
+
+                else -> assert(!avsenderMottaker.isCaptured) { "AvsenderMottaker skal ikke være fanget" }
             }
         }
     }
@@ -174,7 +192,8 @@ internal class DokumentServiceEnhetstest {
 
         sendBrevInnhenteOpplysninger(vilkårsvurdering.behandling)
 
-        assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+        assertThat(personResultat.andreVurderinger).extracting("type")
+            .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
         verify(exactly = 0) {
             vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(any(), any())
         }
@@ -187,7 +206,8 @@ internal class DokumentServiceEnhetstest {
 
         sendBrevInnhenteOpplysninger(vilkårsvurdering.behandling)
 
-        assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+        assertThat(personResultat.andreVurderinger).extracting("type")
+            .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
         verify(exactly = 1) {
             vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(any(), any())
         }
