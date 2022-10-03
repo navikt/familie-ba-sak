@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -109,7 +110,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 alleBehandlingerPåFagsak.filter { it.opprettetTidspunkt.isAfter(behandling.opprettetTidspunkt) && !it.erHenlagt() }
 
             val finnesUgyldigBehandlingEtterDenne =
-                behandlingerOpprettetEtterDenneBehandlingen.filter { it.status == BehandlingStatus.AVSLUTTET }
+                behandlingerOpprettetEtterDenneBehandlingen.filter { it.status == BehandlingStatus.AVSLUTTET && it.resultat != Behandlingsresultat.FORTSATT_INNVILGET }
                     .isNotEmpty()
 
             if (finnesUgyldigBehandlingEtterDenne) {
