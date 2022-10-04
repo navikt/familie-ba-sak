@@ -47,11 +47,11 @@ internal class RestTidslinjerTest {
 
         // Stopper ved søkers siste til-og-med-dato fordi Regelverk er <null> etter det, som filtreres bort
         assertEquals(
-            28.feb(2022).tilLocalDate(),
+            31.jan(2022).tilLocalDate(),
             barnetsTidslinjer.regelverkTidslinje.last().tilOgMed
         )
         assertEquals(
-            28.feb(2022).tilLocalDate(),
+            31.jan(2022).tilLocalDate(),
             barnetsTidslinjer.oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje.last().tilOgMed
         )
 

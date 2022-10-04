@@ -13,3 +13,7 @@ data class Periode<I, T : Tidsenhet>(
 
     override fun toString(): String = "$fraOgMed - $tilOgMed: $innhold"
 }
+
+fun <I, T : Tidsenhet> Tidspunkt<T>.tilPeriodeMedInnhold(innhold: I?) = Periode(this, this, innhold)
+
+fun <I, T : Tidsenhet> Tidspunkt<T>.tilPeriodeUtenInnhold() = tilPeriodeMedInnhold(null as I)
