@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/periodeoffset")
@@ -25,7 +26,7 @@ class RettOffsetController(
     @PostMapping("/simuler-offset-fix")
     @Transactional
     fun simuler() {
-        val behandlinger = finnBehandlinger()
+        val behandlinger = finnBehandlingerMedNullEllerDuplikatOffset()
         val input = RettOffsetIAndelTilkjentYtelseDto(
             simuler = true,
             behandlinger = behandlinger
@@ -44,7 +45,7 @@ class RettOffsetController(
     fun rettOffsetfeil() {
         val input = RettOffsetIAndelTilkjentYtelseDto(
             simuler = false,
-            behandlinger = finnBehandlinger()
+            behandlinger = finnBehandlingerMedNullEllerDuplikatOffset()
         )
         task.doTask(
             Task(
@@ -70,7 +71,46 @@ class RettOffsetController(
         )
     }
 
-    private fun finnBehandlinger(): Set<Long> {
+    @PostMapping("/simuler-offset-for-alle-behandlinger")
+    @Transactional
+    fun simulerOffsetfeilForAlleBehandlinger(@RequestBody(required = true) behandlinger: List<Long>) {
+        val input = RettOffsetIAndelTilkjentYtelseDto(
+            simuler = true,
+            behandlinger = finnAlleBehandlingerEndretEtterFeilOppsto()
+        )
+        task.kjørOffsetFix(
+            Task(
+                type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(input)
+            )
+        )
+    }
+
+    private fun finnAlleBehandlingerEndretEtterFeilOppsto(): Set<Long> {
+        val ugyldigeResultater = listOf(
+            Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+            Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+            Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+            Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+            Behandlingsresultat.AVSLÅTT,
+            Behandlingsresultat.FORTSATT_INNVILGET
+        )
+
+        val behandlingerEtterDato = behandlingRepository.finnBehandlingerOpprettetEtterDatoForOffsetFeil(
+            ugyldigeResultater = ugyldigeResultater,
+            startDato = LocalDate.of(2022, 9, 5),
+            sluttDato = LocalDate.of(2022, 9, 30)
+        )
+        logger.warn(
+            "Behandlinger opprettet f.o.m. 5. september 2022 (${behandlingerEtterDato.size} stk): ${
+            behandlingerEtterDato.joinToString(separator = ",")
+            }"
+        )
+
+        return behandlingerEtterDato.toSet()
+    }
+
+    private fun finnBehandlingerMedNullEllerDuplikatOffset(): Set<Long> {
         val ugyldigeResultater = listOf(
             Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
             Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
