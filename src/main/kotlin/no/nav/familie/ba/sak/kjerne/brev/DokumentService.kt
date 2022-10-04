@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalførin
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
@@ -61,7 +62,8 @@ class DokumentService(
     private val rolleConfig: RolleConfig,
     private val settPåVentService: SettPåVentService,
     private val utgåendeJournalføringService: UtgåendeJournalføringService,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -237,10 +239,16 @@ class DokumentService(
             AvsenderMottaker(
                 idType = BrukerIdType.ORGNR,
                 id = manueltBrevRequest.mottakerIdent,
-                navn = manueltBrevRequest.mottakerNavn
+                navn = utledInstitusjonNavn(manueltBrevRequest)
             )
         } else {
             null
+        }
+    }
+
+    private fun utledInstitusjonNavn(manueltBrevRequest: ManueltBrevRequest): String {
+        return manueltBrevRequest.mottakerNavn.ifBlank {
+            organisasjonService.hentOrganisasjon(manueltBrevRequest.mottakerIdent).navn
         }
     }
 
