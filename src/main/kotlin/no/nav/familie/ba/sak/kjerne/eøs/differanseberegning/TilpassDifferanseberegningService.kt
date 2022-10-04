@@ -41,7 +41,7 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
 @Service
 class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     @Transactional
     override fun skjemaerEndret(
@@ -64,7 +64,7 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
 @Service
 class TilpassDifferanseberegningEtterValutakursService(
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
 
     @Transactional
