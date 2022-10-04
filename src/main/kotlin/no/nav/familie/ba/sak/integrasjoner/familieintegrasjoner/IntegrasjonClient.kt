@@ -32,6 +32,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -389,6 +390,20 @@ class IntegrasjonClient(
             tjeneste = "kodeverk",
             uri = uri,
             formål = "Hent landkoderISO2"
+        ) {
+            getForEntity(uri)
+        }
+    }
+
+    fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon {
+        val uri = UriComponentsBuilder.fromUri(integrasjonUri)
+            .pathSegment("organisasjon", organisasjonsnummer, "valider")
+            .build()
+            .toUri()
+        return kallEksternTjenesteRessurs(
+            tjeneste = "organisasjon",
+            uri = uri,
+            formål = "Hent organisasjon $organisasjonsnummer"
         ) {
             getForEntity(uri)
         }

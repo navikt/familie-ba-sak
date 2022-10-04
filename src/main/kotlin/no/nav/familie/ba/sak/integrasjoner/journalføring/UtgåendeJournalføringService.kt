@@ -23,18 +23,17 @@ class UtgåendeJournalføringService(
 ) {
 
     fun journalførManueltBrev(
-        brukersId: String,
+        fnr: String,
         fagsakId: String,
         journalførendeEnhet: String,
         brev: ByteArray,
         dokumenttype: Dokumenttype,
         førsteside: Førsteside?,
-        brukersType: BrukerIdType = BrukerIdType.FNR,
-        brukersNavn: String = "",
+        avsenderMottaker: AvsenderMottaker? = null,
         tilVerge: Boolean = false
     ): String {
         return journalførDokument(
-            brukerId = brukersId,
+            fnr = fnr,
             fagsakId = fagsakId,
             journalførendeEnhet = journalførendeEnhet,
             brev = listOf(
@@ -45,22 +44,20 @@ class UtgåendeJournalføringService(
                 )
             ),
             førsteside = førsteside,
-            brukersType = brukersType,
-            brukersNavn = brukersNavn,
+            avsenderMottaker = avsenderMottaker,
             tilVerge = tilVerge
         )
     }
 
     fun journalførDokument(
-        brukerId: String,
+        fnr: String,
         fagsakId: String,
         journalførendeEnhet: String? = null,
         brev: List<Dokument>,
         vedlegg: List<Dokument> = emptyList(),
         førsteside: Førsteside? = null,
         behandlingId: Long? = null,
-        brukersType: BrukerIdType = BrukerIdType.FNR,
-        brukersNavn: String = "",
+        avsenderMottaker: AvsenderMottaker? = null,
         tilVerge: Boolean = false
     ): String {
         if (journalførendeEnhet == DEFAULT_JOURNALFØRENDE_ENHET) {
@@ -73,16 +70,8 @@ class UtgåendeJournalføringService(
         val journalpostId = try {
             val journalpost = integrasjonClient.journalførDokument(
                 ArkiverDokumentRequest(
-                    fnr = brukerId,
-                    avsenderMottaker = if (brukersType == BrukerIdType.ORGNR) {
-                        AvsenderMottaker(
-                            brukerId,
-                            brukersType,
-                            brukersNavn
-                        )
-                    } else {
-                        null
-                    },
+                    fnr = fnr,
+                    avsenderMottaker = avsenderMottaker,
                     forsøkFerdigstill = true,
                     hoveddokumentvarianter = brev,
                     vedleggsdokumenter = vedlegg,
@@ -106,7 +95,7 @@ class UtgåendeJournalføringService(
                             "med eksternReferanseId=$eksternReferanseId. Bruker eksisterende journalpost."
                     )
 
-                    hentEksisterendeJournalpost(eksternReferanseId, brukerId)
+                    hentEksisterendeJournalpost(eksternReferanseId, fnr)
                 }
                 else -> throw ressursException
             }
