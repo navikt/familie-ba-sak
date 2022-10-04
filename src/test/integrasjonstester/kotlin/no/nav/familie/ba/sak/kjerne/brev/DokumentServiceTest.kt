@@ -303,7 +303,6 @@ class DokumentServiceTest(
         )
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        // val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlagForInstitusjon(
             behandlingId = behandling.id,
             barnasIdenter = listOf(fnr)
@@ -320,8 +319,7 @@ class DokumentServiceTest(
 
         val manueltBrevRequest = ManueltBrevRequest(
             brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
-            mottakerIdent = orgNummer,
-            mottakerNavn = "Testorganisasjon"
+            mottakerIdent = orgNummer
         ).byggMottakerdata(
             behandling,
             persongrunnlagService,
@@ -330,7 +328,7 @@ class DokumentServiceTest(
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         io.mockk.verify(exactly = 1) {
-            integrasjonClient.journalførDokument(match { it.fnr == fnr; it.avsenderMottaker?.id == orgNummer })
+            integrasjonClient.journalførDokument(match { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" })
         }
     }
 

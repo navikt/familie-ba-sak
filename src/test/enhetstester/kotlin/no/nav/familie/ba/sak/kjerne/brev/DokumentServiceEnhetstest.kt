@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService.Companion.alleredeDistribuertMelding
@@ -29,6 +30,7 @@ import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
+import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
@@ -41,6 +43,7 @@ internal class DokumentServiceEnhetstest {
     val utgåendeJournalføringService = mockk<UtgåendeJournalføringService>(relaxed = true)
     val journalføringRepository = mockk<JournalføringRepository>(relaxed = true)
     val fagsakRepository = mockk<FagsakRepository>(relaxed = true)
+    val organisasjonService = mockk<OrganisasjonService>(relaxed = true)
 
     private val dokumentService: DokumentService = spyk(
         DokumentService(
@@ -57,7 +60,8 @@ internal class DokumentServiceEnhetstest {
             rolleConfig = mockk(relaxed = true),
             settPåVentService = mockk(relaxed = true),
             utgåendeJournalføringService = utgåendeJournalføringService,
-            fagsakRepository = fagsakRepository
+            fagsakRepository = fagsakRepository,
+            organisasjonService = organisasjonService
         )
     )
 
@@ -157,6 +161,10 @@ internal class DokumentServiceEnhetstest {
                 behandling = behandling,
                 journalpostId = "id"
             )
+            every { organisasjonService.hentOrganisasjon(any()) } returns Organisasjon(
+                organisasjonsnummer = brukerId,
+                navn = "Testinstitusjon"
+            )
 
             runCatching {
                 dokumentService.sendManueltBrev(
@@ -173,6 +181,8 @@ internal class DokumentServiceEnhetstest {
                 9 -> {
                     assert(avsenderMottaker.isCaptured) { "AvsenderMottaker skal være fanget" }
                     assertThat(avsenderMottaker.captured.idType).isEqualTo(BrukerIdType.ORGNR)
+                    assertThat(avsenderMottaker.captured.id).isEqualTo(brukerId)
+                    assertThat(avsenderMottaker.captured.navn).isEqualTo("Testinstitusjon")
                 }
 
                 else -> assert(!avsenderMottaker.isCaptured) { "AvsenderMottaker skal ikke være fanget" }
