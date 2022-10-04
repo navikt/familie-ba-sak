@@ -1256,3 +1256,9 @@ fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
             else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
         }
     )
+
+fun ikkeOppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
+    VilkårRegelverkResultat(
+        vilkår = vilkår,
+        regelverkResultat = RegelverkResultat.IKKE_OPPFYLT
+    )
