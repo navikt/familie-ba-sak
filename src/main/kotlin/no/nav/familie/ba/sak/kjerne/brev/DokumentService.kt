@@ -247,9 +247,7 @@ class DokumentService(
     }
 
     private fun utledInstitusjonNavn(manueltBrevRequest: ManueltBrevRequest): String {
-        return if (manueltBrevRequest.mottakerNavn != "") {
-            manueltBrevRequest.mottakerNavn
-        } else {
+        return manueltBrevRequest.mottakerNavn.ifBlank {
             organisasjonService.hentOrganisasjon(manueltBrevRequest.mottakerIdent).navn
         }
     }
