@@ -266,8 +266,8 @@ internal class KompetanseServiceTest {
             .byggPerson()
 
         val forventedeKompetanser = KompetanseBuilder(seksMånederSiden.neste(), behandlingId)
-            .medKompetanse("---", barn1, barn2) // Begge barna har 3 mnd EØS-regelverk før nå-tidspunktet
-            .medKompetanse("   ->", barn1) // Bare barn 1 har EØS-regelverk etter nå-tidspunktet
+            .medKompetanse("--", barn1, barn2) // Begge barna har 3 mnd EØS-regelverk før nå-tidspunktet
+            .medKompetanse("  ->", barn1) // Bare barn 1 har EØS-regelverk etter nå-tidspunktet
             .byggKompetanser()
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
@@ -305,8 +305,8 @@ internal class KompetanseServiceTest {
             .medVilkår("+++++++++++", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
             .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
             .forPerson(barn2, jan(2020))
-            .medVilkår("  +++", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
-            .medVilkår("  EEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
+            .medVilkår("  ++++", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
+            .medVilkår("  EEEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
             .forPerson(barn3, jan(2020))
             .medVilkår("+>", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
             .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
@@ -324,7 +324,7 @@ internal class KompetanseServiceTest {
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
 
         val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
-            .medKompetanse(" SP  SS-----", barn1)
+            .medKompetanse(" SP  SS----", barn1)
             .medKompetanse("     -", barn2)
             .medKompetanse("   PP ", barn1, barn2)
             .byggKompetanser()
