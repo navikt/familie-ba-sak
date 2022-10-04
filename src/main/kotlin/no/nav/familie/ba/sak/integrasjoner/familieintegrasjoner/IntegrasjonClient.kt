@@ -396,10 +396,7 @@ class IntegrasjonClient(
     }
 
     fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon {
-        val uri = UriComponentsBuilder.fromUri(integrasjonUri)
-            .pathSegment("organisasjon", organisasjonsnummer, "valider")
-            .build()
-            .toUri()
+        val uri = URI.create("$integrasjonUri/organisasjon/$organisasjonsnummer")
         return kallEksternTjenesteRessurs(
             tjeneste = "organisasjon",
             uri = uri,
