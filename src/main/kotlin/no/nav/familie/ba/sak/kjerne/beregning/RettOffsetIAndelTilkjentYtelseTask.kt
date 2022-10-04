@@ -27,16 +27,15 @@ class RettOffsetIAndelTilkjentYtelseTask(
     override fun doTask(task: Task) {
         val payload =
             objectMapper.readValue(task.payload, RettOffsetIAndelTilkjentYtelseDto::class.java)
-        køyrTask(payload)
+        simulerEllerRettOffsettForBehandlinger(payload)
     }
 
-    fun kjørOffsetFix(task: Task) {
-        val payload = objectMapper.readValue(task.payload, RettOffsetIAndelTilkjentYtelseDto::class.java)
-
+    private fun simulerEllerRettOffsettForBehandlinger(payload: RettOffsetIAndelTilkjentYtelseDto) {
         val alleBehandlinger = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
         loggBehandlingIder("Alle behandlinger", alleBehandlinger.map { it.id })
 
-        val behandlingerUtenNyereAvsluttetBehandling = finnRelevanteBehandlingerForOppdateringAvOffset(alleBehandlinger).map { it.id }
+        val behandlingerUtenNyereAvsluttetBehandling =
+            finnRelevanteBehandlingerForOppdateringAvOffset(alleBehandlinger).map { it.id }
 
         val behandlingIderSomIkkeKanOppdateres = mutableListOf<Long>()
 
@@ -94,10 +93,13 @@ class RettOffsetIAndelTilkjentYtelseTask(
             behandlingerUtenNyereAvsluttetBehandling.toSet()
         )
         loggBehandlingIder("Behandlinger som blir oppdatert", behandlingerSomBlirOppdatert.toList())
-        loggBehandlingIder("Behandlinger som ville blitt oppdatert, men har avsluttet behandling", behandlingIderSomInneholderOffsetFeil.minus(behandlingerSomBlirOppdatert))
+        loggBehandlingIder(
+            "Behandlinger som ville blitt oppdatert, men har avsluttet behandling",
+            behandlingIderSomInneholderOffsetFeil.minus(behandlingerSomBlirOppdatert)
+        )
     }
 
-    private fun køyrTask(payload: RettOffsetIAndelTilkjentYtelseDto) {
+    fun simulerEllerRettOffsettForBehandlingerMedNullEllerDuplikatOffset(payload: RettOffsetIAndelTilkjentYtelseDto) {
         val behandlingerMedFeilaktigeOffsets = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
         loggBehandlingIder("Behandlinger med feilaktige offsets", behandlingerMedFeilaktigeOffsets.map { it.id })
 
