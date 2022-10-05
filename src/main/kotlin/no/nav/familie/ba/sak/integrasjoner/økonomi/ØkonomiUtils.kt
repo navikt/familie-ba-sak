@@ -123,7 +123,7 @@ object ØkonomiUtils {
      * @param[oppdaterteKjeder] nåværende tilstand
      * @return liste over oppdateringer som skal utføres
      */
-    fun finnBeståendeAndelerMedOppdatertOffset(
+    fun finnBeståendeAndelerMedOffsetSomMåOppdateres(
         oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
         forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>
     ): List<OffsetOppdatering> = oppdaterteKjeder
@@ -132,14 +132,15 @@ object ØkonomiUtils {
             beståendeAndelerIKjede(
                 forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator),
                 oppdatertKjede = oppdatertKjede
-            )?.map { bestående ->
-                OffsetOppdatering(
-                    oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
+            )?.mapNotNull { bestående ->
+                val offsetOppdatering = OffsetOppdatering(
+                    beståendeAndelSomSkalHaOppdatertOffset = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
                         ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand."),
-                    bestående.periodeOffset,
-                    bestående.forrigePeriodeOffset,
-                    bestående.kildeBehandlingId
+                    periodeOffset = bestående.periodeOffset,
+                    forrigePeriodeOffset = bestående.forrigePeriodeOffset,
+                    kildeBehandlingId = bestående.kildeBehandlingId
                 )
+                if (offsetOppdatering.erGyldigOppdatering()) offsetOppdatering else null
             } ?: listOf()
         }
 
