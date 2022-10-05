@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import java.math.BigInteger
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import javax.persistence.LockModeType
@@ -183,5 +182,9 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                 and b.endretTidspunkt <= :sluttDato
         """
     )
-    fun finnBehandlingerOpprettetEtterDatoForOffsetFeil(ugyldigeResultater: List<Behandlingsresultat>, startDato: LocalDate, sluttDato: LocalDate): List<Long>
+    fun finnBehandlingerOpprettetEtterDatoForOffsetFeil(
+        ugyldigeResultater: List<Behandlingsresultat>,
+        startDato: LocalDateTime,
+        sluttDato: LocalDateTime
+    ): List<Long>
 }
