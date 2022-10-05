@@ -59,7 +59,8 @@ class RettOffsetController(
     fun rettOffsetfeilForBehandlinger(@RequestBody(required = true) behandlinger: List<Long>) {
         val input = RettOffsetIAndelTilkjentYtelseDto(
             simuler = false,
-            behandlinger = behandlinger.toSet()
+            behandlinger = behandlinger.toSet(),
+            ignorerValidering = true
         )
         task.doTask(
             Task(
