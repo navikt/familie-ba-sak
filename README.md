@@ -91,21 +91,28 @@ I Postman gjør du et GET-kall med følgende oppsett:
     * `client_secret`: <`AZURE_APP_CLIENT_SECRET`> fra kubectl-kallet over
     * `scope`: `api://dev-gcp.teamfamilie.familie-ba-sak-lokal/.default`
 
-#### Prod
+<details>
+<summary>PROD</summary>
+<br>
+
+#### Oppskrift for kall fra Postman mot prod
 For å finne den nødvendige informasjonen for å få frontend-token'et i prod må du:
 1. Endre kontekst til prod-gcp `kubectl config use-context prod-gcp`
 2. Finne navn på secret ved å kjøre `kubectl -n teamfamilie get secrets` og finne navnet på en secret som starter med `azure-familie-ba-sak-frontend-`. Kopier navnet på secreten.
 3. Kjør `kubectl -n teamfamilie get secret [NAVN PÅ SECRET FRA STEG 2] -o json | jq '.data | map_values(@base64d)'`
 
-I Postman gjør du et GET-kall med følgende oppsett:
+I Postman gjør du et GET-kall med følgende oppsett (OBS OBS - husk at dette er rett mot prod!):
 
 * URL: `https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token`
 * Headers -> Cookie: `fpc=AsRNnIJ3MI9FqfN68mC5KW4`
 * Body: `x-www-form-urlencoded` med følgende key-values
-    * `grant_type`: `client_credentials`
-    * `client_id`: <`AZURE_APP_CLIENT_ID`> fra kubectl-kallet over
-    * `client_secret`: <`AZURE_APP_CLIENT_SECRET`> fra kubectl-kallet over
-    * `scope`: `api://prod-gcp.teamfamilie.familie-ba-sak/.default`
+  * `grant_type`: `client_credentials`
+  * `client_id`: <`AZURE_APP_CLIENT_ID`> fra kubectl-kallet over
+  * `client_secret`: <`AZURE_APP_CLIENT_SECRET`> fra kubectl-kallet over
+  * `scope`: `api://prod-gcp.teamfamilie.familie-ba-sak/.default`
+
+<br>
+</details>
 
 #### Lagre token globalt i Postman
 
