@@ -65,7 +65,7 @@ class RettOffsetController(
 
     @PostMapping("/simuler-offset-for-alle-behandlinger")
     @Transactional
-    fun simulerOffsetfeilForAlleBehandlinger(@RequestBody(required = true) behandlinger: List<Long>) {
+    fun simulerOffsetfeilForAlleBehandlinger() {
         val alleBehandlingerEndretEtterFeilOppsto = finnAlleBehandlingerEndretEtterFeilOppsto()
         var antallTaskerOpprettet: Int = 0
         alleBehandlingerEndretEtterFeilOppsto.chunked(500).forEach {
