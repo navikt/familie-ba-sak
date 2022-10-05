@@ -82,3 +82,5 @@ fun RegelverkResultat?.kombinerMed(resultat: RegelverkResultat?) = when (this) {
     IKKE_OPPFYLT -> IKKE_OPPFYLT
     IKKE_FULLT_VURDERT -> IKKE_FULLT_VURDERT
 }
+
+fun VilkårRegelverkResultat?.erOppfylt() = this?.resultat == Resultat.OPPFYLT

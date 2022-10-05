@@ -12,6 +12,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -77,6 +80,11 @@ class SaksstatistikkService(
             behandlingType = behandling.type.name,
             behandlingStatus = behandling.status.name,
             behandlingKategori = behandling.underkategori.name, // Gjøres pga. tilpasning til DVH-modell
+            behandlingUnderkategori = when (behandling.fagsak.type) { // <-'
+                NORMAL -> null
+                BARN_ENSLIG_MINDREÅRIG -> ENSLIG_MINDREÅRIG_KODE
+                INSTITUSJON -> INSTITUSJON.name
+            },
             behandlingAarsak = behandling.opprettetÅrsak.name,
             automatiskBehandlet = behandling.skalBehandlesAutomatisk,
             utenlandstilsnitt = behandling.kategori.name, // Gjøres pga. tilpasning til DVH-modell
@@ -199,5 +207,6 @@ class SaksstatistikkService(
     companion object {
 
         val TIMEZONE: ZoneId = ZoneId.systemDefault()
+        val ENSLIG_MINDREÅRIG_KODE = "ENSLIG_MINDREÅRIG"
     }
 }
