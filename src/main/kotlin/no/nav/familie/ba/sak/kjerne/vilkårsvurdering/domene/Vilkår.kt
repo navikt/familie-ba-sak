@@ -92,14 +92,15 @@ enum class Vilkår(
 
     fun defaultRegelverk(behandlingKategori: BehandlingKategori): Regelverk? {
         return when (this) {
-            BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD, UTVIDET_BARNETRYGD -> {
+            BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD -> {
                 if (behandlingKategori == BehandlingKategori.EØS) {
                     Regelverk.EØS_FORORDNINGEN
                 } else {
                     Regelverk.NASJONALE_REGLER
                 }
             }
-            UNDER_18_ÅR, GIFT_PARTNERSKAP -> null
+
+            UTVIDET_BARNETRYGD, UNDER_18_ÅR, GIFT_PARTNERSKAP -> null
         }
     }
 
@@ -112,17 +113,21 @@ enum class Vilkår(
             UNDER_18_ÅR -> VurderBarnErUnder18(
                 alder = person.hentAlder()
             )
+
             BOR_MED_SØKER -> VurderBarnErBosattMedSøker(
                 søkerAdresser = person.personopplysningGrunnlag.søker.bostedsadresser,
                 barnAdresser = person.bostedsadresser
             )
+
             GIFT_PARTNERSKAP -> VurderBarnErUgift(
                 sivilstander = person.sivilstander
             )
+
             BOSATT_I_RIKET -> VurderPersonErBosattIRiket(
                 adresser = person.bostedsadresser,
                 vurderFra = vurderFra
             )
+
             LOVLIG_OPPHOLD -> if (person.type == BARN) {
                 VurderBarnHarLovligOpphold(
                     aktør = person.aktør
@@ -146,6 +151,7 @@ enum class Vilkår(
                     opphold = person.opphold
                 )
             }
+
             UTVIDET_BARNETRYGD -> throw Feil("Ikke støtte for å automatisk vurdere vilkåret ${this.beskrivelse}")
         }
 
