@@ -85,6 +85,49 @@ class RettOffsetController(
         }
     }
 
+    @PostMapping("/rett-offset-for-liste-behandlinger")
+    @Transactional
+    fun rettOffsetfeilForListeBehandlinger(@RequestBody(required = true) behandlinger: List<Long>) {
+        var antallTaskerOpprettet = 0
+        behandlinger.chunked(500).forEach {
+            val input = RettOffsetIAndelTilkjentYtelseDto(
+                simuler = false,
+                behandlinger = it.toSet()
+            )
+
+            taskRepository.save(
+                Task(
+                    type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
+                    payload = objectMapper.writeValueAsString(input)
+                )
+            )
+            antallTaskerOpprettet = antallTaskerOpprettet++
+            logger.info("Opprettet RettOffsetIAndelTilkjentYtelseTask nr $antallTaskerOpprettet med ${it.size} behandlinger av totalt ${behandlinger.size}")
+        }
+    }
+
+    @PostMapping("/rett-offset-for-alle-behandlinger")
+    @Transactional
+    fun rettOffsetfeilForAlleBehandlinger() {
+        val alleBehandlingerEndretEtterFeilOppsto = finnAlleBehandlingerEndretEtterFeilOppsto()
+        var antallTaskerOpprettet = 0
+        alleBehandlingerEndretEtterFeilOppsto.chunked(500).forEach {
+            val input = RettOffsetIAndelTilkjentYtelseDto(
+                simuler = false,
+                behandlinger = it.toSet()
+            )
+
+            taskRepository.save(
+                Task(
+                    type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
+                    payload = objectMapper.writeValueAsString(input)
+                )
+            )
+            antallTaskerOpprettet = antallTaskerOpprettet++
+            logger.info("Opprettet RettOffsetIAndelTilkjentYtelseTask nr $antallTaskerOpprettet med ${it.size} behandlinger av totalt ${alleBehandlingerEndretEtterFeilOppsto.size}")
+        }
+    }
+
     private fun finnAlleBehandlingerEndretEtterFeilOppsto(): Set<Long> {
         val ugyldigeResultater = listOf(
             HENLAGT_TEKNISK_VEDLIKEHOLD,
