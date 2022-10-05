@@ -140,8 +140,7 @@ class RettOffsetController(
 
         val behandlingerEtterDato = behandlingRepository.finnBehandlingerOpprettetEtterDatoForOffsetFeil(
             ugyldigeResultater = ugyldigeResultater,
-            startDato = LocalDate.of(2022, 9, 5).atStartOfDay(),
-            sluttDato = LocalDate.of(2022, 9, 30).atStartOfDay()
+            startDato = LocalDate.of(2022, 9, 5).atStartOfDay()
         )
         logger.warn(
             "Behandlinger opprettet f.o.m. 5. september 2022 (${behandlingerEtterDato.size} stk): ${
