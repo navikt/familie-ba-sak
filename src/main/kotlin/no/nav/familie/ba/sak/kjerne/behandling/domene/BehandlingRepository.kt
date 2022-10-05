@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import java.math.BigInteger
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import javax.persistence.LockModeType
@@ -172,4 +173,15 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                 and aty.endretTidspunkt > '2022-09-04'"""
     )
     fun finnBehandlingerMedFeilNullOffsetsForAndelTilkjentYtelse(ugyldigeResultater: List<Behandlingsresultat>): List<Long>
+
+    @Query(
+        """
+            select distinct b.id from Behandling b
+            where b.resultat not in (:ugyldigeResultater)
+                and b.status = 'AVSLUTTET'
+                and b.endretTidspunkt >= :startDato
+                and b.endretTidspunkt <= :sluttDato
+        """
+    )
+    fun finnBehandlingerOpprettetEtterDatoForOffsetFeil(ugyldigeResultater: List<Behandlingsresultat>, startDato: LocalDate, sluttDato: LocalDate): List<Long>
 }

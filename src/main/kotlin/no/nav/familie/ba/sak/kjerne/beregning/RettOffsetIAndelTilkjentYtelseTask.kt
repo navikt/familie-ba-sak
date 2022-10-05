@@ -27,10 +27,75 @@ class RettOffsetIAndelTilkjentYtelseTask(
     override fun doTask(task: Task) {
         val payload =
             objectMapper.readValue(task.payload, RettOffsetIAndelTilkjentYtelseDto::class.java)
-        køyrTask(payload)
+        simulerEllerRettOffsettForBehandlinger(payload)
     }
 
-    private fun køyrTask(payload: RettOffsetIAndelTilkjentYtelseDto) {
+    private fun simulerEllerRettOffsettForBehandlinger(payload: RettOffsetIAndelTilkjentYtelseDto) {
+        val alleBehandlinger = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
+        loggBehandlingIder("Alle behandlinger", alleBehandlinger.map { it.id })
+
+        val behandlingerUtenNyereAvsluttetBehandling =
+            finnRelevanteBehandlingerForOppdateringAvOffset(alleBehandlinger).map { it.id }
+
+        val behandlingIderSomIkkeKanOppdateres = mutableListOf<Long>()
+
+        val behandlingIderSomInneholderOffsetFeil = mutableListOf<Long>()
+
+        alleBehandlinger.forEach {
+            val andelerSomSendesTilOppdrag =
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = it.id)
+
+            val forrigeBehandling =
+                behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = it)
+
+            if (andelerSomSendesTilOppdrag.isNotEmpty() && forrigeBehandling != null) {
+                val andelerFraForrigeBehandling =
+                    beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
+
+                val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
+                    oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerSomSendesTilOppdrag),
+                    forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerFraForrigeBehandling)
+                )
+
+                if (beståendeAndelerMedOppdatertOffset.isNotEmpty()) {
+                    behandlingIderSomInneholderOffsetFeil.add(it.id)
+
+                    val logglinjer =
+                        beståendeAndelerMedOppdatertOffset.joinToString(separator = System.lineSeparator()) { oppdatering ->
+                            formaterLogglinje(
+                                oppdatering
+                            )
+                        }
+                    secureLogger.info(
+                        "Behandling: $it," +
+                            "\nLogglinjer: " +
+                            "\n$logglinjer"
+                    )
+                }
+            } else {
+                if (andelerSomSendesTilOppdrag.isEmpty()) {
+                    secureLogger.warn("Fant ingen andeler som skal sendes til oppdrag for behandling $it")
+                }
+                if (forrigeBehandling == null) {
+                    secureLogger.warn("Fant ikke forrige behandling for behandling $it")
+                }
+                behandlingIderSomIkkeKanOppdateres.add(it.id)
+            }
+        }
+        loggBehandlingIder("Behandlinger som har offset-feil", behandlingIderSomInneholderOffsetFeil)
+        loggBehandlingIder("Behandlinger som ikke kunne oppdateres", behandlingIderSomIkkeKanOppdateres)
+
+        val behandlingerSomBlirOppdatert = behandlingIderSomInneholderOffsetFeil.intersect(
+            behandlingerUtenNyereAvsluttetBehandling.toSet()
+        )
+        loggBehandlingIder("Behandlinger som blir oppdatert", behandlingerSomBlirOppdatert.toList())
+        loggBehandlingIder(
+            "Behandlinger som ville blitt oppdatert, men har avsluttet behandling",
+            behandlingIderSomInneholderOffsetFeil.minus(behandlingerSomBlirOppdatert)
+        )
+    }
+
+    fun simulerEllerRettOffsettForBehandlingerMedNullEllerDuplikatOffset(payload: RettOffsetIAndelTilkjentYtelseDto) {
         val behandlingerMedFeilaktigeOffsets = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
         loggBehandlingIder("Behandlinger med feilaktige offsets", behandlingerMedFeilaktigeOffsets.map { it.id })
 
