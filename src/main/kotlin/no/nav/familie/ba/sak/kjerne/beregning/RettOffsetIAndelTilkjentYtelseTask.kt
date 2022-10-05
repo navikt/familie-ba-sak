@@ -71,6 +71,10 @@ class RettOffsetIAndelTilkjentYtelseTask(
                             "\nLogglinjer: " +
                             "\n$logglinjer"
                     )
+
+                    if (!payload.simuler && behandlingerUtenNyereAvsluttetBehandling.contains(it.id)) {
+                        beståendeAndelerMedOppdatertOffset.forEach { oppdatering -> oppdatering.oppdater() }
+                    }
                 }
             } else {
                 if (andelerSomSendesTilOppdrag.isEmpty()) {
