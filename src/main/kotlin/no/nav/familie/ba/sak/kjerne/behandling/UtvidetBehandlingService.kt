@@ -94,7 +94,7 @@ class UtvidetBehandlingService(
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId)
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId)
+            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
