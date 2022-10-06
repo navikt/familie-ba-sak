@@ -52,7 +52,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 val andelerFraForrigeBehandling =
                     beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
 
-                val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
+                val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOffsetSomMåOppdateres(
                     oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerSomSendesTilOppdrag),
                     forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerFraForrigeBehandling)
                 )
@@ -127,7 +127,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
                     val andelerFraForrigeBehandling =
                         beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
 
-                    val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
+                    val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOffsetSomMåOppdateres(
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerSomSendesTilOppdrag),
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerFraForrigeBehandling)
                     )
