@@ -17,3 +17,20 @@ fun <I, T : Tidsenhet, R> Tidslinje<I, T>.map(mapper: (I?) -> R?): Tidslinje<R, 
             mapper(tidslinje.innholdForTidspunkt(tidspunkt))
     }
 }
+
+/**
+ * Extension-metode for å map'e innhold fra en type og verdi til en annen
+ * Hvis det nå oppstår tilgrensende perioder med samme innhold, slås de sammen
+ */
+fun <I, T : Tidsenhet, R> Tidslinje<I, T>.mapNotNull(mapper: (I) -> R?): Tidslinje<R, T> {
+    val tidslinje = this
+    return object : TidslinjeSomStykkerOppTiden<R, T>(listOf(tidslinje)) {
+        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? {
+            val innhold = tidslinje.innholdForTidspunkt(tidspunkt)
+            return when (innhold) {
+                null -> null
+                else -> mapper(innhold)
+            }
+        }
+    }
+}

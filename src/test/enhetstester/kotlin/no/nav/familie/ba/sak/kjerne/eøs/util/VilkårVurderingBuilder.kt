@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.TidspunktBesøkende
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapNotNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -52,6 +54,13 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
         fun medVilkår(v: String, vararg vilkår: Vilkår): PersonResultatBuilder<T> {
             vilkårsresultatTidslinjer.addAll(
                 vilkår.map { v.tilUtdypendeVilkårRegelverkResultatTidslinje(it, startTidspunkt) }
+            )
+            return this
+        }
+
+        fun medVilkår(tidslinje: Tidslinje<VilkårRegelverkResultat, T>): PersonResultatBuilder<T> {
+            vilkårsresultatTidslinjer.add(
+                tidslinje.mapNotNull { UtdypendeVilkårRegelverkResultat(it.vilkår, it.resultat, it.regelverk) }
             )
             return this
         }
@@ -102,6 +111,9 @@ internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVi
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer() =
     VilkårsvurderingTidslinjer(this.byggVilkårsvurdering(), this.byggPersonopplysningGrunnlag())
+
+fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.byggVilkårsvurderingTidslinjer() =
+    this.byggPerson().byggVilkårsvurderingTidslinjer()
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
     TilkjentYtelseUtils.beregnTilkjentYtelse(
