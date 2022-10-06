@@ -22,13 +22,11 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
 ) {
     @Transactional
     fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: Long): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
-        knyttEventueltSammenAndelerOgEndringer(behandlingId)
         return lagKombinator(behandlingId).lagAndelerMedEndringer()
     }
 
     @Transactional
     fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
-        knyttEventueltSammenAndelerOgEndringer(behandlingId)
         return lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
     }
 
@@ -57,29 +55,6 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
             endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
             featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER, false)
         )
-
-    /**
-     * Oppretter kobling i DB mellom andeler og endringer som et ekstra sikkerhetsnett
-     * hvis BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER-toggle skrus av igjen
-     * Lener seg på at koblingen andel->endring fører til tilsvarende kobling endring->andel
-     * og tilsvarende at fjerning av kobling propageres
-     */
-    private fun knyttEventueltSammenAndelerOgEndringer(behandlingId: Long) {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER, false) &&
-            !featureToggleService.isEnabled(
-                    FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER_UTEN_SIKKERHETSNETT,
-                    false
-                )
-        ) {
-            val andelerTilkjentYtelse = lagKombinator(behandlingId).lagAndelerMedEndringer().map {
-                it.andel.endretUtbetalingAndeler.clear()
-                it.andel.endretUtbetalingAndeler.addAll(it.endreteUtbetalinger)
-
-                it.andel
-            }
-            andelTilkjentYtelseRepository.saveAllAndFlush(andelerTilkjentYtelse)
-        }
-    }
 }
 
 private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
