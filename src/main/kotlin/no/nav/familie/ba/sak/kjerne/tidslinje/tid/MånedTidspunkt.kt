@@ -86,6 +86,10 @@ data class MånedTidspunkt internal constructor(
         }
     }
 
+    override fun taImotBesøk(besøkende: TidspunktBesøkende) {
+        besøkende.besøkMåned(this)
+    }
+
     companion object {
         fun nå() = MånedTidspunkt(YearMonth.now(), Uendelighet.INGEN)
 

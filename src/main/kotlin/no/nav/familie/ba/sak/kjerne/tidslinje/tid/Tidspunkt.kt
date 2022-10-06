@@ -20,6 +20,11 @@ interface Tidsenhet
 class Dag : Tidsenhet
 class Måned : Tidsenhet
 
+interface TidspunktBesøkende {
+    fun besøkDag(tidspunkt: Tidspunkt<Dag>)
+    fun besøkMåned(tidspunkt: Tidspunkt<Måned>)
+}
+
 abstract class Tidspunkt<T : Tidsenhet> internal constructor(
     private val uendelighet: Uendelighet
 ) : Comparable<Tidspunkt<T>> {
@@ -45,6 +50,13 @@ abstract class Tidspunkt<T : Tidsenhet> internal constructor(
     abstract fun somUendeligLengeTil(): Tidspunkt<T>
     abstract fun somFraOgMed(): Tidspunkt<T>
     abstract fun somTilOgMed(): Tidspunkt<T>
+
+    fun <B : TidspunktBesøkende> taImotBesøk(besøkende: B): B {
+        taImotBesøk(besøkende)
+        return besøkende
+    }
+
+    protected abstract fun taImotBesøk(besøkende: TidspunktBesøkende)
 
     companion object {
         fun uendeligLengeSiden(dato: LocalDate) = DagTidspunkt(dato, uendelighet = Uendelighet.FORTID)

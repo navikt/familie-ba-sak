@@ -85,4 +85,7 @@ data class NullTidspunkt<T : Tidsenhet> internal constructor(private val uendeli
             }
         }
     }
+
+    // NullTidspunkt "finnes ikke", så lar denne ignorere besøkende
+    override fun taImotBesøk(besøkende: TidspunktBesøkende) {}
 }

@@ -102,6 +102,10 @@ data class DagTidspunkt internal constructor(
         }
     }
 
+    override fun taImotBesøk(besøkende: TidspunktBesøkende) {
+        besøkende.besøkDag(this)
+    }
+
     companion object {
         fun nå() = DagTidspunkt(LocalDate.now(), Uendelighet.INGEN)
 

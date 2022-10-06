@@ -11,8 +11,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.TidspunktBesøkende
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -88,8 +91,8 @@ internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVi
             vilkårType = this.innhold?.vilkår!!,
             resultat = this.innhold?.resultat!!,
             vurderesEtter = this.innhold?.regelverk,
-            periodeFom = this.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
-            periodeTom = this.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
+            periodeFom = this.fraOgMed.taImotBesøk(DagEllerFørsteDagIMåneden()).dag!!.tilLocalDateEllerNull(),
+            periodeTom = this.tilOgMed.taImotBesøk(DagEllerSisteDagIMåneden()).dag!!.tilLocalDateEllerNull(),
             begrunnelse = "",
             behandlingId = personResultat.vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = this.innhold?.utdypendeVilkårsvurderinger ?: emptyList()
@@ -113,3 +116,27 @@ data class UtdypendeVilkårRegelverkResultat(
     val regelverk: Regelverk?,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
 )
+
+class DagEllerFørsteDagIMåneden : TidspunktBesøkende {
+    var dag: Tidspunkt<Dag>? = null
+
+    override fun besøkDag(tidspunkt: Tidspunkt<Dag>) {
+        dag = tidspunkt
+    }
+
+    override fun besøkMåned(tidspunkt: Tidspunkt<Måned>) {
+        dag = tidspunkt.tilFørsteDagIMåneden()
+    }
+}
+
+class DagEllerSisteDagIMåneden : TidspunktBesøkende {
+    var dag: Tidspunkt<Dag>? = null
+
+    override fun besøkDag(tidspunkt: Tidspunkt<Dag>) {
+        dag = tidspunkt
+    }
+
+    override fun besøkMåned(tidspunkt: Tidspunkt<Måned>) {
+        dag = tidspunkt.tilSisteDagIMåneden()
+    }
+}
