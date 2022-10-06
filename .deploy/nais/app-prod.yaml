@@ -55,6 +55,8 @@ spec:
           cluster: prod-gcp
         - application: familie-ba-mottak
           cluster: prod-fss
+        - application: familie-baks-mottak
+          cluster: prod-gcp
         - application: familie-prosessering
           cluster: prod-gcp
         - application: familie-ba-skatteetaten-api
