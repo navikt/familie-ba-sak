@@ -28,19 +28,13 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
     @Transactional
     fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
         return lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
-    }
-
-    /**
-     * Spesialvariant som brukes mot frontend og i behandlingsresultatsteget
-     * Sjekker at endringsperiode gir mening ift vilkårsvurderingen
-     * Hvis ikke returnes en tom liste med andel tilkjent ytelse
-     * Det signaliserer at "noe" er feil. I frontend brukes dette for å gi "gul trekant"
-     * I behandlingsresultatsteget brukes det tilsvarende for å validere om det er mulig å gå videre
-     */
-    fun finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId: Long) =
-        finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
             .map {
                 it.utenAndelerVedValideringsfeil {
+                    validerPeriodeInnenforTilkjentytelse(
+                        it.endretUtbetalingAndel,
+                        it.andelerTilkjentYtelse
+                    )
+                }.utenAndelerVedValideringsfeil {
                     validerÅrsak(
                         it.årsak,
                         it.endretUtbetalingAndel,
@@ -48,6 +42,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
                     )
                 }
             }
+    }
 
     private fun lagKombinator(behandlingId: Long) =
         AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
@@ -89,16 +84,7 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             endretUtbetalingAndel,
             andeler,
             brukFrikobleteAndelerOgEndringer
-            // Sjekker at endringen ikke "stikker utenfor" hele den tilkjente ytelsen.
-            // I motsatt fall er ikke endringen gyldig og skal ikke være koblet til andelen
-            // Et lite hack som utnytter kode som finnes.
-            // Bør skrives om til å gjøre en "ekte" sjekk på om endringen overlapper andeler uten hull
-        ).utenAndelerVedValideringsfeil {
-            validerPeriodeInnenforTilkjentytelse(
-                endretUtbetalingAndel,
-                andelerTilkjentYtelse
-            )
-        }
+        )
     }
 
     private fun overlapper(
