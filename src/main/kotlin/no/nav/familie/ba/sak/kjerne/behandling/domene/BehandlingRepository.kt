@@ -177,12 +177,14 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         """
             select distinct b.id from Behandling b
             where b.resultat not in (:ugyldigeResultater)
+                and b.opprettetÅrsak not in (:ugyldigeÅrsaker)
                 and b.status = 'AVSLUTTET'
                 and b.endretTidspunkt >= :startDato
         """
     )
     fun finnBehandlingerOpprettetEtterDatoForOffsetFeil(
         ugyldigeResultater: List<Behandlingsresultat>,
+        ugyldigeÅrsaker: List<BehandlingÅrsak> = listOf(BehandlingÅrsak.ENDRE_MIGRERINGSDATO),
         startDato: LocalDateTime
     ): List<Long>
 }
