@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.KjedeId
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
@@ -264,15 +265,16 @@ class BeregningService(
             } ?: emptyList()
     }
 
-    fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
+    fun hentSisteOffsetPerIdent(
+        fagsakId: Long
+    ): Map<KjedeId, Int> {
         val alleAndelerTilkjentYtelserIverksattMotØkonomi =
             hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
                 .flatMap { it.andelerTilkjentYtelse }
                 .filter { it.erAndelSomSkalSendesTilOppdrag() }
-        val alleTideligereKjederIverksattMotØkonomi =
-            ØkonomiUtils.kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
 
-        return ØkonomiUtils.gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
+        return ØkonomiUtils.kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
+            .mapValues { (_, kjede) -> kjede.maxOf { it.periodeOffset!! }.toInt() }
     }
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =

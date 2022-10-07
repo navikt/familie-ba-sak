@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
+import no.nav.familie.ba.sak.integrasjoner.økonomi.KjedeId
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
+import no.nav.familie.ba.sak.integrasjoner.økonomi.tilKjedeId
 import no.nav.familie.ba.sak.integrasjoner.økonomi.valider
 import no.nav.familie.ba.sak.integrasjoner.økonomi.validerOpphørsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
@@ -15,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -47,13 +47,14 @@ class NyUtbetalingsoppdragGenerator {
 
         // grupperer andeler basert på personIdent.
         // Markerte Småbarnstilegg med spesielt suffix SMÅBARNSTILLEGG_SUFFIX
-        val oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = kjedeinndelteAndeler(andelerTilkjentYtelse)
+        val oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>> = kjedeinndelteAndeler(andelerTilkjentYtelse)
 
         // grupperer forrige andeler basert på personIdent.
         // Markerte Småbarnstilegg med spesielt suffix SMÅBARNSTILLEGG_SUFFIX
-        val forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.erAndelSomSkalSendesTilOppdrag() }
-            ?: emptyList()
-        val forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = kjedeinndelteAndeler(forrigeAndeler)
+        val forrigeAndeler =
+            forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.erAndelSomSkalSendesTilOppdrag() }
+                ?: emptyList()
+        val forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>> = kjedeinndelteAndeler(forrigeAndeler)
 
         val erEndretMigreringsDato = vedtakMedTilkjentYtelse.endretMigreringsdato != null
         // Generer et komplett nytt eller bare endringer på et eksisterende betalingsoppdrag.
@@ -161,7 +162,7 @@ class NyUtbetalingsoppdragGenerator {
         andeler: List<List<AndelTilkjentYtelse>>,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
-        sisteOffsetIKjedeOversikt: Map<String, Int>,
+        sisteOffsetIKjedeOversikt: Map<KjedeId, Int>,
         sisteOffsetPåFagsak: Int? = null
     ): Pair<List<AndelTilkjentYtelse>, List<Utbetalingsperiode>> {
         var offset = if (!erFørsteBehandlingPåFagsak) {
@@ -173,15 +174,10 @@ class NyUtbetalingsoppdragGenerator {
 
         val utbetalingsperiode = andeler.filter { kjede -> kjede.isNotEmpty() }
             .flatMap { kjede: List<AndelTilkjentYtelse> ->
-                val ident = kjede.first().aktør.aktivFødselsnummer()
-                val ytelseType = kjede.first().type
+                val ident = kjede.first().tilKjedeId()
                 var forrigeOffsetIKjede: Int? = null
                 if (!erFørsteBehandlingPåFagsak) {
-                    forrigeOffsetIKjede = if (ytelseType == YtelseType.SMÅBARNSTILLEGG) {
-                        sisteOffsetIKjedeOversikt[ident + SMÅBARNSTILLEGG_SUFFIX]
-                    } else {
-                        sisteOffsetIKjedeOversikt[ident]
-                    }
+                    forrigeOffsetIKjede = sisteOffsetIKjedeOversikt[ident]
                 }
                 kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
                     val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1

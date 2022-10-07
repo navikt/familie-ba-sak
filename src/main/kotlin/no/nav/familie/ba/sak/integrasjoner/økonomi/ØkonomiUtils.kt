@@ -4,34 +4,20 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.snittAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.YearMonth
 
 object ØkonomiUtils {
 
-    /**
-     * Deler andeler inn i gruppene de skal kjedes i. Utbetalingsperioder kobles i kjeder per person, bortsett fra
-     * småbarnstillegg og utvidet barnetrygd som separeres i to kjeder for søker. På grunn av dette legges et suffix
-     * på småbarnstillegg når vi arbeider med map.
-     *
-     * @param[andelerForInndeling] andeler som skal sorteres i grupper for kjeding
-     * @return ident med kjedegruppe.
-     */
-    fun kjedeinndelteAndeler(andelerForInndeling: List<AndelTilkjentYtelse>): Map<String, List<AndelTilkjentYtelse>> {
-        val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
-            andelerForInndeling.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
-                it.groupBy { andel -> andel.aktør.aktivFødselsnummer() }
-            }
-        val andelerForKjeding = mutableMapOf<String, List<AndelTilkjentYtelse>>()
-        andelerForKjeding.putAll(personerMedAndeler)
-
-        if (personMedSmåbarnstilleggAndeler.size > 1) {
-            throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
-        } else if (personMedSmåbarnstilleggAndeler.size == 1) {
-            val søkerIdent = personMedSmåbarnstilleggAndeler.keys.first()
-            andelerForKjeding[søkerIdent + SMÅBARNSTILLEGG_SUFFIX] = personMedSmåbarnstilleggAndeler[søkerIdent]!!
-        }
-        return andelerForKjeding
-    }
+    fun kjedeinndelteAndeler(andelerForInndeling: List<AndelTilkjentYtelse>): Map<KjedeId, List<AndelTilkjentYtelse>> =
+        andelerForInndeling
+            .groupBy { andel -> andel.tilKjedeId() }
+            // Rart at dette må sjekkes her. Det burde vært håndtert i vilkårsvurderingen eller når andelene bygges opp
+            // Utvidet barnetrygd valideres altså IKKE, selv om det burde oppføre seg likt(?)
+            .also { validerKunEnYtelse(it, YtelseType.SMÅBARNSTILLEGG) }
+            // Mange tester forventer at kjedene kommer sortert med småbarnstilleg til sist. Burde være unødvendig
+            // Denne sprteringen forutsetter at YtelseType-enum'en er i rekkefølgen: ordinær, utvidet, småbarnstillegg
+            .toSortedMap(compareBy({ it.type.ordinal }, { it.aktør.aktivFødselsnummer() }))
 
     /**
      * Lager oversikt over siste andel i hver kjede som finnes uten endring i oppdatert tilstand.
@@ -44,9 +30,9 @@ object ØkonomiUtils {
      * @return map med personident og siste bestående andel. Bestående andel=null dersom alle opphøres eller ny person.
      */
     fun sisteBeståendeAndelPerKjede(
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>
-    ): Map<String, AndelTilkjentYtelse?> {
+        forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
+        oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>
+    ): Map<KjedeId, AndelTilkjentYtelse?> {
         val allePersoner = forrigeKjeder.keys.union(oppdaterteKjeder.keys)
         return allePersoner.associateWith { kjedeIdentifikator ->
             beståendeAndelerIKjede(
@@ -66,9 +52,9 @@ object ØkonomiUtils {
      * @return map med personident og andel=null som markerer at alle andeler skal opphøres.
      */
     fun sisteAndelPerKjede(
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>
-    ): Map<String, AndelTilkjentYtelse?> =
+        forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
+        oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>
+    ): Map<KjedeId, AndelTilkjentYtelse?> =
         forrigeKjeder.keys.union(oppdaterteKjeder.keys).associateWith { null }
 
     private fun beståendeAndelerIKjede(
@@ -94,9 +80,9 @@ object ØkonomiUtils {
      * @return map med personident og oppdaterte kjeder
      */
     fun oppdaterBeståendeAndelerMedOffset(
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>
-    ): Map<String, List<AndelTilkjentYtelse>> {
+        oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
+        forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>
+    ): Map<KjedeId, List<AndelTilkjentYtelse>> {
         oppdaterteKjeder
             .filter { forrigeKjeder.containsKey(it.key) }
             .forEach { (kjedeIdentifikator, oppdatertKjede) ->
@@ -124,8 +110,8 @@ object ØkonomiUtils {
      * @return liste over oppdateringer som skal utføres
      */
     fun finnBeståendeAndelerMedOffsetSomMåOppdateres(
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>
+        oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
+        forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>
     ): List<OffsetOppdatering> = oppdaterteKjeder
         .filter { forrigeKjeder.containsKey(it.key) }
         .flatMap { (kjedeIdentifikator, oppdatertKjede) ->
@@ -134,7 +120,11 @@ object ØkonomiUtils {
                 oppdatertKjede = oppdatertKjede
             )?.mapNotNull { bestående ->
                 val offsetOppdatering = OffsetOppdatering(
-                    beståendeAndelSomSkalHaOppdatertOffset = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
+                    beståendeAndelSomSkalHaOppdatertOffset = oppdatertKjede.find {
+                        it.erTilsvarendeForUtbetaling(
+                            bestående
+                        )
+                    }
                         ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand."),
                     periodeOffset = bestående.periodeOffset,
                     forrigePeriodeOffset = bestående.forrigePeriodeOffset,
@@ -152,8 +142,8 @@ object ØkonomiUtils {
      * @return andeler som må bygges fordelt på kjeder
      */
     fun andelerTilOpprettelse(
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
-        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>
+        oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
+        sisteBeståendeAndelIHverKjede: Map<KjedeId, AndelTilkjentYtelse?>
     ): List<List<AndelTilkjentYtelse>> =
         oppdaterteKjeder.map { (kjedeIdentifikator, oppdatertKjedeTilstand) ->
             if (sisteBeståendeAndelIHverKjede[kjedeIdentifikator] != null) {
@@ -172,8 +162,8 @@ object ØkonomiUtils {
      * @return map av siste andel og opphørsdato fra kjeder med opphør
      */
     fun andelerTilOpphørMedDato(
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
-        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>,
+        forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
+        sisteBeståendeAndelIHverKjede: Map<KjedeId, AndelTilkjentYtelse?>,
         endretMigreringsDato: YearMonth? = null
     ): List<Pair<AndelTilkjentYtelse, YearMonth>> =
         forrigeKjeder
@@ -192,25 +182,29 @@ object ØkonomiUtils {
                     )
             }
 
-    fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<String, List<AndelTilkjentYtelse>>): Map<String, Int> =
-        andelerFraForrigeBehandling.map { (personIdent, forrigeKjede) ->
-            personIdent to (
-                forrigeKjede.filter { it.kalkulertUtbetalingsbeløp > 0 }
-                    .maxByOrNull { andel -> andel.periodeOffset!! }?.periodeOffset?.toInt()
-                    ?: throw IllegalStateException("Andel i kjede skal ha offset")
-                )
-        }.toMap()
+    fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<KjedeId, List<AndelTilkjentYtelse>>): Map<KjedeId, Int> =
+        andelerFraForrigeBehandling.mapValues { (_, forrigeKjede) ->
+            forrigeKjede.filter { it.kalkulertUtbetalingsbeløp > 0 }
+                .maxOf { andel -> andel.periodeOffset!! }.toInt()
+        }
 
     private fun altIKjedeOpphøres(
-        kjedeidentifikator: String,
-        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>
+        kjedeidentifikator: KjedeId,
+        sisteBeståendeAndelIHverKjede: Map<KjedeId, AndelTilkjentYtelse?>
     ): Boolean = sisteBeståendeAndelIHverKjede[kjedeidentifikator] == null
 
     private fun andelOpphøres(
-        kjedeidentifikator: String,
+        kjedeidentifikator: KjedeId,
         andel: AndelTilkjentYtelse,
-        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>
+        sisteBeståendeAndelIHverKjede: Map<KjedeId, AndelTilkjentYtelse?>
     ): Boolean = andel.stønadFom > sisteBeståendeAndelIHverKjede[kjedeidentifikator]!!.stønadTom
+}
 
-    const val SMÅBARNSTILLEGG_SUFFIX = "_SMÅBARNSTILLEGG"
+fun AndelTilkjentYtelse.tilKjedeId() = KjedeId(this.aktør, this.type)
+data class KjedeId(val aktør: Aktør, val type: YtelseType)
+
+fun validerKunEnYtelse(kjeder: Map<KjedeId, List<AndelTilkjentYtelse>>, type: YtelseType) {
+    if (kjeder.keys.filter { it.type == type }.count() > 1) {
+        throw IllegalArgumentException("Finnes flere personer med ${type.name.lowercase()}")
+    }
 }

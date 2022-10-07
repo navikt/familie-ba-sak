@@ -1,14 +1,12 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteAndelPerKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -44,10 +42,10 @@ class UtbetalingsoppdragGenerator(
         saksbehandlerId: String,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
-        sisteOffsetPerIdent: Map<String, Int> = emptyMap(),
+        forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>> = emptyMap(),
+        sisteOffsetPerIdent: Map<KjedeId, Int> = emptyMap(),
         sisteOffsetPåFagsak: Int? = null,
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
+        oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>> = emptyMap(),
         erSimulering: Boolean = false,
         endretMigreringsDato: YearMonth? = null
     ): Utbetalingsoppdrag {
@@ -133,7 +131,7 @@ class UtbetalingsoppdragGenerator(
         andeler: List<List<AndelTilkjentYtelse>>,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
-        sisteOffsetIKjedeOversikt: Map<String, Int>,
+        sisteOffsetIKjedeOversikt: Map<KjedeId, Int>,
         sisteOffsetPåFagsak: Int? = null,
         skalOppdatereTilkjentYtelse: Boolean
     ): List<Utbetalingsperiode> {
@@ -151,15 +149,10 @@ class UtbetalingsoppdragGenerator(
 
         val utbetalingsperioder = andeler.filter { kjede -> kjede.isNotEmpty() }
             .flatMap { kjede: List<AndelTilkjentYtelse> ->
-                val ident = kjede.first().aktør.aktivFødselsnummer()
-                val ytelseType = kjede.first().type
+                val ident = kjede.first().tilKjedeId()
                 var forrigeOffsetIKjede: Int? = null
                 if (!erFørsteBehandlingPåFagsak) {
-                    forrigeOffsetIKjede = if (ytelseType == YtelseType.SMÅBARNSTILLEGG) {
-                        sisteOffsetIKjedeOversikt[ident + SMÅBARNSTILLEGG_SUFFIX]
-                    } else {
-                        sisteOffsetIKjedeOversikt[ident]
-                    }
+                    forrigeOffsetIKjede = sisteOffsetIKjedeOversikt[ident]
                 }
                 kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
                     val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1

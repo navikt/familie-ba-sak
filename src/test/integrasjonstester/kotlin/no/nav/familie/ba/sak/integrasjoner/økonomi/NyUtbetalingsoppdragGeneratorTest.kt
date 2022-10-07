@@ -1031,7 +1031,7 @@ class NyUtbetalingsoppdragGeneratorTest(
     private fun lagVedtakMedTilkjentYtelse(
         vedtak: Vedtak,
         tilkjentYtelse: TilkjentYtelse,
-        sisteOffsetPerIdent: Map<String, Int> = emptyMap(),
+        sisteOffsetPerIdent: Map<KjedeId, Int> = emptyMap(),
         sisteOffsetPåFagsak: Int? = null,
         erSimulering: Boolean = false
     ) = VedtakMedTilkjentYtelse(
