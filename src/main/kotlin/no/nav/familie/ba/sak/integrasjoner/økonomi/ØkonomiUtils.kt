@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.snittAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import java.time.YearMonth
 
@@ -134,7 +132,11 @@ object ØkonomiUtils {
                 oppdatertKjede = oppdatertKjede
             )?.mapNotNull { bestående ->
                 val offsetOppdatering = OffsetOppdatering(
-                    beståendeAndelSomSkalHaOppdatertOffset = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
+                    beståendeAndelSomSkalHaOppdatertOffset = oppdatertKjede.find {
+                        it.erTilsvarendeForUtbetaling(
+                            bestående
+                        )
+                    }
                         ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand."),
                     periodeOffset = bestående.periodeOffset,
                     forrigePeriodeOffset = bestående.forrigePeriodeOffset,
@@ -213,4 +215,35 @@ object ØkonomiUtils {
     ): Boolean = andel.stønadFom > sisteBeståendeAndelIHverKjede[kjedeidentifikator]!!.stønadTom
 
     const val SMÅBARNSTILLEGG_SUFFIX = "_SMÅBARNSTILLEGG"
+}
+
+/**
+ * Merk at det søkes snitt på visse attributter (erTilsvarendeForUtbetaling)
+ * og man kun returnerer objekter fra receiver (ikke other)
+ */
+private fun Set<AndelTilkjentYtelse>.snittAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
+    val andelerKunIDenne = this.subtractAndeler(other)
+    return this.subtractAndeler(andelerKunIDenne)
+}
+
+private fun Set<AndelTilkjentYtelse>.disjunkteAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
+    val andelerKunIDenne = this.subtractAndeler(other)
+    val andelerKunIAnnen = other.subtractAndeler(this)
+    return andelerKunIDenne.union(andelerKunIAnnen)
+}
+
+private fun Set<AndelTilkjentYtelse>.subtractAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
+    return this.filter { a ->
+        other.none { b -> a.erTilsvarendeForUtbetaling(b) }
+    }.toSet()
+}
+
+private fun AndelTilkjentYtelse.erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
+    return (
+        this.aktør == other.aktør &&
+            this.stønadFom == other.stønadFom &&
+            this.stønadTom == other.stønadTom &&
+            this.kalkulertUtbetalingsbeløp == other.kalkulertUtbetalingsbeløp &&
+            this.type == other.type
+        )
 }
