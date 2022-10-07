@@ -42,9 +42,17 @@ class ØkonomiService(
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
-    fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak: Vedtak, saksbehandlerId: String): Utbetalingsoppdrag {
+    fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+        vedtak: Vedtak,
+        saksbehandlerId: String,
+        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory
+    ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
-        val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
+        val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            vedtak,
+            saksbehandlerId,
+            andelTilkjentYtelseForUtbetalingsoppdragFactory
+        )
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
 
         tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId = vedtak.behandling.id)
@@ -87,12 +95,14 @@ class ØkonomiService(
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
         vedtak: Vedtak,
         saksbehandlerId: String,
+        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
         erSimulering: Boolean = false,
         skalValideres: Boolean = true
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand =
             beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = oppdatertBehandling.id)
+                .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
@@ -115,9 +125,14 @@ class ØkonomiService(
 
             val forrigeTilstand =
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
+                    .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
+
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
-            val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id)
+            val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(
+                forrigeBehandling.fagsak.id,
+                andelTilkjentYtelseForUtbetalingsoppdragFactory
+            )
 
             val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
 

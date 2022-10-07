@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOppr
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
@@ -41,7 +42,7 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person
                 )
-            )
+            ).forIverksetting()
         )
 
         assertEquals(2, kjederBehandling.size)
@@ -82,7 +83,7 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person2
                 )
-            )
+            ).forIverksetting()
         )
         val kjederBehandling2 = kjedeinndelteAndeler(
             listOf(
@@ -114,7 +115,7 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person2
                 )
-            )
+            ).forIverksetting()
         )
 
         val sisteBeståendePerKjede =
@@ -143,7 +144,7 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person
                 )
-            )
+            ).forIverksetting()
         )
         val kjederBehandling2 = kjedeinndelteAndeler(
             listOf(
@@ -161,7 +162,7 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person
                 )
-            )
+            ).forIverksetting()
         )
 
         val sisteBeståendePerKjede =
@@ -188,7 +189,7 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person
                 )
-            )
+            ).forIverksetting()
         )
 
         val sisteBeståendePerKjede =
@@ -216,7 +217,7 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person
                 )
-            )
+            ).forIverksetting()
         )
 
         val sisteBeståendePerKjede =
@@ -257,7 +258,7 @@ internal class ØkonomiUtilsTest {
                     person = person,
                     aktør = person.aktør
                 )
-            )
+            ).forIverksetting()
         )
         val kjederBehandling2 = kjedeinndelteAndeler(
             listOf(
@@ -285,7 +286,7 @@ internal class ØkonomiUtilsTest {
                     person = person,
                     aktør = person.aktør
                 )
-            )
+            ).forIverksetting()
         )
 
         val sisteBeståendePerKjede =
@@ -341,7 +342,7 @@ internal class ØkonomiUtilsTest {
                     person = førsteBarn,
                     aktør = førsteBarn.aktør
                 )
-            )
+            ).forIverksetting()
         )
         val kjederBehandling2 = kjedeinndelteAndeler(
             listOf(
@@ -369,7 +370,7 @@ internal class ØkonomiUtilsTest {
                     person = andreBarn,
                     aktør = andreBarn.aktør
                 )
-            )
+            ).forIverksetting()
         )
 
         val sisteBeståendePerKjede =
@@ -411,7 +412,7 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person
                 )
-            )
+            ).forIverksetting()
         )
         val kjederBehandling2 = kjedeinndelteAndeler(
             listOf(
@@ -436,7 +437,7 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person
                 )
-            )
+            ).forIverksetting()
         )
 
         val sisteBeståendePerKjede =
@@ -485,7 +486,7 @@ internal class ØkonomiUtilsTest {
                     forrigeperiodeIdOffset = 2,
                     person = person2
                 )
-            )
+            ).forIverksetting()
         )
         val kjederBehandling2 = kjedeinndelteAndeler(
             listOf(
@@ -503,7 +504,7 @@ internal class ØkonomiUtilsTest {
                     1054,
                     person = person2
                 )
-            )
+            ).forIverksetting()
         )
 
         val oppdaterte =
@@ -549,7 +550,7 @@ internal class ØkonomiUtilsTest {
                 behandling = forrigeBehandling
             )
 
-        )
+        ).forIverksetting()
 
         val andelerIDenneBehandlingen = listOf(
             lagAndelTilkjentYtelse(
@@ -592,7 +593,7 @@ internal class ØkonomiUtilsTest {
                 forrigeperiodeIdOffset = 2,
                 behandling = behandling
             )
-        )
+        ).forIverksetting()
 
         val oppdateringer = ØkonomiUtils.finnBeståendeAndelerMedOffsetSomMåOppdateres(
             forrigeKjeder = kjedeinndelteAndeler(andelerIForrigeBehandling),
@@ -645,7 +646,7 @@ internal class ØkonomiUtilsTest {
                 kildeBehandlingId = forrigeBehandling.id
             )
 
-        )
+        ).forIverksetting()
 
         val andelerIDenneBehandlingen = listOf(
             lagAndelTilkjentYtelse(
@@ -692,7 +693,7 @@ internal class ØkonomiUtilsTest {
                 behandling = behandling,
                 kildeBehandlingId = behandling.id
             )
-        )
+        ).forIverksetting()
 
         val oppdateringer = ØkonomiUtils.finnBeståendeAndelerMedOffsetSomMåOppdateres(
             forrigeKjeder = kjedeinndelteAndeler(andelerIForrigeBehandling),
@@ -733,7 +734,7 @@ internal class ØkonomiUtilsTest {
                 behandling = forrigeBehandling
             )
 
-        )
+        ).forIverksetting()
 
         val andelerIDenneBehandlingen = listOf(
             lagAndelTilkjentYtelse(
@@ -766,7 +767,7 @@ internal class ØkonomiUtilsTest {
                 forrigeperiodeIdOffset = null,
                 behandling = behandling
             )
-        )
+        ).forIverksetting()
 
         val oppdateringer = ØkonomiUtils.finnBeståendeAndelerMedOffsetSomMåOppdateres(
             forrigeKjeder = kjedeinndelteAndeler(andelerIForrigeBehandling),
@@ -845,7 +846,7 @@ internal class ØkonomiUtilsTest {
                 forrigeperiodeIdOffset = 0,
                 behandling = forrigeBehandling
             )
-        )
+        ).forIverksetting()
 
         val andelerIDenneBehandlingen = listOf(
             lagAndelTilkjentYtelse(
@@ -888,7 +889,7 @@ internal class ØkonomiUtilsTest {
                 forrigeperiodeIdOffset = null,
                 behandling = behandling
             )
-        )
+        ).forIverksetting()
 
         val oppdateringer = ØkonomiUtils.finnBeståendeAndelerMedOffsetSomMåOppdateres(
             forrigeKjeder = kjedeinndelteAndeler(andelerIForrigeBehandling),
@@ -931,3 +932,6 @@ internal class ØkonomiUtilsTest {
         assertEquals(forrigeBehandling.id, andreOrdinæreOppdatering.kildeBehandlingId)
     }
 }
+
+fun Collection<AndelTilkjentYtelse>.forIverksetting() =
+    AndelTilkjentYtelseForIverksettingFactory().pakkInnForUtbetaling(this)

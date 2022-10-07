@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-
 data class OffsetOppdatering(
-    val beståendeAndelSomSkalHaOppdatertOffset: AndelTilkjentYtelse,
+    val beståendeAndelSomSkalHaOppdatertOffset: AndelTilkjentYtelseForUtbetalingsoppdrag,
     val periodeOffset: Long?,
     val forrigePeriodeOffset: Long?,
     val kildeBehandlingId: Long?
@@ -13,6 +11,7 @@ data class OffsetOppdatering(
         beståendeAndelSomSkalHaOppdatertOffset.forrigePeriodeOffset = forrigePeriodeOffset
         beståendeAndelSomSkalHaOppdatertOffset.kildeBehandlingId = kildeBehandlingId
     }
+
     fun erGyldigOppdatering() =
         beståendeAndelSomSkalHaOppdatertOffset.periodeOffset != periodeOffset ||
             beståendeAndelSomSkalHaOppdatertOffset.forrigePeriodeOffset != forrigePeriodeOffset ||

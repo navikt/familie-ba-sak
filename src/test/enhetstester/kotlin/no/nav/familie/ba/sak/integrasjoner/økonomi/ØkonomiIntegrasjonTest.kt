@@ -97,7 +97,11 @@ class ØkonomiIntegrasjonTest(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         assertDoesNotThrow {
-            økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak, "ansvarligSaksbehandler")
+            økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+                vedtak,
+                "ansvarligSaksbehandler",
+                AndelTilkjentYtelseForIverksettingFactory()
+            )
         }
     }
 
@@ -137,7 +141,11 @@ class ØkonomiIntegrasjonTest(
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak, "ansvarligSaksbehandler")
+        økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+            vedtak,
+            "ansvarligSaksbehandler",
+            AndelTilkjentYtelseForIverksettingFactory()
+        )
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
 
         fagsak.status = FagsakStatus.LØPENDE

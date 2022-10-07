@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.OffsetOppdatering
+import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -41,9 +44,12 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
         val behandlingIderSomInneholderOffsetFeil = mutableListOf<Long>()
 
+        val andelTilkjentYtelseForUtbetalingsoppdragFactory = payload.lagAndelTilkjentYtelseForUtbetalingFactory()
+
         alleBehandlinger.forEach {
             val andelerSomSendesTilOppdrag =
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = it.id)
+                    .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
             val forrigeBehandling =
                 behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = it)
@@ -51,6 +57,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
             if (andelerSomSendesTilOppdrag.isNotEmpty() && forrigeBehandling != null) {
                 val andelerFraForrigeBehandling =
                     beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
+                        .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
                 val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOffsetSomMåOppdateres(
                     oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerSomSendesTilOppdrag),
@@ -115,10 +122,13 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
         val behandlingIderSomIkkeKanOppdateres = mutableListOf<Long>()
 
+        val andelTilkjentYtelseForUtbetalingsoppdragFactory = payload.lagAndelTilkjentYtelseForUtbetalingFactory()
+
         relevanteBehandlinger
             .forEach {
                 val andelerSomSendesTilOppdrag =
                     beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = it.id)
+                        .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
                 val forrigeBehandling =
                     behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = it)
@@ -126,6 +136,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 if (andelerSomSendesTilOppdrag.isNotEmpty() && forrigeBehandling != null) {
                     val andelerFraForrigeBehandling =
                         beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
+                            .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
                     val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOffsetSomMåOppdateres(
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerSomSendesTilOppdrag),
@@ -219,3 +230,10 @@ data class RettOffsetIAndelTilkjentYtelseDto(
     val behandlinger: Set<Long>,
     val ignorerValidering: Boolean = false
 )
+
+fun RettOffsetIAndelTilkjentYtelseDto.lagAndelTilkjentYtelseForUtbetalingFactory() =
+    if (this.simuler) {
+        AndelTilkjentYtelseForSimuleringFactory()
+    } else {
+        AndelTilkjentYtelseForIverksettingFactory()
+    }
