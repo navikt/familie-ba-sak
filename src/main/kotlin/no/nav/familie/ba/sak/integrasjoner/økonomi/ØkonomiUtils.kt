@@ -184,9 +184,14 @@ object ØkonomiUtils {
 
     fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<KjedeId, List<AndelTilkjentYtelse>>): Map<KjedeId, Int> =
         andelerFraForrigeBehandling.mapValues { (_, forrigeKjede) ->
-            forrigeKjede.filter { it.kalkulertUtbetalingsbeløp > 0 }
+            forrigeKjede.filter { it.erAndelSomSkalSendesTilOppdrag() }
                 .maxOf { andel -> andel.periodeOffset!! }.toInt()
         }
+
+    fun List<AndelTilkjentYtelse>.tilKjeder() = kjedeinndelteAndeler(this)
+
+    fun Map<KjedeId, List<AndelTilkjentYtelse>>.tilSisteOffsetPerKjede() =
+        gjeldendeForrigeOffsetForKjede(this)
 
     private fun altIKjedeOpphøres(
         kjedeidentifikator: KjedeId,
@@ -198,13 +203,13 @@ object ØkonomiUtils {
         andel: AndelTilkjentYtelse,
         sisteBeståendeAndelIHverKjede: Map<KjedeId, AndelTilkjentYtelse?>
     ): Boolean = andel.stønadFom > sisteBeståendeAndelIHverKjede[kjedeidentifikator]!!.stønadTom
+
+    private fun validerKunEnYtelse(kjeder: Map<KjedeId, List<AndelTilkjentYtelse>>, type: YtelseType) {
+        if (kjeder.keys.filter { it.type == type }.count() > 1) {
+            throw IllegalArgumentException("Finnes flere personer med ${type.name.lowercase()}")
+        }
+    }
 }
 
 fun AndelTilkjentYtelse.tilKjedeId() = KjedeId(this.aktør, this.type)
 data class KjedeId(val aktør: Aktør, val type: YtelseType)
-
-fun validerKunEnYtelse(kjeder: Map<KjedeId, List<AndelTilkjentYtelse>>, type: YtelseType) {
-    if (kjeder.keys.filter { it.type == type }.count() > 1) {
-        throw IllegalArgumentException("Finnes flere personer med ${type.name.lowercase()}")
-    }
-}
