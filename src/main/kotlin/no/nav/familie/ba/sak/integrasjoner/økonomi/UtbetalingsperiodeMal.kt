@@ -38,8 +38,8 @@ data class UtbetalingsperiodeMal(
      */
     fun lagPeriodeFraAndel(
         andel: AndelTilkjentYtelse,
-        periodeIdOffset: Int,
-        forrigePeriodeIdOffset: Int?,
+        periodeIdOffset: Long,
+        forrigePeriodeIdOffset: Long?,
         opphørKjedeFom: YearMonth? = null
     ): Utbetalingsperiode =
         Utbetalingsperiode(

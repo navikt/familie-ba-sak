@@ -43,8 +43,8 @@ class UtbetalingsoppdragGenerator(
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
         forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>> = emptyMap(),
-        sisteOffsetPerIdent: Map<KjedeId, Int> = emptyMap(),
-        sisteOffsetPåFagsak: Int? = null,
+        sisteOffsetPerIdent: Map<KjedeId, Long> = emptyMap(),
+        sisteOffsetPåFagsak: Long? = null,
         oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>> = emptyMap(),
         erSimulering: Boolean = false,
         endretMigreringsDato: YearMonth? = null
@@ -120,8 +120,8 @@ class UtbetalingsoppdragGenerator(
         return andeler.map { (sisteAndelIKjede, opphørKjedeFom) ->
             utbetalingsperiodeMal.lagPeriodeFraAndel(
                 andel = sisteAndelIKjede,
-                periodeIdOffset = sisteAndelIKjede.periodeOffset!!.toInt(),
-                forrigePeriodeIdOffset = sisteAndelIKjede.forrigePeriodeOffset?.toInt(),
+                periodeIdOffset = sisteAndelIKjede.periodeOffset!!,
+                forrigePeriodeIdOffset = sisteAndelIKjede.forrigePeriodeOffset,
                 opphørKjedeFom = opphørKjedeFom
             )
         }
@@ -131,8 +131,8 @@ class UtbetalingsoppdragGenerator(
         andeler: List<List<AndelTilkjentYtelse>>,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
-        sisteOffsetIKjedeOversikt: Map<KjedeId, Int>,
-        sisteOffsetPåFagsak: Int? = null,
+        sisteOffsetIKjedeOversikt: Map<KjedeId, Long>,
+        sisteOffsetPåFagsak: Long? = null,
         skalOppdatereTilkjentYtelse: Boolean
     ): List<Utbetalingsperiode> {
         var offset =
@@ -150,7 +150,7 @@ class UtbetalingsoppdragGenerator(
         val utbetalingsperioder = andeler.filter { kjede -> kjede.isNotEmpty() }
             .flatMap { kjede: List<AndelTilkjentYtelse> ->
                 val ident = kjede.first().tilKjedeId()
-                var forrigeOffsetIKjede: Int? = null
+                var forrigeOffsetIKjede: Long? = null
                 if (!erFørsteBehandlingPåFagsak) {
                     forrigeOffsetIKjede = sisteOffsetIKjedeOversikt[ident]
                 }
@@ -158,7 +158,7 @@ class UtbetalingsoppdragGenerator(
                     val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1
                     utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {
                         andel.periodeOffset = offset.toLong()
-                        andel.forrigePeriodeOffset = forrigeOffset?.toLong()
+                        andel.forrigePeriodeOffset = forrigeOffset
                         andel.kildeBehandlingId =
                             andel.behandlingId // Trengs for å finne tilbake ved konsistensavstemming
                         offset++

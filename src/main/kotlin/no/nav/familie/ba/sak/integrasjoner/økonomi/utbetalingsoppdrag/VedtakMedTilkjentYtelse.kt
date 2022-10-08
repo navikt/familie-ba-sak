@@ -9,8 +9,8 @@ data class VedtakMedTilkjentYtelse(
     val tilkjentYtelse: TilkjentYtelse,
     val vedtak: Vedtak,
     val saksbehandlerId: String,
-    val sisteOffsetPerIdent: Map<KjedeId, Int> = emptyMap(),
-    val sisteOffsetPåFagsak: Int? = null,
+    val sisteOffsetPerIdent: Map<KjedeId, Long> = emptyMap(),
+    val sisteOffsetPåFagsak: Long? = null,
     val erSimulering: Boolean,
     val endretMigreringsdato: YearMonth? = null
 )

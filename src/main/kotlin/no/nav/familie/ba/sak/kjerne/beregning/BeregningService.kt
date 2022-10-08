@@ -272,12 +272,12 @@ class BeregningService(
             .tilKjeder()
             .tilSisteOffsetPerKjede()
 
-    fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
+    fun hentSisteOffsetPåFagsak(behandling: Behandling): Long? =
         behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
             .flatMap { iverksattBehandling ->
                 hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
             }.mapNotNull { it.periodeOffset }
-            .maxOrNull()?.toInt()
+            .maxOrNull()
 
     fun populerTilkjentYtelse(
         behandling: Behandling,

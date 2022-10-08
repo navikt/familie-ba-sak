@@ -182,10 +182,10 @@ object ØkonomiUtils {
                     )
             }
 
-    fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<KjedeId, List<AndelTilkjentYtelse>>): Map<KjedeId, Int> =
+    fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<KjedeId, List<AndelTilkjentYtelse>>): Map<KjedeId, Long> =
         andelerFraForrigeBehandling.mapValues { (_, forrigeKjede) ->
             forrigeKjede.filter { it.erAndelSomSkalSendesTilOppdrag() }
-                .maxOf { andel -> andel.periodeOffset!! }.toInt()
+                .maxOf { andel -> andel.periodeOffset!! }
         }
 
     fun List<AndelTilkjentYtelse>.tilKjeder() = kjedeinndelteAndeler(this)

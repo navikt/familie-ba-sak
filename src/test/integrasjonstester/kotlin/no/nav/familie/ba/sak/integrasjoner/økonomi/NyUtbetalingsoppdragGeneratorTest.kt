@@ -342,7 +342,7 @@ class NyUtbetalingsoppdragGeneratorTest(
             )
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
-        val sisteOffsetPåFagsak = 2
+        val sisteOffsetPåFagsak = 2L
 
         val oppdatertTilkjentYtelse2 = utbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
             lagVedtakMedTilkjentYtelse(
@@ -474,7 +474,7 @@ class NyUtbetalingsoppdragGeneratorTest(
             )
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
-        val sisteOffsetPåFagsak = 1
+        val sisteOffsetPåFagsak = 1L
 
         val oppdatertTilkjentYtelse2 = utbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
             lagVedtakMedTilkjentYtelse(
@@ -736,7 +736,7 @@ class NyUtbetalingsoppdragGeneratorTest(
             )
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
-        val sisteOffsetPåFagsak = 2
+        val sisteOffsetPåFagsak = 2L
 
         val oppdatertTilkjentYtelse2 = utbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
             lagVedtakMedTilkjentYtelse(
@@ -1031,8 +1031,8 @@ class NyUtbetalingsoppdragGeneratorTest(
     private fun lagVedtakMedTilkjentYtelse(
         vedtak: Vedtak,
         tilkjentYtelse: TilkjentYtelse,
-        sisteOffsetPerIdent: Map<KjedeId, Int> = emptyMap(),
-        sisteOffsetPåFagsak: Int? = null,
+        sisteOffsetPerIdent: Map<KjedeId, Long> = emptyMap(),
+        sisteOffsetPåFagsak: Long? = null,
         erSimulering: Boolean = false
     ) = VedtakMedTilkjentYtelse(
         tilkjentYtelse = tilkjentYtelse,

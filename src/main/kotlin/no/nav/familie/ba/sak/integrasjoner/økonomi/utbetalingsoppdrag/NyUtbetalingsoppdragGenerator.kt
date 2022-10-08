@@ -152,8 +152,8 @@ class NyUtbetalingsoppdragGenerator {
                 erEndringPåEksisterendePeriode = true
             ).lagPeriodeFraAndel(
                 andel = sisteAndelIKjede,
-                periodeIdOffset = sisteAndelIKjede.periodeOffset!!.toInt(),
-                forrigePeriodeIdOffset = sisteAndelIKjede.forrigePeriodeOffset?.toInt(),
+                periodeIdOffset = sisteAndelIKjede.periodeOffset!!,
+                forrigePeriodeIdOffset = sisteAndelIKjede.forrigePeriodeOffset,
                 opphørKjedeFom = opphørKjedeFom
             )
         }
@@ -162,8 +162,8 @@ class NyUtbetalingsoppdragGenerator {
         andeler: List<List<AndelTilkjentYtelse>>,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
-        sisteOffsetIKjedeOversikt: Map<KjedeId, Int>,
-        sisteOffsetPåFagsak: Int? = null
+        sisteOffsetIKjedeOversikt: Map<KjedeId, Long>,
+        sisteOffsetPåFagsak: Long? = null
     ): Pair<List<AndelTilkjentYtelse>, List<Utbetalingsperiode>> {
         var offset = if (!erFørsteBehandlingPåFagsak) {
             sisteOffsetPåFagsak?.plus(1)
@@ -175,7 +175,7 @@ class NyUtbetalingsoppdragGenerator {
         val utbetalingsperiode = andeler.filter { kjede -> kjede.isNotEmpty() }
             .flatMap { kjede: List<AndelTilkjentYtelse> ->
                 val ident = kjede.first().tilKjedeId()
-                var forrigeOffsetIKjede: Int? = null
+                var forrigeOffsetIKjede: Long? = null
                 if (!erFørsteBehandlingPåFagsak) {
                     forrigeOffsetIKjede = sisteOffsetIKjedeOversikt[ident]
                 }
