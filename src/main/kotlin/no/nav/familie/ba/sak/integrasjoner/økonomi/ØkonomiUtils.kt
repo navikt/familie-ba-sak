@@ -43,20 +43,6 @@ object ØkonomiUtils {
         }
     }
 
-    /**
-     * Finn alle presidenter i forrige og oppdatert liste. Presidentene er identifikatorn for hver kjede.
-     * Set andeler tilkjentytelse til null som indikerer at hele kjeden skal opphøre.
-     *
-     * @param[forrigeKjeder] forrige behandlings tilstand
-     * @param[oppdaterteKjeder] nåværende tilstand
-     * @return map med personident og andel=null som markerer at alle andeler skal opphøres.
-     */
-    fun sisteAndelPerKjede(
-        forrigeKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>,
-        oppdaterteKjeder: Map<KjedeId, List<AndelTilkjentYtelse>>
-    ): Map<KjedeId, AndelTilkjentYtelse?> =
-        forrigeKjeder.keys.union(oppdaterteKjeder.keys).associateWith { null }
-
     private fun beståendeAndelerIKjede(
         forrigeKjede: List<AndelTilkjentYtelse>?,
         oppdatertKjede: List<AndelTilkjentYtelse>?

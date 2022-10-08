@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteAndelPerKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -60,7 +59,7 @@ class NyUtbetalingsoppdragGenerator {
         // Generer et komplett nytt eller bare endringer på et eksisterende betalingsoppdrag.
         val sisteBeståenAndelIHverKjede = if (vedtakMedTilkjentYtelse.erSimulering || erEndretMigreringsDato) {
             // Gjennom å sette andeler til null markeres at alle perioder i kjeden skal opphøres.
-            sisteAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
+            emptyMap()
         } else {
             // For å kunne behandling alle forlengelser/forkortelser av perioder likt har vi valgt å konsekvent opphøre og erstatte.
             // Det vil si at vi alltid gjenoppbygger kjede fra første endring, selv om vi i realiteten av og til kun endrer datoer
