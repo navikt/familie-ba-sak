@@ -63,7 +63,7 @@ class VilkårsvurderingSteg(
             vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
                 behandling = behandling,
                 bekreftEndringerViaFrontend = true,
-                forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
+                forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentSisteVedtatteBehandlingSomErOpprettetFør(
                     behandling
                 )
             )

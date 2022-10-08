@@ -11,38 +11,20 @@ import java.time.YearMonth
 
 object Behandlingutils {
 
-    fun hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger: List<Behandling>): Behandling? {
-        return iverksatteBehandlinger
-            .filter { it.steg == StegType.BEHANDLING_AVSLUTTET }
+    fun List<Behandling>.finnSisteAvsluttedeBehandling() =
+        this.filter { it.steg == StegType.BEHANDLING_AVSLUTTET }
             .maxByOrNull { it.opprettetTidspunkt }
-    }
 
-    fun hentForrigeBehandlingSomErVedtatt(
-        behandlinger: List<Behandling>,
-        behandlingFørFølgende: Behandling
-    ): Behandling? {
-        return behandlinger
-            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
+    fun List<Behandling>.finnSisteVedtatteBehandlingSomErOpprettetFør(behandling: Behandling) =
+        this.filter { it.opprettetTidspunkt.isBefore(behandling.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
             .maxByOrNull { it.opprettetTidspunkt }
-    }
 
-    fun hentForrigeIverksatteBehandling(
-        iverksatteBehandlinger: List<Behandling>,
-        behandlingFørFølgende: Behandling
-    ): Behandling? {
-        return hentIverksatteBehandlinger(
-            iverksatteBehandlinger,
-            behandlingFørFølgende
-        ).maxByOrNull { it.opprettetTidspunkt }
-    }
+    fun List<Behandling>.finnSisteAvsluttedeBehandlingSomErOpprettetFør(behandling: Behandling) =
+        this.filtrerAvsluttedeBehandlingerSomErOpprettetFør(behandling)
+            .maxByOrNull { it.opprettetTidspunkt }
 
-    fun hentIverksatteBehandlinger(
-        iverksatteBehandlinger: List<Behandling>,
-        behandlingFørFølgende: Behandling
-    ): List<Behandling> {
-        return iverksatteBehandlinger
-            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
-    }
+    fun List<Behandling>.filtrerAvsluttedeBehandlingerSomErOpprettetFør(behandling: Behandling) =
+        this.filter { it.opprettetTidspunkt.isBefore(behandling.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
 
     fun harBehandlingsårsakAlleredeKjørt(
         behandlingÅrsak: BehandlingÅrsak,

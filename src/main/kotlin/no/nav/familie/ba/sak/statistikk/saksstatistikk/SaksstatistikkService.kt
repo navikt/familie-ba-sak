@@ -50,8 +50,9 @@ class SaksstatistikkService(
 
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val forrigeBehandlingId = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-            .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id
+        val forrigeBehandlingId =
+            behandlingHentOgPersisterService.hentSisteVedtatteBehandlingSomErOpprettetFør(behandling)
+                .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {

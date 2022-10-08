@@ -177,7 +177,7 @@ class VilkårService(
 
     private fun finnesUtvidetBarnetrydIForrigeBehandling(behandling: Behandling, personIdent: String): Boolean {
         val forrigeBehandlingSomErVedtatt =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+            behandlingHentOgPersisterService.hentSisteVedtatteBehandlingSomErOpprettetFør(behandling)
         if (forrigeBehandlingSomErVedtatt != null) {
             val forrigeBehandlingsvilkårsvurdering =
                 hentVilkårsvurdering(forrigeBehandlingSomErVedtatt.id) ?: throw Feil(

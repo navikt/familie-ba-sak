@@ -50,7 +50,7 @@ class RegistrerPersongrunnlagEnhetTest {
         val behandling1 = lagBehandling()
         val behandling2 = lagBehandling()
 
-        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling2) } returns behandling1
+        every { behandlingHentOgPersisterService.hentSisteVedtatteBehandlingSomErOpprettetFør(behandling2) } returns behandling1
         every { featureToggleService.isEnabled(any()) } returns true
 
         every {

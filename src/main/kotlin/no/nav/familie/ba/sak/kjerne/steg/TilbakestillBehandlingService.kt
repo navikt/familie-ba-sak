@@ -34,7 +34,7 @@ class TilbakestillBehandlingService(
         vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = bekreftEndringerViaFrontend,
-            forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
+            forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentSisteVedtatteBehandlingSomErOpprettetFør(
                 behandling
             )
         )

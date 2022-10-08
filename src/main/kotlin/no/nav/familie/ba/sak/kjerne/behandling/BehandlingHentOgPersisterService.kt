@@ -1,5 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.filtrerAvsluttedeBehandlingerSomErOpprettetFør
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.finnSisteAvsluttedeBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.finnSisteAvsluttedeBehandlingSomErOpprettetFør
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.finnSisteVedtatteBehandlingSomErOpprettetFør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -37,20 +41,18 @@ class BehandlingHentOgPersisterService(
     /**
      * Henter siste iverksatte behandling på fagsak
      */
-    fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
-        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
-        return Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
-    }
+    fun hentSisteBehandlingSomErIverksatt(fagsakId: Long) =
+        hentIverksatteBehandlinger(fagsakId)
+            .finnSisteAvsluttedeBehandling()
 
     /**
      * Henter siste iverksatte behandling FØR en gitt behandling.
      * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet
      * eller ved behandlingsresultat.
      */
-    fun hentForrigeBehandlingSomErIverksatt(behandling: Behandling): Behandling? {
-        val iverksatteBehandlinger = hentIverksatteBehandlinger(behandling.fagsak.id)
-        return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
-    }
+    fun hentForrigeBehandlingSomErIverksatt(behandling: Behandling) =
+        hentIverksatteBehandlinger(behandling.fagsak.id)
+            .finnSisteAvsluttedeBehandlingSomErOpprettetFør(behandling)
 
     fun hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId: Long): Behandling? {
         val behandling = hent(behandlingId)
@@ -63,8 +65,8 @@ class BehandlingHentOgPersisterService(
      * eller ved behandlingsresultat.
      */
     fun hentBehandlingerSomErIverksatt(behandling: Behandling): List<Behandling> {
-        val iverksatteBehandlinger = hentIverksatteBehandlinger(behandling.fagsak.id)
-        return Behandlingutils.hentIverksatteBehandlinger(iverksatteBehandlinger, behandling)
+        return hentIverksatteBehandlinger(behandling.fagsak.id)
+            .filtrerAvsluttedeBehandlingerSomErOpprettetFør(behandling)
     }
 
     fun hentSisteBehandlingSomErVedtatt(fagsakId: Long): Behandling? {
@@ -76,10 +78,9 @@ class BehandlingHentOgPersisterService(
     /**
      * Henter siste behandling som er vedtatt FØR en gitt behandling
      */
-    fun hentForrigeBehandlingSomErVedtatt(behandling: Behandling): Behandling? {
-        val behandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id)
-        return Behandlingutils.hentForrigeBehandlingSomErVedtatt(behandlinger, behandling)
-    }
+    fun hentSisteVedtatteBehandlingSomErOpprettetFør(behandling: Behandling) =
+        behandlingRepository.finnBehandlinger(behandling.fagsak.id)
+            .finnSisteVedtatteBehandlingSomErOpprettetFør(behandling)
 
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(page: Pageable): Page<BigInteger> =
         behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(page)

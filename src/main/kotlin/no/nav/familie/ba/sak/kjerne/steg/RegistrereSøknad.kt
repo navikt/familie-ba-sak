@@ -48,7 +48,7 @@ class RegistrereSøknad(
         )
 
         val forrigeBehandlingSomErVedtatt =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling)
+            behandlingHentOgPersisterService.hentSisteVedtatteBehandlingSomErOpprettetFør(behandling = behandling)
         persongrunnlagService.registrerBarnFraSøknad(
             behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,

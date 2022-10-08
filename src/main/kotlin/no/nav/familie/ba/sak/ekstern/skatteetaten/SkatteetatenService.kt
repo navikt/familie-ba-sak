@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.finnSisteAvsluttedeBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -98,11 +98,11 @@ class SkatteetatenService(
         val aktivAndelTilkjentYtelsePeriode = mutableListOf<AndelTilkjentYtelsePeriode>()
         stonadPerioder.groupBy { it.getId() }.values.forEach { perioderGroupedByPerson ->
             if (perioderGroupedByPerson.size > 1) {
-                val behandlinger =
+                val sisteAvsluttedeBehandling =
                     perioderGroupedByPerson.map { behandlingRepository.finnBehandling(it.getBehandlingId()) }
-                val sisteIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(behandlinger)
-                if (sisteIverksatteBehandling != null) {
-                    aktivAndelTilkjentYtelsePeriode.addAll(perioderGroupedByPerson.filter { it.getBehandlingId() == sisteIverksatteBehandling.id })
+                        .finnSisteAvsluttedeBehandling()
+                if (sisteAvsluttedeBehandling != null) {
+                    aktivAndelTilkjentYtelsePeriode.addAll(perioderGroupedByPerson.filter { it.getBehandlingId() == sisteAvsluttedeBehandling.id })
                 }
             } else {
                 aktivAndelTilkjentYtelsePeriode.add(perioderGroupedByPerson.first())

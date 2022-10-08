@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.finnSisteAvsluttedeBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -21,9 +21,10 @@ class EndringstidspunktService(
     fun finnEndringstidpunkForBehandling(behandlingId: Long): LocalDate {
         val nyBehandling = behandlingRepository.finnBehandling(behandlingId)
 
-        val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = nyBehandling.fagsak.id)
-        val sistIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
-            ?: return TIDENES_MORGEN
+        val sistIverksatteBehandling =
+            behandlingRepository.finnIverksatteBehandlinger(fagsakId = nyBehandling.fagsak.id)
+                .finnSisteAvsluttedeBehandling()
+                ?: return TIDENES_MORGEN
 
         val nyeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)

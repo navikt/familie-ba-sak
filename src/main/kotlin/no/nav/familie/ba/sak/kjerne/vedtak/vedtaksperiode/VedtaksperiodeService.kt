@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.finnSisteAvsluttedeBehandlingSomErOpprettetFør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -511,13 +511,9 @@ class VedtaksperiodeService(
     fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
         if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
 
-        val iverksatteBehandlinger =
+        val forrigeIverksatteBehandling =
             behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
-
-        val forrigeIverksatteBehandling: Behandling? = Behandlingutils.hentForrigeIverksatteBehandling(
-            iverksatteBehandlinger = iverksatteBehandlinger,
-            behandlingFørFølgende = behandling
-        )
+                .finnSisteAvsluttedeBehandlingSomErOpprettetFør(behandling)
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
             if (forrigeIverksatteBehandling != null) {

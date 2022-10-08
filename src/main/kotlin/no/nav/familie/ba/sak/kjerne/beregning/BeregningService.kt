@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.tilKjeder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.tilSisteOffsetPerKjede
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -95,35 +94,21 @@ class BeregningService(
         barnAktør: Aktør,
         fagsakId: Long
     ): List<TilkjentYtelse> {
-        val andreFagsaker = fagsakService.hentFagsakerPåPerson(barnAktør)
+        return fagsakService.hentFagsakerPåPerson(barnAktør)
             .filter { it.id != fagsakId }
-
-        return andreFagsaker.mapNotNull { fagsak ->
-            val behandlingSomErSendtTilGodkjenning = behandlingRepository.finnBehandlingerSentTilGodkjenning(
-                fagsakId = fagsak.id
-            ).singleOrNull()
-
-            if (behandlingSomErSendtTilGodkjenning != null) {
-                behandlingSomErSendtTilGodkjenning
-            } else {
-                val godkjenteBehandlingerSomIkkeErIverksattEnda =
-                    behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
-                if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) {
-                    godkjenteBehandlingerSomIkkeErIverksattEnda
-                } else {
-                    val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsak.id)
-                    Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
-                }
-            }
-        }.map {
-            hentTilkjentYtelseForBehandling(behandlingId = it.id)
-        }.filter {
-            personopplysningGrunnlagRepository
-                .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
-                ?.barna?.map { barn -> barn.aktør }
-                ?.contains(barnAktør)
-                ?: false
-        }.map { it }
+            .mapNotNull { fagsak ->
+                behandlingRepository.finnBehandlingerSentTilGodkjenning(fagsakId = fagsak.id).singleOrNull()
+                    ?: behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
+                    ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id)
+            }.map {
+                hentTilkjentYtelseForBehandling(behandlingId = it.id)
+            }.filter {
+                personopplysningGrunnlagRepository
+                    .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
+                    ?.barna?.map { barn -> barn.aktør }
+                    ?.contains(barnAktør)
+                    ?: false
+            }.map { it }
     }
 
     fun innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling: Behandling): Boolean {

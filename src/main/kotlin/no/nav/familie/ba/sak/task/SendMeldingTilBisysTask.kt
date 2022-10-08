@@ -4,7 +4,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.finnSisteAvsluttedeBehandlingSomErOpprettetFør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -68,12 +68,10 @@ class SendMeldingTilBisysTask(
     }
 
     fun finnBarnEndretOpplysning(behandling: Behandling): Map<String, List<BarnEndretOpplysning>> {
-        val iverksatteBehandlinger =
+        val forrigeIverksatteBehandling =
             behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
-        val forrigeIverksatteBehandling = Behandlingutils.hentForrigeIverksatteBehandling(
-            iverksatteBehandlinger = iverksatteBehandlinger,
-            behandlingFørFølgende = behandling
-        ) ?: error("Finnes ikke forrige behandling for behandling ${behandling.id}")
+                .finnSisteAvsluttedeBehandlingSomErOpprettetFør(behandling)
+                ?: error("Finnes ikke forrige behandling for behandling ${behandling.id}")
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(forrigeIverksatteBehandling.id)

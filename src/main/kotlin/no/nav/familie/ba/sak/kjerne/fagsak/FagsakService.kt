@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.finnSisteAvsluttedeBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -241,11 +241,9 @@ class FagsakService(
         val aktivBehandling = behandlingRepository.findByFagsakAndAktiv(fagsakId)
 
         val sistIverksatteBehandling =
-            Behandlingutils.hentSisteBehandlingSomErIverksatt(
-                iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(
-                    fagsakId = fagsakId
-                )
-            )
+            behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
+                .finnSisteAvsluttedeBehandling()
+
         val gjeldendeUtbetalingsperioder =
             if (sistIverksatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistIverksatteBehandling) else emptyList()
 

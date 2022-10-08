@@ -23,9 +23,10 @@ class RegistrerPersongrunnlag(
         behandling: Behandling,
         data: RegistrerPersongrunnlagDTO
     ): StegType {
-        val forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-            behandling
-        )
+        val forrigeBehandlingSomErVedtatt =
+            behandlingHentOgPersisterService.hentSisteVedtatteBehandlingSomErOpprettetFør(
+                behandling
+            )
 
         personopplysningGrunnlagForNyBehandlingService.opprettPersonopplysningGrunnlag(
             behandling = behandling,
