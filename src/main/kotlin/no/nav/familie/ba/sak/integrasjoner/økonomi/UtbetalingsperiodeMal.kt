@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -58,7 +60,20 @@ data class UtbetalingsperiodeMal(
             vedtakdatoTom = andel.stønadTom.sisteDagIInneværendeMåned(),
             sats = BigDecimal(andel.kalkulertUtbetalingsbeløp),
             satsType = Utbetalingsperiode.SatsType.MND,
-            utbetalesTil = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
+            utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
             behandlingId = vedtak.behandling.id
         )
+
+    private fun hentUtebetalesTil(fagsak: Fagsak): String {
+        return when (fagsak.type) {
+            FagsakType.INSTITUSJON -> {
+                fagsak.institusjon?.tssEksternId
+                    ?: error("Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen")
+            }
+
+            else -> {
+                fagsak.aktør.aktivFødselsnummer()
+            }
+        }
+    }
 }

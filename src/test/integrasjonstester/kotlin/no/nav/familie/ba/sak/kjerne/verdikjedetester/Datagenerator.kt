@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -59,7 +60,8 @@ fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring = RestJou
     ),
     navIdent = "09123",
     nyBehandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
-    nyBehandlingsårsak = BehandlingÅrsak.SØKNAD
+    nyBehandlingsårsak = BehandlingÅrsak.SØKNAD,
+    fagsakType = FagsakType.NORMAL
 )
 
 fun lagInfotrygdSak(beløp: Double, identBarn: List<String>, valg: String? = "OR", undervalg: String? = "OS"): Sak {

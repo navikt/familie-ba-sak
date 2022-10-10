@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
@@ -36,8 +37,7 @@ data class RestJournalføring(
     val navIdent: String,
     val nyBehandlingstype: BehandlingType,
     val nyBehandlingsårsak: BehandlingÅrsak,
-    val erEnsligMindreårig: Boolean = false,
-    val erPåInstitusjon: Boolean = false,
+    val fagsakType: FagsakType,
     val institusjon: InstitusjonInfo? = null
 ) {
 

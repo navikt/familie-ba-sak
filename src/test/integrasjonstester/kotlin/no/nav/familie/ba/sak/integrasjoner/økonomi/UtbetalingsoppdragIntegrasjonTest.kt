@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -21,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
@@ -128,6 +130,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             utbetalingsperioderPerKlasse.getValue("BATR")[0],
             0,
             null,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2019-03-01",
             "2037-02-28"
@@ -136,6 +139,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[0],
             1,
             null,
+            fagsak.aktør.aktivFødselsnummer(),
             660,
             "2019-04-01",
             "2023-03-31"
@@ -144,6 +148,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[1],
             2,
             1,
+            fagsak.aktør.aktivFødselsnummer(),
             660,
             "2026-05-01",
             "2027-06-30"
@@ -215,6 +220,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[0],
             1,
             null,
+            fagsak.aktør.aktivFødselsnummer(),
             660,
             "2026-05-01",
             "2027-06-30",
@@ -224,6 +230,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             utbetalingsperioderPerKlasse.getValue("BATR")[0],
             2,
             null,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2019-03-01",
             "2037-02-28",
@@ -365,6 +372,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             opphørsperiode!!,
             2,
             1,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2037-01-01",
             "2039-12-31",
@@ -374,6 +382,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             nyeUtbetalingsPerioderSortert.first(),
             3,
             2,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2034-01-01",
             "2034-12-31"
@@ -382,6 +391,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             nyeUtbetalingsPerioderSortert.last(),
             4,
             3,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2037-01-01",
             "2039-12-31"
@@ -491,9 +501,33 @@ class UtbetalingsoppdragIntegrasjonTest(
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
         val sorterteUtbetalingsperioder = utbetalingsoppdrag.utbetalingsperiode.sortedBy { it.periodeId }
-        assertUtbetalingsperiode(sorterteUtbetalingsperioder[0], 1, 0, 1054, "2033-01-01", "2034-12-31")
-        assertUtbetalingsperiode(sorterteUtbetalingsperioder[1], 2, null, 1054, "2022-01-01", "2034-12-31")
-        assertUtbetalingsperiode(sorterteUtbetalingsperioder[2], 3, 2, 1054, "2037-01-01", "2039-12-31")
+        assertUtbetalingsperiode(
+            sorterteUtbetalingsperioder[0],
+            1,
+            0,
+            fagsak.aktør.aktivFødselsnummer(),
+            1054,
+            "2033-01-01",
+            "2034-12-31"
+        )
+        assertUtbetalingsperiode(
+            sorterteUtbetalingsperioder[1],
+            2,
+            null,
+            fagsak.aktør.aktivFødselsnummer(),
+            1054,
+            "2022-01-01",
+            "2034-12-31"
+        )
+        assertUtbetalingsperiode(
+            sorterteUtbetalingsperioder[2],
+            3,
+            2,
+            fagsak.aktør.aktivFødselsnummer(),
+            1054,
+            "2037-01-01",
+            "2039-12-31"
+        )
     }
 
     @Test
@@ -550,6 +584,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             utbetalingsperioderPerKlasse.getValue("BATR")[0],
             0,
             null,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2019-03-01",
             "2037-02-28"
@@ -558,6 +593,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[0],
             1,
             null,
+            fagsak.aktør.aktivFødselsnummer(),
             660,
             "2019-04-01",
             "2023-03-31"
@@ -566,6 +602,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[1],
             2,
             1,
+            fagsak.aktør.aktivFødselsnummer(),
             660,
             "2026-05-01",
             "2027-06-30"
@@ -728,6 +765,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             opphørsperiode!!,
             2,
             1,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2035-01-01",
             "2039-12-31",
@@ -737,6 +775,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             nyeUtbetalingsPerioderSortert.first(),
             3,
             2,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2020-01-01",
             "2029-12-31"
@@ -745,6 +784,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             nyeUtbetalingsPerioderSortert[1],
             4,
             3,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2030-01-01",
             "2034-12-31"
@@ -753,6 +793,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             nyeUtbetalingsPerioderSortert.last(),
             5,
             4,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2035-01-01",
             "2039-12-31"
@@ -894,6 +935,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             opphørsperiode!!,
             2,
             1,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2035-01-01",
             "2039-12-31",
@@ -903,6 +945,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             nyeUtbetalingsPerioderSortert.first(),
             3,
             2,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2020-01-01",
             "2029-12-31"
@@ -911,6 +954,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             nyeUtbetalingsPerioderSortert[1],
             4,
             3,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2030-01-01",
             "2034-12-31"
@@ -919,6 +963,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             nyeUtbetalingsPerioderSortert.last(),
             5,
             4,
+            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2035-01-01",
             "2038-12-31"
@@ -1182,14 +1227,67 @@ class UtbetalingsoppdragIntegrasjonTest(
         assertNull(utbetalingsoppdrag.utbetalingsperiode[1].forrigePeriodeId)
     }
 
+    @Test
+    fun `skal opprette et nytt utbetalingsoppdrag for institusjon`() {
+        val tilfeldigPerson = tilfeldigPerson()
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(
+                tilfeldigPerson.aktør.aktivFødselsnummer(),
+                fagsakType = FagsakType.INSTITUSJON,
+                institusjon = InstitusjonInfo(ORGNUMMER, TSS_ID_INSTITUSJON)
+            )
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val vedtak = lagVedtak(behandling = behandling)
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
+        val andelerTilkjentYtelse = listOf(
+            lagAndelTilkjentYtelse(
+                årMnd("2019-03"),
+                årMnd("2037-02"),
+                YtelseType.ORDINÆR_BARNETRYGD,
+                1054,
+                behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                person = tilfeldigPerson,
+                aktør = personidentService.hentOgLagreAktør(tilfeldigPerson.aktør.aktivFødselsnummer(), true)
+            )
+        )
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
+
+        val utbetalingsoppdrag =
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                "saksbehandler",
+                vedtak,
+                true,
+                oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
+                    andelerTilkjentYtelse
+                )
+            )
+
+        assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
+        assertEquals(1, utbetalingsoppdrag.utbetalingsperiode.size)
+
+        val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
+        assertUtbetalingsperiode(
+            utbetalingsperioderPerKlasse.getValue("BATR")[0],
+            0,
+            null,
+            TSS_ID_INSTITUSJON,
+            1054,
+            "2019-03-01",
+            "2037-02-28"
+        )
+    }
+
     private fun assertUtbetalingsperiode(
         utbetalingsperiode: Utbetalingsperiode,
         periodeId: Long,
         forrigePeriodeId: Long?,
+        utbetalesTil: String,
         sats: Int,
         fom: String,
         tom: String,
         opphørFom: LocalDate? = null
+
     ) {
         assertEquals(periodeId, utbetalingsperiode.periodeId)
         assertEquals(forrigePeriodeId, utbetalingsperiode.forrigePeriodeId)
@@ -1199,5 +1297,11 @@ class UtbetalingsoppdragIntegrasjonTest(
         if (opphørFom != null) {
             assertEquals(opphørFom, utbetalingsperiode.opphør?.opphørDatoFom)
         }
+        assertEquals(utbetalesTil, utbetalingsperiode.utbetalesTil)
+    }
+
+    companion object {
+        private const val TSS_ID_INSTITUSJON = "80000"
+        private const val ORGNUMMER = "987654321"
     }
 }
