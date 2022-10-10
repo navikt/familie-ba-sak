@@ -51,7 +51,7 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
                 Vilkår.GIFT_PARTNERSKAP /*  */ to "++++++++++++++++",
                 Vilkår.BOSATT_I_RIKET /*    */ to "EEEEEEEEEEEEEEEE",
                 Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE",
-                Vilkår.BOR_MED_SØKER /*     */ to "EEEEEEEEEEEEEEEE"
+                Vilkår.BOR_MED_SØKER /*     */ to "ÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉ"
             )
         )
 
@@ -108,7 +108,7 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
                 Vilkår.GIFT_PARTNERSKAP /*  */ to "++++++++++++++++",
                 Vilkår.BOSATT_I_RIKET /*    */ to "EEEEEEEEEEEEEEEE",
                 Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE",
-                Vilkår.BOR_MED_SØKER /*     */ to "EEEEEEEEEEEEEEEE"
+                Vilkår.BOR_MED_SØKER /*     */ to "ÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉ"
             )
         )
 
