@@ -131,13 +131,15 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
             WHERE
                     b.id in :iverksatteLøpendeBehandlinger
                 AND NOT EXISTS (SELECT b2 from Behandling b2 where b2.fagsak.id = b.fagsak.id AND b2.status <> 'AVSLUTTET')
+                AND NOT EXISTS (SELECT aty2 from AndelTilkjentYtelse aty2 where aty2.behandlingId = b.id AND aty2.type = 'SMÅBARNSTILLEGG' AND aty.stønadFom = :innværendeMåned)
                 AND aty.type = 'SMÅBARNSTILLEGG'
                 AND aty.stønadTom = :stønadTom
         """
     )
     fun finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
         iverksatteLøpendeBehandlinger: List<Long>,
-        stønadTom: YearMonth = YearMonth.now().minusMonths(1)
+        stønadTom: YearMonth = YearMonth.now().minusMonths(1),
+        innværendeMåned: YearMonth = YearMonth.now()
     ): List<Long>
 
     @Query(
