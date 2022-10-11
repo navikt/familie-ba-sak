@@ -240,7 +240,8 @@ fun lagAndelTilkjentYtelse(
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null,
     prosent: BigDecimal = BigDecimal(100),
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
+    kildeBehandlingId: Long = behandling.id
 ): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
         aktør = aktør,
@@ -256,7 +257,7 @@ fun lagAndelTilkjentYtelse(
         sats = beløp,
         prosent = prosent,
         endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList(),
-        kildeBehandlingId = behandling.id
+        kildeBehandlingId = kildeBehandlingId
     )
 }
 

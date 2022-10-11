@@ -13,4 +13,8 @@ data class OffsetOppdatering(
         beståendeAndelSomSkalHaOppdatertOffset.forrigePeriodeOffset = forrigePeriodeOffset
         beståendeAndelSomSkalHaOppdatertOffset.kildeBehandlingId = kildeBehandlingId
     }
+    fun erGyldigOppdatering() =
+        beståendeAndelSomSkalHaOppdatertOffset.periodeOffset != periodeOffset ||
+            beståendeAndelSomSkalHaOppdatertOffset.forrigePeriodeOffset != forrigePeriodeOffset ||
+            beståendeAndelSomSkalHaOppdatertOffset.kildeBehandlingId != kildeBehandlingId
 }

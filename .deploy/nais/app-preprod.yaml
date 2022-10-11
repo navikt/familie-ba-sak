@@ -57,6 +57,8 @@ spec:
           cluster: dev-gcp
         - application: familie-ba-mottak
           cluster: dev-fss
+        - application: familie-baks-mottak
+          cluster: dev-gcp
         - application: familie-prosessering
           cluster: dev-gcp
         - application: familie-ba-skatteetaten-api

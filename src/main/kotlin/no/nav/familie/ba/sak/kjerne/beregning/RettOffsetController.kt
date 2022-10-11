@@ -1,9 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.transaction.annotation.Transactional
@@ -12,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/periodeoffset")
@@ -19,23 +28,20 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class RettOffsetController(
     val task: RettOffsetIAndelTilkjentYtelseTask,
-    val behandlingRepository: BehandlingRepository
+    val behandlingRepository: BehandlingRepository,
+    val taskRepository: TaskRepository,
+    val beregningService: BeregningService
 ) {
 
     @PostMapping("/simuler-offset-fix")
     @Transactional
     fun simuler() {
-        val behandlinger = finnBehandlinger()
+        val behandlinger = finnBehandlingerMedNullEllerDuplikatOffset()
         val input = RettOffsetIAndelTilkjentYtelseDto(
             simuler = true,
             behandlinger = behandlinger
         )
-        task.doTask(
-            Task(
-                type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(input)
-            )
-        )
+        task.simulerEllerRettOffsettForBehandlingerMedNullEllerDuplikatOffset(input)
         throw RuntimeException("Kaster exception her for å sikre at ingenting frå transaksjonen blir committa")
     }
 
@@ -44,14 +50,9 @@ class RettOffsetController(
     fun rettOffsetfeil() {
         val input = RettOffsetIAndelTilkjentYtelseDto(
             simuler = false,
-            behandlinger = finnBehandlinger()
+            behandlinger = finnBehandlingerMedNullEllerDuplikatOffset()
         )
-        task.doTask(
-            Task(
-                type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(input)
-            )
-        )
+        task.simulerEllerRettOffsettForBehandlingerMedNullEllerDuplikatOffset(input)
     }
 
     @PostMapping("/rett-offset-for-behandling")
@@ -62,22 +63,123 @@ class RettOffsetController(
             behandlinger = behandlinger.toSet(),
             ignorerValidering = true
         )
-        task.doTask(
-            Task(
-                type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(input)
-            )
-        )
+        task.simulerEllerRettOffsettForBehandlingerMedNullEllerDuplikatOffset(input)
     }
 
-    private fun finnBehandlinger(): Set<Long> {
+    @PostMapping("/simuler-offset-for-alle-behandlinger")
+    @Transactional
+    fun simulerOffsetfeilForAlleBehandlinger() {
+        val alleBehandlingerEndretEtterFeilOppsto = finnAlleBehandlingerEndretEtterFeilOppsto()
+        var antallTaskerOpprettet: Int = 0
+        alleBehandlingerEndretEtterFeilOppsto.chunked(500).forEach {
+            val input = RettOffsetIAndelTilkjentYtelseDto(
+                simuler = true,
+                behandlinger = it.toSet()
+            )
+
+            taskRepository.save(
+                Task(
+                    type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
+                    payload = objectMapper.writeValueAsString(input)
+                )
+            )
+            antallTaskerOpprettet = antallTaskerOpprettet++
+            logger.info("Opprettet RettOffsetIAndelTilkjentYtelseTask nr $antallTaskerOpprettet med ${it.size} behandlinger av totalt ${alleBehandlingerEndretEtterFeilOppsto.size}")
+        }
+    }
+
+    @PostMapping("/rett-offset-for-liste-behandlinger")
+    @Transactional
+    fun rettOffsetfeilForListeBehandlinger(@RequestBody(required = true) behandlinger: List<Long>) {
+        var antallTaskerOpprettet = 0
+        behandlinger.chunked(500).forEach {
+            val input = RettOffsetIAndelTilkjentYtelseDto(
+                simuler = false,
+                behandlinger = it.toSet()
+            )
+
+            taskRepository.save(
+                Task(
+                    type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
+                    payload = objectMapper.writeValueAsString(input)
+                )
+            )
+            antallTaskerOpprettet = antallTaskerOpprettet++
+            logger.info("Opprettet RettOffsetIAndelTilkjentYtelseTask nr $antallTaskerOpprettet med ${it.size} behandlinger av totalt ${behandlinger.size}")
+        }
+    }
+
+    @PostMapping("/rett-offset-for-alle-behandlinger")
+    @Transactional
+    fun rettOffsetfeilForAlleBehandlinger() {
+        val alleBehandlingerEndretEtterFeilOppsto = finnAlleBehandlingerEndretEtterFeilOppsto()
+        var antallTaskerOpprettet = 0
+        alleBehandlingerEndretEtterFeilOppsto.chunked(500).forEach {
+            val input = RettOffsetIAndelTilkjentYtelseDto(
+                simuler = false,
+                behandlinger = it.toSet()
+            )
+
+            taskRepository.save(
+                Task(
+                    type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
+                    payload = objectMapper.writeValueAsString(input)
+                )
+            )
+            antallTaskerOpprettet = antallTaskerOpprettet++
+            logger.info("Opprettet RettOffsetIAndelTilkjentYtelseTask nr $antallTaskerOpprettet med ${it.size} behandlinger av totalt ${alleBehandlingerEndretEtterFeilOppsto.size}")
+        }
+    }
+
+    @PostMapping("/revisjon-av-utbetalingsoppdrag")
+    fun kjørRevisjonPåUtbetalingsoppdrag(@RequestBody(required = true) behandlinger: List<Long>) {
+        logger.info("Starter revisjon av ${behandlinger.size} behandlinger:  $behandlinger")
+
+        behandlinger.forEach { behandlingId ->
+            val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
+
+            if (harFeilUtbetalingsoppdragMhpAndeler(tilkjentYtelse)) {
+                logger.warn("Revisjon av utbetalingsoppdrag for behandling $behandlingId feilet")
+                logger.warn(
+                    "Revisjon av utbetalingsoppdrag for behandling $behandlingId feilet\n" +
+                        "Utbetalingsoppdrag: ${tilkjentYtelse.utbetalingsoppdrag}\n" +
+                        "Andeler: ${tilkjentYtelse.andelerTilkjentYtelse}"
+                )
+            }
+        }
+    }
+
+    private fun finnAlleBehandlingerEndretEtterFeilOppsto(): Set<Long> {
         val ugyldigeResultater = listOf(
-            Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-            Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
-            Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
-            Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
-            Behandlingsresultat.AVSLÅTT,
-            Behandlingsresultat.FORTSATT_INNVILGET
+            HENLAGT_TEKNISK_VEDLIKEHOLD,
+            HENLAGT_SØKNAD_TRUKKET,
+            HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+            HENLAGT_FEILAKTIG_OPPRETTET,
+            AVSLÅTT,
+            FORTSATT_INNVILGET
+        )
+
+        val behandlingerEtterDato = behandlingRepository.finnBehandlingerOpprettetEtterDatoForOffsetFeil(
+            ugyldigeResultater = ugyldigeResultater,
+            startDato = LocalDate.of(2022, 9, 5).atStartOfDay()
+        )
+        logger.warn(
+            "Behandlinger opprettet f.o.m. 5. september 2022 (${behandlingerEtterDato.size} stk): ${
+            behandlingerEtterDato.joinToString(separator = ",")
+            }"
+        )
+
+        return behandlingerEtterDato.toSet()
+    }
+
+    private fun finnBehandlingerMedNullEllerDuplikatOffset(): Set<Long> {
+        val ugyldigeResultater = listOf(
+            HENLAGT_TEKNISK_VEDLIKEHOLD,
+            HENLAGT_SØKNAD_TRUKKET,
+            HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+            HENLAGT_FEILAKTIG_OPPRETTET,
+            AVSLÅTT,
+            FORTSATT_INNVILGET
         )
         val behandlingerMedDuplikateOffset =
             behandlingRepository.finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(ugyldigeResultater = ugyldigeResultater)
@@ -103,4 +205,25 @@ class RettOffsetController(
     companion object {
         private val logger = LoggerFactory.getLogger(RettOffsetController::class.java)
     }
+}
+
+internal fun harFeilUtbetalingsoppdragMhpAndeler(tilkjentYtelse: TilkjentYtelse): Boolean {
+    val utbetalingsoppdrag =
+        objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
+
+    val offsetForAndeler = tilkjentYtelse.andelerTilkjentYtelse.map { it.periodeOffset }
+
+    val utbetalingsperioderMedOpphør = utbetalingsoppdrag.utbetalingsperiode
+        .filter { it.opphør?.opphørDatoFom != null || it.erEndringPåEksisterendePeriode }
+        .map { it.periodeId }
+
+    val utbetalingsperioderSomOpprettes = utbetalingsoppdrag.utbetalingsperiode
+        .filter { it.opphør == null && !it.erEndringPåEksisterendePeriode }
+        .map { it.periodeId }
+
+    val opphørtPeriodeFinnesIAndel = offsetForAndeler.intersect(utbetalingsperioderMedOpphør).isNotEmpty()
+    val nyePerioderManglerIAndel = utbetalingsperioderSomOpprettes.any { !offsetForAndeler.contains(it) }
+
+    val harEnFeil = opphørtPeriodeFinnesIAndel || nyePerioderManglerIAndel
+    return harEnFeil
 }

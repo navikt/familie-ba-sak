@@ -33,11 +33,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
-import no.nav.familie.ba.sak.task.BehandleAnnullerFødselDto
-import no.nav.familie.ba.sak.task.BehandleAnnullertFødselTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -62,7 +59,6 @@ class FagsakService(
     private val skyggesakService: SkyggesakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
-    private val taskRepository: TaskRepository,
     private val institusjonService: InstitusjonService
 ) {
 
@@ -122,6 +118,7 @@ class FagsakService(
                 }
                 åpenSak
             }
+
             else -> fagsakRepository.finnFagsakForAktør(aktør, type)
         }
 
@@ -288,6 +285,7 @@ class FagsakService(
                 aktør,
                 fagsakType
             )
+
             FagsakType.INSTITUSJON -> {
                 fagsakRepository.finnÅpenFagsakForInstitusjon(aktør)
             }
@@ -519,10 +517,6 @@ class FagsakService(
         }
 
         return fagsakDeltagere
-    }
-
-    fun behandleAnnullertFødsel(behandleAnnullerFødselDto: BehandleAnnullerFødselDto) {
-        taskRepository.save(BehandleAnnullertFødselTask.opprettTask(behandleAnnullerFødselDto))
     }
 
     companion object {

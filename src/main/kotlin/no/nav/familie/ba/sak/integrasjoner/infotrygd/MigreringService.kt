@@ -257,9 +257,11 @@ class MigreringService(
                     FagsakStatus.OPPRETTET -> {
                         kastOgTellMigreringsFeil(MigreringsfeilType.MIGRERING_ALLEREDE_PÅBEGYNT)
                     }
+
                     FagsakStatus.LØPENDE -> {
                         kastOgTellMigreringsFeil(MigreringsfeilType.ALLEREDE_MIGRERT)
                     }
+
                     FagsakStatus.AVSLUTTET -> {
                         behandlinger.find { it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
                             ?: kastOgTellMigreringsFeil(MigreringsfeilType.FAGSAK_AVSLUTTET_UTEN_MIGRERING)
@@ -301,6 +303,7 @@ class MigreringService(
             (sak.valg == "OR" && sak.undervalg in listOf("OS", "MD")) -> {
                 BehandlingUnderkategori.ORDINÆR
             }
+
             (sak.valg == "UT" && sak.undervalg in listOf("EF", "MD")) -> {
                 BehandlingUnderkategori.UTVIDET
             }
@@ -334,12 +337,15 @@ class MigreringService(
             sak.valg == "OR" && sak.stønad!!.delytelse.filter { it.tom == null }.size == 1 -> {
                 return
             }
+
             sak.valg == "UT" && sak.stønad!!.delytelse.filter { it.tom == null }.size == 1 -> {
                 return
             }
+
             sak.valg == "UT" && sak.stønad!!.delytelse.filter { it.tom == null }.size == 2 -> {
                 return
             }
+
             sak.stønad!!.delytelse.filter { it.tom == null }.size == 0 -> {
                 if (sak.stønad!!.antallBarn == 0 && sak.stønad!!.barn.isEmpty()) {
                     kastOgTellMigreringsFeil(MigreringsfeilType.DELYTELSE_OG_ANTALLBARN_NULL)
@@ -371,7 +377,7 @@ class MigreringService(
                 MigreringsfeilType.INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD,
                 "Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk} ${løpendeSak.saksnr} på bruker i Infotrygd."
             )
-        } else if (barnUnder18.size != løpendeSak.stønad!!.antallBarn) {
+        } else if (barnUnder18.distinct().size != løpendeSak.stønad!!.antallBarn) {
             secureLog.info(
                 "${MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER.beskrivelse}: " +
                     "barnasIdenter.size=${barnUnder18.size} stønad.antallBarn=${løpendeSak.stønad!!.antallBarn}"
@@ -379,7 +385,7 @@ class MigreringService(
             kastOgTellMigreringsFeil(MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER)
         }
 
-        return barnUnder18
+        return barnUnder18.distinct()
     }
 
     private fun forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(

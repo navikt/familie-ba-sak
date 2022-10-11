@@ -23,8 +23,6 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -75,7 +73,7 @@ internal class RettOffsetIAndelTilkjentYtelseTaskTest(
         val input = RettOffsetIAndelTilkjentYtelseDto(simuler = false, behandlinger = setOf(behandling2))
 
         TransactionTemplate(transactionManager).execute {
-            task.doTask(Task(type = "", payload = objectMapper.writeValueAsString(input)))
+            task.simulerEllerRettOffsettForBehandlingerMedNullEllerDuplikatOffset(input)
         }
 
         andelTilkjentYtelseRepository.flush()
