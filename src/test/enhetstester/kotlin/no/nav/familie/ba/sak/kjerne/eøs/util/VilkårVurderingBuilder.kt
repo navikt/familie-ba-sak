@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.util
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -42,10 +44,12 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
         val vilkårsvurderingBuilder: VilkårsvurderingBuilder<T>,
         val startTidspunkt: Tidspunkt<T>,
         private val person: Person = tilfeldigPerson(),
-        private val vilkårsresultatTidslinjer: MutableList<Tidslinje<VilkårRegelverkResultat, T>> = mutableListOf()
+        private val vilkårsresultatTidslinjer: MutableList<Tidslinje<UtdypendeVilkårRegelverkResultat, T>> = mutableListOf()
     ) {
         fun medVilkår(v: String, vararg vilkår: Vilkår): PersonResultatBuilder<T> {
-            vilkårsresultatTidslinjer.addAll(vilkår.map { v.tilVilkårRegelverkResultatTidslinje(it, startTidspunkt) })
+            vilkårsresultatTidslinjer.addAll(
+                vilkår.map { v.tilUtdypendeVilkårRegelverkResultatTidslinje(it, startTidspunkt) }
+            )
             return this
         }
 
@@ -77,7 +81,7 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
     }
 }
 
-internal fun <T : Tidsenhet> Periode<VilkårRegelverkResultat, T>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> {
+internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> {
     return listOf(
         VilkårResultat(
             personResultat = personResultat,
@@ -87,7 +91,8 @@ internal fun <T : Tidsenhet> Periode<VilkårRegelverkResultat, T>.tilVilkårResu
             periodeFom = this.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
             periodeTom = this.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id
+            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            utdypendeVilkårsvurderinger = this.innhold?.utdypendeVilkårsvurderinger ?: emptyList()
         )
     )
 }
@@ -101,3 +106,10 @@ fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
         behandling = behandling
     )
+
+data class UtdypendeVilkårRegelverkResultat(
+    val vilkår: Vilkår,
+    val resultat: Resultat?,
+    val regelverk: Regelverk?,
+    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
+)
