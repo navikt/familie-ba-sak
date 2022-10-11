@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -55,7 +56,10 @@ class ØkonomiIntegrasjonTest(
     private val personidentService: PersonidentService,
 
     @Autowired
-    private val vedtakService: VedtakService
+    private val vedtakService: VedtakService,
+
+    @Autowired
+    private val simuleringService: SimuleringService
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -187,5 +191,122 @@ class ØkonomiIntegrasjonTest(
             )
         )
         return vilkårsvurdering
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Sjekk at offset settes på andel tilkjent ytelse når behandlingen iverksettes`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val stønadFom = LocalDate.now()
+        val stønadTom = stønadFom.plusYears(17)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val barnAktørId = personidentService.hentOgLagreAktør(barnFnr, true)
+
+        val vilkårsvurdering =
+            lagVilkårsvurdering(behandling, fagsak.aktør, barnAktørId, stønadFom, stønadTom)
+
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+        Assertions.assertNotNull(behandling.fagsak.id)
+
+        val barnAktør = personidentService.hentAktørIder(listOf(barnFnr))
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktør = fagsak.aktør,
+                barnAktør = barnAktør
+            )
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
+
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+        Assertions.assertNotNull(vedtak)
+        vedtak!!.vedtaksdato = LocalDateTime.now()
+        vedtakService.oppdater(vedtak)
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+
+        beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
+            .forEach {
+                Assertions.assertNull(it.periodeOffset)
+                Assertions.assertNull(it.forrigePeriodeOffset)
+                Assertions.assertNull(it.kildeBehandlingId)
+            }
+
+        assertDoesNotThrow {
+            økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+                vedtak,
+                "ansvarligSaksbehandler",
+                AndelTilkjentYtelseForIverksettingFactory()
+            )
+        }
+
+        beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
+            .forEach {
+                Assertions.assertNotNull(it.periodeOffset)
+                Assertions.assertNotNull(it.kildeBehandlingId)
+            }
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Sjekk at offset IKKE settes på andel tilkjent ytelse når behandlingen simuleres`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val stønadFom = LocalDate.now()
+        val stønadTom = stønadFom.plusYears(17)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val barnAktørId = personidentService.hentOgLagreAktør(barnFnr, true)
+
+        val vilkårsvurdering =
+            lagVilkårsvurdering(behandling, fagsak.aktør, barnAktørId, stønadFom, stønadTom)
+
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+        Assertions.assertNotNull(behandling.fagsak.id)
+
+        val barnAktør = personidentService.hentAktørIder(listOf(barnFnr))
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktør = fagsak.aktør,
+                barnAktør = barnAktør
+            )
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
+
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+        Assertions.assertNotNull(vedtak)
+        vedtak!!.vedtaksdato = LocalDateTime.now()
+        vedtakService.oppdater(vedtak)
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+
+        beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
+            .forEach {
+                Assertions.assertNull(it.periodeOffset)
+                Assertions.assertNull(it.forrigePeriodeOffset)
+                Assertions.assertNull(it.kildeBehandlingId)
+            }
+
+        assertDoesNotThrow {
+            simuleringService.oppdaterSimuleringPåBehandling(behandling)
+        }
+
+        beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
+            .forEach {
+                Assertions.assertNull(it.periodeOffset)
+                Assertions.assertNull(it.forrigePeriodeOffset)
+                Assertions.assertNull(it.kildeBehandlingId)
+            }
     }
 }
