@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -41,12 +42,13 @@ class AutobrevOpphørSmåbarnstilleggService(
             overgangstønadOpphørteForrigeMåned(listePeriodeOvergangsstønadGrunnlag = listePeriodeOvergangsstønadGrunnlag)
 
         val behandlingsårsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG
-        val standardbegrunnelse =
-            if (yngsteBarnFylteTreÅrForrigeMåned) {
-                Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
-            } else {
-                Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
-            }
+        val standardbegrunnelse = if (yngsteBarnFylteTreÅrForrigeMåned) {
+            Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
+        } else if (overgangstønadOpphørteForrigeMåned) {
+            Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
+        } else {
+            throw Feil("Finner ikke begrunnelse for Omregning småbarnstillegg")
+        }
 
         if (!autovedtakBrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = fagsakId,
@@ -78,7 +80,7 @@ class AutobrevOpphørSmåbarnstilleggService(
     fun overgangstønadOpphørteForrigeMåned(listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag>): Boolean =
         listePeriodeOvergangsstønadGrunnlag.any { periodeOvergangsstønadGrunnlag ->
             periodeOvergangsstønadGrunnlag.tom.toYearMonth() == YearMonth.now().minusMonths(1)
-        }
+        } && listePeriodeOvergangsstønadGrunnlag.none { periodeOvergangsstønadGrunnlag -> periodeOvergangsstønadGrunnlag.fom.toYearMonth() == YearMonth.now() }
 
     fun yngsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
         val yngsteBarnSinFødselsdato: YearMonth =
