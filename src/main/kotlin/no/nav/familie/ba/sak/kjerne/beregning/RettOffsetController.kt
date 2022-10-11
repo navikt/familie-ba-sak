@@ -137,16 +137,25 @@ class RettOffsetController(
 
         behandlinger.forEach { behandlingId ->
             val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
+            val utbetalingsperioder = tilkjentYtelse.utbetalingsperioder()
+
+            if (utbetalingsperioder.isEmpty()) {
+                logger.warn("Behandling $behandlingId mangler utbettalingsoppdrag")
+            }
 
             if (harFeilUtbetalingsoppdragMhpAndeler(tilkjentYtelse)) {
                 logger.warn("Revisjon av utbetalingsoppdrag for behandling $behandlingId feilet")
-                logger.warn(
+                secureLogger.warn(
                     "Revisjon av utbetalingsoppdrag for behandling $behandlingId feilet\n" +
-                        "Utbetalingsoppdrag: ${tilkjentYtelse.utbetalingsoppdrag}\n" +
-                        "Andeler: ${tilkjentYtelse.andelerTilkjentYtelse}"
+                        "Utbetalingsperioder: \n" +
+                        "${utbetalingsperioder.map { objectMapper.writeValueAsString(it) + "\n" }}" +
+                        "Andeler: \n" +
+                        "${tilkjentYtelse.andelerTilkjentYtelse.map { it.toString() + "\n" }}"
                 )
             }
         }
+
+        logger.info("Avsluttet revisjon av ${behandlinger.size} behandlinger:  $behandlinger")
     }
 
     private fun finnAlleBehandlingerEndretEtterFeilOppsto(): Set<Long> {
@@ -204,20 +213,20 @@ class RettOffsetController(
 
     companion object {
         private val logger = LoggerFactory.getLogger(RettOffsetController::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 
 internal fun harFeilUtbetalingsoppdragMhpAndeler(tilkjentYtelse: TilkjentYtelse): Boolean {
-    val utbetalingsoppdrag =
-        objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
+    val utbetalingsperioder = tilkjentYtelse.utbetalingsperioder()
 
     val offsetForAndeler = tilkjentYtelse.andelerTilkjentYtelse.map { it.periodeOffset }
 
-    val utbetalingsperioderMedOpphør = utbetalingsoppdrag.utbetalingsperiode
+    val utbetalingsperioderMedOpphør = utbetalingsperioder
         .filter { it.opphør?.opphørDatoFom != null || it.erEndringPåEksisterendePeriode }
         .map { it.periodeId }
 
-    val utbetalingsperioderSomOpprettes = utbetalingsoppdrag.utbetalingsperiode
+    val utbetalingsperioderSomOpprettes = utbetalingsperioder
         .filter { it.opphør == null && !it.erEndringPåEksisterendePeriode }
         .map { it.periodeId }
 
@@ -227,3 +236,7 @@ internal fun harFeilUtbetalingsoppdragMhpAndeler(tilkjentYtelse: TilkjentYtelse)
     val harEnFeil = opphørtPeriodeFinnesIAndel || nyePerioderManglerIAndel
     return harEnFeil
 }
+
+fun TilkjentYtelse.utbetalingsperioder() = this.utbetalingsoppdrag?.let {
+    objectMapper.readValue(it, Utbetalingsoppdrag::class.java)
+}?.utbetalingsperiode ?: emptyList()
