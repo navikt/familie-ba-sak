@@ -137,6 +137,7 @@ data class EØSBegrunnelseData(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
     override val apiNavn: String,
 
+    val gjelderSoker: Boolean,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String?,
     val barnetsBostedsland: String,

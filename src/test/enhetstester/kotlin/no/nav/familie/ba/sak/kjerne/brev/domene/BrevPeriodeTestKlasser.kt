@@ -238,7 +238,8 @@ data class EØSBegrunnelseTestConfig(
             .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
             ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
         sokersAktivitet = this.sokersAktivitet,
-        sokersAktivitetsland = this.sokersAktivitetsland
+        sokersAktivitetsland = this.sokersAktivitetsland,
+        gjelderSoker = false
     )
 }
 

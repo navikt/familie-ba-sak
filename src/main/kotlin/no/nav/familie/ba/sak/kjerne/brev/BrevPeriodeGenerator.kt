@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
@@ -85,7 +86,8 @@ class BrevPeriodeGenerator(
                     antallBarn = kompetanse.personer.size,
                     maalform = brevMålform.tilSanityFormat(),
                     sokersAktivitet = kompetanse.søkersAktivitet,
-                    sokersAktivitetsland = kompetanse.søkersAktivitetsland?.navn
+                    sokersAktivitetsland = kompetanse.søkersAktivitetsland?.navn,
+                    gjelderSoker = begrunnelse == EØSStandardbegrunnelse.OPPHØR_BOR_IKKE_I_ET_EØS_LAND || begrunnelse == EØSStandardbegrunnelse.OPPHØR_IKKE_STATSBORGER_I_EØS_LAND
                 )
             }
         }
@@ -93,8 +95,16 @@ class BrevPeriodeGenerator(
     fun hentEøsBegrunnelserMedKompetanser(): List<EØSBegrunnelseMedKompetanser> =
         minimertVedtaksperiode.eøsBegrunnelser.map { eøsBegrunnelseMedTriggere ->
             val kompetanser = when (eøsBegrunnelseMedTriggere.eøsBegrunnelse.vedtakBegrunnelseType) {
-                VedtakBegrunnelseType.EØS_INNVILGET -> hentKompetanserForEØSBegrunnelse(eøsBegrunnelseMedTriggere, minimerteKompetanserForPeriode)
-                VedtakBegrunnelseType.EØS_OPPHØR -> hentKompetanserForEØSBegrunnelse(eøsBegrunnelseMedTriggere, minimerteKompetanserSomStopperRettFørPeriode)
+                VedtakBegrunnelseType.EØS_INNVILGET -> hentKompetanserForEØSBegrunnelse(
+                    eøsBegrunnelseMedTriggere,
+                    minimerteKompetanserForPeriode
+                )
+
+                VedtakBegrunnelseType.EØS_OPPHØR -> hentKompetanserForEØSBegrunnelse(
+                    eøsBegrunnelseMedTriggere,
+                    minimerteKompetanserSomStopperRettFørPeriode
+                )
+
                 else -> emptyList()
             }
             EØSBegrunnelseMedKompetanser(
@@ -159,6 +169,7 @@ class BrevPeriodeGenerator(
         val barnIPeriode: List<MinimertRestPerson> = when (minimertVedtaksperiode.type) {
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
             Vedtaksperiodetype.UTBETALING -> finnBarnIUtbetalingPeriode(identerIBegrunnelene)
+
             Vedtaksperiodetype.OPPHØR -> emptyList()
             Vedtaksperiodetype.AVSLAG -> emptyList()
             Vedtaksperiodetype.FORTSATT_INNVILGET -> barnMedUtbetaling + barnMedNullutbetaling
@@ -194,6 +205,7 @@ class BrevPeriodeGenerator(
             minimertVedtaksperiode.fom,
             minimertVedtaksperiode.begrunnelser.map { it.standardbegrunnelse }
         ) ?: "Du får:"
+
         Vedtaksperiodetype.UTBETALING -> minimertVedtaksperiode.fom!!.tilDagMånedÅr()
         Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
         Vedtaksperiodetype.OPPHØR -> minimertVedtaksperiode.fom!!.tilDagMånedÅr()
@@ -212,6 +224,7 @@ class BrevPeriodeGenerator(
             barnMedUtbetaling.isEmpty() -> BrevPeriodeType.INNVILGELSE_KUN_UTBETALING_PÅ_SØKER
             else -> BrevPeriodeType.INNVILGELSE
         }
+
         Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
         Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG else BrevPeriodeType.AVSLAG_UTEN_PERIODE
         Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.OPPHOR
