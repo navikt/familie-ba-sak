@@ -182,8 +182,11 @@ class FagsakService(
         }
     }
 
-    fun hentMinimalFagsakerForPerson(aktør: Aktør): Ressurs<List<RestMinimalFagsak>> {
-        val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør)
+    fun hentMinimalFagsakerForPerson(
+        aktør: Aktør,
+        fagsakTyper: List<FagsakType> = FagsakType.values().toList()
+    ): Ressurs<List<RestMinimalFagsak>> {
+        val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).filter { fagsakTyper.contains(it.type) }
         return if (!fagsaker.isEmpty()) {
             Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
         } else {
