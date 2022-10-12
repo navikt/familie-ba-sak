@@ -665,6 +665,18 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBarnMedSamboerForBoddSammen12Mnd"
     },
+    REDUKSJON_SMÅBARNSTILLEGG_HAR_IKKE_UTVIDET_BARNETRYGD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSmaabarnstilleggHarIkkeUtvidetBarnetrygd"
+    },
+    REDUKSJON_SØKER_ER_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSoekerErGift"
+    },
+    REDUKSJON_SØKER_BER_OM_OPPHØR_UTVIDET {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSoekerBerOmOpphoerUtvidet"
+    },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagBosattIRiket"
@@ -1261,6 +1273,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetVarigOppholdsrettEosBorger"
     },
+    FORTSATT_INNVILGET_GENERELL_BOR_SAMMEN_MED_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetGenerellBorSammenMedBarn"
+    },
     ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingDeltBostedFullUtbetalingForSoknad"
@@ -1297,6 +1313,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingDeltBostedEndretUtbetaling"
         override val kanDelesOpp: Boolean = true
+    },
+    ENDRET_UTBETALING_SEKUNDÆR_DELT_BOSTED_FULL_UTBETALING_FØR_SØKNAD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingSekundaerDeltBostedFullUtbetalingFoerSoeknad"
     },
     ETTER_ENDRET_UTBETALING_RETTSAVGJØRELSE_DELT_BOSTED {
         override val sanityApiNavn = "etterEndretUtbetalingRettsavgjorelseDeltBosted"
