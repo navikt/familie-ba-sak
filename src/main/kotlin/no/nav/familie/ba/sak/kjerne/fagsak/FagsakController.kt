@@ -107,7 +107,7 @@ class FagsakController(
 
         return Result.runCatching {
             val aktør = personidentService.hentAktør(request.personIdent)
-            fagsakService.hentMinimalFagsakerForPerson(aktør)
+            fagsakService.hentMinimalFagsakerForPerson(aktør = aktør, fagsakTyper = request.fagsakTyper)
         }.fold(
             onSuccess = { return ResponseEntity.ok().body(it) },
             onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
