@@ -130,7 +130,9 @@ class Autobrev6og18ÅrService(
                 behandling.id
             ).filter { it.aktør in barnIBrytningsalder }
 
-        return andelerTilBarnIBrytningsalder.any { it.stønadTom.isAfter(årMåned) }
+        return andelerTilBarnIBrytningsalder.any {
+            it.stønadTom.plusMonths(1) == årMåned || it.stønadTom.plusMonths(1).isAfter(årMåned)
+        }
     }
 
     companion object {
