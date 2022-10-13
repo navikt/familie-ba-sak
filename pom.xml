@@ -17,39 +17,39 @@
 
     <properties>
         <java.version>17</java.version>
-        <kotlin.version>1.7.10</kotlin.version>
+        <kotlin.version>1.7.20</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.1.4</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
         <prosessering.version>1.20220624132237_7f5ba9c</prosessering.version>
-        <felles.version>1.20220927133157_32b7eda</felles.version>
+        <felles.version>1.20221006150009_46021ed</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20220609214258_f30c3ce</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>2.0_20220928092558_a8a42e4</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20220923123433_db565d1</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
-        <mockk.version>1.12.5</mockk.version>
-        <token-validation-spring.version>2.1.4</token-validation-spring.version>
+        <mockk.version>1.13.2</mockk.version>
+        <token-validation-spring.version>2.1.6</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>1.6.11</springdoc.version>
-        <sentry.version>6.4.2</sentry.version>
+        <sentry.version>6.5.0</sentry.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>0.5.3</mock-oauth2-server.version>
+        <mock-oauth2-server.version>0.5.4</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <postgresql.version>42.4.1</postgresql.version>
-        <testcontainers.postgresql.version>1.17.3</testcontainers.postgresql.version>
-        <unleash.version>6.0.1</unleash.version>
+        <testcontainers.postgresql.version>1.17.5</testcontainers.postgresql.version>
+        <unleash.version>6.1.0</unleash.version>
         <maven.model.version>3.8.6</maven.model.version>
         <jackson.module.kotlin.version>2.13.4</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
-        <fpsak-tidslinje.version>2.6.4</fpsak-tidslinje.version>
+        <fpsak-tidslinje.version>2.6.5</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -296,12 +296,6 @@
             <groupId>no.nav.fpsak.tidsserie</groupId>
             <artifactId>fpsak-tidsserie</artifactId>
             <version>${fpsak-tidslinje.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.jupiter</groupId>
-                    <artifactId>junit-jupiter-engine</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.eksterne.kontrakter</groupId>
@@ -338,7 +332,7 @@
         </dependency>
         <dependency>
             <groupId>io.mockk</groupId>
-            <artifactId>mockk</artifactId>
+            <artifactId>mockk-jvm</artifactId>
             <version>${mockk.version}</version>
             <scope>test</scope>
         </dependency>

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -26,14 +27,90 @@ class RettOffsetIAndelTilkjentYtelseTask(
     override fun doTask(task: Task) {
         val payload =
             objectMapper.readValue(task.payload, RettOffsetIAndelTilkjentYtelseDto::class.java)
-        køyrTask(payload)
+        simulerEllerRettOffsettForBehandlinger(payload)
     }
 
-    private fun køyrTask(payload: RettOffsetIAndelTilkjentYtelseDto) {
+    private fun simulerEllerRettOffsettForBehandlinger(payload: RettOffsetIAndelTilkjentYtelseDto) {
+        val alleBehandlinger = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
+        loggBehandlingIder("Alle behandlinger", alleBehandlinger.map { it.id })
+
+        val behandlingerUtenNyereAvsluttetBehandling =
+            finnRelevanteBehandlingerForOppdateringAvOffset(alleBehandlinger).map { it.id }
+
+        val behandlingIderSomIkkeKanOppdateres = mutableListOf<Long>()
+
+        val behandlingIderSomInneholderOffsetFeil = mutableListOf<Long>()
+
+        alleBehandlinger.forEach {
+            val andelerSomSendesTilOppdrag =
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = it.id)
+
+            val forrigeBehandling =
+                behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = it)
+
+            if (andelerSomSendesTilOppdrag.isNotEmpty() && forrigeBehandling != null) {
+                val andelerFraForrigeBehandling =
+                    beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
+
+                val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOffsetSomMåOppdateres(
+                    oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerSomSendesTilOppdrag),
+                    forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerFraForrigeBehandling)
+                )
+
+                if (beståendeAndelerMedOppdatertOffset.isNotEmpty()) {
+                    behandlingIderSomInneholderOffsetFeil.add(it.id)
+
+                    val logglinjer =
+                        beståendeAndelerMedOppdatertOffset.joinToString(separator = System.lineSeparator()) { oppdatering ->
+                            formaterLogglinje(
+                                oppdatering
+                            )
+                        }
+                    secureLogger.info(
+                        "Behandling: $it," +
+                            "\nLogglinjer: " +
+                            "\n$logglinjer"
+                    )
+
+                    if (!payload.simuler && behandlingerUtenNyereAvsluttetBehandling.contains(it.id)) {
+                        beståendeAndelerMedOppdatertOffset.forEach { oppdatering -> oppdatering.oppdater() }
+                    }
+                }
+            } else {
+                if (andelerSomSendesTilOppdrag.isEmpty()) {
+                    secureLogger.warn("Fant ingen andeler som skal sendes til oppdrag for behandling $it")
+                }
+                if (forrigeBehandling == null) {
+                    secureLogger.warn("Fant ikke forrige behandling for behandling $it")
+                }
+                behandlingIderSomIkkeKanOppdateres.add(it.id)
+            }
+        }
+        loggBehandlingIder("Behandlinger som har offset-feil", behandlingIderSomInneholderOffsetFeil)
+        loggBehandlingIder("Behandlinger som ikke kunne oppdateres", behandlingIderSomIkkeKanOppdateres)
+
+        val behandlingerSomBlirOppdatert = behandlingIderSomInneholderOffsetFeil.intersect(
+            behandlingerUtenNyereAvsluttetBehandling.toSet()
+        )
+        loggBehandlingIder("Behandlinger som blir oppdatert", behandlingerSomBlirOppdatert.toList())
+        loggBehandlingIder(
+            "Behandlinger som ville blitt oppdatert, men har avsluttet behandling",
+            behandlingIderSomInneholderOffsetFeil.minus(behandlingerSomBlirOppdatert)
+        )
+    }
+
+    fun simulerEllerRettOffsettForBehandlingerMedNullEllerDuplikatOffset(payload: RettOffsetIAndelTilkjentYtelseDto) {
         val behandlingerMedFeilaktigeOffsets = payload.behandlinger.map { behandlingHentOgPersisterService.hent(it) }
         loggBehandlingIder("Behandlinger med feilaktige offsets", behandlingerMedFeilaktigeOffsets.map { it.id })
 
-        val relevanteBehandlinger = finnRelevanteBehandlingerForOppdateringAvOffset(behandlingerMedFeilaktigeOffsets)
+        val relevanteBehandlinger =
+            if (payload.ignorerValidering) {
+                behandlingerMedFeilaktigeOffsets
+            } else {
+                finnRelevanteBehandlingerForOppdateringAvOffset(
+                    behandlingerMedFeilaktigeOffsets
+                )
+            }
         loggBehandlingIder("Relevante behandlinger", relevanteBehandlinger.map { it.id })
 
         val behandlingIderSomIkkeKanOppdateres = mutableListOf<Long>()
@@ -50,7 +127,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
                     val andelerFraForrigeBehandling =
                         beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
 
-                    val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOppdatertOffset(
+                    val beståendeAndelerMedOppdatertOffset = ØkonomiUtils.finnBeståendeAndelerMedOffsetSomMåOppdateres(
                         oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerSomSendesTilOppdrag),
                         forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(andelerFraForrigeBehandling)
                     )
@@ -109,7 +186,7 @@ class RettOffsetIAndelTilkjentYtelseTask(
                 alleBehandlingerPåFagsak.filter { it.opprettetTidspunkt.isAfter(behandling.opprettetTidspunkt) && !it.erHenlagt() }
 
             val finnesUgyldigBehandlingEtterDenne =
-                behandlingerOpprettetEtterDenneBehandlingen.filter { it.status == BehandlingStatus.AVSLUTTET }
+                behandlingerOpprettetEtterDenneBehandlingen.filter { it.status == BehandlingStatus.AVSLUTTET && it.resultat != Behandlingsresultat.FORTSATT_INNVILGET }
                     .isNotEmpty()
 
             if (finnesUgyldigBehandlingEtterDenne) {
@@ -139,5 +216,6 @@ class RettOffsetIAndelTilkjentYtelseTask(
 
 data class RettOffsetIAndelTilkjentYtelseDto(
     val simuler: Boolean,
-    val behandlinger: Set<Long>
+    val behandlinger: Set<Long>,
+    val ignorerValidering: Boolean = false
 )

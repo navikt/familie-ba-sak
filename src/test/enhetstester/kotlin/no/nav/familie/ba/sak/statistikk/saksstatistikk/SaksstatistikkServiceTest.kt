@@ -9,6 +9,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -38,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -112,6 +114,7 @@ internal class SaksstatistikkServiceTest(
 
     @MockK
     private val settPåVentService: SettPåVentService
+
 ) {
 
     private val sakstatistikkService = SaksstatistikkService(
@@ -299,6 +302,23 @@ internal class SaksstatistikkServiceTest(
         assertThat(behandlingDvh?.settPaaVent?.aarsak).isEqualTo(SettPåVentÅrsak.AVVENTER_DOKUMENTASJON.name)
         assertThat(behandlingDvh?.settPaaVent?.frist)
             .isEqualTo(frist.atStartOfDay(SaksstatistikkService.TIMEZONE))
+    }
+
+    @Test
+    fun `skal levere dvh-kodene for sakstype (institusjon, enslig_mindreårig) i behandlingUnderkategori`() {
+        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
+        every { vedtakService.hentAktivForBehandling(any()) } returns null
+
+        listOf(FagsakType.INSTITUSJON, FagsakType.BARN_ENSLIG_MINDREÅRIG, null)
+            .forEach { optionalSakstype ->
+                val fagsak = defaultFagsak().copy(type = optionalSakstype ?: FagsakType.NORMAL)
+                val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD, fagsak = fagsak)
+
+                every { behandlingHentOgPersisterService.hent(any()) } returns behandling
+
+                val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
+                assertThat("${behandlingDvh?.behandlingUnderkategori}").isSubstringOf("${optionalSakstype?.name}")
+            }
     }
 
     @Test

@@ -2,26 +2,35 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraSisteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilPeriodeMedInnhold
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilPeriodeUtenInnhold
+
+fun Tidslinje<VilkårRegelverkResultat, Dag>.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() = this
+    .tilMånedEtterVilkårsregler { it.erOppfylt() }
+    .slåSammenLike()
+    .filtrerIkkeNull()
 
 /**
- * Extension-funksjon som konverterer en dag-basert tidslinje med VilkårRegelverkResultat til en måned-basert tidslinje
- * Regelen er at resultatet blir først skal bli gjeldende fra og med påfølgende måned.
- * I praksis betyr det at det holder å kikke på verdien for siste dag i måneden og bruke den som månedsverdi i påfølgende måned
- *
- * Funksjonen oppnår dette i følgende steg
- * 1. Konverter til månedstidslinje ved å bruke verdien siste dag i månenden.
- *    F.eks blir verdien for 30/4-2020 til verdien for april 2020, 31/5 til mai-2020-verdien, osv
- * 2. Samme verdi i påfølgende måneder blir slått sammen til én periode
- * 3. Perioder som ikke har verdi (dvs er null) blir fjernet
- * 4. Hele tidslinjen forskyves én måned senere, for å oppfylle regelen om påfølgende måned,
- *    dvs april blir til mai, mai blir til juni osv
+ * Extension-funksjon som konverterer en dag-basert tidslinje til en måned-basert tidslinje etter vilkårsreglene
+ * Vilkårsreglene er at innholdet i siste dag forrige måned brukes som innhold for denne måneden
+ * hvis innholdet siste dag forrige måned <erOppfylt> og innholdet første dag denne måneden også <erOppfylt>
  */
-fun Tidslinje<VilkårRegelverkResultat, Dag>.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() = this
-    .tilMånedFraSisteDagIMåneden() // Månedsverdien er verdien fra siste dag i måneden
-    .slåSammenLike() // Slå sammen perioder som nå er like
-    .filtrerIkkeNull() // Ta bort alle perioder som har null-verdi
-    .forskyv(1) // Flytt alt én måned senere
+fun <I> Tidslinje<I, Dag>.tilMånedEtterVilkårsregler(erOppfylt: (I?) -> Boolean) = tidslinje {
+    (fraOgMed().tilInneværendeMåned()..tilOgMed().tilInneværendeMåned()).map { måned ->
+        val innholdSisteDagForrigeMåned = innholdForTidspunkt(måned.forrige().tilSisteDagIMåneden())
+        val innholdFørsteDagDenneMåned = innholdForTidspunkt(måned.tilFørsteDagIMåneden())
+
+        if (erOppfylt(innholdSisteDagForrigeMåned) && erOppfylt(innholdFørsteDagDenneMåned)) {
+            måned.tilPeriodeMedInnhold(innholdSisteDagForrigeMåned)
+        } else {
+            måned.tilPeriodeUtenInnhold()
+        }
+    }
+}

@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.task.BehandleAnnullerFødselDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
@@ -108,7 +107,7 @@ class FagsakController(
 
         return Result.runCatching {
             val aktør = personidentService.hentAktør(request.personIdent)
-            fagsakService.hentMinimalFagsakerForPerson(aktør)
+            fagsakService.hentMinimalFagsakerForPerson(aktør = aktør, fagsakTyper = request.fagsakTyper)
         }.fold(
             onSuccess = { return ResponseEntity.ok().body(it) },
             onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
@@ -163,12 +162,6 @@ class FagsakController(
         )
 
         return tilbakekrevingService.opprettTilbakekrevingsbehandlingManuelt(fagsakId)
-    }
-
-    @PostMapping(path = ["/annullerFoedsel"])
-    fun behandleAnnullertFødsel(@RequestBody behandleAnnullerFødselDto: BehandleAnnullerFødselDto): Ressurs<String> {
-        fagsakService.behandleAnnullertFødsel(behandleAnnullerFødselDto)
-        return Ressurs.success("Ok", "Ok")
     }
 
     companion object {

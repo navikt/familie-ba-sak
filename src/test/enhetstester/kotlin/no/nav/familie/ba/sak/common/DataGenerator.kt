@@ -240,7 +240,8 @@ fun lagAndelTilkjentYtelse(
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null,
     prosent: BigDecimal = BigDecimal(100),
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
+    kildeBehandlingId: Long = behandling.id
 ): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
         aktør = aktør,
@@ -256,7 +257,7 @@ fun lagAndelTilkjentYtelse(
         sats = beløp,
         prosent = prosent,
         endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList(),
-        kildeBehandlingId = behandling.id
+        kildeBehandlingId = kildeBehandlingId
     )
 }
 
@@ -1255,4 +1256,10 @@ fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
             Regelverk.EØS_FORORDNINGEN -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
             else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
         }
+    )
+
+fun ikkeOppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
+    VilkårRegelverkResultat(
+        vilkår = vilkår,
+        regelverkResultat = RegelverkResultat.IKKE_OPPFYLT
     )
