@@ -1,3 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-data class RestHentFagsakerForPerson(val personIdent: String)
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+
+data class RestHentFagsakerForPerson(val personIdent: String, val fagsakTyper: List<FagsakType> = FagsakType.values().toList())
