@@ -53,12 +53,12 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
 ): Boolean {
     val (forrigeSmåbarnstilleggAndeler, forrigeAndelerIkkeSmåbarnstillegg) = forrigeAndelerTilkjentYtelse.partition { it.erSmåbarnstillegg() }
 
-    val (utvidetAndeler, barnasAndeler) = forrigeAndelerIkkeSmåbarnstillegg.partition { it.erUtvidet() }
+    val (forrigeUtvidetAndeler, forrigeBarnasAndeler) = forrigeAndelerIkkeSmåbarnstillegg.partition { it.erUtvidet() }
 
     val nyeSmåbarnstilleggAndeler = småbarnstilleggBarnetrygdGenerator.lagSmåbarnstilleggAndeler(
         perioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
-        barnasAndeler = barnasAndeler,
-        utvidetAndeler = utvidetAndeler,
+        barnasAndeler = forrigeBarnasAndeler,
+        utvidetAndeler = forrigeUtvidetAndeler,
         barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer
     )
 
