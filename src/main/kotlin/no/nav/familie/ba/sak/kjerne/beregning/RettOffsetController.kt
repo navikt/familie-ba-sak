@@ -7,7 +7,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -27,7 +29,8 @@ import java.time.LocalDate
 class RettOffsetController(
     val task: RettOffsetIAndelTilkjentYtelseTask,
     val behandlingRepository: BehandlingRepository,
-    val taskRepository: TaskRepository
+    val taskRepository: TaskRepository,
+    val beregningService: BeregningService
 ) {
 
     @PostMapping("/simuler-offset-fix")
@@ -128,6 +131,33 @@ class RettOffsetController(
         }
     }
 
+    @PostMapping("/revisjon-av-utbetalingsoppdrag")
+    fun kjørRevisjonPåUtbetalingsoppdrag(@RequestBody(required = true) behandlinger: List<Long>) {
+        logger.info("Starter revisjon av ${behandlinger.size} behandlinger:  $behandlinger")
+
+        behandlinger.forEach { behandlingId ->
+            val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
+            val utbetalingsperioder = tilkjentYtelse.utbetalingsperioder()
+
+            if (utbetalingsperioder.isEmpty()) {
+                logger.warn("Behandling $behandlingId mangler utbettalingsoppdrag")
+            }
+
+            if (harFeilUtbetalingsoppdragMhpAndeler(tilkjentYtelse)) {
+                logger.warn("Revisjon av utbetalingsoppdrag for behandling $behandlingId feilet")
+                secureLogger.warn(
+                    "Revisjon av utbetalingsoppdrag for behandling $behandlingId feilet\n" +
+                        "Utbetalingsperioder: \n" +
+                        "${utbetalingsperioder.map { objectMapper.writeValueAsString(it) + "\n" }}" +
+                        "Andeler: \n" +
+                        "${tilkjentYtelse.andelerTilkjentYtelse.map { it.toString() + "\n" }}"
+                )
+            }
+        }
+
+        logger.info("Avsluttet revisjon av ${behandlinger.size} behandlinger:  $behandlinger")
+    }
+
     private fun finnAlleBehandlingerEndretEtterFeilOppsto(): Set<Long> {
         val ugyldigeResultater = listOf(
             HENLAGT_TEKNISK_VEDLIKEHOLD,
@@ -183,5 +213,30 @@ class RettOffsetController(
 
     companion object {
         private val logger = LoggerFactory.getLogger(RettOffsetController::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
+
+internal fun harFeilUtbetalingsoppdragMhpAndeler(tilkjentYtelse: TilkjentYtelse): Boolean {
+    val utbetalingsperioder = tilkjentYtelse.utbetalingsperioder()
+
+    val offsetForAndeler = tilkjentYtelse.andelerTilkjentYtelse.map { it.periodeOffset }
+
+    val utbetalingsperioderMedOpphør = utbetalingsperioder
+        .filter { it.opphør?.opphørDatoFom != null || it.erEndringPåEksisterendePeriode }
+        .map { it.periodeId }
+
+    val utbetalingsperioderSomOpprettes = utbetalingsperioder
+        .filter { it.opphør == null && !it.erEndringPåEksisterendePeriode }
+        .map { it.periodeId }
+
+    val opphørtPeriodeFinnesIAndel = offsetForAndeler.intersect(utbetalingsperioderMedOpphør).isNotEmpty()
+    val nyePerioderManglerIAndel = utbetalingsperioderSomOpprettes.any { !offsetForAndeler.contains(it) }
+
+    val harEnFeil = opphørtPeriodeFinnesIAndel || nyePerioderManglerIAndel
+    return harEnFeil
+}
+
+fun TilkjentYtelse.utbetalingsperioder() = this.utbetalingsoppdrag?.let {
+    objectMapper.readValue(it, Utbetalingsoppdrag::class.java)
+}?.utbetalingsperiode ?: emptyList()

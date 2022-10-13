@@ -85,16 +85,6 @@ internal class UtbetalingsoppdragServiceTest {
         verify { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
     }
 
-    private fun lagUtbetalingsoppdrag(utbetalingsperiode: List<Utbetalingsperiode>) = Utbetalingsoppdrag(
-        kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
-        fagSystem = "BA",
-        saksnummer = "",
-        aktoer = UUID.randomUUID().toString(),
-        saksbehandlerId = "",
-        avstemmingTidspunkt = LocalDateTime.now(),
-        utbetalingsperiode = utbetalingsperiode
-    )
-
     private fun lagUtbetalingsperiode() = Utbetalingsperiode(
         erEndringPåEksisterendePeriode = false,
         opphør = null,
@@ -117,3 +107,13 @@ internal class UtbetalingsoppdragServiceTest {
             endretDato = LocalDate.now()
         )
 }
+
+fun lagUtbetalingsoppdrag(utbetalingsperiode: List<Utbetalingsperiode>) = Utbetalingsoppdrag(
+    kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
+    fagSystem = "BA",
+    saksnummer = "",
+    aktoer = UUID.randomUUID().toString(),
+    saksbehandlerId = "",
+    avstemmingTidspunkt = LocalDateTime.now(),
+    utbetalingsperiode = utbetalingsperiode
+)
