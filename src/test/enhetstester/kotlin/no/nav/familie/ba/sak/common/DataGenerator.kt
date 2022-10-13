@@ -420,22 +420,28 @@ fun lagTestPersonopplysningGrunnlag(
 fun dato(s: String) = LocalDate.parse(s)
 fun årMnd(s: String) = YearMonth.parse(s)
 
-fun nyOrdinærBehandling(søkersIdent: String, årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): NyBehandling =
+fun nyOrdinærBehandling(
+    søkersIdent: String,
+    årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+    fagsakId: Long
+): NyBehandling =
     NyBehandling(
         søkersIdent = søkersIdent,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
         behandlingÅrsak = årsak,
-        søknadMottattDato = if (årsak == BehandlingÅrsak.SØKNAD) LocalDate.now() else null
+        søknadMottattDato = if (årsak == BehandlingÅrsak.SØKNAD) LocalDate.now() else null,
+        fagsakId = fagsakId
     )
 
-fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
+fun nyRevurdering(søkersIdent: String, fagsakId: Long): NyBehandling = NyBehandling(
     søkersIdent = søkersIdent,
     behandlingType = BehandlingType.REVURDERING,
     kategori = BehandlingKategori.NASJONAL,
     underkategori = BehandlingUnderkategori.ORDINÆR,
-    søknadMottattDato = LocalDate.now()
+    søknadMottattDato = LocalDate.now(),
+    fagsakId = fagsakId
 )
 
 fun lagSøknadDTO(
@@ -639,7 +645,7 @@ fun kjørStegprosessForFGB(
     verge: VergeInfo? = null
 ): Behandling {
     val fagsakType = utledFagsaktype(institusjon, verge)
-    fagsakService.hentEllerOpprettFagsakForPersonIdent(
+    val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(
         fødselsnummer = søkerFnr,
         institusjon = institusjon,
         fagsakType = fagsakType
@@ -653,7 +659,8 @@ fun kjørStegprosessForFGB(
             søkersIdent = søkerFnr,
             barnasIdenter = barnasIdenter,
             søknadMottattDato = LocalDate.now(),
-            fagsakType = fagsakType
+            fagsakType = fagsakType,
+            fagsakId = fagsak.id
         )
     )
 
@@ -799,7 +806,8 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     søkerFnr: String,
     barnasIdenter: List<String>,
     vedtakService: VedtakService,
-    stegService: StegService
+    stegService: StegService,
+    fagsakId: Long
 ): Behandling {
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
@@ -808,7 +816,8 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
             behandlingType = BehandlingType.REVURDERING,
             behandlingÅrsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
             søkersIdent = søkerFnr,
-            barnasIdenter = barnasIdenter
+            barnasIdenter = barnasIdenter,
+            fagsakId = fagsakId
         )
     )
 

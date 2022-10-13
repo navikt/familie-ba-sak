@@ -65,13 +65,14 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     fun `Skal plukke iverksatt FGB`() {
         val forelderIdent = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
         val førstegangsbehandling =
             opprettOgLagreBehandlingMedAndeler(
                 personIdent = forelderIdent,
-                kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L))
+                kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
+                fagsakId = fagsak.id
             )
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
@@ -88,7 +89,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     fun `Skal plukke både iverksatt FGB og revurdering når periode legges til`() {
         val forelderIdent = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
 
@@ -96,7 +97,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
             opprettOgLagreBehandlingMedAndeler(
                 personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
-                medStatus = BehandlingStatus.AVSLUTTET
+                medStatus = BehandlingStatus.AVSLUTTET,
+                fagsakId = fagsak.id
             )
         val revurdering =
             opprettOgLagreRevurderingMedAndeler(
@@ -104,7 +106,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 kildeOgOffsetPåAndeler = listOf(
                     KildeOgOffsetPåAndel(førstegangsbehandling.id, 1L),
                     KildeOgOffsetPåAndel(null, 2L)
-                )
+                ),
+                fagsakId = fagsak.id
             )
 
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
@@ -123,18 +126,20 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     fun `Skal kun plukke revurdering når periode på førstegangsbehandling blir erstattet`() {
         val forelderIdent = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
         opprettOgLagreBehandlingMedAndeler(
             personIdent = forelderIdent,
             kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
-            medStatus = BehandlingStatus.AVSLUTTET
+            medStatus = BehandlingStatus.AVSLUTTET,
+            fagsakId = fagsak.id
         )
         val revurdering =
             opprettOgLagreRevurderingMedAndeler(
                 personIdent = forelderIdent,
-                kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L))
+                kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L)),
+                fagsakId = fagsak.id
             )
 
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
@@ -152,18 +157,20 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     fun `Skal ikke plukke noe ved opphør`() {
         val forelderIdent = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
 
         opprettOgLagreBehandlingMedAndeler(
             personIdent = forelderIdent,
             kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
-            medStatus = BehandlingStatus.AVSLUTTET
+            medStatus = BehandlingStatus.AVSLUTTET,
+            fagsakId = fagsak.id
         )
         opprettOgLagreRevurderingMedAndeler(
             personIdent = forelderIdent,
-            kildeOgOffsetPåAndeler = emptyList()
+            kildeOgOffsetPåAndeler = emptyList(),
+            fagsakId = fagsak.id
         )
 
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
@@ -179,20 +186,22 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     fun `Skal ikke plukke behandling som ikke er iverksatt`() {
         val forelderIdent = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
         val iverksattBehandling =
             opprettOgLagreBehandlingMedAndeler(
                 personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
-                medStatus = BehandlingStatus.AVSLUTTET
+                medStatus = BehandlingStatus.AVSLUTTET,
+                fagsakId = fagsak.id
             )
 
         opprettOgLagreRevurderingMedAndeler(
             personIdent = forelderIdent,
             kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L)),
-            erIverksatt = false
+            erIverksatt = false,
+            fagsakId = fagsak.id
         )
 
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
@@ -209,9 +218,11 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         personIdent: String,
         kildeOgOffsetPåAndeler: List<KildeOgOffsetPåAndel> = emptyList(),
         erIverksatt: Boolean = true,
-        medStatus: BehandlingStatus = BehandlingStatus.UTREDES
+        medStatus: BehandlingStatus = BehandlingStatus.UTREDES,
+        fagsakId: Long
     ): Behandling {
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
+        val behandling =
+            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = personIdent, fagsakId = fagsakId))
         behandling.status = medStatus
         behandlingRepository.save(behandling)
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
@@ -234,9 +245,11 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     private fun opprettOgLagreRevurderingMedAndeler(
         personIdent: String,
         kildeOgOffsetPåAndeler: List<KildeOgOffsetPåAndel> = emptyList(),
-        erIverksatt: Boolean = true
+        erIverksatt: Boolean = true,
+        fagsakId: Long
     ): Behandling {
-        val behandling = behandlingService.opprettBehandling(nyRevurdering(personIdent))
+        val behandling =
+            behandlingService.opprettBehandling(nyRevurdering(søkersIdent = personIdent, fagsakId = fagsakId))
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
         tilkjentYtelseRepository.save(tilkjentYtelse)
         val personFnr = randomFnr()

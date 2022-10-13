@@ -126,7 +126,7 @@ class StegServiceTest(
     @Test
     fun `Skal kjøre gjennom alle steg med datageneratoren`() {
         val søkerFnr = randomFnr()
-        kjørStegprosessForFGB(
+        val behandling = kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(ClientMocks.barnFnr[0]),
@@ -144,7 +144,8 @@ class StegServiceTest(
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(ClientMocks.barnFnr[0]),
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            fagsakId = behandling.fagsak.id
         )
     }
 
@@ -320,7 +321,7 @@ class StegServiceTest(
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
@@ -329,7 +330,8 @@ class StegServiceTest(
                 behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
-                nyMigreringsdato = nyMigreringsdato
+                nyMigreringsdato = nyMigreringsdato,
+                fagsakId = fagsak.id
             )
         )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
@@ -390,7 +392,7 @@ class StegServiceTest(
         val barnFnr = ClientMocks.barnFnr[0]
         val barnasIdenter = listOf(barnFnr)
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val migreringsdato = LocalDate.now().minusMonths(6)
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
@@ -400,7 +402,8 @@ class StegServiceTest(
                 behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
-                nyMigreringsdato = migreringsdato
+                nyMigreringsdato = migreringsdato,
+                fagsakId = fagsak.id
             )
         )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)

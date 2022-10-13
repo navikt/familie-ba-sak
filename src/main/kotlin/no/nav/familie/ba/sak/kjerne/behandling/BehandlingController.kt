@@ -148,7 +148,8 @@ data class NyBehandling(
     val barnasIdenter: List<String> = emptyList(),
     val nyMigreringsdato: LocalDate? = null,
     val søknadMottattDato: LocalDate? = null,
-    val fagsakType: FagsakType = FagsakType.NORMAL
+    val fagsakType: FagsakType = FagsakType.NORMAL,
+    val fagsakId: Long
 ) {
 
     init { // Initiell validering på request

@@ -144,6 +144,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 any(),
                 any(),
+                any(),
                 any()
             )
         }
@@ -171,6 +172,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
 
         verify(exactly = 0) {
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+                any(),
                 any(),
                 any(),
                 any()

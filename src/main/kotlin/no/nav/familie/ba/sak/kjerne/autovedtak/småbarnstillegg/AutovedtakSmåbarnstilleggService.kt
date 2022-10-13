@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstille
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -29,6 +30,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.lang.RuntimeException
 
 @Service
 class AutovedtakSmåbarnstilleggService(
@@ -88,11 +90,14 @@ class AutovedtakSmåbarnstilleggService(
     @Transactional
     override fun kjørBehandling(aktør: Aktør): String {
         antallVedtakOmOvergangsstønad.increment()
+        val fagsak = fagsakService.hent(aktør, FagsakType.NORMAL)
+            ?: throw RuntimeException("Skal ikke kunne skje. Sjekk på om fagsak eksisterer er gjort tidligare i call-stacken")
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = aktør,
                 behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
+                behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
+                fagsakId = fagsak.id
             )
 
         if (behandlingEtterBehandlingsresultat.status != BehandlingStatus.IVERKSETTER_VEDTAK) {

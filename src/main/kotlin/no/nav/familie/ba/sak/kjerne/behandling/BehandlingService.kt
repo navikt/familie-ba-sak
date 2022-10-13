@@ -66,13 +66,10 @@ class BehandlingService(
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
-        val søkersAktør = personidentService.hentAktør(nyBehandling.søkersIdent)
-
-        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør, nyBehandling.fagsakType)
-            ?: throw FunksjonellFeil(
-                melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
-                frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak"
-            )
+        val fagsak = fagsakRepository.finnFagsak(nyBehandling.fagsakId) ?: throw FunksjonellFeil(
+            melding = "Kan ikke lage behandling på person. Fann ikke fagsak ${nyBehandling.fagsakId}",
+            frontendFeilmelding = "Kan ikke lage behandling på person. Fann ikke fagsak ${nyBehandling.fagsakId}"
+        )
 
         val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)
         val sisteBehandlingSomErVedtatt =

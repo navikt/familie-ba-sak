@@ -87,7 +87,14 @@ class BehandlingServiceTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val error = assertThrows<Feil> { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyOrdinærBehandling(fnr)) }
+        val error = assertThrows<Feil> {
+            stegService.håndterNyBehandlingOgSendInfotrygdFeed(
+                nyOrdinærBehandling(
+                    søkersIdent = fnr,
+                    fagsakId = fagsak.id
+                )
+            )
+        }
 
         assertEquals(feilmelding, error.message)
 

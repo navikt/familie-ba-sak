@@ -143,10 +143,11 @@ class EndretUtbetalingAndelTest(
 
         val søkersIdent = scenario.søker.ident!!
 
-        familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
+        val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(
             søkersIdent = søkersIdent,
-            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+            fagsakId = fagsak.data!!.id
         )
 
         val behandling = behandlingHentOgPersisterService.hent(restFagsakMedBehandling.data!!.behandlingId)
