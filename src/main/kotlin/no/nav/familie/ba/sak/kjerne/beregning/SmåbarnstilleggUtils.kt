@@ -51,15 +51,18 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
 ): Boolean {
-    val (forrigeSøkersSmåbarnstilleggAndeler, forrigeSøkersAndreAndeler) = forrigeAndelerTilkjentYtelse.partition { it.erSmåbarnstillegg() }
+    val (forrigeSmåbarnstilleggAndeler, forrigeAndelerIkkeSmåbarnstillegg) = forrigeAndelerTilkjentYtelse.partition { it.erSmåbarnstillegg() }
 
-    val nyeSmåbarnstilleggAndeler = småbarnstilleggBarnetrygdGenerator.lagSmåbarnstilleggAndelerGammel(
+    val (forrigeUtvidetAndeler, forrigeBarnasAndeler) = forrigeAndelerIkkeSmåbarnstillegg.partition { it.erUtvidet() }
+
+    val nyeSmåbarnstilleggAndeler = småbarnstilleggBarnetrygdGenerator.lagSmåbarnstilleggAndeler(
         perioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
-        andelerTilkjentYtelse = forrigeSøkersAndreAndeler,
+        barnasAndeler = forrigeBarnasAndeler,
+        utvidetAndeler = forrigeUtvidetAndeler,
         barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer
     )
 
-    return forrigeSøkersSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)
+    return forrigeSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)
 }
 
 fun hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
