@@ -255,6 +255,10 @@ interface FlettefelterForDokument {
     val navn: Flettefelt
     val fodselsnummer: Flettefelt
     val brevOpprettetDato: Flettefelt
+    val organisasjonsnummer: Flettefelt
+        get() = null
+    val gjelder: Flettefelt
+        get() = null
 }
 
 data class FlettefelterForDokumentImpl(
