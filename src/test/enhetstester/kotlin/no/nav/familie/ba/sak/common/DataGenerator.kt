@@ -659,7 +659,6 @@ fun kjørStegprosessForFGB(
             søkersIdent = søkerFnr,
             barnasIdenter = barnasIdenter,
             søknadMottattDato = LocalDate.now(),
-            fagsakType = fagsakType,
             fagsakId = fagsak.id
         )
     )

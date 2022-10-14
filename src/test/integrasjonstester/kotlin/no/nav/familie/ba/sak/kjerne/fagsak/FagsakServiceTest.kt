@@ -177,7 +177,7 @@ class FagsakServiceTest(
                 søkersIdent = søker1Fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 søknadMottattDato = LocalDate.now(),
-                fagsakId = fagsak1.data!!.id
+                fagsakId = fagsak0.data!!.id
             )
         )
         stegService.håndterPersongrunnlag(
@@ -194,7 +194,7 @@ class FagsakServiceTest(
                 søkersIdent = søker1Fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 søknadMottattDato = LocalDate.now(),
-                fagsakId = fagsak1.data!!.id
+                fagsakId = fagsak0.data!!.id
             )
         )
         stegService.håndterPersongrunnlag(

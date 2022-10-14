@@ -136,7 +136,6 @@ class InnkommendeJournalføringService(
                 behandlingÅrsak = årsak,
                 navIdent = navIdent,
                 søknadMottattDato = søknadMottattDato,
-                fagsakType = fagsakType,
                 fagsakId = fagsak.id
             )
         )

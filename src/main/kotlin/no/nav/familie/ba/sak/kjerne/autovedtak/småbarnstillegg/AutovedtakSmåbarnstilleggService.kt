@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -30,7 +31,6 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.lang.RuntimeException
 
 @Service
 class AutovedtakSmåbarnstilleggService(
@@ -91,7 +91,7 @@ class AutovedtakSmåbarnstilleggService(
     override fun kjørBehandling(aktør: Aktør): String {
         antallVedtakOmOvergangsstønad.increment()
         val fagsak = fagsakService.hent(aktør, FagsakType.NORMAL)
-            ?: throw RuntimeException("Skal ikke kunne skje. Sjekk på om fagsak eksisterer er gjort tidligare i call-stacken")
+            ?: throw Feil(message = "Fant ikke fagsak av typen NORMAL for aktør ${aktør.aktørId}")
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = aktør,
