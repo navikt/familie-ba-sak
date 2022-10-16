@@ -55,8 +55,6 @@ spec:
           cluster: dev-gcp
         - application: familie-ba-sak-frontend-lokal
           cluster: dev-gcp
-        - application: familie-ba-mottak
-          cluster: dev-fss
         - application: familie-baks-mottak
           cluster: dev-gcp
         - application: familie-prosessering

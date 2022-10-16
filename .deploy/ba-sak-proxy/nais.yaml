@@ -67,7 +67,6 @@ spec:
         - application: familie-ba-sak-frontend
         - application: familie-ba-sak-frontend
           cluster: dev-gcp
-        - application: familie-ba-mottak
         - application: familie-prosessering
           cluster: dev-gcp
         - application: familie-ba-skatteetaten-api
