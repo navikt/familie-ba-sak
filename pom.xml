@@ -26,7 +26,7 @@
         <prosessering.version>1.20220624132237_7f5ba9c</prosessering.version>
         <felles.version>1.20221006150009_46021ed</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20220609214258_f30c3ce</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>2.0_20220928092558_a8a42e4</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20221012140422_b9336ff</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20220923123433_db565d1</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
@@ -59,6 +59,37 @@
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>no.nav.familie.felles</groupId>
+                <artifactId>felles</artifactId>
+                <version>${felles.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-bom</artifactId>
+                <version>${kotlin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.sentry</groupId>
+                <artifactId>sentry-bom</artifactId>
+                <version>${sentry.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -157,13 +188,11 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-spring-boot-starter</artifactId>
-            <version>${sentry.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-logback</artifactId>
-            <version>${sentry.version}</version>
         </dependency>
 
         <!-- swagger -->
@@ -217,7 +246,6 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>sikkerhet</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie</groupId>
@@ -227,33 +255,27 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>log</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>leader</artifactId>
-            <version>${felles.version}</version>
         </dependency>
 
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>http-client</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>modell</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>util</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>valutakurs-klient</artifactId>
-            <version>${felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.kontrakter</groupId>

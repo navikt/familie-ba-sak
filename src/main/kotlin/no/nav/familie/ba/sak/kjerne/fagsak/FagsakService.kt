@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVisningBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
@@ -59,7 +60,8 @@ class FagsakService(
     private val skyggesakService: SkyggesakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
-    private val institusjonService: InstitusjonService
+    private val institusjonService: InstitusjonService,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     private val antallFagsakerOpprettetFraManuell =
@@ -182,8 +184,11 @@ class FagsakService(
         }
     }
 
-    fun hentMinimalFagsakerForPerson(aktør: Aktør): Ressurs<List<RestMinimalFagsak>> {
-        val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør)
+    fun hentMinimalFagsakerForPerson(
+        aktør: Aktør,
+        fagsakTyper: List<FagsakType> = FagsakType.values().toList()
+    ): Ressurs<List<RestMinimalFagsak>> {
+        val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).filter { fagsakTyper.contains(it.type) }
         return if (!fagsaker.isEmpty()) {
             Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
         } else {
@@ -264,7 +269,8 @@ class FagsakService(
             institusjon = fagsak.institusjon?.let {
                 InstitusjonInfo(
                     orgNummer = it.orgNummer,
-                    tssEksternId = it.tssEksternId
+                    tssEksternId = it.tssEksternId,
+                    navn = organisasjonService.hentOrganisasjon(it.orgNummer).navn
                 )
             }
         )
