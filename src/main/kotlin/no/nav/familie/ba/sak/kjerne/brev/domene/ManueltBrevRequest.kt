@@ -72,7 +72,7 @@ fun ManueltBrevRequest.byggMottakerdata(
             ?: error("Fant flere eller ingen personer med angitt personident på behandling $behandling")
     }
     val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).run {
-        Enhet(behandlendeEnhetNavn, behandlendeEnhetId)
+        Enhet(enhetId = behandlendeEnhetId, enhetNavn = behandlendeEnhetNavn)
     }
     return when {
         erTilInstitusjon ->
