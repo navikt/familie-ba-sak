@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
@@ -264,11 +266,16 @@ class BeregningService(
             } ?: emptyList()
     }
 
-    fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
+    fun hentSisteOffsetPerIdent(
+        fagsakId: Long,
+        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory
+    ): Map<String, Int> {
         val alleAndelerTilkjentYtelserIverksattMotØkonomi =
             hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
                 .flatMap { it.andelerTilkjentYtelse }
                 .filter { it.erAndelSomSkalSendesTilOppdrag() }
+                .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
+
         val alleTideligereKjederIverksattMotØkonomi =
             ØkonomiUtils.kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
 

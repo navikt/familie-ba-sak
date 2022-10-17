@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -38,11 +39,17 @@ class UtbetalingsoppdragService(
 
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
         vedtak: Vedtak,
-        saksbehandlerId: String
+        saksbehandlerId: String,
+        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory
     ): TilkjentYtelse {
         val oppdatertBehandling = vedtak.behandling
-        val tilkjentYtelse = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
-        val utbetalingsoppdrag = objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
+        val tilkjentYtelse = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            vedtak,
+            saksbehandlerId,
+            andelTilkjentYtelseForUtbetalingsoppdragFactory
+        )
+        val utbetalingsoppdrag =
+            objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
 
         // lagre tilkjent ytelse
         val oppdatertTilkjentYtelse = beregningService.populerTilkjentYtelse(oppdatertBehandling, utbetalingsoppdrag)
@@ -81,6 +88,7 @@ class UtbetalingsoppdragService(
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
         vedtak: Vedtak,
         saksbehandlerId: String,
+        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
         erSimulering: Boolean = false
     ): TilkjentYtelse {
         val behandlingId = vedtak.behandling.id
@@ -90,12 +98,16 @@ class UtbetalingsoppdragService(
         // Henter tilkjentYtelse som har utbetalingsoppdrag og var sendt til oppdrag fra forrige iverksatt behandling
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
         val forrigeTilkjentYtelse = forrigeBehandling?.let { beregningService.hentTilkjentYtelseForBehandling(it.id) }
-        val forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.erAndelSomSkalSendesTilOppdrag() }
+        val forrigeAndeler =
+            forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.erAndelSomSkalSendesTilOppdrag() }
 
         val endretMigreringsdato =
             beregnOmMigreringsDatoErEndret(behandling, forrigeAndeler?.minByOrNull { it.stønadFom }?.stønadFom)
 
-        val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(behandling.fagsak.id)
+        val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(
+            behandling.fagsak.id,
+            andelTilkjentYtelseForUtbetalingsoppdragFactory
+        )
         val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling)
 
         val vedtakMedTilkjentYtelse = VedtakMedTilkjentYtelse(
@@ -110,7 +122,8 @@ class UtbetalingsoppdragService(
 
         return utbetalingsoppdragGenerator.lagTilkjentYtelseMedUtbetalingsoppdrag(
             vedtakMedTilkjentYtelse = vedtakMedTilkjentYtelse,
-            forrigeTilkjentYtelse = forrigeTilkjentYtelse
+            forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+            andelTilkjentYtelseForUtbetalingsoppdragFactory = andelTilkjentYtelseForUtbetalingsoppdragFactory
         )
     }
 
