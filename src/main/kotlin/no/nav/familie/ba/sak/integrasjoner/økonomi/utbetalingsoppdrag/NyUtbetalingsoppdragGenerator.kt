@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
+import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.valider
 import no.nav.familie.ba.sak.integrasjoner.økonomi.validerOpphørsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
@@ -13,7 +16,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståend
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -37,6 +39,7 @@ class NyUtbetalingsoppdragGenerator {
      */
     internal fun lagTilkjentYtelseMedUtbetalingsoppdrag(
         vedtakMedTilkjentYtelse: VedtakMedTilkjentYtelse,
+        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
         forrigeTilkjentYtelse: TilkjentYtelse? = null
     ): TilkjentYtelse {
         val tilkjentYtelse = vedtakMedTilkjentYtelse.tilkjentYtelse
@@ -44,16 +47,22 @@ class NyUtbetalingsoppdragGenerator {
         val erFørsteBehandlingPåFagsak = forrigeTilkjentYtelse == null
         // Filtrer kun andeler som kan sendes til oppdrag
         val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
+            .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
         // grupperer andeler basert på personIdent.
         // Markerte Småbarnstilegg med spesielt suffix SMÅBARNSTILLEGG_SUFFIX
-        val oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = kjedeinndelteAndeler(andelerTilkjentYtelse)
+        val oppdaterteKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
+            kjedeinndelteAndeler(andelerTilkjentYtelse)
 
         // grupperer forrige andeler basert på personIdent.
         // Markerte Småbarnstilegg med spesielt suffix SMÅBARNSTILLEGG_SUFFIX
-        val forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.erAndelSomSkalSendesTilOppdrag() }
-            ?: emptyList()
-        val forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = kjedeinndelteAndeler(forrigeAndeler)
+        val forrigeAndeler =
+            forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.erAndelSomSkalSendesTilOppdrag() }
+                ?.pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
+                ?: emptyList()
+
+        val forrigeKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
+            kjedeinndelteAndeler(forrigeAndeler)
 
         val erEndretMigreringsDato = vedtakMedTilkjentYtelse.endretMigreringsdato != null
         // Generer et komplett nytt eller bare endringer på et eksisterende betalingsoppdrag.
@@ -68,7 +77,7 @@ class NyUtbetalingsoppdragGenerator {
         }
 
         // Finner ut andeler som er opprettet
-        val andelerTilOpprettelse: List<List<AndelTilkjentYtelse>> =
+        val andelerTilOpprettelse: List<List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
         // Setter offsettet til andeler som ikke er endret i denne behandlingen til
@@ -142,7 +151,7 @@ class NyUtbetalingsoppdragGenerator {
     }
 
     private fun lagUtbetalingsperioderForOpphør(
-        andeler: List<Pair<AndelTilkjentYtelse, YearMonth>>,
+        andeler: List<Pair<AndelTilkjentYtelseForUtbetalingsoppdrag, YearMonth>>,
         vedtak: Vedtak
     ): List<Utbetalingsperiode> =
         andeler.map { (sisteAndelIKjede, opphørKjedeFom) ->
@@ -158,12 +167,12 @@ class NyUtbetalingsoppdragGenerator {
         }
 
     private fun lagUtbetalingsperioderForOpprettelse(
-        andeler: List<List<AndelTilkjentYtelse>>,
+        andeler: List<List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
         sisteOffsetIKjedeOversikt: Map<String, Int>,
         sisteOffsetPåFagsak: Int? = null
-    ): Pair<List<AndelTilkjentYtelse>, List<Utbetalingsperiode>> {
+    ): Pair<List<AndelTilkjentYtelseForUtbetalingsoppdrag>, List<Utbetalingsperiode>> {
         var offset = if (!erFørsteBehandlingPåFagsak) {
             sisteOffsetPåFagsak?.plus(1)
                 ?: throw IllegalStateException("Skal finnes offset når ikke første behandling på fagsak")
@@ -172,7 +181,7 @@ class NyUtbetalingsoppdragGenerator {
         }
 
         val utbetalingsperiode = andeler.filter { kjede -> kjede.isNotEmpty() }
-            .flatMap { kjede: List<AndelTilkjentYtelse> ->
+            .flatMap { kjede: List<AndelTilkjentYtelseForUtbetalingsoppdrag> ->
                 val ident = kjede.first().aktør.aktivFødselsnummer()
                 val ytelseType = kjede.first().type
                 var forrigeOffsetIKjede: Int? = null

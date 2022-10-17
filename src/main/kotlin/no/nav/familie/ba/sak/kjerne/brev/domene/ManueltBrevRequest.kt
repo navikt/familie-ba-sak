@@ -34,6 +34,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import java.time.LocalDate
 
+interface Person {
+    val navn: String
+    val fødselsnummer: String
+}
+
 data class ManueltBrevRequest(
     val brevmal: Brevmal,
     val multiselectVerdier: List<String> = emptyList(),
@@ -46,7 +51,8 @@ data class ManueltBrevRequest(
     val enhet: Enhet? = null,
     val antallUkerSvarfrist: Int? = null,
     val barnasFødselsdager: List<LocalDate>? = null,
-    val behandlingKategori: BehandlingKategori? = null
+    val behandlingKategori: BehandlingKategori? = null,
+    val vedrørende: Person? = null
 ) {
 
     override fun toString(): String {
@@ -61,22 +67,30 @@ fun ManueltBrevRequest.byggMottakerdata(
     persongrunnlagService: PersongrunnlagService,
     arbeidsfordelingService: ArbeidsfordelingService
 ): ManueltBrevRequest {
-    val mottakerPerson = if (!erTilInstitusjon) {
-        persongrunnlagService.hentPersonerPåBehandling(listOf(this.mottakerIdent), behandling).singleOrNull()
-            ?: error("Fant en eller ingen mottakere på behandling")
-    } else {
-        null
+    val hentPerson = { ident: String ->
+        persongrunnlagService.hentPersonerPåBehandling(listOf(ident), behandling).singleOrNull()
+            ?: error("Fant flere eller ingen personer med angitt personident på behandling $behandling")
     }
-
-    val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id)
-    return this.copy(
-        enhet = Enhet(
-            enhetNavn = arbeidsfordelingPåBehandling.behandlendeEnhetNavn,
-            enhetId = arbeidsfordelingPåBehandling.behandlendeEnhetId
-        ),
-        mottakerMålform = mottakerPerson?.målform ?: mottakerMålform,
-        mottakerNavn = mottakerPerson?.navn ?: mottakerNavn
-    )
+    val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).run {
+        Enhet(enhetId = behandlendeEnhetId, enhetNavn = behandlendeEnhetNavn)
+    }
+    return when {
+        erTilInstitusjon ->
+            this.copy(
+                enhet = enhet,
+                vedrørende = object : Person {
+                    override val fødselsnummer = behandling.fagsak.aktør.aktivFødselsnummer()
+                    override val navn = hentPerson(fødselsnummer).navn
+                }
+            )
+        else -> hentPerson(mottakerIdent).let { mottakerPerson ->
+            this.copy(
+                enhet = enhet,
+                mottakerMålform = mottakerPerson.målform,
+                mottakerNavn = mottakerPerson.navn
+            )
+        }
+    }
 }
 
 fun ManueltBrevRequest.leggTilEnhet(arbeidsfordelingService: ArbeidsfordelingService): ManueltBrevRequest {
@@ -116,7 +130,9 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 delmalData = InnhenteOpplysningerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
                 flettefelter = InnhenteOpplysningerData.Flettefelter(
                     navn = this.mottakerNavn,
-                    fodselsnummer = this.mottakerIdent,
+                    fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                    organisasjonsnummer = if (erTilInstitusjon) mottakerIdent else null,
+                    gjelder = this.vedrørende?.navn,
                     dokumentliste = this.multiselectVerdier
                 )
             )

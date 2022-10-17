@@ -10,6 +10,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
@@ -55,23 +56,6 @@ internal class UtbetalingsoppdragServiceTest {
         every {
             service.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 any(),
-                any()
-            )
-        } returns lagTilkjentYtelse(utbetalingsoppdrag)
-        val vedtak = mockk<Vedtak> {
-            every { behandling } returns mockk {
-                every { id } returns 1L
-            }
-        }
-        service.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak, "")
-        verify { økonomiKlient wasNot Called }
-    }
-
-    @Test
-    fun `skal sende til oppdrag hvis det fins utbetalingsperioder`() {
-        val utbetalingsoppdrag = lagUtbetalingsoppdrag(listOf(lagUtbetalingsperiode()))
-        every {
-            service.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 any(),
                 any()
             )
@@ -81,7 +65,34 @@ internal class UtbetalingsoppdragServiceTest {
                 every { id } returns 1L
             }
         }
-        service.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak, "")
+        service.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+            vedtak,
+            "",
+            AndelTilkjentYtelseForIverksettingFactory()
+        )
+        verify { økonomiKlient wasNot Called }
+    }
+
+    @Test
+    fun `skal sende til oppdrag hvis det fins utbetalingsperioder`() {
+        val utbetalingsoppdrag = lagUtbetalingsoppdrag(listOf(lagUtbetalingsperiode()))
+        every {
+            service.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                any(),
+                any(),
+                any()
+            )
+        } returns lagTilkjentYtelse(utbetalingsoppdrag)
+        val vedtak = mockk<Vedtak> {
+            every { behandling } returns mockk {
+                every { id } returns 1L
+            }
+        }
+        service.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+            vedtak,
+            "",
+            AndelTilkjentYtelseForIverksettingFactory()
+        )
         verify { økonomiKlient.iverksettOppdrag(utbetalingsoppdrag) }
     }
 

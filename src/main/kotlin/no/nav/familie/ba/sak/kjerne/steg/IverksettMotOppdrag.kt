@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -64,13 +65,15 @@ class IverksettMotOppdrag(
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
             val tilkjentYtelse = utbetalingsoppdragService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
                 vedtak = vedtakService.hent(data.vedtaksId),
-                saksbehandlerId = data.saksbehandlerId
+                saksbehandlerId = data.saksbehandlerId,
+                andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory()
             )
             secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på ny måte=${tilkjentYtelse.utbetalingsoppdrag}")
         } else {
             val utbetalingsoppdrag = økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
                 vedtak = vedtakService.hent(data.vedtaksId),
-                saksbehandlerId = data.saksbehandlerId
+                saksbehandlerId = data.saksbehandlerId,
+                andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory()
             )
             val gammelUtbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
             secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på gamle måte=$gammelUtbetalingsoppdrag")

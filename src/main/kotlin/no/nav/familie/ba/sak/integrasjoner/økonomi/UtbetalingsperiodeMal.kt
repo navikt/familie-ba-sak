@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -37,7 +36,7 @@ data class UtbetalingsperiodeMal(
      * @return Periode til utbetalingsoppdrag
      */
     fun lagPeriodeFraAndel(
-        andel: AndelTilkjentYtelse,
+        andel: AndelTilkjentYtelseForUtbetalingsoppdrag,
         periodeIdOffset: Int,
         forrigePeriodeIdOffset: Int?,
         opphørKjedeFom: YearMonth? = null

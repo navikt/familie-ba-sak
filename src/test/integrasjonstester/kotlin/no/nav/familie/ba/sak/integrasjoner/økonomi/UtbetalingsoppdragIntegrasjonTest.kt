@@ -118,7 +118,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerTilkjentYtelse
+                    andelerTilkjentYtelse.forIverksetting()
                 )
             )
 
@@ -203,11 +203,11 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak = vedtak,
                 erFørsteBehandlingPåFagsak = false,
                 forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerTilkjentYtelse
+                    andelerTilkjentYtelse.forIverksetting()
                 ),
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerTilkjentYtelse
+                        andelerTilkjentYtelse.forIverksetting()
                     )
                 )
             )
@@ -295,7 +295,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                andelerFørstegangsbehandling
+                andelerFørstegangsbehandling.forIverksetting()
             )
         )
 
@@ -346,16 +346,16 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak2,
                 false,
                 forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerFørstegangsbehandling
+                    andelerFørstegangsbehandling.forIverksetting()
                 ),
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling
+                        andelerFørstegangsbehandling.forIverksetting()
                     )
                 ),
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerRevurdering
+                    andelerRevurdering.forIverksetting()
                 )
             )
 
@@ -443,7 +443,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                andelerFørstegangsbehandling
+                andelerFørstegangsbehandling.forIverksetting()
             )
         )
 
@@ -485,16 +485,16 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak2,
                 false,
                 forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerFørstegangsbehandling
+                    andelerFørstegangsbehandling.forIverksetting()
                 ),
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling
+                        andelerFørstegangsbehandling.forIverksetting()
                     )
                 ),
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerRevurdering
+                    andelerRevurdering.forIverksetting()
                 )
             )
 
@@ -572,7 +572,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                andelerTilkjentYtelse
+                andelerTilkjentYtelse.forIverksetting()
             )
         )
 
@@ -624,7 +624,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerTilkjentYtelse
+                    andelerTilkjentYtelse.forIverksetting()
                 )
             )
         }
@@ -687,7 +687,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                andelerFørstegangsbehandling
+                andelerFørstegangsbehandling.forIverksetting()
             )
         )
 
@@ -738,16 +738,16 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak2,
                 false,
                 forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerFørstegangsbehandling
+                    andelerFørstegangsbehandling.forIverksetting()
                 ),
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling
+                        andelerFørstegangsbehandling.forIverksetting()
                     )
                 ),
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerRevurdering
+                    andelerRevurdering.forIverksetting()
                 ),
                 erSimulering = true
             )
@@ -856,7 +856,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                andelerFørstegangsbehandling
+                andelerFørstegangsbehandling.forIverksetting()
             )
         )
 
@@ -908,16 +908,16 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak2,
                 false,
                 forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerFørstegangsbehandling
+                    andelerFørstegangsbehandling.forIverksetting()
                 ),
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling
+                        andelerFørstegangsbehandling.forIverksetting()
                     )
                 ),
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerRevurdering
+                    andelerRevurdering.forIverksetting()
                 ),
                 erSimulering = true
             )
@@ -1043,15 +1043,15 @@ class UtbetalingsoppdragIntegrasjonTest(
             false,
             sisteOffsetPåFagsak = 1,
             forrigeKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                andelerAndregangsbehandling
+                andelerAndregangsbehandling.forIverksetting()
             ),
             sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                 ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerFørstegangsbehandling + andelerAndregangsbehandling
+                    (andelerFørstegangsbehandling + andelerAndregangsbehandling).forIverksetting()
                 )
             ),
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                andelerRevurderingsbehandling
+                andelerRevurderingsbehandling.forIverksetting()
             )
         )
 
@@ -1093,7 +1093,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                andelerFørstegangsbehandling
+                andelerFørstegangsbehandling.forIverksetting()
             )
         )
 
@@ -1115,7 +1115,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             false,
             oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                andelerRevurdering
+                andelerRevurdering.forIverksetting()
             )
         )
 
@@ -1177,7 +1177,11 @@ class UtbetalingsoppdragIntegrasjonTest(
         førsteTilkjentYtelse.utbetalingsoppdrag = "utbetalingsoppdrg"
         tilkjentYtelseRepository.saveAndFlush(førsteTilkjentYtelse)
 
-        økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(førsteVedtak, "Z123")
+        økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            førsteVedtak,
+            "Z123",
+            AndelTilkjentYtelseForIverksettingFactory()
+        )
         førsteBehandling.status = BehandlingStatus.AVSLUTTET
         førsteBehandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
         behandlingService.lagre(førsteBehandling)
@@ -1216,7 +1220,11 @@ class UtbetalingsoppdragIntegrasjonTest(
         andreTilkjentYtelse.andelerTilkjentYtelse.addAll(andreAndelerTilkjentYtelse)
         tilkjentYtelseRepository.saveAndFlush(andreTilkjentYtelse)
 
-        val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(andreVedtak, "Z123")
+        val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            andreVedtak,
+            "Z123",
+            AndelTilkjentYtelseForIverksettingFactory()
+        )
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
         assertEquals(true, utbetalingsoppdrag.utbetalingsperiode.first().erEndringPåEksisterendePeriode)
@@ -1259,7 +1267,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.kjedeinndelteAndeler(
-                    andelerTilkjentYtelse
+                    andelerTilkjentYtelse.forIverksetting()
                 )
             )
 

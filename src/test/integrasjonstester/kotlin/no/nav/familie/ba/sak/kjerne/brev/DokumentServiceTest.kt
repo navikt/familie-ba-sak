@@ -330,6 +330,8 @@ class DokumentServiceTest(
         io.mockk.verify(exactly = 1) {
             integrasjonClient.journalførDokument(match { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" })
         }
+        assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
+        assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
     }
 
     fun lagTestPersonopplysningGrunnlagForInstitusjon(
@@ -364,7 +366,7 @@ class DokumentServiceTest(
                     type = PersonType.BARN,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fødselsdato = barnasFødselsdatoer[index],
-                    navn = "",
+                    navn = "institusjonsbarnets navn",
                     kjønn = Kjønn.MANN
                 ).also { barn ->
                     barn.statsborgerskap = mutableListOf(

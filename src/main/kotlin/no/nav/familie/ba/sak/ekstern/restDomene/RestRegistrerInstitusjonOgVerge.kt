@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.verge.Verge
 
 data class VergeInfo(val ident: String)
 
-data class InstitusjonInfo(val orgNummer: String?, val tssEksternId: String?)
+data class InstitusjonInfo(val orgNummer: String?, val tssEksternId: String?, val navn: String? = null)
 
 data class RestRegistrerInstitusjonOgVerge(
     val vergeInfo: VergeInfo?,
