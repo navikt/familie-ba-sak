@@ -139,11 +139,11 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosSokerBerOmOpphor"
     },
-    OPPHØR_BOR_IKKE_I_ET_EØS_LAND {
+    OPPHØR_BARN_BOR_IKKE_I_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorBorIkkeIEtEOSland"
     },
-    OPPHØR_BARN_BOR_IKKE_I_EØS_LAND {
+    OPPHØR_IKKE_STATSBORGER_I_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorIkkeStatsborgerIEosLand"
     },
