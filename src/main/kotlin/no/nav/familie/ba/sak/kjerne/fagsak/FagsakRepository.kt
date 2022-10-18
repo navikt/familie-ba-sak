@@ -33,7 +33,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :aktør and f.type = 'INSTITUSJON' and f.status <> 'AVSLUTTET' and f.arkivert = false")
-    fun finnÅpenFagsakForInstitusjon(aktør: Aktør): Fagsak?
+    fun finnÅpneFagsakerForInstitusjon(aktør: Aktør): List<Fagsak>
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :aktør and f.type = 'INSTITUSJON' and f.status <> 'AVSLUTTET' and f.arkivert = false and f.institusjon.orgNummer = :orgNummer")

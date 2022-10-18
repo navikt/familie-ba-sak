@@ -93,7 +93,7 @@ class FagsakControllerTest(
         val fnr = randomFnr()
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
-        val fagsak = fagsakService.hent(tilAktør(fnr))
+        val fagsak = fagsakService.hentNormalFagsak(tilAktør(fnr))
         assertEquals(fnr, fagsak?.aktør?.aktivFødselsnummer())
         assertEquals(FagsakType.NORMAL, fagsak?.type)
         assertNull(fagsak?.institusjon)
@@ -130,7 +130,7 @@ class FagsakControllerTest(
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-        assertEquals(fnr, fagsakService.hent(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
+        assertEquals(fnr, fagsakService.hentNormalFagsak(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
@@ -154,7 +154,7 @@ class FagsakControllerTest(
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-        assertEquals(fnr, fagsakService.hent(aktør)?.aktør?.aktivFødselsnummer())
+        assertEquals(fnr, fagsakService.hentNormalFagsak(aktør)?.aktør?.aktivFødselsnummer())
 
         personidentRepository.save(
             personidentRepository.getById(fnr).also { it.aktiv = false }
@@ -251,8 +251,8 @@ class FagsakControllerTest(
                 )
             )
         }
-        val fagsak = fagsakService.hent(tilAktør(fnr), FagsakType.INSTITUSJON)
-        assertNull(fagsak)
+        val fagsaker = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
+        assert(fagsaker.status == Ressurs.Status.FEILET)
         assertEquals("Mangler påkrevd variabel orgnummer for institusjon", exception.message)
     }
 
@@ -268,13 +268,14 @@ class FagsakControllerTest(
                 institusjon = InstitusjonInfo("orgnr", "tss-id")
             )
         )
-        val fagsak = fagsakService.hent(tilAktør(fnr), FagsakType.INSTITUSJON)
-        assertNotNull(fagsak)
-        assertEquals(fnr, fagsak?.aktør?.aktivFødselsnummer())
-        assertEquals(FagsakType.INSTITUSJON, fagsak?.type)
-        println(fagsak)
-        assertNotNull(fagsak?.institusjon)
-        assertEquals("orgnr", fagsak?.institusjon?.orgNummer)
-        assertEquals("tss-id", fagsak?.institusjon?.tssEksternId)
+        val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
+        assert(fagsakerRessurs.status == Ressurs.Status.SUKSESS)
+        val fagsaker = fagsakerRessurs.data!!
+        assert(fagsaker.isNotEmpty()) { "Fagsak skulle ha blitt opprettet" }
+        assertEquals(fnr, fagsaker[0].søkerFødselsnummer)
+        assertEquals(FagsakType.INSTITUSJON, fagsaker[0].fagsakType)
+        assertNotNull(fagsaker[0].institusjon)
+        assertEquals("orgnr", fagsaker[0].institusjon?.orgNummer)
+        assertEquals("tss-id", fagsaker[0].institusjon?.tssEksternId)
     }
 }

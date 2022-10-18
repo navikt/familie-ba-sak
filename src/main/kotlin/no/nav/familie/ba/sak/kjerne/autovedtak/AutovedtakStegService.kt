@@ -103,7 +103,8 @@ class AutovedtakStegService(
 
         if (håndterÅpenBehandlingOgAvbrytAutovedtak(
                 aktør = mottakersAktør,
-                autovedtaktype = autovedtaktype
+                autovedtaktype = autovedtaktype,
+                fagsakId = hentFagsakIdFraBehandlingsdata(autovedtaktype, behandlingsdata)
             )
         ) {
             secureLoggAutovedtakBehandling(
@@ -135,8 +136,28 @@ class AutovedtakStegService(
         return resultatAvKjøring
     }
 
-    private fun håndterÅpenBehandlingOgAvbrytAutovedtak(aktør: Aktør, autovedtaktype: Autovedtaktype): Boolean {
-        val åpenBehandling = fagsakService.hent(aktør)?.let {
+    private fun <Behandlingsdata> hentFagsakIdFraBehandlingsdata(
+        autovedtaktype: Autovedtaktype,
+        behandlingsdata: Behandlingsdata
+    ): Long? {
+        return if (autovedtaktype == Autovedtaktype.OMREGNING_BREV) {
+            (behandlingsdata as AutovedtakBrevBehandlingsdata).fagsakId
+        } else {
+            null
+        }
+    }
+
+    private fun håndterÅpenBehandlingOgAvbrytAutovedtak(
+        aktør: Aktør,
+        autovedtaktype: Autovedtaktype,
+        fagsakId: Long?
+    ): Boolean {
+        val fagsak = if (fagsakId != null) {
+            fagsakService.hentPåFagsakId(fagsakId)
+        } else {
+            fagsakService.hentNormalFagsak(aktør = aktør)
+        }
+        val åpenBehandling = fagsak?.let {
             behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(it.id)
         }
 
