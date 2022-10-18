@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -67,7 +68,7 @@ class Autobrev6og18ÅrService(
 
         if (!barnIBrytningsalderHarLøpendeYtelse(
                 alder = autobrev6og18ÅrDTO.alder,
-                behandling = behandling,
+                behandlingId = behandling.id,
                 årMåned = autobrev6og18ÅrDTO.årMåned
 
             )
@@ -115,24 +116,32 @@ class Autobrev6og18ÅrService(
 
     private fun barnIBrytningsalderHarLøpendeYtelse(
         alder: Int,
-        behandling: Behandling,
+        behandlingId: Long,
         årMåned: YearMonth
     ): Boolean {
         val barnIBrytningsalder =
-            barnMedAngittAlderInneværendeMåned(behandlingId = behandling.id, alder = alder).map { it.aktør }
+            barnMedAngittAlderInneværendeMåned(behandlingId = behandlingId, alder = alder).map { it.aktør }
 
         if (barnIBrytningsalder.isEmpty()) {
-            throw Feil("Forventer å finne minst et barn i brytningsalder for omregning 6 eller 18 år for behandling=${behandling.id}")
+            throw Feil("Forventer å finne minst et barn i brytningsalder for omregning 6 eller 18 år for behandling=$behandlingId")
         }
 
         val andelerTilBarnIBrytningsalder =
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandling.id
+                behandlingId
             ).filter { it.aktør in barnIBrytningsalder }
 
-        return andelerTilBarnIBrytningsalder.any {
-            it.stønadTom.plusMonths(1) == årMåned || it.stønadTom.plusMonths(1).isAfter(årMåned)
-        }
+        return harBarnIBrytningsalderLøpendeAndeler(alder, andelerTilBarnIBrytningsalder, årMåned)
+    }
+
+    private fun harBarnIBrytningsalderLøpendeAndeler(
+        alder: Int,
+        andelerTilBarnIBrytningsalder: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        årMåned: YearMonth
+    ) = when (alder) {
+        Alder.ATTEN.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned }
+        Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned } && andelerTilBarnIBrytningsalder.any { it.stønadFom == årMåned }
+        else -> throw Feil("Ugyldig alder")
     }
 
     companion object {
