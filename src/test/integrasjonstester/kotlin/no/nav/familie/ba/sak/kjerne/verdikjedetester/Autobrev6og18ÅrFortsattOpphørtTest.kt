@@ -58,7 +58,7 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
         )
 
         val fagsakId = familieBaSakKlient().opprettFagsak(søkersIdent = scenario.søker.ident!!).data?.id!!
-        familieBaSakKlient().opprettBehandling(søkersIdent = scenario.søker.ident)
+        familieBaSakKlient().opprettBehandling(søkersIdent = scenario.søker.ident, fagsakId = fagsakId)
 
         val restFagsakEtterOpprettelse = familieBaSakKlient().hentFagsak(fagsakId = fagsakId)
 

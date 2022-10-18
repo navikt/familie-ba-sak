@@ -45,10 +45,11 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
 
         val søkersIdent = scenario.søker.ident!!
 
-        familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
+        val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restUtvidetBehandling = familieBaSakKlient().opprettBehandling(
             søkersIdent = søkersIdent,
-            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+            fagsakId = fagsak.data!!.id
         ).data!!
 
         val restRegistrerSøknad =

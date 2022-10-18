@@ -126,7 +126,7 @@ class InnkommendeJournalføringService(
         fagsakType: FagsakType = FagsakType.NORMAL,
         institusjon: InstitusjonInfo? = null
     ): Behandling {
-        fagsakService.hentEllerOpprettFagsak(personIdent, type = fagsakType, institusjon = institusjon)
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, type = fagsakType, institusjon = institusjon)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 kategori = kategori,
@@ -136,7 +136,7 @@ class InnkommendeJournalføringService(
                 behandlingÅrsak = årsak,
                 navIdent = navIdent,
                 søknadMottattDato = søknadMottattDato,
-                fagsakType = fagsakType
+                fagsakId = fagsak.id
             )
         )
     }

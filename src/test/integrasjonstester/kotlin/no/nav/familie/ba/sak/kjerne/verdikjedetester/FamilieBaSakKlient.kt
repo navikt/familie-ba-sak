@@ -103,7 +103,8 @@ class FamilieBaSakKlient(
         søkersIdent: String,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-        behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+        behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+        fagsakId: Long
     ): Ressurs<RestUtvidetBehandling> {
         val uri = URI.create("$baSakUrl/api/behandlinger")
 
@@ -115,7 +116,8 @@ class FamilieBaSakKlient(
                 søkersIdent = søkersIdent,
                 behandlingType = behandlingType,
                 behandlingÅrsak = behandlingÅrsak,
-                søknadMottattDato = if (behandlingÅrsak == BehandlingÅrsak.SØKNAD) LocalDate.now() else null
+                søknadMottattDato = if (behandlingÅrsak == BehandlingÅrsak.SØKNAD) LocalDate.now() else null,
+                fagsakId = fagsakId
             ),
             headers
         )
