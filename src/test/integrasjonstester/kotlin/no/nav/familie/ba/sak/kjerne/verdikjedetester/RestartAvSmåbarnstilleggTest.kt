@@ -182,8 +182,9 @@ class RestartAvSmåbarnstilleggTest(
         val restBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
+                behandlingType = behandlingType,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-                behandlingType = behandlingType
+                fagsakId = fagsak.id
             )
         val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
@@ -232,9 +233,10 @@ class RestartAvSmåbarnstilleggTest(
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 behandlingType = behandlingType,
-                behandlingÅrsak = behandlingÅrsak
+                behandlingÅrsak = behandlingÅrsak,
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+                fagsakId = fagsak.id
             )
 
         return fullførRestenAvBehandlingen(
@@ -288,9 +290,10 @@ class RestartAvSmåbarnstilleggTest(
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 behandlingType = behandlingType,
-                behandlingÅrsak = behandlingÅrsak
+                behandlingÅrsak = behandlingÅrsak,
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+                fagsakId = fagsak.id
             )
         return behandlingHentOgPersisterService.hent(restUtvidetBehandling.data!!.behandlingId)
     }

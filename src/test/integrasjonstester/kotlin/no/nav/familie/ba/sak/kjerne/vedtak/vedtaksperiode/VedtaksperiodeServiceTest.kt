@@ -95,7 +95,8 @@ class VedtaksperiodeServiceTest(
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(barnFnr, barn2Fnr),
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            fagsakId = førstegangsbehandling!!.fagsak.id
         )
     }
 

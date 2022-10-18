@@ -146,8 +146,9 @@ class VilkårServiceTest(
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling =
+            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
@@ -310,7 +311,8 @@ class VilkårServiceTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+        val behandling =
+            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
@@ -519,8 +521,9 @@ class VilkårServiceTest(
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling =
+            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 

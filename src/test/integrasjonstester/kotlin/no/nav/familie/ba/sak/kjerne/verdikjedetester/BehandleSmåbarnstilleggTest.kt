@@ -135,7 +135,8 @@ class BehandleSmåbarnstilleggTest(
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restBehandling = familieBaSakKlient().opprettBehandling(
             søkersIdent = søkersIdent,
-            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+            fagsakId = fagsak.data!!.id
         )
 
         val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)

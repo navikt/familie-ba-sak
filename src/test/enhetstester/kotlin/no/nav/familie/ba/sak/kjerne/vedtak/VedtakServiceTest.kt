@@ -147,7 +147,6 @@ class VedtakServiceTest(
             arbeidsfordelingService,
             infotrygdService,
             vedtaksperiodeService,
-            personidentService,
             taskRepository,
             vilkårsvurderingService
         )

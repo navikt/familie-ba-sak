@@ -67,7 +67,8 @@ class AutovedtakSatsendringService(
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = søkerAktør,
                 behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = BehandlingÅrsak.SATSENDRING
+                behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
+                fagsakId = behandling.fagsak.id
             )
 
         val opprettetVedtak =

@@ -52,8 +52,9 @@ class TotrinnskontrollTest(
     fun `Skal godkjenne 2 trinnskontroll`() {
         val fnr = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling =
+            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
         assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
@@ -102,8 +103,9 @@ class TotrinnskontrollTest(
     fun `Skal underkjenne 2 trinnskontroll`() {
         val fnr = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling =
+            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
         assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
