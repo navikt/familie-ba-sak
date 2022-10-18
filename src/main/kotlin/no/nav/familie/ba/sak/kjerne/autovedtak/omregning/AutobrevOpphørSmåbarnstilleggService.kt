@@ -72,7 +72,8 @@ class AutobrevOpphørSmåbarnstilleggService(
             behandlingsdata = AutovedtakBrevBehandlingsdata(
                 aktør = behandling.fagsak.aktør,
                 behandlingsårsak = behandlingsårsak,
-                standardbegrunnelse = standardbegrunnelse
+                standardbegrunnelse = standardbegrunnelse,
+                fagsakId = fagsakId
             )
         )
     }

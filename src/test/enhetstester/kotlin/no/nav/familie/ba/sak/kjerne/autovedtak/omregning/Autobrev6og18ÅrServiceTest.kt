@@ -158,6 +158,7 @@ internal class Autobrev6og18ÅrServiceTest {
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 any(),
                 any(),
+                any(),
                 any()
             )
         }

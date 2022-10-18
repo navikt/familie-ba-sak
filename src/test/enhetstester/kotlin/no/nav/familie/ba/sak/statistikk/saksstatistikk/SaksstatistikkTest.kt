@@ -113,10 +113,11 @@ class SaksstatistikkTest(
     fun `Skal lagre saksstatistikk behandling til repository og sende meldinger`() {
         val fnr = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)
         val behandling = behandlingService.opprettBehandling(
             nyOrdinærBehandling(
-                fnr
+                søkersIdent = fnr,
+                fagsakId = fagsak.id
             )
         )
 

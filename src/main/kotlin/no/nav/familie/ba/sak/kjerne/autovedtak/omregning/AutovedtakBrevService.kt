@@ -27,7 +27,8 @@ import java.time.YearMonth
 data class AutovedtakBrevBehandlingsdata(
     val aktør: Aktør,
     val behandlingsårsak: BehandlingÅrsak,
-    val standardbegrunnelse: Standardbegrunnelse
+    val standardbegrunnelse: Standardbegrunnelse,
+    val fagsakId: Long
 )
 
 @Service
@@ -49,7 +50,8 @@ class AutovedtakBrevService(
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = behandlingsdata.aktør,
                 behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = behandlingsdata.behandlingsårsak
+                behandlingÅrsak = behandlingsdata.behandlingsårsak,
+                fagsakId = behandlingsdata.fagsakId
             )
 
         vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(

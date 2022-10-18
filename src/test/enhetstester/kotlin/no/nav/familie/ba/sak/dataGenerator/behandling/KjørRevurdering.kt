@@ -68,7 +68,7 @@ fun kjørStegprosessForBehandling(
     persongrunnlagService: PersongrunnlagService,
     andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ): Behandling {
-    fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+    val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
 
     val nyBehandling = NyBehandling(
         kategori = BehandlingKategori.NASJONAL,
@@ -77,7 +77,8 @@ fun kjørStegprosessForBehandling(
         behandlingType = behandlingstype,
         behandlingÅrsak = behandlingÅrsak,
         barnasIdenter = barnasIdenter,
-        søknadMottattDato = LocalDate.now()
+        søknadMottattDato = LocalDate.now(),
+        fagsakId = fagsak.id
     )
 
     val behandling = stegService.håndterNyBehandling(nyBehandling)

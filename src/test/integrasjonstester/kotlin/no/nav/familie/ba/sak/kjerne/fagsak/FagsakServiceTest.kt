@@ -176,7 +176,8 @@ class FagsakServiceTest(
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 søkersIdent = søker1Fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                søknadMottattDato = LocalDate.now()
+                søknadMottattDato = LocalDate.now(),
+                fagsakId = fagsak0.data!!.id
             )
         )
         stegService.håndterPersongrunnlag(
@@ -192,7 +193,8 @@ class FagsakServiceTest(
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 søkersIdent = søker1Fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                søknadMottattDato = LocalDate.now()
+                søknadMottattDato = LocalDate.now(),
+                fagsakId = fagsak0.data!!.id
             )
         )
         stegService.håndterPersongrunnlag(
@@ -209,7 +211,8 @@ class FagsakServiceTest(
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 søkersIdent = søker2Fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                søknadMottattDato = LocalDate.now()
+                søknadMottattDato = LocalDate.now(),
+                fagsakId = fagsak1.data!!.id
             )
         )
         stegService.håndterPersongrunnlag(
@@ -263,7 +266,7 @@ class FagsakServiceTest(
             mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
-        fagsakService.hentEllerOpprettFagsak(
+        val fagsak = fagsakService.hentEllerOpprettFagsak(
             FagsakRequest(
                 søker1Fnr
             )
@@ -275,7 +278,8 @@ class FagsakServiceTest(
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 søkersIdent = søker1Fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                søknadMottattDato = LocalDate.now()
+                søknadMottattDato = LocalDate.now(),
+                fagsakId = fagsak.data!!.id
             )
         )
 

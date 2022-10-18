@@ -91,8 +91,13 @@ class PersongrunnlagIntegrationTest(
             kontaktinformasjonForDoedsbo = null
         )
 
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerAktør.aktivFødselsnummer()))
+        val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
+        val behandling = behandlingService.opprettBehandling(
+            nyOrdinærBehandling(
+                søkersIdent = søkerAktør.aktivFødselsnummer(),
+                fagsakId = fagsak.data!!.id
+            )
+        )
 
         val personopplysningGrunnlag = persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = søkerAktør,
@@ -124,7 +129,14 @@ class PersongrunnlagIntegrationTest(
             forelderBarnRelasjon = emptySet(),
             bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            statsborgerskap = listOf(Statsborgerskap(land = "POL", gyldigFraOgMed = null, gyldigTilOgMed = null, bekreftelsesdato = null)),
+            statsborgerskap = listOf(
+                Statsborgerskap(
+                    land = "POL",
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                    bekreftelsesdato = null
+                )
+            ),
             dødsfall = null,
             kontaktinformasjonForDoedsbo = null
         )
@@ -140,7 +152,7 @@ class PersongrunnlagIntegrationTest(
             dødsfall = null,
             kontaktinformasjonForDoedsbo = null
         )
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
+        val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
         val behandling = behandlingService.opprettBehandling(
             NyBehandling(
                 skalBehandlesAutomatisk = true,
@@ -148,7 +160,8 @@ class PersongrunnlagIntegrationTest(
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL, // alltid NASJONAL for fødselshendelse
-                underkategori = BehandlingUnderkategori.ORDINÆR
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                fagsakId = fagsak.data!!.id
             )
         )
 
@@ -175,7 +188,14 @@ class PersongrunnlagIntegrationTest(
             forelderBarnRelasjon = emptySet(),
             bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            statsborgerskap = listOf(Statsborgerskap(land = "NOR", gyldigFraOgMed = null, gyldigTilOgMed = null, bekreftelsesdato = null)),
+            statsborgerskap = listOf(
+                Statsborgerskap(
+                    land = "NOR",
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                    bekreftelsesdato = null
+                )
+            ),
             dødsfall = null,
             kontaktinformasjonForDoedsbo = null
         )
@@ -191,7 +211,7 @@ class PersongrunnlagIntegrationTest(
             dødsfall = null,
             kontaktinformasjonForDoedsbo = null
         )
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
+        val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = morAktør.aktivFødselsnummer()))
         val behandling = behandlingService.opprettBehandling(
             NyBehandling(
                 skalBehandlesAutomatisk = true,
@@ -199,7 +219,8 @@ class PersongrunnlagIntegrationTest(
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                fagsakId = fagsak.data!!.id
             )
         )
 
@@ -238,8 +259,13 @@ class PersongrunnlagIntegrationTest(
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT))
         )
 
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerAktør.aktivFødselsnummer()))
+        val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
+        val behandling = behandlingService.opprettBehandling(
+            nyOrdinærBehandling(
+                søkersIdent = søkerAktør.aktivFødselsnummer(),
+                fagsakId = fagsak.data!!.id
+            )
+        )
 
         val personopplysningGrunnlag = persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             søkerAktør,
