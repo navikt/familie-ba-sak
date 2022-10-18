@@ -124,8 +124,10 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 )
             )
         )
-    Brevmal.INNHENTE_OPPLYSNINGER ->
+    Brevmal.INNHENTE_OPPLYSNINGER,
+    Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON ->
         InnhenteOpplysningerBrev(
+            mal = brevmal,
             data = InnhenteOpplysningerData(
                 delmalData = InnhenteOpplysningerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
                 flettefelter = InnhenteOpplysningerData.Flettefelter(

@@ -38,6 +38,7 @@ class manuelBrevRequestTest {
             mottakerIdent = fnr
         )
         val brevRequestTilInstitusjon = baseRequest.copy(
+            brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
             mottakerIdent = orgnr,
             vedrørende = object : Person {
                 override val fødselsnummer = fnr

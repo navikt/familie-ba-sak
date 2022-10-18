@@ -27,7 +27,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "innhenteOpplysningerEtterSoknadISED",
         "Innhente opplysninger etter søknad i SED"
     ),
-
+    INNHENTE_OPPLYSNINGER_INSTITUSJON(false, "innhenteOpplysningerInstitusjon", "Innhente opplysninger institusjon"),
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "Henlegge trukket søknad"),
     VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "Varsel om revurdering"),
     VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14(
@@ -96,6 +96,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         when (this) {
             INNHENTE_OPPLYSNINGER,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
+            INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             VARSEL_OM_REVURDERING_SAMBOER,
@@ -146,6 +147,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> Dokumenttype.BARNETRYGD_VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS
             INFORMASJONSBREV_KAN_SØKE_EØS -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE_EØS
+            INNHENTE_OPPLYSNINGER_INSTITUSJON -> Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER_INSTITUSJON
 
             VEDTAK_ENDRING,
             VEDTAK_OPPHØRT,
@@ -164,7 +166,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     val distribusjonstype: Distribusjonstype
         get() = when (this) {
             INFORMASJONSBREV_DELT_BOSTED -> Distribusjonstype.VIKTIG
-            INNHENTE_OPPLYSNINGER -> Distribusjonstype.VIKTIG
+            INNHENTE_OPPLYSNINGER, INNHENTE_OPPLYSNINGER_INSTITUSJON -> Distribusjonstype.VIKTIG
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
             HENLEGGE_TRUKKET_SØKNAD -> Distribusjonstype.ANNET
             VARSEL_OM_REVURDERING -> Distribusjonstype.VIKTIG

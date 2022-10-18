@@ -318,7 +318,7 @@ class DokumentServiceTest(
         )
 
         val manueltBrevRequest = ManueltBrevRequest(
-            brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
+            brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
             mottakerIdent = orgNummer
         ).byggMottakerdata(
             behandling,
