@@ -41,3 +41,6 @@ data class TidspunktClosedRange<T : Tidsenhet>(
 
 operator fun <T : Tidsenhet> Tidspunkt<T>.rangeTo(tilOgMed: Tidspunkt<T>): TidspunktClosedRange<T> =
     TidspunktClosedRange(this, tilOgMed)
+
+fun <T : Tidsenhet> Tidspunkt<T>.ogSenere() = this.somUendeligLengeTil().rangeTo(this.somUendeligLengeTil())
+fun <T : Tidsenhet> Tidspunkt<T>.ogTidligere() = this.somUendeligLengeSiden().rangeTo(this.somUendeligLengeSiden())
