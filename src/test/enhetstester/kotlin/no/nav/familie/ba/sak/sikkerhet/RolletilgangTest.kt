@@ -117,7 +117,7 @@ class RolletilgangTest(
     fun `Skal kaste feil når innlogget veileder prøver å opprette behandling gjennom test-rest-endepunkt som validerer på db-nivå`() {
         val fnr = randomFnr()
 
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+        val fagsak = fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
 
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
@@ -130,7 +130,10 @@ class RolletilgangTest(
                 )
             )
         )
-        val requestEntity = HttpEntity<String>(objectMapper.writeValueAsString(nyOrdinærBehandling(fnr)), header)
+        val requestEntity = HttpEntity<String>(
+            objectMapper.writeValueAsString(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.data!!.id)),
+            header
+        )
 
         val error = assertThrows<HttpClientErrorException> {
             restTemplate.postForEntity<Ressurs<Behandling>>(

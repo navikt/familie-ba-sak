@@ -124,11 +124,10 @@ class MigreringService(
             }
 
             // Vi ønsker at steg'ene selv lagrer aktører. De blir cachet i appen så det blir ikke gjort nytt kall mot PDL
-            val personAktør = personidentService.hentOgLagreAktør(personIdent, false)
             val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, false)
             kastFeilVedDobbeltforekomstViaHistoriskIdent(barnasAktør, barnasIdenter)
 
-            try {
+            val fagsak = try {
                 fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
                     .also { kastFeilDersomAlleredeMigrert(it) }
             } catch (exception: Exception) {
@@ -149,7 +148,8 @@ class MigreringService(
                         skalBehandlesAutomatisk = true,
                         underkategori = underkategori,
                         barnasIdenter = barnasIdenter,
-                        kategori = if (erEøsSak(løpendeInfotrygdsak)) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
+                        kategori = if (erEøsSak(løpendeInfotrygdsak)) BehandlingKategori.EØS else BehandlingKategori.NASJONAL,
+                        fagsakId = fagsak.id
                     )
                 )
             }.getOrElse { kastOgTellMigreringsFeil(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING, it.message, it) }

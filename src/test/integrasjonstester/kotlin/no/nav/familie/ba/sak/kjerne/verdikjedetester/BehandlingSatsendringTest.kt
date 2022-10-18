@@ -185,7 +185,8 @@ class BehandlingSatsendringTest(
         val revurdering = familieBaSakKlient().opprettBehandling(
             søkersIdent = scenario.søker.ident,
             behandlingType = BehandlingType.REVURDERING,
-            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER
+            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+            fagsakId = behandling.fagsak.id
         )
         val revurderingEtterVilkårsvurdering =
             familieBaSakKlient().validerVilkårsvurdering(behandlingId = revurdering.data!!.behandlingId)

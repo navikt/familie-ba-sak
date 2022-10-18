@@ -210,9 +210,15 @@ class FagsakControllerTest(
         val søkerAktør = mockPersonidentService.hentOgLagreAktør(ClientMocks.søkerFnr[0], true)
         val barnaAktør = mockPersonidentService.hentOgLagreAktørIder(ClientMocks.barnFnr.toList().subList(0, 1), true)
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
 
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
+        val behandling =
+            behandlingService.opprettBehandling(
+                nyOrdinærBehandling(
+                    søkersIdent = ClientMocks.søkerFnr[0],
+                    fagsakId = fagsak.id
+                )
+            )
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             personAktør,
             barnaAktør,
@@ -270,39 +276,5 @@ class FagsakControllerTest(
         assertNotNull(fagsak?.institusjon)
         assertEquals("orgnr", fagsak?.institusjon?.orgNummer)
         assertEquals("tss-id", fagsak?.institusjon?.tssEksternId)
-    }
-
-    @Test
-    @Tag("integration")
-    fun `Oppretting av fagsak for institusjone skal feile med funksjonell feil hvis det er 1 åpen fagsak på aktør av type institusjon`() {
-        val fnr = randomFnr()
-
-        fagsakController.hentEllerOpprettFagsak(
-            FagsakRequest(
-                personIdent = fnr,
-                fagsakType = FagsakType.INSTITUSJON,
-                institusjon = InstitusjonInfo("orgnr", "tss-id")
-            )
-        )
-        val fagsak = fagsakService.hent(tilAktør(fnr), FagsakType.INSTITUSJON)
-        assertNotNull(fagsak)
-        assertEquals(fnr, fagsak?.aktør?.aktivFødselsnummer())
-        assertEquals(FagsakType.INSTITUSJON, fagsak?.type)
-        println(fagsak)
-        assertNotNull(fagsak?.institusjon)
-        assertEquals("orgnr", fagsak?.institusjon?.orgNummer)
-        assertEquals("tss-id", fagsak?.institusjon?.tssEksternId)
-
-        val funksjonellFeil =
-            assertThrows<FunksjonellFeil> {
-                fagsakController.hentEllerOpprettFagsak(
-                    FagsakRequest(
-                        personIdent = fnr,
-                        fagsakType = FagsakType.INSTITUSJON,
-                        institusjon = InstitusjonInfo("orgnr2", "tss-id")
-                    )
-                )
-            }
-        assertEquals("Kan kun ha en åpen sak av type Institusjon", funksjonellFeil.message)
     }
 }
