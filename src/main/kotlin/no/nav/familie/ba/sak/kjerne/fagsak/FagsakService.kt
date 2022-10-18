@@ -110,17 +110,8 @@ class FagsakService(
         var fagsak = when (type) {
             FagsakType.INSTITUSJON -> {
                 if (institusjon?.orgNummer == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
-                val åpenSak = fagsakRepository.finnÅpenFagsakForInstitusjon(aktør)
-
-                if (åpenSak != null && åpenSak.institusjon?.orgNummer != institusjon.orgNummer) {
-                    throw FunksjonellFeil(
-                        melding = "Kan kun ha en åpen sak av type Institusjon",
-                        frontendFeilmelding = "Det finnes allerede en åpen sak av type Institusjon registrert på et annet orgnummer. Lukk fagsaken med id=${åpenSak.id} hvis man vil registrere en ny sak på et annet orgnummer"
-                    )
-                }
-                åpenSak
+                fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, institusjon.orgNummer)
             }
-
             else -> fagsakRepository.finnFagsakForAktør(aktør, type)
         }
 
@@ -285,17 +276,11 @@ class FagsakService(
         return hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakType, institusjon)
     }
 
-    fun hent(aktør: Aktør, fagsakType: FagsakType = FagsakType.NORMAL): Fagsak? {
-        return when (fagsakType) {
-            FagsakType.NORMAL, FagsakType.BARN_ENSLIG_MINDREÅRIG -> fagsakRepository.finnFagsakForAktør(
-                aktør,
-                fagsakType
-            )
-
-            FagsakType.INSTITUSJON -> {
-                fagsakRepository.finnÅpenFagsakForInstitusjon(aktør)
-            }
-        }
+    fun hentNormalFagsak(aktør: Aktør): Fagsak? {
+        return fagsakRepository.finnFagsakForAktør(
+            aktør,
+            FagsakType.NORMAL
+        )
     }
 
     fun hentPåFagsakId(fagsakId: Long): Fagsak {

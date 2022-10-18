@@ -43,7 +43,7 @@ class AutobrevStegServiceTest {
         }
 
         every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
-        every { fagsakService.hent(aktør) } returns fagsak
+        every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
         every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
 
@@ -64,7 +64,7 @@ class AutobrevStegServiceTest {
         }
 
         every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
-        every { fagsakService.hent(aktør) } returns fagsak
+        every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
         every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
 
@@ -85,7 +85,7 @@ class AutobrevStegServiceTest {
         }
 
         every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
-        every { fagsakService.hent(aktør) } returns fagsak
+        every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
         every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
 

@@ -244,7 +244,7 @@ class FagsakServiceTest(
         assertEquals("søker3", søkeresultat3.filter { it.ident == søker3Fnr }[0].navn)
         assertNull(søkeresultat3.find { it.ident == søker3Fnr }!!.fagsakId)
 
-        val fagsak = fagsakService.hent(søker1Aktør)!!
+        val fagsak = fagsakService.hentNormalFagsak(søker1Aktør)!!
 
         assertEquals(
             FagsakStatus.OPPRETTET.name,
