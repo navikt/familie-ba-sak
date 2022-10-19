@@ -8,6 +8,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 
 /**
