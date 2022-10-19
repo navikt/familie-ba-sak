@@ -74,7 +74,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at løpende fagsak med avsluttede behandlinger og barn på 18 ikke oppretter en behandling for omregning`() {
-        val (behandling, søker) = initMock(alder = 18, medSøsken = false)
+        val behandling = initMock(alder = 18, medSøsken = false).first
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -89,7 +89,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke opprettes om barn med angitt ålder ikke finnes`() {
-        val (behandling, søker) = initMock(alder = 7, medSøsken = false)
+        val behandling = initMock(alder = 7, medSøsken = false).first
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -104,7 +104,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke opprettes om fagsak ikke er løpende`() {
-        val (behandling, søker) = initMock(fagsakStatus = FagsakStatus.OPPRETTET, alder = 6, medSøsken = false)
+        val behandling = initMock(fagsakStatus = FagsakStatus.OPPRETTET, alder = 6, medSøsken = false).first
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -119,7 +119,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning blir trigget for løpende fagsak med barn som fyller 6 år inneværende måned`() {
-        val (behandling, søker) = initMock(alder = 6, medSøsken = false)
+        val behandling = initMock(alder = 6, medSøsken = false).first
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -145,7 +145,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning blir trigget for løpende fagsak med barn som fyller 18 år inneværende måned og som har søsken`() {
-        val (behandling, søker) = initMock(alder = 18, medSøsken = true)
+        val behandling = initMock(alder = 18, medSøsken = true).first
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -171,7 +171,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke blir trigget for løpende fagsak med barn som fyller 6år inneværende måned, hvis barnet ikke har løpende andel tilkjent ytelse`() {
-        val (behandling, søker) = initMock(alder = 6, medSøsken = false)
+        val behandling = initMock(alder = 6, medSøsken = false).first
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -220,7 +220,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke blir trigget for løpende fagsak med barn som fyller 18år inneværende måned, hvis barnet ikke har løpende andel tilkjent ytelse`() {
-        val (behandling, søker) = initMock(alder = 18, medSøsken = true)
+        val (behandling, søker, barnIBrytningsalder) = initMock(alder = 18, medSøsken = true)
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -231,8 +231,6 @@ internal class Autobrev6og18ÅrServiceTest {
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
         every { stegService.håndterNyBehandling(any()) } returns behandling
 
-        val barn18årUtenAktivTilkjentYtelse =
-            tilfeldigPerson(LocalDate.now().minusYears(Alder.ATTEN.år.toLong()).minusMonths(1))
         val barn10årMedAktivTilkjentYtelse = tilfeldigPerson(LocalDate.now().minusYears(10))
 
         every {
@@ -242,9 +240,9 @@ internal class Autobrev6og18ÅrServiceTest {
         } returns listOf(
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
-                tom = YearMonth.now().minusMonths(1), // en gammel ytelse
+                tom = YearMonth.now().minusMonths(2), // en gammel ytelse
                 beløp = 1054,
-                person = barn18årUtenAktivTilkjentYtelse
+                person = barnIBrytningsalder
             ),
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
@@ -269,7 +267,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at vi ikke oppretter behandling hvis brev er sendt fra infotrygd`() {
-        val (behandling, søker) = initMock(alder = 6, medSøsken = false)
+        val behandling = initMock(alder = 6, medSøsken = false).first
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -307,7 +305,7 @@ internal class Autobrev6og18ÅrServiceTest {
         fagsakStatus: FagsakStatus = FagsakStatus.LØPENDE,
         alder: Long,
         medSøsken: Boolean
-    ): Pair<Behandling, Person> {
+    ): Triple<Behandling, Person, Person> {
         val behandling = lagBehandling().also {
             it.fagsak.status = fagsakStatus
             it.status = behandlingStatus
@@ -386,6 +384,6 @@ internal class Autobrev6og18ÅrServiceTest {
             behandling.id,
             *personer
         )
-        return Pair(behandling, søker)
+        return Triple(behandling, søker, barnIBrytningsalder)
     }
 }
