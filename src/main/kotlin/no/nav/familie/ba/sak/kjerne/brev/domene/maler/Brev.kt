@@ -212,7 +212,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
             SVARTIDSBREV,
-            SVARTIDSBREV_INSTITUSJON -> true
+            SVARTIDSBREV_INSTITUSJON,
+            FORLENGET_SVARTIDSBREV_INSTITUSJON -> true
 
             else -> false
         }
@@ -250,7 +251,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
             SVARTIDSBREV,
-            SVARTIDSBREV_INSTITUSJON -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            SVARTIDSBREV_INSTITUSJON,
+            FORLENGET_SVARTIDSBREV_INSTITUSJON -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
 
             else -> throw Feil("Venteårsak ikke definert for brevtype $this")
         }

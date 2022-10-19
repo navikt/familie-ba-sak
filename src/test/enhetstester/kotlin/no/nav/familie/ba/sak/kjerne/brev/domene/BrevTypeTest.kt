@@ -18,7 +18,9 @@ class BrevTypeTest {
         Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
         Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
         Brevmal.SVARTIDSBREV,
-        Brevmal.FORLENGET_SVARTIDSBREV
+        Brevmal.FORLENGET_SVARTIDSBREV,
+        Brevmal.SVARTIDSBREV_INSTITUSJON,
+        Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON
     )
 
     private val førerIkkeTilAvventingAvDokumentasjon = Brevmal.values().filter { it !in førerTilAvventerDokumentasjon }
