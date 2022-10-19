@@ -23,10 +23,10 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.1.4</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
-        <prosessering.version>1.20220624132237_7f5ba9c</prosessering.version>
+        <prosessering.version>1.20221018032424_7bf7f93</prosessering.version>
         <felles.version>1.20221006150009_46021ed</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20220609214258_f30c3ce</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>2.0_20221012140422_b9336ff</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20221019095706_faf4f68</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20220923123433_db565d1</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
@@ -38,7 +38,7 @@
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>0.5.4</mock-oauth2-server.version>
+        <mock-oauth2-server.version>0.5.5</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
@@ -249,7 +249,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.familie</groupId>
-            <artifactId>prosessering-jdbc</artifactId>
+            <artifactId>prosessering-core</artifactId>
             <version>${prosessering.version}</version>
         </dependency>
         <dependency>
