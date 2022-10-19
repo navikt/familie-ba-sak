@@ -12,13 +12,17 @@ data class Svartidsbrev(
         fodselsnummer: String,
         enhet: String,
         mal: Brevmal,
-        erEøsBehandling: Boolean
+        erEøsBehandling: Boolean,
+        organisasjonsnummer: String? = null,
+        gjelder: String? = null
     ) : this(
         mal = mal,
         data = SvartidsbrevData(
             flettefelter = SvartidsbrevData.Flettefelter(
                 navn = navn,
-                fodselsnummer = fodselsnummer
+                fodselsnummer = fodselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                gjelder = gjelder
             ),
             delmalData = SvartidsbrevData.DelmalData(
                 signatur = SignaturDelmal(
@@ -39,15 +43,21 @@ data class SvartidsbrevData(
     data class Flettefelter(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
-        override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr())
+        override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+        override val organisasjonsnummer: Flettefelt,
+        override val gjelder: Flettefelt
     ) : FlettefelterForDokument {
 
         constructor(
             navn: String,
-            fodselsnummer: String
+            fodselsnummer: String,
+            organisasjonsnummer: String? = null,
+            gjelder: String? = null
         ) : this(
             navn = flettefelt(navn),
-            fodselsnummer = flettefelt(fodselsnummer)
+            fodselsnummer = flettefelt(fodselsnummer),
+            organisasjonsnummer = flettefelt(organisasjonsnummer),
+            gjelder = flettefelt(gjelder)
         )
     }
 

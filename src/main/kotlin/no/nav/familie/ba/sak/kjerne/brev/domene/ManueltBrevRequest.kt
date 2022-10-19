@@ -186,6 +186,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 )
             )
         }
+
     Brevmal.SVARTIDSBREV ->
         Svartidsbrev(
             navn = this.mottakerNavn,
@@ -198,14 +199,30 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
                 this.behandlingKategori == BehandlingKategori.EØS
             }
         )
-    Brevmal.FORLENGET_SVARTIDSBREV ->
+
+    Brevmal.SVARTIDSBREV_INSTITUSJON ->
+        Svartidsbrev(
+            navn = this.mottakerNavn,
+            fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+            enhet = this.enhetNavn(),
+            mal = Brevmal.SVARTIDSBREV_INSTITUSJON,
+            erEøsBehandling = false,
+            organisasjonsnummer = mottakerIdent,
+            gjelder = this.vedrørende?.navn
+        )
+
+    Brevmal.FORLENGET_SVARTIDSBREV,
+    Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON ->
         ForlengetSvartidsbrev(
             navn = this.mottakerNavn,
-            fodselsnummer = this.mottakerIdent,
+            fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
             enhetNavn = this.enhetNavn(),
             årsaker = this.multiselectVerdier,
-            antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw Feil("Antall uker svarfrist er ikke satt")
+            antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw Feil("Antall uker svarfrist er ikke satt"),
+            organisasjonsnummer = if (erTilInstitusjon) mottakerIdent else null,
+            gjelder = this.vedrørende?.navn
         )
+
     Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
