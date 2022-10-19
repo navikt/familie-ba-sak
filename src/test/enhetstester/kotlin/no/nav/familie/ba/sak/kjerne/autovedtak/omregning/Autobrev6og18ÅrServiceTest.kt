@@ -182,7 +182,7 @@ internal class Autobrev6og18ÅrServiceTest {
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
         every { stegService.håndterNyBehandling(any()) } returns behandling
 
-        val barn18årUtenAktivTilkjentYtelse =
+        val barn6årUtenAktivTilkjentYtelse =
             tilfeldigPerson(LocalDate.now().minusYears(Alder.SEKS.år.toLong()).minusMonths(1))
         val barn10årMedAktivTilkjentYtelse = tilfeldigPerson(LocalDate.now().minusYears(10))
 
@@ -195,7 +195,7 @@ internal class Autobrev6og18ÅrServiceTest {
                 fom = inneværendeMåned().minusYears(4),
                 tom = YearMonth.now().minusMonths(1), // en gammel ytelse
                 beløp = 1054,
-                person = barn18årUtenAktivTilkjentYtelse
+                person = barn6årUtenAktivTilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
@@ -232,7 +232,7 @@ internal class Autobrev6og18ÅrServiceTest {
         every { stegService.håndterNyBehandling(any()) } returns behandling
 
         val barn18årUtenAktivTilkjentYtelse =
-            tilfeldigPerson(LocalDate.now().minusYears(Alder.SEKS.år.toLong()).minusMonths(1))
+            tilfeldigPerson(LocalDate.now().minusYears(Alder.ATTEN.år.toLong()).minusMonths(1))
         val barn10årMedAktivTilkjentYtelse = tilfeldigPerson(LocalDate.now().minusYears(10))
 
         every {
