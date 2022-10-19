@@ -190,7 +190,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
     Brevmal.SVARTIDSBREV ->
         Svartidsbrev(
             navn = this.mottakerNavn,
-            fodselsnummer = mottakerIdent,
+            fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             mal = Brevmal.SVARTIDSBREV,
             erEøsBehandling = if (this.behandlingKategori == null) {
