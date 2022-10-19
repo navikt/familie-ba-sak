@@ -52,7 +52,9 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     ),
 
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
+    SVARTIDSBREV_INSTITUSJON(false, "svartidsbrevInstitusjon", "Svartidsbrev institusjon"),
     FORLENGET_SVARTIDSBREV(false, "forlengetSvartidsbrev", "Forlenget svartidsbrev"),
+    FORLENGET_SVARTIDSBREV_INSTITUSJON(false, "forlengetSvartidsbrevInstitusjon", "Forlenget svartidsbrev institusjon"),
     INFORMASJONSBREV_FØDSEL_MINDREÅRIG(
         false,
         "informasjonsbrevFodselMindreaarig",
@@ -106,7 +108,9 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INFORMASJONSBREV_DELT_BOSTED,
             HENLEGGE_TRUKKET_SØKNAD,
             SVARTIDSBREV,
+            SVARTIDSBREV_INSTITUSJON,
             FORLENGET_SVARTIDSBREV,
+            FORLENGET_SVARTIDSBREV_INSTITUSJON,
             INFORMASJONSBREV_FØDSEL_UMYNDIG,
             INFORMASJONSBREV_FØDSEL_VERGEMÅL,
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
@@ -148,6 +152,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS
             INFORMASJONSBREV_KAN_SØKE_EØS -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE_EØS
             INNHENTE_OPPLYSNINGER_INSTITUSJON -> Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER_INSTITUSJON
+            SVARTIDSBREV_INSTITUSJON -> Dokumenttype.BARNETRYGD_SVARTIDSBREV_INSTITUSJON
+            FORLENGET_SVARTIDSBREV_INSTITUSJON -> Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV_INSTITUSJON
 
             VEDTAK_ENDRING,
             VEDTAK_OPPHØRT,
@@ -174,8 +180,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_SAMBOER -> Distribusjonstype.ANNET
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> Distribusjonstype.VIKTIG
-            SVARTIDSBREV -> Distribusjonstype.ANNET
-            FORLENGET_SVARTIDSBREV -> Distribusjonstype.ANNET
+            SVARTIDSBREV, SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
+            FORLENGET_SVARTIDSBREV, FORLENGET_SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_UMYNDIG -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Distribusjonstype.ANNET
@@ -205,7 +211,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
-            SVARTIDSBREV -> true
+            SVARTIDSBREV,
+            SVARTIDSBREV_INSTITUSJON -> true
 
             else -> false
         }
@@ -225,7 +232,10 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
                 else -> throw Feil("Behandlingskategori er ikke satt fot $this")
             }
 
-            FORLENGET_SVARTIDSBREV -> manuellFrist ?: throw Feil("Ventefrist var ikke satt for $this")
+            SVARTIDSBREV_INSTITUSJON -> 3 * 7
+            FORLENGET_SVARTIDSBREV, FORLENGET_SVARTIDSBREV_INSTITUSJON ->
+                manuellFrist
+                    ?: throw Feil("Ventefrist var ikke satt for $this")
 
             else -> throw Feil("Ventefrist ikke definert for brevtype $this")
         }
@@ -239,7 +249,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
-            SVARTIDSBREV -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            SVARTIDSBREV,
+            SVARTIDSBREV_INSTITUSJON -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
 
             else -> throw Feil("Venteårsak ikke definert for brevtype $this")
         }
