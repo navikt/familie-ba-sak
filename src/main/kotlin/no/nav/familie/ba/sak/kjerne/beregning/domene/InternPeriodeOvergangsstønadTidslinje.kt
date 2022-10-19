@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
 
 open class InternPeriodeOvergangsstønadTidslinje(
     private val internePeriodeOvergangsstønader: List<InternPeriodeOvergangsstønad>

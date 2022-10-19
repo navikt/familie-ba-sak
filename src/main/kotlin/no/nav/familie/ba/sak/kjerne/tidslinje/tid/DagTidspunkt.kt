@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tid
 
-import no.nav.familie.ba.sak.common.sisteDagIMåned
 import java.time.LocalDate
 import java.time.YearMonth
 
 data class DagTidspunkt internal constructor(
-    private val dato: LocalDate,
-    private val uendelighet: Uendelighet
+    internal val dato: LocalDate,
+    override val uendelighet: Uendelighet
 ) : Tidspunkt<Dag>(uendelighet) {
 
     init {
@@ -15,18 +14,6 @@ data class DagTidspunkt internal constructor(
         } else if (dato > PRAKTISK_SENESTE_DAG) {
             throw IllegalArgumentException("Kan ikke håndtere så sent tidspunkt. Bruk uendeligLengeTil()")
         }
-    }
-
-    override fun tilFørsteDagIMåneden(): DagTidspunkt {
-        return this.copy(dato = dato.withDayOfMonth(1))
-    }
-
-    override fun tilSisteDagIMåneden(): DagTidspunkt {
-        return this.copy(dato = dato.sisteDagIMåned())
-    }
-
-    override fun tilInneværendeMåned(): MånedTidspunkt {
-        return MånedTidspunkt(dagTilMånedKonverterer(this.dato), uendelighet)
     }
 
     override fun tilLocalDateEllerNull(): LocalDate? {
@@ -50,7 +37,7 @@ data class DagTidspunkt internal constructor(
     }
 
     override fun flytt(tidsenheter: Long): DagTidspunkt {
-        return this.copy(dato = dato.plusDays(tidsenheter))
+        return this.copy(dato = dato.plusDays(tidsenheter), uendelighet)
     }
 
     override fun somEndelig(): DagTidspunkt {

@@ -10,7 +10,7 @@ val PRAKTISK_TIDLIGSTE_DAG = LocalDate.of(1900, 1, 1)
 internal val månedTilDagKonverterer: (YearMonth) -> LocalDate = { it.atEndOfMonth() }
 internal val dagTilMånedKonverterer: (LocalDate) -> YearMonth = { it.toYearMonth() }
 
-internal enum class Uendelighet {
+enum class Uendelighet {
     INGEN,
     FORTID,
     FREMTID
@@ -21,11 +21,8 @@ class Dag : Tidsenhet
 class Måned : Tidsenhet
 
 abstract class Tidspunkt<T : Tidsenhet> internal constructor(
-    private val uendelighet: Uendelighet
+    internal open val uendelighet: Uendelighet
 ) : Comparable<Tidspunkt<T>> {
-    abstract fun tilFørsteDagIMåneden(): Tidspunkt<Dag>
-    abstract fun tilSisteDagIMåneden(): Tidspunkt<Dag>
-    abstract fun tilInneværendeMåned(): Tidspunkt<Måned>
     abstract fun tilLocalDateEllerNull(): LocalDate?
     abstract fun tilLocalDate(): LocalDate
     abstract fun tilYearMonthEllerNull(): YearMonth?
