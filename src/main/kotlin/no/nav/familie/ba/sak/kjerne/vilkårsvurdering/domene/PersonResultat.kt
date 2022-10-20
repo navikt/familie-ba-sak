@@ -6,11 +6,13 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
@@ -151,7 +153,7 @@ class PersonResultat(
     fun harEksplisittAvslag() = vilkårResultater.any { it.erEksplisittAvslagPåSøknad == true }
 }
 
-fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>> =
+fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør, Tidslinje<List<VilkårResultat>, Måned>> =
     this.associate { personResultat ->
         val vilkårResultaterForAktørMap = personResultat.vilkårResultater
             .groupByTo(mutableMapOf()) { it.vilkårType }
@@ -159,7 +161,8 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
 
         val vilkårResultaterKombinert = vilkårResultaterForAktørMap
             .tilVilkårResultatTidslinjer()
-            .kombinerUtenNull { it }
+            .kombiner { alleVilkårOppfyltEllerNull(it) }
+            .filtrerIkkeNull()
 
         val vilkårResultaterForMåned = vilkårResultaterKombinert
             .tilMånedFraSisteDagIMåneden()
@@ -179,7 +182,7 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
 private fun MutableList<VilkårResultat>.fjernAvslagUtenPeriodeHvisDetFinsAndreVilkårResultat(): List<VilkårResultat> =
     if (this.any { !it.erAvslagUtenPeriode() }) this.filterNot { it.erAvslagUtenPeriode() } else this
 
-private fun Tidslinje<Iterable<VilkårResultat>, Måned>.beskjærPå18årVilkåretOmDetFinnes(
+private fun Tidslinje<List<VilkårResultat>, Måned>.beskjærPå18årVilkåretOmDetFinnes(
     under18VilkårResultater: List<VilkårResultat>?
 ) = if (under18VilkårResultater == null) {
     this
@@ -192,3 +195,7 @@ private fun Tidslinje<Iterable<VilkårResultat>, Måned>.beskjærPå18årVilkår
 
 private fun Map<Vilkår, List<VilkårResultat>>.tilVilkårResultatTidslinjer() =
     this.map { (_, vilkårResultater) -> VilkårResultatTidslinje(vilkårResultater) }
+
+fun alleVilkårOppfyltEllerNull(vilkårResultater: Iterable<VilkårResultat?>): List<VilkårResultat>? {
+    return if (vilkårResultater.all { it?.resultat == Resultat.OPPFYLT }) vilkårResultater.filterNotNull() else null
+}
