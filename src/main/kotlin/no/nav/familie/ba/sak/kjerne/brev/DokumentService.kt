@@ -189,10 +189,9 @@ class DokumentService(
             )
         }
 
-        if ((
-            manueltBrevRequest.brevmal == Brevmal.INNHENTE_OPPLYSNINGER ||
-                manueltBrevRequest.brevmal == Brevmal.VARSEL_OM_REVURDERING
-            ) && behandling != null
+        if (
+            behandling != null &&
+            manueltBrevRequest.brevmal.førerTilOpplysningsplikt()
         ) {
             leggTilOpplysningspliktIVilkårsvurdering(behandling)
         }
