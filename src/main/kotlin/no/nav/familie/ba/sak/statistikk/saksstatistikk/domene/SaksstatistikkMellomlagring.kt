@@ -28,6 +28,9 @@ data class SaksstatistikkMellomlagring(
     val id: Long = 0,
 
     @Column(name = "offset_verdi")
+    var offsetVerdiOnPrem: Long? = null,
+
+    @Column(name = "offset_aiven")
     var offsetVerdi: Long? = null,
 
     @Column(name = "funksjonell_id")
