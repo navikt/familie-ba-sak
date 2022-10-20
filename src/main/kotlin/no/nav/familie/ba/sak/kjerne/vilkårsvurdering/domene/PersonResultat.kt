@@ -157,18 +157,22 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
             .groupByTo(mutableMapOf()) { it.vilkårType }
             .mapValues { if (it.key != Vilkår.BOR_MED_SØKER) it.value else it.value.fjernAvslagUtenPeriodeHvisDetFinsAndreVilkårResultat() }
 
-        val vilkårResultaterKombinertOgForsøvetOgBeskåretTidslinje = vilkårResultaterForAktørMap
+        val vilkårResultaterKombinert = vilkårResultaterForAktørMap
             .tilVilkårResultatTidslinjer()
             .kombinerUtenNull { it }
+
+        val vilkårResultaterForMåned = vilkårResultaterKombinert
             .tilMånedFraSisteDagIMåneden()
             .filtrer { it != null && it.toList().isNotEmpty() }
             .forskyv(1)
+
+        val vilkårResultaterBeskåret = vilkårResultaterForMåned
             .beskjærPå18årVilkåretOmDetFinnes(vilkårResultaterForAktørMap[Vilkår.UNDER_18_ÅR])
             .slåSammenLike()
 
         Pair(
             personResultat.aktør,
-            vilkårResultaterKombinertOgForsøvetOgBeskåretTidslinje
+            vilkårResultaterBeskåret
         )
     }
 
