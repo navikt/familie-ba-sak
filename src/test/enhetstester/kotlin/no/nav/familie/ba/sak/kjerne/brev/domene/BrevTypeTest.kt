@@ -12,6 +12,7 @@ class BrevTypeTest {
 
     private val førerTilAvventerDokumentasjon = listOf(
         Brevmal.INNHENTE_OPPLYSNINGER,
+        Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
         Brevmal.VARSEL_OM_REVURDERING,
         Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
         Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,

@@ -202,10 +202,20 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> Distribusjonstype.VEDTAK
         }
 
+    fun førerTilOpplysningsplikt(): Boolean =
+        when (this) {
+            INNHENTE_OPPLYSNINGER,
+            INNHENTE_OPPLYSNINGER_INSTITUSJON,
+            VARSEL_OM_REVURDERING -> true
+
+            else -> false
+        }
+
     fun setterBehandlingPåVent(): Boolean =
         when (this) {
             FORLENGET_SVARTIDSBREV,
             INNHENTE_OPPLYSNINGER,
+            INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
@@ -221,6 +231,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     fun ventefristDager(manuellFrist: Long? = null, behandlingKategori: BehandlingKategori?): Long =
         when (this) {
             INNHENTE_OPPLYSNINGER,
+            INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
@@ -245,6 +256,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         when (this) {
             FORLENGET_SVARTIDSBREV,
             INNHENTE_OPPLYSNINGER,
+            INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
