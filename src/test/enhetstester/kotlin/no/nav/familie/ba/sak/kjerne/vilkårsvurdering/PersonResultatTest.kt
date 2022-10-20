@@ -60,7 +60,7 @@ class PersonResultatTest {
 
         val forskjøvedeVedtaksperioder = førskjøvetVilkårResultatTidslinjeMap[søker.aktør]!!.perioder()
         Assertions.assertEquals(april2020, forskjøvedeVedtaksperioder.first().fraOgMed.tilYearMonth())
-        Assertions.assertEquals(juni2020, forskjøvedeVedtaksperioder.first().tilOgMed.tilYearMonth())
+        Assertions.assertEquals(mai2020, forskjøvedeVedtaksperioder.first().tilOgMed.tilYearMonth())
     }
 
     @Test
@@ -110,7 +110,7 @@ class PersonResultatTest {
         Assertions.assertEquals(mai2020, forskjøvedeVedtaksperioder.first().tilOgMed.tilYearMonth())
 
         Assertions.assertEquals(juni2020, forskjøvedeVedtaksperioder.elementAt(1).fraOgMed.tilYearMonth())
-        Assertions.assertEquals(juli2020, forskjøvedeVedtaksperioder.elementAt(1).tilOgMed.tilYearMonth())
+        Assertions.assertEquals(juni2020, forskjøvedeVedtaksperioder.elementAt(1).tilOgMed.tilYearMonth())
     }
 
     @Test
@@ -163,7 +163,7 @@ class PersonResultatTest {
         Assertions.assertEquals(april2020, forskjøvedeVedtaksperioder.first().tilOgMed.tilYearMonth())
 
         Assertions.assertEquals(juni2020, forskjøvedeVedtaksperioder.elementAt(1).fraOgMed.tilYearMonth())
-        Assertions.assertEquals(juli2020, forskjøvedeVedtaksperioder.elementAt(1).tilOgMed.tilYearMonth())
+        Assertions.assertEquals(juni2020, forskjøvedeVedtaksperioder.elementAt(1).tilOgMed.tilYearMonth())
     }
 
     @Test

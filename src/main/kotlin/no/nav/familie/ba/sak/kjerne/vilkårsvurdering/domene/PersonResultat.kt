@@ -7,17 +7,15 @@ import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.tilMånedEtterVilkårsregler
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -165,9 +163,7 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
             .filtrerIkkeNull()
 
         val vilkårResultaterForMåned = vilkårResultaterKombinert
-            .tilMånedFraSisteDagIMåneden()
-            .filtrer { it != null && it.toList().isNotEmpty() }
-            .forskyv(1)
+            .tilMånedEtterVilkårsregler { it.alleVilkårErOppfylt() }
 
         val vilkårResultaterBeskåret = vilkårResultaterForMåned
             .beskjærPå18årVilkåretOmDetFinnes(vilkårResultaterForAktørMap[Vilkår.UNDER_18_ÅR])
@@ -196,6 +192,8 @@ private fun Tidslinje<List<VilkårResultat>, Måned>.beskjærPå18årVilkåretOm
 private fun Map<Vilkår, List<VilkårResultat>>.tilVilkårResultatTidslinjer() =
     this.map { (_, vilkårResultater) -> VilkårResultatTidslinje(vilkårResultater) }
 
-fun alleVilkårOppfyltEllerNull(vilkårResultater: Iterable<VilkårResultat?>): List<VilkårResultat>? {
+private fun alleVilkårOppfyltEllerNull(vilkårResultater: Iterable<VilkårResultat?>): List<VilkårResultat>? {
     return if (vilkårResultater.all { it?.resultat == Resultat.OPPFYLT }) vilkårResultater.filterNotNull() else null
 }
+
+private fun List<VilkårResultat>?.alleVilkårErOppfylt() = !this.isNullOrEmpty()
