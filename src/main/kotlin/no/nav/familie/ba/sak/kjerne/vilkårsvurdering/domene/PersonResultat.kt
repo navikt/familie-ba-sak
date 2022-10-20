@@ -167,6 +167,7 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
 
         val vilkårResultaterBeskåret = vilkårResultaterForMåned
             .beskjærPå18årVilkåretOmDetFinnes(vilkårResultaterForAktørMap[Vilkår.UNDER_18_ÅR])
+            .filtrerIkkeNull()
             .slåSammenLike()
 
         Pair(
