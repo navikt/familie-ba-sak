@@ -463,14 +463,14 @@ class UtbetalingsperiodeUtilTest {
             faktiskResultat.map { it.type }.toSet()
         )
     }
-}
 
-private fun Vilkårsvurdering.lagGodkjentPersonResultatForBarn(person: Person) = lagPersonResultat(
-    vilkårsvurdering = this,
-    aktør = person.aktør,
-    resultat = Resultat.OPPFYLT,
-    periodeFom = person.fødselsdato,
-    periodeTom = person.fødselsdato.til18ÅrsVilkårsdato(),
-    lagFullstendigVilkårResultat = true,
-    personType = person.type
-)
+    private fun Vilkårsvurdering.lagGodkjentPersonResultatForBarn(person: Person) = lagPersonResultat(
+        vilkårsvurdering = this,
+        aktør = person.aktør,
+        resultat = Resultat.OPPFYLT,
+        periodeFom = person.fødselsdato,
+        periodeTom = person.fødselsdato.til18ÅrsVilkårsdato(),
+        lagFullstendigVilkårResultat = true,
+        personType = person.type
+    )
+}
