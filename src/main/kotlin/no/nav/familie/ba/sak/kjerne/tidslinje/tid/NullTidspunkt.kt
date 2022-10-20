@@ -3,8 +3,9 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.tid
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class NullTidspunkt<T : Tidsenhet> internal constructor(private val uendelighet: Uendelighet) :
-    Tidspunkt<T>(uendelighet) {
+data class NullTidspunkt<T : Tidsenhet>(
+    override val uendelighet: Uendelighet
+) : Tidspunkt<T>(uendelighet) {
 
     companion object {
         // Vi plasserer fra-og-med uendelig langt inn i fremtiden og til-og-med uendelig langt bak i fortiden
@@ -14,18 +15,6 @@ data class NullTidspunkt<T : Tidsenhet> internal constructor(private val uendeli
     }
 
     val nullTidspunktException = IllegalStateException("Dette er et NULL-tidspunkt")
-
-    override fun tilFørsteDagIMåneden(): Tidspunkt<Dag> {
-        return NullTidspunkt(uendelighet)
-    }
-
-    override fun tilSisteDagIMåneden(): Tidspunkt<Dag> {
-        return NullTidspunkt(uendelighet)
-    }
-
-    override fun tilInneværendeMåned(): Tidspunkt<Måned> {
-        return NullTidspunkt(uendelighet)
-    }
 
     override fun tilLocalDateEllerNull(): LocalDate? {
         return null

@@ -5,8 +5,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 data class MånedTidspunkt internal constructor(
-    private val måned: YearMonth,
-    private val uendelighet: Uendelighet
+    internal val måned: YearMonth,
+    override val uendelighet: Uendelighet
 ) : Tidspunkt<Måned>(uendelighet) {
     init {
         if (måned < PRAKTISK_TIDLIGSTE_DAG.toYearMonth()) {
@@ -15,14 +15,6 @@ data class MånedTidspunkt internal constructor(
             throw IllegalArgumentException("Tidspunktet er for lenge til. Bruk uendeligLengeTil()")
         }
     }
-
-    override fun tilFørsteDagIMåneden(): DagTidspunkt =
-        DagTidspunkt(måned.atDay(1), this.uendelighet)
-
-    override fun tilSisteDagIMåneden(): DagTidspunkt =
-        DagTidspunkt(måned.atEndOfMonth(), this.uendelighet)
-
-    override fun tilInneværendeMåned() = this
 
     override fun tilLocalDateEllerNull(): LocalDate? =
         tilYearMonthEllerNull()?.let(månedTilDagKonverterer)
