@@ -229,7 +229,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
             personResultat = personResultatBarn1,
             periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeTom = juli2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -263,7 +263,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn2 = VilkårResultat(
             personResultat = personResultatBarn2,
             periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeTom = juli2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -413,7 +413,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
             personResultat = personResultatBarn,
             periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeTom = juli2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
