@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.config
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.kontrakter.felles.Applikasjon
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -51,6 +54,11 @@ class KafkaAivenConfig(val environment: Environment) {
     @Bean(name = [KafkaListenerConfigUtils.KAFKA_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME])
     fun kafkaListenerEndpointRegistry(): KafkaListenerEndpointRegistry? {
         return KafkaListenerEndpointRegistry()
+    }
+
+    @Bean("kafkaObjectMapper")
+    fun kafkaObjectMapper(): ObjectMapper {
+        return objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
     }
 
     private fun producerConfigs(): Map<String, Any> {
