@@ -59,9 +59,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     lateinit var kafkaObjectMapper: ObjectMapper
 
     @Autowired
-    lateinit var kafkaTemplate: KafkaTemplate<String, Any>
-
-    @Autowired
     lateinit var kafkaAivenTemplate: KafkaTemplate<String, String>
 
     override fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long {
@@ -77,42 +74,30 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     override fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long {
         val behandlingsMelding = kafkaObjectMapper.writeValueAsString(melding.jsonToBehandlingDVH())
 
-        val responseOnPrem =
-            kafkaTemplate.send(
-                SAKSSTATISTIKK_BEHANDLING_ONPREM_TOPIC,
-                melding.funksjonellId,
-                melding.jsonToBehandlingDVH()
-            )
-                .get()
-
         val response =
             kafkaAivenTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, melding.funksjonellId, behandlingsMelding).get()
-        logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> onprem=${responseOnPrem.recordMetadata.offset()} aiven=${response.recordMetadata.offset()}")
+        logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> offset=${response.recordMetadata.offset()}")
 
         saksstatistikkBehandlingDvhCounter.increment()
-        melding.offsetVerdiOnPrem = responseOnPrem.recordMetadata.offset()
         melding.offsetVerdi = response.recordMetadata.offset()
         melding.sendtTidspunkt = LocalDateTime.now()
         saksstatistikkMellomlagringRepository.save(melding)
-        return responseOnPrem.recordMetadata.offset()
+        return response.recordMetadata.offset()
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     override fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long {
         val saksMelding = kafkaObjectMapper.writeValueAsString(melding.jsonToSakDVH())
-        val responseOnPrem =
-            kafkaTemplate.send(SAKSSTATISTIKK_SAK_ONPREM_TOPIC, melding.funksjonellId, melding.jsonToSakDVH()).get()
 
         val response =
             kafkaAivenTemplate.send(SAKSSTATISTIKK_SAK_TOPIC, melding.funksjonellId, saksMelding).get()
-        logger.info("$SAKSSTATISTIKK_SAK_ONPREM_TOPIC -> message sent -> onprem=${responseOnPrem.recordMetadata.offset()} aiven=${response.recordMetadata.offset()}")
+        logger.info("$SAKSSTATISTIKK_SAK_TOPIC -> message sent -> offset=${response.recordMetadata.offset()}")
 
         saksstatistikkSakDvhCounter.increment()
-        melding.offsetVerdiOnPrem = responseOnPrem.recordMetadata.offset()
         melding.offsetVerdi = response.recordMetadata.offset()
         melding.sendtTidspunkt = LocalDateTime.now()
         saksstatistikkMellomlagringRepository.save(melding)
-        return responseOnPrem.recordMetadata.offset()
+        return response.recordMetadata.offset()
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -174,12 +159,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private const val VEDTAKV2_TOPIC = "teamfamilie.aapen-barnetrygd-vedtak-v2"
-
-        @Deprecated("Kan slettes når man skrur av onprem")
-        private const val SAKSSTATISTIKK_BEHANDLING_ONPREM_TOPIC = "aapen-barnetrygd-saksstatistikk-behandling-v1"
-
-        @Deprecated("Kan slettes når man skrur av onprem")
-        private const val SAKSSTATISTIKK_SAK_ONPREM_TOPIC = "aapen-barnetrygd-saksstatistikk-sak-v1"
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "teamfamilie.aapen-barnetrygd-saksstatistikk-behandling-v1"
         private const val SAKSSTATISTIKK_SAK_TOPIC = "teamfamilie.aapen-barnetrygd-saksstatistikk-sak-v1"
         private const val COUNTER_NAME = "familie.ba.sak.kafka.produsert"

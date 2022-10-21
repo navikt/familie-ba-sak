@@ -65,7 +65,6 @@ class SendMeldingTilBisysTaskTest {
         )
 
         every { listenableFutureMock.addCallback(any(), any()) } just runs
-        kafkaProducer.kafkaTemplate = mockk()
         kafkaProducer.kafkaAivenTemplate = mockk()
         return Mocks(
             behandlingRepositoryMock,
