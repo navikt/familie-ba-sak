@@ -33,3 +33,27 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/kafka/prod/dvh_vedtak_topic.yaml
+      - name: Deploy dvh_saksstatistikk_sak_v1_topic til dev
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: dev-gcp
+          RESOURCE: .deploy/nais/kafka/dev/dvh_saksstatistikk_sak_v1_topic.yaml
+      - name: Deploy dvh_saksstatistikk_sak_v1_topic til prod
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: prod-gcp
+          RESOURCE: .deploy/nais/kafka/prod/dvh_saksstatistikk_sak_v1_topic.yaml
+      - name: Deploy dvh_sakstatistikk_behandling_v1_topic til dev
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: dev-gcp
+          RESOURCE: .deploy/nais/kafka/dev/dvh_sakstatistikk_behandling_v1_topic.yaml
+      - name: Deploy dvh_sakstatistikk_behandling_v1_topic til prod
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: prod-gcp
+          RESOURCE: .deploy/nais/kafka/prod/dvh_sakstatistikk_behandling_v1_topic.yaml

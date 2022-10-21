@@ -38,7 +38,7 @@ class SaksstatistikkControllerTest {
         every { saksstatistikkMellomlagringRepository.saveAndFlush(capture(slot)) } returns mockk()
         controller.registrerSendtFraStatistikk(request)
 
-        assertThat(slot.captured.offsetVerdi).isEqualTo(request.offset)
+        assertThat(slot.captured.offsetVerdiOnPrem).isEqualTo(request.offset)
         assertThat(slot.captured.type).isEqualTo(SaksstatistikkMellomlagringType.SAK)
         assertThat(slot.captured.sendtTidspunkt).isCloseTo(
             LocalDateTime.now(),
@@ -63,7 +63,7 @@ class SaksstatistikkControllerTest {
 
         controller.registrerSendtFraStatistikk(request)
 
-        assertThat(slot.captured.offsetVerdi).isEqualTo(request.offset)
+        assertThat(slot.captured.offsetVerdiOnPrem).isEqualTo(request.offset)
         assertThat(slot.captured.type).isEqualTo(SaksstatistikkMellomlagringType.BEHANDLING)
         assertThat(slot.captured.sendtTidspunkt).isCloseTo(
             LocalDateTime.now(),
