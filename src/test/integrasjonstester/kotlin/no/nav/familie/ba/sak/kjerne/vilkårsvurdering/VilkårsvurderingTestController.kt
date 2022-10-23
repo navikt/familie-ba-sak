@@ -124,8 +124,8 @@ class VilkårsvurderingTestController(
 private fun Map<LocalDate, Map<Vilkår, String>>.tilPersoner(): List<Person> {
     return this.keys.mapIndexed { indeks, startTidspunkt ->
         when (indeks) {
-            0 -> tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = startTidspunkt)
-            else -> tilfeldigPerson(personType = PersonType.BARN, fødselsdato = startTidspunkt)
+            0 -> tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = startTidspunkt.tilFødselsdato())
+            else -> tilfeldigPerson(personType = PersonType.BARN, fødselsdato = startTidspunkt.tilFødselsdato())
         }
     }.map {
         it.copy(id = 0).also { it.sivilstander.clear() }
@@ -139,7 +139,7 @@ fun Map<LocalDate, Map<Vilkår, String>>.tilVilkårsvurdering(
     val builder = VilkårsvurderingBuilder<Måned>(behandling)
 
     this.entries.forEach { (startTidspunkt, vilkårsresultater) ->
-        val person = personopplysningGrunnlag.personer.first { it.fødselsdato == startTidspunkt }
+        val person = personopplysningGrunnlag.personer.first { it.fødselsdato == startTidspunkt.tilFødselsdato() }
 
         val personBuilder = builder.forPerson(person, startTidspunkt.tilMånedTidspunkt())
         vilkårsresultater.forEach { (vilkår, tidslinje) -> personBuilder.medVilkår(tidslinje, vilkår) }
@@ -148,3 +148,5 @@ fun Map<LocalDate, Map<Vilkår, String>>.tilVilkårsvurdering(
 
     return builder.byggVilkårsvurdering()
 }
+
+private fun LocalDate.tilFødselsdato() = this.minusYears(3)
