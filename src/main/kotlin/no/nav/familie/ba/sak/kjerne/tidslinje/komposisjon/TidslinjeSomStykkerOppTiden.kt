@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 
+@Deprecated("Bruk funksjonen tidlinjeFraTidspunkt i stedet")
 abstract class TidslinjeSomStykkerOppTiden<I, T : Tidsenhet>(
     avhengigheter: Collection<Tidslinje<*, T>>
 ) : TidslinjeMedAvhengigheter<I, T>(avhengigheter) {
