@@ -18,6 +18,22 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.outerJoin(
     }
 }
 
+fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.leftJoin(
+    høyreTidslinjer: Map<K, Tidslinje<H, T>>,
+    kombinator: (V?, H?) -> R?
+): Map<K, Tidslinje<R, T>> {
+    val venstreTidslinjer = this
+    val venstreNøkler = venstreTidslinjer.keys
+
+    return venstreNøkler.associateWith { nøkkel ->
+        val venstreTidslinje = venstreTidslinjer.getOrDefault(nøkkel, TomTidslinje())
+        val høyreTidslinje = høyreTidslinjer.getOrDefault(nøkkel, TomTidslinje())
+
+        venstreTidslinje.kombinerMed(høyreTidslinje, kombinator)
+    }
+}
+
+// TODO: Strengt tatt ikke en leftJoin. Er bare en vanlig kombinerMed, og bruken bør erstattes med det
 fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.leftJoin(
     høyreTidslinje: Tidslinje<H, T>,
     kombinator: (V, H?) -> R?
