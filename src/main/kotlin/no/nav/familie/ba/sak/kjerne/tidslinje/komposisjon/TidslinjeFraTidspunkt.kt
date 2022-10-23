@@ -33,6 +33,8 @@ data class Innholdsresultat<I>(
     val innhold: I?,
     val harInnhold: Boolean = true
 ) {
+    constructor(innhold: I?) : this(innhold, true)
+
     companion object {
         fun <I> utenInnhold() = Innholdsresultat<I>(null, false)
     }
