@@ -55,7 +55,7 @@ class TekniskEndringAvFødselshendelseTest(
                 )
             )
         )
-        behandleFødselshendelse(
+        val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
                 barnasIdenter = listOf(scenario.barna.first().ident!!)
@@ -66,12 +66,13 @@ class TekniskEndringAvFødselshendelseTest(
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService
-        )
+        )!!
 
         val restUtvidetBehandling = familieBaSakKlient().opprettBehandling(
             søkersIdent = scenario.søker.ident,
             behandlingType = BehandlingType.TEKNISK_ENDRING,
-            behandlingÅrsak = BehandlingÅrsak.TEKNISK_ENDRING
+            behandlingÅrsak = BehandlingÅrsak.TEKNISK_ENDRING,
+            fagsakId = behandling.fagsak.id
         )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandling,

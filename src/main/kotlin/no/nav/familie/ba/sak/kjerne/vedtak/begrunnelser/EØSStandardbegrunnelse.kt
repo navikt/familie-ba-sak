@@ -139,7 +139,7 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosSokerBerOmOpphor"
     },
-    OPPHØR_BOR_IKKE_I_ET_EØS_LAND {
+    OPPHØR_BARN_BOR_IKKE_I_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorBorIkkeIEtEOSland"
     },
@@ -162,6 +162,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_SEPARASJONSAVTALEN_GJELDER_IKKE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorSeparasjonsavtaleGjelderIkke"
+    },
+    OPPHØR_SØKER_OG_BARN_BOR_IKKE_I_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSoekerOgBarnBorIkkeIEosLand"
+    },
+    OPPHØR_SØKER_BOR_IKKE_I_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSoekerBorIkkeIEosLand"
     };
 
     override val kanDelesOpp: Boolean = false

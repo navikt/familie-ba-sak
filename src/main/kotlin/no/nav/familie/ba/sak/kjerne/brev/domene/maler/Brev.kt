@@ -27,7 +27,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "innhenteOpplysningerEtterSoknadISED",
         "Innhente opplysninger etter søknad i SED"
     ),
-
+    INNHENTE_OPPLYSNINGER_INSTITUSJON(false, "innhenteOpplysningerInstitusjon", "Innhente opplysninger institusjon"),
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "Henlegge trukket søknad"),
     VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "Varsel om revurdering"),
     VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14(
@@ -52,7 +52,9 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     ),
 
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
+    SVARTIDSBREV_INSTITUSJON(false, "svartidsbrevInstitusjon", "Svartidsbrev institusjon"),
     FORLENGET_SVARTIDSBREV(false, "forlengetSvartidsbrev", "Forlenget svartidsbrev"),
+    FORLENGET_SVARTIDSBREV_INSTITUSJON(false, "forlengetSvartidsbrevInstitusjon", "Forlenget svartidsbrev institusjon"),
     INFORMASJONSBREV_FØDSEL_MINDREÅRIG(
         false,
         "informasjonsbrevFodselMindreaarig",
@@ -96,6 +98,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         when (this) {
             INNHENTE_OPPLYSNINGER,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
+            INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             VARSEL_OM_REVURDERING_SAMBOER,
@@ -105,7 +108,9 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INFORMASJONSBREV_DELT_BOSTED,
             HENLEGGE_TRUKKET_SØKNAD,
             SVARTIDSBREV,
+            SVARTIDSBREV_INSTITUSJON,
             FORLENGET_SVARTIDSBREV,
+            FORLENGET_SVARTIDSBREV_INSTITUSJON,
             INFORMASJONSBREV_FØDSEL_UMYNDIG,
             INFORMASJONSBREV_FØDSEL_VERGEMÅL,
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
@@ -146,6 +151,9 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> Dokumenttype.BARNETRYGD_VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS
             INFORMASJONSBREV_KAN_SØKE_EØS -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE_EØS
+            INNHENTE_OPPLYSNINGER_INSTITUSJON -> Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER_INSTITUSJON
+            SVARTIDSBREV_INSTITUSJON -> Dokumenttype.BARNETRYGD_SVARTIDSBREV_INSTITUSJON
+            FORLENGET_SVARTIDSBREV_INSTITUSJON -> Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV_INSTITUSJON
 
             VEDTAK_ENDRING,
             VEDTAK_OPPHØRT,
@@ -164,7 +172,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     val distribusjonstype: Distribusjonstype
         get() = when (this) {
             INFORMASJONSBREV_DELT_BOSTED -> Distribusjonstype.VIKTIG
-            INNHENTE_OPPLYSNINGER -> Distribusjonstype.VIKTIG
+            INNHENTE_OPPLYSNINGER, INNHENTE_OPPLYSNINGER_INSTITUSJON -> Distribusjonstype.VIKTIG
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
             HENLEGGE_TRUKKET_SØKNAD -> Distribusjonstype.ANNET
             VARSEL_OM_REVURDERING -> Distribusjonstype.VIKTIG
@@ -172,8 +180,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_SAMBOER -> Distribusjonstype.ANNET
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> Distribusjonstype.VIKTIG
-            SVARTIDSBREV -> Distribusjonstype.ANNET
-            FORLENGET_SVARTIDSBREV -> Distribusjonstype.ANNET
+            SVARTIDSBREV, SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
+            FORLENGET_SVARTIDSBREV, FORLENGET_SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_UMYNDIG -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Distribusjonstype.ANNET
@@ -194,16 +202,28 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> Distribusjonstype.VEDTAK
         }
 
+    fun førerTilOpplysningsplikt(): Boolean =
+        when (this) {
+            INNHENTE_OPPLYSNINGER,
+            INNHENTE_OPPLYSNINGER_INSTITUSJON,
+            VARSEL_OM_REVURDERING -> true
+
+            else -> false
+        }
+
     fun setterBehandlingPåVent(): Boolean =
         when (this) {
             FORLENGET_SVARTIDSBREV,
             INNHENTE_OPPLYSNINGER,
+            INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
-            SVARTIDSBREV -> true
+            SVARTIDSBREV,
+            SVARTIDSBREV_INSTITUSJON,
+            FORLENGET_SVARTIDSBREV_INSTITUSJON -> true
 
             else -> false
         }
@@ -211,6 +231,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     fun ventefristDager(manuellFrist: Long? = null, behandlingKategori: BehandlingKategori?): Long =
         when (this) {
             INNHENTE_OPPLYSNINGER,
+            INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
@@ -223,7 +244,10 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
                 else -> throw Feil("Behandlingskategori er ikke satt fot $this")
             }
 
-            FORLENGET_SVARTIDSBREV -> manuellFrist ?: throw Feil("Ventefrist var ikke satt for $this")
+            SVARTIDSBREV_INSTITUSJON -> 3 * 7
+            FORLENGET_SVARTIDSBREV, FORLENGET_SVARTIDSBREV_INSTITUSJON ->
+                manuellFrist
+                    ?: throw Feil("Ventefrist var ikke satt for $this")
 
             else -> throw Feil("Ventefrist ikke definert for brevtype $this")
         }
@@ -232,12 +256,15 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         when (this) {
             FORLENGET_SVARTIDSBREV,
             INNHENTE_OPPLYSNINGER,
+            INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
-            SVARTIDSBREV -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            SVARTIDSBREV,
+            SVARTIDSBREV_INSTITUSJON,
+            FORLENGET_SVARTIDSBREV_INSTITUSJON -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
 
             else -> throw Feil("Venteårsak ikke definert for brevtype $this")
         }

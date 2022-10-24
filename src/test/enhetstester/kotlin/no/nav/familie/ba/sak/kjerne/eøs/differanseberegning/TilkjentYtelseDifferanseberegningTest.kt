@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.oppdaterTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.byggTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan

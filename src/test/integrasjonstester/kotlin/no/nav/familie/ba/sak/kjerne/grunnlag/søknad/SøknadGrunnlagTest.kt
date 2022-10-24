@@ -82,9 +82,9 @@ class SøknadGrunnlagTest(
         val barnIdent = randomFnr()
         val søkerAktør = personidentService.hentAktør(søkerIdent)
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling(søkerIdent)
+            lagNyBehandling(søkerIdent, fagsak.id)
         )
 
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
@@ -108,9 +108,9 @@ class SøknadGrunnlagTest(
         val barnIdent = randomFnr()
         val søkerAktør = personidentService.hentAktør(søkerIdent)
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling(søkerIdent)
+            lagNyBehandling(søkerIdent, fagsak.id)
         )
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
 
@@ -162,9 +162,9 @@ class SøknadGrunnlagTest(
             endringAvOpplysningerBegrunnelse = ""
         )
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling(søkerIdent)
+            lagNyBehandling(søkerIdent, fagsak.id)
         )
 
         stegService.håndterSøknad(
@@ -182,12 +182,13 @@ class SøknadGrunnlagTest(
         assertTrue(persongrunnlag.barna.none { it.aktør.aktivFødselsnummer() == uregistrertBarn })
     }
 
-    private fun lagNyBehandling(søkerIdent: String) = NyBehandling(
+    private fun lagNyBehandling(søkerIdent: String, fagsakId: Long) = NyBehandling(
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
         søkersIdent = søkerIdent,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        søknadMottattDato = LocalDate.now()
+        søknadMottattDato = LocalDate.now(),
+        fagsakId = fagsakId
     )
 
     @Test

@@ -165,16 +165,6 @@ data class AndelTilkjentYtelse(
             "forrigePeriodeOffset = $forrigePeriodeOffset, kildeBehandlingId = $kildeBehandlingId, nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, differanseberegnetBeløp = $differanseberegnetPeriodebeløp)"
     }
 
-    fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
-        return (
-            this.aktør == other.aktør &&
-                this.stønadFom == other.stønadFom &&
-                this.stønadTom == other.stønadTom &&
-                this.kalkulertUtbetalingsbeløp == other.kalkulertUtbetalingsbeløp &&
-                this.type == other.type
-            )
-    }
-
     fun overlapperMed(andelFraAnnenBehandling: AndelTilkjentYtelse): Boolean {
         return this.type == andelFraAnnenBehandling.type &&
             this.overlapperPeriode(andelFraAnnenBehandling.periode)
@@ -237,30 +227,6 @@ data class AndelTilkjentYtelse(
             .filter { vilkårResultat ->
                 regelverkavhenigeVilkår().any { it == vilkårResultat.vilkårType }
             }
-
-    companion object {
-
-        /**
-         * Merk at det søkes snitt på visse attributter (erTilsvarendeForUtbetaling)
-         * og man kun returnerer objekter fra receiver (ikke other)
-         */
-        fun Set<AndelTilkjentYtelse>.snittAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
-            val andelerKunIDenne = this.subtractAndeler(other)
-            return this.subtractAndeler(andelerKunIDenne)
-        }
-
-        fun Set<AndelTilkjentYtelse>.disjunkteAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
-            val andelerKunIDenne = this.subtractAndeler(other)
-            val andelerKunIAnnen = other.subtractAndeler(this)
-            return andelerKunIDenne.union(andelerKunIAnnen)
-        }
-
-        private fun Set<AndelTilkjentYtelse>.subtractAndeler(other: Set<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> {
-            return this.filter { a ->
-                other.none { b -> a.erTilsvarendeForUtbetaling(b) }
-            }.toSet()
-        }
-    }
 }
 
 fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp(): List<AndelTilkjentYtelse> {

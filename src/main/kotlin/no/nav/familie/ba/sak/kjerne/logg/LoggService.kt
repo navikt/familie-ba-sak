@@ -77,12 +77,10 @@ class LoggService(
     }
 
     fun opprettRegistrerInstitusjonLogg(behandling: Behandling) {
-        val tittel = "institusjon ble registrert"
         lagre(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.INSTITUSJON_REGISTRERT,
-                tittel = tittel,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER

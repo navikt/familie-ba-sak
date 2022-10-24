@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
@@ -90,7 +89,7 @@ class AutovedtakFødselshendelseService(
         }
 
         val (barnSomSkalBehandlesForMor, alleBarnSomKanBehandles) = finnBarnSomSkalBehandlesForMor(
-            fagsak = fagsakService.hent(aktør = morsAktør),
+            fagsak = fagsakService.hentNormalFagsak(aktør = morsAktør),
             nyBehandlingHendelse = behandlingsdata
         )
 
@@ -110,7 +109,7 @@ class AutovedtakFødselshendelseService(
         val morsAktør = personidentService.hentAktør(nyBehandling.morsIdent)
 
         val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
-            fagsak = fagsakService.hent(aktør = morsAktør),
+            fagsak = fagsakService.hentNormalFagsak(aktør = morsAktør),
             nyBehandlingHendelse = nyBehandling
         )
 
@@ -181,7 +180,7 @@ class AutovedtakFødselshendelseService(
     }
 
     private fun hentÅpenNormalBehandling(aktør: Aktør): Behandling? {
-        return fagsakService.hent(aktør, FagsakType.NORMAL)?.let {
+        return fagsakService.hentNormalFagsak(aktør)?.let {
             behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(it.id)
         }
     }

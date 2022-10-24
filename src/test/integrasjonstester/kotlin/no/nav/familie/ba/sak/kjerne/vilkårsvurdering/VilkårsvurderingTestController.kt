@@ -64,7 +64,7 @@ class VilkårsvurderingTestController(
         val søker = personer.first { it.type == PersonType.SØKER }
         val barn = personer.filter { it.type == PersonType.BARN }
 
-        fagsakService.hentEllerOpprettFagsak(søker.aktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søker.aktør.aktivFødselsnummer())
 
         val behandling = behandlingService.opprettBehandling(
             NyBehandling(
@@ -73,7 +73,8 @@ class VilkårsvurderingTestController(
                 søkersIdent = søker.aktør.aktivFødselsnummer(),
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 søknadMottattDato = LocalDate.now(),
-                barnasIdenter = barn.map { it.aktør.aktivFødselsnummer() }
+                barnasIdenter = barn.map { it.aktør.aktivFødselsnummer() },
+                fagsakId = fagsak.id
             )
         )
 

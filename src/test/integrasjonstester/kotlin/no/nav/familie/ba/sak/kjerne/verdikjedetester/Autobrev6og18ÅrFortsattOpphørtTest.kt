@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import java.time.LocalDate
-import java.time.YearMonth
 
 class Autobrev6og18ÅrFortsattOpphørtTest(
     @Autowired private val fagsakService: FagsakService,
@@ -58,7 +58,7 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
         )
 
         val fagsakId = familieBaSakKlient().opprettFagsak(søkersIdent = scenario.søker.ident!!).data?.id!!
-        familieBaSakKlient().opprettBehandling(søkersIdent = scenario.søker.ident)
+        familieBaSakKlient().opprettBehandling(søkersIdent = scenario.søker.ident, fagsakId = fagsakId)
 
         val restFagsakEtterOpprettelse = familieBaSakKlient().hentFagsak(fagsakId = fagsakId)
 
@@ -157,7 +157,7 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
             autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
                 fagsakId = fagsakId,
                 alder = 18,
-                årMåned = YearMonth.now()
+                årMåned = inneværendeMåned()
             )
         )
 

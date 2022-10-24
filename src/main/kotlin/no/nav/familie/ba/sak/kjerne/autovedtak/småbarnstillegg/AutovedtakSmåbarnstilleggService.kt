@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -72,7 +73,7 @@ class AutovedtakSmåbarnstilleggService(
         }
 
     override fun skalAutovedtakBehandles(behandlingsdata: Aktør): Boolean {
-        val fagsak = fagsakService.hent(aktør = behandlingsdata) ?: return false
+        val fagsak = fagsakService.hentNormalFagsak(aktør = behandlingsdata) ?: return false
         val påvirkerFagsak = småbarnstilleggService.vedtakOmOvergangsstønadPåvirkerFagsak(fagsak)
         return if (!påvirkerFagsak) {
             antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak.increment()
@@ -88,11 +89,14 @@ class AutovedtakSmåbarnstilleggService(
     @Transactional
     override fun kjørBehandling(aktør: Aktør): String {
         antallVedtakOmOvergangsstønad.increment()
+        val fagsak = fagsakService.hentNormalFagsak(aktør)
+            ?: throw Feil(message = "Fant ikke fagsak av typen NORMAL for aktør ${aktør.aktørId}")
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = aktør,
                 behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
+                behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
+                fagsakId = fagsak.id
             )
 
         if (behandlingEtterBehandlingsresultat.status != BehandlingStatus.IVERKSETTER_VEDTAK) {

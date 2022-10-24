@@ -21,7 +21,7 @@ import java.time.LocalDate
 internal class VilkårsvurderingTidslinjerTest {
 
     @Test
-    fun `kan ha to overlappende perioder hvis det er bor med søker-vilkåret`() {
+    fun `et vilkår kan ha overlappende vilkårsresultater hvis bare ett er oppfylt`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -40,25 +40,17 @@ internal class VilkårsvurderingTidslinjerTest {
                 LocalDate.now().minusMonths(2)
             )
         }
+
+        // Legg på et overlappende vilkårsresultat som IKKE er oppfylt
         vilkårsvurdering.personResultater.filter { it.aktør.aktivFødselsnummer() == barnFnr }.forEach {
-            it.vilkårResultater.add(
-                lagVilkårResultat(
-                    id = 500,
-                    personResultat = it,
-                    vilkårType = Vilkår.BOR_MED_SØKER,
-                    behandlingId = defaultBehandling.id,
-                    periodeTom = null,
-                    resultat = Resultat.OPPFYLT
-                )
-            )
             it.vilkårResultater.add(
                 lagVilkårResultat(
                     id = 1000,
                     personResultat = it,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     behandlingId = defaultBehandling.id,
-                    periodeFom = null,
-                    periodeTom = null,
+                    periodeFom = null, // uendelig lenge siden
+                    periodeTom = null, // uendelig lenge til
                     resultat = Resultat.IKKE_OPPFYLT
                 )
             )
@@ -73,7 +65,7 @@ internal class VilkårsvurderingTidslinjerTest {
     }
 
     @Test
-    fun `kan ikke ha to overlappende perioder hvis det er bosatt i riket-vilkåret`() {
+    fun `kan ikke ha to overlappende vilkårsresultater hvis begge er oppfylt`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
         val barn2Fnr = randomFnr()
@@ -92,6 +84,8 @@ internal class VilkårsvurderingTidslinjerTest {
                 LocalDate.now().minusMonths(2)
             )
         }
+
+        // Legg på et overlappende vilkårsresultat som ER oppfylt
         vilkårsvurdering.personResultater.filter { it.aktør.aktivFødselsnummer() == barnFnr }.forEach {
             it.vilkårResultater.add(
                 lagVilkårResultat(
@@ -101,17 +95,6 @@ internal class VilkårsvurderingTidslinjerTest {
                     behandlingId = defaultBehandling.id,
                     periodeTom = null,
                     resultat = Resultat.OPPFYLT
-                )
-            )
-            it.vilkårResultater.add(
-                lagVilkårResultat(
-                    id = 1000,
-                    personResultat = it,
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
-                    behandlingId = defaultBehandling.id,
-                    periodeFom = null,
-                    periodeTom = null,
-                    resultat = Resultat.IKKE_OPPFYLT
                 )
             )
         }

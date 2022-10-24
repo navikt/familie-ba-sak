@@ -27,7 +27,8 @@ import java.time.YearMonth
 data class AutovedtakBrevBehandlingsdata(
     val aktør: Aktør,
     val behandlingsårsak: BehandlingÅrsak,
-    val standardbegrunnelse: Standardbegrunnelse
+    val standardbegrunnelse: Standardbegrunnelse,
+    val fagsakId: Long
 )
 
 @Service
@@ -49,7 +50,8 @@ class AutovedtakBrevService(
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = behandlingsdata.aktør,
                 behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = behandlingsdata.behandlingsårsak
+                behandlingÅrsak = behandlingsdata.behandlingsårsak,
+                fagsakId = behandlingsdata.fagsakId
             )
 
         vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
@@ -154,14 +156,17 @@ private fun BehandlingÅrsak.tilBrevkoder(): List<InfotrygdBrevkode> {
             InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_6_ÅR,
             InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_6_ÅR
         )
+
         BehandlingÅrsak.OMREGNING_18ÅR -> listOf(
             InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_18_ÅR,
             InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_18_ÅR
         )
+
         BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> listOf(
             InfotrygdBrevkode.BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG,
             InfotrygdBrevkode.BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG
         )
+
         else -> emptyList()
     }
 }

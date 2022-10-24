@@ -183,9 +183,9 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette behandlende enhet ved opprettelse av behandling`() {
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling()
+            lagNyBehandling(fagsak.id)
         )
 
         val arbeidsfordelingPåBehandling =
@@ -197,9 +197,9 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad`() {
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling()
+            lagNyBehandling(fagsak.id)
         )
 
         val arbeidsfordelingPåBehandling =
@@ -225,9 +225,9 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette ny behandlende enhet ved registrering av søknad`() {
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling()
+            lagNyBehandling(fagsak.id)
         )
 
         val arbeidsfordelingPåBehandling =
@@ -253,9 +253,9 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette ny behandlende enhet når man legger til nytt barn ved endring på søknadsgrunnlag`() {
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling()
+            lagNyBehandling(fagsak.id)
         )
 
         val arbeidsfordelingPåBehandling =
@@ -305,9 +305,9 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad når enhet er manuelt satt`() {
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling()
+            lagNyBehandling(fagsak.id)
         )
 
         val arbeidsfordelingPåBehandling =
@@ -341,9 +341,9 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette ny behandlende enhet og oppdatere eksisterende oppgave ved registrering av søknad`() {
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling()
+            lagNyBehandling(fagsak.id)
         )
 
         val arbeidsfordelingPåBehandling =
@@ -375,12 +375,13 @@ class ArbeidsfordelingIntegrationTest(
         )
     }
 
-    private fun lagNyBehandling() = NyBehandling(
+    private fun lagNyBehandling(fagsakId: Long) = NyBehandling(
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
         søkersIdent = SØKER_FNR,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        søknadMottattDato = now()
+        søknadMottattDato = now(),
+        fagsakId = fagsakId
     )
 
     companion object {

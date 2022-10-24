@@ -57,7 +57,11 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         val fagsakOriginal = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
-        opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
+        opprettOgLagreBehandlingMedAndeler(
+            personIdent = forelderIdent,
+            offsetPåAndeler = listOf(1L),
+            fagsakId = fagsakOriginal.id
+        )
 
         val fagsak = fagsakService.hentLøpendeFagsaker()
 
@@ -77,7 +81,11 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
         val førstegangsbehandling =
-            opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
+            opprettOgLagreBehandlingMedAndeler(
+                personIdent = forelderIdent,
+                offsetPåAndeler = listOf(1L),
+                fagsakId = fagsakOriginal.id
+            )
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(førstegangsbehandling.id)
 
@@ -94,9 +102,11 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         personIdent: String,
         offsetPåAndeler: List<Long> = emptyList(),
         erIverksatt: Boolean = true,
-        medStatus: BehandlingStatus = BehandlingStatus.UTREDES
+        medStatus: BehandlingStatus = BehandlingStatus.UTREDES,
+        fagsakId: Long
     ): Behandling {
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(personIdent))
+        val behandling =
+            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = personIdent, fagsakId = fagsakId))
         behandling.status = medStatus
         behandlingRepository.save(behandling)
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)

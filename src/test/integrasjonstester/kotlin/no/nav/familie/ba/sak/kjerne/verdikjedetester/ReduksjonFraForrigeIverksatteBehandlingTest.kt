@@ -112,8 +112,9 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         val restBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
+                behandlingType = behandlingType,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-                behandlingType = behandlingType
+                fagsakId = fagsak.id
             )
         val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
@@ -159,9 +160,10 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 behandlingType = behandlingType,
-                behandlingÅrsak = behandlingÅrsak
+                behandlingÅrsak = behandlingÅrsak,
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+                fagsakId = fagsak.id
             )
 
         return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(

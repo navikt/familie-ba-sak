@@ -123,8 +123,8 @@ class NyUtbetalingsoppdragGeneratorTest(
             lagVedtakMedTilkjentYtelse(
                 vedtak = vedtak,
                 tilkjentYtelse = tilkjentYtelse
-            )
-
+            ),
+            AndelTilkjentYtelseForIverksettingFactory()
         )
         val utbetalingsoppdrag = konvertTilUtbetalingsoppdrag(oppdatertTilkjentYtelse.utbetalingsoppdrag)
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
@@ -212,11 +212,12 @@ class NyUtbetalingsoppdragGeneratorTest(
                 tilkjentYtelse = lagInitiellTilkjentYtelse(behandling),
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerTilkjentYtelse
+                        andelerTilkjentYtelse.forIverksetting()
                     )
                 ),
                 sisteOffsetPåFagsak = 0
             ),
+            AndelTilkjentYtelseForIverksettingFactory(),
             forrigeTilkjentYtelse = forrigeTilkjentYtelse
         )
         val utbetalingsoppdrag = konvertTilUtbetalingsoppdrag(oppdatertTilkjentYtelse.utbetalingsoppdrag)
@@ -301,7 +302,8 @@ class NyUtbetalingsoppdragGeneratorTest(
             lagVedtakMedTilkjentYtelse(
                 vedtak = vedtak,
                 tilkjentYtelse = tilkjentYtelse
-            )
+            ),
+            AndelTilkjentYtelseForIverksettingFactory()
         )
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
@@ -349,12 +351,13 @@ class NyUtbetalingsoppdragGeneratorTest(
                 vedtak = vedtak2,
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling
+                        andelerFørstegangsbehandling.forIverksetting()
                     )
                 ),
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 tilkjentYtelse = tilkjentYtelse2
             ),
+            AndelTilkjentYtelseForIverksettingFactory(),
             forrigeTilkjentYtelse = oppdatertTilkjentYtelse
         )
         val utbetalingsoppdrag = konvertTilUtbetalingsoppdrag(oppdatertTilkjentYtelse2.utbetalingsoppdrag)
@@ -441,7 +444,8 @@ class NyUtbetalingsoppdragGeneratorTest(
             lagVedtakMedTilkjentYtelse(
                 vedtak = vedtak,
                 tilkjentYtelse = tilkjentYtelse
-            )
+            ),
+            AndelTilkjentYtelseForIverksettingFactory()
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -481,12 +485,13 @@ class NyUtbetalingsoppdragGeneratorTest(
                 vedtak = vedtak2,
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling
+                        andelerFørstegangsbehandling.forIverksetting()
                     )
                 ),
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 tilkjentYtelse = tilkjentYtelse2
             ),
+            AndelTilkjentYtelseForIverksettingFactory(),
             forrigeTilkjentYtelse = oppdatertTilkjentYtelse
         )
         val utbetalingsoppdrag = konvertTilUtbetalingsoppdrag(oppdatertTilkjentYtelse2.utbetalingsoppdrag)
@@ -567,7 +572,8 @@ class NyUtbetalingsoppdragGeneratorTest(
             lagVedtakMedTilkjentYtelse(
                 vedtak = vedtak,
                 tilkjentYtelse = tilkjentYtelse
-            )
+            ),
+            AndelTilkjentYtelseForIverksettingFactory()
         )
         val utbetalingsoppdrag = konvertTilUtbetalingsoppdrag(oppdatertTilkjentYtelse.utbetalingsoppdrag)
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
@@ -634,7 +640,8 @@ class NyUtbetalingsoppdragGeneratorTest(
                     vedtak = vedtak,
                     erSimulering = true,
                     tilkjentYtelse = tilkjentYtelse
-                )
+                ),
+                AndelTilkjentYtelseForIverksettingFactory()
             )
         }
         assertEquals("Finnes flere personer med småbarnstillegg", exception.message)
@@ -694,7 +701,8 @@ class NyUtbetalingsoppdragGeneratorTest(
             lagVedtakMedTilkjentYtelse(
                 vedtak = vedtak,
                 tilkjentYtelse = tilkjentYtelse
-            )
+            ),
+            AndelTilkjentYtelseForIverksettingFactory()
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -744,12 +752,13 @@ class NyUtbetalingsoppdragGeneratorTest(
                 erSimulering = true,
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling
+                        andelerFørstegangsbehandling.forIverksetting()
                     )
                 ),
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 tilkjentYtelse = tilkjentYtelse2
             ),
+            AndelTilkjentYtelseForIverksettingFactory(),
             forrigeTilkjentYtelse = oppdatertTilkjentYtelse
         )
         val utbetalingsoppdrag = konvertTilUtbetalingsoppdrag(oppdatertTilkjentYtelse2.utbetalingsoppdrag)
@@ -833,7 +842,8 @@ class NyUtbetalingsoppdragGeneratorTest(
             lagVedtakMedTilkjentYtelse(
                 vedtak = vedtak,
                 tilkjentYtelse = tilkjentYtelse
-            )
+            ),
+            AndelTilkjentYtelseForIverksettingFactory()
         )
         oppdatertTilkjentYtelse.andelerTilkjentYtelse.forEach { it.tilkjentYtelse = oppdatertTilkjentYtelse }
         beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
@@ -856,10 +866,11 @@ class NyUtbetalingsoppdragGeneratorTest(
                 sisteOffsetPåFagsak = 0,
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.kjedeinndelteAndeler(
-                        andelerFørstegangsbehandling
+                        andelerFørstegangsbehandling.forIverksetting()
                     )
                 )
             ),
+            AndelTilkjentYtelseForIverksettingFactory(),
             forrigeTilkjentYtelse = oppdatertTilkjentYtelse
         )
 
@@ -923,7 +934,11 @@ class NyUtbetalingsoppdragGeneratorTest(
         førsteTilkjentYtelse.utbetalingsoppdrag = "utbetalingsoppdrg"
         tilkjentYtelseRepository.saveAndFlush(førsteTilkjentYtelse)
 
-        utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(førsteVedtak, "Z123")
+        utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            førsteVedtak,
+            "Z123",
+            AndelTilkjentYtelseForIverksettingFactory()
+        )
         førsteBehandling.status = BehandlingStatus.AVSLUTTET
         førsteBehandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
         behandlingService.lagre(førsteBehandling)
@@ -963,7 +978,11 @@ class NyUtbetalingsoppdragGeneratorTest(
         tilkjentYtelseRepository.saveAndFlush(andreTilkjentYtelse)
 
         val tilkjentYtelse =
-            utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(andreVedtak, "Z123")
+            utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                andreVedtak,
+                "Z123",
+                AndelTilkjentYtelseForIverksettingFactory()
+            )
         val utbetalingsoppdrag =
             objectMapper.readValue(tilkjentYtelse.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -1006,8 +1025,8 @@ class NyUtbetalingsoppdragGeneratorTest(
             lagVedtakMedTilkjentYtelse(
                 vedtak = vedtak,
                 tilkjentYtelse = tilkjentYtelse
-            )
-
+            ),
+            AndelTilkjentYtelseForIverksettingFactory()
         )
         val utbetalingsoppdrag = konvertTilUtbetalingsoppdrag(oppdatertTilkjentYtelse.utbetalingsoppdrag)
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)

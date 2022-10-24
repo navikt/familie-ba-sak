@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -59,20 +58,16 @@ class BehandlingService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val infotrygdService: InfotrygdService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val personidentService: PersonidentService,
     private val taskRepository: TaskRepositoryWrapper,
     private val vilkårsvurderingService: VilkårsvurderingService
 ) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
-        val søkersAktør = personidentService.hentAktør(nyBehandling.søkersIdent)
-
-        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør, nyBehandling.fagsakType)
-            ?: throw FunksjonellFeil(
-                melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
-                frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak"
-            )
+        val fagsak = fagsakRepository.finnFagsak(nyBehandling.fagsakId) ?: throw FunksjonellFeil(
+            melding = "Kan ikke lage behandling på person. Fant ikke fagsak ${nyBehandling.fagsakId}",
+            frontendFeilmelding = "Kan ikke lage behandling på person. Fant ikke fagsak."
+        )
 
         val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)
         val sisteBehandlingSomErVedtatt =

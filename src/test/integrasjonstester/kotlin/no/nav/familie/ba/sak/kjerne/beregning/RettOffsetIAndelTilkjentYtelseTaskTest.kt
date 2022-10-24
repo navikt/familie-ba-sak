@@ -112,7 +112,8 @@ internal class RettOffsetIAndelTilkjentYtelseTaskTest(
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-                behandlingType = behandlingType
+                behandlingType = behandlingType,
+                fagsakId = fagsak.id
             )
         val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
@@ -165,9 +166,10 @@ internal class RettOffsetIAndelTilkjentYtelseTaskTest(
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().opprettBehandling(
                 søkersIdent = fagsak.søkerFødselsnummer,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 behandlingType = behandlingType,
-                behandlingÅrsak = behandlingÅrsak
+                behandlingÅrsak = behandlingÅrsak,
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+                fagsakId = fagsak.id
             )
 
         return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
