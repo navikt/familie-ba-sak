@@ -24,3 +24,9 @@ spec:
     - team: teamfamilie
       application: familie-ba-kafka-manager
       access: read
+    - team: ptsak
+      application: pt-sak-barnetrygd-dev
+      access: read
+    - team: ptsak
+      application: pt-sak-barnetrygd-preprod
+      access: read
