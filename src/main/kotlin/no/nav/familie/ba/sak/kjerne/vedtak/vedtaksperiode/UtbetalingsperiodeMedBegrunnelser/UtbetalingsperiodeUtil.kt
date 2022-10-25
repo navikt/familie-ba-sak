@@ -31,14 +31,18 @@ fun hentPerioderMedUtbetaling(
             .filtrer { !it.isNullOrEmpty() }
             .slåSammenLike()
 
-    return andelerTilkjentYtelse
+    val alleAndelerKombinertTidslinje = andelerTilkjentYtelse
         .tilTidslinjerPerPerson().values
         .kombinerUtenNull { it }
         .filtrer { !it?.toList().isNullOrEmpty() }
+
+    val andelerSplittetOppTidslinje = alleAndelerKombinertTidslinje
         .leftJoin(splittkriterierForVedtaksperiodeTidslinje) { andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode ->
             Pair(andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode)
         }
         .filtrerIkkeNull()
+
+    return andelerSplittetOppTidslinje
         .perioder()
         .map {
             VedtaksperiodeMedBegrunnelser(
