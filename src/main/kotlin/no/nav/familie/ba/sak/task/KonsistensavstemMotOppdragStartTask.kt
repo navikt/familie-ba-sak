@@ -9,6 +9,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -54,12 +55,15 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         logger.info("Start: hent behandlinger klar for konsistensavstemming ${LocalDateTime.now()}")
         var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
-        for (chunkNr in 1..100) {
+        val behandlinger = mutableListOf<BigInteger>()
+        for (chunkNr in 1..40) {
             logger.info("Chunk $chunkNr: hent behandlinger klar for konsistensavstemming ${LocalDateTime.now()}")
+            behandlinger.addAll(relevanteBehandlinger.content)
             relevanteBehandlinger =
                 avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
         }
         logger.info("Slutt: hent behandlinger klar for konsistensavstemming ${LocalDateTime.now()}")
+        logger.info("behandlinger: $behandlinger")
     }
 
     fun dryRunKonsistensavstemmingOmskriving(size: Int) {
@@ -67,10 +71,12 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         val sideantall = Pageable.ofSize(size)
         var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(sideantall)
         logger.info("Antall sider: ${relevanteBehandlinger.totalPages} og antallBehandlinger ${relevanteBehandlinger.size}")
+        val loggBehandlinger = mutableListOf<BigInteger>()
         var chunkNr = 0
 
-        for (pageNumber in 1..10) {
+        for (pageNumber in 1..2) {
             relevanteBehandlinger.chunked(500).forEach { behandlinger ->
+                loggBehandlinger.addAll(behandlinger)
                 logger.info("Chunk $chunkNr: hent behandlinger klar for konsistensavstemming omskriving ${LocalDateTime.now()}")
                 chunkNr = chunkNr.inc()
             }
@@ -80,6 +86,7 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         }
 
         logger.info("Slutt: hent behandlinger klar for konsistensavstemming omskriving${LocalDateTime.now()}")
+        logger.info("behandlinger: $loggBehandlinger")
     }
 
     companion object {
