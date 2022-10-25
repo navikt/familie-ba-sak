@@ -2,10 +2,15 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.Innholdsresultat
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.aug
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jul
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jun
@@ -13,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.okt
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -64,5 +70,14 @@ internal class MapTidslinjeTest {
         assertEquals(forventet, faktisk)
         assertEquals(jan(2020), faktisk.fraOgMed())
         assertEquals(okt(2021), faktisk.tilOgMed())
+
+        (
+            (aug(2019)..des(2019))
+                .plus(apr(2020)..jun(2020))
+                .plus(sep(2020)..feb(2021))
+                .plus(nov(2021)..mai(2022))
+            ).forEach {
+            assertEquals(Innholdsresultat.utenInnhold<String>(), faktisk.innholdsresultatForTidspunkt(it))
+        }
     }
 }

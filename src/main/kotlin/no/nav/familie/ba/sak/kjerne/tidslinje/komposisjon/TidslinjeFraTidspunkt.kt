@@ -46,12 +46,15 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.innholdsresultatForTidspunkt(tidspunkt: T
 fun <I, T : Tidsenhet> Collection<Periode<I, T>>.innholdsresultatForTidspunkt(
     tidspunkt: Tidspunkt<T>
 ): Innholdsresultat<I> {
-    val periode = this.firstOrNull { it.fraOgMed <= tidspunkt && it.tilOgMed >= tidspunkt }
+    val periode = this.firstOrNull { it.omfatter(tidspunkt) }
     return when (periode) {
         null -> Innholdsresultat.utenInnhold()
         else -> Innholdsresultat(periode.innhold, true)
     }
 }
+
+private fun <I, T : Tidsenhet> Periode<I, T>.omfatter(tidspunkt: Tidspunkt<T>) =
+    this.fraOgMed <= tidspunkt && this.tilOgMed >= tidspunkt
 
 private data class TidspunktMedInnholdsresultat<I, T : Tidsenhet>(
     val tidspunkt: Tidspunkt<T>,
