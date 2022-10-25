@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelServic
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -26,6 +27,7 @@ class EndretUtbetalingAndelTidslinjeService(
 internal fun Iterable<EndretUtbetalingAndel>.tilBarnasHarEtterbetaling3ÅrTidslinjer(): Map<Aktør, Tidslinje<Boolean, Måned>> {
     return this
         .filter { it.årsak == Årsak.ETTERBETALING_3ÅR }
+        .filter { it.person?.type == PersonType.BARN }
         .filter { it.person?.aktør != null }
         .groupBy { it.person?.aktør!! }
         .mapValues { (_, endringer) -> endringer.map { it.tilPeriode { true } } }

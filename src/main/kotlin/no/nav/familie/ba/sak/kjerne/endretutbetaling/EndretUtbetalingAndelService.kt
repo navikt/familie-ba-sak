@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -27,7 +28,8 @@ class EndretUtbetalingAndelService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val sanityService: SanityService,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList()
 ) {
     fun hentEndredeUtbetalingAndeler(behandlingId: Long) =
         endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
@@ -88,6 +90,12 @@ class EndretUtbetalingAndelService(
         validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, andelTilkjentYtelser)
 
         endretUtbetalingAndelRepository.saveAndFlush(endretUtbetalingAndel)
+        endretUtbetalingAndelOppdatertAbonnementer.forEach {
+            it.endretUtbetalingAndelerOppdatert(
+                behandlingId = BehandlingId(behandling.id),
+                endretUtbetalingAndeler = andreEndredeAndelerPåBehandling + endretUtbetalingAndel
+            )
+        }
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling,
@@ -143,4 +151,11 @@ class EndretUtbetalingAndelService(
             it.andelTilkjentYtelser.clear()
         }
     }
+}
+
+interface EndretUtbetalingAndelerOppdatertAbonnent {
+    fun endretUtbetalingAndelerOppdatert(
+        behandlingId: BehandlingId,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+    )
 }

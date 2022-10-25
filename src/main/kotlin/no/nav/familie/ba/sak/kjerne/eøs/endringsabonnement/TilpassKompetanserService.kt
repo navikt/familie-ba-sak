@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelerOppdatertAbonnent
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -12,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.EndretUtbetalingAndelTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.tilBarnasHarEtterbetaling3ÅrTidslinjer
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -51,6 +54,39 @@ class TilpassKompetanserTilRegelverkService(
 
         val barnasHarEtterbetaling3ÅrTidslinjer =
             endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId)
+
+        val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
+            gjeldendeKompetanser,
+            barnasRegelverkResultatTidslinjer,
+            barnasHarEtterbetaling3ÅrTidslinjer
+        ).medBehandlingId(behandlingId)
+
+        skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
+    }
+}
+
+@Service
+class TilpassKompetanserTilEndretUtebetalingAndelerService(
+    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
+    kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>
+) : EndretUtbetalingAndelerOppdatertAbonnent {
+    val skjemaService = PeriodeOgBarnSkjemaService(
+        kompetanseRepository,
+        endringsabonnenter
+    )
+
+    @Transactional
+    override fun endretUtbetalingAndelerOppdatert(
+        behandlingId: BehandlingId,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+    ) {
+        val gjeldendeKompetanser = skjemaService.hentMedBehandlingId(behandlingId)
+        val barnasRegelverkResultatTidslinjer =
+            vilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId)
+
+        val barnasHarEtterbetaling3ÅrTidslinjer = endretUtbetalingAndeler
+            .tilBarnasHarEtterbetaling3ÅrTidslinjer()
 
         val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
             gjeldendeKompetanser,
