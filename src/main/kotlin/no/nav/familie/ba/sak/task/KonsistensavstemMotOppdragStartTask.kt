@@ -36,10 +36,10 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         var chunkNr = 1
         for (pageNumber in 1..relevanteBehandlinger.totalPages) {
             relevanteBehandlinger.content.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
-                .forEach { oppstykketRelaterterteBehandlinger ->
+                .forEach { oppstykketRelevanteBehandlinger ->
                     avstemmingService.opprettKonsistensavstemmingDataTask(
                         konsistensavstemmingTask.avstemmingdato,
-                        oppstykketRelaterterteBehandlinger,
+                        oppstykketRelevanteBehandlinger,
                         konsistensavstemmingTask.batchId,
                         transaksjonsId,
                         chunkNr
