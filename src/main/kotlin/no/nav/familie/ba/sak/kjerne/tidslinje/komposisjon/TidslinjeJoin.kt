@@ -17,10 +17,3 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.outerJoin(
         venstreTidslinje.kombinerMed(høyreTidslinje, kombinator)
     }
 }
-
-fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.leftJoin(
-    høyreTidslinje: Tidslinje<H, T>,
-    kombinator: (V, H?) -> R?
-): Tidslinje<R, T> = this.kombinerMed(høyreTidslinje) { venstre, høyre ->
-    venstre?.let { kombinator(venstre, høyre) }
-}
