@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -29,7 +29,7 @@ class EndretUtbetalingAndelController(
     private val tilgangService: TilgangService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val tilbakestillBehandlingService: TilbakestillBehandlingService
+    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService
 ) {
 
     @PutMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
@@ -52,7 +52,9 @@ class EndretUtbetalingAndelController(
             restEndretUtbetalingAndel
         )
 
-        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
+        tilbakestillBehandlingTilBehandlingsresultatService
+            .tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
+
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -79,7 +81,8 @@ class EndretUtbetalingAndelController(
             endretUtbetalingAndelId
         )
 
-        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
+        tilbakestillBehandlingTilBehandlingsresultatService
+            .tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -101,7 +104,9 @@ class EndretUtbetalingAndelController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
 
-        tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
+        tilbakestillBehandlingTilBehandlingsresultatService
+            .tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
+
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
