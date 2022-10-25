@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
 import junit.framework.Assert.assertEquals
@@ -10,6 +11,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragDataTask
+import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.BeforeEach
@@ -42,12 +46,15 @@ class AvstemmingServiceTest {
     val batchId = 1000000L
     val avstemmingsdato = LocalDateTime.now()
     val transaksjonsId = UUID.randomUUID()
+    val konsistensavstemmingStartTaskDTO = KonsistensavstemmingStartTaskDTO(batchId, avstemmingsdato)
+
+    lateinit var task: KonsistensavstemMotOppdragStartTask
 
     @BeforeEach
     fun setUp() {
         val behandlingId = BigInteger.ONE
         val page = mockk<Page<BigInteger>>()
-        val pageable = Pageable.ofSize(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
+        val pageable = Pageable.ofSize(KonsistensavstemMotOppdragStartTask.ANTALL_BEHANDLINGER)
         every { behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable) } returns page
         every { page.totalPages } returns 1
         every { page.content } returns listOf(behandlingId)
@@ -74,6 +81,10 @@ class AvstemmingServiceTest {
         )
         val aktivFødselsnummere = mapOf(behandlingId.toLong() to "test")
         every { behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(any()) } returns aktivFødselsnummere
+        val uuidMock = mockkStatic(UUID::class)
+        every { UUID.randomUUID() } returns transaksjonsId
+
+        task = KonsistensavstemMotOppdragStartTask(avstemmingService)
     }
 
     @Test
@@ -85,10 +96,11 @@ class AvstemmingServiceTest {
             )
         } returns ""
 
-        konsistensavstemOppdragStart(
-            batchId = batchId,
-            avstemmingsdato = avstemmingsdato,
-            transaksjonsId = transaksjonsId
+        task.doTask(
+            Task(
+                payload = objectMapper.writeValueAsString(konsistensavstemmingStartTaskDTO),
+                type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE
+            )
         )
 
         val taskSlots = mutableListOf<Task>()
@@ -148,28 +160,5 @@ class AvstemmingServiceTest {
         assertEquals(1, dataChunkSlot.captured.chunkNr)
         assertEquals(transaksjonsId, dataChunkSlot.captured.transaksjonsId)
         assertEquals(true, dataChunkSlot.captured.erSendt)
-    }
-
-    private fun konsistensavstemOppdragStart(batchId: Long, avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
-        avstemmingService.nullstillDataChunk()
-
-        avstemmingService.sendKonsistensavstemmingStart(avstemmingsdato, transaksjonsId)
-
-        var relevanteBehandlinger =
-            avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
-
-        for (chunkNr in 1..relevanteBehandlinger.totalPages) {
-            avstemmingService.opprettKonsistensavstemmingDataTask(
-                avstemmingsdato,
-                relevanteBehandlinger,
-                batchId,
-                transaksjonsId,
-                chunkNr
-            )
-            relevanteBehandlinger =
-                avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
-        }
-
-        avstemmingService.opprettKonsistensavstemmingAvsluttTask(batchId, transaksjonsId, avstemmingsdato)
     }
 }
