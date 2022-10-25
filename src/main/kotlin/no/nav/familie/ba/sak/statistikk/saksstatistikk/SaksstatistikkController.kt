@@ -63,7 +63,7 @@ class SaksstatistikkController(
             val kontraktversjon = jsnoNode.get("versjon").asText()
 
             val sm = SaksstatistikkMellomlagring(
-                offsetVerdi = input.offset,
+                offsetVerdiOnPrem = input.offset,
                 funksjonellId = funksjonellId,
                 type = input.type,
                 json = input.json,
