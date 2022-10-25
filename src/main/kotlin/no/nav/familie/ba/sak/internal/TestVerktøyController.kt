@@ -108,14 +108,14 @@ class TestVerktøyController(
         }
     }
 
-    @GetMapping(path = ["/test-konsistenavstemming"])
+    @PostMapping(path = ["/test-konsistenavstemming"])
     @Unprotected
     fun testKonsistensavstemmingLogikk(): ResponseEntity<Ressurs<String>> {
         konsistensavstemMotOppdragStartTask.dryRunKonsistensavstemming()
         return ResponseEntity.ok(Ressurs.success("OK"))
     }
 
-    @GetMapping(path = ["/test-konsistenavstemming/{size}"])
+    @PostMapping(path = ["/test-konsistenavstemming/{size}"])
     @Unprotected
     fun testKonsistensavstemmingLogikkNy(@PathVariable size: Int): ResponseEntity<Ressurs<String>> {
         konsistensavstemMotOppdragStartTask.dryRunKonsistensavstemmingOmskriving(size)
