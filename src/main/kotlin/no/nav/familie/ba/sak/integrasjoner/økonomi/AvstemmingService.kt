@@ -5,8 +5,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragDataTask
+import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragPerioderGeneratorTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingPerioderGeneratorTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import no.nav.familie.prosessering.domene.Task
@@ -46,6 +48,16 @@ class AvstemmingService(
         dataChunkRepository.saveAllAndFlush(
             dataChunkRepository.findByErSendt(false).map { dataChunk -> dataChunk.also { it.erSendt = true } }
         )
+    }
+
+    fun erKonsistensavstemmingKjørtForTransaksjonsid(transaksjonsId: UUID): Boolean {
+        val dataChunks = dataChunkRepository.findByTransaksjonsId(transaksjonsId)
+        return dataChunks.none { !it.erSendt }
+    }
+
+    fun erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(transaksjonsId: UUID, chunkNr: Int): Boolean {
+        val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
+        return dataChunk.erSendt
     }
 
     fun konsistensavstemOppdragData(
@@ -103,34 +115,36 @@ class AvstemmingService(
         behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun opprettKonsistensavstemmingDataTask(
+    fun opprettKonsistensavstemmingPerioderGeneratorTask(
         avstemmingsdato: LocalDateTime,
-        relevanteBehandlinger: List<BigInteger>,
+        relevanteBehandlinger: List<Long>,
         batchId: Long,
         transaksjonsId: UUID,
         chunkNr: Int
     ) {
-        val perioderTilAvstemming =
-            hentDataForKonsistensavstemming(
-                avstemmingsdato,
-                relevanteBehandlinger.map { it.toLong() }
+        val batch = batchRepository.getReferenceById(batchId)
+        dataChunkRepository.save(
+            DataChunk(
+                batch = batch,
+                transaksjonsId = transaksjonsId,
+                chunkNr = chunkNr
             )
-        val batch = batchRepository.getById(batchId)
+        )
 
-        logger.info("Oppretter konsisensavstemmingstasker for transaksjonsId $transaksjonsId og chunk $chunkNr med ${perioderTilAvstemming.size} løpende saker")
-        val konsistensavstemmingDataTask = Task(
-            type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE,
+        logger.info("Oppretter task for å generere perioder for relevante behandlinger. transaksjonsId=$transaksjonsId og chunk=$chunkNr med ${relevanteBehandlinger.size} behandlinger")
+        val task = Task(
+            type = KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(
-                KonsistensavstemmingDataTaskDTO(
+                KonsistensavstemmingPerioderGeneratorTaskDTO(
                     transaksjonsId = transaksjonsId,
                     chunkNr = chunkNr,
-                    avstemmingdato = avstemmingsdato,
-                    perioderForBehandling = perioderTilAvstemming
+                    avstemmingsdato = avstemmingsdato,
+                    batchId = batchId,
+                    relevanteBehandlinger = relevanteBehandlinger
                 )
             )
         )
-        taskRepository.save(konsistensavstemmingDataTask)
-        dataChunkRepository.save(DataChunk(batch = batch, transaksjonsId = transaksjonsId, chunkNr = chunkNr))
+        taskRepository.save(task)
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
@@ -149,7 +163,7 @@ class AvstemmingService(
         logger.info("[dryRun-konsinstenavstemming] Oppretter konsisensavstemmingstasker for transaksjonsId $transaksjonsId og chunk $chunkNr med ${perioderTilAvstemming.size} løpende saker")
     }
 
-    private fun hentDataForKonsistensavstemming(
+    fun hentDataForKonsistensavstemming(
         avstemmingstidspunkt: LocalDateTime,
         relevanteBehandlinger: List<Long>
     ): List<PerioderForBehandling> {

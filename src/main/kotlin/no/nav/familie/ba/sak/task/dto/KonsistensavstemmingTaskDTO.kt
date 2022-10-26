@@ -6,7 +6,11 @@ import java.util.UUID
 
 data class KonsistensavstemmingTaskDTO(val avstemmingdato: LocalDateTime)
 
-data class KonsistensavstemmingStartTaskDTO(val batchId: Long, val avstemmingdato: LocalDateTime)
+data class KonsistensavstemmingStartTaskDTO(
+    val batchId: Long,
+    val avstemmingdato: LocalDateTime,
+    val transaksjonsId: UUID = UUID.randomUUID()
+)
 
 data class KonsistensavstemmingDataTaskDTO(
     val transaksjonsId: UUID,
@@ -19,4 +23,12 @@ data class KonsistensavstemmingAvsluttTaskDTO(
     val batchId: Long,
     val transaksjonsId: UUID,
     val avstemmingsdato: LocalDateTime
+)
+
+data class KonsistensavstemmingPerioderGeneratorTaskDTO(
+    val batchId: Long,
+    val transaksjonsId: UUID,
+    val avstemmingsdato: LocalDateTime,
+    val chunkNr: Int,
+    val relevanteBehandlinger: List<Long>
 )
