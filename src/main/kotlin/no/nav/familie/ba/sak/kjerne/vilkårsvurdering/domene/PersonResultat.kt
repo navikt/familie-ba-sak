@@ -161,7 +161,7 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
 
         val vilkårResultaterKombinert = vilkårResultaterForAktørMap
             .tilVilkårResultatTidslinjer()
-            .kombiner { alleVilkårOppfyltEllerNull(it) }
+            .kombiner { it.alleVilkårOppfyltEllerNull() }
             .filtrerIkkeNull()
 
         val vilkårResultaterForMåned = vilkårResultaterKombinert
@@ -196,6 +196,5 @@ private fun Tidslinje<List<VilkårResultat>, Måned>.beskjærPå18årVilkåretOm
 private fun Map<Vilkår, List<VilkårResultat>>.tilVilkårResultatTidslinjer() =
     this.map { (_, vilkårResultater) -> VilkårResultatTidslinje(vilkårResultater) }
 
-fun alleVilkårOppfyltEllerNull(vilkårResultater: Iterable<VilkårResultat?>): List<VilkårResultat>? {
-    return if (vilkårResultater.all { it?.resultat == Resultat.OPPFYLT }) vilkårResultater.filterNotNull() else null
-}
+fun Iterable<VilkårResultat?>.alleVilkårOppfyltEllerNull(): List<VilkårResultat>? =
+    filterNotNull().takeIf { vilkårResultater -> vilkårResultater.all { it.resultat == Resultat.OPPFYLT } }
