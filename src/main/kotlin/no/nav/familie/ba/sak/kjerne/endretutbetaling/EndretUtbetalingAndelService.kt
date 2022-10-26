@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -90,18 +89,19 @@ class EndretUtbetalingAndelService(
         validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, andelTilkjentYtelser)
 
         endretUtbetalingAndelRepository.saveAndFlush(endretUtbetalingAndel)
-        endretUtbetalingAndelOppdatertAbonnementer.forEach {
-            it.endretUtbetalingAndelerOppdatert(
-                behandlingId = BehandlingId(behandling.id),
-                endretUtbetalingAndeler = andreEndredeAndelerPåBehandling + endretUtbetalingAndel
-            )
-        }
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling,
             personopplysningGrunnlag,
             endretUtbetalingAndel
         )
+
+        endretUtbetalingAndelOppdatertAbonnementer.forEach {
+            it.endretUtbetalingAndelerOppdatert(
+                behandlingId = behandling.id,
+                endretUtbetalingAndeler = andreEndredeAndelerPåBehandling + endretUtbetalingAndel
+            )
+        }
     }
 
     @Transactional
@@ -110,7 +110,7 @@ class EndretUtbetalingAndelService(
         endretUtbetalingAndelId: Long
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
-        endretUtbetalingAndel.andelTilkjentYtelser.forEach { it.endretUtbetalingAndeler.clear() }
+        endretUtbetalingAndel?.andelTilkjentYtelser?.forEach { it.endretUtbetalingAndeler.clear() }
         endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
 
         val personopplysningGrunnlag =
@@ -118,6 +118,13 @@ class EndretUtbetalingAndelService(
                 ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+
+        endretUtbetalingAndelOppdatertAbonnementer.forEach { abonnent ->
+            abonnent.endretUtbetalingAndelerOppdatert(
+                behandlingId = behandling.id,
+                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+            )
+        }
     }
 
     @Transactional
@@ -155,7 +162,7 @@ class EndretUtbetalingAndelService(
 
 interface EndretUtbetalingAndelerOppdatertAbonnent {
     fun endretUtbetalingAndelerOppdatert(
-        behandlingId: BehandlingId,
+        behandlingId: Long,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     )
 }
