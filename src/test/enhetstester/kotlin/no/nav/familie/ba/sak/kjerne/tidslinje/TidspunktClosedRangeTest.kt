@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogSenere
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogTidligere
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import org.junit.jupiter.api.Assertions
@@ -28,5 +31,25 @@ class TidspunktClosedRangeTest {
         Assertions.assertEquals(305, tidsrom.count())
         Assertions.assertEquals(fom, tidsrom.first())
         Assertions.assertEquals(tom, tidsrom.last())
+    }
+
+    @Test
+    fun `test tidsrom med uendelig fremtid fra et tidspunkt`() {
+        val fom = YearMonth.of(2020, 1).tilTidspunkt()
+        val tidsrom = fom.ogSenere()
+
+        Assertions.assertEquals(1, tidsrom.count())
+        Assertions.assertEquals(fom.somUendeligLengeTil(), tidsrom.first())
+        Assertions.assertEquals(fom.somUendeligLengeTil(), tidsrom.last())
+    }
+
+    @Test
+    fun `test tidsrom med uendelig fortid fra et tidspunkt`() {
+        val tom = YearMonth.of(2020, 1).tilTidspunkt()
+        val tidsrom = tom.ogTidligere()
+
+        Assertions.assertEquals(1, tidsrom.count())
+        Assertions.assertEquals(tom.somUendeligLengeSiden(), tidsrom.first())
+        Assertions.assertEquals(tom.somUendeligLengeSiden(), tidsrom.last())
     }
 }

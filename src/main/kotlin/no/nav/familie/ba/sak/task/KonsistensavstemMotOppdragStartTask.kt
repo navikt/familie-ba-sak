@@ -30,16 +30,22 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         avstemmingService.nullstillDataChunk()
         avstemmingService.sendKonsistensavstemmingStart(konsistensavstemmingTask.avstemmingdato, transaksjonsId)
 
-        var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
+        var relevanteBehandlinger =
+            avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(Pageable.ofSize(ANTALL_BEHANDLINGER))
 
-        for (chunkNr in 1..relevanteBehandlinger.totalPages) {
-            avstemmingService.opprettKonsistensavstemmingDataTask(
-                konsistensavstemmingTask.avstemmingdato,
-                relevanteBehandlinger,
-                konsistensavstemmingTask.batchId,
-                transaksjonsId,
-                chunkNr
-            )
+        var chunkNr = 1
+        for (pageNumber in 1..relevanteBehandlinger.totalPages) {
+            relevanteBehandlinger.content.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
+                .forEach { oppstykketRelevanteBehandlinger ->
+                    avstemmingService.opprettKonsistensavstemmingDataTask(
+                        konsistensavstemmingTask.avstemmingdato,
+                        oppstykketRelevanteBehandlinger,
+                        konsistensavstemmingTask.batchId,
+                        transaksjonsId,
+                        chunkNr
+                    )
+                    chunkNr = chunkNr.inc()
+                }
             relevanteBehandlinger =
                 avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
         }
@@ -49,21 +55,6 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
             transaksjonsId,
             konsistensavstemmingTask.avstemmingdato
         )
-    }
-
-    fun dryRunKonsistensavstemming() {
-        logger.info("Start: hent behandlinger klar for konsistensavstemming ${LocalDateTime.now()}")
-        var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
-
-        val behandlinger = mutableListOf<BigInteger>()
-        for (chunkNr in 1..40) {
-            logger.info("Chunk $chunkNr: hent behandlinger klar for konsistensavstemming ${LocalDateTime.now()}")
-            behandlinger.addAll(relevanteBehandlinger.content)
-            relevanteBehandlinger =
-                avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
-        }
-        logger.info("Slutt: hent behandlinger klar for konsistensavstemming ${LocalDateTime.now()}")
-        logger.info("behandlinger: $behandlinger")
     }
 
     fun dryRunKonsistensavstemmingOmskriving(size: Int) {
@@ -91,6 +82,7 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
 
     companion object {
         const val TASK_STEP_TYPE = "konsistensavstemMotOppdragStart"
+        const val ANTALL_BEHANDLINGER = 10000
         private val logger = LoggerFactory.getLogger(KonsistensavstemMotOppdragStartTask::class.java)
     }
 }
