@@ -18,7 +18,8 @@ import java.util.UUID
     taskStepType = KonsistensavstemMotOppdragStartTask
         .TASK_STEP_TYPE,
     beskrivelse = "Start Konsistensavstemming mot oppdrag",
-    maxAntallFeil = 3
+    maxAntallFeil = 1,
+    settTilManuellOppfølgning = true
 )
 class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingService) : AsyncTaskStep {
 
@@ -58,26 +59,31 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
     }
 
     fun dryRunKonsistensavstemmingOmskriving(size: Int) {
-        logger.info("Start: hent behandlinger klar for konsistensavstemming omskriving ${LocalDateTime.now()}")
+        logger.info("[dryRun-konsinstenavstemming] Start: hent behandlinger klar for konsistensavstemming omskriving ${LocalDateTime.now()}")
+        val transaksjonsId = UUID.randomUUID()
         val sideantall = Pageable.ofSize(size)
         var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(sideantall)
-        logger.info("Antall sider: ${relevanteBehandlinger.totalPages} og antallBehandlinger ${relevanteBehandlinger.size}")
+        logger.info("[dryRun-konsinstenavstemming] Antall sider: ${relevanteBehandlinger.totalPages} og antallBehandlinger ${relevanteBehandlinger.size}")
         val loggBehandlinger = mutableListOf<BigInteger>()
         var chunkNr = 0
 
         for (pageNumber in 1..2) {
             relevanteBehandlinger.chunked(500).forEach { behandlinger ->
                 loggBehandlinger.addAll(behandlinger)
-                logger.info("Chunk $chunkNr: hent behandlinger klar for konsistensavstemming omskriving ${LocalDateTime.now()}")
+                avstemmingService.opprettKonsistensavstemmingDataTaskDryrun(
+                    LocalDateTime.now(),
+                    behandlinger,
+                    transaksjonsId,
+                    chunkNr
+                )
                 chunkNr = chunkNr.inc()
             }
             relevanteBehandlinger =
                 avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
-            logger.info("Antall sider: $relevanteBehandlinger og antallBehandlinger ${relevanteBehandlinger.size}")
         }
 
-        logger.info("Slutt: hent behandlinger klar for konsistensavstemming omskriving${LocalDateTime.now()}")
-        logger.info("behandlinger: $loggBehandlinger")
+        logger.info("[dryRun-konsinstenavstemming] Slutt: hent behandlinger klar for konsistensavstemming omskriving${LocalDateTime.now()}")
+        logger.info("[dryRun-konsinstenavstemming] behandlinger: $loggBehandlinger")
     }
 
     companion object {
