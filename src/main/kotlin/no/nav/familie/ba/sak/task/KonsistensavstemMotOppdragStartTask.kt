@@ -28,8 +28,11 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
             objectMapper.readValue(task.payload, KonsistensavstemmingStartTaskDTO::class.java)
         val transaksjonsId = UUID.randomUUID()
 
+        val avstemmingsDato = LocalDateTime.now()
+        logger.info("Konsistensavstemming ble initielt trigget ${konsistensavstemmingTask.avstemmingdato}, men bruker $avstemmingsDato som avstemmingsdato")
+
         avstemmingService.nullstillDataChunk()
-        avstemmingService.sendKonsistensavstemmingStart(konsistensavstemmingTask.avstemmingdato, transaksjonsId)
+        avstemmingService.sendKonsistensavstemmingStart(avstemmingsDato, transaksjonsId)
 
         var relevanteBehandlinger =
             avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(Pageable.ofSize(ANTALL_BEHANDLINGER))
@@ -39,7 +42,7 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
             relevanteBehandlinger.content.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
                 .forEach { oppstykketRelevanteBehandlinger ->
                     avstemmingService.opprettKonsistensavstemmingDataTask(
-                        konsistensavstemmingTask.avstemmingdato,
+                        avstemmingsDato,
                         oppstykketRelevanteBehandlinger,
                         konsistensavstemmingTask.batchId,
                         transaksjonsId,
@@ -54,7 +57,7 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         avstemmingService.opprettKonsistensavstemmingAvsluttTask(
             konsistensavstemmingTask.batchId,
             transaksjonsId,
-            konsistensavstemmingTask.avstemmingdato
+            avstemmingsDato
         )
     }
 
