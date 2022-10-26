@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -25,7 +25,7 @@ class AutovedtakService(
     private val vedtakService: VedtakService,
     private val loggService: LoggService,
     private val totrinnskontrollService: TotrinnskontrollService,
-    private val tilbakestillBehandlingService: TilbakestillBehandlingService
+    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService
 ) {
     fun opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
         aktør: Aktør,
@@ -60,9 +60,9 @@ class AutovedtakService(
         val omgjortBehandling = behandlingService.omgjørTilManuellBehandling(behandling)
 
         return when (steg) {
-            StegType.VILKÅRSVURDERING -> tilbakestillBehandlingService.tilbakestillBehandlingTilBehandlingsresultat(
-                behandlingId = omgjortBehandling.id
-            )
+            StegType.VILKÅRSVURDERING ->
+                tilbakestillBehandlingTilBehandlingsresultatService
+                    .tilbakestillBehandlingTilBehandlingsresultat(behandlingId = omgjortBehandling.id)
             else -> throw Feil("Steg $steg er ikke støttet ved omgjøring av automatisk behandling til manuell.")
         }
     }
