@@ -133,6 +133,22 @@ class AvstemmingService(
         dataChunkRepository.save(DataChunk(batch = batch, transaksjonsId = transaksjonsId, chunkNr = chunkNr))
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    fun opprettKonsistensavstemmingDataTaskDryrun(
+        avstemmingsdato: LocalDateTime,
+        relevanteBehandlinger: List<BigInteger>,
+        transaksjonsId: UUID,
+        chunkNr: Int
+    ) {
+        val perioderTilAvstemming =
+            hentDataForKonsistensavstemming(
+                avstemmingsdato,
+                relevanteBehandlinger.map { it.toLong() }
+            )
+
+        logger.info("[dryRun-konsinstenavstemming] Oppretter konsisensavstemmingstasker for transaksjonsId $transaksjonsId og chunk $chunkNr med ${perioderTilAvstemming.size} løpende saker")
+    }
+
     private fun hentDataForKonsistensavstemming(
         avstemmingstidspunkt: LocalDateTime,
         relevanteBehandlinger: List<Long>

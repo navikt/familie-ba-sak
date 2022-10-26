@@ -31,7 +31,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         val startTask = KonsistensavstemMotOppdragStartTask(avstemmingService)
 
         justRun { avstemmingService.nullstillDataChunk() }
-        justRun { avstemmingService.sendKonsistensavstemmingStart(avstemmingdato, any()) }
+        justRun { avstemmingService.sendKonsistensavstemmingStart(any(), any()) }
         val page = mockk<Page<BigInteger>>()
         val pageable = mockk<Pageable>()
         val nrOfPages = 3
@@ -41,21 +41,21 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         every { avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(any()) } returns page
         justRun {
             avstemmingService.opprettKonsistensavstemmingDataTask(
-                avstemmingdato,
+                any(),
                 any(),
                 batchId,
                 any(),
                 any()
             )
         }
-        justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(batchId, any(), avstemmingdato) }
+        justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(batchId, any(), any()) }
         startTask.doTask(task)
 
         verify(exactly = 1) { avstemmingService.nullstillDataChunk() }
-        verify(exactly = 1) { avstemmingService.sendKonsistensavstemmingStart(avstemmingdato, any()) }
+        verify(exactly = 1) { avstemmingService.sendKonsistensavstemmingStart(any(), any()) }
         verify(exactly = nrOfPages) {
             avstemmingService.opprettKonsistensavstemmingDataTask(
-                avstemmingdato,
+                any(),
                 any(),
                 batchId,
                 any(),
