@@ -82,7 +82,7 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNull(
  * fra minste fraOgMed til største fraOgMed() fra alle tidslinjene
  * Innhold (I) og tidsenhet (T) må være av samme type
  * Kombintor-funksjonen tar inn Iterable<I> og returner (nullable) R
- * Resultatet er en tidslnije med tidsenhet T og innhold R
+ * Resultatet er en tidslinje med tidsenhet T og innhold R
  */
 fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
     listeKombinator: (Iterable<I?>) -> R?
