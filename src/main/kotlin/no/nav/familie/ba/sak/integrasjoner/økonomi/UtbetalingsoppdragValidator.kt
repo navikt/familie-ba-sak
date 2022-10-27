@@ -10,11 +10,12 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 
 fun Utbetalingsoppdrag.valider(
     behandlingsresultat: Behandlingsresultat,
-    erEndreMigreringsdatoBehandling: Boolean = false
+    erEndreMigreringsdatoBehandling: Boolean = false,
+    erOkMedManglendeUtbetalingsperioder: Boolean = false
 ) {
     if (this.utbetalingsperiode.isNotEmpty() && behandlingsresultat == Behandlingsresultat.FORTSATT_INNVILGET && !erEndreMigreringsdatoBehandling) {
         throw FunksjonellFeil("Behandling har resultat fortsatt innvilget, men det finnes utbetalingsperioder som ifølge systemet skal endres. $KONTAKT_TEAMET_SUFFIX")
-    } else if (this.utbetalingsperiode.isEmpty()) {
+    } else if (this.utbetalingsperiode.isEmpty() && !erOkMedManglendeUtbetalingsperioder) {
         throw FunksjonellFeil(
             "Utbetalingsoppdraget inneholder ingen utbetalingsperioder " +
                 "og det er grunn til å tro at denne ikke bør simuleres eller iverksettes. $KONTAKT_TEAMET_SUFFIX"

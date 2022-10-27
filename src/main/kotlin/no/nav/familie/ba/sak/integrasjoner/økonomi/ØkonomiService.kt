@@ -181,7 +181,11 @@ class ØkonomiService(
                 } else {
                     it.valider(
                         behandlingsresultat = vedtak.behandling.resultat,
-                        erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                        erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                        erOkMedManglendeUtbetalingsperioder = featureToggleService.isEnabled(
+                            FeatureToggleConfig.UTBETALINGSOPPDRAG_UTEN_PERIODER_ER_OK,
+                            false
+                        )
                     )
                 }
             }

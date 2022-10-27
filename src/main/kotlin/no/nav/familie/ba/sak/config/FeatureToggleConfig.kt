@@ -100,6 +100,7 @@ class FeatureToggleConfig(
     }
 
     companion object {
+        const val UTBETALINGSOPPDRAG_UTEN_PERIODER_ER_OK = "familie-ba-sak.utbetalingsoppdrag.uten-perioder-er-ok"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
