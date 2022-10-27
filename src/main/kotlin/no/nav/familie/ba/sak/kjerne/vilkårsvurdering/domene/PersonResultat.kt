@@ -193,6 +193,7 @@ private fun Tidslinje<List<VilkårResultat>, Måned>.beskjærPå18årVilkåretOm
 private fun Map<Vilkår, List<VilkårResultat>>.tilVilkårResultatTidslinjer() =
     this.map { (_, vilkårResultater) -> VilkårResultatTidslinje(vilkårResultater) }
 
+
 private fun alleVilkårOppfyltEllerNull(vilkårResultater: Iterable<VilkårResultat?>): List<VilkårResultat>? {
     return if (vilkårResultater.all { it?.resultat == Resultat.OPPFYLT }) vilkårResultater.filterNotNull() else null
 }

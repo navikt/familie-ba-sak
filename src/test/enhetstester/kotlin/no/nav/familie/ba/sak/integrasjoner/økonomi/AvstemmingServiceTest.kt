@@ -16,6 +16,8 @@ import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.Page
@@ -24,6 +26,7 @@ import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class AvstemmingServiceTest {
@@ -89,9 +92,10 @@ class AvstemmingServiceTest {
 
     @Test
     fun `Verifiser at konsistensavstemOppdragStart oppretter data- og avslutt task og sender start melding`() {
+        val avstemmingsdatoSlot = slot<LocalDateTime>()
         every {
             økonomiKlient.konsistensavstemOppdragStart(
-                avstemmingsdato,
+                capture(avstemmingsdatoSlot),
                 transaksjonsId
             )
         } returns ""
@@ -111,7 +115,7 @@ class AvstemmingServiceTest {
 
         verify(exactly = 1) {
             økonomiKlient.konsistensavstemOppdragStart(
-                avstemmingsdato = avstemmingsdato,
+                avstemmingsdato = avstemmingsdatoSlot.captured,
                 transaksjonsId = transaksjonsId
             )
         }
@@ -121,6 +125,8 @@ class AvstemmingServiceTest {
 
         assertEquals(KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE, taskSlots[0].type)
         assertEquals(KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE, taskSlots[1].type)
+
+        Assertions.assertThat(avstemmingsdatoSlot.captured).isCloseTo(LocalDateTime.now(), within(10, ChronoUnit.SECONDS))
     }
 
     @Test
