@@ -4,10 +4,8 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
-import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragDataTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragPerioderGeneratorTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
-import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingPerioderGeneratorTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
@@ -52,7 +50,12 @@ class AvstemmingService(
 
     fun erKonsistensavstemmingKjørtForTransaksjonsid(transaksjonsId: UUID): Boolean {
         val dataChunks = dataChunkRepository.findByTransaksjonsId(transaksjonsId)
-        return dataChunks.none { !it.erSendt }
+        return dataChunks.none { !it.erSendt } && dataChunks.isNotEmpty()
+    }
+
+    fun erKonsistensavstemmingDelvisKjørtForTransaksjonsid(transaksjonsId: UUID): Boolean {
+        val dataChunks = dataChunkRepository.findByTransaksjonsId(transaksjonsId)
+        return dataChunks.any { !it.erSendt } && dataChunks.isNotEmpty()
     }
 
     fun erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(transaksjonsId: UUID, chunkNr: Int): Boolean {

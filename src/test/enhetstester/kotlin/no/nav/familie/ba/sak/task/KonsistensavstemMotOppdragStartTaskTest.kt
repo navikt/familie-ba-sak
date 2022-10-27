@@ -40,7 +40,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         every { page.content } returns listOf(BigInteger.valueOf(42))
         every { avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(any()) } returns page
         justRun {
-            avstemmingService.opprettKonsistensavstemmingDataTask(
+            avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(
                 any(),
                 any(),
                 batchId,
@@ -54,7 +54,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         verify(exactly = 1) { avstemmingService.nullstillDataChunk() }
         verify(exactly = 1) { avstemmingService.sendKonsistensavstemmingStart(any(), any()) }
         verify(exactly = nrOfPages) {
-            avstemmingService.opprettKonsistensavstemmingDataTask(
+            avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(
                 any(),
                 any(),
                 batchId,

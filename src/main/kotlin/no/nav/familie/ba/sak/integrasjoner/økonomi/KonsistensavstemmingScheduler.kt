@@ -55,5 +55,6 @@ class KonsistensavstemmingScheduler(
 enum class KjøreStatus {
     FERDIG,
     TATT,
-    LEDIG
+    LEDIG,
+    MANUELL
 }

@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import com.fasterxml.jackson.core.type.TypeReference
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.DataChunkRepository
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingPerioderGeneratorTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -22,8 +20,7 @@ import org.springframework.stereotype.Service
 )
 class KonsistensavstemMotOppdragPerioderGeneratorTask(
     val avstemmingService: AvstemmingService,
-    val taskRepository: TaskRepository,
-    val dataChunkRepository: DataChunkRepository
+    val taskRepository: TaskRepository
 ) :
     AsyncTaskStep {
 
@@ -31,7 +28,11 @@ class KonsistensavstemMotOppdragPerioderGeneratorTask(
         val taskDto =
             objectMapper.readValue(task.payload, KonsistensavstemmingPerioderGeneratorTaskDTO::class.java)
 
-        if (avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(taskDto.transaksjonsId, taskDto.chunkNr)) return
+        if (avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
+                taskDto.transaksjonsId,
+                taskDto.chunkNr
+            )
+        ) return
 
         val perioderTilAvstemming =
             avstemmingService.hentDataForKonsistensavstemming(
@@ -55,8 +56,9 @@ class KonsistensavstemMotOppdragPerioderGeneratorTask(
     }
 
     companion object {
-        private val logger: Logger = LoggerFactory.getLogger(KonsistensavstemMotOppdragPerioderGeneratorTask::class.java)
+        private val logger: Logger =
+            LoggerFactory.getLogger(KonsistensavstemMotOppdragPerioderGeneratorTask::class.java)
 
-        const val TASK_STEP_TYPE = "konsistensavstemMotOppdragMellomlagring"
+        const val TASK_STEP_TYPE = "konsistensavstemMotOppdragPerioderGeneratorTask"
     }
 }

@@ -30,12 +30,14 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         val avstemmingsDato = LocalDateTime.now()
         logger.info("Konsistensavstemming ble initielt trigget ${konsistensavstemmingTask.avstemmingdato}, men bruker $avstemmingsDato som avstemmingsdato")
 
-
         if (avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsid(konsistensavstemmingTask.transaksjonsId)) {
             logger.info("Konsistensavstemmning er allerede kjørt for transaksjonsId ${konsistensavstemmingTask.transaksjonsId}")
             return
         }
-        avstemmingService.sendKonsistensavstemmingStart(avstemmingsDato, konsistensavstemmingTask.transaksjonsId)
+
+        if (!avstemmingService.erKonsistensavstemmingDelvisKjørtForTransaksjonsid(konsistensavstemmingTask.transaksjonsId)) {
+            avstemmingService.sendKonsistensavstemmingStart(avstemmingsDato, konsistensavstemmingTask.transaksjonsId)
+        }
 
         var relevanteBehandlinger =
             avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(Pageable.ofSize(ANTALL_BEHANDLINGER))
@@ -44,7 +46,11 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         for (pageNumber in 1..relevanteBehandlinger.totalPages) {
             relevanteBehandlinger.content.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
                 .forEach { oppstykketRelevanteBehandlinger ->
-                    if (!avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(konsistensavstemmingTask.transaksjonsId, chunkNr)) {
+                    if (!avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
+                            konsistensavstemmingTask.transaksjonsId,
+                            chunkNr
+                        )
+                    ) {
                         avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(
                             avstemmingsDato,
                             oppstykketRelevanteBehandlinger.map { it.toLong() },

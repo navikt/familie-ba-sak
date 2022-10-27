@@ -4,12 +4,11 @@ import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class KonsistensavstemmingTaskDTO(val avstemmingdato: LocalDateTime)
-
 data class KonsistensavstemmingStartTaskDTO(
     val batchId: Long,
     val avstemmingdato: LocalDateTime,
-    val transaksjonsId: UUID = UUID.randomUUID()
+    val transaksjonsId: UUID = UUID.randomUUID(),
+    val sendTilØkonomi: Boolean = true
 )
 
 data class KonsistensavstemmingDataTaskDTO(
