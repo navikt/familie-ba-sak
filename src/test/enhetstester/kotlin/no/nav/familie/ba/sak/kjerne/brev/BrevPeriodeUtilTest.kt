@@ -96,7 +96,12 @@ class BrevPeriodeUtilTest {
 }
 
 private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtaksperiodetype): BrevperiodeData {
-    val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(personerPåBehandling = emptyList(), minimertePersonResultater = emptyList(), minimerteEndredeUtbetalingAndeler = emptyList())
+    val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
+        personerPåBehandling = emptyList(),
+        minimertePersonResultater = emptyList(),
+        minimerteEndredeUtbetalingAndeler = emptyList(),
+        erInstitusjon = false
+    )
     return BrevperiodeData(
         restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
         erFørsteVedtaksperiodePåFagsak = false,

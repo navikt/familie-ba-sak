@@ -20,7 +20,12 @@ enum class BrevPeriodeType(val apiNavn: String) {
     OPPHOR("opphor"),
     AVSLAG("avslag"),
     AVSLAG_UTEN_PERIODE("avslagUtenPeriode"),
-    FORTSATT_INNVILGET("fortsattInnvilget")
+    FORTSATT_INNVILGET("fortsattInnvilget"),
+    INNVILGELSE_INSTITUSJON("innvilgelseInstitusjon"),
+    OPPHOR_INSTITUSJON("opphorInstitusjon"),
+    AVSLAG_INSTITUSJON("avslagInstitusjon"),
+    AVSLAG_UTEN_PERIODE_INSTITUSJON("avslagUtenPeriodeInstitusjon"),
+    FORTSATT_INNVILGET_INSTITUSJON("fortsattInnvilgetInstitusjon"),
 }
 
 enum class EndretUtbetalingBrevPeriodeType(val apiNavn: String) {
@@ -36,5 +41,7 @@ data class VedtakFellesfelter(
     val hjemmeltekst: Hjemmeltekst,
     val søkerNavn: String,
     val søkerFødselsnummer: String,
-    val perioder: List<BrevPeriode>
+    val perioder: List<BrevPeriode>,
+    val organisasjonsnummer: String? = null,
+    val gjelder: String? = null
 )

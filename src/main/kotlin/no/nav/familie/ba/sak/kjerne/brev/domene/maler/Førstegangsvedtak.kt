@@ -9,7 +9,8 @@ data class Førstegangsvedtak(
 
     constructor(
         vedtakFellesfelter: VedtakFellesfelter,
-        etterbetaling: Etterbetaling?
+        etterbetaling: Etterbetaling? = null,
+        etterbetalingInstitusjon: EtterbetalingInstitusjon? = null
     ) :
         this(
             data = FørstegangsvedtakData(
@@ -20,11 +21,14 @@ data class Førstegangsvedtak(
                         beslutter = vedtakFellesfelter.beslutter
                     ),
                     etterbetaling = etterbetaling,
-                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst
+                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                    etterbetalingInstitusjon = etterbetalingInstitusjon
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    organisasjonsnummer = vedtakFellesfelter.organisasjonsnummer,
+                    gjelder = vedtakFellesfelter.gjelder
                 ),
                 perioder = vedtakFellesfelter.perioder
             )
@@ -40,6 +44,7 @@ data class FørstegangsvedtakData(
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val etterbetaling: Etterbetaling?,
-        val hjemmeltekst: Hjemmeltekst
+        val hjemmeltekst: Hjemmeltekst,
+        val etterbetalingInstitusjon: EtterbetalingInstitusjon?
     )
 }

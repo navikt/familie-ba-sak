@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
+import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Dødsfall
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.DødsfallData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Etterbetaling
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EtterbetalingInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForsattInnvilget
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Hjemmeltekst
@@ -51,7 +53,8 @@ class BrevService(
     private val brevPeriodeService: BrevPeriodeService,
     private val sanityService: SanityService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val korrigertEtterbetalingService: KorrigertEtterbetalingService
+    private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
+    private val organisasjonService: OrganisasjonService
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -65,6 +68,11 @@ class BrevService(
                 etterbetaling = hentEtterbetaling(vedtak)
             )
 
+            Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON -> Førstegangsvedtak(
+                vedtakFellesfelter = vedtakFellesfelter,
+                etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak)
+            ).copy(mal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON)
+
             Brevmal.VEDTAK_ENDRING -> VedtakEndring(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
@@ -72,10 +80,22 @@ class BrevService(
                 erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
             )
 
+            Brevmal.VEDTAK_ENDRING_INSTITUSJON -> VedtakEndring(
+                vedtakFellesfelter = vedtakFellesfelter,
+                etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
+                erKlage = vedtak.behandling.erKlage(),
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
+            ).copy(mal = Brevmal.VEDTAK_ENDRING_INSTITUSJON)
+
             Brevmal.VEDTAK_OPPHØRT -> Opphørt(
                 vedtakFellesfelter = vedtakFellesfelter,
                 erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
             )
+
+            Brevmal.VEDTAK_OPPHØRT_INSTITUSJON -> Opphørt(
+                vedtakFellesfelter = vedtakFellesfelter,
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
+            ).copy(mal = Brevmal.VEDTAK_OPPHØRT_INSTITUSJON)
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> OpphørMedEndring(
                 vedtakFellesfelter = vedtakFellesfelter,
@@ -84,8 +104,12 @@ class BrevService(
             )
 
             Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
+            Brevmal.VEDTAK_AVSLAG_INSTITUSJON -> Avslag(vedtakFellesfelter = vedtakFellesfelter).copy(mal = Brevmal.VEDTAK_AVSLAG_INSTITUSJON)
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter)
+            Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter).copy(
+                mal = Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
+            )
 
             Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG -> Autovedtak6og18årOgSmåbarnstillegg(
                 vedtakFellesfelter = vedtakFellesfelter
@@ -109,10 +133,13 @@ class BrevService(
         brevmal: Brevmal,
         vedtakFellesfelter: VedtakFellesfelter
     ) {
-        if (brevmal == Brevmal.VEDTAK_OPPHØRT && vedtakFellesfelter.perioder.size > 1) {
+        if (listOf(
+                Brevmal.VEDTAK_OPPHØRT,
+                Brevmal.VEDTAK_OPPHØRT_INSTITUSJON
+            ).contains(brevmal) && vedtakFellesfelter.perioder.size > 1
+        ) {
             throw Feil(
-                "Brevtypen er \"opphørt\", men mer enn én periode ble sendt med. Brev av typen opphørt skal kun ha én " +
-                    "periode."
+                "Brevtypen er \"opphørt\", men mer enn én periode ble sendt med. Brev av typen opphørt skal kun ha én " + "periode."
             )
         }
     }
@@ -189,14 +216,20 @@ class BrevService(
             målform = brevPerioderData.first().brevMålform
         )
 
+        val organisasjonsnummer = vedtak.behandling.fagsak.institusjon?.orgNummer
+        val organisasjonsnavn =
+            vedtak.behandling.fagsak.institusjon?.let { organisasjonService.hentOrganisasjon(it.orgNummer).navn }
+
         return VedtakFellesfelter(
             enhet = grunnlagOgSignaturData.enhet,
             saksbehandler = grunnlagOgSignaturData.saksbehandler,
             beslutter = grunnlagOgSignaturData.beslutter,
             hjemmeltekst = Hjemmeltekst(hjemler),
-            søkerNavn = grunnlagOgSignaturData.grunnlag.søker.navn,
+            søkerNavn = organisasjonsnavn ?: grunnlagOgSignaturData.grunnlag.søker.navn,
             søkerFødselsnummer = grunnlagOgSignaturData.grunnlag.søker.aktør.aktivFødselsnummer(),
-            perioder = brevperioder
+            perioder = brevperioder,
+            organisasjonsnummer = organisasjonsnummer,
+            gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null
         )
     }
 
@@ -225,14 +258,15 @@ class BrevService(
     private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? =
         hentEtterbetalingsbeløp(vedtak)?.let { Etterbetaling(it) }
 
+    private fun hentEtterbetalingInstitusjon(vedtak: Vedtak): EtterbetalingInstitusjon? =
+        hentEtterbetalingsbeløp(vedtak)?.let { EtterbetalingInstitusjon(it) }
+
     private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? {
         val etterbetalingsBeløp =
             korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(vedtak.behandling.id)?.beløp?.toBigDecimal()
                 ?: simuleringService.hentEtterbetaling(vedtak.behandling.id)
 
-        return etterbetalingsBeløp
-            .takeIf { it > BigDecimal.ZERO }
-            ?.run { Utils.formaterBeløp(this.toInt()) }
+        return etterbetalingsBeløp.takeIf { it > BigDecimal.ZERO }?.run { Utils.formaterBeløp(this.toInt()) }
     }
 
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =

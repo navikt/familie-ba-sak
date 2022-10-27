@@ -9,9 +9,10 @@ data class VedtakEndring(
 
     constructor(
         vedtakFellesfelter: VedtakFellesfelter,
-        etterbetaling: Etterbetaling?,
+        etterbetaling: Etterbetaling? = null,
         erFeilutbetalingPåBehandling: Boolean,
-        erKlage: Boolean
+        erKlage: Boolean,
+        etterbetalingInstitusjon: EtterbetalingInstitusjon? = null
     ) :
         this(
             data = EndringVedtakData(
@@ -24,11 +25,15 @@ data class VedtakEndring(
                     etterbetaling = etterbetaling,
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                     klage = erKlage,
-                    feilutbetaling = erFeilutbetalingPåBehandling
+                    klageInstitusjon = erKlage,
+                    feilutbetaling = erFeilutbetalingPåBehandling,
+                    etterbetalingInstitusjon = etterbetalingInstitusjon
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    organisasjonsnummer = vedtakFellesfelter.organisasjonsnummer,
+                    gjelder = vedtakFellesfelter.gjelder
                 ),
                 perioder = vedtakFellesfelter.perioder
             )
@@ -46,6 +51,8 @@ data class EndringVedtakData(
         val etterbetaling: Etterbetaling?,
         val feilutbetaling: Boolean,
         val hjemmeltekst: Hjemmeltekst,
-        val klage: Boolean
+        val klage: Boolean,
+        val klageInstitusjon: Boolean,
+        val etterbetalingInstitusjon: EtterbetalingInstitusjon?
     )
 }

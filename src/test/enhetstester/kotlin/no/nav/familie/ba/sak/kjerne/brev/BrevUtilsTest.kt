@@ -126,12 +126,38 @@ internal class BrevUtilsTest {
     }
 
     @Test
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for innvilget førstegangsbehandling og institusjon`() {
+        støttedeBehandlingsersultaterFørstegangsbehandling.filterNot { it == Behandlingsresultat.AVSLÅTT }.forEach {
+            Assertions.assertEquals(
+                Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
+                hentManuellVedtaksbrevtype(
+                    BehandlingType.FØRSTEGANGSBEHANDLING,
+                    it,
+                    true
+                )
+            )
+        }
+    }
+
+    @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for avslått førstegangsbehandling`() {
         Assertions.assertEquals(
             Brevmal.VEDTAK_AVSLAG,
             hentManuellVedtaksbrevtype(
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 Behandlingsresultat.AVSLÅTT
+            )
+        )
+    }
+
+    @Test
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for avslått førstegangsbehandling og institusjon`() {
+        Assertions.assertEquals(
+            Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
+            hentManuellVedtaksbrevtype(
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                Behandlingsresultat.AVSLÅTT,
+                true
             )
         )
     }
@@ -174,6 +200,20 @@ internal class BrevUtilsTest {
         }
     }
 
+    @Test
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Vedtak endring' og institusjon`() {
+        behandlingsersultaterForVedtakEndring.forEach {
+            Assertions.assertEquals(
+                Brevmal.VEDTAK_ENDRING_INSTITUSJON,
+                hentManuellVedtaksbrevtype(
+                    BehandlingType.REVURDERING,
+                    it,
+                    true
+                )
+            )
+        }
+    }
+
     private val behandlingsersultaterForOpphørt = listOf(Behandlingsresultat.OPPHØRT)
     private val behandlingsersultaterForFortsattOpphørt = listOf(Behandlingsresultat.FORTSATT_OPPHØRT)
 
@@ -185,6 +225,20 @@ internal class BrevUtilsTest {
                 hentManuellVedtaksbrevtype(
                     BehandlingType.REVURDERING,
                     it
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt' og institusjon`() {
+        behandlingsersultaterForOpphørt.forEach {
+            Assertions.assertEquals(
+                Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
+                hentManuellVedtaksbrevtype(
+                    BehandlingType.REVURDERING,
+                    it,
+                    true
                 )
             )
         }
@@ -228,6 +282,20 @@ internal class BrevUtilsTest {
         }
     }
 
+    @Test
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Fortsatt innvilget' og institusjon`() {
+        behandlingsersultaterForFortsattInnvilget.forEach {
+            Assertions.assertEquals(
+                Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
+                hentManuellVedtaksbrevtype(
+                    BehandlingType.REVURDERING,
+                    it,
+                    true
+                )
+            )
+        }
+    }
+
     private val behandlingsersultaterForAvslag = listOf(Behandlingsresultat.AVSLÅTT)
 
     @Test
@@ -238,6 +306,20 @@ internal class BrevUtilsTest {
                 hentManuellVedtaksbrevtype(
                     BehandlingType.REVURDERING,
                     it
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Avslag' og institusjon`() {
+        behandlingsersultaterForAvslag.forEach {
+            Assertions.assertEquals(
+                Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
+                hentManuellVedtaksbrevtype(
+                    BehandlingType.REVURDERING,
+                    it,
+                    true
                 )
             )
         }

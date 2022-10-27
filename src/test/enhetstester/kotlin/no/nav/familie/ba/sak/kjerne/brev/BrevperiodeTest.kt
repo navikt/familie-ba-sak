@@ -63,8 +63,9 @@ class BrevperiodeTest {
 
             val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
                 personerPåBehandling = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertPerson() },
+                minimertePersonResultater = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertePersonResultater() },
                 minimerteEndredeUtbetalingAndeler = behandlingsresultatPersonTestConfig.personerPåBehandling.flatMap { it.tilMinimerteEndredeUtbetalingAndeler() },
-                minimertePersonResultater = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertePersonResultater() }
+                erInstitusjon = false
             )
 
             val brevperiode = try {
