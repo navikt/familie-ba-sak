@@ -218,7 +218,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
             enhetNavn = this.enhetNavn(),
             årsaker = this.multiselectVerdier,
-            antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw Feil("Antall uker svarfrist er ikke satt"),
+            antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw Feil(message = "Antall uker svarfrist er ikke satt", frontendFeilmelding = "Antall uker svarfrist er ikke satt"),
             organisasjonsnummer = if (erTilInstitusjon) mottakerIdent else null,
             gjelder = this.vedrørende?.navn
         )
