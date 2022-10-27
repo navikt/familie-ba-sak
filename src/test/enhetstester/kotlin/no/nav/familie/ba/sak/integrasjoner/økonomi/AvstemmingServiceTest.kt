@@ -6,7 +6,6 @@ import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
 import junit.framework.Assert.assertEquals
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
@@ -26,7 +25,6 @@ import org.springframework.data.domain.Pageable
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
@@ -63,19 +61,19 @@ class AvstemmingServiceTest {
         every { page.totalPages } returns 1
         every { page.content } returns listOf(behandlingId)
         every { page.nextPageable() } returns pageable
-
-        every {
-            beregningService.hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
-                any(),
-                any()
-            )
-        } returns listOf(
-            lagAndelTilkjentYtelse(
-                fom = YearMonth.now().minusMonths(4),
-                tom = YearMonth.now(),
-                periodeIdOffset = 0
-            ).also { it.kildeBehandlingId = behandlingId.toLong() }
-        )
+        //
+        // every {
+        //     beregningService.hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
+        //         any(),
+        //         any()
+        //     )
+        // } returns listOf(
+        //     lagAndelTilkjentYtelse(
+        //         fom = YearMonth.now().minusMonths(4),
+        //         tom = YearMonth.now(),
+        //         periodeIdOffset = 0
+        //     ).also { it.kildeBehandlingId = behandlingId.toLong() }
+        // )
         every { batchRepository.getReferenceById(batchId) } returns Batch(id = batchId, kjøreDato = LocalDate.now())
         every { taskRepository.save(any()) } returns Task(type = "dummy", payload = "")
         every { dataChunkRepository.save(any()) } returns DataChunk(
@@ -133,7 +131,6 @@ class AvstemmingServiceTest {
         assertEquals(batchId, perioderGeneratorDto.batchId)
         assertEquals(transaksjonsId, perioderGeneratorDto.transaksjonsId)
         assertEquals(1, perioderGeneratorDto.chunkNr)
-        assertEquals(avstemmingsdatoSlot.captured, perioderGeneratorDto.avstemmingsdato)
         assertThat(perioderGeneratorDto.relevanteBehandlinger).hasSize(1).containsExactly(1)
         assertEquals(KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE, taskSlots[1].type)
         assertThat(avstemmingsdatoSlot.captured)

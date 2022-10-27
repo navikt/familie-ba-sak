@@ -8,6 +8,8 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.RekjørSenereException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -34,13 +36,19 @@ class KonsistensavstemMotOppdragAvsluttTask(
             )
         }
 
-        avstemmingService.konsistensavstemOppdragAvslutt(
-            avstemmingsdato = konsistensavstemmingAvsluttTask.avstemmingsdato,
-            transaksjonsId = konsistensavstemmingAvsluttTask.transaksjonsId
-        )
+        if (konsistensavstemmingAvsluttTask.sendTilØkonomi) {
+            avstemmingService.konsistensavstemOppdragAvslutt(
+                avstemmingsdato = konsistensavstemmingAvsluttTask.avstemmingsdato,
+                transaksjonsId = konsistensavstemmingAvsluttTask.transaksjonsId
+            )
+        } else {
+            logger.info("Send til økonomi skrudd av for ${konsistensavstemmingAvsluttTask.transaksjonsId} for task $TASK_STEP_TYPE")
+        }
     }
 
     companion object {
         const val TASK_STEP_TYPE = "konsistensavstemMotOppdragAvslutt"
+        private val logger: Logger =
+            LoggerFactory.getLogger(KonsistensavstemMotOppdragAvsluttTask::class.java)
     }
 }

@@ -15,13 +15,15 @@ data class KonsistensavstemmingDataTaskDTO(
     val transaksjonsId: UUID,
     val chunkNr: Int,
     val avstemmingdato: LocalDateTime,
-    val perioderForBehandling: List<PerioderForBehandling>
+    val perioderForBehandling: List<PerioderForBehandling>,
+    val sendTilØkonomi: Boolean = true
 )
 
 data class KonsistensavstemmingAvsluttTaskDTO(
     val batchId: Long,
     val transaksjonsId: UUID,
-    val avstemmingsdato: LocalDateTime
+    val avstemmingsdato: LocalDateTime,
+    val sendTilØkonomi: Boolean = true
 )
 
 data class KonsistensavstemmingPerioderGeneratorTaskDTO(
@@ -29,5 +31,6 @@ data class KonsistensavstemmingPerioderGeneratorTaskDTO(
     val transaksjonsId: UUID,
     val avstemmingsdato: LocalDateTime,
     val chunkNr: Int,
-    val relevanteBehandlinger: List<Long>
+    val relevanteBehandlinger: List<Long>,
+    val sendTilØkonomi: Boolean = true
 )

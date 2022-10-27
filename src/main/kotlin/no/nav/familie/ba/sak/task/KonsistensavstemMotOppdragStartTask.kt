@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingPerioderGeneratorTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -36,7 +38,14 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         }
 
         if (!avstemmingService.erKonsistensavstemmingDelvisKjørtForTransaksjonsid(konsistensavstemmingTask.transaksjonsId)) {
-            avstemmingService.sendKonsistensavstemmingStart(avstemmingsDato, konsistensavstemmingTask.transaksjonsId)
+            if (konsistensavstemmingTask.sendTilØkonomi) {
+                avstemmingService.sendKonsistensavstemmingStart(
+                    avstemmingsDato,
+                    konsistensavstemmingTask.transaksjonsId
+                )
+            } else {
+                logger.info("Send til økonomi skrudd av for ${konsistensavstemmingTask.transaksjonsId} for task $TASK_STEP_TYPE")
+            }
         }
 
         var relevanteBehandlinger =
@@ -52,11 +61,14 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
                         )
                     ) {
                         avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(
-                            avstemmingsDato,
-                            oppstykketRelevanteBehandlinger.map { it.toLong() },
-                            konsistensavstemmingTask.batchId,
-                            konsistensavstemmingTask.transaksjonsId,
-                            chunkNr
+                            KonsistensavstemmingPerioderGeneratorTaskDTO(
+                                transaksjonsId = konsistensavstemmingTask.transaksjonsId,
+                                chunkNr = chunkNr,
+                                avstemmingsdato = konsistensavstemmingTask.avstemmingdato,
+                                batchId = konsistensavstemmingTask.batchId,
+                                relevanteBehandlinger = oppstykketRelevanteBehandlinger.map { it.toLong() },
+                                sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi
+                            )
                         )
                     } else {
                         logger.info("Konsistensavstemmning er allerede kjørt for transaksjonsId ${konsistensavstemmingTask.transaksjonsId} og chunkNr $chunkNr")
@@ -68,9 +80,12 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         }
 
         avstemmingService.opprettKonsistensavstemmingAvsluttTask(
-            konsistensavstemmingTask.batchId,
-            konsistensavstemmingTask.transaksjonsId,
-            avstemmingsDato
+            KonsistensavstemmingAvsluttTaskDTO(
+                batchId = konsistensavstemmingTask.batchId,
+                transaksjonsId = konsistensavstemmingTask.transaksjonsId,
+                avstemmingsdato = konsistensavstemmingTask.avstemmingdato,
+                sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi
+            )
         )
     }
 

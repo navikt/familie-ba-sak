@@ -48,7 +48,8 @@ class KonsistensavstemMotOppdragPerioderGeneratorTask(
                     transaksjonsId = taskDto.transaksjonsId,
                     chunkNr = taskDto.chunkNr,
                     avstemmingdato = taskDto.avstemmingsdato,
-                    perioderForBehandling = perioderTilAvstemming
+                    perioderForBehandling = perioderTilAvstemming,
+                    sendTilØkonomi = taskDto.sendTilØkonomi
                 )
             )
         )

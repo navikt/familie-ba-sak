@@ -94,20 +94,12 @@ class AvstemmingService(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettKonsistensavstemmingAvsluttTask(
-        batchId: Long,
-        transaksjonsId: UUID,
-        avstemmingsdato: LocalDateTime
+        konsistensavstemmingAvsluttTaskDTO: KonsistensavstemmingAvsluttTaskDTO
     ) {
-        logger.info("Oppretter avsluttingstask for transaksjonsId $transaksjonsId")
+        logger.info("Oppretter avsluttingstask for transaksjonsId ${konsistensavstemmingAvsluttTaskDTO.transaksjonsId}")
         val konsistensavstemmingAvsluttTask = Task(
             type = KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(
-                KonsistensavstemmingAvsluttTaskDTO(
-                    batchId = batchId,
-                    transaksjonsId = transaksjonsId,
-                    avstemmingsdato = avstemmingsdato
-                )
-            )
+            payload = objectMapper.writeValueAsString(konsistensavstemmingAvsluttTaskDTO)
         )
         taskRepository.save(konsistensavstemmingAvsluttTask)
     }
@@ -119,32 +111,22 @@ class AvstemmingService(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettKonsistensavstemmingPerioderGeneratorTask(
-        avstemmingsdato: LocalDateTime,
-        relevanteBehandlinger: List<Long>,
-        batchId: Long,
-        transaksjonsId: UUID,
-        chunkNr: Int
+        konsistensavstemmingPerioderGeneratorTaskDTO: KonsistensavstemmingPerioderGeneratorTaskDTO
     ) {
-        val batch = batchRepository.getReferenceById(batchId)
+        val batch = batchRepository.getReferenceById(konsistensavstemmingPerioderGeneratorTaskDTO.batchId)
         dataChunkRepository.save(
             DataChunk(
                 batch = batch,
-                transaksjonsId = transaksjonsId,
-                chunkNr = chunkNr
+                transaksjonsId = konsistensavstemmingPerioderGeneratorTaskDTO.transaksjonsId,
+                chunkNr = konsistensavstemmingPerioderGeneratorTaskDTO.chunkNr
             )
         )
 
-        logger.info("Oppretter task for å generere perioder for relevante behandlinger. transaksjonsId=$transaksjonsId og chunk=$chunkNr med ${relevanteBehandlinger.size} behandlinger")
+        logger.info("Oppretter task for å generere perioder for relevante behandlinger. transaksjonsId=${konsistensavstemmingPerioderGeneratorTaskDTO.transaksjonsId} og chunk=${konsistensavstemmingPerioderGeneratorTaskDTO.chunkNr} med ${konsistensavstemmingPerioderGeneratorTaskDTO.relevanteBehandlinger.size} behandlinger")
         val task = Task(
             type = KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(
-                KonsistensavstemmingPerioderGeneratorTaskDTO(
-                    transaksjonsId = transaksjonsId,
-                    chunkNr = chunkNr,
-                    avstemmingsdato = avstemmingsdato,
-                    batchId = batchId,
-                    relevanteBehandlinger = relevanteBehandlinger
-                )
+                konsistensavstemmingPerioderGeneratorTaskDTO
             )
         )
         taskRepository.save(task)
