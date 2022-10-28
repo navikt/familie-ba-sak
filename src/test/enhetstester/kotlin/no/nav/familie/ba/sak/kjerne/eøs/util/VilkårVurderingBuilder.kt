@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -13,8 +14,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilDagEllerFørsteDagIPerioden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilDagEllerSisteDagIPerioden
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapNotNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -55,6 +57,13 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
             return this
         }
 
+        fun medVilkår(tidslinje: Tidslinje<VilkårRegelverkResultat, T>): PersonResultatBuilder<T> {
+            vilkårsresultatTidslinjer.add(
+                tidslinje.mapNotNull { UtdypendeVilkårRegelverkResultat(it.vilkår, it.resultat, it.regelverk) }
+            )
+            return this
+        }
+
         fun forPerson(person: Person, startTidspunkt: Tidspunkt<T>): PersonResultatBuilder<T> {
             return byggPerson().forPerson(person, startTidspunkt)
         }
@@ -90,9 +99,9 @@ internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVi
             vilkårType = this.innhold?.vilkår!!,
             resultat = this.innhold?.resultat!!,
             vurderesEtter = this.innhold?.regelverk,
-            periodeFom = this.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
-            periodeTom = this.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
-            begrunnelse = "",
+            periodeFom = this.fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDateEllerNull(),
+            periodeTom = this.tilOgMed.tilDagEllerSisteDagIPerioden().tilLocalDateEllerNull(),
+            begrunnelse = "En begrunnelse",
             behandlingId = personResultat.vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = this.innhold?.utdypendeVilkårsvurderinger ?: emptyList()
         )
@@ -101,6 +110,9 @@ internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVi
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer() =
     VilkårsvurderingTidslinjer(this.byggVilkårsvurdering(), this.byggPersonopplysningGrunnlag())
+
+fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.byggVilkårsvurderingTidslinjer() =
+    this.byggPerson().byggVilkårsvurderingTidslinjer()
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
     TilkjentYtelseUtils.beregnTilkjentYtelse(
@@ -114,4 +126,11 @@ data class UtdypendeVilkårRegelverkResultat(
     val resultat: Resultat?,
     val regelverk: Regelverk?,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
-)
+) {
+    constructor(
+        vilkår: Vilkår,
+        resultat: Resultat?,
+        regelverk: Regelverk?,
+        vararg utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering
+    ) : this(vilkår, resultat, regelverk, utdypendeVilkårsvurdering.toList())
+}

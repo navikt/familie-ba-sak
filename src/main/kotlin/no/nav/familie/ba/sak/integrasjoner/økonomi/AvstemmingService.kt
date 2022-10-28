@@ -13,7 +13,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -106,7 +105,7 @@ class AvstemmingService(
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettKonsistensavstemmingDataTask(
         avstemmingsdato: LocalDateTime,
-        relevanteBehandlinger: Page<BigInteger>,
+        relevanteBehandlinger: List<BigInteger>,
         batchId: Long,
         transaksjonsId: UUID,
         chunkNr: Int
@@ -114,7 +113,7 @@ class AvstemmingService(
         val perioderTilAvstemming =
             hentDataForKonsistensavstemming(
                 avstemmingsdato,
-                relevanteBehandlinger.content.map { it.toLong() }
+                relevanteBehandlinger.map { it.toLong() }
             )
         val batch = batchRepository.getById(batchId)
 
@@ -132,6 +131,22 @@ class AvstemmingService(
         )
         taskRepository.save(konsistensavstemmingDataTask)
         dataChunkRepository.save(DataChunk(batch = batch, transaksjonsId = transaksjonsId, chunkNr = chunkNr))
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    fun opprettKonsistensavstemmingDataTaskDryrun(
+        avstemmingsdato: LocalDateTime,
+        relevanteBehandlinger: List<BigInteger>,
+        transaksjonsId: UUID,
+        chunkNr: Int
+    ) {
+        val perioderTilAvstemming =
+            hentDataForKonsistensavstemming(
+                avstemmingsdato,
+                relevanteBehandlinger.map { it.toLong() }
+            )
+
+        logger.info("[dryRun-konsinstenavstemming] Oppretter konsisensavstemmingstasker for transaksjonsId $transaksjonsId og chunk $chunkNr med ${perioderTilAvstemming.size} løpende saker")
     }
 
     private fun hentDataForKonsistensavstemming(

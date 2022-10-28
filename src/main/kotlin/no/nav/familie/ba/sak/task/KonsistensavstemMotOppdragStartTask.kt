@@ -18,7 +18,8 @@ import java.util.UUID
     taskStepType = KonsistensavstemMotOppdragStartTask
         .TASK_STEP_TYPE,
     beskrivelse = "Start Konsistensavstemming mot oppdrag",
-    maxAntallFeil = 3
+    maxAntallFeil = 1,
+    settTilManuellOppfølgning = true
 )
 class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingService) : AsyncTaskStep {
 
@@ -27,19 +28,28 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
             objectMapper.readValue(task.payload, KonsistensavstemmingStartTaskDTO::class.java)
         val transaksjonsId = UUID.randomUUID()
 
+        val avstemmingsDato = LocalDateTime.now()
+        logger.info("Konsistensavstemming ble initielt trigget ${konsistensavstemmingTask.avstemmingdato}, men bruker $avstemmingsDato som avstemmingsdato")
+
         avstemmingService.nullstillDataChunk()
-        avstemmingService.sendKonsistensavstemmingStart(konsistensavstemmingTask.avstemmingdato, transaksjonsId)
+        avstemmingService.sendKonsistensavstemmingStart(avstemmingsDato, transaksjonsId)
 
-        var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
+        var relevanteBehandlinger =
+            avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(Pageable.ofSize(ANTALL_BEHANDLINGER))
 
-        for (chunkNr in 1..relevanteBehandlinger.totalPages) {
-            avstemmingService.opprettKonsistensavstemmingDataTask(
-                konsistensavstemmingTask.avstemmingdato,
-                relevanteBehandlinger,
-                konsistensavstemmingTask.batchId,
-                transaksjonsId,
-                chunkNr
-            )
+        var chunkNr = 1
+        for (pageNumber in 1..relevanteBehandlinger.totalPages) {
+            relevanteBehandlinger.content.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
+                .forEach { oppstykketRelevanteBehandlinger ->
+                    avstemmingService.opprettKonsistensavstemmingDataTask(
+                        avstemmingsDato,
+                        oppstykketRelevanteBehandlinger,
+                        konsistensavstemmingTask.batchId,
+                        transaksjonsId,
+                        chunkNr
+                    )
+                    chunkNr = chunkNr.inc()
+                }
             relevanteBehandlinger =
                 avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
         }
@@ -47,50 +57,41 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         avstemmingService.opprettKonsistensavstemmingAvsluttTask(
             konsistensavstemmingTask.batchId,
             transaksjonsId,
-            konsistensavstemmingTask.avstemmingdato
+            avstemmingsDato
         )
     }
 
-    fun dryRunKonsistensavstemming() {
-        logger.info("Start: hent behandlinger klar for konsistensavstemming ${LocalDateTime.now()}")
-        var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
-
-        val behandlinger = mutableListOf<BigInteger>()
-        for (chunkNr in 1..40) {
-            logger.info("Chunk $chunkNr: hent behandlinger klar for konsistensavstemming ${LocalDateTime.now()}")
-            behandlinger.addAll(relevanteBehandlinger.content)
-            relevanteBehandlinger =
-                avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
-        }
-        logger.info("Slutt: hent behandlinger klar for konsistensavstemming ${LocalDateTime.now()}")
-        logger.info("behandlinger: $behandlinger")
-    }
-
     fun dryRunKonsistensavstemmingOmskriving(size: Int) {
-        logger.info("Start: hent behandlinger klar for konsistensavstemming omskriving ${LocalDateTime.now()}")
+        logger.info("[dryRun-konsinstenavstemming] Start: hent behandlinger klar for konsistensavstemming omskriving ${LocalDateTime.now()}")
+        val transaksjonsId = UUID.randomUUID()
         val sideantall = Pageable.ofSize(size)
         var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(sideantall)
-        logger.info("Antall sider: ${relevanteBehandlinger.totalPages} og antallBehandlinger ${relevanteBehandlinger.size}")
+        logger.info("[dryRun-konsinstenavstemming] Antall sider: ${relevanteBehandlinger.totalPages} og antallBehandlinger ${relevanteBehandlinger.size}")
         val loggBehandlinger = mutableListOf<BigInteger>()
         var chunkNr = 0
 
         for (pageNumber in 1..2) {
             relevanteBehandlinger.chunked(500).forEach { behandlinger ->
                 loggBehandlinger.addAll(behandlinger)
-                logger.info("Chunk $chunkNr: hent behandlinger klar for konsistensavstemming omskriving ${LocalDateTime.now()}")
+                avstemmingService.opprettKonsistensavstemmingDataTaskDryrun(
+                    LocalDateTime.now(),
+                    behandlinger,
+                    transaksjonsId,
+                    chunkNr
+                )
                 chunkNr = chunkNr.inc()
             }
             relevanteBehandlinger =
                 avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
-            logger.info("Antall sider: $relevanteBehandlinger og antallBehandlinger ${relevanteBehandlinger.size}")
         }
 
-        logger.info("Slutt: hent behandlinger klar for konsistensavstemming omskriving${LocalDateTime.now()}")
-        logger.info("behandlinger: $loggBehandlinger")
+        logger.info("[dryRun-konsinstenavstemming] Slutt: hent behandlinger klar for konsistensavstemming omskriving${LocalDateTime.now()}")
+        logger.info("[dryRun-konsinstenavstemming] behandlinger: $loggBehandlinger")
     }
 
     companion object {
         const val TASK_STEP_TYPE = "konsistensavstemMotOppdragStart"
+        const val ANTALL_BEHANDLINGER = 10000
         private val logger = LoggerFactory.getLogger(KonsistensavstemMotOppdragStartTask::class.java)
     }
 }
