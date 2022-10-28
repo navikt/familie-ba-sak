@@ -70,6 +70,14 @@ krever at man henter azuread fra en pod til familie-ba-sak. Som rulleres oftere 
 * BA_SAK_CLIENT_ID=`AZURE_APP_CLIENT_ID` (fra `familie-ba-sak`)
 * CLIENT_SECRET=`AZURE_APP_CLIENT_SECRET` (fra `familie-ba-sak`)
 
+### Funksjonsbrytere
+
+Vi bruker [unleash](https://unleash.nais.io) til å håndtere funksjonsbrytere.
+
+#### Skru av og på ved lokal testing
+
+Setter du `-D<funksjonsbryter>=[true|false]` på VM Options, vil den gjeldende bryteren skrus av eller på
+
 ### Bruke Postman
 
 Du kan bruke Postman til å kalle APIene i ba-sak. Det krever at du har satt opp [autentisering](#autentisering) riktig,
@@ -96,9 +104,12 @@ I Postman gjør du et GET-kall med følgende oppsett:
 <br>
 
 #### Oppskrift for kall fra Postman mot prod
+
 For å finne den nødvendige informasjonen for å få frontend-token'et i prod må du:
+
 1. Endre kontekst til prod-gcp `kubectl config use-context prod-gcp`
-2. Finne navn på secret ved å kjøre `kubectl -n teamfamilie get secrets` og finne navnet på en secret som starter med `azure-familie-ba-sak-frontend-`. Kopier navnet på secreten.
+2. Finne navn på secret ved å kjøre `kubectl -n teamfamilie get secrets` og finne navnet på en secret som starter
+   med `azure-familie-ba-sak-frontend-`. Kopier navnet på secreten.
 3. Kjør `kubectl -n teamfamilie get secret [NAVN PÅ SECRET FRA STEG 2] -o json | jq '.data | map_values(@base64d)'`
 
 I Postman gjør du et GET-kall med følgende oppsett (OBS OBS - husk at dette er rett mot prod!):
@@ -106,10 +117,10 @@ I Postman gjør du et GET-kall med følgende oppsett (OBS OBS - husk at dette er
 * URL: `https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token`
 * Headers -> Cookie: `fpc=AsRNnIJ3MI9FqfN68mC5KW4`
 * Body: `x-www-form-urlencoded` med følgende key-values
-  * `grant_type`: `client_credentials`
-  * `client_id`: <`AZURE_APP_CLIENT_ID`> fra kubectl-kallet over
-  * `client_secret`: <`AZURE_APP_CLIENT_SECRET`> fra kubectl-kallet over
-  * `scope`: `api://prod-gcp.teamfamilie.familie-ba-sak/.default`
+    * `grant_type`: `client_credentials`
+    * `client_id`: <`AZURE_APP_CLIENT_ID`> fra kubectl-kallet over
+    * `client_secret`: <`AZURE_APP_CLIENT_SECRET`> fra kubectl-kallet over
+    * `scope`: `api://prod-gcp.teamfamilie.familie-ba-sak/.default`
 
 <br>
 </details>
@@ -164,12 +175,14 @@ curl -X POST "http://igroup:itest@localhost:8840/api/v1/topics" -H "Accept: appl
 Master-branchen blir automatisk bygget ved merge og deployet først til preprod og dernest til prod.
 
 ### Hastedeploy
+
 Hvis vi trenger å deploye raskt til prod, har vi egne byggejobber for den biten, som trigges manuelt.
 
 Den ene (krise-rett-i-prod) sjekker ut koden og bygger fra den.
 
-Den andre (krise-eksisterende-image-rett-i-prod) lar deg deploye et tidligere bygd image. Det slår til for eksempel hvis du skal rulle tilbake til forrige versjon.
-Denne tar som parameter taggen til imaget du vil deploye. Denne finner du under actions på GitHub, finn byggejobben du vil gå tilbake til, og kopier taggen derfra.
+Den andre (krise-eksisterende-image-rett-i-prod) lar deg deploye et tidligere bygd image. Det slår til for eksempel hvis
+du skal rulle tilbake til forrige versjon. Denne tar som parameter taggen til imaget du vil deploye. Denne finner du
+under actions på GitHub, finn byggejobben du vil gå tilbake til, og kopier taggen derfra.
 
 ### Oppretting av Kafka kø
 
