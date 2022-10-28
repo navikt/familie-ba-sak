@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 fun hentPerioderMedUtbetaling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     vedtak: Vedtak,
-    forskjøvetVilkårResultatTidslinjeMap: Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>
+    forskjøvetVilkårResultatTidslinjeMap: Map<Aktør, Tidslinje<List<VilkårResultat>, Måned>>
 ): List<VedtaksperiodeMedBegrunnelser> {
     val splittkriterierForVedtaksperiodeTidslinje =
         forskjøvetVilkårResultatTidslinjeMap
@@ -55,7 +55,7 @@ private data class SplittkriterierForVedtaksperiode(
     val regelverk: Regelverk?
 )
 
-private fun Map<Aktør, Tidslinje<Iterable<VilkårResultat>, Måned>>.tilSplittkriterierForVedtaksperiodeTidslinjer():
+private fun Map<Aktør, Tidslinje<List<VilkårResultat>, Måned>>.tilSplittkriterierForVedtaksperiodeTidslinjer():
     List<Tidslinje<Pair<Aktør, SplittkriterierForVedtaksperiode>?, Måned>> =
     this.map { (aktør, vilkårsvurderingTidslinje) ->
         vilkårsvurderingTidslinje.map { vilkårResultater ->

@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.task
 
 import io.mockk.every
-import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
@@ -31,31 +30,32 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         val task = Task(payload = payload, type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE)
         val startTask = KonsistensavstemMotOppdragStartTask(avstemmingService)
 
-        every { avstemmingService.nullstillDataChunk() } just runs
-        every { avstemmingService.sendKonsistensavstemmingStart(avstemmingdato, any()) } just runs
+        justRun { avstemmingService.nullstillDataChunk() }
+        justRun { avstemmingService.sendKonsistensavstemmingStart(any(), any()) }
         val page = mockk<Page<BigInteger>>()
         val pageable = mockk<Pageable>()
         val nrOfPages = 3
         every { page.totalPages } returns nrOfPages
         every { page.nextPageable() } returns pageable
+        every { page.content } returns listOf(BigInteger.valueOf(42))
         every { avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(any()) } returns page
-        every {
+        justRun {
             avstemmingService.opprettKonsistensavstemmingDataTask(
-                avstemmingdato,
+                any(),
                 any(),
                 batchId,
                 any(),
                 any()
             )
-        } just runs
-        every { avstemmingService.opprettKonsistensavstemmingAvsluttTask(batchId, any(), avstemmingdato) } just runs
+        }
+        justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(batchId, any(), any()) }
         startTask.doTask(task)
 
         verify(exactly = 1) { avstemmingService.nullstillDataChunk() }
-        verify(exactly = 1) { avstemmingService.sendKonsistensavstemmingStart(avstemmingdato, any()) }
+        verify(exactly = 1) { avstemmingService.sendKonsistensavstemmingStart(any(), any()) }
         verify(exactly = nrOfPages) {
             avstemmingService.opprettKonsistensavstemmingDataTask(
-                avstemmingdato,
+                any(),
                 any(),
                 batchId,
                 any(),

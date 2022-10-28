@@ -34,17 +34,6 @@ spring:
     locations: classpath:db/migration,classpath:db/init
   kafka:
     client-id: familie-ba-sak
-    properties:
-      security.protocol: SASL_SSL
-      sasl:
-        mechanism: PLAIN
-        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${CREDENTIAL_USERNAME}" password="${CREDENTIAL_PASSWORD}";
-    producer:
-      group-id: srvfamilie-ba-sak
-      acks: 1
-      retries: 3
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 logging:
   config: "classpath:logback-spring.xml"

@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkResultatTidslinje
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -32,7 +33,7 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("---  ----", barn1)
             .byggKompetanser()
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder)
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder, emptyMap())
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
@@ -47,7 +48,7 @@ class TilpassKompetanserTilRegelverkTest {
 
         val forventedeKompetanser = emptyList<Kompetanse>()
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder)
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder, emptyMap())
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
@@ -66,7 +67,11 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("SSS  SS--", barn1)
             .byggKompetanser()
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, barnasRegelverkResultatTidslinjer)
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
+            kompetanser,
+            barnasRegelverkResultatTidslinjer,
+            emptyMap()
+        )
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
@@ -88,8 +93,11 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("   - ", barn2)
             .byggKompetanser().sortedBy { it.fom }
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, barnasRegelverkResultatTidslinjer)
-            .sortedBy { it.fom }
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
+            kompetanser,
+            barnasRegelverkResultatTidslinjer,
+            emptyMap()
+        ).sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
@@ -125,8 +133,11 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("-  SS    ", barn3)
             .byggKompetanser().sortedBy { it.fom }
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, barnasRegelverkResultatTidslinjer)
-            .sortedBy { it.fom }
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
+            kompetanser,
+            barnasRegelverkResultatTidslinjer,
+            emptyMap()
+        ).sortedBy { it.fom }
 
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
@@ -145,8 +156,11 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("  ->", barn1, barn2)
             .byggKompetanser().sortedBy { it.fom }
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, barnasRegelverkResultatTidslinjer)
-            .sortedBy { it.fom }
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
+            kompetanser,
+            barnasRegelverkResultatTidslinjer,
+            emptyMap()
+        ).sortedBy { it.fom }
 
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
     }
@@ -179,9 +193,42 @@ class TilpassKompetanserTilRegelverkTest {
             .medKompetanse("     SS--", barn1)
             .byggKompetanser().sortedBy { it.fom }
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, barnasRegelverkResultatTidslinjer)
-            .sortedBy { it.fom }
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
+            kompetanser,
+            barnasRegelverkResultatTidslinjer,
+            emptyMap()
+        ).sortedBy { it.fom }
 
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `tilpass kompetanser mot eøs for to barn, der ett barn har etterbetaling 3 år`() {
+        val kompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("SS--SSSS", barn1, barn2)
+            .byggKompetanser()
+
+        val barnasRegelverkResultatTidslinjer = mapOf(
+            barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020),
+            barn2.aktør to "EEEENNEEE".tilRegelverkResultatTidslinje(jan2020)
+        )
+
+        val barnasHarEtterbetaling3År = mapOf(
+            barn1.aktør to "TTT      ".somBoolskTidslinje(jan2020)
+        )
+
+        val forventedeKompetanser = KompetanseBuilder(jan2020)
+            .medKompetanse("      SS-", barn1, barn2)
+            .medKompetanse("     S", barn1)
+            .medKompetanse("SS-- ", barn2)
+            .byggKompetanser().sortedBy { it.fom }
+
+        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(
+            kompetanser,
+            barnasRegelverkResultatTidslinjer,
+            barnasHarEtterbetaling3År
+        ).sortedBy { it.fom }
+
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }
 }

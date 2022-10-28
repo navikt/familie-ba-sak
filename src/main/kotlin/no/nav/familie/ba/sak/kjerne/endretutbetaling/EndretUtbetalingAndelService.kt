@@ -27,7 +27,8 @@ class EndretUtbetalingAndelService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val sanityService: SanityService,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList()
 ) {
     fun hentEndredeUtbetalingAndeler(behandlingId: Long) =
         endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
@@ -94,6 +95,13 @@ class EndretUtbetalingAndelService(
             personopplysningGrunnlag,
             endretUtbetalingAndel
         )
+
+        endretUtbetalingAndelOppdatertAbonnementer.forEach {
+            it.endretUtbetalingAndelerOppdatert(
+                behandlingId = behandling.id,
+                endretUtbetalingAndeler = andreEndredeAndelerPåBehandling + endretUtbetalingAndel
+            )
+        }
     }
 
     @Transactional
@@ -102,7 +110,7 @@ class EndretUtbetalingAndelService(
         endretUtbetalingAndelId: Long
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
-        endretUtbetalingAndel.andelTilkjentYtelser.forEach { it.endretUtbetalingAndeler.clear() }
+        endretUtbetalingAndel?.andelTilkjentYtelser?.forEach { it.endretUtbetalingAndeler.clear() }
         endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
 
         val personopplysningGrunnlag =
@@ -110,6 +118,13 @@ class EndretUtbetalingAndelService(
                 ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+
+        endretUtbetalingAndelOppdatertAbonnementer.forEach { abonnent ->
+            abonnent.endretUtbetalingAndelerOppdatert(
+                behandlingId = behandling.id,
+                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+            )
+        }
     }
 
     @Transactional
@@ -143,4 +158,11 @@ class EndretUtbetalingAndelService(
             it.andelTilkjentYtelser.clear()
         }
     }
+}
+
+interface EndretUtbetalingAndelerOppdatertAbonnent {
+    fun endretUtbetalingAndelerOppdatert(
+        behandlingId: Long,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+    )
 }

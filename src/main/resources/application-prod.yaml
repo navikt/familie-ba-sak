@@ -153,8 +153,6 @@ spring:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ba-sak
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-  kafka:
-    bootstrap-servers: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
 
 sentry.environment: prod
 

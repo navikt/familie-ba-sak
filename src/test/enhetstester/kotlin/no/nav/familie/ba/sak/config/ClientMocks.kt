@@ -210,12 +210,12 @@ class ClientMocks {
             every {
                 mockFeatureToggleService.isEnabled(capture(featureSlot))
             } answers {
-                mockFeatureToggleServiceAnswer
+                System.getProperty(featureSlot.captured)?.toBoolean() ?: mockFeatureToggleServiceAnswer
             }
             every {
                 mockFeatureToggleService.isEnabled(capture(featureSlot), any())
             } answers {
-                mockFeatureToggleServiceAnswer
+                System.getProperty(featureSlot.captured)?.toBoolean() ?: mockFeatureToggleServiceAnswer
             }
         }
 
