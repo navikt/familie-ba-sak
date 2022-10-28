@@ -52,7 +52,7 @@ class AvstemmingService(
 
     fun erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(transaksjonsId: UUID, chunkNr: Int): Boolean {
         val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
-        return dataChunk.erSendt
+        return dataChunk?.erSendt == true
     }
 
     fun konsistensavstemOppdragData(
@@ -63,6 +63,7 @@ class AvstemmingService(
     ) {
         logger.info("Utfører konsisensavstemming: Sender perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr")
         val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
+            ?: error("Finner ingen datachunk for $transaksjonsId og $chunkNr")
 
         if (dataChunk.erSendt) {
             logger.info("Utfører konsisensavstemming: Perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr er allerede sendt.")

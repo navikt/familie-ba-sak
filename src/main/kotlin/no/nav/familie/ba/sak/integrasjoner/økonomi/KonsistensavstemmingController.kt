@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -29,6 +30,7 @@ class KonsistensavstemmingController(
 
     @PostMapping(path = ["/dryrun"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Transactional
+    @Unprotected
     fun kjørKonsistensavstemmingUtenSendingTilØkonomi(): ResponseEntity<Ressurs<String>> {
         val transaksjonsId = UUID.randomUUID()
         val batch = batchRepository.saveAndFlush(Batch(kjøreDato = LocalDate.now(), status = KjøreStatus.MANUELL))

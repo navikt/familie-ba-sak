@@ -32,7 +32,9 @@ class KonsistensavstemMotOppdragPerioderGeneratorTask(
                 taskDto.transaksjonsId,
                 taskDto.chunkNr
             )
-        ) return
+        ) {
+            return
+        }
 
         val perioderTilAvstemming =
             avstemmingService.hentDataForKonsistensavstemming(
