@@ -79,7 +79,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     VEDTAK_FORTSATT_INNVILGET(true, "vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
     VEDTAK_KORREKSJON_VEDTAKSBREV(true, "korrigertVedtakEgenBrevmal", "Korrigere vedtak med egen brevmal"),
     VEDTAK_OPPHØR_DØDSFALL(true, "dodsfall", "Dødsfall"),
-    VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON(true, "foerstegangsvedtakInstitusjon", "Førstegangsvedtak institusjon"),
+    VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON(true, "foerstegangsvedtakInstitusjon", "Førstegangsvedtak"),
     VEDTAK_ENDRING_INSTITUSJON(true, "vedtakEndringInstitusjon", "Vedtak endring"),
     VEDTAK_OPPHØRT_INSTITUSJON(true, "vedtakOpphoerInstitusjon", "Opphørt"),
     VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON(true, "opphorMedEndringInstitusjon", "Opphør med endring"),

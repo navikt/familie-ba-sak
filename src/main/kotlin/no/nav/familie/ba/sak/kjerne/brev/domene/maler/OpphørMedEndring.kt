@@ -3,17 +3,19 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 
 data class OpphørMedEndring(
-    override val mal: Brevmal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
+    override val mal: Brevmal,
     override val data: OpphørMedEndringData
 ) : Vedtaksbrev {
 
     constructor(
+        mal: Brevmal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
         vedtakFellesfelter: VedtakFellesfelter,
         etterbetaling: Etterbetaling? = null,
         erFeilutbetalingPåBehandling: Boolean,
         etterbetalingInstitusjon: EtterbetalingInstitusjon? = null
     ) :
         this(
+            mal = mal,
             data = OpphørMedEndringData(
                 delmalData = OpphørMedEndringData.Delmaler(
                     signaturVedtak = SignaturVedtak(

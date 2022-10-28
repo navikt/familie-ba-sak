@@ -69,9 +69,10 @@ class BrevService(
             )
 
             Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON -> Førstegangsvedtak(
+                mal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak)
-            ).copy(mal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON)
+            )
 
             Brevmal.VEDTAK_ENDRING -> VedtakEndring(
                 vedtakFellesfelter = vedtakFellesfelter,
@@ -81,11 +82,12 @@ class BrevService(
             )
 
             Brevmal.VEDTAK_ENDRING_INSTITUSJON -> VedtakEndring(
+                mal = Brevmal.VEDTAK_ENDRING_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
                 erKlage = vedtak.behandling.erKlage(),
                 erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
-            ).copy(mal = Brevmal.VEDTAK_ENDRING_INSTITUSJON)
+            )
 
             Brevmal.VEDTAK_OPPHØRT -> Opphørt(
                 vedtakFellesfelter = vedtakFellesfelter,
@@ -93,9 +95,10 @@ class BrevService(
             )
 
             Brevmal.VEDTAK_OPPHØRT_INSTITUSJON -> Opphørt(
+                mal = Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter,
                 erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
-            ).copy(mal = Brevmal.VEDTAK_OPPHØRT_INSTITUSJON)
+            )
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> OpphørMedEndring(
                 vedtakFellesfelter = vedtakFellesfelter,
@@ -104,17 +107,22 @@ class BrevService(
             )
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON -> OpphørMedEndring(
+                mal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
                 erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
-            ).copy(mal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON)
+            )
 
             Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
-            Brevmal.VEDTAK_AVSLAG_INSTITUSJON -> Avslag(vedtakFellesfelter = vedtakFellesfelter).copy(mal = Brevmal.VEDTAK_AVSLAG_INSTITUSJON)
+            Brevmal.VEDTAK_AVSLAG_INSTITUSJON -> Avslag(
+                mal = Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
+                vedtakFellesfelter = vedtakFellesfelter
+            )
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter)
-            Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter).copy(
-                mal = Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
+            Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> ForsattInnvilget(
+                mal = Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
+                vedtakFellesfelter = vedtakFellesfelter
             )
 
             Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG -> Autovedtak6og18årOgSmåbarnstillegg(
@@ -223,8 +231,7 @@ class BrevService(
         )
 
         val organisasjonsnummer = vedtak.behandling.fagsak.institusjon?.orgNummer
-        val organisasjonsnavn =
-            vedtak.behandling.fagsak.institusjon?.let { organisasjonService.hentOrganisasjon(it.orgNummer).navn }
+        val organisasjonsnavn = organisasjonsnummer?.let { organisasjonService.hentOrganisasjon(it).navn }
 
         return VedtakFellesfelter(
             enhet = grunnlagOgSignaturData.enhet,
