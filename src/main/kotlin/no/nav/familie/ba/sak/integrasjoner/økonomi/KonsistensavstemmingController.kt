@@ -27,7 +27,7 @@ class KonsistensavstemmingController(
     private val batchRepository: BatchRepository
 ) {
 
-    @PostMapping(path = ["/konsistensavstemming/dryrun"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(path = ["/dryrun"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Transactional
     fun kjørKonsistensavstemmingUtenSendingTilØkonomi(): ResponseEntity<Ressurs<String>> {
         val transaksjonsId = UUID.randomUUID()
