@@ -405,6 +405,18 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetMedlemAvFolketrygdenUtenDato"
     },
+    INNVILGET_GYLDIG_KONTONUMMER_REGISTRERT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetGyldigKontonummerRegistrert"
+    },
+    INNVILGET_FULL_UTBETALING_AVTALE_DELT_BOSTED_ANNEN_OMSORGSPERSON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFullUtbetalingAvtaleDeltBostedAnnenOmsorgsperson"
+    },
+    INNVILGET_FULL_UTBETALING_ANNEN_FORELDER_ØNSKER_IKKE_DELT_BARNETRYGD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFullUtbetalingAnnenForelderOnskerIkkeDeltBarnetrygd"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
