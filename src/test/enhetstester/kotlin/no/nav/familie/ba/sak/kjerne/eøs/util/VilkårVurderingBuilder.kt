@@ -101,7 +101,7 @@ internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVi
             vurderesEtter = this.innhold?.regelverk,
             periodeFom = this.fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDateEllerNull(),
             periodeTom = this.tilOgMed.tilDagEllerSisteDagIPerioden().tilLocalDateEllerNull(),
-            begrunnelse = "",
+            begrunnelse = "En begrunnelse",
             behandlingId = personResultat.vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = this.innhold?.utdypendeVilkårsvurderinger ?: emptyList()
         )
@@ -126,4 +126,11 @@ data class UtdypendeVilkårRegelverkResultat(
     val resultat: Resultat?,
     val regelverk: Regelverk?,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
-)
+) {
+    constructor(
+        vilkår: Vilkår,
+        resultat: Resultat?,
+        regelverk: Regelverk?,
+        vararg utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering
+    ) : this(vilkår, resultat, regelverk, utdypendeVilkårsvurdering.toList())
+}
