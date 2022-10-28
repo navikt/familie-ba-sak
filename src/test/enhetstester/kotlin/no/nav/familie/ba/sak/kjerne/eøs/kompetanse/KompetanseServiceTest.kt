@@ -172,6 +172,31 @@ internal class KompetanseServiceTest {
     }
 
     @Test
+    fun `skal kunne forkorte til-og-med ved å sende inn identisk skjema med tidligere til-og-med-dato`() {
+        val behandlingId = BehandlingId(10L)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        // Kompetanse med sekundærland for tre barn med til-og-med-dato
+        KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("SSSSSSS", barn1, barn2, barn3)
+            .lagreTil(mockKompetanseRepository)
+
+        // Endrer kun til-og-med dato til tidligere tidspunkt
+        val oppdatertKompetanse = kompetanse(jan(2020), "SSS", barn1, barn2, barn3)
+        kompetanseService.oppdaterKompetanse(behandlingId, oppdatertKompetanse)
+
+        // Forventer tomt skjema fra oppdatert dato og fremover til orignal til-og-med
+        val forventedeKompetanser = KompetanseBuilder(jan(2020), behandlingId)
+            .medKompetanse("SSS----", barn1, barn2, barn3)
+            .byggKompetanser()
+
+        val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
     fun `skal opprette tomt skjema for barn som fjernes fra ellers uendret skjema`() {
         val behandlingId = BehandlingId(10L)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)

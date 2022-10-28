@@ -61,8 +61,8 @@ fun <T : PeriodeOgBarnSkjema<T>> T.utenInnholdHeretter() =
 fun <T : PeriodeOgBarnSkjema<T>> T.medBarnaSomForsvinnerFra(skjema: T): T =
     this.kopier(barnAktører = skjema.barnAktører.minus(this.barnAktører))
 
-fun <T : PeriodeOgBarnSkjema<T>> T.periodeBlirLukketAv(skjema: T): Boolean =
-    this.tom == null && skjema.tom != null
+fun <T : PeriodeOgBarnSkjema<T>> T.tilOgMedBlirForkortetEllerLukketAv(skjema: T): Boolean =
+    skjema.tom != null && (this.tom == null || this.tom!! > skjema.tom)
 
 fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraTilOgMed(skjema: T): Boolean =
     this.kopier(tom = skjema.tom) == skjema
