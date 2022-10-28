@@ -13,25 +13,89 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import java.math.BigInteger
 import java.time.LocalDateTime
+import java.util.UUID
 
 internal class KonsistensavstemMotOppdragStartTaskTest {
     private val avstemmingService = mockk<AvstemmingService>()
+    private val startTask = KonsistensavstemMotOppdragStartTask(avstemmingService)
 
     @Test
-    fun `Test at start konsistensavstemmingstask nullstiller chunktabell, sender start data og avslutt task`() {
-        val avstemmingdato = LocalDateTime.of(2022, 4, 1, 0, 0)
-        val batchId = 123L
-        val payload = objectMapper.writeValueAsString(
-            KonsistensavstemmingStartTaskDTO(
-                batchId = batchId,
-                avstemmingdato = avstemmingdato
-            )
-        )
-        val task = Task(payload = payload, type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE)
-        val startTask = KonsistensavstemMotOppdragStartTask(avstemmingService)
+    fun `Ved kjøring av task første gang, så skal den sende start til økonomi, opprette generer perioder task for avstemming og og sende avslutt til økonomi`() {
+        val (transaksjonsId, task) = opprettStartTask()
 
-        justRun { avstemmingService.nullstillDataChunk() }
-        justRun { avstemmingService.sendKonsistensavstemmingStart(any(), any()) }
+        every { avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsid(transaksjonsId) } returns false
+        every { avstemmingService.erKonsistensavstemmingDelvisKjørtForTransaksjonsid(transaksjonsId) } returns false
+        every {
+            avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
+                transaksjonsId,
+                range(1, 3)
+            )
+        } returns false
+        justRun { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
+        mockTreSiderMedSisteBehandlinger()
+        justRun {
+            avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(any())
+        }
+        justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
+
+        startTask.doTask(task)
+
+        verify(exactly = 1) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
+        verify(exactly = 3) {
+            avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(
+                any()
+            )
+        }
+        verify(exactly = 1) { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
+    }
+
+    @Test
+    fun `Ved rekjøring av task som er alt kjørt, så skal den avslutte uten å sende meldinger eller generere perioder`() {
+        val (transaksjonsId, task) = opprettStartTask()
+
+        every { avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsid(transaksjonsId) } returns true
+
+        startTask.doTask(task)
+
+        verify(exactly = 0) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
+        verify(exactly = 0) { avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(any()) }
+        verify(exactly = 0) { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
+    }
+
+    @Test
+    fun `Ved rekjøring av task som er delvis kjørt, så skal den ikke sende start melding, men opprette generer perioder på avstemminger som det ikke er sendt og sende avslutt melding til økonomi`() {
+        val (transaksjonsId, task) = opprettStartTask()
+
+        every { avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsid(transaksjonsId) } returns false
+        every { avstemmingService.erKonsistensavstemmingDelvisKjørtForTransaksjonsid(transaksjonsId) } returns true
+        every {
+            avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
+                transaksjonsId,
+                range(1, 2)
+            )
+        } returns true
+        every {
+            avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
+                transaksjonsId,
+                3
+            )
+        } returns false
+
+        justRun { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
+        mockTreSiderMedSisteBehandlinger()
+        justRun {
+            avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(any())
+        }
+        justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
+
+        startTask.doTask(task)
+
+        verify(exactly = 0) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
+        verify(exactly = 1) { avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(any()) }
+        verify(exactly = 1) { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
+    }
+
+    private fun mockTreSiderMedSisteBehandlinger() {
         val page = mockk<Page<BigInteger>>()
         val pageable = mockk<Pageable>()
         val nrOfPages = 3
@@ -39,18 +103,20 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         every { page.nextPageable() } returns pageable
         every { page.content } returns listOf(BigInteger.valueOf(42))
         every { avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(any()) } returns page
-        justRun {
-            avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(any())
-        }
-        justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
-        startTask.doTask(task)
+    }
 
-        verify(exactly = 1) { avstemmingService.nullstillDataChunk() }
-        verify(exactly = 1) { avstemmingService.sendKonsistensavstemmingStart(any(), any()) }
-        verify(exactly = nrOfPages) {
-            avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(
-                any()
+    private fun opprettStartTask(): Pair<UUID, Task> {
+        val avstemmingdato = LocalDateTime.of(2022, 4, 1, 0, 0)
+        val batchId = 123L
+        val transaksjonsId = UUID.randomUUID()
+        val payload = objectMapper.writeValueAsString(
+            KonsistensavstemmingStartTaskDTO(
+                batchId = batchId,
+                avstemmingdato = avstemmingdato,
+                transaksjonsId = transaksjonsId
             )
-        }
+        )
+        val task = Task(payload = payload, type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE)
+        return Pair(transaksjonsId, task)
     }
 }

@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -38,13 +37,6 @@ class AvstemmingService(
         økonomiKlient.konsistensavstemOppdragStart(
             avstemmingsdato,
             transaksjonsId
-        )
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun nullstillDataChunk() {
-        dataChunkRepository.saveAllAndFlush(
-            dataChunkRepository.findByErSendt(false).map { dataChunk -> dataChunk.also { it.erSendt = true } }
         )
     }
 
@@ -130,22 +122,6 @@ class AvstemmingService(
             )
         )
         taskRepository.save(task)
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    fun opprettKonsistensavstemmingDataTaskDryrun(
-        avstemmingsdato: LocalDateTime,
-        relevanteBehandlinger: List<BigInteger>,
-        transaksjonsId: UUID,
-        chunkNr: Int
-    ) {
-        val perioderTilAvstemming =
-            hentDataForKonsistensavstemming(
-                avstemmingsdato,
-                relevanteBehandlinger.map { it.toLong() }
-            )
-
-        logger.info("[dryRun-konsinstenavstemming] Oppretter konsisensavstemmingstasker for transaksjonsId $transaksjonsId og chunk $chunkNr med ${perioderTilAvstemming.size} løpende saker")
     }
 
     fun hentDataForKonsistensavstemming(

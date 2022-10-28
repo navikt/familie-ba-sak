@@ -11,9 +11,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.math.BigInteger
 import java.time.LocalDateTime
-import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
@@ -87,34 +85,6 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
                 sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi
             )
         )
-    }
-
-    fun dryRunKonsistensavstemmingOmskriving(size: Int) {
-        logger.info("[dryRun-konsinstenavstemming] Start: hent behandlinger klar for konsistensavstemming omskriving ${LocalDateTime.now()}")
-        val transaksjonsId = UUID.randomUUID()
-        val sideantall = Pageable.ofSize(size)
-        var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(sideantall)
-        logger.info("[dryRun-konsinstenavstemming] Antall sider: ${relevanteBehandlinger.totalPages} og antallBehandlinger ${relevanteBehandlinger.size}")
-        val loggBehandlinger = mutableListOf<BigInteger>()
-        var chunkNr = 0
-
-        for (pageNumber in 1..2) {
-            relevanteBehandlinger.chunked(500).forEach { behandlinger ->
-                loggBehandlinger.addAll(behandlinger)
-                avstemmingService.opprettKonsistensavstemmingDataTaskDryrun(
-                    LocalDateTime.now(),
-                    behandlinger,
-                    transaksjonsId,
-                    chunkNr
-                )
-                chunkNr = chunkNr.inc()
-            }
-            relevanteBehandlinger =
-                avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
-        }
-
-        logger.info("[dryRun-konsinstenavstemming] Slutt: hent behandlinger klar for konsistensavstemming omskriving${LocalDateTime.now()}")
-        logger.info("[dryRun-konsinstenavstemming] behandlinger: $loggBehandlinger")
     }
 
     companion object {
