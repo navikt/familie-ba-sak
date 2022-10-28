@@ -103,6 +103,12 @@ class BrevService(
                 erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
             )
 
+            Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON -> OpphørMedEndring(
+                vedtakFellesfelter = vedtakFellesfelter,
+                etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
+            ).copy(mal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON)
+
             Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
             Brevmal.VEDTAK_AVSLAG_INSTITUSJON -> Avslag(vedtakFellesfelter = vedtakFellesfelter).copy(mal = Brevmal.VEDTAK_AVSLAG_INSTITUSJON)
 

@@ -80,9 +80,10 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     VEDTAK_KORREKSJON_VEDTAKSBREV(true, "korrigertVedtakEgenBrevmal", "Korrigere vedtak med egen brevmal"),
     VEDTAK_OPPHØR_DØDSFALL(true, "dodsfall", "Dødsfall"),
     VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON(true, "foerstegangsvedtakInstitusjon", "Førstegangsvedtak institusjon"),
-    VEDTAK_AVSLAG_INSTITUSJON(true, "vedtakAvslagInstitusjon", "Avslag"),
-    VEDTAK_OPPHØRT_INSTITUSJON(true, "vedtakOpphoerInstitusjon", "Opphørt"),
     VEDTAK_ENDRING_INSTITUSJON(true, "vedtakEndringInstitusjon", "Vedtak endring"),
+    VEDTAK_OPPHØRT_INSTITUSJON(true, "vedtakOpphoerInstitusjon", "Opphørt"),
+    VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON(true, "opphorMedEndringInstitusjon", "Opphør med endring"),
+    VEDTAK_AVSLAG_INSTITUSJON(true, "vedtakAvslagInstitusjon", "Avslag"),
     VEDTAK_FORTSATT_INNVILGET_INSTITUSJON(true, "vedtakFortsattInnvilgetInstitusjon", "Vedtak fortstatt innvilget"),
 
     @Deprecated(
@@ -136,6 +137,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VEDTAK_OPPHØRT_INSTITUSJON,
             VEDTAK_ENDRING_INSTITUSJON,
             VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
+            VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
             DØDSFALL,
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
@@ -178,6 +180,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VEDTAK_OPPHØRT_INSTITUSJON,
             VEDTAK_ENDRING_INSTITUSJON,
             VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
+            VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
             DØDSFALL,
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
@@ -216,6 +219,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VEDTAK_OPPHØRT_INSTITUSJON -> Distribusjonstype.VEDTAK
             VEDTAK_ENDRING_INSTITUSJON -> Distribusjonstype.VEDTAK
             VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> Distribusjonstype.VEDTAK
+            VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON -> Distribusjonstype.VEDTAK
             DØDSFALL -> throw Feil("Dødsfall skal ikke brukes")
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG -> Distribusjonstype.VEDTAK
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> Distribusjonstype.VEDTAK

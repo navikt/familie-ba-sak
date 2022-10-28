@@ -267,6 +267,20 @@ internal class BrevUtilsTest {
         }
     }
 
+    @Test
+    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphør med endring' og institusjon`() {
+        behandlingsersultaterForOpphørMedEndring.forEach {
+            Assertions.assertEquals(
+                Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
+                hentManuellVedtaksbrevtype(
+                    BehandlingType.REVURDERING,
+                    it,
+                    true
+                )
+            )
+        }
+    }
+
     private val behandlingsersultaterForFortsattInnvilget = listOf(Behandlingsresultat.FORTSATT_INNVILGET)
 
     @Test

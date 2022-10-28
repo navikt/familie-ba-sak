@@ -140,7 +140,7 @@ fun hentManuellVedtaksbrevtype(
                     DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
                     AVSLÅTT_OG_OPPHØRT,
                     AVSLÅTT_ENDRET_OG_OPPHØRT,
-                    ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING
+                    ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
 
                     FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
 
