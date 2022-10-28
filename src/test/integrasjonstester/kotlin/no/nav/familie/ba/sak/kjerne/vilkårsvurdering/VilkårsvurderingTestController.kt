@@ -23,7 +23,13 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE_MED_SØKER
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.OMFATTET_AV_NORSK_LOVGIVNING
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -146,5 +152,23 @@ fun Map<LocalDate, Map<Vilkår, String>>.tilVilkårsvurdering(
         personBuilder.byggPerson()
     }
 
-    return builder.byggVilkårsvurdering()
+    return builder.byggVilkårsvurdering().leggPåUtdypendeVilkår()
+}
+
+private fun Vilkårsvurdering.leggPåUtdypendeVilkår(): Vilkårsvurdering {
+    this.personResultater.forEach { personresultat ->
+        personresultat.vilkårResultater.forEach {
+            when {
+                it.vilkårType == BOSATT_I_RIKET && personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
+                    it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + OMFATTET_AV_NORSK_LOVGIVNING
+                it.vilkårType == BOSATT_I_RIKET && !personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
+                    it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + BARN_BOR_I_NORGE
+                it.vilkårType == BOR_MED_SØKER && !personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
+                    it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + BARN_BOR_I_NORGE_MED_SØKER
+                else -> Any()
+            }
+        }
+    }
+
+    return this
 }
