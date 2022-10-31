@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -101,7 +102,10 @@ class AvstemmingService(
         logger.info("Oppretter avsluttingstask for transaksjonsId ${konsistensavstemmingAvsluttTaskDTO.transaksjonsId}")
         val konsistensavstemmingAvsluttTask = Task(
             type = KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(konsistensavstemmingAvsluttTaskDTO)
+            payload = objectMapper.writeValueAsString(konsistensavstemmingAvsluttTaskDTO),
+            properties = Properties().apply {
+                this["transaksjonsId"] = konsistensavstemmingAvsluttTaskDTO.transaksjonsId.toString()
+            }
         )
         taskRepository.save(konsistensavstemmingAvsluttTask)
     }
@@ -119,8 +123,8 @@ class AvstemmingService(
         dataChunkRepository.save(
             DataChunk(
                 batch = batch,
-                transaksjonsId = konsistensavstemmingPerioderGeneratorTaskDTO.transaksjonsId,
-                chunkNr = konsistensavstemmingPerioderGeneratorTaskDTO.chunkNr
+                chunkNr = konsistensavstemmingPerioderGeneratorTaskDTO.chunkNr,
+                transaksjonsId = konsistensavstemmingPerioderGeneratorTaskDTO.transaksjonsId
             )
         )
 
@@ -129,7 +133,11 @@ class AvstemmingService(
             type = KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(
                 konsistensavstemmingPerioderGeneratorTaskDTO
-            )
+            ),
+            properties = Properties().apply {
+                this["transaksjonsId"] = konsistensavstemmingPerioderGeneratorTaskDTO.transaksjonsId.toString()
+                this["chunkNr"] = konsistensavstemmingPerioderGeneratorTaskDTO.chunkNr.toString()
+            }
         )
         taskRepository.save(task)
     }

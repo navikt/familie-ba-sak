@@ -11,9 +11,12 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.util.Properties
+import java.util.UUID
 
 @Component
 class KonsistensavstemmingScheduler(
@@ -25,21 +28,27 @@ class KonsistensavstemmingScheduler(
 ) {
 
     @Scheduled(cron = "0 0 22 * * *")
+    @Transactional
     fun utførKonsistensavstemming() {
         val inneværendeMåned = YearMonth.from(now())
         val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dato = now()) ?: return
 
         logger.info("Kjører konsistensavstemming for $inneværendeMåned")
 
+        val transaksjonsId = UUID.randomUUID()
         taskRepository.save(
             Task(
                 type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     KonsistensavstemmingStartTaskDTO(
                         batchId = plukketBatch.id,
-                        avstemmingdato = LocalDateTime.now()
+                        avstemmingdato = LocalDateTime.now(),
+                        transaksjonsId = transaksjonsId
                     )
-                )
+                ),
+                properties = Properties().apply {
+                    this["transaksjonsId"] = transaksjonsId.toString()
+                }
             )
         )
 
