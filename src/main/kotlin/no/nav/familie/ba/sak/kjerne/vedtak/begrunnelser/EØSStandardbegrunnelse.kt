@@ -131,6 +131,22 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSekundaerlandBeggeForeldreBosattINorge"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_TILLEGGSTEKST_PRIMÆR_DELT_BOSTED_ANNEN_FORELDER_IKKE_RETT {
+        override val sanityApiNavn = "innvilgetTilleggstekstPrimaerDeltBostedAnnenForelderIkkeRett"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_TILLEGGSTEKST_SEKUNDÆR_FULL_UTBETALING {
+        override val sanityApiNavn = "innvilgetTilleggstekstSekundaerFullUtbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_TILLEGGSTEKST_SEKUNDÆR_AVTALE_DELT_BOSTED {
+        override val sanityApiNavn = "innvilgetTilleggstekstSekundaerAvtaleDeltBosted"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_TILLEGGSTEKST_SEKUNDÆR_DELT_BOSTED_ANNEN_FORELDER_IKKE_RETT {
+        override val sanityApiNavn = "innvilgetTilleggstekstsekundaerDeltBostedAnnenForelderIkkeRett"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
@@ -170,7 +186,16 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_SØKER_BOR_IKKE_I_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorSoekerBorIkkeIEosLand"
-    };
+    },
+    OPPHØR_ARBEIDER_MER_ENN_25_PROSENT_I_ANNET_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorArbeiderMerEnn25ProsentIAnnetEosLand"
+    },
+    OPPHØR_UTSENDT_ARBEIDSTAKER_FRA_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorUtsendtArbeidstakerFraEosLand"
+    }
+    ;
 
     override val kanDelesOpp: Boolean = false
 
