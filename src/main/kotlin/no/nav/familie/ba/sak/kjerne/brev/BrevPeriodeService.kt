@@ -81,7 +81,8 @@ class BrevPeriodeService(
         val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
             vilkårsvurdering = vilkårsvurdering,
             endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-            persongrunnlag = personopplysningGrunnlag
+            persongrunnlag = personopplysningGrunnlag,
+            erInstitusjon = vilkårsvurdering.behandling.fagsak.institusjon != null
         )
 
         return vedtaksperioderId.map {

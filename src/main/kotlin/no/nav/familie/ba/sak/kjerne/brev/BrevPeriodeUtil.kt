@@ -36,12 +36,14 @@ fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
 fun hentRestBehandlingsgrunnlagForBrev(
     persongrunnlag: PersonopplysningGrunnlag,
     vilkårsvurdering: Vilkårsvurdering,
-    endredeUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
+    endredeUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
+    erInstitusjon: Boolean
 ): RestBehandlingsgrunnlagForBrev {
     return RestBehandlingsgrunnlagForBrev(
         personerPåBehandling = persongrunnlag.søkerOgBarn.map { it.tilMinimertPerson() },
         minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-        minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertRestEndretUtbetalingAndel() }
+        minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertRestEndretUtbetalingAndel() },
+        erInstitusjon = erInstitusjon
     )
 }
 

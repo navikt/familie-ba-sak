@@ -3,17 +3,20 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 
 data class VedtakEndring(
-    override val mal: Brevmal = Brevmal.VEDTAK_ENDRING,
+    override val mal: Brevmal,
     override val data: EndringVedtakData
 ) : Vedtaksbrev {
 
     constructor(
+        mal: Brevmal = Brevmal.VEDTAK_ENDRING,
         vedtakFellesfelter: VedtakFellesfelter,
-        etterbetaling: Etterbetaling?,
+        etterbetaling: Etterbetaling? = null,
         erFeilutbetalingPåBehandling: Boolean,
-        erKlage: Boolean
+        erKlage: Boolean,
+        etterbetalingInstitusjon: EtterbetalingInstitusjon? = null
     ) :
         this(
+            mal = mal,
             data = EndringVedtakData(
                 delmalData = EndringVedtakData.Delmaler(
                     signaturVedtak = SignaturVedtak(
@@ -24,11 +27,15 @@ data class VedtakEndring(
                     etterbetaling = etterbetaling,
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                     klage = erKlage,
-                    feilutbetaling = erFeilutbetalingPåBehandling
+                    klageInstitusjon = erKlage,
+                    feilutbetaling = erFeilutbetalingPåBehandling,
+                    etterbetalingInstitusjon = etterbetalingInstitusjon
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    organisasjonsnummer = vedtakFellesfelter.organisasjonsnummer,
+                    gjelder = vedtakFellesfelter.gjelder
                 ),
                 perioder = vedtakFellesfelter.perioder
             )
@@ -46,6 +53,8 @@ data class EndringVedtakData(
         val etterbetaling: Etterbetaling?,
         val feilutbetaling: Boolean,
         val hjemmeltekst: Hjemmeltekst,
-        val klage: Boolean
+        val klage: Boolean,
+        val klageInstitusjon: Boolean,
+        val etterbetalingInstitusjon: EtterbetalingInstitusjon?
     )
 }

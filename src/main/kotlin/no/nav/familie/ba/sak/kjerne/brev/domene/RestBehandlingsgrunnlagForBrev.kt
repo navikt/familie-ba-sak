@@ -5,5 +5,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 data class RestBehandlingsgrunnlagForBrev(
     val personerPåBehandling: List<MinimertRestPerson>,
     val minimertePersonResultater: List<MinimertRestPersonResultat>,
-    val minimerteEndredeUtbetalingAndeler: List<MinimertRestEndretAndel>
+    val minimerteEndredeUtbetalingAndeler: List<MinimertRestEndretAndel>,
+    val erInstitusjon: Boolean
 )

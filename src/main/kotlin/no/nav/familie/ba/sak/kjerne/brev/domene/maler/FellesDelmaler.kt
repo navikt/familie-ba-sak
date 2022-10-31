@@ -32,6 +32,15 @@ data class Etterbetaling(
     )
 }
 
+data class EtterbetalingInstitusjon(
+    val etterbetalingsbelop: Flettefelt
+) {
+
+    constructor(etterbetalingsbeløp: String) : this(
+        flettefelt(etterbetalingsbeløp)
+    )
+}
+
 data class Hjemmeltekst(
     val hjemler: Flettefelt
 ) {

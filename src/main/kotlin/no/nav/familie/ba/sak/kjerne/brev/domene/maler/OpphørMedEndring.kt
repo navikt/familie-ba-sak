@@ -3,17 +3,19 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 
 data class OpphørMedEndring(
-    override val mal: Brevmal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
+    override val mal: Brevmal,
     override val data: OpphørMedEndringData
 ) : Vedtaksbrev {
 
     constructor(
+        mal: Brevmal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
         vedtakFellesfelter: VedtakFellesfelter,
-
-        etterbetaling: Etterbetaling?,
-        erFeilutbetalingPåBehandling: Boolean
+        etterbetaling: Etterbetaling? = null,
+        erFeilutbetalingPåBehandling: Boolean,
+        etterbetalingInstitusjon: EtterbetalingInstitusjon? = null
     ) :
         this(
+            mal = mal,
             data = OpphørMedEndringData(
                 delmalData = OpphørMedEndringData.Delmaler(
                     signaturVedtak = SignaturVedtak(
@@ -23,11 +25,14 @@ data class OpphørMedEndring(
                     ),
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                     feilutbetaling = erFeilutbetalingPåBehandling,
-                    etterbetaling = etterbetaling
+                    etterbetaling = etterbetaling,
+                    etterbetalingInstitusjon = etterbetalingInstitusjon
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    organisasjonsnummer = vedtakFellesfelter.organisasjonsnummer,
+                    gjelder = vedtakFellesfelter.gjelder
                 ),
                 perioder = vedtakFellesfelter.perioder
             )
@@ -43,6 +48,7 @@ data class OpphørMedEndringData(
         val signaturVedtak: SignaturVedtak,
         val feilutbetaling: Boolean,
         val hjemmeltekst: Hjemmeltekst,
-        val etterbetaling: Etterbetaling?
+        val etterbetaling: Etterbetaling?,
+        val etterbetalingInstitusjon: EtterbetalingInstitusjon?
     )
 }

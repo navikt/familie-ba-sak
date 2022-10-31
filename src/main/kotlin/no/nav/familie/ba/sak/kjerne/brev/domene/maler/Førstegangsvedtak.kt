@@ -3,15 +3,18 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 
 data class Førstegangsvedtak(
-    override val mal: Brevmal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
+    override val mal: Brevmal,
     override val data: FørstegangsvedtakData
 ) : Vedtaksbrev {
 
     constructor(
+        mal: Brevmal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
         vedtakFellesfelter: VedtakFellesfelter,
-        etterbetaling: Etterbetaling?
+        etterbetaling: Etterbetaling? = null,
+        etterbetalingInstitusjon: EtterbetalingInstitusjon? = null
     ) :
         this(
+            mal = mal,
             data = FørstegangsvedtakData(
                 delmalData = FørstegangsvedtakData.Delmaler(
                     signaturVedtak = SignaturVedtak(
@@ -20,11 +23,14 @@ data class Førstegangsvedtak(
                         beslutter = vedtakFellesfelter.beslutter
                     ),
                     etterbetaling = etterbetaling,
-                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst
+                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                    etterbetalingInstitusjon = etterbetalingInstitusjon
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    organisasjonsnummer = vedtakFellesfelter.organisasjonsnummer,
+                    gjelder = vedtakFellesfelter.gjelder
                 ),
                 perioder = vedtakFellesfelter.perioder
             )
@@ -40,6 +46,7 @@ data class FørstegangsvedtakData(
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val etterbetaling: Etterbetaling?,
-        val hjemmeltekst: Hjemmeltekst
+        val hjemmeltekst: Hjemmeltekst,
+        val etterbetalingInstitusjon: EtterbetalingInstitusjon?
     )
 }
