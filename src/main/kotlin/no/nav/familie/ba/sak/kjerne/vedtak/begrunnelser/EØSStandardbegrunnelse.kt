@@ -191,7 +191,7 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorArbeiderMerEnn25ProsentIAnnetEosLand"
     },
-    opphør_Utsendt_Arbeidstaker_Fra_Eøs_Land {
+    OPPHØR_UTSENDT_ARBEIDSTAKER_FRA_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorUtsendtArbeidstakerFraEosLand"
     }
