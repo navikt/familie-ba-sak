@@ -39,6 +39,11 @@ class KonsistensavstemMotOppdragAvsluttTask(
             )
         }
 
+        if (avstemmingService.harBatchStatusFerdig(konsistensavstemmingAvsluttTask.batchId)) {
+            logger.info("Batch med id ${konsistensavstemmingAvsluttTask.batchId} og transaksjonsId=${konsistensavstemmingAvsluttTask.transaksjonsId} er allerede ferdig kjørt, så skipper sending til økonomi")
+            return
+        }
+
         if (konsistensavstemmingAvsluttTask.sendTilØkonomi) {
             avstemmingService.konsistensavstemOppdragAvslutt(
                 avstemmingsdato = konsistensavstemmingAvsluttTask.avstemmingsdato,
