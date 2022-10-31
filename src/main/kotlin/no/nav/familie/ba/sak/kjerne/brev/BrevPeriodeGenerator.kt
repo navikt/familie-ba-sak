@@ -205,17 +205,33 @@ class BrevPeriodeGenerator(
         fom: LocalDate?,
         barnMedUtbetaling: List<MinimertRestPerson>,
         utbetalingsbeløp: Int
-    ) = when (minimertVedtaksperiode.type) {
-        Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET
-        Vedtaksperiodetype.UTBETALING -> when {
-            utbetalingsbeløp == 0 -> BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING
-            barnMedUtbetaling.isEmpty() -> BrevPeriodeType.INNVILGELSE_KUN_UTBETALING_PÅ_SØKER
-            else -> BrevPeriodeType.INNVILGELSE
+    ) = if (restBehandlingsgrunnlagForBrev.erInstitusjon) {
+        when (minimertVedtaksperiode.type) {
+            Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET_INSTITUSJON
+            Vedtaksperiodetype.UTBETALING -> when (utbetalingsbeløp) {
+                0 -> BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING
+                else -> BrevPeriodeType.INNVILGELSE_INSTITUSJON
+            }
+
+            Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
+            Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG_INSTITUSJON else BrevPeriodeType.AVSLAG_UTEN_PERIODE_INSTITUSJON
+            Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.OPPHOR_INSTITUSJON
+            Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.INNVILGELSE_INSTITUSJON
         }
-        Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
-        Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG else BrevPeriodeType.AVSLAG_UTEN_PERIODE
-        Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.OPPHOR
-        Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.INNVILGELSE
+    } else {
+        when (minimertVedtaksperiode.type) {
+            Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET
+            Vedtaksperiodetype.UTBETALING -> when {
+                utbetalingsbeløp == 0 -> BrevPeriodeType.INNVILGELSE_INGEN_UTBETALING
+                barnMedUtbetaling.isEmpty() -> BrevPeriodeType.INNVILGELSE_KUN_UTBETALING_PÅ_SØKER
+                else -> BrevPeriodeType.INNVILGELSE
+            }
+
+            Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
+            Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG else BrevPeriodeType.AVSLAG_UTEN_PERIODE
+            Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.OPPHOR
+            Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.INNVILGELSE
+        }
     }
 
     fun finnBarnIUtbetalingPeriode(identerIBegrunnelene: List<String>): List<MinimertRestPerson> {

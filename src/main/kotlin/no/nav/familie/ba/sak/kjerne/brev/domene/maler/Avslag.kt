@@ -3,14 +3,16 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 
 data class Avslag(
-    override val mal: Brevmal = Brevmal.VEDTAK_AVSLAG,
+    override val mal: Brevmal,
     override val data: AvslagData
 ) : Vedtaksbrev {
 
     constructor(
+        mal: Brevmal = Brevmal.VEDTAK_AVSLAG,
         vedtakFellesfelter: VedtakFellesfelter
     ) :
         this(
+            mal = mal,
             data = AvslagData(
                 delmalData = AvslagData.Delmaler(
                     signaturVedtak = SignaturVedtak(
@@ -22,7 +24,9 @@ data class Avslag(
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    organisasjonsnummer = vedtakFellesfelter.organisasjonsnummer,
+                    gjelder = vedtakFellesfelter.gjelder
                 ),
                 perioder = vedtakFellesfelter.perioder
             )

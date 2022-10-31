@@ -47,9 +47,10 @@ class VedtaksperiodeServiceUtilsTest {
             vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
             periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
             restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
-                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
-                minimerteEndredeUtbetalingAndeler = emptyList()
+                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+                minimerteEndredeUtbetalingAndeler = emptyList(),
+                erInstitusjon = false
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
@@ -99,10 +100,11 @@ class VedtaksperiodeServiceUtilsTest {
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
             restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
-                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
+                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler
-                    .map { it.tilMinimertRestEndretUtbetalingAndel() }
+                    .map { it.tilMinimertRestEndretUtbetalingAndel() },
+                erInstitusjon = false
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,

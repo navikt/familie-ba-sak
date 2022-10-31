@@ -41,7 +41,7 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 -B --no-transfer-progress package --settings .m2/maven-settings.xml --file pom.xml -Dtest="no/nav/familie/ba/sak/kjerne/verdikjedetester/**"
-  deploy-to-preprod:
+  bygg:
     name: Bygg app/image, push til github, deploy til preprod-gcp
     runs-on: ubuntu-latest
     steps:
@@ -73,6 +73,14 @@ jobs:
         run: docker push ${IMAGE_LATEST}
       - name: Skriv ut docker-taggen
         run: echo 'Docker-tag er ${{ github.sha }} ' >> $GITHUB_STEP_SUMMARY
+  deploy-preprod:
+    name: Deploy til dev-gcp
+    runs-on: ubuntu-latest
+    needs: [bygg]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Deploy til dev-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
@@ -82,7 +90,7 @@ jobs:
   deploy-to-prod:
     name: Deploy til prod-gcp
     runs-on: ubuntu-latest
-    needs: [integrasjonstester,verdikjedetester,deploy-to-preprod]
+    needs: [integrasjonstester,verdikjedetester,deploy-preprod]
     steps:
       - uses: actions/checkout@v3
         with:
