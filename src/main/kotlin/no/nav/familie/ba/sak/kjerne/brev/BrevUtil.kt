@@ -54,7 +54,7 @@ fun hentVedtaksbrevmal(behandling: Behandling): Brevmal {
     val brevmal = if (behandling.skalBehandlesAutomatisk) {
         hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak, behandling.fagsak.status)
     } else {
-        hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
+        hentManuellVedtaksbrevtype(behandling.type, behandling.resultat, behandling.fagsak.institusjon != null)
     }
 
     return if (brevmal.erVedtaksbrev) brevmal else throw Feil("Brevmal ${brevmal.visningsTekst} er ikke vedtaksbrev")
@@ -79,7 +79,8 @@ private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fa
 
 fun hentManuellVedtaksbrevtype(
     behandlingType: BehandlingType,
-    behandlingsresultat: Behandlingsresultat
+    behandlingsresultat: Behandlingsresultat,
+    erInstitusjon: Boolean = false
 ): Brevmal {
     val feilmeldingBehandlingTypeOgResultat =
         "Brev ikke støttet for behandlingstype=$behandlingType og behandlingsresultat=$behandlingsresultat"
@@ -90,48 +91,95 @@ fun hentManuellVedtaksbrevtype(
 
     return when (behandlingType) {
         BehandlingType.FØRSTEGANGSBEHANDLING ->
-            when (behandlingsresultat) {
-                INNVILGET,
-                INNVILGET_OG_OPPHØRT,
-                DELVIS_INNVILGET,
-                DELVIS_INNVILGET_OG_OPPHØRT -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK
+            if (erInstitusjon) {
+                when (behandlingsresultat) {
+                    INNVILGET,
+                    INNVILGET_OG_OPPHØRT,
+                    DELVIS_INNVILGET,
+                    DELVIS_INNVILGET_OG_OPPHØRT -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON
 
-                AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
+                    AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
 
-                else -> throw FunksjonellFeil(
-                    melding = feilmeldingBehandlingTypeOgResultat,
-                    frontendFeilmelding = frontendFeilmelding
-                )
+                    else -> throw FunksjonellFeil(
+                        melding = feilmeldingBehandlingTypeOgResultat,
+                        frontendFeilmelding = frontendFeilmelding
+                    )
+                }
+            } else {
+                when (behandlingsresultat) {
+                    INNVILGET,
+                    INNVILGET_OG_OPPHØRT,
+                    DELVIS_INNVILGET,
+                    DELVIS_INNVILGET_OG_OPPHØRT -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK
+
+                    AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
+
+                    else -> throw FunksjonellFeil(
+                        melding = feilmeldingBehandlingTypeOgResultat,
+                        frontendFeilmelding = frontendFeilmelding
+                    )
+                }
             }
 
         BehandlingType.REVURDERING ->
-            when (behandlingsresultat) {
-                INNVILGET,
-                INNVILGET_OG_ENDRET,
-                DELVIS_INNVILGET,
-                DELVIS_INNVILGET_OG_ENDRET,
-                AVSLÅTT_OG_ENDRET,
-                ENDRET_UTBETALING, ENDRET_UTEN_UTBETALING -> Brevmal.VEDTAK_ENDRING
+            if (erInstitusjon) {
+                when (behandlingsresultat) {
+                    INNVILGET,
+                    INNVILGET_OG_ENDRET,
+                    DELVIS_INNVILGET,
+                    DELVIS_INNVILGET_OG_ENDRET,
+                    AVSLÅTT_OG_ENDRET,
+                    ENDRET_UTBETALING, ENDRET_UTEN_UTBETALING -> Brevmal.VEDTAK_ENDRING_INSTITUSJON
 
-                OPPHØRT,
-                FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
+                    OPPHØRT,
+                    FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT_INSTITUSJON
 
-                INNVILGET_OG_OPPHØRT,
-                INNVILGET_ENDRET_OG_OPPHØRT,
-                DELVIS_INNVILGET_OG_OPPHØRT,
-                DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
-                AVSLÅTT_OG_OPPHØRT,
-                AVSLÅTT_ENDRET_OG_OPPHØRT,
-                ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING
+                    INNVILGET_OG_OPPHØRT,
+                    INNVILGET_ENDRET_OG_OPPHØRT,
+                    DELVIS_INNVILGET_OG_OPPHØRT,
+                    DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
+                    AVSLÅTT_OG_OPPHØRT,
+                    AVSLÅTT_ENDRET_OG_OPPHØRT,
+                    ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
 
-                FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET
+                    FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
 
-                AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
+                    AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
 
-                else -> throw FunksjonellFeil(
-                    melding = feilmeldingBehandlingTypeOgResultat,
-                    frontendFeilmelding = frontendFeilmelding
-                )
+                    else -> throw FunksjonellFeil(
+                        melding = feilmeldingBehandlingTypeOgResultat,
+                        frontendFeilmelding = frontendFeilmelding
+                    )
+                }
+            } else {
+                when (behandlingsresultat) {
+                    INNVILGET,
+                    INNVILGET_OG_ENDRET,
+                    DELVIS_INNVILGET,
+                    DELVIS_INNVILGET_OG_ENDRET,
+                    AVSLÅTT_OG_ENDRET,
+                    ENDRET_UTBETALING, ENDRET_UTEN_UTBETALING -> Brevmal.VEDTAK_ENDRING
+
+                    OPPHØRT,
+                    FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
+
+                    INNVILGET_OG_OPPHØRT,
+                    INNVILGET_ENDRET_OG_OPPHØRT,
+                    DELVIS_INNVILGET_OG_OPPHØRT,
+                    DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
+                    AVSLÅTT_OG_OPPHØRT,
+                    AVSLÅTT_ENDRET_OG_OPPHØRT,
+                    ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING
+
+                    FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET
+
+                    AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
+
+                    else -> throw FunksjonellFeil(
+                        melding = feilmeldingBehandlingTypeOgResultat,
+                        frontendFeilmelding = frontendFeilmelding
+                    )
+                }
             }
 
         else -> throw FunksjonellFeil(

@@ -79,6 +79,12 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     VEDTAK_FORTSATT_INNVILGET(true, "vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
     VEDTAK_KORREKSJON_VEDTAKSBREV(true, "korrigertVedtakEgenBrevmal", "Korrigere vedtak med egen brevmal"),
     VEDTAK_OPPHØR_DØDSFALL(true, "dodsfall", "Dødsfall"),
+    VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON(true, "foerstegangsvedtakInstitusjon", "Førstegangsvedtak"),
+    VEDTAK_ENDRING_INSTITUSJON(true, "vedtakEndringInstitusjon", "Vedtak endring"),
+    VEDTAK_OPPHØRT_INSTITUSJON(true, "vedtakOpphoerInstitusjon", "Opphørt"),
+    VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON(true, "opphorMedEndringInstitusjon", "Opphør med endring"),
+    VEDTAK_AVSLAG_INSTITUSJON(true, "vedtakAvslagInstitusjon", "Avslag"),
+    VEDTAK_FORTSATT_INNVILGET_INSTITUSJON(true, "vedtakFortsattInnvilgetInstitusjon", "Vedtak fortstatt innvilget"),
 
     @Deprecated(
         "Brukes ikke lenger. Må ha denne for å kunne få gjennom tasker med gammelt enum-navn." +
@@ -126,6 +132,12 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VEDTAK_FORTSATT_INNVILGET,
             VEDTAK_KORREKSJON_VEDTAKSBREV,
             VEDTAK_OPPHØR_DØDSFALL,
+            VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
+            VEDTAK_AVSLAG_INSTITUSJON,
+            VEDTAK_OPPHØRT_INSTITUSJON,
+            VEDTAK_ENDRING_INSTITUSJON,
+            VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
+            VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
             DØDSFALL,
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
@@ -163,6 +175,12 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VEDTAK_FØRSTEGANGSVEDTAK,
             VEDTAK_KORREKSJON_VEDTAKSBREV,
             VEDTAK_OPPHØR_DØDSFALL,
+            VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
+            VEDTAK_AVSLAG_INSTITUSJON,
+            VEDTAK_OPPHØRT_INSTITUSJON,
+            VEDTAK_ENDRING_INSTITUSJON,
+            VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
+            VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
             DØDSFALL,
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
@@ -196,6 +214,12 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VEDTAK_FORTSATT_INNVILGET -> Distribusjonstype.VEDTAK
             VEDTAK_KORREKSJON_VEDTAKSBREV -> Distribusjonstype.VEDTAK
             VEDTAK_OPPHØR_DØDSFALL -> Distribusjonstype.VEDTAK
+            VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON -> Distribusjonstype.VEDTAK
+            VEDTAK_AVSLAG_INSTITUSJON -> Distribusjonstype.VEDTAK
+            VEDTAK_OPPHØRT_INSTITUSJON -> Distribusjonstype.VEDTAK
+            VEDTAK_ENDRING_INSTITUSJON -> Distribusjonstype.VEDTAK
+            VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> Distribusjonstype.VEDTAK
+            VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON -> Distribusjonstype.VEDTAK
             DØDSFALL -> throw Feil("Dødsfall skal ikke brukes")
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG -> Distribusjonstype.VEDTAK
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> Distribusjonstype.VEDTAK
@@ -291,15 +315,21 @@ interface FlettefelterForDokument {
 data class FlettefelterForDokumentImpl(
     override val navn: Flettefelt,
     override val fodselsnummer: Flettefelt,
-    override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr())
+    override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+    override val organisasjonsnummer: Flettefelt,
+    override val gjelder: Flettefelt
 ) : FlettefelterForDokument {
 
     constructor(
         navn: String,
-        fodselsnummer: String
+        fodselsnummer: String,
+        organisasjonsnummer: String? = null,
+        gjelder: String? = null
     ) : this(
         navn = flettefelt(navn),
-        fodselsnummer = flettefelt(fodselsnummer)
+        fodselsnummer = flettefelt(fodselsnummer),
+        organisasjonsnummer = flettefelt(organisasjonsnummer),
+        gjelder = flettefelt(gjelder)
     )
 }
 
