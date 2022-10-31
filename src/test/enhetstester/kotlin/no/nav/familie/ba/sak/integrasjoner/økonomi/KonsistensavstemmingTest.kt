@@ -86,7 +86,7 @@ class KonsistensavstemmingTest {
             KonsistensavstemMotOppdragPerioderGeneratorTask(avstemmingService, taskRepository)
         konsistensavstemMotOppdraDataTask = KonsistensavstemMotOppdragDataTask(avstemmingService)
         konsistensavstemMotOppdragAvsluttTask =
-            KonsistensavstemMotOppdragAvsluttTask(avstemmingService, dataChunkRepository)
+            KonsistensavstemMotOppdragAvsluttTask(avstemmingService, dataChunkRepository, BatchService(batchRepository))
     }
 
     @AfterAll
@@ -135,15 +135,10 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Verifiser at konsistensavstemming ikke kjører hvis alle datachunker allerede er sendt til økonomi for transaksjonId`() {
-        every { dataChunkRepository.findByTransaksjonsId(transaksjonsId) } returns
-            listOf(
-                DataChunk(
-                    batch = Batch(kjøreDato = LocalDate.now()),
-                    transaksjonsId = transaksjonsId,
-                    erSendt = true,
-                    chunkNr = 1
-                )
-            )
+        every { batchRepository.getReferenceById(batchId) } returns Batch(
+            kjøreDato = LocalDate.now(),
+            status = KjøreStatus.FERDIG
+        )
 
         konistensavstemmingStartTask.doTask(
             Task(
@@ -172,7 +167,6 @@ class KonsistensavstemmingTest {
                 chunkNr = 2
             )
         )
-        every { dataChunkRepository.findByTransaksjonsId(transaksjonsId) } returns datachunks
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 1) } returns datachunks[0]
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 2) } returns datachunks[1]
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 3) } returns null
@@ -409,7 +403,6 @@ class KonsistensavstemmingTest {
             )
         } returns ""
 
-        every { dataChunkRepository.findByTransaksjonsId(transaksjonsId) } returns emptyList()
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, any()) } returns null
         return avstemmingsdatoSlot
     }
@@ -459,5 +452,7 @@ class KonsistensavstemmingTest {
                 transaksjonsId
             )
         } returns ""
+
+        every { batchRepository.saveAndFlush(any()) } returns Batch(kjøreDato = LocalDate.now())
     }
 }

@@ -41,14 +41,13 @@ class AvstemmingService(
         )
     }
 
-    fun erKonsistensavstemmingKjørtForTransaksjonsid(transaksjonsId: UUID): Boolean {
-        val dataChunks = dataChunkRepository.findByTransaksjonsId(transaksjonsId)
-        return dataChunks.none { !it.erSendt } && dataChunks.isNotEmpty()
+    fun harBatchStatusFerdig(batchId: Long): Boolean {
+        val batch = batchRepository.getReferenceById(batchId)
+        return batch.status == KjøreStatus.FERDIG
     }
 
-    fun erKonsistensavstemmingDelvisKjørtForTransaksjonsid(transaksjonsId: UUID): Boolean {
-        val dataChunks = dataChunkRepository.findByTransaksjonsId(transaksjonsId)
-        return dataChunks.any { !it.erSendt } && dataChunks.isNotEmpty()
+    fun erKonsistensavstemmingStartet(transaksjonsId: UUID): Boolean {
+        return dataChunkRepository.findByTransaksjonsId(transaksjonsId).isNotEmpty()
     }
 
     fun skalOppretteKonsistensavstemingPeriodeGeneratorTask(transaksjonsId: UUID, chunkNr: Int): Boolean {

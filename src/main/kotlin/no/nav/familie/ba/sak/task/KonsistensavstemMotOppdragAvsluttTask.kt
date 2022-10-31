@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.BatchService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.DataChunkRepository
+import no.nav.familie.ba.sak.integrasjoner.økonomi.KjøreStatus
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -21,7 +23,8 @@ import java.time.LocalDateTime
 )
 class KonsistensavstemMotOppdragAvsluttTask(
     val avstemmingService: AvstemmingService,
-    val dataChunkRepository: DataChunkRepository
+    val dataChunkRepository: DataChunkRepository,
+    val batchService: BatchService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -44,6 +47,8 @@ class KonsistensavstemMotOppdragAvsluttTask(
         } else {
             logger.info("Send til økonomi skrudd av for ${konsistensavstemmingAvsluttTask.transaksjonsId} for task $TASK_STEP_TYPE")
         }
+
+        batchService.lagreNyStatus(konsistensavstemmingAvsluttTask.batchId, KjøreStatus.FERDIG)
     }
 
     companion object {

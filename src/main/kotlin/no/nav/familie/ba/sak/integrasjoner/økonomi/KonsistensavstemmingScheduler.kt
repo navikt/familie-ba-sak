@@ -52,7 +52,7 @@ class KonsistensavstemmingScheduler(
             )
         )
 
-        batchService.lagreNyStatus(plukketBatch, KjøreStatus.FERDIG)
+        batchService.lagreNyStatus(plukketBatch, KjøreStatus.TATT)
     }
 
     companion object {

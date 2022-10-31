@@ -19,4 +19,10 @@ class BatchService(val batchRepository: BatchRepository) {
         batch.status = status
         batchRepository.saveAndFlush(batch)
     }
+
+    fun lagreNyStatus(batchId: Long, status: KjøreStatus) {
+        val batch = batchRepository.getReferenceById(batchId)
+        batch.status = status
+        batchRepository.saveAndFlush(batch)
+    }
 }

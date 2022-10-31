@@ -30,12 +30,12 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         val avstemmingsDato = LocalDateTime.now()
         logger.info("Konsistensavstemming ble initielt trigget ${konsistensavstemmingTask.avstemmingdato}, men bruker $avstemmingsDato som avstemmingsdato")
 
-        if (avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsid(konsistensavstemmingTask.transaksjonsId)) {
-            logger.info("Konsistensavstemmning er allerede kjørt for transaksjonsId ${konsistensavstemmingTask.transaksjonsId}")
+        if (avstemmingService.harBatchStatusFerdig(konsistensavstemmingTask.batchId)) {
+            logger.info("Konsistensavstemmning er allerede kjørt for transaksjonsId ${konsistensavstemmingTask.transaksjonsId} og ${konsistensavstemmingTask.batchId}")
             return
         }
 
-        if (!avstemmingService.erKonsistensavstemmingDelvisKjørtForTransaksjonsid(konsistensavstemmingTask.transaksjonsId)) {
+        if (!avstemmingService.erKonsistensavstemmingStartet(konsistensavstemmingTask.transaksjonsId)) {
             if (konsistensavstemmingTask.sendTilØkonomi) {
                 avstemmingService.sendKonsistensavstemmingStart(
                     avstemmingsDato,

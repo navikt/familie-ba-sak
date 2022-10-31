@@ -23,8 +23,8 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
     fun `Ved kjøring av task første gang, så skal den sende start til økonomi, opprette generer perioder task for avstemming og og sende avslutt til økonomi`() {
         val (transaksjonsId, task) = opprettStartTask()
 
-        every { avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsid(transaksjonsId) } returns false
-        every { avstemmingService.erKonsistensavstemmingDelvisKjørtForTransaksjonsid(transaksjonsId) } returns false
+        every { avstemmingService.harBatchStatusFerdig(123L) } returns false
+        every { avstemmingService.erKonsistensavstemmingStartet(transaksjonsId) } returns false
         every {
             avstemmingService.skalOppretteKonsistensavstemingPeriodeGeneratorTask(
                 transaksjonsId,
@@ -59,7 +59,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
     fun `Ved rekjøring av task som er alt kjørt, så skal den avslutte uten å sende meldinger eller generere perioder`() {
         val (transaksjonsId, task) = opprettStartTask()
 
-        every { avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsid(transaksjonsId) } returns true
+        every { avstemmingService.harBatchStatusFerdig(123L) } returns true
 
         startTask.doTask(task)
 
@@ -72,8 +72,8 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
     fun `Ved rekjøring av task som er delvis kjørt, så skal den ikke sende start melding, men opprette generer perioder på avstemminger som det ikke er sendt og sende avslutt melding til økonomi`() {
         val (transaksjonsId, task) = opprettStartTask()
 
-        every { avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsid(transaksjonsId) } returns false
-        every { avstemmingService.erKonsistensavstemmingDelvisKjørtForTransaksjonsid(transaksjonsId) } returns true
+        every { avstemmingService.harBatchStatusFerdig(123L) } returns false
+        every { avstemmingService.erKonsistensavstemmingStartet(transaksjonsId) } returns true
         every {
             avstemmingService.skalOppretteKonsistensavstemingPeriodeGeneratorTask(
                 transaksjonsId,
