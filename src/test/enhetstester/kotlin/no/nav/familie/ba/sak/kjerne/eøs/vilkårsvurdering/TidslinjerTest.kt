@@ -242,7 +242,8 @@ internal class TidslinjerTest {
 
         val kompetanser = tilpassKompetanserTilRegelverk(
             emptyList(),
-            barnaRegelverkTidslinjer
+            barnaRegelverkTidslinjer,
+            emptyMap()
         )
 
         assertEquals(1, kompetanser.size)
@@ -287,7 +288,8 @@ internal class TidslinjerTest {
 
         val kompetanser = tilpassKompetanserTilRegelverk(
             emptyList(),
-            barnaRegelverkTidslinjer
+            barnaRegelverkTidslinjer,
+            emptyMap()
         )
 
         val forventetRegelverkResultat =
@@ -336,7 +338,8 @@ internal class TidslinjerTest {
 
         val kompetanser = tilpassKompetanserTilRegelverk(
             emptyList(),
-            barnaRegelverkTidslinjer
+            barnaRegelverkTidslinjer,
+            emptyMap()
         )
 
         assertEquals(1, kompetanser.size)
