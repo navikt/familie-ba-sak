@@ -32,11 +32,3 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.leftJoin(
         venstreTidslinje.kombinerMed(høyreTidslinje, kombinator)
     }
 }
-
-// TODO: Strengt tatt ikke en leftJoin. Er bare en vanlig kombinerMed, og bruken bør erstattes med det
-fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.leftJoin(
-    høyreTidslinje: Tidslinje<H, T>,
-    kombinator: (V, H?) -> R?
-): Tidslinje<R, T> = this.kombinerMed(høyreTidslinje) { venstre, høyre ->
-    venstre?.let { kombinator(venstre, høyre) }
-}
