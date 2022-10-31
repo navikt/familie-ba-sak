@@ -50,6 +50,10 @@ class AvstemmingService(
         return dataChunks.any { !it.erSendt } && dataChunks.isNotEmpty()
     }
 
+    fun skalOppretteKonsistensavstemingPeriodeGeneratorTask(transaksjonsId: UUID, chunkNr: Int): Boolean {
+        return dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr) == null
+    }
+
     fun erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(transaksjonsId: UUID, chunkNr: Int): Boolean {
         val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
         return dataChunk?.erSendt == true
@@ -59,7 +63,8 @@ class AvstemmingService(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>,
         transaksjonsId: UUID,
-        chunkNr: Int
+        chunkNr: Int,
+        sendTilØkonomi: Boolean
     ) {
         logger.info("Utfører konsisensavstemming: Sender perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr")
         val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
@@ -70,11 +75,15 @@ class AvstemmingService(
             return
         }
 
-        økonomiKlient.konsistensavstemOppdragData(
-            avstemmingsdato,
-            perioderTilAvstemming,
-            transaksjonsId
-        )
+        if (sendTilØkonomi) {
+            økonomiKlient.konsistensavstemOppdragData(
+                avstemmingsdato,
+                perioderTilAvstemming,
+                transaksjonsId
+            )
+        } else {
+            logger.info("Send til økonomi skrudd av for $transaksjonsId for task konsistensavstemOppdragData")
+        }
 
         dataChunkRepository.save(dataChunk.also { it.erSendt = true })
     }

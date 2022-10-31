@@ -26,6 +26,12 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         every { avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsid(transaksjonsId) } returns false
         every { avstemmingService.erKonsistensavstemmingDelvisKjørtForTransaksjonsid(transaksjonsId) } returns false
         every {
+            avstemmingService.skalOppretteKonsistensavstemingPeriodeGeneratorTask(
+                transaksjonsId,
+                any()
+            )
+        } returns true
+        every {
             avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
                 transaksjonsId,
                 range(1, 3)
@@ -69,17 +75,17 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         every { avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsid(transaksjonsId) } returns false
         every { avstemmingService.erKonsistensavstemmingDelvisKjørtForTransaksjonsid(transaksjonsId) } returns true
         every {
-            avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
+            avstemmingService.skalOppretteKonsistensavstemingPeriodeGeneratorTask(
                 transaksjonsId,
                 range(1, 2)
             )
-        } returns true
+        } returns false
         every {
-            avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
+            avstemmingService.skalOppretteKonsistensavstemingPeriodeGeneratorTask(
                 transaksjonsId,
                 3
             )
-        } returns false
+        } returns true
 
         justRun { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         mockTreSiderMedSisteBehandlinger()

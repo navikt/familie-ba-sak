@@ -25,16 +25,13 @@ class KonsistensavstemMotOppdragDataTask(
         val konsistensavstemmingDataTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingDataTaskDTO::class.java)
 
-        if (konsistensavstemmingDataTask.sendTilØkonomi) {
-            avstemmingService.konsistensavstemOppdragData(
-                avstemmingsdato = konsistensavstemmingDataTask.avstemmingdato,
-                perioderTilAvstemming = konsistensavstemmingDataTask.perioderForBehandling,
-                transaksjonsId = konsistensavstemmingDataTask.transaksjonsId,
-                chunkNr = konsistensavstemmingDataTask.chunkNr
-            )
-        } else {
-            logger.info("Send til økonomi skrudd av for ${konsistensavstemmingDataTask.transaksjonsId} for task $TASK_STEP_TYPE")
-        }
+        avstemmingService.konsistensavstemOppdragData(
+            avstemmingsdato = konsistensavstemmingDataTask.avstemmingdato,
+            perioderTilAvstemming = konsistensavstemmingDataTask.perioderForBehandling,
+            transaksjonsId = konsistensavstemmingDataTask.transaksjonsId,
+            chunkNr = konsistensavstemmingDataTask.chunkNr,
+            sendTilØkonomi = konsistensavstemmingDataTask.sendTilØkonomi
+        )
     }
 
     companion object {

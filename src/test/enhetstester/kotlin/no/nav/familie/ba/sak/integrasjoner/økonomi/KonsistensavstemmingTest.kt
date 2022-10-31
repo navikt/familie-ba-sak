@@ -168,20 +168,14 @@ class KonsistensavstemmingTest {
             DataChunk(
                 batch = Batch(kjøreDato = LocalDate.now()),
                 transaksjonsId = transaksjonsId,
-                erSendt = true,
-                chunkNr = 2
-            ),
-            DataChunk(
-                batch = Batch(kjøreDato = LocalDate.now()),
-                transaksjonsId = transaksjonsId,
                 erSendt = false,
-                chunkNr = 3
+                chunkNr = 2
             )
         )
         every { dataChunkRepository.findByTransaksjonsId(transaksjonsId) } returns datachunks
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 1) } returns datachunks[0]
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 2) } returns datachunks[1]
-        every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 3) } returns datachunks[2]
+        every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 3) } returns null
 
         val page = mockk<Page<BigInteger>>()
         val pageable = Pageable.ofSize(KonsistensavstemMotOppdragStartTask.ANTALL_BEHANDLINGER)
@@ -235,7 +229,7 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Verifiser at konsistensavstemOppdragData sender data og oppdatere datachunk tabellen`() {
-        lagMockForStartTaskHappCase()
+        lagMockOppdragDataHappeCase()
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 1) } returns
             DataChunk(
                 batch = Batch(id = batchId, kjøreDato = LocalDate.now()),
@@ -250,15 +244,25 @@ class KonsistensavstemmingTest {
             )
         } returns ""
 
-        avstemmingService.konsistensavstemOppdragData(
-            avstemmingsdato = avstemmingsdato,
-            transaksjonsId = transaksjonsId,
-            chunkNr = 1,
-            perioderTilAvstemming = emptyList()
+        konsistensavstemMotOppdraDataTask.doTask(
+            Task(
+                payload = objectMapper.writeValueAsString(
+                    KonsistensavstemmingDataTaskDTO(
+                        transaksjonsId = transaksjonsId,
+                        chunkNr = 1,
+                        avstemmingdato = avstemmingsdato,
+                        perioderForBehandling = emptyList(),
+                        sendTilØkonomi = true
+                    )
+                ),
+                type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE
+            )
+
         )
 
         val dataChunkSlot = slot<DataChunk>()
         verify(exactly = 1) { dataChunkRepository.save(capture(dataChunkSlot)) }
+        assertThat(dataChunkSlot.captured.erSendt).isTrue()
 
         verify(exactly = 1) {
             økonomiKlient.konsistensavstemOppdragData(
@@ -296,7 +300,7 @@ class KonsistensavstemmingTest {
         )
         verify(exactly = 3) { taskRepository.save(capture(taskSlots)) }
 
-        lagMockOppdragDatarHappeCase()
+        lagMockOppdragDataHappeCase()
         konsistensavstemMotOppdraDataTask.doTask(
             Task(
                 payload = taskSlots.first { it.type == KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE }.payload,
@@ -304,6 +308,10 @@ class KonsistensavstemmingTest {
             )
         )
         verify(exactly = 3) { taskRepository.save(capture(taskSlots)) }
+        val datachunksSlot = mutableListOf<DataChunk>()
+        verify(exactly = 2) { dataChunkRepository.save(capture(datachunksSlot)) }
+        assertThat(datachunksSlot.last().erSendt).isTrue()
+
         val dataTask =
             taskSlots.find { it.type == KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE }!!
         val dataTaskDto = objectMapper.readValue(dataTask.payload, KonsistensavstemmingDataTaskDTO::class.java)
@@ -350,7 +358,7 @@ class KonsistensavstemmingTest {
         )
         verify(exactly = 3) { taskRepository.save(capture(taskSlots)) }
 
-        lagMockOppdragDatarHappeCase()
+        lagMockOppdragDataHappeCase()
         konsistensavstemMotOppdraDataTask.doTask(
             Task(
                 payload = taskSlots.first { it.type == KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE }.payload,
@@ -358,6 +366,9 @@ class KonsistensavstemmingTest {
             )
         )
         verify(exactly = 3) { taskRepository.save(capture(taskSlots)) }
+        val datachunksSlot = mutableListOf<DataChunk>()
+        verify(exactly = 2) { dataChunkRepository.save(capture(datachunksSlot)) }
+        assertThat(datachunksSlot.last().erSendt).isTrue()
 
         lagMockAvsluttHappyCase()
         val avsluttTask =
@@ -399,6 +410,7 @@ class KonsistensavstemmingTest {
         } returns ""
 
         every { dataChunkRepository.findByTransaksjonsId(transaksjonsId) } returns emptyList()
+        every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, any()) } returns null
         return avstemmingsdatoSlot
     }
 
@@ -419,7 +431,7 @@ class KonsistensavstemmingTest {
         every { behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(any()) } returns aktivFødselsnummere
     }
 
-    private fun lagMockOppdragDatarHappeCase() {
+    private fun lagMockOppdragDataHappeCase() {
         every {
             økonomiKlient.konsistensavstemOppdragData(
                 any(),
@@ -427,6 +439,17 @@ class KonsistensavstemmingTest {
                 transaksjonsId
             )
         } returns ""
+
+        every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 1) } returns DataChunk(
+            batch = Batch(kjøreDato = LocalDate.now()),
+            chunkNr = 1,
+            transaksjonsId = transaksjonsId
+        )
+        every { dataChunkRepository.save(any()) } returns DataChunk(
+            batch = Batch(kjøreDato = LocalDate.now()),
+            chunkNr = 1,
+            transaksjonsId = transaksjonsId
+        )
     }
 
     private fun lagMockAvsluttHappyCase() {
