@@ -53,7 +53,7 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         for (pageNumber in 1..relevanteBehandlinger.totalPages) {
             relevanteBehandlinger.content.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
                 .forEach { oppstykketRelevanteBehandlinger ->
-                    logger.info("Oppretter perioder for transaksjonsId${konsistensavstemmingTask.transaksjonsId} og chunkNr=$chunkNr")
+                    logger.info("Oppretter perioder for transaksjonsId=${konsistensavstemmingTask.transaksjonsId} og chunkNr=$chunkNr")
                     if (avstemmingService.skalOppretteKonsistensavstemingPeriodeGeneratorTask(
                             konsistensavstemmingTask.transaksjonsId,
                             chunkNr
