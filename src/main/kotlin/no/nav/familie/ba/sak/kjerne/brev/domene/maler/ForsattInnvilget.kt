@@ -3,14 +3,16 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 
 data class ForsattInnvilget(
-    override val mal: Brevmal = Brevmal.VEDTAK_FORTSATT_INNVILGET,
+    override val mal: Brevmal,
     override val data: ForsattInnvilgetData
 ) : Vedtaksbrev {
 
     constructor(
+        mal: Brevmal = Brevmal.VEDTAK_FORTSATT_INNVILGET,
         vedtakFellesfelter: VedtakFellesfelter
     ) :
         this(
+            mal = mal,
             data = ForsattInnvilgetData(
                 delmalData = ForsattInnvilgetData.Delmaler(
                     signaturVedtak = SignaturVedtak(
@@ -22,7 +24,9 @@ data class ForsattInnvilget(
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    organisasjonsnummer = vedtakFellesfelter.organisasjonsnummer,
+                    gjelder = vedtakFellesfelter.gjelder
                 ),
                 perioder = vedtakFellesfelter.perioder
             )
