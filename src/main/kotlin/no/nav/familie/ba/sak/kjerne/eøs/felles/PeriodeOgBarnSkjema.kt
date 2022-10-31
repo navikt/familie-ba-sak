@@ -52,10 +52,10 @@ fun <T : PeriodeOgBarnSkjema<T>> T.utenBarn(): T =
 fun <T : PeriodeOgBarnSkjema<T>> T.utenPeriode(): T =
     this.kopier(fom = null, tom = null, barnAktører = this.barnAktører)
 
-fun <T : PeriodeOgBarnSkjema<T>> T.utenInnholdHeretter() =
+fun <T : PeriodeOgBarnSkjema<T>> T.utenInnholdTilOgMed(tom: YearMonth?) =
     this.kopier(
-        fom = tom?.plusMonths(1),
-        tom = null
+        fom = this.tom?.plusMonths(1),
+        tom = tom
     ).utenInnhold()
 
 fun <T : PeriodeOgBarnSkjema<T>> T.medBarnaSomForsvinnerFra(skjema: T): T =
