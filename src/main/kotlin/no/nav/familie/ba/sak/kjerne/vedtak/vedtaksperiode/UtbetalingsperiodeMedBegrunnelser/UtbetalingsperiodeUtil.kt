@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
@@ -37,8 +37,11 @@ fun hentPerioderMedUtbetaling(
         .filtrer { !it?.toList().isNullOrEmpty() }
 
     val andelerSplittetOppTidslinje = alleAndelerKombinertTidslinje
-        .leftJoin(splittkriterierForVedtaksperiodeTidslinje) { andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode ->
-            Pair(andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode)
+        .kombinerMed(splittkriterierForVedtaksperiodeTidslinje) { andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode ->
+            when (andelerTilkjentYtelseIPeriode) {
+                null -> null
+                else -> Pair(andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode)
+            }
         }
         .filtrerIkkeNull()
 
