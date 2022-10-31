@@ -52,17 +52,17 @@ fun <T : PeriodeOgBarnSkjema<T>> T.utenBarn(): T =
 fun <T : PeriodeOgBarnSkjema<T>> T.utenPeriode(): T =
     this.kopier(fom = null, tom = null, barnAktører = this.barnAktører)
 
-fun <T : PeriodeOgBarnSkjema<T>> T.utenInnholdHeretter() =
+fun <T : PeriodeOgBarnSkjema<T>> T.utenInnholdTilOgMed(tom: YearMonth?) =
     this.kopier(
-        fom = tom?.plusMonths(1),
-        tom = null
+        fom = this.tom?.plusMonths(1),
+        tom = tom
     ).utenInnhold()
 
 fun <T : PeriodeOgBarnSkjema<T>> T.medBarnaSomForsvinnerFra(skjema: T): T =
     this.kopier(barnAktører = skjema.barnAktører.minus(this.barnAktører))
 
-fun <T : PeriodeOgBarnSkjema<T>> T.periodeBlirLukketAv(skjema: T): Boolean =
-    this.tom == null && skjema.tom != null
+fun <T : PeriodeOgBarnSkjema<T>> T.tilOgMedBlirForkortetEllerLukketAv(skjema: T): Boolean =
+    skjema.tom != null && (this.tom == null || this.tom!! > skjema.tom)
 
 fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraTilOgMed(skjema: T): Boolean =
     this.kopier(tom = skjema.tom) == skjema
