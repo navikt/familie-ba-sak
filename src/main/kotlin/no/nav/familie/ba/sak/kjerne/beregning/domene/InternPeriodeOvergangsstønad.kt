@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -60,20 +59,6 @@ fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandl
     overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>,
     søkerAktør: Aktør
 ): List<InternPeriodeOvergangsstønad> {
-    val personidenterMedOvergangsstønadIForrigeOgInneværendeBehandling = (this + overgangsstønadPerioderFraForrigeBehandling).map { it.personIdent }.toSet()
-    val allePersonidenterErTilknyttetSøker =
-        personidenterMedOvergangsstønadIForrigeOgInneværendeBehandling.all { personident -> søkerAktør.personidenter.map { it.fødselsnummer }.contains(personident) }
-
-    if (!allePersonidenterErTilknyttetSøker) {
-        secureLogger.info(
-            "Fant overgangsstønad for andre personer enn søker. \n" +
-                "Personer: $personidenterMedOvergangsstønadIForrigeOgInneværendeBehandling \n" +
-                "Perioder i inneværende behandling: $this \n" +
-                "Perioder fra forrige behandling: $overgangsstønadPerioderFraForrigeBehandling"
-        )
-        throw Feil("Antar overgangsstønad for kun søker, men fant overgangsstønad for andre personer enn søker.")
-    }
-
     val tidligerePerioder = this.filter { it.tomDato.isSameOrBefore(LocalDate.now()) }
     val framtidigePerioder = this.minus(tidligerePerioder)
     val nyeOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(framtidigePerioder)
