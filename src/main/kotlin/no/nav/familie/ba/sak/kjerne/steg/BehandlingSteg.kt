@@ -137,7 +137,11 @@ enum class StegType(
     FERDIGSTILLE_BEHANDLING(
         rekkefølge = 13,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(
+            BehandlingStatus.IVERKSETTER_VEDTAK,
+            BehandlingStatus.UTREDES,
+            BehandlingStatus.FATTER_VEDTAK
+        )
     ),
     BEHANDLING_AVSLUTTET(
         rekkefølge = 14,
