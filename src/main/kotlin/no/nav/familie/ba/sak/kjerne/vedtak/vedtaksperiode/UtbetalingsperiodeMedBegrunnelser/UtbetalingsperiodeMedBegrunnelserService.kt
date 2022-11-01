@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.identifiserReduksjonsperioderFraSistIverksatteBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
 import org.springframework.stereotype.Service
 
 @Service
@@ -35,13 +34,10 @@ class UtbetalingsperiodeMedBegrunnelserService(
         val vilkårsvurdering =
             vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = vedtak.behandling.id)
 
-        val forskjøvetVilkårResultatTidslinjeMap =
-            vilkårsvurdering.personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
-
         val utbetalingsperioder = hentPerioderMedUtbetaling(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             vedtak = vedtak,
-            forskjøvetVilkårResultatTidslinjeMap = forskjøvetVilkårResultatTidslinjeMap
+            personResultater = vilkårsvurdering.personResultater
         )
 
         val perioderMedReduksjonFraSistIverksatteBehandling =
