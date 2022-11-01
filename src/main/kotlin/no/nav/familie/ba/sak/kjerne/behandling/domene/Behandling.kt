@@ -417,11 +417,13 @@ enum class BehandlingKategori(val visningsnavn: String, val nivå: Int) {
 fun List<BehandlingKategori>.finnHøyesteKategori(): BehandlingKategori? = this.maxByOrNull { it.nivå }
 
 enum class BehandlingUnderkategori(val visningsnavn: String, val nivå: Int) {
+    INSTITUSJON("Institusjon", 3),
     UTVIDET("Utvidet", 2),
     ORDINÆR("Ordinær", 1);
 
     fun tilOppgaveBehandlingTema(): OppgaveBehandlingTema {
         return when (this) {
+            INSTITUSJON -> OppgaveBehandlingTema.NasjonalInstitusjon
             UTVIDET -> OppgaveBehandlingTema.UtvidetBarnetrygd
             ORDINÆR -> OppgaveBehandlingTema.OrdinærBarnetrygd
         }
