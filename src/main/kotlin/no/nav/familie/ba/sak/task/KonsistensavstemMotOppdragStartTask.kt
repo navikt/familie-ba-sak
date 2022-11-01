@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
-import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingPerioderGeneratorTaskDTO
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -53,13 +53,13 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         for (pageNumber in 1..relevanteBehandlinger.totalPages) {
             relevanteBehandlinger.content.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
                 .forEach { oppstykketRelevanteBehandlinger ->
-                    if (avstemmingService.skalOppretteKonsistensavstemingPeriodeGeneratorTask(
+                    if (avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
                             konsistensavstemmingTask.transaksjonsId,
                             chunkNr
                         )
                     ) {
-                        avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(
-                            KonsistensavstemmingPerioderGeneratorTaskDTO(
+                        avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
+                            KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO(
                                 transaksjonsId = konsistensavstemmingTask.transaksjonsId,
                                 chunkNr = chunkNr,
                                 avstemmingsdato = avstemmingsdato,
@@ -69,7 +69,7 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
                             )
                         )
                     } else {
-                        logger.info("Generer perioder task alt kjørt for ${konsistensavstemmingTask.transaksjonsId} og chunkNr $chunkNr")
+                        logger.info("Finn perioder for avstemming task alt kjørt for ${konsistensavstemmingTask.transaksjonsId} og chunkNr $chunkNr")
                     }
                     chunkNr = chunkNr.inc()
                 }

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
-import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingPerioderGeneratorTaskDTO
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -15,11 +15,11 @@ import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE,
-    beskrivelse = "Genererer perioder til Konsistensavstemming",
+    taskStepType = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE,
+    beskrivelse = "Finn perioder til avstemming for relevante behandlinger",
     maxAntallFeil = 3
 )
-class KonsistensavstemMotOppdragPerioderGeneratorTask(
+class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
     val avstemmingService: AvstemmingService,
     val taskRepository: TaskRepository
 ) :
@@ -27,7 +27,10 @@ class KonsistensavstemMotOppdragPerioderGeneratorTask(
 
     override fun doTask(task: Task) {
         val taskDto =
-            objectMapper.readValue(task.payload, KonsistensavstemmingPerioderGeneratorTaskDTO::class.java)
+            objectMapper.readValue(
+                task.payload,
+                KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO::class.java
+            )
 
         if (avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
                 taskDto.transaksjonsId,
@@ -66,8 +69,8 @@ class KonsistensavstemMotOppdragPerioderGeneratorTask(
 
     companion object {
         private val logger: Logger =
-            LoggerFactory.getLogger(KonsistensavstemMotOppdragPerioderGeneratorTask::class.java)
+            LoggerFactory.getLogger(KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask::class.java)
 
-        const val TASK_STEP_TYPE = "konsistensavstemMotOppdragPerioderGeneratorTask"
+        const val TASK_STEP_TYPE = "konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlinger"
     }
 }

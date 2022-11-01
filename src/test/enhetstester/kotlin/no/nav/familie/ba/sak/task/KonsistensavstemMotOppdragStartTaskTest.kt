@@ -20,13 +20,13 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
     private val startTask = KonsistensavstemMotOppdragStartTask(avstemmingService)
 
     @Test
-    fun `Ved kjøring av task første gang, så skal den sende start til økonomi, opprette generer perioder task for avstemming og og sende avslutt til økonomi`() {
+    fun `Ved kjøring av task første gang, så skal den sende start til økonomi, opprette finn perioder til avstemming task og og sende avslutt til økonomi`() {
         val (transaksjonsId, task) = opprettStartTask()
 
         every { avstemmingService.harBatchStatusFerdig(123L) } returns false
         every { avstemmingService.erKonsistensavstemmingStartet(transaksjonsId) } returns false
         every {
-            avstemmingService.skalOppretteKonsistensavstemingPeriodeGeneratorTask(
+            avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
                 transaksjonsId,
                 any()
             )
@@ -40,7 +40,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         justRun { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         mockTreSiderMedSisteBehandlinger()
         justRun {
-            avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(any())
+            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any())
         }
         justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
 
@@ -48,7 +48,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
 
         verify(exactly = 1) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         verify(exactly = 3) {
-            avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(
+            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
                 any()
             )
         }
@@ -64,24 +64,24 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         startTask.doTask(task)
 
         verify(exactly = 0) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
-        verify(exactly = 0) { avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(any()) }
+        verify(exactly = 0) { avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any()) }
         verify(exactly = 0) { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
     }
 
     @Test
-    fun `Ved rekjøring av task som er delvis kjørt, så skal den ikke sende start melding, men opprette generer perioder på avstemminger som det ikke er sendt og sende avslutt melding til økonomi`() {
+    fun `Ved rekjøring av task som er delvis kjørt, så skal den ikke sende start melding, men opprette finn perioder til avstemminger som det ikke er sendt og sende avslutt melding til økonomi`() {
         val (transaksjonsId, task) = opprettStartTask()
 
         every { avstemmingService.harBatchStatusFerdig(123L) } returns false
         every { avstemmingService.erKonsistensavstemmingStartet(transaksjonsId) } returns true
         every {
-            avstemmingService.skalOppretteKonsistensavstemingPeriodeGeneratorTask(
+            avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
                 transaksjonsId,
                 range(1, 2)
             )
         } returns false
         every {
-            avstemmingService.skalOppretteKonsistensavstemingPeriodeGeneratorTask(
+            avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
                 transaksjonsId,
                 3
             )
@@ -90,14 +90,14 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         justRun { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         mockTreSiderMedSisteBehandlinger()
         justRun {
-            avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(any())
+            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any())
         }
         justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
 
         startTask.doTask(task)
 
         verify(exactly = 0) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
-        verify(exactly = 1) { avstemmingService.opprettKonsistensavstemmingPerioderGeneratorTask(any()) }
+        verify(exactly = 1) { avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any()) }
         verify(exactly = 1) { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
     }
 

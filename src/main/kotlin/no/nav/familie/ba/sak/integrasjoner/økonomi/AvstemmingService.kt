@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
-import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragPerioderGeneratorTask
+import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
-import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingPerioderGeneratorTaskDTO
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import no.nav.familie.prosessering.domene.Task
@@ -50,7 +50,7 @@ class AvstemmingService(
         return dataChunkRepository.findByTransaksjonsId(transaksjonsId).isNotEmpty()
     }
 
-    fun skalOppretteKonsistensavstemingPeriodeGeneratorTask(transaksjonsId: UUID, chunkNr: Int): Boolean {
+    fun skalOppretteFinnPerioderForRelevanteBehandlingerTask(transaksjonsId: UUID, chunkNr: Int): Boolean {
         logger.info("Sjekker om konsistensavstemming er gjort for=$transaksjonsId og chunkNr=$chunkNr")
         return dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr) == null
     }
@@ -116,27 +116,29 @@ class AvstemmingService(
         behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun opprettKonsistensavstemmingPerioderGeneratorTask(
-        konsistensavstemmingPerioderGeneratorTaskDTO: KonsistensavstemmingPerioderGeneratorTaskDTO
+    fun opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
+        konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO: KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
     ) {
-        val batch = batchRepository.getReferenceById(konsistensavstemmingPerioderGeneratorTaskDTO.batchId)
+        val batch =
+            batchRepository.getReferenceById(konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.batchId)
         dataChunkRepository.save(
             DataChunk(
                 batch = batch,
-                chunkNr = konsistensavstemmingPerioderGeneratorTaskDTO.chunkNr,
-                transaksjonsId = konsistensavstemmingPerioderGeneratorTaskDTO.transaksjonsId
+                chunkNr = konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr,
+                transaksjonsId = konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId
             )
         )
 
-        logger.info("Oppretter task for å generere perioder for relevante behandlinger. transaksjonsId=${konsistensavstemmingPerioderGeneratorTaskDTO.transaksjonsId} og chunk=${konsistensavstemmingPerioderGeneratorTaskDTO.chunkNr} for ${konsistensavstemmingPerioderGeneratorTaskDTO.relevanteBehandlinger.size} behandlinger")
+        logger.info("Oppretter task for å generere perioder for relevante behandlinger. transaksjonsId=${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId} og chunk=${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr} for ${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.relevanteBehandlinger.size} behandlinger")
         val task = Task(
-            type = KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE,
+            type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(
-                konsistensavstemmingPerioderGeneratorTaskDTO
+                konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
             ),
             properties = Properties().apply {
-                this["transaksjonsId"] = konsistensavstemmingPerioderGeneratorTaskDTO.transaksjonsId.toString()
-                this["chunkNr"] = konsistensavstemmingPerioderGeneratorTaskDTO.chunkNr.toString()
+                this["transaksjonsId"] =
+                    konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId.toString()
+                this["chunkNr"] = konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr.toString()
             }
         )
         taskRepository.save(task)

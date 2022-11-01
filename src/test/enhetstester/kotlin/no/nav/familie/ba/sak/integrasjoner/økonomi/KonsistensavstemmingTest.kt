@@ -13,10 +13,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragDataTask
-import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragPerioderGeneratorTask
+import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
-import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingPerioderGeneratorTaskDTO
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -61,8 +61,8 @@ class KonsistensavstemmingTest {
     private val transaksjonsId = UUID.randomUUID()
     private val konsistensavstemmingStartTaskDTO =
         KonsistensavstemmingStartTaskDTO(batchId, avstemmingsdato, transaksjonsId)
-    private val perioderGeneratorDto =
-        KonsistensavstemmingPerioderGeneratorTaskDTO(
+    private val perioderForRelevanteBehandlingerDT =
+        KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO(
             batchId,
             transaksjonsId,
             avstemmingsdato,
@@ -71,8 +71,8 @@ class KonsistensavstemmingTest {
         )
 
     private lateinit var konistensavstemmingStartTask: KonsistensavstemMotOppdragStartTask
-    private lateinit var konsistensavstemMotOppdraPerioderGeneratorTask: KonsistensavstemMotOppdragPerioderGeneratorTask
-    private lateinit var konsistensavstemMotOppdraDataTask: KonsistensavstemMotOppdragDataTask
+    private lateinit var konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask: KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask
+    private lateinit var konsistensavstemMotOppdragDataTask: KonsistensavstemMotOppdragDataTask
     private lateinit var konsistensavstemMotOppdragAvsluttTask: KonsistensavstemMotOppdragAvsluttTask
 
     @BeforeEach
@@ -82,9 +82,9 @@ class KonsistensavstemmingTest {
         every { UUID.randomUUID() } returns transaksjonsId
         every { taskRepository.save(any()) } returns Task(type = "dummy", payload = "")
         konistensavstemmingStartTask = KonsistensavstemMotOppdragStartTask(avstemmingService)
-        konsistensavstemMotOppdraPerioderGeneratorTask =
-            KonsistensavstemMotOppdragPerioderGeneratorTask(avstemmingService, taskRepository)
-        konsistensavstemMotOppdraDataTask = KonsistensavstemMotOppdragDataTask(avstemmingService)
+        konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask =
+            KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(avstemmingService, taskRepository)
+        konsistensavstemMotOppdragDataTask = KonsistensavstemMotOppdragDataTask(avstemmingService)
         konsistensavstemMotOppdragAvsluttTask =
             KonsistensavstemMotOppdragAvsluttTask(avstemmingService, dataChunkRepository, BatchService(batchRepository))
     }
@@ -95,7 +95,7 @@ class KonsistensavstemmingTest {
     }
 
     @Test
-    fun `Verifiser at konsistensavstemOppdragStart oppretter generer- og avslutt task og sender start melding hvis transaksjon ikke allerede kjørt`() {
+    fun `Første gangs kjøring av start task - Verifiser at konsistensavstemOppdragStart oppretter finn perioder for relevante behandlinger task- og avslutt task og sender start melding hvis transaksjon ikke allerede kjørt`() {
         val avstemmingsdatoSlot = lagMockForStartTaskHappCase()
 
         konistensavstemmingStartTask.doTask(
@@ -121,20 +121,26 @@ class KonsistensavstemmingTest {
         assertEquals(1, dataChunkSlot.captured.chunkNr)
         assertEquals(transaksjonsId, dataChunkSlot.captured.transaksjonsId)
 
-        assertEquals(KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE, taskSlots[0].type)
-        val perioderGeneratorDto =
-            objectMapper.readValue(taskSlots[0].payload, KonsistensavstemmingPerioderGeneratorTaskDTO::class.java)
-        assertEquals(batchId, perioderGeneratorDto.batchId)
-        assertEquals(transaksjonsId, perioderGeneratorDto.transaksjonsId)
-        assertEquals(1, perioderGeneratorDto.chunkNr)
-        assertThat(perioderGeneratorDto.relevanteBehandlinger).hasSize(1).containsExactly(1)
+        assertEquals(
+            KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE,
+            taskSlots[0].type
+        )
+        val finnPerioderForRelevanteBehandlingerDto =
+            objectMapper.readValue(
+                taskSlots[0].payload,
+                KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO::class.java
+            )
+        assertEquals(batchId, finnPerioderForRelevanteBehandlingerDto.batchId)
+        assertEquals(transaksjonsId, finnPerioderForRelevanteBehandlingerDto.transaksjonsId)
+        assertEquals(1, finnPerioderForRelevanteBehandlingerDto.chunkNr)
+        assertThat(finnPerioderForRelevanteBehandlingerDto.relevanteBehandlinger).hasSize(1).containsExactly(1)
         assertEquals(KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE, taskSlots[1].type)
         assertThat(avstemmingsdatoSlot.captured)
             .isCloseTo(LocalDateTime.now(), within(10, ChronoUnit.SECONDS))
     }
 
     @Test
-    fun `Verifiser at konsistensavstemming ikke kjører hvis alle datachunker allerede er sendt til økonomi for transaksjonId`() {
+    fun `Rekjøring av start task - Verifiser at konsistensavstemming ikke kjører hvis alle datachunker allerede er sendt til økonomi for transaksjonId`() {
         every { batchRepository.getReferenceById(batchId) } returns Batch(
             kjøreDato = LocalDate.now(),
             status = KjøreStatus.FERDIG
@@ -151,7 +157,7 @@ class KonsistensavstemmingTest {
     }
 
     @Test
-    fun `Verifiser at konsistensavstemming kun rekjører chunker som ikke allerede er kjørt`() {
+    fun `Rekjøring av start task - Verifiser at konsistensavstemming kun rekjører chunker som ikke allerede er kjørt`() {
         lagMockForStartTaskHappCase()
         val datachunks = listOf(
             DataChunk(
@@ -189,25 +195,31 @@ class KonsistensavstemmingTest {
         val taskSlots = mutableListOf<Task>()
         verify(exactly = 2) { taskRepository.save(capture(taskSlots)) }
 
-        assertEquals(KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE, taskSlots[0].type)
-        val perioderGeneratorDto =
-            objectMapper.readValue(taskSlots[0].payload, KonsistensavstemmingPerioderGeneratorTaskDTO::class.java)
-        assertEquals(batchId, perioderGeneratorDto.batchId)
-        assertEquals(transaksjonsId, perioderGeneratorDto.transaksjonsId)
-        assertEquals(3, perioderGeneratorDto.chunkNr)
-        assertThat(perioderGeneratorDto.relevanteBehandlinger).hasSize(450)
+        assertEquals(
+            KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE,
+            taskSlots[0].type
+        )
+        val finnPerioderForRelevanteBehandlingerDto =
+            objectMapper.readValue(
+                taskSlots[0].payload,
+                KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO::class.java
+            )
+        assertEquals(batchId, finnPerioderForRelevanteBehandlingerDto.batchId)
+        assertEquals(transaksjonsId, finnPerioderForRelevanteBehandlingerDto.transaksjonsId)
+        assertEquals(3, finnPerioderForRelevanteBehandlingerDto.chunkNr)
+        assertThat(finnPerioderForRelevanteBehandlingerDto.relevanteBehandlinger).hasSize(450)
 
         assertEquals(KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE, taskSlots[1].type)
     }
 
     @Test
-    fun `Verifiser at konsistensavstemPeriodeGeneratorTask finner perioder for behandlinger og oppretter data task`() {
-        lagMockGenererPerioderHappeCase()
+    fun `Verifiser at konsistensavstemPeriodeFinnPerioderForRelevanteBehandlingerTask finner perioder for behandlinger og oppretter data task`() {
+        lagMockFinnPerioderForRelevanteBehandlingerHappeCase()
 
-        konsistensavstemMotOppdraPerioderGeneratorTask.doTask(
+        konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.doTask(
             Task(
-                payload = objectMapper.writeValueAsString(perioderGeneratorDto),
-                type = KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE
+                payload = objectMapper.writeValueAsString(perioderForRelevanteBehandlingerDT),
+                type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE
             )
         )
 
@@ -238,7 +250,7 @@ class KonsistensavstemmingTest {
             )
         } returns ""
 
-        konsistensavstemMotOppdraDataTask.doTask(
+        konsistensavstemMotOppdragDataTask.doTask(
             Task(
                 payload = objectMapper.writeValueAsString(
                     KonsistensavstemmingDataTaskDTO(
@@ -283,19 +295,19 @@ class KonsistensavstemmingTest {
         val taskSlots = mutableListOf<Task>()
         verify(exactly = 2) { taskRepository.save(capture(taskSlots)) }
 
-        lagMockGenererPerioderHappeCase()
-        val periodeGeneratorTask =
-            taskSlots.find { it.type == KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE }!!
-        konsistensavstemMotOppdraPerioderGeneratorTask.doTask(
+        lagMockFinnPerioderForRelevanteBehandlingerHappeCase()
+        val finnPerioderForRelevanteBehandlingerTask =
+            taskSlots.find { it.type == KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE }!!
+        konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.doTask(
             Task(
-                payload = periodeGeneratorTask.payload,
-                type = KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE
+                payload = finnPerioderForRelevanteBehandlingerTask.payload,
+                type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE
             )
         )
         verify(exactly = 3) { taskRepository.save(capture(taskSlots)) }
 
         lagMockOppdragDataHappeCase()
-        konsistensavstemMotOppdraDataTask.doTask(
+        konsistensavstemMotOppdragDataTask.doTask(
             Task(
                 payload = taskSlots.first { it.type == KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE }.payload,
                 type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE
@@ -341,19 +353,19 @@ class KonsistensavstemmingTest {
         val taskSlots = mutableListOf<Task>()
         verify(exactly = 2) { taskRepository.save(capture(taskSlots)) }
 
-        lagMockGenererPerioderHappeCase()
-        val periodeGeneratorTask =
-            taskSlots.find { it.type == KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE }!!
-        konsistensavstemMotOppdraPerioderGeneratorTask.doTask(
+        lagMockFinnPerioderForRelevanteBehandlingerHappeCase()
+        val finnPerioderForRelevanteBehandlingerTask =
+            taskSlots.find { it.type == KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE }!!
+        konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.doTask(
             Task(
-                payload = periodeGeneratorTask.payload,
-                type = KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE
+                payload = finnPerioderForRelevanteBehandlingerTask.payload,
+                type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE
             )
         )
         verify(exactly = 3) { taskRepository.save(capture(taskSlots)) }
 
         lagMockOppdragDataHappeCase()
-        konsistensavstemMotOppdraDataTask.doTask(
+        konsistensavstemMotOppdragDataTask.doTask(
             Task(
                 payload = taskSlots.first { it.type == KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE }.payload,
                 type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE
@@ -407,7 +419,7 @@ class KonsistensavstemmingTest {
         return avstemmingsdatoSlot
     }
 
-    private fun lagMockGenererPerioderHappeCase() {
+    private fun lagMockFinnPerioderForRelevanteBehandlingerHappeCase() {
         every {
             beregningService.hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
                 any(),

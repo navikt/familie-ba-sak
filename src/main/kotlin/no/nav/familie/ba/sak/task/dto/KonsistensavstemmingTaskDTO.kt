@@ -26,7 +26,7 @@ data class KonsistensavstemmingAvsluttTaskDTO(
     val sendTilØkonomi: Boolean = true
 )
 
-data class KonsistensavstemmingPerioderGeneratorTaskDTO(
+data class KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO(
     val batchId: Long,
     val transaksjonsId: UUID,
     val avstemmingsdato: LocalDateTime,
