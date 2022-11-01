@@ -51,6 +51,7 @@ class AvstemmingService(
     }
 
     fun skalOppretteKonsistensavstemingPeriodeGeneratorTask(transaksjonsId: UUID, chunkNr: Int): Boolean {
+        logger.info("Sjekker om konsistensavstemming er gjort for=$transaksjonsId og chunkNr=$chunkNr")
         return dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr) == null
     }
 
@@ -66,12 +67,12 @@ class AvstemmingService(
         chunkNr: Int,
         sendTilØkonomi: Boolean
     ) {
-        logger.info("Utfører konsisensavstemming: Sender perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr")
+        logger.info("Utfører konsistensavstemOppdragData: Sender perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr")
         val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
             ?: error("Finner ingen datachunk for $transaksjonsId og $chunkNr")
 
         if (dataChunk.erSendt) {
-            logger.info("Utfører konsisensavstemming: Perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr er allerede sendt.")
+            logger.info("Utfører konsistensavstemOppdragData: Perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr er allerede sendt.")
             return
         }
 
@@ -82,7 +83,7 @@ class AvstemmingService(
                 transaksjonsId
             )
         } else {
-            logger.info("Send til økonomi skrudd av for $transaksjonsId for task konsistensavstemOppdragData")
+            logger.info("Send datamelding til økonomi i dry-run modus for $transaksjonsId og $chunkNr")
         }
 
         dataChunkRepository.save(dataChunk.also { it.erSendt = true })
@@ -98,7 +99,7 @@ class AvstemmingService(
     fun opprettKonsistensavstemmingAvsluttTask(
         konsistensavstemmingAvsluttTaskDTO: KonsistensavstemmingAvsluttTaskDTO
     ) {
-        logger.info("Oppretter avsluttingstask for transaksjonsId ${konsistensavstemmingAvsluttTaskDTO.transaksjonsId}")
+        logger.info("Oppretter avsluttingstask for transaksjonsId=${konsistensavstemmingAvsluttTaskDTO.transaksjonsId}")
         val konsistensavstemmingAvsluttTask = Task(
             type = KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(konsistensavstemmingAvsluttTaskDTO),
@@ -127,7 +128,7 @@ class AvstemmingService(
             )
         )
 
-        logger.info("Oppretter task for å generere perioder for relevante behandlinger. transaksjonsId=${konsistensavstemmingPerioderGeneratorTaskDTO.transaksjonsId} og chunk=${konsistensavstemmingPerioderGeneratorTaskDTO.chunkNr} med ${konsistensavstemmingPerioderGeneratorTaskDTO.relevanteBehandlinger.size} behandlinger")
+        logger.info("Oppretter task for å generere perioder for relevante behandlinger. transaksjonsId=${konsistensavstemmingPerioderGeneratorTaskDTO.transaksjonsId} og chunk=${konsistensavstemmingPerioderGeneratorTaskDTO.chunkNr} for ${konsistensavstemmingPerioderGeneratorTaskDTO.relevanteBehandlinger.size} behandlinger")
         val task = Task(
             type = KonsistensavstemMotOppdragPerioderGeneratorTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(

@@ -34,6 +34,7 @@ class KonsistensavstemMotOppdragPerioderGeneratorTask(
                 taskDto.chunkNr
             )
         ) {
+            logger.info("Finn perioder for avstemming er alt kjørt for ${taskDto.transaksjonsId} og ${taskDto.chunkNr}")
             return
         }
 
@@ -43,7 +44,7 @@ class KonsistensavstemMotOppdragPerioderGeneratorTask(
                 taskDto.relevanteBehandlinger
             )
 
-        logger.info("Oppretter konsisensavstemmingstasker for transaksjonsId ${taskDto.transaksjonsId} og chunk ${taskDto.chunkNr} med ${perioderTilAvstemming.size} løpende saker")
+        logger.info("Finner perioder til avstemming for transaksjonsId ${taskDto.transaksjonsId} og chunk ${taskDto.chunkNr} med ${perioderTilAvstemming.size} løpende saker")
         val konsistensavstemmingDataTask = Task(
             type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(

@@ -27,22 +27,22 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         val konsistensavstemmingTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingStartTaskDTO::class.java)
 
-        val avstemmingsDato = LocalDateTime.now()
-        logger.info("Konsistensavstemming ble initielt trigget ${konsistensavstemmingTask.avstemmingdato}, men bruker $avstemmingsDato som avstemmingsdato")
+        val avstemmingsdato = LocalDateTime.now()
+        logger.info("Konsistensavstemming ble initielt trigget ${konsistensavstemmingTask.avstemmingdato}, men bruker $avstemmingsdato som avstemmingsdato")
 
         if (avstemmingService.harBatchStatusFerdig(konsistensavstemmingTask.batchId)) {
-            logger.info("Konsistensavstemmning er allerede kjørt for transaksjonsId ${konsistensavstemmingTask.transaksjonsId} og ${konsistensavstemmingTask.batchId}")
+            logger.info("Konsistensavstemmning er allerede kjørt for transaksjonsId=${konsistensavstemmingTask.transaksjonsId} og batchId=${konsistensavstemmingTask.batchId}")
             return
         }
 
         if (!avstemmingService.erKonsistensavstemmingStartet(konsistensavstemmingTask.transaksjonsId)) {
             if (konsistensavstemmingTask.sendTilØkonomi) {
                 avstemmingService.sendKonsistensavstemmingStart(
-                    avstemmingsDato,
+                    avstemmingsdato,
                     konsistensavstemmingTask.transaksjonsId
                 )
             } else {
-                logger.info("Send til økonomi skrudd av for ${konsistensavstemmingTask.transaksjonsId} for task $TASK_STEP_TYPE")
+                logger.info("Send startmelding til økonomi i dry-run modus for ${konsistensavstemmingTask.transaksjonsId}")
             }
         }
 
@@ -53,7 +53,6 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         for (pageNumber in 1..relevanteBehandlinger.totalPages) {
             relevanteBehandlinger.content.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
                 .forEach { oppstykketRelevanteBehandlinger ->
-                    logger.info("Oppretter perioder for transaksjonsId=${konsistensavstemmingTask.transaksjonsId} og chunkNr=$chunkNr")
                     if (avstemmingService.skalOppretteKonsistensavstemingPeriodeGeneratorTask(
                             konsistensavstemmingTask.transaksjonsId,
                             chunkNr
@@ -63,14 +62,14 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
                             KonsistensavstemmingPerioderGeneratorTaskDTO(
                                 transaksjonsId = konsistensavstemmingTask.transaksjonsId,
                                 chunkNr = chunkNr,
-                                avstemmingsdato = konsistensavstemmingTask.avstemmingdato,
+                                avstemmingsdato = avstemmingsdato,
                                 batchId = konsistensavstemmingTask.batchId,
                                 relevanteBehandlinger = oppstykketRelevanteBehandlinger.map { it.toLong() },
                                 sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi
                             )
                         )
                     } else {
-                        logger.info("Konsistensavstemmning er allerede kjørt for transaksjonsId ${konsistensavstemmingTask.transaksjonsId} og chunkNr $chunkNr")
+                        logger.info("Generer perioder task alt kjørt for ${konsistensavstemmingTask.transaksjonsId} og chunkNr $chunkNr")
                     }
                     chunkNr = chunkNr.inc()
                 }
@@ -82,7 +81,7 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
             KonsistensavstemmingAvsluttTaskDTO(
                 batchId = konsistensavstemmingTask.batchId,
                 transaksjonsId = konsistensavstemmingTask.transaksjonsId,
-                avstemmingsdato = konsistensavstemmingTask.avstemmingdato,
+                avstemmingsdato = avstemmingsdato,
                 sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi
             )
         )

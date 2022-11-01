@@ -50,7 +50,7 @@ class KonsistensavstemMotOppdragAvsluttTask(
                 transaksjonsId = konsistensavstemmingAvsluttTask.transaksjonsId
             )
         } else {
-            logger.info("Send til økonomi skrudd av for ${konsistensavstemmingAvsluttTask.transaksjonsId} for task $TASK_STEP_TYPE")
+            logger.info("Send avsluttmelding til økonomi i dry-run modus for transaksjonsId=${konsistensavstemmingAvsluttTask.transaksjonsId}")
         }
 
         batchService.lagreNyStatus(konsistensavstemmingAvsluttTask.batchId, KjøreStatus.FERDIG)
