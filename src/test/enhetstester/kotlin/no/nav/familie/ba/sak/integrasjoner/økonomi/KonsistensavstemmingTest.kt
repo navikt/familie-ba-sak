@@ -1,11 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.mockk.CapturingSlot
-import io.mockk.clearAllMocks
-import io.mockk.clearStaticMockk
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
@@ -23,7 +20,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -77,9 +73,6 @@ class KonsistensavstemmingTest {
 
     @BeforeEach
     fun setUp() {
-        clearAllMocks()
-        val uuidMock = mockkStatic(UUID::class)
-        every { UUID.randomUUID() } returns transaksjonsId
         every { taskRepository.save(any()) } returns Task(type = "dummy", payload = "")
         konistensavstemmingStartTask = KonsistensavstemMotOppdragStartTask(avstemmingService)
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask =
@@ -87,11 +80,6 @@ class KonsistensavstemmingTest {
         konsistensavstemMotOppdragDataTask = KonsistensavstemMotOppdragDataTask(avstemmingService)
         konsistensavstemMotOppdragAvsluttTask =
             KonsistensavstemMotOppdragAvsluttTask(avstemmingService, dataChunkRepository, BatchService(batchRepository))
-    }
-
-    @AfterAll
-    fun teardown() {
-        clearStaticMockk(UUID::class)
     }
 
     @Test
