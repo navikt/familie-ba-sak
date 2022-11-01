@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragDataTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
@@ -19,7 +20,6 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,7 +30,6 @@ import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -54,17 +53,6 @@ class KonsistensavstemmingTest {
     private val batchId = 1000000L
     private val behandlingId = BigInteger.ONE
     private val avstemmingsdato = LocalDateTime.now()
-    private val transaksjonsId = UUID.randomUUID()
-    private val konsistensavstemmingStartTaskDTO =
-        KonsistensavstemmingStartTaskDTO(batchId, avstemmingsdato, transaksjonsId)
-    private val perioderForRelevanteBehandlingerDT =
-        KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO(
-            batchId,
-            transaksjonsId,
-            avstemmingsdato,
-            1,
-            listOf(behandlingId.toLong())
-        )
 
     private lateinit var konistensavstemmingStartTask: KonsistensavstemMotOppdragStartTask
     private lateinit var konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask: KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask
@@ -84,47 +72,77 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Første gangs kjøring av start task - Verifiser at konsistensavstemOppdragStart oppretter finn perioder for relevante behandlinger task- og avslutt task og sender start melding hvis transaksjon ikke allerede kjørt`() {
-        val avstemmingsdatoSlot = lagMockForStartTaskHappCase()
-
+        val transaksjonsId = UUID.randomUUID()
+        val avstemmingsdatoSlot = lagMockForStartTaskHappCase(transaksjonsId)
         konistensavstemmingStartTask.doTask(
             Task(
-                payload = objectMapper.writeValueAsString(konsistensavstemmingStartTaskDTO),
+                payload = objectMapper.writeValueAsString(
+                    KonsistensavstemmingStartTaskDTO(
+                        batchId,
+                        avstemmingsdato,
+                        transaksjonsId
+                    )
+                ),
                 type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE
             )
         )
 
         val taskSlots = mutableListOf<Task>()
-        verify(exactly = 2) { taskRepository.save(capture(taskSlots)) }
-
-        val dataChunkSlot = slot<DataChunk>()
-        verify(exactly = 1) { dataChunkRepository.save(capture(dataChunkSlot)) }
-
-        verify(exactly = 1) {
-            økonomiKlient.konsistensavstemOppdragStart(
-                avstemmingsdato = avstemmingsdatoSlot.captured,
-                transaksjonsId = transaksjonsId
+        verify(atLeast = 1) { taskRepository.save(capture(taskSlots)) }
+        // sjekk at KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask er opprettet
+        val finnPerioderForRelevanteBehandlingerTask =
+            finnFørsteTaskAvTypePåTransaksjonsId(
+                taskSlots,
+                transaksjonsId,
+                KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE
             )
-        }
-
-        assertEquals(1, dataChunkSlot.captured.chunkNr)
-        assertEquals(transaksjonsId, dataChunkSlot.captured.transaksjonsId)
-
-        assertEquals(
-            KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE,
-            taskSlots[0].type
-        )
+        assertThat(finnPerioderForRelevanteBehandlingerTask).isNotNull
         val finnPerioderForRelevanteBehandlingerDto =
             objectMapper.readValue(
-                taskSlots[0].payload,
+                finnPerioderForRelevanteBehandlingerTask!!.payload,
                 KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO::class.java
             )
         assertEquals(batchId, finnPerioderForRelevanteBehandlingerDto.batchId)
         assertEquals(transaksjonsId, finnPerioderForRelevanteBehandlingerDto.transaksjonsId)
         assertEquals(1, finnPerioderForRelevanteBehandlingerDto.chunkNr)
         assertThat(finnPerioderForRelevanteBehandlingerDto.relevanteBehandlinger).hasSize(1).containsExactly(1)
-        assertEquals(KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE, taskSlots[1].type)
-        assertThat(avstemmingsdatoSlot.captured)
-            .isCloseTo(LocalDateTime.now(), within(10, ChronoUnit.SECONDS))
+
+        // sjekk at KonsistensavstemMotOppdragAvsluttTask er opprettet
+        val finnAvsluttTask = finnFørsteTaskAvTypePåTransaksjonsId(
+            taskSlots,
+            transaksjonsId,
+            KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE
+        )
+        val finnAvsluttTaskDto =
+            objectMapper.readValue(
+                finnAvsluttTask!!.payload,
+                KonsistensavstemmingAvsluttTaskDTO::class.java
+            )
+        assertThat(finnAvsluttTask).isNotNull
+        assertEquals(batchId, finnAvsluttTaskDto.batchId)
+        assertEquals(transaksjonsId, finnAvsluttTaskDto.transaksjonsId)
+
+        // sjekk at datachunk er opprettet
+        val dataChunkSlot = mutableListOf<DataChunk>()
+        verify(atLeast = 1) { dataChunkRepository.save(capture(dataChunkSlot)) }
+        assertThat(dataChunkSlot.filter { it.transaksjonsId == transaksjonsId }).hasSize(1)
+        assertEquals(1, dataChunkSlot.find { it.transaksjonsId == transaksjonsId }?.chunkNr)
+
+        // sjekk at det har blitt sendt startmelding
+        verify(exactly = 1) {
+            økonomiKlient.konsistensavstemOppdragStart(
+                avstemmingsdato = avstemmingsdatoSlot.captured,
+                transaksjonsId = transaksjonsId
+            )
+        }
+    }
+
+    private fun finnFørsteTaskAvTypePåTransaksjonsId(
+        tasker: List<Task>,
+        transaksjonsId: UUID,
+        type: String
+    ): Task? {
+        return tasker.find { it.payload.contains(transaksjonsId.toString()) && it.type == type }
     }
 
     @Test
@@ -133,10 +151,17 @@ class KonsistensavstemmingTest {
             kjøreDato = LocalDate.now(),
             status = KjøreStatus.FERDIG
         )
+        val transaksjonsId = UUID.randomUUID()
 
         konistensavstemmingStartTask.doTask(
             Task(
-                payload = objectMapper.writeValueAsString(konsistensavstemmingStartTaskDTO),
+                payload = objectMapper.writeValueAsString(
+                    KonsistensavstemmingStartTaskDTO(
+                        batchId,
+                        avstemmingsdato,
+                        transaksjonsId
+                    )
+                ),
                 type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE
             )
         )
@@ -146,7 +171,8 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Rekjøring av start task - Verifiser at konsistensavstemming kun rekjører chunker som ikke allerede er kjørt`() {
-        lagMockForStartTaskHappCase()
+        val transaksjonsId = UUID.randomUUID()
+        lagMockForStartTaskHappCase(transaksjonsId)
         val datachunks = listOf(
             DataChunk(
                 batch = Batch(kjøreDato = LocalDate.now()),
@@ -174,7 +200,13 @@ class KonsistensavstemmingTest {
 
         konistensavstemmingStartTask.doTask(
             Task(
-                payload = objectMapper.writeValueAsString(konsistensavstemmingStartTaskDTO),
+                payload = objectMapper.writeValueAsString(
+                    KonsistensavstemmingStartTaskDTO(
+                        batchId,
+                        avstemmingsdato,
+                        transaksjonsId
+                    )
+                ),
                 type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE
             )
         )
@@ -202,19 +234,28 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Verifiser at konsistensavstemPeriodeFinnPerioderForRelevanteBehandlingerTask finner perioder for behandlinger og oppretter data task`() {
+        val transaksjonsId = UUID.randomUUID()
         lagMockFinnPerioderForRelevanteBehandlingerHappeCase()
 
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.doTask(
             Task(
-                payload = objectMapper.writeValueAsString(perioderForRelevanteBehandlingerDT),
+                payload = objectMapper.writeValueAsString(
+                    KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO(
+                        batchId,
+                        transaksjonsId,
+                        avstemmingsdato,
+                        1,
+                        listOf(behandlingId.toLong())
+                    )
+                ),
                 type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE
             )
         )
 
         val taskSlots = mutableListOf<Task>()
-        verify(exactly = 1) { taskRepository.save(capture(taskSlots)) }
+        verify(atLeast = 1) { taskRepository.save(capture(taskSlots)) }
         val konsistensavstemmingDataDto =
-            objectMapper.readValue(taskSlots[0].payload, KonsistensavstemmingDataTaskDTO::class.java)
+            objectMapper.readValue(taskSlots.last().payload, KonsistensavstemmingDataTaskDTO::class.java)
         assertEquals(konsistensavstemmingDataDto.chunkNr, 1)
         assertEquals(konsistensavstemmingDataDto.transaksjonsId, transaksjonsId)
         assertThat(konsistensavstemmingDataDto.perioderForBehandling)
@@ -223,7 +264,8 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Verifiser at konsistensavstemOppdragData sender data og oppdatere datachunk tabellen`() {
-        lagMockOppdragDataHappeCase()
+        val transaksjonsId = UUID.randomUUID()
+        lagMockOppdragDataHappeCase(transaksjonsId)
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 1) } returns
             DataChunk(
                 batch = Batch(id = batchId, kjøreDato = LocalDate.now()),
@@ -273,50 +315,71 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Kjør alle tasker med input generert fra task som oppretter tasken`() {
-        lagMockForStartTaskHappCase()
+        val transaksjonsId = UUID.randomUUID()
+        lagMockForStartTaskHappCase(transaksjonsId)
         konistensavstemmingStartTask.doTask(
             Task(
-                payload = objectMapper.writeValueAsString(konsistensavstemmingStartTaskDTO),
+                payload = objectMapper.writeValueAsString(
+                    KonsistensavstemmingStartTaskDTO(
+                        batchId,
+                        avstemmingsdato,
+                        transaksjonsId
+                    )
+                ),
                 type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE
             )
         )
         val taskSlots = mutableListOf<Task>()
-        verify(exactly = 2) { taskRepository.save(capture(taskSlots)) }
+        verify(atLeast = 2) { taskRepository.save(capture(taskSlots)) }
+        val finnPerioderTask = finnFørsteTaskAvTypePåTransaksjonsId(
+            taskSlots,
+            transaksjonsId,
+            KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE
+        )!!
 
         lagMockFinnPerioderForRelevanteBehandlingerHappeCase()
-        val finnPerioderForRelevanteBehandlingerTask =
-            taskSlots.find { it.type == KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE }!!
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.doTask(
             Task(
-                payload = finnPerioderForRelevanteBehandlingerTask.payload,
+                payload = finnPerioderTask!!.payload,
                 type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE
             )
         )
-        verify(exactly = 3) { taskRepository.save(capture(taskSlots)) }
+        verify(atLeast = 3) { taskRepository.save(capture(taskSlots)) }
 
-        lagMockOppdragDataHappeCase()
+        lagMockOppdragDataHappeCase(transaksjonsId)
+        val finnDataTask = finnFørsteTaskAvTypePåTransaksjonsId(
+            taskSlots,
+            transaksjonsId,
+            KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE
+        )!!
         konsistensavstemMotOppdragDataTask.doTask(
             Task(
-                payload = taskSlots.first { it.type == KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE }.payload,
+                payload = finnDataTask.payload,
                 type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE
             )
         )
-        verify(exactly = 3) { taskRepository.save(capture(taskSlots)) }
+        verify(atLeast = 3) { taskRepository.save(capture(taskSlots)) }
+        val dataTask = finnFørsteTaskAvTypePåTransaksjonsId(
+            taskSlots,
+            transaksjonsId,
+            KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE
+        )!!
         val datachunksSlot = mutableListOf<DataChunk>()
-        verify(exactly = 2) { dataChunkRepository.save(capture(datachunksSlot)) }
-        assertThat(datachunksSlot.last().erSendt).isTrue()
+        verify(atLeast = 2) { dataChunkRepository.save(capture(datachunksSlot)) }
+        assertThat(datachunksSlot.last { it.transaksjonsId == transaksjonsId }.erSendt).isTrue()
 
-        val dataTask =
-            taskSlots.find { it.type == KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE }!!
         val dataTaskDto = objectMapper.readValue(dataTask.payload, KonsistensavstemmingDataTaskDTO::class.java)
         assertThat(dataTaskDto.chunkNr).isEqualTo(1)
         assertThat(dataTaskDto.transaksjonsId).isEqualTo(transaksjonsId)
         assertThat(dataTaskDto.perioderForBehandling).hasSize(1)
         assertThat(dataTaskDto.sendTilØkonomi).isTrue()
 
-        lagMockAvsluttHappyCase()
-        val avsluttTask =
-            taskSlots.find { it.type == KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE }!!
+        lagMockAvsluttHappyCase(transaksjonsId)
+        val avsluttTask = finnFørsteTaskAvTypePåTransaksjonsId(
+            taskSlots,
+            transaksjonsId,
+            KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE
+        )!!
         konsistensavstemMotOppdragAvsluttTask.doTask(
             Task(
                 payload = avsluttTask.payload,
@@ -331,42 +394,57 @@ class KonsistensavstemmingTest {
 
     @Test
     fun `Kjør alle tasker med input generert fra task som oppretter tasken og send til økonomi skrudd av`() {
-        lagMockForStartTaskHappCase()
+        val transaksjonsId = UUID.randomUUID()
+        lagMockForStartTaskHappCase(transaksjonsId)
         konistensavstemmingStartTask.doTask(
             Task(
-                payload = objectMapper.writeValueAsString(konsistensavstemmingStartTaskDTO.copy(sendTilØkonomi = false)),
+                payload = objectMapper.writeValueAsString(
+                    KonsistensavstemmingStartTaskDTO(
+                        batchId,
+                        avstemmingsdato,
+                        transaksjonsId,
+                        false
+                    )
+                ),
                 type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE
             )
         )
         val taskSlots = mutableListOf<Task>()
-        verify(exactly = 2) { taskRepository.save(capture(taskSlots)) }
+        verify(atLeast = 2) { taskRepository.save(capture(taskSlots)) }
 
         lagMockFinnPerioderForRelevanteBehandlingerHappeCase()
-        val finnPerioderForRelevanteBehandlingerTask =
-            taskSlots.find { it.type == KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE }!!
+        val finnPerioderForRelevanteBehandlingerTask = finnFørsteTaskAvTypePåTransaksjonsId(
+            taskSlots,
+            transaksjonsId,
+            KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE
+        )!!
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.doTask(
             Task(
                 payload = finnPerioderForRelevanteBehandlingerTask.payload,
                 type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE
             )
         )
-        verify(exactly = 3) { taskRepository.save(capture(taskSlots)) }
+        verify(atLeast = 3) { taskRepository.save(capture(taskSlots)) }
 
-        lagMockOppdragDataHappeCase()
+        lagMockOppdragDataHappeCase(transaksjonsId)
         konsistensavstemMotOppdragDataTask.doTask(
             Task(
-                payload = taskSlots.first { it.type == KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE }.payload,
+                payload = finnFørsteTaskAvTypePåTransaksjonsId(
+                    taskSlots,
+                    transaksjonsId,
+                    KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE
+                )!!.payload,
                 type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE
             )
         )
-        verify(exactly = 3) { taskRepository.save(capture(taskSlots)) }
-        val datachunksSlot = mutableListOf<DataChunk>()
-        verify(exactly = 2) { dataChunkRepository.save(capture(datachunksSlot)) }
-        assertThat(datachunksSlot.last().erSendt).isTrue()
+        verify(atLeast = 3) { taskRepository.save(capture(taskSlots)) }
 
-        lagMockAvsluttHappyCase()
-        val avsluttTask =
-            taskSlots.find { it.type == KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE }!!
+        lagMockAvsluttHappyCase(transaksjonsId)
+        val avsluttTask = finnFørsteTaskAvTypePåTransaksjonsId(
+            taskSlots,
+            transaksjonsId,
+            KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE
+        )!!
         konsistensavstemMotOppdragAvsluttTask.doTask(
             Task(
                 payload = avsluttTask.payload,
@@ -379,7 +457,7 @@ class KonsistensavstemmingTest {
         verify(exactly = 0) { økonomiKlient.konsistensavstemOppdragAvslutt(any(), transaksjonsId) }
     }
 
-    private fun lagMockForStartTaskHappCase(): CapturingSlot<LocalDateTime> {
+    private fun lagMockForStartTaskHappCase(transaksjonsId: UUID): CapturingSlot<LocalDateTime> {
         val behandlingId = BigInteger.ONE
         val page = mockk<Page<BigInteger>>()
         val pageable = Pageable.ofSize(KonsistensavstemMotOppdragStartTask.ANTALL_BEHANDLINGER)
@@ -424,7 +502,7 @@ class KonsistensavstemmingTest {
         every { behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(any()) } returns aktivFødselsnummere
     }
 
-    private fun lagMockOppdragDataHappeCase() {
+    private fun lagMockOppdragDataHappeCase(transaksjonsId: UUID) {
         every {
             økonomiKlient.konsistensavstemOppdragData(
                 any(),
@@ -445,7 +523,7 @@ class KonsistensavstemmingTest {
         )
     }
 
-    private fun lagMockAvsluttHappyCase() {
+    private fun lagMockAvsluttHappyCase(transaksjonsId: UUID) {
         every {
             økonomiKlient.konsistensavstemOppdragAvslutt(
                 any(),
