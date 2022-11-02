@@ -129,7 +129,7 @@ class AvstemmingService(
             )
         )
 
-        logger.info("Oppretter task for å generere perioder for relevante behandlinger. transaksjonsId=${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId} og chunk=${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr} for ${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.relevanteBehandlinger.size} behandlinger")
+        logger.info("Oppretter task for å finne perioder for relevante behandlinger. transaksjonsId=${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId} og chunk=${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr} for ${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.relevanteBehandlinger.size} behandlinger")
         val task = Task(
             type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(
