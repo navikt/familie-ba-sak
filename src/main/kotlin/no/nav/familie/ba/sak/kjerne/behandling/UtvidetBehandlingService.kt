@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
@@ -105,7 +106,7 @@ class UtvidetBehandlingService(
             skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
             type = behandling.type,
             kategori = behandling.kategori,
-            underkategori = behandling.underkategori,
+            underkategori = behandling.underkategori.tilDto(),
             årsak = behandling.opprettetÅrsak,
             opprettetTidspunkt = behandling.opprettetTidspunkt,
             endretAv = behandling.endretAv,
