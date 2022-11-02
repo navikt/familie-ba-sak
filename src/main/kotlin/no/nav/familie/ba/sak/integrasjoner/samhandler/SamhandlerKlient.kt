@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.ba.tss.SøkSamhandlerInfo
 import no.nav.familie.kontrakter.ba.tss.SøkSamhandlerInfoRequest
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -18,6 +19,7 @@ class SamhandlerKlient(
     @Qualifier("jwtBearer") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "samhandler") {
 
+    @Cacheable("hent-samhandler", cacheManager = "dailyCache")
     fun hentSamhandler(orgNummer: String): SamhandlerInfo {
         val uri = URI.create("$familieOppdragUri/tss/orgnr/$orgNummer")
 
