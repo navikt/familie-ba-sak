@@ -440,9 +440,9 @@ class StegService(
             }
 
             // TODO: Det bør sees på en ytterligere robustgjøring for alle steg som SB kan utføre.
-            val tekniskVedlikeholdHenleggelse =
+            val erTekniskVedlikeholdHenleggelse =
                 behandlingSteg.stegType() == StegType.HENLEGG_BEHANDLING && henleggÅrsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD
-            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK && !tekniskVedlikeholdHenleggelse) {
+            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK && !erTekniskVedlikeholdHenleggelse) {
                 throw FunksjonellFeil(
                     "Behandlingen er på steg '${behandling.steg.displayName()}', " +
                         "og er da låst for alle andre type endringer."
