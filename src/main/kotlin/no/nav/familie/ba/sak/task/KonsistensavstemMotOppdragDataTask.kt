@@ -36,7 +36,5 @@ class KonsistensavstemMotOppdragDataTask(
 
     companion object {
         const val TASK_STEP_TYPE = "konsistensavstemMotOppdragData"
-        private val logger: Logger =
-            LoggerFactory.getLogger(KonsistensavstemMotOppdragDataTask::class.java)
     }
 }
