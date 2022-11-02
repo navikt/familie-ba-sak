@@ -67,8 +67,8 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var defaultCacheManager: CacheManager
 
     @Autowired
-    @Qualifier("kodeverkCache")
-    private lateinit var kodeverkCacheManager: CacheManager
+    @Qualifier("dailyCache")
+    private lateinit var dailyCacheManager: CacheManager
 
     @Autowired
     @Qualifier("shortCache")
@@ -128,7 +128,7 @@ abstract class AbstractMockkSpringRunner {
     }
 
     private fun clearCaches() {
-        listOf(defaultCacheManager, shortCacheManager, kodeverkCacheManager).forEach {
+        listOf(defaultCacheManager, shortCacheManager, dailyCacheManager).forEach {
             it.cacheNames.mapNotNull { cacheName -> it.getCache(cacheName) }
                 .forEach { cache -> cache.clear() }
         }
