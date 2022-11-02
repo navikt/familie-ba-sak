@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -9,9 +11,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.math.BigInteger
 import java.time.LocalDateTime
-import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
@@ -26,13 +26,25 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
     override fun doTask(task: Task) {
         val konsistensavstemmingTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingStartTaskDTO::class.java)
-        val transaksjonsId = UUID.randomUUID()
 
-        val avstemmingsDato = LocalDateTime.now()
-        logger.info("Konsistensavstemming ble initielt trigget ${konsistensavstemmingTask.avstemmingdato}, men bruker $avstemmingsDato som avstemmingsdato")
+        val avstemmingsdato = LocalDateTime.now()
+        logger.info("Konsistensavstemming ble initielt trigget ${konsistensavstemmingTask.avstemmingdato}, men bruker $avstemmingsdato som avstemmingsdato")
 
-        avstemmingService.nullstillDataChunk()
-        avstemmingService.sendKonsistensavstemmingStart(avstemmingsDato, transaksjonsId)
+        if (avstemmingService.harBatchStatusFerdig(konsistensavstemmingTask.batchId)) {
+            logger.info("Konsistensavstemmning er allerede kjørt for transaksjonsId=${konsistensavstemmingTask.transaksjonsId} og batchId=${konsistensavstemmingTask.batchId}")
+            return
+        }
+
+        if (!avstemmingService.erKonsistensavstemmingStartet(konsistensavstemmingTask.transaksjonsId)) {
+            if (konsistensavstemmingTask.sendTilØkonomi) {
+                avstemmingService.sendKonsistensavstemmingStart(
+                    avstemmingsdato,
+                    konsistensavstemmingTask.transaksjonsId
+                )
+            } else {
+                logger.info("Send startmelding til økonomi i dry-run modus for ${konsistensavstemmingTask.transaksjonsId}")
+            }
+        }
 
         var relevanteBehandlinger =
             avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(Pageable.ofSize(ANTALL_BEHANDLINGER))
@@ -41,13 +53,24 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         for (pageNumber in 1..relevanteBehandlinger.totalPages) {
             relevanteBehandlinger.content.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
                 .forEach { oppstykketRelevanteBehandlinger ->
-                    avstemmingService.opprettKonsistensavstemmingDataTask(
-                        avstemmingsDato,
-                        oppstykketRelevanteBehandlinger,
-                        konsistensavstemmingTask.batchId,
-                        transaksjonsId,
-                        chunkNr
-                    )
+                    if (avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
+                            konsistensavstemmingTask.transaksjonsId,
+                            chunkNr
+                        )
+                    ) {
+                        avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
+                            KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO(
+                                transaksjonsId = konsistensavstemmingTask.transaksjonsId,
+                                chunkNr = chunkNr,
+                                avstemmingsdato = avstemmingsdato,
+                                batchId = konsistensavstemmingTask.batchId,
+                                relevanteBehandlinger = oppstykketRelevanteBehandlinger.map { it.toLong() },
+                                sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi
+                            )
+                        )
+                    } else {
+                        logger.info("Finn perioder for avstemming task alt kjørt for ${konsistensavstemmingTask.transaksjonsId} og chunkNr $chunkNr")
+                    }
                     chunkNr = chunkNr.inc()
                 }
             relevanteBehandlinger =
@@ -55,38 +78,13 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         }
 
         avstemmingService.opprettKonsistensavstemmingAvsluttTask(
-            konsistensavstemmingTask.batchId,
-            transaksjonsId,
-            avstemmingsDato
+            KonsistensavstemmingAvsluttTaskDTO(
+                batchId = konsistensavstemmingTask.batchId,
+                transaksjonsId = konsistensavstemmingTask.transaksjonsId,
+                avstemmingsdato = avstemmingsdato,
+                sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi
+            )
         )
-    }
-
-    fun dryRunKonsistensavstemmingOmskriving(size: Int) {
-        logger.info("[dryRun-konsinstenavstemming] Start: hent behandlinger klar for konsistensavstemming omskriving ${LocalDateTime.now()}")
-        val transaksjonsId = UUID.randomUUID()
-        val sideantall = Pageable.ofSize(size)
-        var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(sideantall)
-        logger.info("[dryRun-konsinstenavstemming] Antall sider: ${relevanteBehandlinger.totalPages} og antallBehandlinger ${relevanteBehandlinger.size}")
-        val loggBehandlinger = mutableListOf<BigInteger>()
-        var chunkNr = 0
-
-        for (pageNumber in 1..2) {
-            relevanteBehandlinger.chunked(500).forEach { behandlinger ->
-                loggBehandlinger.addAll(behandlinger)
-                avstemmingService.opprettKonsistensavstemmingDataTaskDryrun(
-                    LocalDateTime.now(),
-                    behandlinger,
-                    transaksjonsId,
-                    chunkNr
-                )
-                chunkNr = chunkNr.inc()
-            }
-            relevanteBehandlinger =
-                avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
-        }
-
-        logger.info("[dryRun-konsinstenavstemming] Slutt: hent behandlinger klar for konsistensavstemming omskriving${LocalDateTime.now()}")
-        logger.info("[dryRun-konsinstenavstemming] behandlinger: $loggBehandlinger")
     }
 
     companion object {

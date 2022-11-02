@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
-import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragDataTask
+import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
-import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import no.nav.familie.prosessering.domene.Task
@@ -17,8 +17,8 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigInteger
 import java.time.LocalDateTime
+import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -41,32 +41,50 @@ class AvstemmingService(
         )
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun nullstillDataChunk() {
-        dataChunkRepository.saveAllAndFlush(
-            dataChunkRepository.findByErSendt(false).map { dataChunk -> dataChunk.also { it.erSendt = true } }
-        )
+    fun harBatchStatusFerdig(batchId: Long): Boolean {
+        val batch = batchRepository.getReferenceById(batchId)
+        return batch.status == KjøreStatus.FERDIG
+    }
+
+    fun erKonsistensavstemmingStartet(transaksjonsId: UUID): Boolean {
+        return dataChunkRepository.findByTransaksjonsId(transaksjonsId).isNotEmpty()
+    }
+
+    fun skalOppretteFinnPerioderForRelevanteBehandlingerTask(transaksjonsId: UUID, chunkNr: Int): Boolean {
+        logger.info("Sjekker om konsistensavstemming er gjort for=$transaksjonsId og chunkNr=$chunkNr")
+        return dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr) == null
+    }
+
+    fun erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(transaksjonsId: UUID, chunkNr: Int): Boolean {
+        val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
+        return dataChunk?.erSendt == true
     }
 
     fun konsistensavstemOppdragData(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>,
         transaksjonsId: UUID,
-        chunkNr: Int
+        chunkNr: Int,
+        sendTilØkonomi: Boolean
     ) {
-        logger.info("Utfører konsisensavstemming: Sender perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr")
+        logger.info("Utfører konsistensavstemOppdragData: Sender perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr")
         val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
+            ?: error("Finner ingen datachunk for $transaksjonsId og $chunkNr")
 
         if (dataChunk.erSendt) {
-            logger.info("Utfører konsisensavstemming: Perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr er allerede sendt.")
+            logger.info("Utfører konsistensavstemOppdragData: Perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr er allerede sendt.")
             return
         }
 
-        økonomiKlient.konsistensavstemOppdragData(
-            avstemmingsdato,
-            perioderTilAvstemming,
-            transaksjonsId
-        )
+        if (sendTilØkonomi) {
+            økonomiKlient.konsistensavstemOppdragData(
+                avstemmingsdato,
+                perioderTilAvstemming,
+                transaksjonsId
+            )
+        } else {
+            logger.info("Send datamelding til økonomi i dry-run modus for $transaksjonsId og $chunkNr")
+        }
 
         dataChunkRepository.save(dataChunk.also { it.erSendt = true })
     }
@@ -79,20 +97,15 @@ class AvstemmingService(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettKonsistensavstemmingAvsluttTask(
-        batchId: Long,
-        transaksjonsId: UUID,
-        avstemmingsdato: LocalDateTime
+        konsistensavstemmingAvsluttTaskDTO: KonsistensavstemmingAvsluttTaskDTO
     ) {
-        logger.info("Oppretter avsluttingstask for transaksjonsId $transaksjonsId")
+        logger.info("Oppretter avsluttingstask for transaksjonsId=${konsistensavstemmingAvsluttTaskDTO.transaksjonsId}")
         val konsistensavstemmingAvsluttTask = Task(
             type = KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(
-                KonsistensavstemmingAvsluttTaskDTO(
-                    batchId = batchId,
-                    transaksjonsId = transaksjonsId,
-                    avstemmingsdato = avstemmingsdato
-                )
-            )
+            payload = objectMapper.writeValueAsString(konsistensavstemmingAvsluttTaskDTO),
+            properties = Properties().apply {
+                this["transaksjonsId"] = konsistensavstemmingAvsluttTaskDTO.transaksjonsId.toString()
+            }
         )
         taskRepository.save(konsistensavstemmingAvsluttTask)
     }
@@ -103,53 +116,35 @@ class AvstemmingService(
         behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun opprettKonsistensavstemmingDataTask(
-        avstemmingsdato: LocalDateTime,
-        relevanteBehandlinger: List<BigInteger>,
-        batchId: Long,
-        transaksjonsId: UUID,
-        chunkNr: Int
+    fun opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
+        konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO: KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
     ) {
-        val perioderTilAvstemming =
-            hentDataForKonsistensavstemming(
-                avstemmingsdato,
-                relevanteBehandlinger.map { it.toLong() }
-            )
-        val batch = batchRepository.getById(batchId)
-
-        logger.info("Oppretter konsisensavstemmingstasker for transaksjonsId $transaksjonsId og chunk $chunkNr med ${perioderTilAvstemming.size} løpende saker")
-        val konsistensavstemmingDataTask = Task(
-            type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(
-                KonsistensavstemmingDataTaskDTO(
-                    transaksjonsId = transaksjonsId,
-                    chunkNr = chunkNr,
-                    avstemmingdato = avstemmingsdato,
-                    perioderForBehandling = perioderTilAvstemming
-                )
+        val batch =
+            batchRepository.getReferenceById(konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.batchId)
+        dataChunkRepository.save(
+            DataChunk(
+                batch = batch,
+                chunkNr = konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr,
+                transaksjonsId = konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId
             )
         )
-        taskRepository.save(konsistensavstemmingDataTask)
-        dataChunkRepository.save(DataChunk(batch = batch, transaksjonsId = transaksjonsId, chunkNr = chunkNr))
+
+        logger.info("Oppretter task for å finne perioder for relevante behandlinger. transaksjonsId=${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId} og chunk=${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr} for ${konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.relevanteBehandlinger.size} behandlinger")
+        val task = Task(
+            type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE,
+            payload = objectMapper.writeValueAsString(
+                konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
+            ),
+            properties = Properties().apply {
+                this["transaksjonsId"] =
+                    konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId.toString()
+                this["chunkNr"] = konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr.toString()
+            }
+        )
+        taskRepository.save(task)
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    fun opprettKonsistensavstemmingDataTaskDryrun(
-        avstemmingsdato: LocalDateTime,
-        relevanteBehandlinger: List<BigInteger>,
-        transaksjonsId: UUID,
-        chunkNr: Int
-    ) {
-        val perioderTilAvstemming =
-            hentDataForKonsistensavstemming(
-                avstemmingsdato,
-                relevanteBehandlinger.map { it.toLong() }
-            )
-
-        logger.info("[dryRun-konsinstenavstemming] Oppretter konsisensavstemmingstasker for transaksjonsId $transaksjonsId og chunk $chunkNr med ${perioderTilAvstemming.size} løpende saker")
-    }
-
-    private fun hentDataForKonsistensavstemming(
+    fun hentDataForKonsistensavstemming(
         avstemmingstidspunkt: LocalDateTime,
         relevanteBehandlinger: List<Long>
     ): List<PerioderForBehandling> {
