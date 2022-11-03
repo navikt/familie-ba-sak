@@ -17,11 +17,11 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -119,7 +119,7 @@ class VedtaksperiodeServiceTest(
             behandling = behandling,
             restRegistrerSøknad = RestRegistrerSøknad(
                 søknad = SøknadDTO(
-                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
                     søkerMedOpplysninger = SøkerMedOpplysninger(
                         ident = søkerFnr
                     ),
