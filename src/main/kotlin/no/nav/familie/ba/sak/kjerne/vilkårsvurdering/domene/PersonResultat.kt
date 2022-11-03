@@ -193,7 +193,7 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
         )
     }
 
-fun List<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(): List<Tidslinje<VilkårResultat, Måned>> {
+fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(): List<Tidslinje<VilkårResultat, Måned>> {
     return this.groupBy { it.vilkårType }.map { (key, value) ->
         val tidslinje = VilkårResultatTidslinje(value).filtrerIkkeNull()
 

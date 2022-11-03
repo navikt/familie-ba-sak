@@ -364,7 +364,7 @@ class PersonResultatTest {
         val vilkårResultater = lagVilkårForPerson(
             fom = fom,
             tom = null,
-            spesielleVilkår = listOf(
+            spesielleVilkår = setOf(
                 lagVilkårResultat(
                     periodeFom = fom,
                     periodeTom = deltBostedTom,
@@ -416,7 +416,7 @@ class PersonResultatTest {
         val vilkårResultater = lagVilkårForPerson(
             fom = fom,
             tom = null,
-            spesielleVilkår = listOf(
+            spesielleVilkår = setOf(
                 lagVilkårResultat(
                     periodeFom = fom,
                     periodeTom = deltBostedTom,
@@ -468,7 +468,7 @@ class PersonResultatTest {
         val vilkårResultater = lagVilkårForPerson(
             fom = fom,
             tom = null,
-            spesielleVilkår = listOf(
+            spesielleVilkår = setOf(
                 lagVilkårResultat(
                     periodeFom = fom,
                     periodeTom = b2bTom,
@@ -513,10 +513,10 @@ class PersonResultatTest {
     private fun lagVilkårForPerson(
         fom: LocalDate,
         tom: LocalDate? = null,
-        spesielleVilkår: List<VilkårResultat>,
+        spesielleVilkår: Set<VilkårResultat>,
         generiskeVilkår: List<Vilkår> = listOf(Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP),
         maksTom: LocalDate? = null
-    ): List<VilkårResultat> {
+    ): Set<VilkårResultat> {
         return spesielleVilkår + generiskeVilkår.map {
             lagVilkårResultat(
                 periodeFom = fom,
