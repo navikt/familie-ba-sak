@@ -180,6 +180,42 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
         )
     }
 
+/**
+ * Extention-funksjon som konverterer en dag-basert tidslinje til en måned-basert tidslinje for 'bor med søker'-vilkår resultater
+ * Funksjonen itererer fra måneden FØR fra-og-med-måned til måneden ETTER til-og-med-måneden for å ta hensyn til uendelighet
+ * Reglene er som følger:
+ * 2020-04-30    | 2020-05-01    -> Resultat
+ * Oppfylt Delt  | Oppfylt Fullt -> 2020-05 Oppfylt Fullt
+ * Oppfylt Fullt | Opppfylt Delt  -> 2020-05 Oppfylt Fullt
+ * Oppfylt Fullt | Opppfylt Fullt -> 2020-05 Oppfylt Fullt
+ * Oppfylt Delt  | Ikke oppfylt  -> <Tomt>
+ * Oppfylt Fullt | Ikke oppfylt  -> <Tomt>
+ * Ikke oppfylt | Oppfylt Delt   -> <Tomt>
+ * Ikke oppfylt | Oppfylt Fullt  -> <Tomt>
+ */
+private fun Tidslinje<VilkårResultat, Dag>.tilMånedEtterForBorMedSøker() = tidslinje {
+    (fraOgMed().tilForrigeMåned()..tilOgMed().tilNesteMåned()).map { måned ->
+        val innholdSisteDagForrigeMåned = innholdForTidspunkt(måned.forrige().tilSisteDagIMåneden())
+        val innholdFørsteDagDenneMåned = innholdForTidspunkt(måned.tilFørsteDagIMåneden())
+
+        val deltBostedTilFullt = innholdSisteDagForrigeMåned?.erDeltBosted() == true && innholdFørsteDagDenneMåned?.erDeltBosted() == false
+        val fulltTilDeltBosted = innholdSisteDagForrigeMåned?.erDeltBosted() == false && innholdFørsteDagDenneMåned?.erDeltBosted() == true
+        val bådeForrigeOgDenneErOppfylt = innholdSisteDagForrigeMåned?.erOppfylt() == true && innholdFørsteDagDenneMåned?.erOppfylt() == true
+
+        if (deltBostedTilFullt && bådeForrigeOgDenneErOppfylt) {
+            måned.tilPeriodeMedInnhold(innholdFørsteDagDenneMåned)
+        } else if (fulltTilDeltBosted && bådeForrigeOgDenneErOppfylt) {
+            måned.tilPeriodeMedInnhold(innholdSisteDagForrigeMåned)
+        } else if (bådeForrigeOgDenneErOppfylt) {
+            måned.tilPeriodeMedInnhold(innholdFørsteDagDenneMåned)
+        } else {
+            måned.tilPeriodeUtenInnhold()
+        }
+    }
+}
+
+private fun VilkårResultat.erDeltBosted() = this.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) || this.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
+
 private fun MutableList<VilkårResultat>.fjernAvslagUtenPeriodeHvisDetFinsAndreVilkårResultat(): List<VilkårResultat> =
     if (this.any { !it.erAvslagUtenPeriode() }) this.filterNot { it.erAvslagUtenPeriode() } else this
 
