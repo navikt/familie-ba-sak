@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -27,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBos
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboerBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboerData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevMedÅrsaker
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollEøs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.VarselbrevMedÅrsakerOgBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -52,7 +54,8 @@ data class ManueltBrevRequest(
     val antallUkerSvarfrist: Int? = null,
     val barnasFødselsdager: List<LocalDate>? = null,
     val behandlingKategori: BehandlingKategori? = null,
-    val vedrørende: Person? = null
+    val vedrørende: Person? = null,
+    val mottakerlandSed: String? = null
 ) {
 
     override fun toString(): String {
@@ -60,6 +63,9 @@ data class ManueltBrevRequest(
     }
 
     fun enhetNavn(): String = this.enhet?.enhetNavn ?: error("Finner ikke enhetsnavn på manuell brevrequest")
+
+    fun mottakerlandSED(): String =
+        this.mottakerlandSed ?: error("Finner ikke mottakerland for SED på manuell brevrequest")
 }
 
 fun ManueltBrevRequest.byggMottakerdata(
@@ -106,7 +112,7 @@ fun ManueltBrevRequest.leggTilEnhet(arbeidsfordelingService: ArbeidsfordelingSer
     )
 }
 
-fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
+fun ManueltBrevRequest.tilBrev(landkoderISO2: Map<String, String>) = when (this.brevmal) {
     Brevmal.INFORMASJONSBREV_DELT_BOSTED ->
         InformasjonsbrevDeltBostedBrev(
             data = InformasjonsbrevDeltBostedData(
@@ -261,6 +267,7 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             varselÅrsaker = this.multiselectVerdier,
             barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager()
         )
+
     Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS ->
         VarselbrevMedÅrsaker(
             mal = Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
@@ -269,6 +276,26 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
             varselÅrsaker = this.multiselectVerdier,
             enhet = this.enhetNavn()
         )
+
+    Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS ->
+        VarselbrevÅrlegKontrollEøs(
+            mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+            navn = this.mottakerNavn,
+            fødselsnummer = this.mottakerIdent,
+            enhet = this.enhetNavn(),
+            mottakerlandSed = tilLandNavn(landkoderISO2, this.mottakerlandSED())
+        )
+
+    Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER ->
+        VarselbrevÅrlegKontrollEøs(
+            mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+            navn = this.mottakerNavn,
+            fødselsnummer = this.mottakerIdent,
+            enhet = this.enhetNavn(),
+            mottakerlandSed = tilLandNavn(landkoderISO2, this.mottakerlandSED()),
+            dokumentliste = this.multiselectVerdier
+        )
+
     Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED ->
         InnhenteOpplysningerOmBarn(
             mal = Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
@@ -305,6 +332,19 @@ fun ManueltBrevRequest.tilBrev() = when (this.brevmal) {
     Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
     Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
     Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")
+}
+
+private fun tilLandNavn(landkoderISO2: Map<String, String>, landKode: String): String {
+    if (landKode.length != 2) {
+        throw Feil("LandkoderISO2 forventer en landkode med to tegn")
+    }
+
+    val landNavn = (
+        landkoderISO2[landKode]
+            ?: throw Feil("Fant ikke navn for landkode $landKode ")
+        )
+
+    return landNavn.storForbokstav()
 }
 
 private fun List<LocalDate>?.tilFormaterteFødselsdager() = Utils.slåSammen(

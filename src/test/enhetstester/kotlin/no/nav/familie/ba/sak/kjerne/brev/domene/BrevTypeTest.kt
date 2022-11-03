@@ -24,17 +24,30 @@ class BrevTypeTest {
         Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON
     )
 
-    private val førerIkkeTilAvventingAvDokumentasjon = Brevmal.values().filter { it !in førerTilAvventerDokumentasjon }
+    private val eøsDokumentMedAvventerDokumentasjon = listOf(
+        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER
+    )
+
+    private val førerIkkeTilAvventingAvDokumentasjon = Brevmal.values()
+        .filter {
+            it !in førerTilAvventerDokumentasjon && it !in eøsDokumentMedAvventerDokumentasjon
+        }
 
     @Test
     fun `Skal si om behandling settes på vent`() {
-        val setterIkkeBehandlingPåVent = Brevmal.values().filter { !førerTilAvventerDokumentasjon.contains(it) }
+        val setterIkkeBehandlingPåVent = Brevmal.values()
+            .filter { !førerTilAvventerDokumentasjon.contains(it) && it !in eøsDokumentMedAvventerDokumentasjon }
 
         setterIkkeBehandlingPåVent.forEach {
             Assertions.assertFalse(it.setterBehandlingPåVent())
         }
 
         førerTilAvventerDokumentasjon.forEach {
+            Assertions.assertTrue(it.setterBehandlingPåVent())
+        }
+
+        eøsDokumentMedAvventerDokumentasjon.forEach {
             Assertions.assertTrue(it.setterBehandlingPåVent())
         }
 
@@ -60,6 +73,14 @@ class BrevTypeTest {
     @Test
     fun `Skal gi riktig ventefrist eøs`() {
         Assertions.assertEquals(90L, Brevmal.SVARTIDSBREV.ventefristDager(behandlingKategori = BehandlingKategori.EØS))
+        Assertions.assertEquals(
+            60L,
+            Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS.ventefristDager(behandlingKategori = BehandlingKategori.EØS)
+        )
+        Assertions.assertEquals(
+            60L,
+            Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER.ventefristDager(behandlingKategori = BehandlingKategori.EØS)
+        )
     }
 
     @Test
