@@ -13,7 +13,7 @@ class RestVisningBehandling(
     val behandlingId: Long,
     val opprettetTidspunkt: LocalDateTime,
     val kategori: BehandlingKategori,
-    val underkategori: BehandlingUnderkategori,
+    val underkategori: BehandlingUnderkategoriDTO,
     val aktiv: Boolean,
     val årsak: BehandlingÅrsak?,
     val type: BehandlingType,
@@ -26,7 +26,7 @@ fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) = RestVisni
     behandlingId = this.id,
     opprettetTidspunkt = this.opprettetTidspunkt,
     kategori = this.kategori,
-    underkategori = this.underkategori,
+    underkategori = this.underkategori.tilDto(),
     aktiv = this.aktiv,
     årsak = this.opprettetÅrsak,
     type = this.type,
@@ -34,3 +34,18 @@ fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) = RestVisni
     resultat = this.resultat,
     vedtaksdato = vedtaksdato
 )
+
+enum class BehandlingUnderkategoriDTO {
+    ORDINÆR,
+    UTVIDET
+}
+
+fun BehandlingUnderkategoriDTO.tilDomene() = when (this) {
+    BehandlingUnderkategoriDTO.ORDINÆR -> BehandlingUnderkategori.ORDINÆR
+    BehandlingUnderkategoriDTO.UTVIDET -> BehandlingUnderkategori.UTVIDET
+}
+
+fun BehandlingUnderkategori.tilDto() = when (this) {
+    BehandlingUnderkategori.ORDINÆR -> BehandlingUnderkategoriDTO.ORDINÆR
+    BehandlingUnderkategori.UTVIDET -> BehandlingUnderkategoriDTO.UTVIDET
+}

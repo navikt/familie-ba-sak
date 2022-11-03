@@ -283,7 +283,7 @@ data class Behandling(
 
     fun hentYtelseTypeTilVilkår(): YtelseType = when (underkategori) {
         BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
-        else -> YtelseType.ORDINÆR_BARNETRYGD
+        BehandlingUnderkategori.ORDINÆR -> YtelseType.ORDINÆR_BARNETRYGD
     }
 
     fun harUtførtSteg(steg: StegType) =

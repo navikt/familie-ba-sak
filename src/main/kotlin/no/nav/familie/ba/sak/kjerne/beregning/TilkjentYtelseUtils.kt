@@ -433,12 +433,16 @@ object TilkjentYtelseUtils {
         underkategori: BehandlingUnderkategori,
         personType: PersonType
     ): YtelseType {
-        return if (personType == PersonType.SØKER && underkategori == BehandlingUnderkategori.UTVIDET) {
-            YtelseType.UTVIDET_BARNETRYGD
-        } else if (personType == PersonType.BARN) {
-            YtelseType.ORDINÆR_BARNETRYGD
-        } else {
-            throw Feil("Ikke støttet. Klarte ikke utlede YtelseType for underkategori $underkategori og persontype $personType.")
+        return when (underkategori) {
+            BehandlingUnderkategori.UTVIDET -> when (personType) {
+                PersonType.SØKER -> YtelseType.UTVIDET_BARNETRYGD
+                PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
+                PersonType.ANNENPART -> throw Feil("Utvidet barnetrygd kan ikke værre knyttet til Annen part")
+            }
+            BehandlingUnderkategori.ORDINÆR -> when (personType) {
+                PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
+                PersonType.SØKER, PersonType.ANNENPART -> throw Feil("Ordinær barnetrygd kan bare være knyttet til barn")
+            }
         }
     }
 
