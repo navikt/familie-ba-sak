@@ -40,6 +40,11 @@ class EØSBegrunnelse(
     @Column(name = "begrunnelse", updatable = false)
     val begrunnelse: EØSStandardbegrunnelse
 ) {
+    fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): EØSBegrunnelse =
+        EØSBegrunnelse(
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            begrunnelse = this.begrunnelse
+        )
 
     fun tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
         standardbegrunnelse = this.begrunnelse.enumnavnTilString(),
