@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -79,7 +80,10 @@ class SaksstatistikkService(
             sakId = behandling.fagsak.id.toString(),
             behandlingType = behandling.type.name,
             behandlingStatus = behandling.status.name,
-            behandlingKategori = behandling.underkategori.name, // Gjøres pga. tilpasning til DVH-modell
+            behandlingKategori = when (behandling.underkategori) { // Gjøres pga. tilpasning til DVH-modell
+                BehandlingUnderkategori.ORDINÆR -> behandling.underkategori.name
+                BehandlingUnderkategori.UTVIDET -> behandling.underkategori.name
+            },
             behandlingUnderkategori = when (behandling.fagsak.type) { // <-'
                 NORMAL -> null
                 BARN_ENSLIG_MINDREÅRIG -> ENSLIG_MINDREÅRIG_KODE

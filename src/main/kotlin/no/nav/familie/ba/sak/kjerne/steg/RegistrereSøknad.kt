@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.ekstern.restDomene.tilDomene
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -32,10 +33,10 @@ class RegistrereSøknad(
         val søknadDTO: SøknadDTO = data.søknad
         val innsendtSøknad = søknadDTO.writeValueAsString()
 
-        if (behandling.underkategori != søknadDTO.underkategori) {
+        if (behandling.underkategori != søknadDTO.underkategori.tilDomene()) {
             behandlingstemaService.oppdaterBehandlingstema(
                 behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
-                overstyrtUnderkategori = søknadDTO.underkategori
+                overstyrtUnderkategori = søknadDTO.underkategori.tilDomene()
             )
         }
 

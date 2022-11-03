@@ -111,13 +111,15 @@ data class VilkårsvurderingForNyBehandlingUtils(
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
             // NB Dette må gjøres om når vi skal begynne å migrere EØS-saker
-            val ytelseType = if (person.type == PersonType.SØKER) {
-                when (vilkårsvurdering.behandling.underkategori) {
+            val ytelseType = when (person.type) {
+                PersonType.SØKER -> when (vilkårsvurdering.behandling.underkategori) {
                     BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
                     BehandlingUnderkategori.ORDINÆR -> YtelseType.ORDINÆR_BARNETRYGD
                 }
-            } else {
-                YtelseType.ORDINÆR_BARNETRYGD
+                PersonType.BARN, PersonType.ANNENPART -> when (vilkårsvurdering.behandling.underkategori) {
+                    BehandlingUnderkategori.UTVIDET -> YtelseType.ORDINÆR_BARNETRYGD // Er ikke dette en feilsituasjon? Ref TilkjentYtelseUtils.finnYtelseType
+                    BehandlingUnderkategori.ORDINÆR -> YtelseType.ORDINÆR_BARNETRYGD
+                }
             }
 
             val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type, ytelseType = ytelseType)
