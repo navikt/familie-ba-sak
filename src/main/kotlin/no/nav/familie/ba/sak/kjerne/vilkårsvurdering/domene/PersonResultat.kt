@@ -225,6 +225,7 @@ fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(): List<Tidslin
  * Oppfylt Delt  | Oppfylt Fullt -> 2020-05 Oppfylt Fullt
  * Oppfylt Fullt | Opppfylt Delt  -> 2020-05 Oppfylt Fullt
  * Oppfylt Fullt | Opppfylt Fullt -> 2020-05 Oppfylt Fullt
+ * Oppfylt Delt  | Oppfylt Delt   -> 2020-05 Oppfylt Delt (pga forrige mnd)
  * Oppfylt Delt  | Ikke oppfylt  -> <Tomt>
  * Oppfylt Fullt | Ikke oppfylt  -> <Tomt>
  * Ikke oppfylt | Oppfylt Delt   -> <Tomt>
@@ -235,13 +236,10 @@ private fun Tidslinje<VilkårResultat, Dag>.tilMånedEtterForBorMedSøker() = ti
         val innholdSisteDagForrigeMåned = innholdForTidspunkt(måned.forrige().tilSisteDagIMåneden())
         val innholdFørsteDagDenneMåned = innholdForTidspunkt(måned.tilFørsteDagIMåneden())
 
-        val deltBostedTilFullt = innholdSisteDagForrigeMåned?.erDeltBosted() == true && innholdFørsteDagDenneMåned?.erDeltBosted() == false
-        val fulltTilDeltBosted = innholdSisteDagForrigeMåned?.erDeltBosted() == false && innholdFørsteDagDenneMåned?.erDeltBosted() == true
+        val deltBostedDenneMåneden = innholdFørsteDagDenneMåned?.erDeltBosted() == true
         val bådeForrigeOgDenneErOppfylt = innholdSisteDagForrigeMåned?.erOppfylt() == true && innholdFørsteDagDenneMåned?.erOppfylt() == true
 
-        if (deltBostedTilFullt && bådeForrigeOgDenneErOppfylt) {
-            måned.tilPeriodeMedInnhold(innholdFørsteDagDenneMåned)
-        } else if (fulltTilDeltBosted && bådeForrigeOgDenneErOppfylt) {
+        if (deltBostedDenneMåneden && bådeForrigeOgDenneErOppfylt) {
             måned.tilPeriodeMedInnhold(innholdSisteDagForrigeMåned)
         } else if (bådeForrigeOgDenneErOppfylt) {
             måned.tilPeriodeMedInnhold(innholdFørsteDagDenneMåned)
