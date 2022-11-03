@@ -193,6 +193,12 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
         )
     }
 
+fun Set<PersonResultat>.tilTidslinjeForSplitt(): Tidslinje<List<VilkårResultat>, Måned> {
+    val tidslinjerPerPerson = this.map { it.tilTidslinjeForSplittForPerson() }
+
+    return tidslinjerPerPerson.kombiner { it.filterNotNull().flatten() }.filtrerIkkeNull().slåSammenLike()
+}
+
 private fun PersonResultat.tilTidslinjeForSplittForPerson(): Tidslinje<List<VilkårResultat>, Måned> {
     val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår()
 
