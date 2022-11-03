@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
-import hentPerioderMedUtbetalingDeprecated
+import hentPerioderMedUtbetaling
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -87,10 +86,10 @@ class UtbetalingsperiodeUtilTest {
             vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2)
         )
 
-        val faktiskResultat = hentPerioderMedUtbetalingDeprecated(
+        val faktiskResultat = hentPerioderMedUtbetaling(
             listOf(andelPerson1MarsTilApril, andelPerson1MaiTilJuli, andelPerson2MarsTilJuli),
             vedtak,
-            personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
+            personResultater
         )
 
         Assertions.assertEquals(
@@ -161,10 +160,10 @@ class UtbetalingsperiodeUtilTest {
             vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2)
         )
 
-        val faktiskResultat = hentPerioderMedUtbetalingDeprecated(
+        val faktiskResultat = hentPerioderMedUtbetaling(
             listOf(andelPerson1MarsTilMai, andelPerson2MaiTilJuli),
             vedtak,
-            personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
+            personResultater
         )
 
         Assertions.assertEquals(
@@ -219,7 +218,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
             personResultat = personResultatBarn1,
             periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = april2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeTom = april2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -228,8 +227,8 @@ class UtbetalingsperiodeUtilTest {
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
             personResultat = personResultatBarn1,
-            periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeFom = mai2020.førsteDagIInneværendeMåned(),
+            periodeTom = juli2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -253,7 +252,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn2 = VilkårResultat(
             personResultat = personResultatBarn2,
             periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = april2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeTom = april2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -262,8 +261,8 @@ class UtbetalingsperiodeUtilTest {
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn2 = VilkårResultat(
             personResultat = personResultatBarn2,
-            periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeFom = mai2020.førsteDagIInneværendeMåned(),
+            periodeTom = juli2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -297,10 +296,10 @@ class UtbetalingsperiodeUtilTest {
             )
         )
 
-        val faktiskResultat = hentPerioderMedUtbetalingDeprecated(
+        val faktiskResultat = hentPerioderMedUtbetaling(
             listOf(andelBarn1MarsTilJuli, andelBarn2MarsTilJuli),
             vedtak,
-            setOf(personResultatBarn1, personResultatBarn2).tilFørskjøvetVilkårResultatTidslinjeMap()
+            setOf(personResultatBarn1, personResultatBarn2)
         )
 
         Assertions.assertEquals(
@@ -335,10 +334,10 @@ class UtbetalingsperiodeUtilTest {
             person = barn1
         )
 
-        val faktiskResultat = hentPerioderMedUtbetalingDeprecated(
+        val faktiskResultat = hentPerioderMedUtbetaling(
             listOf(andelBarn1MarsTilApril, andelBarn1JuliTilJuli),
             vedtak,
-            emptyMap()
+            emptySet()
         )
 
         val forventetResultat = listOf(
@@ -402,7 +401,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
             personResultat = personResultatBarn,
             periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = april2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeTom = april2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -412,8 +411,8 @@ class UtbetalingsperiodeUtilTest {
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
             personResultat = personResultatBarn,
-            periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeFom = mai2020.førsteDagIInneværendeMåned(),
+            periodeTom = juli2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -447,10 +446,10 @@ class UtbetalingsperiodeUtilTest {
             )
         )
 
-        val faktiskResultat = hentPerioderMedUtbetalingDeprecated(
+        val faktiskResultat = hentPerioderMedUtbetaling(
             listOf(andelBarnMarsTilJuli),
             vedtak,
-            setOf(personResultatBarn).tilFørskjøvetVilkårResultatTidslinjeMap()
+            setOf(personResultatBarn)
         )
 
         Assertions.assertEquals(
@@ -463,14 +462,14 @@ class UtbetalingsperiodeUtilTest {
             faktiskResultat.map { it.type }.toSet()
         )
     }
-}
 
-private fun Vilkårsvurdering.lagGodkjentPersonResultatForBarn(person: Person) = lagPersonResultat(
-    vilkårsvurdering = this,
-    aktør = person.aktør,
-    resultat = Resultat.OPPFYLT,
-    periodeFom = person.fødselsdato,
-    periodeTom = person.fødselsdato.til18ÅrsVilkårsdato(),
-    lagFullstendigVilkårResultat = true,
-    personType = person.type
-)
+    private fun Vilkårsvurdering.lagGodkjentPersonResultatForBarn(person: Person) = lagPersonResultat(
+        vilkårsvurdering = this,
+        aktør = person.aktør,
+        resultat = Resultat.OPPFYLT,
+        periodeFom = person.fødselsdato,
+        periodeTom = person.fødselsdato.til18ÅrsVilkårsdato(),
+        lagFullstendigVilkårResultat = true,
+        personType = person.type
+    )
+}
