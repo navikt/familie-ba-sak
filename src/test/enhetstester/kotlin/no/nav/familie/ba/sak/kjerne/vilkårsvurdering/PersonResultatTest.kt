@@ -3,19 +3,24 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilForskjøvetTidslinjerForHvertVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import java.time.LocalDate
 import java.time.YearMonth
 
 class PersonResultatTest {
@@ -348,5 +353,177 @@ class PersonResultatTest {
             )
         }
         assertDoesNotThrow { setOf(personResultat).tilFørskjøvetVilkårResultatTidslinjeMap() }
+    }
+
+    @Test
+    fun `Skal lage riktig splitt når bor med søker går fra delt bosted til fullt`() {
+        val fom = LocalDate.now().minusMonths(7).førsteDagIInneværendeMåned()
+        val deltBostedTom = LocalDate.now().minusMonths(1).sisteDagIMåned()
+        val barnets18årsdag = LocalDate.now().plusYears(14)
+
+        val vilkårResultater = lagVilkårForPerson(
+            fom = fom,
+            tom = null,
+            spesielleVilkår = listOf(
+                lagVilkårResultat(
+                    periodeFom = fom,
+                    periodeTom = deltBostedTom,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    resultat = Resultat.OPPFYLT,
+                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                ),
+                lagVilkårResultat(
+                    periodeFom = deltBostedTom.plusMonths(1).førsteDagIInneværendeMåned(),
+                    periodeTom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    resultat = Resultat.OPPFYLT
+                )
+            ),
+            maksTom = barnets18årsdag
+        )
+
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår()
+
+        Assertions.assertEquals(5, tidslinjer.size)
+
+        val borMedSøkerTidslinje = tidslinjer.first()
+        val borMedSøkerPerioder = borMedSøkerTidslinje.perioder()
+
+        Assertions.assertEquals(2, borMedSøkerPerioder.size)
+
+        val deltBostedPeriode = borMedSøkerPerioder.first()
+        val fullPeriode = borMedSøkerPerioder.last()
+
+        Assertions.assertEquals(fom.plusMonths(1).toYearMonth(), deltBostedPeriode.fraOgMed.tilYearMonth())
+        Assertions.assertEquals(deltBostedTom.toYearMonth(), deltBostedPeriode.tilOgMed.tilYearMonth())
+        Assertions.assertEquals(deltBostedTom.plusMonths(1).toYearMonth(), fullPeriode.fraOgMed.tilYearMonth())
+        Assertions.assertNull(fullPeriode.tilOgMed.tilYearMonthEllerNull())
+
+        tidslinjer.subList(1, tidslinjer.size).forEach {
+            Assertions.assertEquals(1, it.perioder().size)
+            val periode = it.perioder().first()
+            Assertions.assertEquals(fom.plusMonths(1).toYearMonth(), periode.fraOgMed.tilYearMonth())
+            Assertions.assertNull(fullPeriode.tilOgMed.tilYearMonthEllerNull())
+        }
+    }
+
+    @Test
+    fun `Skal lage riktig splitt når bor med søker går fra fullt til delt bosted`() {
+        val fom = LocalDate.now().minusMonths(7).førsteDagIInneværendeMåned()
+        val deltBostedTom = LocalDate.now().minusMonths(1).sisteDagIMåned()
+        val barnets18årsdag = LocalDate.now().plusYears(14)
+
+        val vilkårResultater = lagVilkårForPerson(
+            fom = fom,
+            tom = null,
+            spesielleVilkår = listOf(
+                lagVilkårResultat(
+                    periodeFom = fom,
+                    periodeTom = deltBostedTom,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    resultat = Resultat.OPPFYLT
+                ),
+                lagVilkårResultat(
+                    periodeFom = deltBostedTom.plusMonths(1).førsteDagIInneværendeMåned(),
+                    periodeTom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    resultat = Resultat.OPPFYLT,
+                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                )
+            ),
+            maksTom = barnets18årsdag
+        )
+
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår()
+
+        Assertions.assertEquals(5, tidslinjer.size)
+
+        val borMedSøkerTidslinje = tidslinjer.first()
+        val borMedSøkerPerioder = borMedSøkerTidslinje.perioder()
+
+        Assertions.assertEquals(2, borMedSøkerPerioder.size)
+
+        val deltBostedPeriode = borMedSøkerPerioder.first()
+        val fullPeriode = borMedSøkerPerioder.last()
+
+        Assertions.assertEquals(fom.plusMonths(1).toYearMonth(), deltBostedPeriode.fraOgMed.tilYearMonth())
+        Assertions.assertEquals(deltBostedTom.plusMonths(1).toYearMonth(), deltBostedPeriode.tilOgMed.tilYearMonth())
+        Assertions.assertEquals(deltBostedTom.plusMonths(2).toYearMonth(), fullPeriode.fraOgMed.tilYearMonth())
+        Assertions.assertNull(fullPeriode.tilOgMed.tilYearMonthEllerNull())
+
+        tidslinjer.subList(1, tidslinjer.size).forEach {
+            Assertions.assertEquals(1, it.perioder().size)
+            val periode = it.perioder().first()
+            Assertions.assertEquals(fom.plusMonths(1).toYearMonth(), periode.fraOgMed.tilYearMonth())
+            Assertions.assertNull(fullPeriode.tilOgMed.tilYearMonthEllerNull())
+        }
+    }
+
+    @Test
+    fun `Skal lage riktig splitt når bor med søker er oppfylt i to back2back-perioder uten utdypende vilkårsvurdering`() {
+        val fom = LocalDate.now().minusMonths(7).førsteDagIInneværendeMåned()
+        val b2bTom = LocalDate.now().minusMonths(1).sisteDagIMåned()
+        val barnets18årsdag = LocalDate.now().plusYears(14)
+
+        val vilkårResultater = lagVilkårForPerson(
+            fom = fom,
+            tom = null,
+            spesielleVilkår = listOf(
+                lagVilkårResultat(
+                    periodeFom = fom,
+                    periodeTom = b2bTom,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    resultat = Resultat.OPPFYLT
+                ),
+                lagVilkårResultat(
+                    periodeFom = b2bTom.plusMonths(1).førsteDagIInneværendeMåned(),
+                    periodeTom = null,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    resultat = Resultat.OPPFYLT
+                )
+            ),
+            maksTom = barnets18årsdag
+        )
+
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår()
+
+        Assertions.assertEquals(5, tidslinjer.size)
+
+        val borMedSøkerTidslinje = tidslinjer.first()
+        val borMedSøkerPerioder = borMedSøkerTidslinje.perioder()
+
+        Assertions.assertEquals(2, borMedSøkerPerioder.size)
+
+        val førstePeriode = borMedSøkerPerioder.first()
+        val andrePeriode = borMedSøkerPerioder.last()
+
+        Assertions.assertEquals(fom.plusMonths(1).toYearMonth(), førstePeriode.fraOgMed.tilYearMonth())
+        Assertions.assertEquals(b2bTom.toYearMonth(), førstePeriode.tilOgMed.tilYearMonth())
+        Assertions.assertEquals(b2bTom.plusMonths(1).toYearMonth(), andrePeriode.fraOgMed.tilYearMonth())
+        Assertions.assertNull(andrePeriode.tilOgMed.tilYearMonthEllerNull())
+
+        tidslinjer.subList(1, tidslinjer.size).forEach {
+            Assertions.assertEquals(1, it.perioder().size)
+            val periode = it.perioder().first()
+            Assertions.assertEquals(fom.plusMonths(1).toYearMonth(), periode.fraOgMed.tilYearMonth())
+            Assertions.assertNull(andrePeriode.tilOgMed.tilYearMonthEllerNull())
+        }
+    }
+
+    private fun lagVilkårForPerson(
+        fom: LocalDate,
+        tom: LocalDate? = null,
+        spesielleVilkår: List<VilkårResultat>,
+        generiskeVilkår: List<Vilkår> = listOf(Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP),
+        maksTom: LocalDate? = null
+    ): List<VilkårResultat> {
+        return spesielleVilkår + generiskeVilkår.map {
+            lagVilkårResultat(
+                periodeFom = fom,
+                periodeTom = if (it == Vilkår.UNDER_18_ÅR) maksTom else tom,
+                vilkårType = it,
+                resultat = Resultat.OPPFYLT
+            )
+        }
     }
 }
