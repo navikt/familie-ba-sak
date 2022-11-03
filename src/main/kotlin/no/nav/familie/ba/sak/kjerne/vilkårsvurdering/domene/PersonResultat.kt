@@ -211,7 +211,9 @@ fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(): List<Tidslin
 
         val månedTidslinje = if (key == Vilkår.BOR_MED_SØKER) {
             tidslinje.tilMånedEtterForBorMedSøker()
-        } else tidslinje.tilMånedEtterVilkårsregler { it?.erOppfylt() == true }
+        } else {
+            tidslinje.tilMånedEtterVilkårsregler { it?.erOppfylt() == true }
+        }
 
         månedTidslinje.filtrerIkkeNull().slåSammenLike()
     }
