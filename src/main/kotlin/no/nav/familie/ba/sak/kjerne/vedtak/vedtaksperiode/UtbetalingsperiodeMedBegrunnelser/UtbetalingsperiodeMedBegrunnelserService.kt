@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
-import hentPerioderMedUtbetaling
+import hentPerioderMedUtbetalingDeprecated
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -38,7 +38,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
         val forskjøvetVilkårResultatTidslinjeMap =
             vilkårsvurdering.personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
 
-        val utbetalingsperioder = hentPerioderMedUtbetaling(
+        val utbetalingsperioder = hentPerioderMedUtbetalingDeprecated(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             vedtak = vedtak,
             forskjøvetVilkårResultatTidslinjeMap = forskjøvetVilkårResultatTidslinjeMap

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
-import hentPerioderMedUtbetaling
+import hentPerioderMedUtbetalingDeprecated
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
@@ -87,7 +87,7 @@ class UtbetalingsperiodeUtilTest {
             vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2)
         )
 
-        val faktiskResultat = hentPerioderMedUtbetaling(
+        val faktiskResultat = hentPerioderMedUtbetalingDeprecated(
             listOf(andelPerson1MarsTilApril, andelPerson1MaiTilJuli, andelPerson2MarsTilJuli),
             vedtak,
             personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
@@ -161,7 +161,7 @@ class UtbetalingsperiodeUtilTest {
             vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2)
         )
 
-        val faktiskResultat = hentPerioderMedUtbetaling(
+        val faktiskResultat = hentPerioderMedUtbetalingDeprecated(
             listOf(andelPerson1MarsTilMai, andelPerson2MaiTilJuli),
             vedtak,
             personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
@@ -297,7 +297,7 @@ class UtbetalingsperiodeUtilTest {
             )
         )
 
-        val faktiskResultat = hentPerioderMedUtbetaling(
+        val faktiskResultat = hentPerioderMedUtbetalingDeprecated(
             listOf(andelBarn1MarsTilJuli, andelBarn2MarsTilJuli),
             vedtak,
             setOf(personResultatBarn1, personResultatBarn2).tilFørskjøvetVilkårResultatTidslinjeMap()
@@ -335,7 +335,7 @@ class UtbetalingsperiodeUtilTest {
             person = barn1
         )
 
-        val faktiskResultat = hentPerioderMedUtbetaling(
+        val faktiskResultat = hentPerioderMedUtbetalingDeprecated(
             listOf(andelBarn1MarsTilApril, andelBarn1JuliTilJuli),
             vedtak,
             emptyMap()
@@ -447,7 +447,7 @@ class UtbetalingsperiodeUtilTest {
             )
         )
 
-        val faktiskResultat = hentPerioderMedUtbetaling(
+        val faktiskResultat = hentPerioderMedUtbetalingDeprecated(
             listOf(andelBarnMarsTilJuli),
             vedtak,
             setOf(personResultatBarn).tilFørskjøvetVilkårResultatTidslinjeMap()
