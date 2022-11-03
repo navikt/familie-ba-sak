@@ -87,6 +87,7 @@ class MigreringService(
     private val secureLog = LoggerFactory.getLogger("secureLogger")
     private val migrertCounter = Metrics.counter("migrering.ok")
     private val migrertUtvidetCounter = Metrics.counter("migrering.utvidet.ok")
+    private val migrertInstitusjonCounter = Metrics.counter("migrering.institusjon.ok")
     private val migrertAvSaksbehandler = Metrics.counter("migrering.saksbehandler")
     private val migrertAvSaksbehandlerNotificationFeil = Metrics.counter("migrering.saksbehandler.send.feilet")
 
@@ -190,6 +191,7 @@ class MigreringService(
             when (underkategori) {
                 BehandlingUnderkategori.ORDINÆR -> migrertCounter.increment()
                 BehandlingUnderkategori.UTVIDET -> migrertUtvidetCounter.increment()
+                BehandlingUnderkategori.INSTITUSJON -> migrertInstitusjonCounter.increment()
             }
             val migreringResponseDto = MigreringResponseDto(
                 fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,

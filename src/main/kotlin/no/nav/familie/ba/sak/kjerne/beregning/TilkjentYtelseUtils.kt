@@ -443,6 +443,10 @@ object TilkjentYtelseUtils {
                 PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
                 PersonType.SØKER, PersonType.ANNENPART -> throw Feil("Ordinær barnetrygd kan bare være knyttet til barn")
             }
+            BehandlingUnderkategori.INSTITUSJON -> when (personType) {
+                PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
+                PersonType.SØKER, PersonType.ANNENPART -> throw Feil("Institusjon kan ikke være knyttet til noe annet enn barn")
+            }
         }
     }
 
