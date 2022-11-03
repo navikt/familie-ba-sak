@@ -7,14 +7,27 @@ import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.tilMånedEtterVilkårsregler
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilForrigeMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilNesteMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilPeriodeMedInnhold
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilPeriodeUtenInnhold
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraSisteDagIMåneden
@@ -179,6 +192,18 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
             vilkårResultaterBeskåret
         )
     }
+
+fun List<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(): List<Tidslinje<VilkårResultat, Måned>> {
+    return this.groupBy { it.vilkårType }.map { (key, value) ->
+        val tidslinje = VilkårResultatTidslinje(value).filtrerIkkeNull()
+
+        val månedTidslinje = if (key == Vilkår.BOR_MED_SØKER) {
+            tidslinje.tilMånedEtterForBorMedSøker()
+        } else tidslinje.tilMånedEtterVilkårsregler { it?.erOppfylt() == true }
+
+        månedTidslinje.filtrerIkkeNull().slåSammenLike()
+    }
+}
 
 /**
  * Extention-funksjon som konverterer en dag-basert tidslinje til en måned-basert tidslinje for 'bor med søker'-vilkår resultater
