@@ -60,6 +60,37 @@ fun hentPerioderMedUtbetalingDeprecated(
         }
 }
 
+fun hentPerioderMedUtbetaling(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    vedtak: Vedtak,
+    personResultater: Set<PersonResultat>
+): List<VedtaksperiodeMedBegrunnelser> {
+    val tidslinjeForSplitt = personResultater.tilTidslinjeForSplitt()
+
+    val alleAndelerKombinertTidslinje = andelerTilkjentYtelse
+        .tilTidslinjerPerPerson().values
+        .kombinerUtenNull { it }
+        .filtrer { !it?.toList().isNullOrEmpty() }
+
+    val andelerSplittetOppTidslinje = alleAndelerKombinertTidslinje.kombinerMed(tidslinjeForSplitt) { andelerIPeriode, splittVilkårIPeriode ->
+        when (andelerIPeriode) {
+            null -> null
+            else -> Pair(andelerIPeriode, splittVilkårIPeriode)
+        }
+    }.filtrerIkkeNull()
+
+    return andelerSplittetOppTidslinje
+        .perioder()
+        .map {
+            VedtaksperiodeMedBegrunnelser(
+                fom = it.fraOgMed.tilYearMonthEllerNull()?.førsteDagIInneværendeMåned(),
+                tom = it.tilOgMed.tilYearMonthEllerNull()?.sisteDagIInneværendeMåned(),
+                vedtak = vedtak,
+                type = Vedtaksperiodetype.UTBETALING
+            )
+        }
+}
+
 private data class SplittkriterierForVedtaksperiode(
     val utdypendeVilkårsvurderinger: Set<UtdypendeVilkårsvurdering>,
     val regelverk: Regelverk?

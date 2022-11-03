@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
+import hentPerioderMedUtbetaling
 import hentPerioderMedUtbetalingDeprecated
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -38,11 +40,19 @@ class UtbetalingsperiodeMedBegrunnelserService(
         val forskjøvetVilkårResultatTidslinjeMap =
             vilkårsvurdering.personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
 
-        val utbetalingsperioder = hentPerioderMedUtbetalingDeprecated(
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            vedtak = vedtak,
-            forskjøvetVilkårResultatTidslinjeMap = forskjøvetVilkårResultatTidslinjeMap
-        )
+        val utbetalingsperioder = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_SPLITTE_VEDTAKSPERIODER)) {
+            hentPerioderMedUtbetaling(
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                vedtak = vedtak,
+                personResultater = vilkårsvurdering.personResultater
+            )
+        } else {
+            hentPerioderMedUtbetalingDeprecated(
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                vedtak = vedtak,
+                forskjøvetVilkårResultatTidslinjeMap = forskjøvetVilkårResultatTidslinjeMap
+            )
+        }
 
         val perioderMedReduksjonFraSistIverksatteBehandling =
             hentReduksjonsperioderFraInnvilgelsesTidspunkt(
