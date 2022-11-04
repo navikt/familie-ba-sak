@@ -126,7 +126,7 @@ class DokumentService(
         erForhåndsvisning: Boolean = false
     ): ByteArray {
         Result.runCatching {
-            val brev: Brev = manueltBrevRequest.tilBrev()
+            val brev: Brev = manueltBrevRequest.tilBrev { integrasjonClient.hentLandkoderISO2() }
             return brevKlient.genererBrev(
                 målform = manueltBrevRequest.mottakerMålform.tilSanityFormat(),
                 brev = brev
