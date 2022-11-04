@@ -171,7 +171,11 @@ class ØkonomiService(
 
         return utbetalingsoppdrag.also {
             if (skalValideres) {
-                if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
+                if (featureToggleService.isEnabled(
+                        FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY_VALIDERING,
+                        false
+                    )
+                ) {
                     it.valider(
                         behandlingsresultat = vedtak.behandling.resultat,
                         behandlingskategori = vedtak.behandling.kategori,
