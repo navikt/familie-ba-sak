@@ -937,57 +937,57 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagIkkeOppholdstillatelseMerEnn12Maaneder"
     },
-    AVSLAG_IKKE_EØS_BORGER {
+    AVSLAG_EØS_IKKE_EØS_BORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagIkkeEosBorger"
+        override val sanityApiNavn = "avslagEosIkkeEosBorger"
     },
-    AVSLAG_IKKE_BOSATT_I_EØS_LAND {
+    AVSLAG_EØS_IKKE_BOSATT_I_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagIkkeBosattIEosLand"
+        override val sanityApiNavn = "avslagEosIkkeBosattIEosLand"
     },
-    AVSLAG_JOBBER_IKKE {
+    AVSLAG_EØS_JOBBER_IKKE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagJobberIkke"
+        override val sanityApiNavn = "avslagEosJobberIkke"
     },
-    AVSLAG_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND {
+    AVSLAG_EØS_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagUtsendtArbeidstakerFraAnnetEosLand"
+        override val sanityApiNavn = "avslagEosUtsendtArbeidstakerFraAnnetEosLand"
     },
-    AVSLAG_ARBEIDER_MER_ENN_25_PROSENT_I_ANNET_EØS_LAND {
+    AVSLAG_EØS_ARBEIDER_MER_ENN_25_PROSENT_I_ANNET_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagArbeiderMerEnn25ProsentIAnnetEosLand"
+        override val sanityApiNavn = "avslagEosArbeiderMerEnn25ProsentIAnnetEosLand"
     },
-    AVSLAG_KUN_KORTE_USAMMENHENGENDE_ARBEIDSPERIODER {
+    AVSLAG_EØS_KUN_KORTE_USAMMENHENGENDE_ARBEIDSPERIODER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagKunKorteUsammenhengendeArbeidsperioder"
+        override val sanityApiNavn = "avslagEosKunKorteUsammenhengendeArbeidsperioder"
     },
-    AVSLAG_IKKE_PENGER_FRA_NAV_SOM_ERSTATTER_LØNN {
+    AVSLAG_EØS_IKKE_PENGER_FRA_NAV_SOM_ERSTATTER_LØNN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagIkkePengerFraNavSomErstatterLoenn"
+        override val sanityApiNavn = "avslagEosIkkePengerFraNavSomErstatterLoenn"
     },
-    AVSLAG_SEPARASJONSAVTALEN_GJELDER_IKKE {
+    AVSLAG_EØS_SEPARASJONSAVTALEN_GJELDER_IKKE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagSeparasjonsavtalenGjelderIkke"
+        override val sanityApiNavn = "avslagEosSeparasjonsavtalenGjelderIkke"
     },
-    AVSLAG_IKKE_LOVLIG_OPPHOLD_SOM_EØS_BORGER {
+    AVSLAG_EØS_IKKE_LOVLIG_OPPHOLD_SOM_EØS_BORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagIkkeLovligOppholdSomEosBorger"
+        override val sanityApiNavn = "avslagEosIkkeLovligOppholdSomEosBorger"
     },
-    AVSLAG_IKKE_OPPHOLDSRETT_SOM_FAMILIEMEDLEM_AV_EØS_BORGER {
+    AVSLAG_EØS_IKKE_OPPHOLDSRETT_SOM_FAMILIEMEDLEM_AV_EØS_BORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagIkkeOppholdsrettSomFamiliemedlemAvEosBorger"
+        override val sanityApiNavn = "avslagEosIkkeOppholdsrettSomFamiliemedlemAvEosBorger"
     },
-    AVSLAG_IKKE_STUDENT {
+    AVSLAG_EØS_IKKE_STUDENT {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagIkkeStudent"
+        override val sanityApiNavn = "avslagEosIkkeStudent"
     },
-    AVSLAG_IKKE_ANSVAR_FOR_BARN {
+    AVSLAG_EØS_IKKE_ANSVAR_FOR_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagIkkeAnsvarForBarn"
+        override val sanityApiNavn = "avslagEosIkkeAnsvarForBarn"
     },
-    AVSLAG_VURDERING_IKKE_ANSVAR_FOR_BARN {
+    AVSLAG_EØS_VURDERING_IKKE_ANSVAR_FOR_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagVurderingIkkeAnsvarForBarn"
+        override val sanityApiNavn = "avslagEosVurderingIkkeAnsvarForBarn"
     },
     OPPHØR_BARN_FLYTTET_FRA_SØKER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
