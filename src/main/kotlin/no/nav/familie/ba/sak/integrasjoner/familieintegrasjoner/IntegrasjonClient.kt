@@ -54,7 +54,7 @@ class IntegrasjonClient(
     @Qualifier("jwtBearer") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "integrasjon") {
 
-    @Cacheable("alle-eøs-land", cacheManager = "kodeverkCache")
+    @Cacheable("alle-eøs-land", cacheManager = "dailyCache")
     fun hentAlleEØSLand(): KodeverkDto {
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/eea")
 
@@ -67,7 +67,7 @@ class IntegrasjonClient(
         }
     }
 
-    @Cacheable("land", cacheManager = "kodeverkCache")
+    @Cacheable("land", cacheManager = "dailyCache")
     fun hentLand(landkode: String): String {
         if (landkode.length != 3) {
             throw Feil("Støtter bare landkoder med tre bokstaver")
@@ -169,7 +169,7 @@ class IntegrasjonClient(
         }
     }
 
-    @Cacheable("enhet", cacheManager = "kodeverkCache")
+    @Cacheable("enhet", cacheManager = "dailyCache")
     fun hentEnhet(enhetId: String?): NavKontorEnhet {
         val uri = URI.create("$integrasjonUri/arbeidsfordeling/nav-kontor/$enhetId")
 
@@ -382,7 +382,7 @@ class IntegrasjonClient(
         }
     }
 
-    @Cacheable("landkoder-ISO_3166-1_alfa-2", cacheManager = "kodeverkCache")
+    @Cacheable("landkoder-ISO_3166-1_alfa-2", cacheManager = "dailyCache")
     fun hentLandkoderISO2(): Map<String, String> {
         val uri = URI.create("$integrasjonUri/kodeverk/landkoderISO2")
 

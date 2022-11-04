@@ -85,28 +85,6 @@ class ØkonomiKlient(
         }
     }
 
-    fun konsistensavstemOppdrag(
-        avstemmingsdato: LocalDateTime,
-        perioderTilAvstemming: List<PerioderForBehandling>
-    ): String {
-        val uri = URI.create("$familieOppdragUri/v2/konsistensavstemming")
-
-        return kallEksternTjenesteRessurs(
-            tjeneste = "familie-oppdrag",
-            uri = uri,
-            formål = "Gjør konsistensavstemming mot oppdrag (Deprecated)"
-        ) {
-            postForEntity(
-                uri = uri,
-                KonsistensavstemmingRequestV2(
-                    fagsystem = FAGSYSTEM,
-                    avstemmingstidspunkt = avstemmingsdato,
-                    perioderForBehandlinger = perioderTilAvstemming
-                )
-            )
-        }
-    }
-
     fun konsistensavstemOppdragStart(
         avstemmingsdato: LocalDateTime,
         transaksjonsId: UUID

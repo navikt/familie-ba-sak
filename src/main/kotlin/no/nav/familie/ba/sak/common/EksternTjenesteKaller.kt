@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.web.client.HttpClientErrorException
 import java.net.URI
 
-val logger = LoggerFactory.getLogger("eksternTjenesteKaller")
+val eksternTjenesteKallerLogger = LoggerFactory.getLogger("eksternTjenesteKaller")
 val secureLogger = LoggerFactory.getLogger("secureLogger")
 inline fun <reified Data> kallEksternTjeneste(
     tjeneste: String,
@@ -20,7 +20,7 @@ inline fun <reified Data> kallEksternTjeneste(
 
     return try {
         eksterntKall().also {
-            logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
+            eksternTjenesteKallerLogger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
         }
     } catch (exception: Exception) {
         throw handleException(exception = exception, tjeneste = tjeneste, uri = uri, formål = formål)
@@ -37,7 +37,7 @@ inline fun <reified Data> kallEksternTjenesteRessurs(
 
     return try {
         eksterntKall().getDataOrThrow().also {
-            logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
+            eksternTjenesteKallerLogger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
         }
     } catch (exception: Exception) {
         throw handleException(exception = exception, tjeneste = tjeneste, uri = uri, formål = formål)
@@ -54,7 +54,7 @@ inline fun <reified Data> kallEksternTjenesteUtenRespons(
 
     try {
         eksterntKall().also {
-            logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
+            eksternTjenesteKallerLogger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
         }
     } catch (exception: Exception) {
         throw handleException(exception = exception, tjeneste = tjeneste, uri = uri, formål = formål)
@@ -71,7 +71,7 @@ fun loggEksternKall(
     uri: URI,
     formål: String
 ) {
-    logger.info("${lagEksternKallPreMelding(tjeneste, uri)} $formål")
+    eksternTjenesteKallerLogger.info("${lagEksternKallPreMelding(tjeneste, uri)} $formål")
 }
 
 fun handleException(
@@ -91,7 +91,7 @@ fun handleException(
                 } Kall mot $tjeneste feilet. Formål: $formål. Feilmelding: ${exception.ressurs.melding}",
                 exception.cause
             )
-            logger.warn(
+            eksternTjenesteKallerLogger.warn(
                 "${
                 lagEksternKallPreMelding(
                     tjeneste,
@@ -101,6 +101,7 @@ fun handleException(
             )
             exception
         }
+
         is HttpClientErrorException -> exception
         else -> opprettIntegrasjonsException(tjeneste, uri, exception, formål)
     }

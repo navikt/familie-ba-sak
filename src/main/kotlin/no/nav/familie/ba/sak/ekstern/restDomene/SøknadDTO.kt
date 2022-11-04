@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDate
@@ -11,7 +10,7 @@ data class RestRegistrerSøknad(
 )
 
 data class SøknadDTO(
-    val underkategori: BehandlingUnderkategori,
+    val underkategori: BehandlingUnderkategoriDTO,
     val søkerMedOpplysninger: SøkerMedOpplysninger,
     val barnaMedOpplysninger: List<BarnMedOpplysninger>,
     val endringAvOpplysningerBegrunnelse: String

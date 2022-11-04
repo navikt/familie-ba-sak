@@ -1,13 +1,17 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.BatchService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.DataChunkRepository
+import no.nav.familie.ba.sak.integrasjoner.økonomi.KjøreStatus
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.RekjørSenereException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -19,7 +23,8 @@ import java.time.LocalDateTime
 )
 class KonsistensavstemMotOppdragAvsluttTask(
     val avstemmingService: AvstemmingService,
-    val dataChunkRepository: DataChunkRepository
+    val dataChunkRepository: DataChunkRepository,
+    val batchService: BatchService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -34,13 +39,26 @@ class KonsistensavstemMotOppdragAvsluttTask(
             )
         }
 
-        avstemmingService.konsistensavstemOppdragAvslutt(
-            avstemmingsdato = konsistensavstemmingAvsluttTask.avstemmingsdato,
-            transaksjonsId = konsistensavstemmingAvsluttTask.transaksjonsId
-        )
+        if (avstemmingService.harBatchStatusFerdig(konsistensavstemmingAvsluttTask.batchId)) {
+            logger.info("Batch med id ${konsistensavstemmingAvsluttTask.batchId} og transaksjonsId=${konsistensavstemmingAvsluttTask.transaksjonsId} er allerede ferdig kjørt, så skipper sending til økonomi")
+            return
+        }
+
+        if (konsistensavstemmingAvsluttTask.sendTilØkonomi) {
+            avstemmingService.konsistensavstemOppdragAvslutt(
+                avstemmingsdato = konsistensavstemmingAvsluttTask.avstemmingsdato,
+                transaksjonsId = konsistensavstemmingAvsluttTask.transaksjonsId
+            )
+        } else {
+            logger.info("Send avsluttmelding til økonomi i dry-run modus for transaksjonsId=${konsistensavstemmingAvsluttTask.transaksjonsId}")
+        }
+
+        batchService.lagreNyStatus(konsistensavstemmingAvsluttTask.batchId, KjøreStatus.FERDIG)
     }
 
     companion object {
         const val TASK_STEP_TYPE = "konsistensavstemMotOppdragAvslutt"
+        private val logger: Logger =
+            LoggerFactory.getLogger(KonsistensavstemMotOppdragAvsluttTask::class.java)
     }
 }

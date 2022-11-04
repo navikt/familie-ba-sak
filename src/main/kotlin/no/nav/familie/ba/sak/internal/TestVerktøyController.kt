@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
 import no.nav.familie.ba.sak.task.SatsendringTask
 import no.nav.familie.ba.sak.task.StartSatsendringForAlleBehandlingerTask
 import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
@@ -31,8 +30,7 @@ class TestVerktøyController(
     private val personidentService: PersonidentService,
     private val envService: EnvService,
     private val autovedtakStegService: AutovedtakStegService,
-    private val taskRepository: TaskRepositoryWrapper,
-    private val konsistensavstemMotOppdragStartTask: KonsistensavstemMotOppdragStartTask
+    private val taskRepository: TaskRepositoryWrapper
 ) {
 
     @GetMapping(path = ["/autobrev"])
@@ -106,13 +104,6 @@ class TestVerktøyController(
         } else {
             ResponseEntity.ok(Ressurs.success(MELDING))
         }
-    }
-
-    @PostMapping(path = ["/test-konsistenavstemming/{size}"])
-    @Unprotected
-    fun testKonsistensavstemmingLogikkNy(@PathVariable size: Int): ResponseEntity<Ressurs<String>> {
-        konsistensavstemMotOppdragStartTask.dryRunKonsistensavstemmingOmskriving(size)
-        return ResponseEntity.ok(Ressurs.success("OK"))
     }
 
     companion object {

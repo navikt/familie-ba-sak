@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -450,7 +451,7 @@ fun lagSøknadDTO(
     underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
 ): SøknadDTO {
     return SøknadDTO(
-        underkategori = underkategori,
+        underkategori = underkategori.tilDto(),
         søkerMedOpplysninger = SøkerMedOpplysninger(
             ident = søkerIdent
         ),
@@ -664,7 +665,10 @@ fun kjørStegprosessForFGB(
     )
 
     if (verge != null) {
-        stegService.håndterRegistrerVerge(behandling, RestRegistrerInstitusjonOgVerge(vergeInfo = verge, institusjonInfo = null))
+        stegService.håndterRegistrerVerge(
+            behandling,
+            RestRegistrerInstitusjonOgVerge(vergeInfo = verge, institusjonInfo = null)
+        )
     }
 
     val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(

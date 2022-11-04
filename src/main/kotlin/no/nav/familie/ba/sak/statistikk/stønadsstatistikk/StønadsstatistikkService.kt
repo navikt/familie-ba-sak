@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -71,7 +72,10 @@ class StønadsstatistikkService(
             personV2 = hentSøkerV2(behandlingId),
             ensligForsørger = utledEnsligForsørger(behandlingId), // TODO implementere støtte for dette
             kategoriV2 = KategoriV2.valueOf(behandling.kategori.name),
-            underkategoriV2 = UnderkategoriV2.valueOf(behandling.underkategori.name),
+            underkategoriV2 = when (behandling.underkategori) {
+                BehandlingUnderkategori.ORDINÆR -> UnderkategoriV2.valueOf(behandling.underkategori.name)
+                BehandlingUnderkategori.UTVIDET -> UnderkategoriV2.valueOf(behandling.underkategori.name)
+            },
             behandlingTypeV2 = BehandlingTypeV2.valueOf(behandling.type.name),
             utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandlingId),
             funksjonellId = UUID.randomUUID().toString(),

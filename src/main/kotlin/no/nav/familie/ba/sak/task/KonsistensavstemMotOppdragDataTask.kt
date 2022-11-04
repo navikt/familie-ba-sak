@@ -27,7 +27,8 @@ class KonsistensavstemMotOppdragDataTask(
             avstemmingsdato = konsistensavstemmingDataTask.avstemmingdato,
             perioderTilAvstemming = konsistensavstemmingDataTask.perioderForBehandling,
             transaksjonsId = konsistensavstemmingDataTask.transaksjonsId,
-            chunkNr = konsistensavstemmingDataTask.chunkNr
+            chunkNr = konsistensavstemmingDataTask.chunkNr,
+            sendTilØkonomi = konsistensavstemmingDataTask.sendTilØkonomi
         )
     }
 

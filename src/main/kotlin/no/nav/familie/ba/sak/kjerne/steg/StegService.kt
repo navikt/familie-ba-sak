@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
@@ -303,7 +304,11 @@ class StegService(
         val behandlingSteg: HenleggBehandling =
             hentBehandlingSteg(StegType.HENLEGG_BEHANDLING) as HenleggBehandling
 
-        val behandlingEtterHenleggeSteg = håndterSteg(behandling, behandlingSteg) {
+        val behandlingEtterHenleggeSteg = håndterSteg(
+            behandling = behandling,
+            behandlingSteg = behandlingSteg,
+            henleggÅrsak = henleggBehandlingInfo.årsak
+        ) {
             behandlingSteg.utførStegOgAngiNeste(behandling, henleggBehandlingInfo)
         }
 
@@ -395,6 +400,7 @@ class StegService(
     private fun håndterSteg(
         behandling: Behandling,
         behandlingSteg: BehandlingSteg<*>,
+        henleggÅrsak: HenleggÅrsak? = null,
         utførendeSteg: () -> StegType
     ): Behandling {
         try {
@@ -434,7 +440,9 @@ class StegService(
             }
 
             // TODO: Det bør sees på en ytterligere robustgjøring for alle steg som SB kan utføre.
-            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
+            val erTekniskVedlikeholdHenleggelse =
+                behandlingSteg.stegType() == StegType.HENLEGG_BEHANDLING && henleggÅrsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD
+            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK && !erTekniskVedlikeholdHenleggelse) {
                 throw FunksjonellFeil(
                     "Behandlingen er på steg '${behandling.steg.displayName()}', " +
                         "og er da låst for alle andre type endringer."
