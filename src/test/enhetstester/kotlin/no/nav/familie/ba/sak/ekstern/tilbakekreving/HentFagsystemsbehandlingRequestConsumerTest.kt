@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
+import no.nav.familie.kontrakter.felles.tilbakekreving.Regelverk
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -137,7 +138,8 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
             HentFagsystemsbehandlingRequest(
                 eksternFagsakId = behandling.fagsak.id.toString(),
                 eksternId = behandling.id.toString(),
-                ytelsestype = Ytelsestype.BARNETRYGD
+                ytelsestype = Ytelsestype.BARNETRYGD,
+                regelverk = Regelverk.NASJONAL
             )
         )
     }

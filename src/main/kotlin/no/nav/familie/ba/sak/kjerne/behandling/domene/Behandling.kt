@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.steg.SISTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verge.Verge
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.tilbakekreving.Regelverk
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -411,6 +412,12 @@ enum class BehandlingKategori(val visningsnavn: String, val nivå: Int) {
             NASJONAL -> OppgaveBehandlingType.NASJONAL
         }
     }
+
+    fun tilRegelverk(): Regelverk =
+        when (this) {
+            EØS -> Regelverk.EØS
+            NASJONAL -> Regelverk.NASJONAL
+        }
 }
 
 fun List<BehandlingKategori>.finnHøyesteKategori(): BehandlingKategori? = this.maxByOrNull { it.nivå }

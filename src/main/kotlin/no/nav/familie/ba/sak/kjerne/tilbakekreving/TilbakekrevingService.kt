@@ -155,6 +155,7 @@ class TilbakekrevingService(
 
         return OpprettTilbakekrevingRequest(
             fagsystem = Fagsystem.BA,
+            regelverk = behandling.kategori.tilRegelverk(),
             ytelsestype = Ytelsestype.BARNETRYGD,
             eksternFagsakId = behandling.fagsak.id.toString(),
             personIdent = personopplysningGrunnlag.søker.aktør.aktivFødselsnummer(),

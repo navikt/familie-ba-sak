@@ -60,6 +60,7 @@ class FagsystemsbehandlingService(
             eksternFagsakId = request.eksternFagsakId,
             eksternId = request.eksternId,
             ytelsestype = request.ytelsestype,
+            regelverk = request.regelverk,
             personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
             språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
             enhetId = arbeidsfordeling.behandlendeEnhetId,
