@@ -415,7 +415,7 @@ internal class FiltreringsregelTest {
     @Test
     fun `Mor har ugyldig fødselsnummer`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("23456789111"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("23236789111"))
         val barn1Person =
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("21111777001"))
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
