@@ -194,6 +194,58 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_UTSENDT_ARBEIDSTAKER_FRA_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorUtsendtArbeidstakerFraEosLand"
+    },
+    AVSLAG_EØS_IKKE_EØS_BORGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeEosBorger"
+    },
+    AVSLAG_EØS_IKKE_BOSATT_I_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeBosattIEosLand"
+    },
+    AVSLAG_EØS_JOBBER_IKKE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosJobberIkke"
+    },
+    AVSLAG_EØS_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosUtsendtArbeidstakerFraAnnetEosLand"
+    },
+    AVSLAG_EØS_ARBEIDER_MER_ENN_25_PROSENT_I_ANNET_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosArbeiderMerEnn25ProsentIAnnetEosLand"
+    },
+    AVSLAG_EØS_KUN_KORTE_USAMMENHENGENDE_ARBEIDSPERIODER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosKunKorteUsammenhengendeArbeidsperioder"
+    },
+    AVSLAG_EØS_IKKE_PENGER_FRA_NAV_SOM_ERSTATTER_LØNN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkePengerFraNavSomErstatterLoenn"
+    },
+    AVSLAG_EØS_SEPARASJONSAVTALEN_GJELDER_IKKE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosSeparasjonsavtalenGjelderIkke"
+    },
+    AVSLAG_EØS_IKKE_LOVLIG_OPPHOLD_SOM_EØS_BORGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeLovligOppholdSomEosBorger"
+    },
+    AVSLAG_EØS_IKKE_OPPHOLDSRETT_SOM_FAMILIEMEDLEM_AV_EØS_BORGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeOppholdsrettSomFamiliemedlemAvEosBorger"
+    },
+    AVSLAG_EØS_IKKE_STUDENT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeStudent"
+    },
+    AVSLAG_EØS_IKKE_ANSVAR_FOR_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeAnsvarForBarn"
+    },
+    AVSLAG_EØS_VURDERING_IKKE_ANSVAR_FOR_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosVurderingIkkeAnsvarForBarn"
     }
     ;
 
