@@ -50,6 +50,16 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "varselOmRevurderingFraNasjonalTilEOS",
         "Varsel om revurdering fra nasjonal til EØS"
     ),
+    VARSEL_OM_ÅRLIG_REVURDERING_EØS(
+        false,
+        "varselOmAarligRevurderingEos",
+        "Varsel om årlig revurdering EØS"
+    ),
+    VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER(
+        false,
+        "varselOmAarligRevurderingEosMedInnhentingAvOpplysninger",
+        "Varsel om årlig revurdering EØS med innhenting av opplysninger"
+    ),
 
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
     SVARTIDSBREV_INSTITUSJON(false, "svartidsbrevInstitusjon", "Svartidsbrev institusjon"),
@@ -109,7 +119,9 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             VARSEL_OM_REVURDERING_SAMBOER,
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
-            VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> true
+            VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> true
 
             INFORMASJONSBREV_DELT_BOSTED,
             HENLEGGE_TRUKKET_SØKNAD,
@@ -162,6 +174,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED -> Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> Dokumenttype.BARNETRYGD_VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS -> Dokumenttype.BARNETRYGD_VARSEL_OM_ÅRLIG_REVURDERING_EØS
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> Dokumenttype.BARNETRYGD_VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER
             INFORMASJONSBREV_KAN_SØKE_EØS -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE_EØS
             INNHENTE_OPPLYSNINGER_INSTITUSJON -> Dokumenttype.BARNETRYGD_INNHENTE_OPPLYSNINGER_INSTITUSJON
             SVARTIDSBREV_INSTITUSJON -> Dokumenttype.BARNETRYGD_SVARTIDSBREV_INSTITUSJON
@@ -198,6 +212,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_SAMBOER -> Distribusjonstype.ANNET
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS -> Distribusjonstype.VIKTIG
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS -> Distribusjonstype.VIKTIG
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> Distribusjonstype.VIKTIG
             SVARTIDSBREV, SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
             FORLENGET_SVARTIDSBREV, FORLENGET_SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Distribusjonstype.ANNET
@@ -247,7 +263,9 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
             SVARTIDSBREV,
             SVARTIDSBREV_INSTITUSJON,
-            FORLENGET_SVARTIDSBREV_INSTITUSJON -> true
+            FORLENGET_SVARTIDSBREV_INSTITUSJON,
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> true
 
             else -> false
         }
@@ -273,6 +291,9 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
                 manuellFrist
                     ?: throw Feil("Ventefrist var ikke satt for $this")
 
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> 30 * 2
+
             else -> throw Feil("Ventefrist ikke definert for brevtype $this")
         }
 
@@ -288,7 +309,9 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
             SVARTIDSBREV,
             SVARTIDSBREV_INSTITUSJON,
-            FORLENGET_SVARTIDSBREV_INSTITUSJON -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            FORLENGET_SVARTIDSBREV_INSTITUSJON,
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
 
             else -> throw Feil("Venteårsak ikke definert for brevtype $this")
         }

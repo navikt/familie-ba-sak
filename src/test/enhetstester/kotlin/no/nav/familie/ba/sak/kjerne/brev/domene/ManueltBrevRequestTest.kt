@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForlengetSvartidsbrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollEøs
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -19,7 +20,7 @@ class ManueltBrevRequestTest {
 
     @Test
     fun `Forlenget svartidsbrev request skal gi forlenget svartid brevmal med riktig data`() {
-        val brev = baseRequest.copy(Brevmal.FORLENGET_SVARTIDSBREV).tilBrev()
+        val brev = baseRequest.copy(Brevmal.FORLENGET_SVARTIDSBREV).tilBrev { emptyMap() }
 
         assertThat(brev::class).isEqualTo(ForlengetSvartidsbrev::class)
         brev as ForlengetSvartidsbrev
@@ -41,7 +42,7 @@ class ManueltBrevRequestTest {
                 navn = "testnavn"
             )
         )
-            .tilBrev()
+            .tilBrev { emptyMap() }
 
         assertThat(brev::class).isEqualTo(ForlengetSvartidsbrev::class)
         brev as ForlengetSvartidsbrev
@@ -71,18 +72,53 @@ class ManueltBrevRequestTest {
                 navn = "navn tilhørende $fnr"
             )
         )
-        brevRequestTilPerson.tilBrev().data.apply {
+        brevRequestTilPerson.tilBrev { emptyMap() }.data.apply {
             assertThat(flettefelter.fodselsnummer).containsExactly(brevRequestTilPerson.mottakerIdent)
             assertThat(flettefelter.navn).containsExactly(brevRequestTilPerson.mottakerNavn)
             assertThat(flettefelter.organisasjonsnummer).isNull()
             assertThat(flettefelter.gjelder).isNull()
         }
-        brevRequestTilInstitusjon.tilBrev().data.apply {
+        brevRequestTilInstitusjon.tilBrev { emptyMap() }.data.apply {
             assertThat(flettefelter.organisasjonsnummer).containsExactly(brevRequestTilInstitusjon.mottakerIdent)
             assertThat(flettefelter.fodselsnummer).containsExactly(brevRequestTilInstitusjon.vedrørende?.fødselsnummer)
             assertThat(flettefelter.navn).containsExactly(brevRequestTilPerson.mottakerNavn)
             assertThat(flettefelter.gjelder).containsExactly(brevRequestTilInstitusjon.vedrørende?.navn)
         }
+    }
+
+    @Test
+    fun `Varsel årleg kontroll eøs request skal gi varsel årleg kontroll eøs brevmal med riktig data`() {
+        val brev = baseRequest.copy(brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS, mottakerlandSed = "SE")
+            .tilBrev { mapOf(Pair("SE", "Sverige")) }
+
+        assertThat(brev::class).isEqualTo(VarselbrevÅrlegKontrollEøs::class)
+        brev as VarselbrevÅrlegKontrollEøs
+
+        assertThat(brev.mal).isEqualTo(Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS)
+
+        assertThat(brev.data.flettefelter.mottakerlandSed!!.single()).isEqualTo("Sverige")
+        assertThat(brev.data.flettefelter.dokumentliste!!.isEmpty()).isTrue
+    }
+
+    @Test
+    fun `Varsel årleg kontroll eøs med innhenting av opplysninger request skal gi varsel årleg kontroll eøs brevmal med riktig data`() {
+        val dokumentliste = listOf("Dokument 1", "Dokument 2")
+        val brev = baseRequest.copy(
+            brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+            mottakerlandSed = "SE",
+            multiselectVerdier = dokumentliste
+        )
+            .tilBrev { mapOf(Pair("SE", "Sverige")) }
+
+        assertThat(brev::class).isEqualTo(VarselbrevÅrlegKontrollEøs::class)
+        brev as VarselbrevÅrlegKontrollEøs
+
+        assertThat(brev.mal).isEqualTo(Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER)
+
+        assertThat(brev.data.flettefelter.mottakerlandSed!!.single()).isEqualTo("Sverige")
+        assertThat(brev.data.flettefelter.dokumentliste!!.isEmpty()).isFalse
+        println(brev.data.flettefelter.dokumentliste)
+        assertThat(brev.data.flettefelter.dokumentliste).containsAll(dokumentliste)
     }
 
     class PersonITest(override val fødselsnummer: String, override val navn: String) : Person
