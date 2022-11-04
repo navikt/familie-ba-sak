@@ -112,7 +112,7 @@ fun ManueltBrevRequest.leggTilEnhet(arbeidsfordelingService: ArbeidsfordelingSer
     )
 }
 
-fun ManueltBrevRequest.tilBrev(landkoderISO2: Map<String, String>) = when (this.brevmal) {
+fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = when (this.brevmal) {
     Brevmal.INFORMASJONSBREV_DELT_BOSTED ->
         InformasjonsbrevDeltBostedBrev(
             data = InformasjonsbrevDeltBostedData(
@@ -283,7 +283,7 @@ fun ManueltBrevRequest.tilBrev(landkoderISO2: Map<String, String>) = when (this.
             navn = this.mottakerNavn,
             fødselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
-            mottakerlandSed = tilLandNavn(landkoderISO2, this.mottakerlandSED())
+            mottakerlandSed = tilLandNavn(hentLandkoder(), this.mottakerlandSED())
         )
 
     Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER ->
@@ -292,7 +292,7 @@ fun ManueltBrevRequest.tilBrev(landkoderISO2: Map<String, String>) = when (this.
             navn = this.mottakerNavn,
             fødselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
-            mottakerlandSed = tilLandNavn(landkoderISO2, this.mottakerlandSED()),
+            mottakerlandSed = tilLandNavn(hentLandkoder(), this.mottakerlandSED()),
             dokumentliste = this.multiselectVerdier
         )
 
