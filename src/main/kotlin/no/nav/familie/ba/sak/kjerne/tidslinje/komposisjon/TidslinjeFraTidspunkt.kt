@@ -38,7 +38,17 @@ data class Innholdsresultat<I>(
     companion object {
         fun <I> utenInnhold() = Innholdsresultat<I>(null, false)
     }
+
+    val harVerdi
+        get() = harInnhold && innhold != null
+
+    val verdi
+        get() = innhold!!
+
+    fun <R> mapVerdi(mapper: (I) -> R): R? = if (this.harVerdi) mapper(verdi) else null
 }
+
+fun <I> I.tilInnhold() = Innholdsresultat(this)
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.innholdsresultatForTidspunkt(tidspunkt: Tidspunkt<T>): Innholdsresultat<I> =
     perioder().innholdsresultatForTidspunkt(tidspunkt)
