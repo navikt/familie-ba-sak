@@ -3,13 +3,19 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.Innholdsresultat.Companion.utenInnhold
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tilInnhold
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilForrigeMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilNesteMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 
@@ -56,6 +62,26 @@ fun <I> Tidslinje<I, Dag>.tilMånedFraSisteDagIMåneden(): Tidslinje<I, Måned> 
             }
         }
     }
+}
+
+/**
+ * Extention-metode som konverterer en dag-basert tidslinje til en måned-basert tidslinje.
+ * <mapper>-funksjonen tar inn verdiene fra de to dagene før og etter månedsskiftet,
+ * det vil si verdiene fra siste dag i forrige måned og første dag i inneværemde måned.
+ * <mapper>-funksjonen kalles bare dersom begge dagene har en verdi.
+ * Return-verdien er innholdet som blir brukt for inneværende måned.
+ * Hvis retur-verdien er <null>, vil den resulterende måneden mangle verdi.
+ * Funksjonen vil bruke månedsskiftene fra måneden før tidslinjens <fraOgMed> frem til og med måneden etter <tilOgMed>
+ */
+fun <I, R> Tidslinje<I, Dag>.tilMånedFraMånedsskifteIkkeNull(
+    mapper: (innholdSisteDagForrigeMåned: I, innholdFørsteDagDenneMåned: I) -> R?
+): Tidslinje<R, Måned> = (fraOgMed().tilForrigeMåned()..tilOgMed().tilNesteMåned()).tidslinjeFraTidspunkt { måned ->
+    val innholdSisteDagForrigeMåned = innholdsresultatForTidspunkt(måned.forrige().tilSisteDagIMåneden())
+    val innholdFørsteDagDenneMåned = innholdsresultatForTidspunkt(måned.tilFørsteDagIMåneden())
+
+    innholdSisteDagForrigeMåned
+        .mapVerdi { s -> innholdFørsteDagDenneMåned.mapVerdi { mapper(s, it) } }
+        ?.let { it.tilInnhold() } ?: utenInnhold()
 }
 
 /**
