@@ -29,13 +29,6 @@ abstract class Tidspunkt<T : Tidsenhet> internal constructor(
     abstract fun tilYearMonth(): YearMonth
 
     abstract fun flytt(tidsenheter: Long): Tidspunkt<T>
-    fun neste() = flytt(1)
-    fun forrige() = flytt(-1)
-
-    fun erRettFør(tidspunkt: Tidspunkt<T>) = neste() == tidspunkt
-    fun erEndelig(): Boolean = uendelighet == Uendelighet.INGEN
-    fun erUendeligLengeSiden(): Boolean = uendelighet == Uendelighet.FORTID
-    fun erUendeligLengeTil(): Boolean = uendelighet == Uendelighet.FREMTID
 
     abstract fun somEndelig(): Tidspunkt<T>
     abstract fun somUendeligLengeSiden(): Tidspunkt<T>

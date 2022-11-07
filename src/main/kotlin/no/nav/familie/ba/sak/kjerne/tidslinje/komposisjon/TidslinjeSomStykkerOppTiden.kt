@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erRettFør
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 
 @Deprecated("Bruk funksjonen tidlinjeFraTidspunkt i stedet")

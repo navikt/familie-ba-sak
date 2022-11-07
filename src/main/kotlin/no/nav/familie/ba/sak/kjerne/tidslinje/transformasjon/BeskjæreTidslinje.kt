@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTid
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 

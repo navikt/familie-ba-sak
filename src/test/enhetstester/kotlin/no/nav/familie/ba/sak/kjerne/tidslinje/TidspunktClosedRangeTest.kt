@@ -3,6 +3,10 @@ package no.nav.familie.ba.sak.kjerne.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erEndelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.neste
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
