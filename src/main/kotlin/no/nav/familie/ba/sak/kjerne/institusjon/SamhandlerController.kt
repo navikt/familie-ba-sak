@@ -24,8 +24,14 @@ class SamhandlerController(
     @GetMapping(path = ["/orgnr/{orgnr}"])
     fun hentSamhandlerDataForOrganisasjon(
         @PathVariable("orgnr") orgNummer: String
-    ): Ressurs<SamhandlerInfo> {
-        return Ressurs.success(institusjonService.hentSamhandler(orgNummer).copy(orgNummer = orgNummer))
+    ): Ressurs<SamhandlerInfo> = try {
+        Ressurs.success(institusjonService.hentSamhandler(orgNummer).copy(orgNummer = orgNummer))
+    } catch (e: Error) {
+        throw FunksjonellFeil(
+            "Finner ikke institusjon. Kontakt NØS for å opprette TSS-ident.",
+            httpStatus = HttpStatus.BAD_REQUEST,
+            throwable = e
+        )
     }
 
     @PostMapping(path = ["/navn"])
