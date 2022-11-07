@@ -26,7 +26,7 @@ class SamhandlerController(
         @PathVariable("orgnr") orgNummer: String
     ): Ressurs<SamhandlerInfo> = try {
         Ressurs.success(institusjonService.hentSamhandler(orgNummer).copy(orgNummer = orgNummer))
-    } catch (e: Error) {
+    } catch (e: Exception) {
         throw FunksjonellFeil(
             "Finner ikke institusjon. Kontakt NØS for å opprette TSS-ident.",
             httpStatus = HttpStatus.BAD_REQUEST,
