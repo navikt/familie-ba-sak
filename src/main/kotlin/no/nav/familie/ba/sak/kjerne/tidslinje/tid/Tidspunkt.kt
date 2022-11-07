@@ -29,12 +29,7 @@ abstract class Tidspunkt<T : Tidsenhet> internal constructor(
     abstract fun tilYearMonth(): YearMonth
 
     abstract fun flytt(tidsenheter: Long): Tidspunkt<T>
-
-    abstract fun somEndelig(): Tidspunkt<T>
-    abstract fun somUendeligLengeSiden(): Tidspunkt<T>
-    abstract fun somUendeligLengeTil(): Tidspunkt<T>
-    abstract fun somFraOgMed(): Tidspunkt<T>
-    abstract fun somTilOgMed(): Tidspunkt<T>
+    internal abstract fun medUendelighet(uendelighet: Uendelighet): Tidspunkt<T>
 
     companion object {
         fun uendeligLengeSiden(dato: LocalDate) = DagTidspunkt(dato, uendelighet = Uendelighet.FORTID)

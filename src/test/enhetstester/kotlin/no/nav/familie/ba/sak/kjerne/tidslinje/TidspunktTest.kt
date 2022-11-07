@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des

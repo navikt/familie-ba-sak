@@ -40,33 +40,8 @@ data class DagTidspunkt internal constructor(
         return this.copy(dato = dato.plusDays(tidsenheter), uendelighet)
     }
 
-    override fun somEndelig(): DagTidspunkt {
-        return copy(uendelighet = Uendelighet.INGEN)
-    }
-
-    override fun somUendeligLengeSiden(): DagTidspunkt {
-        return copy(uendelighet = Uendelighet.FORTID)
-    }
-
-    override fun somUendeligLengeTil(): DagTidspunkt {
-        return copy(uendelighet = Uendelighet.FREMTID)
-    }
-
-    override fun somFraOgMed(): DagTidspunkt {
-        return if (uendelighet == Uendelighet.FREMTID) {
-            somEndelig()
-        } else {
-            this
-        }
-    }
-
-    override fun somTilOgMed(): DagTidspunkt {
-        return if (uendelighet == Uendelighet.FORTID) {
-            somEndelig()
-        } else {
-            this
-        }
-    }
+    override fun medUendelighet(uendelighet: Uendelighet): DagTidspunkt =
+        copy(uendelighet = uendelighet)
 
     override fun toString(): String {
         return when (uendelighet) {

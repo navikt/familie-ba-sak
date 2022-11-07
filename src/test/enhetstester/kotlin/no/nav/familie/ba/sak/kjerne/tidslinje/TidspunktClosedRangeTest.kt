@@ -8,6 +8,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.neste
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somEndelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeTil
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

@@ -37,7 +37,8 @@ data class MånedTidspunkt internal constructor(
 
     override fun flytt(tidsenheter: Long) = copy(måned = måned.plusMonths(tidsenheter))
 
-    override fun somEndelig(): MånedTidspunkt = this.copy(uendelighet = Uendelighet.INGEN)
+    override fun medUendelighet(uendelighet: Uendelighet): MånedTidspunkt =
+        copy(uendelighet = uendelighet)
 
     override fun toString(): String {
         return when (uendelighet) {
@@ -46,24 +47,6 @@ data class MånedTidspunkt internal constructor(
         } + måned + when (uendelighet) {
             Uendelighet.FREMTID -> "-->"
             else -> ""
-        }
-    }
-
-    override fun somUendeligLengeSiden(): MånedTidspunkt = this.copy(uendelighet = Uendelighet.FORTID)
-    override fun somUendeligLengeTil(): MånedTidspunkt = this.copy(uendelighet = Uendelighet.FREMTID)
-    override fun somFraOgMed(): MånedTidspunkt {
-        return if (uendelighet == Uendelighet.FREMTID) {
-            somEndelig()
-        } else {
-            this
-        }
-    }
-
-    override fun somTilOgMed(): MånedTidspunkt {
-        return if (uendelighet == Uendelighet.FORTID) {
-            somEndelig()
-        } else {
-            this
         }
     }
 

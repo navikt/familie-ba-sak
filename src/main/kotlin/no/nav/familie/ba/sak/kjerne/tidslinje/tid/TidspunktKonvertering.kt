@@ -45,19 +45,22 @@ fun <T : Tidsenhet> Tidspunkt<T>.tilDagEllerSisteDagIPerioden() = when (this) {
     else -> NullTidspunkt(this.uendelighet)
 }
 
-fun <T : Tidsenhet> Tidspunkt<T>.somFraOgMed() = when (uendelighet) {
-    Uendelighet.FREMTID -> somEndelig()
-    else -> this
-}
-
-fun <T : Tidsenhet> Tidspunkt<T>.somTilOgMed() = when (uendelighet) {
-    Uendelighet.FORTID -> somEndelig()
-    else -> this
-}
-
 fun <T : Tidsenhet> Tidspunkt<T>.neste() = flytt(1)
 fun <T : Tidsenhet> Tidspunkt<T>.forrige() = flytt(-1)
 fun <T : Tidsenhet> Tidspunkt<T>.erRettFør(tidspunkt: Tidspunkt<T>) = neste() == tidspunkt
 fun <T : Tidsenhet> Tidspunkt<T>.erEndelig(): Boolean = uendelighet == Uendelighet.INGEN
 fun <T : Tidsenhet> Tidspunkt<T>.erUendeligLengeSiden(): Boolean = uendelighet == Uendelighet.FORTID
 fun <T : Tidsenhet> Tidspunkt<T>.erUendeligLengeTil(): Boolean = uendelighet == Uendelighet.FREMTID
+
+fun <T : Tidsenhet> Tidspunkt<T>.somEndelig() = medUendelighet(Uendelighet.INGEN)
+fun <T : Tidsenhet> Tidspunkt<T>.somUendeligLengeSiden() = medUendelighet(Uendelighet.FORTID)
+fun <T : Tidsenhet> Tidspunkt<T>.somUendeligLengeTil() = medUendelighet(Uendelighet.FREMTID)
+fun <T : Tidsenhet> Tidspunkt<T>.somFraOgMed() = when (uendelighet) {
+    Uendelighet.FREMTID -> medUendelighet(Uendelighet.INGEN)
+    else -> this
+}
+
+fun <T : Tidsenhet> Tidspunkt<T>.somTilOgMed() = when (uendelighet) {
+    Uendelighet.FORTID -> medUendelighet(Uendelighet.INGEN)
+    else -> this
+}

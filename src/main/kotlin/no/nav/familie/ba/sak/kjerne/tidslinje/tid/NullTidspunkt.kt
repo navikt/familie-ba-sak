@@ -36,24 +36,12 @@ data class NullTidspunkt<T : Tidsenhet>(
         return this // Er uendelig, så enhver flytting forblir uendelig
     }
 
-    override fun somEndelig(): Tidspunkt<T> {
-        return this // Forblir uendelig
-    }
-
-    override fun somUendeligLengeSiden(): Tidspunkt<T> {
-        return fraOgMed()
-    }
-
-    override fun somUendeligLengeTil(): Tidspunkt<T> {
-        return tilOgMed()
-    }
-
-    override fun somFraOgMed(): Tidspunkt<T> {
-        return fraOgMed()
-    }
-
-    override fun somTilOgMed(): Tidspunkt<T> {
-        return tilOgMed()
+    override fun medUendelighet(uendelighet: Uendelighet): Tidspunkt<T> {
+        return when (uendelighet) {
+            Uendelighet.INGEN -> this
+            Uendelighet.FORTID -> NullTidspunkt(Uendelighet.FREMTID)
+            Uendelighet.FREMTID -> NullTidspunkt(Uendelighet.FORTID)
+        }
     }
 
     override fun sammenliknMed(tidspunkt: Tidspunkt<T>): Int {
