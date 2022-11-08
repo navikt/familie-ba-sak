@@ -72,7 +72,7 @@ class UtvidetBehandlingService(
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personer = personopplysningGrunnlag?.søkerOgBarn
 
-        val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
         val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
 

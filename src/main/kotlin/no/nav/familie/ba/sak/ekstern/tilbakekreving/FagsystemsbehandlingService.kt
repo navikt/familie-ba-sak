@@ -47,7 +47,7 @@ class FagsystemsbehandlingService(
     ): HentFagsystemsbehandlingRespons {
         val behandlingId = behandling.id
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
-        val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
+        val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId)
         val aktivVedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId)
 
         val faktainfo = Faktainfo(
