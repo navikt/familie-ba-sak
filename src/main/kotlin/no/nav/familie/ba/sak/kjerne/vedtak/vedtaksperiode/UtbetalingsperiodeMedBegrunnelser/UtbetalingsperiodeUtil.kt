@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
@@ -34,21 +35,14 @@ fun hentPerioderMedUtbetalingDeprecated(
             .filtrer { !it.isNullOrEmpty() }
             .slåSammenLike()
 
-    val alleAndelerKombinertTidslinje = andelerTilkjentYtelse
+    return andelerTilkjentYtelse
         .tilTidslinjerPerPerson().values
         .kombinerUtenNull { it }
         .filtrer { !it?.toList().isNullOrEmpty() }
-
-    val andelerSplittetOppTidslinje = alleAndelerKombinertTidslinje
-        .kombinerMed(splittkriterierForVedtaksperiodeTidslinje) { andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode ->
-            when (andelerTilkjentYtelseIPeriode) {
-                null -> null
-                else -> Pair(andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode)
-            }
+        .leftJoin(splittkriterierForVedtaksperiodeTidslinje) { andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode ->
+            Pair(andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode)
         }
         .filtrerIkkeNull()
-
-    return andelerSplittetOppTidslinje
         .perioder()
         .map {
             VedtaksperiodeMedBegrunnelser(
