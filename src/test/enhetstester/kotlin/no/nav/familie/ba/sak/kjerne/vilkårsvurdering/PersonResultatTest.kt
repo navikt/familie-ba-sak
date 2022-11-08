@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårResultat
@@ -23,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.beskjærPå18År
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilForskjøvetTidslinjerForHvertVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinjeForSplitt
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -544,6 +546,126 @@ class PersonResultatTest {
         Assertions.assertEquals(1, under18PerioderEtterBeskjæring.size)
         Assertions.assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), under18PerioderEtterBeskjæring.first().fraOgMed.tilYearMonth())
         Assertions.assertEquals(barn.fødselsdato.plusYears(18).minusMonths(1).toYearMonth(), under18PerioderEtterBeskjæring.first().tilOgMed.tilYearMonth())
+    }
+
+    @Test
+    fun `Skal lage korrekt tidslinje for splitting av vedtaksperioder`() {
+        val februar2020 = YearMonth.of(2020, 2)
+        val oktober2020 = YearMonth.of(2020, 10)
+        val mars2021 = YearMonth.of(2021, 3)
+        val desember2021 = YearMonth.of(2021, 12)
+        val mai2022 = YearMonth.of(2022, 5)
+
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2015, 5, 6))
+        val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 9, 7))
+
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søkerAktør = søker.aktør,
+            behandling = lagBehandling(),
+            resultat = Resultat.OPPFYLT
+        )
+
+        val personResultatSøker = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = søker.aktør
+        )
+
+        personResultatSøker.setSortedVilkårResultater(
+            lagVilkårForPerson(
+                personResultat = personResultatSøker,
+                fom = februar2020.førsteDagIInneværendeMåned(),
+                tom = null,
+                generiskeVilkår = listOf(Vilkår.LOVLIG_OPPHOLD, Vilkår.BOSATT_I_RIKET)
+            )
+        )
+
+        val personResultatBarn1 = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = barn1.aktør
+        )
+
+        personResultatBarn1.setSortedVilkårResultater(
+            lagVilkårForPerson(
+                fom = oktober2020.førsteDagIInneværendeMåned(),
+                tom = null,
+                maksTom = barn1.fødselsdato.til18ÅrsVilkårsdato(),
+                spesielleVilkår = setOf(
+                    lagVilkårResultat(
+                        periodeFom = oktober2020.førsteDagIInneværendeMåned(),
+                        periodeTom = desember2021.sisteDagIInneværendeMåned(),
+                        vilkårType = Vilkår.BOR_MED_SØKER,
+                        resultat = Resultat.OPPFYLT,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                    ),
+                    lagVilkårResultat(
+                        periodeFom = desember2021.plusMonths(1).førsteDagIInneværendeMåned(),
+                        periodeTom = null,
+                        vilkårType = Vilkår.BOR_MED_SØKER,
+                        resultat = Resultat.OPPFYLT
+                    )
+                )
+            )
+        )
+
+        val personResultatBarn2 = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = barn2.aktør
+        )
+
+        personResultatBarn2.setSortedVilkårResultater(
+            lagVilkårForPerson(
+                fom = oktober2020.førsteDagIInneværendeMåned(),
+                tom = null,
+                maksTom = barn1.fødselsdato.til18ÅrsVilkårsdato(),
+                generiskeVilkår = listOf(Vilkår.BOSATT_I_RIKET, Vilkår.BOR_MED_SØKER, Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP),
+                spesielleVilkår = setOf(
+                    lagVilkårResultat(
+                        periodeFom = mars2021.førsteDagIInneværendeMåned(),
+                        periodeTom = mai2022.sisteDagIInneværendeMåned(),
+                        vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                        resultat = Resultat.OPPFYLT
+                    ),
+                    lagVilkårResultat(
+                        periodeFom = mai2022.plusMonths(1).førsteDagIInneværendeMåned(),
+                        periodeTom = null,
+                        vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                        resultat = Resultat.OPPFYLT
+                    )
+                )
+            )
+        )
+
+        val personResultater = setOf(personResultatSøker, personResultatBarn1, personResultatBarn2)
+
+        val tidslinje = personResultater.tilTidslinjeForSplitt(
+            mapOf(
+                søker.aktør to søker.fødselsdato,
+                barn1.aktør to barn1.fødselsdato,
+                barn2.aktør to barn2.fødselsdato
+            )
+        )
+
+        val perioder = tidslinje.perioder()
+
+        val perioderRelevantForTesting = perioder.filter { it.fraOgMed.tilYearMonth().isSameOrBefore(mai2022) }
+
+        Assertions.assertEquals(4, perioderRelevantForTesting.size)
+
+        val periode1 = perioderRelevantForTesting[0]
+        val periode2 = perioderRelevantForTesting[1]
+        val periode3 = perioderRelevantForTesting[2]
+        val periode4 = perioderRelevantForTesting[3]
+
+        assertPeriode(periode = periode1, forventetFom = februar2020.plusMonths(1), forventetTom = oktober2020)
+        assertPeriode(periode = periode2, forventetFom = oktober2020.plusMonths(1), forventetTom = mars2021)
+        assertPeriode(periode = periode3, forventetFom = mars2021.plusMonths(1), forventetTom = desember2021)
+        assertPeriode(periode = periode4, forventetFom = desember2021.plusMonths(1), forventetTom = mai2022)
+    }
+
+    private fun assertPeriode(periode: Periode<List<VilkårResultat>, Måned>, forventetFom: YearMonth, forventetTom: YearMonth) {
+        Assertions.assertEquals(forventetFom, periode.fraOgMed.tilYearMonth())
+        Assertions.assertEquals(forventetTom, periode.tilOgMed.tilYearMonth())
     }
 
     private fun lagVilkårForPerson(
