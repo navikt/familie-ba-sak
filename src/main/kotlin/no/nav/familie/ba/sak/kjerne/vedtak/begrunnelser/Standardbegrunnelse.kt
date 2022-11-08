@@ -417,6 +417,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetFullUtbetalingAnnenForelderOnskerIkkeDeltBarnetrygd"
     },
+    INNVILGET_OVERGANG_EØS_TIL_NASJONAL_NORSK_NORDISK_FAMILIE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetOvergangEosTilNasjonalNorskNordiskFamilie"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -688,6 +692,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_SØKER_BER_OM_OPPHØR_UTVIDET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonSoekerBerOmOpphoerUtvidet"
+    },
+    REDUKSJON_DELT_BOSTED_SØKER_BER_OM_OPPHØR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonDeltBostedSoekerBerOmOpphoer"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
@@ -1112,6 +1120,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_SØKER_BER_OM_OPPHØR {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorSokerBerOmOpphor"
+    },
+    OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorIkkeOppholdstillatelseMerEnn12Maaneder"
+    },
+    OPPHØR_DELT_BOSTED_SØKER_BER_OM_OPPHØR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphordeltBostedSoekerBerOmOpphoer"
     },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
