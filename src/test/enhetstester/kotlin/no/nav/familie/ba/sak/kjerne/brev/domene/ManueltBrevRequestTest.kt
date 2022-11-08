@@ -117,7 +117,6 @@ class ManueltBrevRequestTest {
 
         assertThat(brev.data.flettefelter.mottakerlandSed!!.single()).isEqualTo("Sverige")
         assertThat(brev.data.flettefelter.dokumentliste!!.isEmpty()).isFalse
-        println(brev.data.flettefelter.dokumentliste)
         assertThat(brev.data.flettefelter.dokumentliste).containsAll(dokumentliste)
     }
 
