@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.YearMonth
 
 class UtbetalingsperiodeUtilTest {
@@ -87,9 +88,13 @@ class UtbetalingsperiodeUtilTest {
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
-            listOf(andelPerson1MarsTilApril, andelPerson1MaiTilJuli, andelPerson2MarsTilJuli),
-            vedtak,
-            personResultater
+            andelerTilkjentYtelse = listOf(andelPerson1MarsTilApril, andelPerson1MaiTilJuli, andelPerson2MarsTilJuli),
+            vedtak = vedtak,
+            personResultater = personResultater,
+            personerOgFødselsdatoer = mapOf(
+                person1.aktør to person1.fødselsdato,
+                person2.aktør to person2.fødselsdato
+            )
         )
 
         Assertions.assertEquals(
@@ -161,9 +166,13 @@ class UtbetalingsperiodeUtilTest {
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
-            listOf(andelPerson1MarsTilMai, andelPerson2MaiTilJuli),
-            vedtak,
-            personResultater
+            andelerTilkjentYtelse = listOf(andelPerson1MarsTilMai, andelPerson2MaiTilJuli),
+            vedtak = vedtak,
+            personResultater = personResultater,
+            personerOgFødselsdatoer = mapOf(
+                person1.aktør to person1.fødselsdato,
+                person2.aktør to person2.fødselsdato
+            )
         )
 
         Assertions.assertEquals(
@@ -297,9 +306,14 @@ class UtbetalingsperiodeUtilTest {
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
-            listOf(andelBarn1MarsTilJuli, andelBarn2MarsTilJuli),
-            vedtak,
-            setOf(personResultatBarn1, personResultatBarn2)
+            andelerTilkjentYtelse = listOf(andelBarn1MarsTilJuli, andelBarn2MarsTilJuli),
+            vedtak = vedtak,
+            personResultater = setOf(personResultatBarn1, personResultatBarn2),
+            personerOgFødselsdatoer = mapOf(
+                søker.aktør to søker.fødselsdato,
+                barn1.aktør to barn1.fødselsdato,
+                barn2.aktør to barn2.fødselsdato
+            )
         )
 
         Assertions.assertEquals(
@@ -318,7 +332,7 @@ class UtbetalingsperiodeUtilTest {
         val mars2020 = YearMonth.of(2020, 3)
         val april2020 = YearMonth.of(2020, 4)
         val juli2020 = YearMonth.of(2020, 7)
-        val barn1 = lagPerson()
+        val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(9))
         val vedtak = lagVedtak()
 
         val andelBarn1MarsTilApril = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -335,9 +349,12 @@ class UtbetalingsperiodeUtilTest {
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
-            listOf(andelBarn1MarsTilApril, andelBarn1JuliTilJuli),
-            vedtak,
-            emptySet()
+            andelerTilkjentYtelse = listOf(andelBarn1MarsTilApril, andelBarn1JuliTilJuli),
+            vedtak = vedtak,
+            personResultater = emptySet(),
+            personerOgFødselsdatoer = mapOf(
+                barn1.aktør to barn1.fødselsdato
+            )
         )
 
         val forventetResultat = listOf(
@@ -447,9 +464,13 @@ class UtbetalingsperiodeUtilTest {
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
-            listOf(andelBarnMarsTilJuli),
-            vedtak,
-            setOf(personResultatBarn)
+            andelerTilkjentYtelse = listOf(andelBarnMarsTilJuli),
+            vedtak = vedtak,
+            personResultater = setOf(personResultatBarn),
+            personerOgFødselsdatoer = mapOf(
+                søker.aktør to søker.fødselsdato,
+                barn.aktør to barn.fødselsdato
+            )
         )
 
         Assertions.assertEquals(

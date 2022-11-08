@@ -386,7 +386,7 @@ class PersonResultatTest {
             maksTom = barnets18årsdag
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår()
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -438,7 +438,7 @@ class PersonResultatTest {
             maksTom = barnets18årsdag
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår()
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -489,7 +489,7 @@ class PersonResultatTest {
             maksTom = barnets18årsdag
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår()
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -604,7 +604,11 @@ class PersonResultatTest {
 
         val personResultater = setOf(personResultatSøker, personResultatBarn1, personResultatBarn2)
 
-        val tidslinje = personResultater.tilTidslinjeForSplitt()
+        val tidslinje = personResultater.tilTidslinjeForSplitt(mapOf(
+            søker.aktør to søker.fødselsdato,
+            barn1.aktør to barn1.fødselsdato,
+            barn2.aktør to barn2.fødselsdato
+        ))
 
         val perioder = tidslinje.perioder()
 
