@@ -1,11 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tid
 
-import java.time.LocalDate
-import java.time.YearMonth
-
-val PRAKTISK_SENESTE_DAG = LocalDate.of(2499, 12, 31)
-val PRAKTISK_TIDLIGSTE_DAG = LocalDate.of(1900, 1, 1)
-
 enum class Uendelighet {
     INGEN,
     FORTID,
@@ -21,30 +15,6 @@ abstract class Tidspunkt<T : Tidsenhet> internal constructor(
 ) : Comparable<Tidspunkt<T>> {
     abstract fun flytt(tidsenheter: Long): Tidspunkt<T>
     internal abstract fun medUendelighet(uendelighet: Uendelighet): Tidspunkt<T>
-
-    companion object {
-        fun uendeligLengeSiden(dato: LocalDate) = DagTidspunkt(dato, uendelighet = Uendelighet.FORTID)
-        fun uendeligLengeSiden(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.FORTID)
-        fun uendeligLengeTil(dato: LocalDate) = DagTidspunkt(dato, uendelighet = Uendelighet.FREMTID)
-        fun uendeligLengeTil(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.FREMTID)
-        fun fraOgMed(fraOgMed: LocalDate?, praktiskMinsteFraOgMed: LocalDate): DagTidspunkt =
-            if (fraOgMed == null || fraOgMed < PRAKTISK_TIDLIGSTE_DAG) {
-                uendeligLengeSiden(maxOf(praktiskMinsteFraOgMed, PRAKTISK_TIDLIGSTE_DAG))
-            } else {
-                DagTidspunkt(fraOgMed, Uendelighet.INGEN)
-            }
-
-        fun tilOgMed(tilOgMed: LocalDate?, praktiskStørsteTilOgMed: LocalDate): DagTidspunkt =
-            if (tilOgMed == null || tilOgMed > PRAKTISK_SENESTE_DAG) {
-                uendeligLengeTil(minOf(praktiskStørsteTilOgMed, PRAKTISK_SENESTE_DAG))
-            } else {
-                DagTidspunkt(tilOgMed, Uendelighet.INGEN)
-            }
-
-        fun med(dato: LocalDate) = DagTidspunkt(dato, Uendelighet.INGEN)
-        fun med(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.INGEN)
-        fun med(år: Int, måned: Int) = MånedTidspunkt(YearMonth.of(år, måned), Uendelighet.INGEN)
-    }
 
     // Betrakter to uendeligheter som like, selv underliggende tidspunkt kan være forskjellig
     override fun compareTo(other: Tidspunkt<T>) =

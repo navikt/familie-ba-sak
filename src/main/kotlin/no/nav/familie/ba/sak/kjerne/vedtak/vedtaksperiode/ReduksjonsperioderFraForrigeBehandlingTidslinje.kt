@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 
 class ReduksjonsperioderFraForrigeBehandlingTidslinje(
@@ -13,8 +13,8 @@ class ReduksjonsperioderFraForrigeBehandlingTidslinje(
     override fun lagPerioder(): List<Periode<VedtaksperiodeMedBegrunnelser, Dag>> =
         vedtaksperioderMedBegrunnelser.map {
             Periode(
-                fraOgMed = it.fom.tilTidspunktEllerUendeligLengeSiden(),
-                tilOgMed = it.tom.tilTidspunktEllerUendeligLengeTil(),
+                fraOgMed = it.fom.tilTidspunktEllerTidligereEnn(it.tom),
+                tilOgMed = it.tom.tilTidspunktEllerSenereEnn(it.fom),
                 innhold = it.copy(fom = null, tom = null) // Gjør at perioder med samme innhold blir slått sammen
             )
         }

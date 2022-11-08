@@ -7,14 +7,6 @@ data class DagTidspunkt internal constructor(
     override val uendelighet: Uendelighet
 ) : Tidspunkt<Dag>(uendelighet) {
 
-    init {
-        if (dato < PRAKTISK_TIDLIGSTE_DAG) {
-            throw IllegalArgumentException("Kan ikke håndtere så tidlig tidspunkt. Bruk uendeligLengeSiden()")
-        } else if (dato > PRAKTISK_SENESTE_DAG) {
-            throw IllegalArgumentException("Kan ikke håndtere så sent tidspunkt. Bruk uendeligLengeTil()")
-        }
-    }
-
     fun tilLocalDateEllerNull(): LocalDate? {
         return if (uendelighet != Uendelighet.INGEN) {
             null
@@ -57,6 +49,9 @@ data class DagTidspunkt internal constructor(
 
     companion object {
         fun nå() = DagTidspunkt(LocalDate.now(), Uendelighet.INGEN)
+        fun uendeligLengeSiden(dato: LocalDate = LocalDate.now()) = DagTidspunkt(dato, uendelighet = Uendelighet.FORTID)
+        fun uendeligLengeTil(dato: LocalDate = LocalDate.now()) = DagTidspunkt(dato, uendelighet = Uendelighet.FREMTID)
+        fun med(dato: LocalDate) = DagTidspunkt(dato, Uendelighet.INGEN)
 
         internal fun LocalDate?.tilTidspunktEllerTidligereEnn(tidspunkt: LocalDate?) =
             tilTidspunktEllerUendelig(tidspunkt ?: LocalDate.now(), Uendelighet.FORTID)
@@ -64,22 +59,10 @@ data class DagTidspunkt internal constructor(
         internal fun LocalDate?.tilTidspunktEllerSenereEnn(tidspunkt: LocalDate?) =
             tilTidspunktEllerUendelig(tidspunkt ?: LocalDate.now(), Uendelighet.FREMTID)
 
-        internal fun LocalDate?.tilTidspunktEllerUendeligLengeSiden() =
-            this.tilTidspunktEllerUendelig(PRAKTISK_TIDLIGSTE_DAG.plusYears(1), Uendelighet.FORTID)
-
-        internal fun LocalDate?.tilTidspunktEllerUendeligLengeTil() =
-            this.tilTidspunktEllerUendelig(PRAKTISK_SENESTE_DAG.minusYears(1), Uendelighet.FREMTID)
-
         private fun LocalDate?.tilTidspunktEllerUendelig(default: LocalDate?, uendelighet: Uendelighet) =
             this?.let { DagTidspunkt(it, Uendelighet.INGEN) } ?: DagTidspunkt(
                 default ?: LocalDate.now(),
                 uendelighet
             )
-
-        fun dagForUendeligLengeSiden(dato: LocalDate = LocalDate.now()) =
-            DagTidspunkt(dato, uendelighet = Uendelighet.FORTID)
-
-        fun dagMedUendeligLengeTil(dato: LocalDate = LocalDate.now()) =
-            DagTidspunkt(dato, uendelighet = Uendelighet.FREMTID)
     }
 }

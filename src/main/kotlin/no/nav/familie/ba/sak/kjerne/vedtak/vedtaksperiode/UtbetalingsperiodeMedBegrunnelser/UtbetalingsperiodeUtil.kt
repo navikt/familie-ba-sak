@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilLocalDateEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -68,19 +69,20 @@ fun hentPerioderMedUtbetaling(
         .kombinerUtenNull { it }
         .filtrer { !it?.toList().isNullOrEmpty() }
 
-    val andelerSplittetOppTidslinje = alleAndelerKombinertTidslinje.kombinerMed(tidslinjeForSplitt) { andelerIPeriode, splittVilkårIPeriode ->
-        when (andelerIPeriode) {
-            null -> null
-            else -> Pair(andelerIPeriode, splittVilkårIPeriode)
-        }
-    }.filtrerIkkeNull()
+    val andelerSplittetOppTidslinje =
+        alleAndelerKombinertTidslinje.kombinerMed(tidslinjeForSplitt) { andelerIPeriode, splittVilkårIPeriode ->
+            when (andelerIPeriode) {
+                null -> null
+                else -> Pair(andelerIPeriode, splittVilkårIPeriode)
+            }
+        }.filtrerIkkeNull()
 
     return andelerSplittetOppTidslinje
         .perioder()
         .map {
             VedtaksperiodeMedBegrunnelser(
-                fom = it.fraOgMed.tilYearMonthEllerNull()?.førsteDagIInneværendeMåned(),
-                tom = it.tilOgMed.tilYearMonthEllerNull()?.sisteDagIInneværendeMåned(),
+                fom = it.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
+                tom = it.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
                 vedtak = vedtak,
                 type = Vedtaksperiodetype.UTBETALING
             )

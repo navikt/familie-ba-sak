@@ -8,13 +8,6 @@ data class MånedTidspunkt internal constructor(
     internal val måned: YearMonth,
     override val uendelighet: Uendelighet
 ) : Tidspunkt<Måned>(uendelighet) {
-    init {
-        if (måned < PRAKTISK_TIDLIGSTE_DAG.toYearMonth()) {
-            throw IllegalArgumentException("Tidspunktet er for lenge siden. Bruk uendeligLengeSiden()")
-        } else if (måned > PRAKTISK_SENESTE_DAG.toYearMonth()) {
-            throw IllegalArgumentException("Tidspunktet er for lenge til. Bruk uendeligLengeTil()")
-        }
-    }
 
     fun tilYearMonthEllerNull(): YearMonth? =
         if (uendelighet != Uendelighet.INGEN) {
@@ -58,6 +51,10 @@ data class MånedTidspunkt internal constructor(
 
     companion object {
         fun nå() = MånedTidspunkt(YearMonth.now(), Uendelighet.INGEN)
+        fun uendeligLengeTil(måned: YearMonth = YearMonth.now()) = MånedTidspunkt(måned, Uendelighet.FREMTID)
+        fun uendeligLengeSiden(måned: YearMonth = YearMonth.now()) = MånedTidspunkt(måned, Uendelighet.FORTID)
+        fun med(måned: YearMonth) = MånedTidspunkt(måned, Uendelighet.INGEN)
+        fun med(år: Int, måned: Int) = MånedTidspunkt(YearMonth.of(år, måned), Uendelighet.INGEN)
 
         internal fun YearMonth.tilTidspunkt() = MånedTidspunkt(this, Uendelighet.INGEN)
 
@@ -67,23 +64,11 @@ data class MånedTidspunkt internal constructor(
         internal fun YearMonth?.tilTidspunktEllerSenereEnn(tidspunkt: YearMonth?) =
             tilTidspunktEllerUendelig(tidspunkt ?: YearMonth.now(), Uendelighet.FREMTID)
 
-        internal fun YearMonth?.tilTidspunktEllerUendeligLengeSiden() =
-            this.tilTidspunktEllerUendelig(PRAKTISK_TIDLIGSTE_DAG.toYearMonth(), Uendelighet.FORTID)
-
-        internal fun YearMonth?.tilTidspunktEllerUendeligLengeTil() =
-            this.tilTidspunktEllerUendelig(PRAKTISK_SENESTE_DAG.toYearMonth(), Uendelighet.FREMTID)
-
         private fun YearMonth?.tilTidspunktEllerUendelig(default: YearMonth?, uendelighet: Uendelighet) =
             this?.let { MånedTidspunkt(it, Uendelighet.INGEN) } ?: MånedTidspunkt(
                 default ?: YearMonth.now(),
                 uendelighet
             )
-
-        fun månedForUendeligLengeSiden(måned: YearMonth = YearMonth.now()) =
-            MånedTidspunkt(måned, uendelighet = Uendelighet.FORTID)
-
-        fun månedOmUendeligLenge(måned: YearMonth = YearMonth.now()) =
-            MånedTidspunkt(måned, uendelighet = Uendelighet.FREMTID)
 
         fun LocalDate.tilMånedTidspunkt() = MånedTidspunkt(this.toYearMonth(), Uendelighet.INGEN)
     }

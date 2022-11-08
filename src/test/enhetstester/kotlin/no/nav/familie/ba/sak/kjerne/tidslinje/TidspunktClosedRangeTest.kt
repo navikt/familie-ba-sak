@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erEndelig
@@ -199,8 +201,8 @@ class TidspunktClosedRangeTest {
 
     @Test
     fun testTidsromMedMåneder() {
-        val fom = Tidspunkt.uendeligLengeSiden(YearMonth.of(2020, 1))
-        val tom = Tidspunkt.uendeligLengeTil(YearMonth.of(2020, 10))
+        val fom = MånedTidspunkt.uendeligLengeSiden(YearMonth.of(2020, 1))
+        val tom = MånedTidspunkt.uendeligLengeTil(YearMonth.of(2020, 10))
         val tidsrom = fom..tom
 
         assertEquals(10, tidsrom.count())
@@ -210,8 +212,8 @@ class TidspunktClosedRangeTest {
 
     @Test
     fun testTidsromMedDager() {
-        val fom = Tidspunkt.uendeligLengeSiden(LocalDate.of(2020, 1, 1))
-        val tom = Tidspunkt.uendeligLengeTil(LocalDate.of(2020, 10, 31))
+        val fom = DagTidspunkt.uendeligLengeSiden(LocalDate.of(2020, 1, 1))
+        val tom = DagTidspunkt.uendeligLengeTil(LocalDate.of(2020, 10, 31))
         val tidsrom = fom..tom
 
         assertEquals(305, tidsrom.count())

@@ -135,4 +135,14 @@ internal class BeskjæreTidslinjeTest {
         assertEquals(forventet, faktisk)
         assertEquals(forventet.somEndelig(), faktisk.somEndelig())
     }
+
+    @Test
+    fun `beskjære mot tom tidslinje skal gi tom tidslinje`() {
+        val hovedlinje = "bbb".tilCharTidslinje(feb(2002))
+
+        val faktisk = hovedlinje.beskjærEtter(TomTidslinje<Char, Måned>())
+        val forventet = TomTidslinje<Char, Måned>()
+
+        assertEquals(forventet, faktisk)
+    }
 }

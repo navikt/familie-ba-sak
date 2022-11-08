@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
@@ -18,9 +19,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
  * Perioder som ligger helt utenfor grensene vil forsvinne.
  * Perioden i hver ende som ligger delvis innenfor, vil forkortes.
  * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den nye benyttes
+ * Beskjæring mot tom tidslinje vil gi tom tidslinje
  */
 fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærEtter(tidslinje: Tidslinje<*, T>): Tidslinje<I, T> = when {
-    tidsrom().isEmpty() -> this
+    tidslinje.tidsrom().isEmpty() -> TomTidslinje()
     else -> beskjær(tidslinje.fraOgMed()!!, tidslinje.tilOgMed()!!)
 }
 
@@ -30,9 +32,10 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærEtter(tidslinje: Tidslinje<*, T>)
  * Perioder som ligger helt utenfor grensene vil forsvinne.
  * Perioden i hver ende som ligger delvis innenfor, vil forkortes.
  * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den nye benyttes
+ * Beskjæring mot tom tidslinje vil gi tom tidslinje
  */
 fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMedEtter(tidslinje: Tidslinje<*, T>): Tidslinje<I, T> = when {
-    tidsrom().isEmpty() -> this
+    tidslinje.tidsrom().isEmpty() -> TomTidslinje()
     else -> beskjær(this.fraOgMed()!!, tidslinje.tilOgMed()!!)
 }
 
