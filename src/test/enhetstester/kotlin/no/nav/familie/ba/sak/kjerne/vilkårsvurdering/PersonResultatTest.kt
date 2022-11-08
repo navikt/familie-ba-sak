@@ -12,11 +12,15 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilMånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.beskjærPå18År
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilForskjøvetTidslinjerForHvertVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
 import org.junit.jupiter.api.Assertions
@@ -512,9 +516,34 @@ class PersonResultatTest {
         }
     }
 
-    private fun assertPeriode(periode: Periode<List<VilkårResultat>, Måned>, forventetFom: YearMonth, forventetTom: YearMonth) {
-        Assertions.assertEquals(forventetFom, periode.fraOgMed.tilYearMonth())
-        Assertions.assertEquals(forventetTom, periode.tilOgMed.tilYearMonth())
+    @Test
+    fun `Skal kutte UNDER_18 tidslinjen måneden før 18-årsdag`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(18))
+
+        val under18VilkårResultat = listOf(
+            lagVilkårResultat(
+                periodeFom = barn.fødselsdato,
+                periodeTom = barn.fødselsdato.plusYears(18).minusDays(1),
+                vilkårType = Vilkår.UNDER_18_ÅR,
+                resultat = Resultat.OPPFYLT
+            )
+        )
+
+        val under18årVilkårTidslinje: Tidslinje<VilkårResultat, Måned> = tidslinje { under18VilkårResultat.map { Periode(fraOgMed = it.periodeFom!!.tilMånedTidspunkt().neste(), tilOgMed = it.periodeTom!!.tilMånedTidspunkt(), innhold = it) } }
+
+        val under18PerioderFørBeskjæring = under18årVilkårTidslinje.perioder()
+
+        Assertions.assertEquals(1, under18PerioderFørBeskjæring.size)
+        Assertions.assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), under18PerioderFørBeskjæring.first().fraOgMed.tilYearMonth())
+        Assertions.assertEquals(barn.fødselsdato.plusYears(18).toYearMonth(), under18PerioderFørBeskjæring.first().tilOgMed.tilYearMonth())
+
+        val tidslinjeBeskåret = under18årVilkårTidslinje.beskjærPå18År(barn.fødselsdato)
+
+        val under18PerioderEtterBeskjæring = tidslinjeBeskåret.perioder()
+
+        Assertions.assertEquals(1, under18PerioderEtterBeskjæring.size)
+        Assertions.assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), under18PerioderEtterBeskjæring.first().fraOgMed.tilYearMonth())
+        Assertions.assertEquals(barn.fødselsdato.plusYears(18).minusMonths(1).toYearMonth(), under18PerioderEtterBeskjæring.first().tilOgMed.tilYearMonth())
     }
 
     private fun lagVilkårForPerson(
