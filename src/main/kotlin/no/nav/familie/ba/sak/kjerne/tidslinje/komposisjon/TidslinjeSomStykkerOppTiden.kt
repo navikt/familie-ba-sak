@@ -5,10 +5,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erRettFør
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somEndelig
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somTilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 
 @Deprecated("Bruk funksjonen tidlinjeFraTidspunkt i stedet")
 abstract class TidslinjeSomStykkerOppTiden<I, T : Tidsenhet>(
@@ -17,12 +17,10 @@ abstract class TidslinjeSomStykkerOppTiden<I, T : Tidsenhet>(
     constructor(vararg avhengighet: Tidslinje<*, T>) :
         this(avhengighet.asList())
 
-    val fraOgMed = avhengigheter.fraOgMed()
-    val tilOgMed = avhengigheter.tilOgMed()
+    val tidsrom = avhengigheter.tidsrom()
 
     override fun lagPerioder(): Collection<Periode<I, T>> {
-        val tidspunkter = fraOgMed..tilOgMed
-        return tidspunkter.map { tidspunkt -> TidspunktMedInnhold(tidspunkt, finnInnholdForTidspunkt(tidspunkt)) }
+        return tidsrom.map { tidspunkt -> TidspunktMedInnhold(tidspunkt, finnInnholdForTidspunkt(tidspunkt)) }
             .fold(emptyList()) { perioder, tidspunktMedInnhold ->
                 val sistePeriode = perioder.lastOrNull()
                 when {

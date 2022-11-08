@@ -78,7 +78,7 @@ fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder:
             else -> null
         }
     }.values
-        .mapNotNull { it.filtrerIkkeNull().fraOgMed().tilYearMonthEllerNull() }
+        .mapNotNull { it.filtrerIkkeNull().fraOgMed()?.tilYearMonthEllerNull() }
         .minOfOrNull { it } ?: TIDENES_ENDE.toYearMonth()
 }
 

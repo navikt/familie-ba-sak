@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.NullTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteEllerNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteEllerNull
 
 /**
  * Base-klassen for alle tidslinjer. Bygger på en tanke om at en tidslinje inneholder en
@@ -101,10 +104,30 @@ abstract class Tidslinje<I, T : Tidsenhet> {
 }
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.fraOgMed() =
-    this.perioder().firstOrNull()?.fraOgMed ?: NullTidspunkt.fraOgMed()
+    this.perioder().firstOrNull()?.fraOgMed
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.tilOgMed() =
-    this.perioder().lastOrNull()?.tilOgMed ?: NullTidspunkt.tilOgMed()
+    this.perioder().lastOrNull()?.tilOgMed
+
+fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.fraOgMed() = this
+    .map { it.fraOgMed() }
+    .filterNotNull()
+    .minsteEllerNull()
+
+fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tilOgMed() = this
+    .map { it.tilOgMed() }
+    .filterNotNull()
+    .størsteEllerNull()
+
+fun <I, T : Tidsenhet> Tidslinje<I, T>.tidsrom(): Collection<Tidspunkt<T>> = when {
+    this.perioder().isEmpty() -> emptyList()
+    else -> (perioder().first().fraOgMed.rangeTo(perioder().last().tilOgMed)).toList()
+}
+
+fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tidsrom(): Collection<Tidspunkt<T>> = when {
+    fraOgMed() == null || tilOgMed() == null -> emptyList()
+    else -> (fraOgMed()!!..tilOgMed()!!).toList()
+}
 
 fun <I, T : Tidsenhet> tidslinje(lagPerioder: () -> Collection<Periode<I, T>>) =
     object : Tidslinje<I, T>() {

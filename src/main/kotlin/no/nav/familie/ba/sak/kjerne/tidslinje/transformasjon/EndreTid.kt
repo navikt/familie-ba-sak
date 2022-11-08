@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
@@ -29,16 +30,19 @@ fun <I, R> Tidslinje<I, Dag>.tilMåned(mapper: (List<I?>) -> R?): Tidslinje<R, M
     val dagTidslinje = this
 
     return object : Tidslinje<R, Måned>() {
-        val fraOgMed = dagTidslinje.fraOgMed().tilInneværendeMåned()
-        val tilOgMed = dagTidslinje.tilOgMed().tilInneværendeMåned()
+        val fraOgMed = dagTidslinje.fraOgMed()?.tilInneværendeMåned()
+        val tilOgMed = dagTidslinje.tilOgMed()?.tilInneværendeMåned()
 
         override fun lagPerioder(): Collection<Periode<R, Måned>> {
-            val månedTidsrom = fraOgMed..tilOgMed
-            return månedTidsrom.map { måned ->
-                val dagerIMåned = måned.tilFørsteDagIMåneden()..måned.tilSisteDagIMåneden()
-                val innholdAlleDager = dagerIMåned.map { dag -> dagTidslinje.innholdForTidspunkt(dag) }
+            return if (tilOgMed == null || fraOgMed == null) {
+                emptyList()
+            } else {
+                (fraOgMed..tilOgMed).map { måned ->
+                    val dagerIMåned = måned.tilFørsteDagIMåneden()..måned.tilSisteDagIMåneden()
+                    val innholdAlleDager = dagerIMåned.map { dag -> dagTidslinje.innholdForTidspunkt(dag) }
 
-                Periode(måned, måned, mapper(innholdAlleDager))
+                    Periode(måned, måned, mapper(innholdAlleDager))
+                }
             }
         }
     }
@@ -52,14 +56,17 @@ fun <I> Tidslinje<I, Dag>.tilMånedFraSisteDagIMåneden(): Tidslinje<I, Måned> 
     val dagTidslinje = this
 
     return object : Tidslinje<I, Måned>() {
-        val fraOgMed = dagTidslinje.fraOgMed().tilInneværendeMåned()
-        val tilOgMed = dagTidslinje.tilOgMed().tilInneværendeMåned()
+        val fraOgMed = dagTidslinje.fraOgMed()?.tilInneværendeMåned()
+        val tilOgMed = dagTidslinje.tilOgMed()?.tilInneværendeMåned()
 
         override fun lagPerioder(): Collection<Periode<I, Måned>> {
-            val månedTidsrom = fraOgMed..tilOgMed
-            return månedTidsrom.map { måned ->
-                val innholdSisteDag = dagTidslinje.innholdForTidspunkt(måned.tilSisteDagIMåneden())
-                Periode(måned, måned, innholdSisteDag)
+            return if (tilOgMed == null || fraOgMed == null) {
+                emptyList()
+            } else {
+                (fraOgMed..tilOgMed).map { måned ->
+                    val innholdSisteDag = dagTidslinje.innholdForTidspunkt(måned.tilSisteDagIMåneden())
+                    Periode(måned, måned, innholdSisteDag)
+                }
             }
         }
     }
@@ -76,11 +83,21 @@ fun <I> Tidslinje<I, Dag>.tilMånedFraSisteDagIMåneden(): Tidslinje<I, Måned> 
  */
 fun <I, R> Tidslinje<I, Dag>.tilMånedFraMånedsskifteIkkeNull(
     mapper: (innholdSisteDagForrigeMåned: I, innholdFørsteDagDenneMåned: I) -> R?
-): Tidslinje<R, Måned> = (fraOgMed().tilForrigeMåned()..tilOgMed().tilNesteMåned()).tidslinjeFraTidspunkt { måned ->
-    val innholdSisteDagForrigeMåned = innholdsresultatForTidspunkt(måned.forrige().tilSisteDagIMåneden())
-    val innholdFørsteDagDenneMåned = innholdsresultatForTidspunkt(måned.tilFørsteDagIMåneden())
+): Tidslinje<R, Måned> {
+    val fraOgMed = fraOgMed()
+    val tilOgMed = tilOgMed()
 
-    innholdSisteDagForrigeMåned.mapVerdi { s -> innholdFørsteDagDenneMåned.mapVerdi { mapper(s, it) } }.tilVerdi()
+    return if (fraOgMed == null || tilOgMed == null) {
+        TomTidslinje()
+    } else {
+        (fraOgMed.tilForrigeMåned()..tilOgMed.tilNesteMåned()).tidslinjeFraTidspunkt { måned ->
+            val innholdSisteDagForrigeMåned = innholdsresultatForTidspunkt(måned.forrige().tilSisteDagIMåneden())
+            val innholdFørsteDagDenneMåned = innholdsresultatForTidspunkt(måned.tilFørsteDagIMåneden())
+
+            innholdSisteDagForrigeMåned
+                .mapVerdi { s -> innholdFørsteDagDenneMåned.mapVerdi { mapper(s, it) } }.tilVerdi()
+        }
+    }
 }
 
 /**

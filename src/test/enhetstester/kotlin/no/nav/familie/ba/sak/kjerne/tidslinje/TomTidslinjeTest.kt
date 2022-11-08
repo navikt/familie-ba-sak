@@ -3,14 +3,11 @@ package no.nav.familie.ba.sak.kjerne.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.PRAKTISK_SENESTE_DAG
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.PRAKTISK_TIDLIGSTE_DAG
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Uendelighet
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -21,13 +18,13 @@ internal class TomTidslinjeTest {
         val fom = TomTidslinje<Boolean, Dag>().fraOgMed()
         val tom = TomTidslinje<Boolean, Dag>().tilOgMed()
 
-        assertTrue(DagTidspunkt(PRAKTISK_SENESTE_DAG, Uendelighet.FREMTID) <= fom)
-        assertTrue(DagTidspunkt(PRAKTISK_TIDLIGSTE_DAG, Uendelighet.FORTID) >= tom)
+        assertNull(fom)
+        assertNull(tom)
     }
 
     @Test
     fun `test at tidsrommet mellom fra-og-med og til-og-med er tomt`() {
-        assertTrue(TomTidslinje<Boolean, Dag>().fraOgMed().rangeTo(TomTidslinje<Boolean, Dag>().tilOgMed()).isEmpty())
+        assertTrue(TomTidslinje<Boolean, Dag>().tidsrom().toList().isEmpty())
     }
 
     @Test
