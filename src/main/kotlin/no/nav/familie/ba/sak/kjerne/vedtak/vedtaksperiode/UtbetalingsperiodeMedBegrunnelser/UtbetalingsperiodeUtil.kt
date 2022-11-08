@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinjeForSplitt
+import java.time.LocalDate
 
 @Deprecated("Erstattes av hentPerioderMedUtbetaling")
 fun hentPerioderMedUtbetalingDeprecated(
@@ -57,9 +58,10 @@ fun hentPerioderMedUtbetalingDeprecated(
 fun hentPerioderMedUtbetaling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     vedtak: Vedtak,
-    personResultater: Set<PersonResultat>
+    personResultater: Set<PersonResultat>,
+    personerOgFødselsdatoer: Map<Aktør, LocalDate>
 ): List<VedtaksperiodeMedBegrunnelser> {
-    val tidslinjeForSplitt = personResultater.tilTidslinjeForSplitt()
+    val tidslinjeForSplitt = personResultater.tilTidslinjeForSplitt(personerOgFødselsdatoer)
 
     val alleAndelerKombinertTidslinje = andelerTilkjentYtelse
         .tilTidslinjerPerPerson().values

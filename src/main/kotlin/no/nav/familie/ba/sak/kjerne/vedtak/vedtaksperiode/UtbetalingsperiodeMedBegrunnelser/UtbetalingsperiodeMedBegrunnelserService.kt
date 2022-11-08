@@ -37,16 +37,18 @@ class UtbetalingsperiodeMedBegrunnelserService(
         val vilkårsvurdering =
             vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = vedtak.behandling.id)
 
-        val forskjøvetVilkårResultatTidslinjeMap =
-            vilkårsvurdering.personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
-
         val utbetalingsperioder = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_SPLITTE_VEDTAKSPERIODER)) {
+            val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
+            val personerOgFødselsdatoer = personopplysningGrunnlag.personer.associate { it.aktør to it.fødselsdato }
             hentPerioderMedUtbetaling(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 vedtak = vedtak,
-                personResultater = vilkårsvurdering.personResultater
+                personResultater = vilkårsvurdering.personResultater,
+                personerOgFødselsdatoer = personerOgFødselsdatoer
             )
         } else {
+            val forskjøvetVilkårResultatTidslinjeMap =
+                vilkårsvurdering.personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
             hentPerioderMedUtbetalingDeprecated(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 vedtak = vedtak,
