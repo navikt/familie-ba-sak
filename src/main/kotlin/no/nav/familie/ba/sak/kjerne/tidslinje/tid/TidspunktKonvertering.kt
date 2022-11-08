@@ -65,3 +65,8 @@ fun <T : Tidsenhet> Tidspunkt<T>.somTilOgMed() = when (uendelighet) {
     Uendelighet.FORTID -> medUendelighet(Uendelighet.INGEN)
     else -> this
 }
+
+fun <T : Tidsenhet> Tidspunkt<T>.tilYearMonth() = this.tilInneværendeMåned().tilYearMonth()
+fun <T : Tidsenhet> Tidspunkt<T>.tilYearMonthEllerNull() = this.tilInneværendeMåned().tilYearMonthEllerNull()
+fun <T : Tidsenhet> Tidspunkt<T>.tilLocalDate() = this.tilDagEllerSisteDagIPerioden().tilLocalDate()
+fun <T : Tidsenhet> Tidspunkt<T>.tilLocalDateEllerNull() = this.tilDagEllerSisteDagIPerioden().tilLocalDateEllerNull()

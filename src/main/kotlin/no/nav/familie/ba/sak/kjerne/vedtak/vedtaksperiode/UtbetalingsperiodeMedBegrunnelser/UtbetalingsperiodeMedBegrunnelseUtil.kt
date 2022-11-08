@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeOgUnikId
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperioderMedUnikIdTidslinje
@@ -42,7 +42,7 @@ data class UtbetalingsperiodeMedOverlappendeKompetanse(
 fun Tidslinje<UtbetalingsperiodeMedOverlappendeKompetanse, Måned>.lagVedtaksperioderMedBegrunnelser(): List<VedtaksperiodeMedBegrunnelser> =
     this.perioder().mapNotNull {
         it.innhold?.vedtaksperiodeOgUnikId?.vedtaksperiode?.copy(
-            fom = it.fraOgMed.tilLocalDateEllerNull()?.førsteDagIInneværendeMåned(),
-            tom = it.tilOgMed.tilLocalDateEllerNull()?.sisteDagIMåned()
+            fom = it.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
+            tom = it.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull()
         )
     }

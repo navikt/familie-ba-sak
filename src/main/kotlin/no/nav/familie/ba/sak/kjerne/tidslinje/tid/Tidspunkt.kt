@@ -1,14 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tid
 
-import no.nav.familie.ba.sak.common.toYearMonth
 import java.time.LocalDate
 import java.time.YearMonth
 
 val PRAKTISK_SENESTE_DAG = LocalDate.of(2499, 12, 31)
 val PRAKTISK_TIDLIGSTE_DAG = LocalDate.of(1900, 1, 1)
-
-internal val månedTilDagKonverterer: (YearMonth) -> LocalDate = { it.atEndOfMonth() }
-internal val dagTilMånedKonverterer: (LocalDate) -> YearMonth = { it.toYearMonth() }
 
 enum class Uendelighet {
     INGEN,
@@ -23,11 +19,6 @@ class Måned : Tidsenhet
 abstract class Tidspunkt<T : Tidsenhet> internal constructor(
     internal open val uendelighet: Uendelighet
 ) : Comparable<Tidspunkt<T>> {
-    abstract fun tilLocalDateEllerNull(): LocalDate?
-    abstract fun tilLocalDate(): LocalDate
-    abstract fun tilYearMonthEllerNull(): YearMonth?
-    abstract fun tilYearMonth(): YearMonth
-
     abstract fun flytt(tidsenheter: Long): Tidspunkt<T>
     internal abstract fun medUendelighet(uendelighet: Uendelighet): Tidspunkt<T>
 

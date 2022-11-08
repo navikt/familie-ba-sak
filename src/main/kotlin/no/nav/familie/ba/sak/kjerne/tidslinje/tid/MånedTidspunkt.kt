@@ -16,19 +16,14 @@ data class MånedTidspunkt internal constructor(
         }
     }
 
-    override fun tilLocalDateEllerNull(): LocalDate? =
-        tilYearMonthEllerNull()?.let(månedTilDagKonverterer)
-
-    override fun tilLocalDate(): LocalDate = månedTilDagKonverterer(måned)
-
-    override fun tilYearMonthEllerNull(): YearMonth? =
+    fun tilYearMonthEllerNull(): YearMonth? =
         if (uendelighet != Uendelighet.INGEN) {
             null
         } else {
             måned
         }
 
-    override fun tilYearMonth(): YearMonth =
+    fun tilYearMonth(): YearMonth =
         if (uendelighet != Uendelighet.INGEN) {
             throw IllegalStateException("Tidspunktet er uendelig")
         } else {
@@ -51,7 +46,7 @@ data class MånedTidspunkt internal constructor(
     }
 
     override fun sammenliknMed(tidspunkt: Tidspunkt<Måned>): Int {
-        return måned.compareTo(tidspunkt.tilYearMonth())
+        return måned.compareTo((tidspunkt as MånedTidspunkt).måned)
     }
 
     override fun equals(other: Any?): Boolean {

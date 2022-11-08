@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tid
 
 import java.time.LocalDate
-import java.time.YearMonth
 
 data class DagTidspunkt internal constructor(
     internal val dato: LocalDate,
@@ -16,7 +15,7 @@ data class DagTidspunkt internal constructor(
         }
     }
 
-    override fun tilLocalDateEllerNull(): LocalDate? {
+    fun tilLocalDateEllerNull(): LocalDate? {
         return if (uendelighet != Uendelighet.INGEN) {
             null
         } else {
@@ -24,16 +23,8 @@ data class DagTidspunkt internal constructor(
         }
     }
 
-    override fun tilLocalDate(): LocalDate {
+    fun tilLocalDate(): LocalDate {
         return tilLocalDateEllerNull() ?: throw IllegalStateException("Tidspunkt er uendelig")
-    }
-
-    override fun tilYearMonthEllerNull(): YearMonth? {
-        return tilLocalDateEllerNull()?.let { dagTilMånedKonverterer(it) }
-    }
-
-    override fun tilYearMonth(): YearMonth {
-        return dagTilMånedKonverterer(tilLocalDate())
     }
 
     override fun flytt(tidsenheter: Long): DagTidspunkt {
@@ -54,7 +45,7 @@ data class DagTidspunkt internal constructor(
     }
 
     override fun sammenliknMed(tidspunkt: Tidspunkt<Dag>): Int {
-        return dato.compareTo(tidspunkt.tilLocalDate())
+        return dato.compareTo((tidspunkt as DagTidspunkt).dato)
     }
 
     override fun equals(other: Any?): Boolean {
