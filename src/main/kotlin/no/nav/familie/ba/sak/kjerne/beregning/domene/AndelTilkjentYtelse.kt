@@ -11,6 +11,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -317,4 +322,12 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilTidslinjerPerPersonOgType
         AndelTilkjentYtelseTidslinje(
             andelerTilkjentYtelsePåPerson
         )
+    }
+
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilTidslinjerPerPerson(): Map<Aktør, Tidslinje<Iterable<AndelTilkjentYtelseMedEndreteUtbetalinger>, Måned>> =
+    groupBy { it.aktør }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
+        val andelerPrType = andelerTilkjentYtelsePåPerson.groupBy { it.type }
+        val tidslinjer = andelerPrType.map { AndelTilkjentYtelseTidslinje(it.value) }
+
+        tidslinjer.kombinerUtenNull { it }.filtrer { !it?.toList().isNullOrEmpty() }.slåSammenLike()
     }
