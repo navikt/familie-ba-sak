@@ -19,3 +19,5 @@ class VilkårResultatTidslinje(
             )
         }
 }
+
+fun List<VilkårResultat>.tilTidslinje() = VilkårResultatTidslinje(this)

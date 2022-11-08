@@ -7,29 +7,17 @@ import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.tilMånedEtterVilkårsregler
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilForrigeMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilNesteMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilPeriodeMedInnhold
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilPeriodeUtenInnhold
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -205,48 +193,18 @@ private fun PersonResultat.tilTidslinjeForSplittForPerson(): Tidslinje<List<Vilk
     return tidslinjer.kombiner { alleVilkårOppfyltEllerNull(it) }.filtrerIkkeNull().slåSammenLike()
 }
 
-fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(): List<Tidslinje<VilkårResultat, Måned>> {
-    return this.groupBy { it.vilkårType }.map { (key, value) ->
-        val tidslinje = VilkårResultatTidslinje(value).filtrerIkkeNull()
-
-        val månedTidslinje = if (key == Vilkår.BOR_MED_SØKER) {
-            tidslinje.tilMånedEtterForBorMedSøker()
-        } else {
-            tidslinje.tilMånedEtterVilkårsregler { it?.erOppfylt() == true }
-        }
-
-        månedTidslinje.filtrerIkkeNull().slåSammenLike()
-    }
-}
-
 /**
- * Extention-funksjon som konverterer en dag-basert tidslinje til en måned-basert tidslinje for 'bor med søker'-vilkår resultater
- * Funksjonen itererer fra måneden FØR fra-og-med-måned til måneden ETTER til-og-med-måneden for å ta hensyn til uendelighet
- * Reglene er som følger:
- * 2020-04-30    | 2020-05-01    -> Resultat
- * Oppfylt Delt  | Oppfylt Fullt -> 2020-05 Oppfylt Fullt
- * Oppfylt Fullt | Opppfylt Delt  -> 2020-05 Oppfylt Fullt
- * Oppfylt Fullt | Opppfylt Fullt -> 2020-05 Oppfylt Fullt
- * Oppfylt Delt  | Oppfylt Delt   -> 2020-05 Oppfylt Delt (pga forrige mnd)
- * Oppfylt Delt  | Ikke oppfylt  -> <Tomt>
- * Oppfylt Fullt | Ikke oppfylt  -> <Tomt>
- * Ikke oppfylt | Oppfylt Delt   -> <Tomt>
- * Ikke oppfylt | Oppfylt Fullt  -> <Tomt>
- */
-private fun Tidslinje<VilkårResultat, Dag>.tilMånedEtterForBorMedSøker() = tidslinje {
-    (fraOgMed().tilForrigeMåned()..tilOgMed().tilNesteMåned()).map { måned ->
-        val innholdSisteDagForrigeMåned = innholdForTidspunkt(måned.forrige().tilSisteDagIMåneden())
-        val innholdFørsteDagDenneMåned = innholdForTidspunkt(måned.tilFørsteDagIMåneden())
-
-        val deltBostedDenneMåneden = innholdFørsteDagDenneMåned?.erDeltBosted() == true
-        val bådeForrigeOgDenneErOppfylt = innholdSisteDagForrigeMåned?.erOppfylt() == true && innholdFørsteDagDenneMåned?.erOppfylt() == true
-
-        if (deltBostedDenneMåneden && bådeForrigeOgDenneErOppfylt) {
-            måned.tilPeriodeMedInnhold(innholdSisteDagForrigeMåned)
-        } else if (bådeForrigeOgDenneErOppfylt) {
-            måned.tilPeriodeMedInnhold(innholdFørsteDagDenneMåned)
-        } else {
-            måned.tilPeriodeUtenInnhold()
+ * Extention-funksjon som tar inn et sett med vilkårResultater og returnerer en forskjøvet måned-basert tidslinje for hvert vilkår
+ * Se readme-fil for utdypende forklaring av logikken for hvert vilkår
+ * */
+fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(): List<Tidslinje<VilkårResultat, Måned>> {
+    return this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
+        vilkårResultater.tilTidslinje().tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
+            when {
+                !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null
+                vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
+                else -> innholdFørsteDagDenneMåned
+            }
         }
     }
 }
