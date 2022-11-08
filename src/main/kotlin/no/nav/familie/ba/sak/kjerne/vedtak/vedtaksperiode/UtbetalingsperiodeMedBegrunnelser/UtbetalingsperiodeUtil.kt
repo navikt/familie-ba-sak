@@ -2,12 +2,12 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinjeForSplittForPerson
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinjeForSplitt
 import java.time.LocalDate
 
 @Deprecated("Erstattes av hentPerioderMedUtbetaling")
@@ -61,24 +61,21 @@ fun hentPerioderMedUtbetaling(
     personResultater: Set<PersonResultat>,
     personerOgFødselsdatoer: Map<Aktør, LocalDate>
 ): List<VedtaksperiodeMedBegrunnelser> {
-    val splittTidslinjerPerPerson =
-        personResultater.associate { it.aktør to it.tilTidslinjeForSplittForPerson(fødselsdato = personerOgFødselsdatoer[it.aktør]) }
+    val tidslinjeForSplitt = personResultater.tilTidslinjeForSplitt(personerOgFødselsdatoer)
 
-    val andelerTidslinjerPerPerson = andelerTilkjentYtelse
-        .tilTidslinjerPerPerson()
+    val alleAndelerKombinertTidslinje = andelerTilkjentYtelse
+        .tilTidslinjerPerPersonOgType().values
+        .kombinerUtenNull { it }
+        .filtrer { !it?.toList().isNullOrEmpty() }
 
-    val andelerSplittetOppTidslinjer = andelerTidslinjerPerPerson
-        .leftJoin(splittTidslinjerPerPerson) { andelerIPeriode, splittVilkårIPeriode ->
-            when (andelerIPeriode) {
-                null -> null
-                else -> Pair(andelerIPeriode, splittVilkårIPeriode)
-            }
-        }.map { (_, tidslinje) -> tidslinje.filtrerIkkeNull().slåSammenLike() }
+    val andelerSplittetOppTidslinje = alleAndelerKombinertTidslinje.kombinerMed(tidslinjeForSplitt) { andelerIPeriode, splittVilkårIPeriode ->
+        when (andelerIPeriode) {
+            null -> null
+            else -> Pair(andelerIPeriode, splittVilkårIPeriode)
+        }
+    }.filtrerIkkeNull()
 
-    val kombinertTidslinje = andelerSplittetOppTidslinjer
-        .kombinerUtenNull { it }.filtrer { !it?.toList().isNullOrEmpty() }
-
-    return kombinertTidslinje
+    return andelerSplittetOppTidslinje
         .perioder()
         .map {
             VedtaksperiodeMedBegrunnelser(
