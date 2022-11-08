@@ -182,13 +182,14 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
     }
 
 fun Set<PersonResultat>.tilTidslinjeForSplitt(personerOgFødselsdatoer: Map<Aktør, LocalDate>): Tidslinje<List<VilkårResultat>, Måned> {
-    val tidslinjerPerPerson = this.map { it.tilTidslinjeForSplittForPerson(personerOgFødselsdatoer) }
+    val tidslinjerPerPerson = this.map {
+        it.tilTidslinjeForSplittForPerson(fødselsdato = personerOgFødselsdatoer[it.aktør])
+    }
 
     return tidslinjerPerPerson.kombiner { it.filterNotNull().flatten() }.filtrerIkkeNull().slåSammenLike()
 }
 
-private fun PersonResultat.tilTidslinjeForSplittForPerson(personerOgFødselsdatoer: Map<Aktør, LocalDate>): Tidslinje<List<VilkårResultat>, Måned> {
-    val fødselsdato = personerOgFødselsdatoer[this.aktør]
+fun PersonResultat.tilTidslinjeForSplittForPerson(fødselsdato: LocalDate?): Tidslinje<List<VilkårResultat>, Måned> {
     val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår(fødselsdato)
 
     return tidslinjer.kombiner { alleVilkårOppfyltEllerNull(it) }.filtrerIkkeNull().slåSammenLike()
