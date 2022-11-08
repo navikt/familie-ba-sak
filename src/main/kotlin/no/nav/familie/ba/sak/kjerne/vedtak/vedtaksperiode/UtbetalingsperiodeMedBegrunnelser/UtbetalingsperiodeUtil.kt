@@ -3,6 +3,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPerson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -37,7 +38,7 @@ fun hentPerioderMedUtbetalingDeprecated(
             .slåSammenLike()
 
     return andelerTilkjentYtelse
-        .tilTidslinjerPerPerson().values
+        .tilTidslinjerPerPersonOgType().values
         .kombinerUtenNull { it }
         .filtrer { !it?.toList().isNullOrEmpty() }
         .leftJoin(splittkriterierForVedtaksperiodeTidslinje) { andelerTilkjentYtelseIPeriode, utdypendeVilkårIPeriode ->
