@@ -24,9 +24,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.YearMonth
 
 class UtbetalingsperiodeUtilTest {
@@ -88,9 +88,13 @@ class UtbetalingsperiodeUtilTest {
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
-            listOf(andelPerson1MarsTilApril, andelPerson1MaiTilJuli, andelPerson2MarsTilJuli),
-            vedtak,
-            personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
+            andelerTilkjentYtelse = listOf(andelPerson1MarsTilApril, andelPerson1MaiTilJuli, andelPerson2MarsTilJuli),
+            vedtak = vedtak,
+            personResultater = personResultater,
+            personerOgFødselsdatoer = mapOf(
+                person1.aktør to person1.fødselsdato,
+                person2.aktør to person2.fødselsdato
+            )
         )
 
         Assertions.assertEquals(
@@ -162,9 +166,13 @@ class UtbetalingsperiodeUtilTest {
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
-            listOf(andelPerson1MarsTilMai, andelPerson2MaiTilJuli),
-            vedtak,
-            personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
+            andelerTilkjentYtelse = listOf(andelPerson1MarsTilMai, andelPerson2MaiTilJuli),
+            vedtak = vedtak,
+            personResultater = personResultater,
+            personerOgFødselsdatoer = mapOf(
+                person1.aktør to person1.fødselsdato,
+                person2.aktør to person2.fødselsdato
+            )
         )
 
         Assertions.assertEquals(
@@ -219,7 +227,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
             personResultat = personResultatBarn1,
             periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = april2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeTom = april2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -228,8 +236,8 @@ class UtbetalingsperiodeUtilTest {
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
             personResultat = personResultatBarn1,
-            periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeFom = mai2020.førsteDagIInneværendeMåned(),
+            periodeTom = juli2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -253,7 +261,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn2 = VilkårResultat(
             personResultat = personResultatBarn2,
             periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = april2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeTom = april2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -262,8 +270,8 @@ class UtbetalingsperiodeUtilTest {
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn2 = VilkårResultat(
             personResultat = personResultatBarn2,
-            periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeFom = mai2020.førsteDagIInneværendeMåned(),
+            periodeTom = juli2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -298,9 +306,14 @@ class UtbetalingsperiodeUtilTest {
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
-            listOf(andelBarn1MarsTilJuli, andelBarn2MarsTilJuli),
-            vedtak,
-            setOf(personResultatBarn1, personResultatBarn2).tilFørskjøvetVilkårResultatTidslinjeMap()
+            andelerTilkjentYtelse = listOf(andelBarn1MarsTilJuli, andelBarn2MarsTilJuli),
+            vedtak = vedtak,
+            personResultater = setOf(personResultatBarn1, personResultatBarn2),
+            personerOgFødselsdatoer = mapOf(
+                søker.aktør to søker.fødselsdato,
+                barn1.aktør to barn1.fødselsdato,
+                barn2.aktør to barn2.fødselsdato
+            )
         )
 
         Assertions.assertEquals(
@@ -319,7 +332,7 @@ class UtbetalingsperiodeUtilTest {
         val mars2020 = YearMonth.of(2020, 3)
         val april2020 = YearMonth.of(2020, 4)
         val juli2020 = YearMonth.of(2020, 7)
-        val barn1 = lagPerson()
+        val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(9))
         val vedtak = lagVedtak()
 
         val andelBarn1MarsTilApril = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -336,9 +349,12 @@ class UtbetalingsperiodeUtilTest {
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
-            listOf(andelBarn1MarsTilApril, andelBarn1JuliTilJuli),
-            vedtak,
-            emptyMap()
+            andelerTilkjentYtelse = listOf(andelBarn1MarsTilApril, andelBarn1JuliTilJuli),
+            vedtak = vedtak,
+            personResultater = emptySet(),
+            personerOgFødselsdatoer = mapOf(
+                barn1.aktør to barn1.fødselsdato
+            )
         )
 
         val forventetResultat = listOf(
@@ -402,7 +418,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
             personResultat = personResultatBarn,
             periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = april2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeTom = april2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -412,8 +428,8 @@ class UtbetalingsperiodeUtilTest {
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
             personResultat = personResultatBarn,
-            periodeFom = mai2020.minusMonths(1).førsteDagIInneværendeMåned(),
-            periodeTom = juli2020.minusMonths(1).sisteDagIInneværendeMåned(),
+            periodeFom = mai2020.førsteDagIInneværendeMåned(),
+            periodeTom = juli2020.sisteDagIInneværendeMåned(),
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
@@ -448,9 +464,13 @@ class UtbetalingsperiodeUtilTest {
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
-            listOf(andelBarnMarsTilJuli),
-            vedtak,
-            setOf(personResultatBarn).tilFørskjøvetVilkårResultatTidslinjeMap()
+            andelerTilkjentYtelse = listOf(andelBarnMarsTilJuli),
+            vedtak = vedtak,
+            personResultater = setOf(personResultatBarn),
+            personerOgFødselsdatoer = mapOf(
+                søker.aktør to søker.fødselsdato,
+                barn.aktør to barn.fødselsdato
+            )
         )
 
         Assertions.assertEquals(
@@ -463,14 +483,14 @@ class UtbetalingsperiodeUtilTest {
             faktiskResultat.map { it.type }.toSet()
         )
     }
-}
 
-private fun Vilkårsvurdering.lagGodkjentPersonResultatForBarn(person: Person) = lagPersonResultat(
-    vilkårsvurdering = this,
-    aktør = person.aktør,
-    resultat = Resultat.OPPFYLT,
-    periodeFom = person.fødselsdato,
-    periodeTom = person.fødselsdato.til18ÅrsVilkårsdato(),
-    lagFullstendigVilkårResultat = true,
-    personType = person.type
-)
+    private fun Vilkårsvurdering.lagGodkjentPersonResultatForBarn(person: Person) = lagPersonResultat(
+        vilkårsvurdering = this,
+        aktør = person.aktør,
+        resultat = Resultat.OPPFYLT,
+        periodeFom = person.fødselsdato,
+        periodeTom = person.fødselsdato.til18ÅrsVilkårsdato(),
+        lagFullstendigVilkårResultat = true,
+        personType = person.type
+    )
+}
