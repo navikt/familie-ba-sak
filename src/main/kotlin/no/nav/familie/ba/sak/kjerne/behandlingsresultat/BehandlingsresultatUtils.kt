@@ -98,7 +98,11 @@ object BehandlingsresultatUtils {
             samledeResultater.remove(YtelsePersonResultat.OPPHØRT)
         }
 
-        return when {
+        return finnBehandlingsresultat(samledeResultater)
+    }
+
+    private fun finnBehandlingsresultat(samledeResultater: MutableSet<YtelsePersonResultat>): Behandlingsresultat =
+        when {
             samledeResultater.isEmpty() -> Behandlingsresultat.FORTSATT_INNVILGET
             samledeResultater == setOf(YtelsePersonResultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.FORTSATT_OPPHØRT
             samledeResultater == setOf(YtelsePersonResultat.ENDRET_UTBETALING) -> Behandlingsresultat.ENDRET_UTBETALING
@@ -107,9 +111,11 @@ object BehandlingsresultatUtils {
                 YtelsePersonResultat.ENDRET_UTBETALING,
                 YtelsePersonResultat.ENDRET_UTEN_UTBETALING
             ) -> Behandlingsresultat.ENDRET_UTBETALING
+
             samledeResultater.matcherAltOgHarBådeEndretOgOpphørtResultat(emptySet()) -> Behandlingsresultat.ENDRET_OG_OPPHØRT
             samledeResultater == setOf(YtelsePersonResultat.OPPHØRT, YtelsePersonResultat.FORTSATT_OPPHØRT) ||
                 samledeResultater == setOf(YtelsePersonResultat.OPPHØRT) -> Behandlingsresultat.OPPHØRT
+
             samledeResultater == setOf(YtelsePersonResultat.INNVILGET) -> Behandlingsresultat.INNVILGET
             samledeResultater.matcherAltOgHarOpphørtResultat(setOf(YtelsePersonResultat.INNVILGET)) -> Behandlingsresultat.INNVILGET_OG_OPPHØRT
             samledeResultater.matcherAltOgHarEndretResultat(setOf(YtelsePersonResultat.INNVILGET)) -> Behandlingsresultat.INNVILGET_OG_ENDRET
@@ -118,24 +124,28 @@ object BehandlingsresultatUtils {
                 YtelsePersonResultat.INNVILGET,
                 YtelsePersonResultat.AVSLÅTT
             ) -> Behandlingsresultat.DELVIS_INNVILGET
+
             samledeResultater.matcherAltOgHarOpphørtResultat(
                 setOf(
                     YtelsePersonResultat.INNVILGET,
                     YtelsePersonResultat.AVSLÅTT
                 )
             ) -> Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT
+
             samledeResultater.matcherAltOgHarEndretResultat(
                 setOf(
                     YtelsePersonResultat.INNVILGET,
                     YtelsePersonResultat.AVSLÅTT
                 )
             ) -> Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET
+
             samledeResultater.matcherAltOgHarBådeEndretOgOpphørtResultat(
                 setOf(
                     YtelsePersonResultat.INNVILGET,
                     YtelsePersonResultat.AVSLÅTT
                 )
             ) -> Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
+
             samledeResultater == setOf(YtelsePersonResultat.AVSLÅTT) -> Behandlingsresultat.AVSLÅTT
             samledeResultater == setOf(
                 YtelsePersonResultat.AVSLÅTT,
@@ -145,18 +155,20 @@ object BehandlingsresultatUtils {
                 YtelsePersonResultat.AVSLÅTT,
                 YtelsePersonResultat.OPPHØRT
             ) -> Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
+
             samledeResultater == setOf(
                 YtelsePersonResultat.AVSLÅTT,
                 YtelsePersonResultat.OPPHØRT,
                 YtelsePersonResultat.FORTSATT_OPPHØRT
             ) -> Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
+
             samledeResultater.matcherAltOgHarEndretResultat(setOf(YtelsePersonResultat.AVSLÅTT)) -> Behandlingsresultat.AVSLÅTT_OG_ENDRET
             samledeResultater.matcherAltOgHarBådeEndretOgOpphørtResultat(
                 setOf(YtelsePersonResultat.AVSLÅTT)
             ) -> Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+
             else -> throw ikkeStøttetFeil(samledeResultater)
         }
-    }
 }
 
 private fun kombinerOverlappendeAndelerForSøker(andeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): List<BehandlingsresultatAndelTilkjentYtelse> {
