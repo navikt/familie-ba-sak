@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -43,7 +42,7 @@ class VedtaksperiodeServiceEnhetstest {
         featureToggleService = mockk(),
         utbetalingsperiodeMedBegrunnelserService = mockk(relaxed = true),
         kompetanseRepository = mockk(),
-        andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+        andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
     )
 
     private val person = lagPerson()
@@ -70,7 +69,7 @@ class VedtaksperiodeServiceEnhetstest {
         every { behandlingRepository.finnIverksatteBehandlinger(any()) } returns listOf(behandling, forrigeBehandling)
         every { endringstidspunktService.finnEndringstidpunkForBehandling(vedtak.behandling.id) } returns endringstidspunkt
         every { persongrunnlagService.hentAktiv(any()) } returns
-                lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
+            lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeBehandling.id)
         } returns listOf(ytelseOpphørtSammeMåned)
