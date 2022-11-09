@@ -80,8 +80,8 @@ class OppgaveService(
                 beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
                 enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
                 behandlingstema = when (behandling.underkategori) {
-                    BehandlingUnderkategori.ORDINÆR -> behandling.underkategori.tilOppgaveBehandlingTema().value
-                    BehandlingUnderkategori.UTVIDET -> behandling.underkategori.tilOppgaveBehandlingTema().value
+                    BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET, BehandlingUnderkategori.INSTITUSJON ->
+                        behandling.underkategori.tilOppgaveBehandlingTema().value
                 },
                 behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
                 tilordnetRessurs = tilordnetNavIdent
