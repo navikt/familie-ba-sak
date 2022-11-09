@@ -6,9 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.samhandlereInfoMock
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.samhandler.SamhandlerKlient
-import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ba.tss.SøkSamhandlerInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
