@@ -205,7 +205,7 @@ class OpphørsperiodeTest {
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
             forrigePersonopplysningGrunnlag = personopplysningGrunnlag
-        )
+        ).run (::slåSammenOpphørsperioder)
 
         assertEquals(1, opphørsperioder.size)
         assertEquals(reduksjonFom.nesteMåned(), opphørsperioder[0].periodeFom.toYearMonth())
