@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
@@ -87,7 +88,6 @@ class MigreringService(
     private val secureLog = LoggerFactory.getLogger("secureLogger")
     private val migrertCounter = Metrics.counter("migrering.ok")
     private val migrertUtvidetCounter = Metrics.counter("migrering.utvidet.ok")
-    private val migrertInstitusjonCounter = Metrics.counter("migrering.institusjon.ok")
     private val migrertAvSaksbehandler = Metrics.counter("migrering.saksbehandler")
     private val migrertAvSaksbehandlerNotificationFeil = Metrics.counter("migrering.saksbehandler.send.feilet")
 
@@ -191,7 +191,7 @@ class MigreringService(
             when (underkategori) {
                 BehandlingUnderkategori.ORDINÆR -> migrertCounter.increment()
                 BehandlingUnderkategori.UTVIDET -> migrertUtvidetCounter.increment()
-                BehandlingUnderkategori.INSTITUSJON -> migrertInstitusjonCounter.increment()
+                BehandlingUnderkategori.INSTITUSJON -> throw Feil("Migrering av institusjon er ikke støttet")
             }
             val migreringResponseDto = MigreringResponseDto(
                 fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
