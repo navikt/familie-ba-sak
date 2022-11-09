@@ -36,14 +36,11 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
 object TilkjentYtelseUtils {
-
-    private val logger = LoggerFactory.getLogger(TilkjentYtelseUtils::class.java)
 
     fun beregnTilkjentYtelse(
         vilkårsvurdering: Vilkårsvurdering,
@@ -145,11 +142,11 @@ object TilkjentYtelseUtils {
                             ?: error("Finner ikke barn på map over barna i behandlingen")
                         val beløpsperioder =
                             beregnBeløpsperioder(
-                                overlappendePerioderesultatSøker,
-                                periodeResultatBarn,
-                                innvilgedePeriodeResultatBarna,
-                                innvilgetPeriodeResultatSøker,
-                                person
+                                overlappendePerioderesultatSøker = overlappendePerioderesultatSøker,
+                                periodeResultatBarn = periodeResultatBarn,
+                                innvilgedePeriodeResultatBarna = innvilgedePeriodeResultatBarna,
+                                innvilgetPeriodeResultatSøker = innvilgetPeriodeResultatSøker,
+                                person = person
                             )
                         beløpsperioder.map { beløpsperiode ->
                             val prosent =
