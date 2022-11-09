@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -158,12 +158,13 @@ class BehandlingsresultatService(
             ?.map { personidentService.hentAktør(it.ident) }
             ?: emptyList()
 
-        val utvidetBarnetrygdSøker =
-            if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET) {
-                listOf(behandling.fagsak.aktør)
-            } else {
-                emptyList()
+        val utvidetBarnetrygdSøker = søknadDTO?.let {
+            when (it.underkategori) {
+                BehandlingUnderkategoriDTO.UTVIDET -> listOf(behandling.fagsak.aktør)
+                BehandlingUnderkategoriDTO.INSTITUSJON -> emptyList()
+                BehandlingUnderkategoriDTO.ORDINÆR -> emptyList()
             }
+        } ?: emptyList()
 
         val nyeBarn = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
             .map { it.aktør }

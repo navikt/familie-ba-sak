@@ -147,7 +147,10 @@ class BeregningService(
             barnMedUtbetalingSomIkkeBlittEndretISisteBehandling.intersect(nyeBarnISisteBehandling)
 
         return behandling.resultat == Behandlingsresultat.INNVILGET_OG_OPPHØRT &&
-            behandling.underkategori == BehandlingUnderkategori.ORDINÆR &&
+            when (behandling.underkategori) {
+                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.INSTITUSJON -> true
+                BehandlingUnderkategori.UTVIDET -> false
+            } &&
             behandling.erSøknad() &&
             nyeBarnMedUtebtalingSomIkkeErEndret.isEmpty()
     }

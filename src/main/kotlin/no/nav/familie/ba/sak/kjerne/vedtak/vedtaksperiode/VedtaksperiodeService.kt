@@ -353,6 +353,11 @@ class VedtaksperiodeService(
                     it.kopier(nyVedtaksperiodeMedBegrunnelser)
                 }
             )
+            nyVedtaksperiodeMedBegrunnelser.settEØSBegrunnelser(
+                vedtaksperiodeMedBegrunnelser.eøsBegrunnelser.map {
+                    it.kopier(nyVedtaksperiodeMedBegrunnelser)
+                }
+            )
             nyVedtaksperiodeMedBegrunnelser.settFritekster(
                 vedtaksperiodeMedBegrunnelser.fritekster.map {
                     it.kopier(nyVedtaksperiodeMedBegrunnelser)

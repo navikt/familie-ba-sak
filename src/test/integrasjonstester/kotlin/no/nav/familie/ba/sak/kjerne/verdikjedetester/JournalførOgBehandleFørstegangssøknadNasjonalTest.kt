@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -250,7 +251,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterJournalføring.data!!)
 
-        assertEquals(BehandlingUnderkategori.UTVIDET, aktivBehandling.underkategori)
+        assertEquals(BehandlingUnderkategoriDTO.UTVIDET, aktivBehandling.underkategori)
 
         val restRegistrerSøknad =
             RestRegistrerSøknad(

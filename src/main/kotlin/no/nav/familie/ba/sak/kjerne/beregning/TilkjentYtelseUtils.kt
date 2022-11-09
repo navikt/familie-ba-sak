@@ -36,14 +36,11 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
 object TilkjentYtelseUtils {
-
-    private val logger = LoggerFactory.getLogger(TilkjentYtelseUtils::class.java)
 
     fun beregnTilkjentYtelse(
         vilkårsvurdering: Vilkårsvurdering,
@@ -145,11 +142,11 @@ object TilkjentYtelseUtils {
                             ?: error("Finner ikke barn på map over barna i behandlingen")
                         val beløpsperioder =
                             beregnBeløpsperioder(
-                                overlappendePerioderesultatSøker,
-                                periodeResultatBarn,
-                                innvilgedePeriodeResultatBarna,
-                                innvilgetPeriodeResultatSøker,
-                                person
+                                overlappendePerioderesultatSøker = overlappendePerioderesultatSøker,
+                                periodeResultatBarn = periodeResultatBarn,
+                                innvilgedePeriodeResultatBarna = innvilgedePeriodeResultatBarna,
+                                innvilgetPeriodeResultatSøker = innvilgetPeriodeResultatSøker,
+                                person = person
                             )
                         beløpsperioder.map { beløpsperiode ->
                             val prosent =
@@ -433,12 +430,20 @@ object TilkjentYtelseUtils {
         underkategori: BehandlingUnderkategori,
         personType: PersonType
     ): YtelseType {
-        return if (personType == PersonType.SØKER && underkategori == BehandlingUnderkategori.UTVIDET) {
-            YtelseType.UTVIDET_BARNETRYGD
-        } else if (personType == PersonType.BARN) {
-            YtelseType.ORDINÆR_BARNETRYGD
-        } else {
-            throw Feil("Ikke støttet. Klarte ikke utlede YtelseType for underkategori $underkategori og persontype $personType.")
+        return when (underkategori) {
+            BehandlingUnderkategori.UTVIDET -> when (personType) {
+                PersonType.SØKER -> YtelseType.UTVIDET_BARNETRYGD
+                PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
+                PersonType.ANNENPART -> throw Feil("Utvidet barnetrygd kan ikke værre knyttet til Annen part")
+            }
+            BehandlingUnderkategori.ORDINÆR -> when (personType) {
+                PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
+                PersonType.SØKER, PersonType.ANNENPART -> throw Feil("Ordinær barnetrygd kan bare være knyttet til barn")
+            }
+            BehandlingUnderkategori.INSTITUSJON -> when (personType) {
+                PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
+                PersonType.SØKER, PersonType.ANNENPART -> throw Feil("Institusjon kan ikke være knyttet til noe annet enn barn")
+            }
         }
     }
 

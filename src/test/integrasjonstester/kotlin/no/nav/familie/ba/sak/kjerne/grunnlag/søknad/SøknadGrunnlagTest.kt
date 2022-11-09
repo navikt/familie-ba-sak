@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
@@ -146,7 +147,7 @@ class SøknadGrunnlagTest(
         val søkerAktør = personidentService.hentAktør(søkerIdent)
 
         val søknadDTO = SøknadDTO(
-            underkategori = BehandlingUnderkategori.ORDINÆR,
+            underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
             søkerMedOpplysninger = SøkerMedOpplysninger(
                 ident = søkerIdent
             ),
@@ -227,7 +228,7 @@ class SøknadGrunnlagTest(
             behandling = behandlingEtterVilkårsvurderingSteg,
             restRegistrerSøknad = RestRegistrerSøknad(
                 søknad = SøknadDTO(
-                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
                     søkerMedOpplysninger = SøkerMedOpplysninger(
                         ident = søkerFnr
                     ),
@@ -277,7 +278,7 @@ class SøknadGrunnlagTest(
             behandling = behandlingEtterVilkårsvurderingSteg,
             restRegistrerSøknad = RestRegistrerSøknad(
                 søknad = SøknadDTO(
-                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
                     søkerMedOpplysninger = SøkerMedOpplysninger(
                         ident = søkerFnr
                     ),

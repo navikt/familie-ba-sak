@@ -63,9 +63,13 @@ class BehandlingstemaService(
 
             behandlingHentOgPersisterService.lagreEllerOppdater(behandling).also { lagretBehandling ->
                 oppgaveService.patchOppgaverForBehandling(lagretBehandling) {
-                    if (it.behandlingstema != lagretBehandling.underkategori.tilOppgaveBehandlingTema().value || it.behandlingstype != lagretBehandling.kategori.tilOppgavebehandlingType().value) {
+                    val lagretUnderkategori = lagretBehandling.underkategori
+                    if (it.behandlingstema != lagretUnderkategori.tilOppgaveBehandlingTema().value || it.behandlingstype != lagretBehandling.kategori.tilOppgavebehandlingType().value) {
                         it.copy(
-                            behandlingstema = lagretBehandling.underkategori.tilOppgaveBehandlingTema().value,
+                            behandlingstema = when (lagretUnderkategori) {
+                                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET, BehandlingUnderkategori.INSTITUSJON ->
+                                    behandling.underkategori.tilOppgaveBehandlingTema().value
+                            },
                             behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value
                         )
                     } else {
