@@ -51,7 +51,7 @@ class BehandlingsresultatUtilsTest {
             Behandlingsresultat.IKKE_VURDERT
         ).forEach {
             val feil = assertThrows<FunksjonellFeil> {
-                BehandlingsresultatUtils.validerBehandlingsresultat(behandling, it)
+                validerBehandlingsresultat(behandling, it)
             }
             assertTrue(feil.message?.contains("ugyldig") ?: false)
         }
@@ -62,7 +62,7 @@ class BehandlingsresultatUtilsTest {
         val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
 
         val feil = assertThrows<FunksjonellFeil> {
-            BehandlingsresultatUtils.validerBehandlingsresultat(behandling, Behandlingsresultat.IKKE_VURDERT)
+            validerBehandlingsresultat(behandling, Behandlingsresultat.IKKE_VURDERT)
         }
         assertTrue(feil.message?.contains("ugyldig") ?: false)
     }

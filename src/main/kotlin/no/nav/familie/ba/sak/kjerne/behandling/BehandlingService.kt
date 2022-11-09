@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoServ
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.validerBehandlingsresultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -232,7 +232,7 @@ class BehandlingService(
 
     fun oppdaterBehandlingsresultat(behandlingId: Long, resultat: Behandlingsresultat): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        BehandlingsresultatUtils.validerBehandlingsresultat(behandling, resultat)
+        validerBehandlingsresultat(behandling, resultat)
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
         loggService.opprettVilkårsvurderingLogg(
