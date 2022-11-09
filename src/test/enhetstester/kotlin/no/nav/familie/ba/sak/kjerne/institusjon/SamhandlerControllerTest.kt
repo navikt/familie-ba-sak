@@ -8,11 +8,14 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.samhandlereInfoMock
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.samhandler.SamhandlerKlient
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ba.tss.SøkSamhandlerInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
 
 internal class SamhandlerControllerTest {
 
@@ -38,7 +41,7 @@ internal class SamhandlerControllerTest {
 
     @Test
     fun `Kaster feilmelding hvis det ikke fins organisasjon med gitt orgnr`() {
-        every { samhandlerKlientMock.hentSamhandler(any()) } throws IntegrasjonException("fant ikke")
+        every { samhandlerKlientMock.hentSamhandler(any()) } throws HttpClientErrorException(HttpStatus.NOT_FOUND)
         val feil = assertThrows<FunksjonellFeil> {
             samhandlerController.hentSamhandlerDataForOrganisasjon("123456789")
         }

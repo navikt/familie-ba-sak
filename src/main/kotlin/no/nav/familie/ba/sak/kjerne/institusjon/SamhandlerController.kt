@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.institusjon
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ba.tss.SamhandlerInfo
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.client.HttpClientErrorException
 
 @RestController
 @RequestMapping("/api/samhandler")
@@ -27,12 +29,18 @@ class SamhandlerController(
     ): Ressurs<SamhandlerInfo> = try {
         Ressurs.success(institusjonService.hentSamhandler(orgNummer).copy(orgNummer = orgNummer))
     } catch (e: Exception) {
-        throw FunksjonellFeil(
-            "Finner ikke institusjon. Kontakt NØS for å opprette TSS-ident.",
-            httpStatus = HttpStatus.BAD_REQUEST,
-            throwable = e
-        )
+        if (e.erNotFound()) {
+            throw FunksjonellFeil(
+                "Finner ikke institusjon. Kontakt NØS for å opprette TSS-ident.",
+                httpStatus = HttpStatus.NOT_FOUND,
+                throwable = e
+            )
+        }
+        throw e
     }
+
+    fun Exception.erNotFound() = (this is RessursException && httpStatus == HttpStatus.NOT_FOUND) ||
+        (this is HttpClientErrorException && statusCode == HttpStatus.NOT_FOUND)
 
     @PostMapping(path = ["/navn"])
     fun søkSamhandlerinfoFraNavn(
