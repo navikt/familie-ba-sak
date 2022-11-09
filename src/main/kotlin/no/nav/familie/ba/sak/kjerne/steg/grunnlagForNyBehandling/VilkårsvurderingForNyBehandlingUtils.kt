@@ -114,11 +114,11 @@ data class VilkårsvurderingForNyBehandlingUtils(
             val ytelseType = when (person.type) {
                 PersonType.SØKER -> when (vilkårsvurdering.behandling.underkategori) {
                     BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
-                    BehandlingUnderkategori.ORDINÆR -> YtelseType.ORDINÆR_BARNETRYGD
+                    BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.INSTITUSJON -> YtelseType.ORDINÆR_BARNETRYGD
                 }
                 PersonType.BARN, PersonType.ANNENPART -> when (vilkårsvurdering.behandling.underkategori) {
                     BehandlingUnderkategori.UTVIDET -> YtelseType.ORDINÆR_BARNETRYGD // Er ikke dette en feilsituasjon? Ref TilkjentYtelseUtils.finnYtelseType
-                    BehandlingUnderkategori.ORDINÆR -> YtelseType.ORDINÆR_BARNETRYGD
+                    BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.INSTITUSJON -> YtelseType.ORDINÆR_BARNETRYGD
                 }
             }
 

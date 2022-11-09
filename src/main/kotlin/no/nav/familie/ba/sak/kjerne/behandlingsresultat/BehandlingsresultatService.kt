@@ -161,6 +161,7 @@ class BehandlingsresultatService(
         val utvidetBarnetrygdSøker = søknadDTO?.let {
             when (it.underkategori) {
                 BehandlingUnderkategoriDTO.UTVIDET -> listOf(behandling.fagsak.aktør)
+                BehandlingUnderkategoriDTO.INSTITUSJON -> emptyList()
                 BehandlingUnderkategoriDTO.ORDINÆR -> emptyList()
             }
         } ?: emptyList()
