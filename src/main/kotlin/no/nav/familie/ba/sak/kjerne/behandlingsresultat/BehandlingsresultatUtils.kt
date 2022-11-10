@@ -41,6 +41,7 @@ object BehandlingsresultatUtils {
                 PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(
                     andelerFraForrigeTilkjentYtelse.filter { it.aktør == aktør }
                 )
+
                 else -> andelerFraForrigeTilkjentYtelse.filter { it.aktør == aktør }
                     .map { andelTilkjentYtelse ->
                         BehandlingsresultatAndelTilkjentYtelse(
@@ -65,7 +66,10 @@ object BehandlingsresultatUtils {
         )
     }
 
-    fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): Behandlingsresultat {
+    fun utledBehandlingsresultatBasertPåYtelsePersoner(
+        ytelsePersoner: List<YtelsePerson>,
+        erUtvidaBarnetrygdEndra: Boolean = false
+    ): Behandlingsresultat {
         validerYtelsePersoner(ytelsePersoner)
 
         val samledeResultater = ytelsePersoner.flatMap { it.resultater }.toMutableSet()
@@ -90,7 +94,7 @@ object BehandlingsresultatUtils {
 
         val opphørSomFørerTilEndring =
             altOpphører && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling && !kunFortsattOpphørt
-        if (opphørSomFørerTilEndring) {
+        if (opphørSomFørerTilEndring || erUtvidaBarnetrygdEndra) {
             samledeResultater.add(YtelsePersonResultat.ENDRET_UTBETALING)
         }
 

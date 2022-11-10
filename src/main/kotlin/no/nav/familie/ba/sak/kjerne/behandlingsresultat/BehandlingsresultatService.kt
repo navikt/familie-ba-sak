@@ -72,6 +72,7 @@ class BehandlingsresultatService(
                     vilkårsvurdering.personResultater
                         .flatMap { personResultat -> personResultat.vilkårResultater }
                         .any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
                 PersonType.BARN -> true
                 PersonType.ANNENPART -> false
             }
@@ -110,8 +111,17 @@ class BehandlingsresultatService(
                 .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() }
         }
 
+        val erUtvidaBarnetrygdEndra = andelerMedEndringer.filter { it.erUtvidet() }
+            .map { Pair(it, forrigeAndelerMedEndringer.filter { it.erUtvidet() }.find { f -> f.andel.aktør == it.andel.aktør }) }
+            .filter { it.second != null }
+            .any { pair ->
+                (pair.second!!.andel.stønadFom != pair.first.stønadFom || pair.second!!.andel.stønadTom != pair.first.andel.stønadTom)
+            }
         val behandlingsresultat =
-            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                ytelsePersonerMedResultat,
+                erUtvidaBarnetrygdEndra
+            )
         secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat")
         logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $behandlingsresultat")
 
@@ -134,6 +144,7 @@ class BehandlingsresultatService(
                     )
                 }
             }
+
             FagsakType.INSTITUSJON -> {
                 val ytelseType = ytelsePersoner.single().ytelseType
                 if (ytelseType != YtelseType.ORDINÆR_BARNETRYGD) {
@@ -142,6 +153,7 @@ class BehandlingsresultatService(
                     )
                 }
             }
+
             FagsakType.BARN_ENSLIG_MINDREÅRIG -> {
                 ytelsePersoner.single()
             }
