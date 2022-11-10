@@ -508,7 +508,7 @@ class VedtaksperiodeService(
         )
     }
 
-    fun hentOpphørsperioder(behandling: Behandling, endringstidspunkt: LocalDate? = null): List<Opphørsperiode> {
+    fun hentOpphørsperioder(behandling: Behandling, endringstidspunkt: LocalDate = TIDENES_MORGEN): List<Opphørsperiode> {
         if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
 
         val iverksatteBehandlinger =
@@ -546,7 +546,7 @@ class VedtaksperiodeService(
             andelerTilkjentYtelse = andelerTilkjentYtelse
         )
         val (perioderFørEndringstidspunkt, fraEndringstidspunktOgUtover) =
-            alleOpphørsperioder.partition { it.periodeFom.isBefore(endringstidspunkt ?: TIDENES_MORGEN) }
+            alleOpphørsperioder.partition { it.periodeFom.isBefore(endringstidspunkt) }
 
         return perioderFørEndringstidspunkt + slåSammenOpphørsperioder(fraEndringstidspunktOgUtover)
     }
