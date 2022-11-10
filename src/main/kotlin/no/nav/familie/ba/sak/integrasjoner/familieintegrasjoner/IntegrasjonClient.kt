@@ -234,6 +234,23 @@ class IntegrasjonClient(
         }
     }
 
+    fun tilordneEnhetForOppgave(oppgaveId: Long, nyEnhet: String): OppgaveResponse {
+        val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/enhet/$nyEnhet")
+        val uri = UriComponentsBuilder.fromUri(baseUri).queryParam("fjernMappeFraOppgave", true).build()
+            .toUri() // fjerner alltid mappe fra Barnetrygd siden hver enhet sin mappestruktur
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = "oppgave",
+            uri = uri,
+            formål = "Bytt enhet"
+        ) {
+            patchForEntity(
+                uri,
+                HttpHeaders().medContentTypeJsonUTF8()
+            )
+        }
+    }
+
     fun finnOppgaveMedId(oppgaveId: Long): Oppgave {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
 
