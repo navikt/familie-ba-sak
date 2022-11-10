@@ -59,10 +59,21 @@ object TilkjentYtelseUtils {
 
         val andelerTilkjentYtelseBarnaUtenEndringer = beregnAndelerTilkjentYtelseForBarna(
             personopplysningGrunnlag = personopplysningGrunnlag,
-            vilkårsvurdering = vilkårsvurdering,
-            tilkjentYtelse = tilkjentYtelse,
-            behandlingUnderkategori = behandling.underkategori
-        )
+            vilkårsvurdering = vilkårsvurdering
+        ).map {
+            AndelTilkjentYtelse(
+                behandlingId = vilkårsvurdering.behandling.id,
+                tilkjentYtelse = tilkjentYtelse,
+                aktør = it.person.aktør,
+                stønadFom = it.stønadFom,
+                stønadTom = it.stønadTom,
+                kalkulertUtbetalingsbeløp = it.beløp,
+                nasjonaltPeriodebeløp = it.beløp,
+                type = finnYtelseType(behandling.underkategori, it.person.type),
+                sats = it.sats,
+                prosent = it.prosent
+            )
+        }
 
         val barnasAndelerInkludertEtterbetaling3ÅrEndringer = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
@@ -118,12 +129,10 @@ object TilkjentYtelseUtils {
         barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ): Boolean = utvidetAndeler.isNotEmpty() && barnasAndeler.isNotEmpty()
 
-    fun beregnAndelerTilkjentYtelseForBarna(
+    internal fun beregnAndelerTilkjentYtelseForBarna(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        vilkårsvurdering: Vilkårsvurdering,
-        tilkjentYtelse: TilkjentYtelse,
-        behandlingUnderkategori: BehandlingUnderkategori
-    ): List<AndelTilkjentYtelse> {
+        vilkårsvurdering: Vilkårsvurdering
+    ): List<BeregnetAndel> {
         val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
 
         val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
@@ -152,15 +161,11 @@ object TilkjentYtelseUtils {
                             val prosent =
                                 if (periodeResultatBarn.erDeltBostedSomSkalDeles()) BigDecimal(50) else BigDecimal(100)
                             val nasjonaltPeriodebeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent)
-                            AndelTilkjentYtelse(
-                                behandlingId = vilkårsvurdering.behandling.id,
-                                tilkjentYtelse = tilkjentYtelse,
-                                aktør = person.aktør,
+                            BeregnetAndel(
+                                person = person,
                                 stønadFom = beløpsperiode.fraOgMed,
                                 stønadTom = beløpsperiode.tilOgMed,
-                                kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp,
-                                nasjonaltPeriodebeløp = nasjonaltPeriodebeløp,
-                                type = finnYtelseType(behandlingUnderkategori, person.type),
+                                beløp = nasjonaltPeriodebeløp,
                                 sats = beløpsperiode.sats,
                                 prosent = prosent
                             )
@@ -522,3 +527,12 @@ private fun slåSammenEtterfølgendePerioderMedSammeBeløp(
     }
     return sammenlagt
 }
+
+internal data class BeregnetAndel(
+    val person: Person,
+    val stønadFom: YearMonth,
+    val stønadTom: YearMonth,
+    val beløp: Int,
+    val sats: Int,
+    val prosent: BigDecimal
+)

@@ -14,3 +14,6 @@ fun <I, T : Tidsenhet> konkatenerTidslinjer(vararg tidslinje: Tidslinje<I, T>) =
             else -> it.single { it != null }
         }
     }
+
+operator fun <I, T : Tidsenhet> Tidslinje<I, T>.plus(tidslinje: Tidslinje<I, T>): Tidslinje<I, T> =
+    konkatenerTidslinjer(this, tidslinje)
