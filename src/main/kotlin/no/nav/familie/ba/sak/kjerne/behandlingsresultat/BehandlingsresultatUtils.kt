@@ -68,7 +68,7 @@ object BehandlingsresultatUtils {
 
     fun utledBehandlingsresultatBasertPåYtelsePersoner(
         ytelsePersoner: List<YtelsePerson>,
-        erUtvidaBarnetrygdEndra: Boolean = false
+        erUtvidaBarnetrygdEndra: Boolean
     ): Behandlingsresultat {
         validerYtelsePersoner(ytelsePersoner)
 
