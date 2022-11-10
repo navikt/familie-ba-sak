@@ -58,7 +58,7 @@ class JournalførVedtaksbrev(
         }
 
         val behanlendeEnhet =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
 
         val mottaker = if (fagsak.type == FagsakType.INSTITUSJON) {
             mutableListOf(MottakerInfo(fagsak.institusjon!!.orgNummer, BrukerIdType.ORGNR, false))

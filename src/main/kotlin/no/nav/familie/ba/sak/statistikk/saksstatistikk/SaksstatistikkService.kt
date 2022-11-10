@@ -58,11 +58,12 @@ class SaksstatistikkService(
             BehandlingÅrsak.SØKNAD -> {
                 behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId) ?: behandling.opprettetTidspunkt
             }
+
             else -> behandling.opprettetTidspunkt
         }
 
         val behandlendeEnhetsKode =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
         val ansvarligEnhetKode = arbeidsfordelingService.hentArbeidsfordelingsenhet(behandling).enhetId
 
         val aktivtVedtak = vedtakService.hentAktivForBehandling(behandlingId)

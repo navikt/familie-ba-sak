@@ -189,7 +189,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
     }
@@ -203,7 +203,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(
@@ -218,7 +218,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistrering =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
     }
 
@@ -231,7 +231,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(
@@ -246,7 +246,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistrering =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(FORTROLIG_ENHET, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
     }
 
@@ -259,7 +259,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(
@@ -274,7 +274,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(
             IKKE_FORTROLIG_ENHET,
             arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode.behandlendeEnhetId
@@ -295,7 +295,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(
             FORTROLIG_ENHET,
             arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode.behandlendeEnhetId
@@ -311,7 +311,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(
@@ -334,7 +334,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistrering =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(MANUELT_OVERSTYRT_ENHET, arbeidsfordelingPåBehandlingEtterSøknadsregistrering.behandlendeEnhetId)
     }
 
@@ -347,7 +347,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         val arbeidsfordelingPåBehandling =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         oppgaveService.opprettOppgave(behandling.id, Oppgavetype.BehandleSak, now())
@@ -364,11 +364,11 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         verify(exactly = 1) {
-            oppgaveService.patchOppgave(any())
+            integrasjonClient.tilordneEnhetForOppgave(any(), any())
         }
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(
             FORTROLIG_ENHET,
             arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode.behandlendeEnhetId

@@ -291,7 +291,7 @@ class BrevService(
             behandling = vedtak.behandling,
             totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
         )
-        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
+        val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
         return GrunnlagOgSignaturData(
             grunnlag = personopplysningGrunnlag,
             saksbehandler = saksbehandler,
