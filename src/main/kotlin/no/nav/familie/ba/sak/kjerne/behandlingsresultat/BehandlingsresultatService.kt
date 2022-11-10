@@ -110,16 +110,26 @@ class BehandlingsresultatService(
                 .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() }
         }
 
-        val behandlingsresultat =
-            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-                ytelsePersonerMedResultat,
-                erUtvidaBarnetrygdEndra(andelerMedEndringer, forrigeAndelerMedEndringer)
-            )
-        secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat")
-        logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $behandlingsresultat")
-
-        return behandlingsresultat
+        return utledBehandlingsresultat(
+            ytelsePersonerMedResultat,
+            andelerMedEndringer,
+            forrigeAndelerMedEndringer,
+            behandling
+        )
     }
+
+    internal fun utledBehandlingsresultat(
+        ytelsePersonerMedResultat: List<YtelsePerson>,
+        andelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        behandling: Behandling
+    ) =
+        BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+            ytelsePersonerMedResultat,
+            erUtvidaBarnetrygdEndra(andelerMedEndringer, forrigeAndelerMedEndringer)
+        )
+            .also { secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat") }
+            .also { logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $it") }
 
     private fun erUtvidaBarnetrygdEndra(
         andelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
