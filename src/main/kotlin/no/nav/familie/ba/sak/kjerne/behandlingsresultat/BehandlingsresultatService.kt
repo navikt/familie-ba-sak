@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -111,22 +112,31 @@ class BehandlingsresultatService(
                 .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() }
         }
 
-        val erUtvidaBarnetrygdEndra = andelerMedEndringer.filter { it.erUtvidet() }
-            .map { Pair(it, forrigeAndelerMedEndringer.filter { it.erUtvidet() }.find { f -> f.andel.aktør == it.andel.aktør }) }
-            .filter { it.second != null }
-            .any { pair ->
-                (pair.second!!.andel.stønadFom != pair.first.stønadFom || pair.second!!.andel.stønadTom != pair.first.andel.stønadTom)
-            }
         val behandlingsresultat =
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 ytelsePersonerMedResultat,
-                erUtvidaBarnetrygdEndra
+                erUtvidaBarnetrygdEndra(andelerMedEndringer, forrigeAndelerMedEndringer)
             )
         secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat")
         logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $behandlingsresultat")
 
         return behandlingsresultat
     }
+
+    private fun erUtvidaBarnetrygdEndra(
+        andelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+    ) = andelerMedEndringer.filter { it.erUtvidet() }
+        .map {
+            Pair(
+                it,
+                forrigeAndelerMedEndringer.filter { f -> f.erUtvidet() }.find { f -> f.andel.aktør == it.andel.aktør }
+            )
+        }
+        .filter { it.second != null }
+        .any { pair ->
+            (pair.second!!.andel.stønadFom != pair.first.stønadFom || pair.second!!.andel.stønadTom != pair.first.andel.stønadTom)
+        }
 
     private fun validerYtelsePersoner(behandling: Behandling, ytelsePersoner: List<YtelsePerson>) {
         when (behandling.fagsak.type) {
