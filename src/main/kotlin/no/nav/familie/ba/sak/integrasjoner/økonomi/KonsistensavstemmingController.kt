@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -24,7 +24,7 @@ import javax.transaction.Transactional
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class KonsistensavstemmingController(
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val batchRepository: BatchRepository
 ) {
 
@@ -52,7 +52,7 @@ class KonsistensavstemmingController(
     ): Pair<UUID, Task> {
         val transaksjonsId = UUID.randomUUID()
         val batch = batchRepository.saveAndFlush(Batch(kjøreDato = LocalDate.now(), status = KjøreStatus.MANUELL))
-        val task = taskRepository.save(
+        val task = taskService.save(
             Task(
                 type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
