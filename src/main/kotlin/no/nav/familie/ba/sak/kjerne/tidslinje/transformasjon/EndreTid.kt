@@ -3,11 +3,10 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.Innholdsresultat.Companion.utenInnhold
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tilInnhold
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tilVerdi
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
@@ -79,9 +78,7 @@ fun <I, R> Tidslinje<I, Dag>.tilMånedFraMånedsskifteIkkeNull(
     val innholdSisteDagForrigeMåned = innholdsresultatForTidspunkt(måned.forrige().tilSisteDagIMåneden())
     val innholdFørsteDagDenneMåned = innholdsresultatForTidspunkt(måned.tilFørsteDagIMåneden())
 
-    innholdSisteDagForrigeMåned
-        .mapVerdi { s -> innholdFørsteDagDenneMåned.mapVerdi { mapper(s, it) } }
-        ?.let { it.tilInnhold() } ?: utenInnhold()
+    innholdSisteDagForrigeMåned.mapVerdi { s -> innholdFørsteDagDenneMåned.mapVerdi { mapper(s, it) } }.tilVerdi()
 }
 
 /**
