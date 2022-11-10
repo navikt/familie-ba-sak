@@ -140,7 +140,7 @@ class OppgaveService(
         }
     }
 
-    fun endretTilordnetEnhetPåOppgaverForBehandling(behandling: Behandling, nyEnhet: String) {
+    fun endreTilordnetEnhetPåOppgaverForBehandling(behandling: Behandling, nyEnhet: String) {
         hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
             val oppgave = hentOppgave(dbOppgave.gsakId.toLong())
             logger.info("Oppdaterer enhet fra ${oppgave.tildeltEnhetsnr} til $nyEnhet på oppgave ${oppgave.id}")

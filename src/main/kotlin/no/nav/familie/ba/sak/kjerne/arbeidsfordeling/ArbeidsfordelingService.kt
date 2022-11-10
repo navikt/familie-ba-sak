@@ -160,7 +160,7 @@ class ArbeidsfordelingService(
                 begrunnelse = begrunnelse
             )
 
-            oppgaveService.endretTilordnetEnhetPåOppgaverForBehandling(
+            oppgaveService.endreTilordnetEnhetPåOppgaverForBehandling(
                 behandling,
                 oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId
             )
