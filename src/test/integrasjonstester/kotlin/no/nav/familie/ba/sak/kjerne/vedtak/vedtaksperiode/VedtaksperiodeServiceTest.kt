@@ -558,7 +558,6 @@ class VedtaksperiodeServiceTest(
     @Test
     fun `generere vedtaksperioder basert på manuelt overstyrt endringstidspunkt`() {
         val vedtak = lagVedtak()
-        val behandlingId = vedtak.behandling.id
         val avslagsperioder = listOf(
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak,
@@ -582,10 +581,8 @@ class VedtaksperiodeServiceTest(
             )
         )
         val vedtaksperioder = vedtaksperiodeService.filtrerUtPerioderBasertPåEndringstidspunkt(
-            behandlingId = behandlingId,
             vedtaksperioderMedBegrunnelser = utbetalingsperioder,
-            gjelderFortsattInnvilget = false,
-            manueltOverstyrtEndringstidspunkt = LocalDate.of(2021, 3, 1)
+            endringstidspunkt = LocalDate.of(2021, 3, 1)
         ) + avslagsperioder
 
         assertNotNull(vedtaksperioder)
