@@ -108,6 +108,9 @@ class IntegrasjonClientMock {
             every { mockIntegrasjonClient.patchOppgave(any()) } returns
                 OppgaveResponse(12345678L)
 
+            every { mockIntegrasjonClient.tilordneEnhetForOppgave(any(), any()) } returns
+                OppgaveResponse(12345678L)
+
             every { mockIntegrasjonClient.fordelOppgave(any(), any()) } returns
                 OppgaveResponse(12345678L)
 
