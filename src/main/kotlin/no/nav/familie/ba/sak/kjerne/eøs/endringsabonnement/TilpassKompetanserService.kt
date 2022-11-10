@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -134,8 +135,9 @@ private fun Map<Aktør, Tidslinje<RegelverkResultat, Måned>>.tilBarnasEøsRegel
     }
 
 private fun <I, T : Tidsenhet> Tidslinje<I, T>.forlengFremtidTilUendelig(nå: Tidspunkt<T>): Tidslinje<I, T> {
-    return if (this.tilOgMed() > nå) {
-        this.flyttTilOgMed(this.tilOgMed().somUendeligLengeTil())
+    val tilOgMed = this.tilOgMed()
+    return if (tilOgMed != null && tilOgMed > nå) {
+        this.flyttTilOgMed(tilOgMed.somUendeligLengeTil())
     } else {
         this
     }
@@ -143,8 +145,9 @@ private fun <I, T : Tidsenhet> Tidslinje<I, T>.forlengFremtidTilUendelig(nå: Ti
 
 private fun <I, T : Tidsenhet> Tidslinje<I, T>.flyttTilOgMed(tilTidspunkt: Tidspunkt<T>): Tidslinje<I, T> {
     val tidslinje = this
+    val fraOgMed = tidslinje.fraOgMed()
 
-    return if (tilTidspunkt < tidslinje.fraOgMed()) {
+    return if (fraOgMed == null || tilTidspunkt < fraOgMed) {
         TomTidslinje()
     } else {
         object : Tidslinje<I, T>() {

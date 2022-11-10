@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.forrige
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.neste
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import java.time.LocalDate
 import java.time.YearMonth
