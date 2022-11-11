@@ -7,7 +7,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -21,7 +21,7 @@ import java.util.Properties
 )
 class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
     val avstemmingService: AvstemmingService,
-    val taskRepository: TaskRepository
+    val taskService: TaskService
 ) :
     AsyncTaskStep {
 
@@ -64,7 +64,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
                 this["transaksjonsId"] = taskDto.transaksjonsId.toString()
             }
         )
-        taskRepository.save(konsistensavstemmingDataTask)
+        taskService.save(konsistensavstemmingDataTask)
     }
 
     companion object {
