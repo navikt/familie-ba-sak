@@ -64,6 +64,11 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
             return this
         }
 
+        fun medUtdypendeVilkår(tidslinje: Tidslinje<UtdypendeVilkårRegelverkResultat, T>): PersonResultatBuilder<T> {
+            vilkårsresultatTidslinjer.add(tidslinje)
+            return this
+        }
+
         fun forPerson(person: Person, startTidspunkt: Tidspunkt<T>): PersonResultatBuilder<T> {
             return byggPerson().forPerson(person, startTidspunkt)
         }
