@@ -16,6 +16,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilMånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.neste
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilYearMonthEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -531,21 +534,41 @@ class PersonResultatTest {
             )
         )
 
-        val under18årVilkårTidslinje: Tidslinje<VilkårResultat, Måned> = tidslinje { under18VilkårResultat.map { Periode(fraOgMed = it.periodeFom!!.tilMånedTidspunkt().neste(), tilOgMed = it.periodeTom!!.tilMånedTidspunkt(), innhold = it) } }
+        val under18årVilkårTidslinje: Tidslinje<VilkårResultat, Måned> = tidslinje {
+            under18VilkårResultat.map {
+                Periode(
+                    fraOgMed = it.periodeFom!!.tilMånedTidspunkt().neste(),
+                    tilOgMed = it.periodeTom!!.tilMånedTidspunkt(),
+                    innhold = it
+                )
+            }
+        }
 
         val under18PerioderFørBeskjæring = under18årVilkårTidslinje.perioder()
 
         Assertions.assertEquals(1, under18PerioderFørBeskjæring.size)
-        Assertions.assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), under18PerioderFørBeskjæring.first().fraOgMed.tilYearMonth())
-        Assertions.assertEquals(barn.fødselsdato.plusYears(18).toYearMonth(), under18PerioderFørBeskjæring.first().tilOgMed.tilYearMonth())
+        Assertions.assertEquals(
+            barn.fødselsdato.plusMonths(1).toYearMonth(),
+            under18PerioderFørBeskjæring.first().fraOgMed.tilYearMonth()
+        )
+        Assertions.assertEquals(
+            barn.fødselsdato.plusYears(18).toYearMonth(),
+            under18PerioderFørBeskjæring.first().tilOgMed.tilYearMonth()
+        )
 
         val tidslinjeBeskåret = under18årVilkårTidslinje.beskjærPå18År(barn.fødselsdato)
 
         val under18PerioderEtterBeskjæring = tidslinjeBeskåret.perioder()
 
         Assertions.assertEquals(1, under18PerioderEtterBeskjæring.size)
-        Assertions.assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), under18PerioderEtterBeskjæring.first().fraOgMed.tilYearMonth())
-        Assertions.assertEquals(barn.fødselsdato.plusYears(18).minusMonths(1).toYearMonth(), under18PerioderEtterBeskjæring.first().tilOgMed.tilYearMonth())
+        Assertions.assertEquals(
+            barn.fødselsdato.plusMonths(1).toYearMonth(),
+            under18PerioderEtterBeskjæring.first().fraOgMed.tilYearMonth()
+        )
+        Assertions.assertEquals(
+            barn.fødselsdato.plusYears(18).minusMonths(1).toYearMonth(),
+            under18PerioderEtterBeskjæring.first().tilOgMed.tilYearMonth()
+        )
     }
 
     @Test
@@ -618,7 +641,12 @@ class PersonResultatTest {
                 fom = oktober2020.førsteDagIInneværendeMåned(),
                 tom = null,
                 maksTom = barn1.fødselsdato.til18ÅrsVilkårsdato(),
-                generiskeVilkår = listOf(Vilkår.BOSATT_I_RIKET, Vilkår.BOR_MED_SØKER, Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP),
+                generiskeVilkår = listOf(
+                    Vilkår.BOSATT_I_RIKET,
+                    Vilkår.BOR_MED_SØKER,
+                    Vilkår.UNDER_18_ÅR,
+                    Vilkår.GIFT_PARTNERSKAP
+                ),
                 spesielleVilkår = setOf(
                     lagVilkårResultat(
                         periodeFom = mars2021.førsteDagIInneværendeMåned(),
@@ -663,7 +691,11 @@ class PersonResultatTest {
         assertPeriode(periode = periode4, forventetFom = desember2021.plusMonths(1), forventetTom = mai2022)
     }
 
-    private fun assertPeriode(periode: Periode<List<VilkårResultat>, Måned>, forventetFom: YearMonth, forventetTom: YearMonth) {
+    private fun assertPeriode(
+        periode: Periode<List<VilkårResultat>, Måned>,
+        forventetFom: YearMonth,
+        forventetTom: YearMonth
+    ) {
         Assertions.assertEquals(forventetFom, periode.fraOgMed.tilYearMonth())
         Assertions.assertEquals(forventetTom, periode.tilOgMed.tilYearMonth())
     }
@@ -672,7 +704,12 @@ class PersonResultatTest {
         fom: LocalDate,
         tom: LocalDate? = null,
         spesielleVilkår: Set<VilkårResultat> = emptySet(),
-        generiskeVilkår: List<Vilkår> = listOf(Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP),
+        generiskeVilkår: List<Vilkår> = listOf(
+            Vilkår.BOSATT_I_RIKET,
+            Vilkår.LOVLIG_OPPHOLD,
+            Vilkår.UNDER_18_ÅR,
+            Vilkår.GIFT_PARTNERSKAP
+        ),
         maksTom: LocalDate? = null,
         personResultat: PersonResultat? = null
     ): Set<VilkårResultat> {

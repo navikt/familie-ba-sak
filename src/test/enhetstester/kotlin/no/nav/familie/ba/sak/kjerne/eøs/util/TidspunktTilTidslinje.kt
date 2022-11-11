@@ -17,5 +17,7 @@ fun <T : Tidsenhet, I> TidspunktClosedRange<T>.tilTidslinje(innhold: () -> I): T
     }
 }
 
+infix fun <T : Tidsenhet, I> TidspunktClosedRange<T>.med(innhold: () -> I): Tidslinje<I, T> = this.tilTidslinje(innhold)
+
 fun <T : Tidsenhet, I> Tidspunkt<T>.tilTidslinje(innhold: () -> I): Tidslinje<I, T> =
     this.rangeTo(this).tilTidslinje(innhold)

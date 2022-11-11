@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.transaction.annotation.Transactional
@@ -29,7 +29,7 @@ import java.time.LocalDate
 class RettOffsetController(
     val task: RettOffsetIAndelTilkjentYtelseTask,
     val behandlingRepository: BehandlingRepository,
-    val taskRepository: TaskRepository,
+    val taskService: TaskService,
     val beregningService: BeregningService
 ) {
 
@@ -77,7 +77,7 @@ class RettOffsetController(
                 behandlinger = it.toSet()
             )
 
-            taskRepository.save(
+            taskService.save(
                 Task(
                     type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(input)
@@ -98,7 +98,7 @@ class RettOffsetController(
                 behandlinger = it.toSet()
             )
 
-            taskRepository.save(
+            taskService.save(
                 Task(
                     type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(input)
@@ -120,7 +120,7 @@ class RettOffsetController(
                 behandlinger = it.toSet()
             )
 
-            taskRepository.save(
+            taskService.save(
                 Task(
                     type = RettOffsetIAndelTilkjentYtelseTask.TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(input)

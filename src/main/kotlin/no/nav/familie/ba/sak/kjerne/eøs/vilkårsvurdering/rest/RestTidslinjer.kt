@@ -8,16 +8,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTids
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMedEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
@@ -116,10 +114,7 @@ enum class BeregningOppsummeringStatus {
 
 fun tilfeldigOppsummering(regelverkResultatTidslinje: Tidslinje<RegelverkResultat, Måned>):
     List<RestTidslinjePeriode<BeregningOppsummering>> {
-    val tilfeldigTidslinje = tilfeldigIntTidslinje(
-        regelverkResultatTidslinje.fraOgMed(),
-        regelverkResultatTidslinje.tilOgMed()
-    )
+    val tilfeldigTidslinje = tilfeldigIntTidslinje(regelverkResultatTidslinje.tidsrom())
 
     return regelverkResultatTidslinje
         .kombinerMed(tilfeldigTidslinje) { regelverkResultat, rnd ->
@@ -141,14 +136,13 @@ fun tilfeldigOppsummering(regelverkResultatTidslinje: Tidslinje<RegelverkResulta
 }
 
 fun <T : Tidsenhet> tilfeldigIntTidslinje(
-    fraOgMed: Tidspunkt<T>,
-    tilOgMed: Tidspunkt<T>
+    tidsrom: Iterable<Tidspunkt<T>>
 ): Tidslinje<Int, T> {
     val random = Random()
 
     return object : Tidslinje<Int, T>() {
         override fun lagPerioder(): Collection<Periode<Int, T>> {
-            return (fraOgMed..tilOgMed).map { Periode(it, it, random.nextInt()) }
+            return tidsrom.map { Periode(it, it, random.nextInt()) }
         }
     }
 }

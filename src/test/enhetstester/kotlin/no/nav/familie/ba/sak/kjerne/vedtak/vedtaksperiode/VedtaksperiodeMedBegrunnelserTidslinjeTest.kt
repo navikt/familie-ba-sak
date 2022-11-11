@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.PRAKTISK_SENESTE_DAG
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.PRAKTISK_TIDLIGSTE_DAG
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -37,8 +35,8 @@ class VedtaksperiodeMedBegrunnelserTidslinjeTest {
         val periode1 = perioderFraTidslinje.first()
         val periode2 = perioderFraTidslinje.last()
 
-        Assertions.assertEquals(Tidspunkt.uendeligLengeSiden(PRAKTISK_TIDLIGSTE_DAG), periode1.fraOgMed)
-        Assertions.assertEquals(Tidspunkt.uendeligLengeTil(PRAKTISK_SENESTE_DAG), periode2.tilOgMed)
+        Assertions.assertEquals(DagTidspunkt.uendeligLengeSiden(), periode1.fraOgMed)
+        Assertions.assertEquals(DagTidspunkt.uendeligLengeTil(), periode2.tilOgMed)
     }
 
     @Test

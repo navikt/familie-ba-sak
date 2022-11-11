@@ -2,19 +2,13 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erRettFør
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somEndelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somFraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somTilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
-
-fun <T : Tidsenhet> Tidslinje<*, T>.tidsrom(): Iterable<Tidspunkt<T>> = fraOgMed()..tilOgMed()
-
-fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tidsrom(): Iterable<Tidspunkt<T>> = when {
-    this.toList().isEmpty() -> emptyList()
-    else -> fraOgMed()..tilOgMed()
-}
 
 fun <T : Tidsenhet, I> Iterable<Tidspunkt<T>>.tidslinjeFraTidspunkt(
     tidspunktMapper: (Tidspunkt<T>) -> Innholdsresultat<I>

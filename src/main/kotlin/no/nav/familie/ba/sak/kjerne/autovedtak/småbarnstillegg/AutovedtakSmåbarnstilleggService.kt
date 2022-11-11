@@ -26,7 +26,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -38,7 +38,7 @@ class AutovedtakSmåbarnstilleggService(
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val småbarnstilleggService: SmåbarnstilleggService,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val beregningService: BeregningService,
     private val autovedtakService: AutovedtakService,
     private val oppgaveService: OppgaveService,
@@ -127,7 +127,7 @@ class AutovedtakSmåbarnstilleggService(
             vedtakEtterTotrinn,
             SikkerhetContext.hentSaksbehandler()
         )
-        taskRepository.save(task)
+        taskService.save(task)
 
         return AutovedtakStegService.BEHANDLING_FERDIG
     }
