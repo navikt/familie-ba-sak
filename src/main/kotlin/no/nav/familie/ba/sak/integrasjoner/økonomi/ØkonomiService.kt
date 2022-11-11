@@ -85,10 +85,15 @@ class ØkonomiService(
 
     fun hentStatus(oppdragId: OppdragId, behandlingId: Long): OppdragStatus {
         val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId)
-        if (andelerTilkjentYtelse.any { it.erAndelSomSkalSendesTilOppdrag() }) {
+        if (andelerTilkjentYtelse.filter { it.behandlingId == behandlingId }.any { it.erAndelSomSkalSendesTilOppdrag() }) {
             return økonomiKlient.hentStatus(oppdragId)
         }
-        return OppdragStatus.KVITTERT_OK // sendte ikke data til økonomi
+        val atys = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
+        return if (atys.isEmpty()) OppdragStatus.KVITTERT_OK // sendte ikke data til økonomi
+        else atys
+            .filter { it.kildeBehandlingId != null }
+            .map { økonomiKlient.hentStatus(oppdragId.copy(behandlingsId = it.kildeBehandlingId.toString())) }
+            .first()
     }
 
     @Transactional
