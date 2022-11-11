@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -29,7 +29,6 @@ class BehandlingsresultatService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val personidentService: PersonidentService,
-    private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -72,6 +71,7 @@ class BehandlingsresultatService(
                     vilkårsvurdering.personResultater
                         .flatMap { personResultat -> personResultat.vilkårResultater }
                         .any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
                 PersonType.BARN -> true
                 PersonType.ANNENPART -> false
             }
@@ -110,13 +110,41 @@ class BehandlingsresultatService(
                 .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() }
         }
 
-        val behandlingsresultat =
-            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)
-        secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat")
-        logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $behandlingsresultat")
-
-        return behandlingsresultat
+        return utledBehandlingsresultat(
+            ytelsePersonerMedResultat,
+            andelerMedEndringer,
+            forrigeAndelerMedEndringer,
+            behandling
+        )
     }
+
+    internal fun utledBehandlingsresultat(
+        ytelsePersonerMedResultat: List<YtelsePerson>,
+        andelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        behandling: Behandling
+    ) =
+        BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+            ytelsePersonerMedResultat,
+            erUtvidaBarnetrygdEndra(andelerMedEndringer, forrigeAndelerMedEndringer)
+        )
+            .also { secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat") }
+            .also { logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $it") }
+
+    private fun erUtvidaBarnetrygdEndra(
+        andelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+    ) = andelerMedEndringer.filter { it.erUtvidet() }
+        .map {
+            Pair(
+                it,
+                forrigeAndelerMedEndringer.filter { f -> f.erUtvidet() }.find { f -> f.andel.aktør == it.andel.aktør }
+            )
+        }
+        .filter { it.second != null }
+        .any { pair ->
+            (pair.second!!.andel.stønadFom != pair.first.stønadFom || pair.second!!.andel.stønadTom != pair.first.andel.stønadTom)
+        }
 
     private fun validerYtelsePersoner(behandling: Behandling, ytelsePersoner: List<YtelsePerson>) {
         when (behandling.fagsak.type) {
@@ -134,6 +162,7 @@ class BehandlingsresultatService(
                     )
                 }
             }
+
             FagsakType.INSTITUSJON -> {
                 val ytelseType = ytelsePersoner.single().ytelseType
                 if (ytelseType != YtelseType.ORDINÆR_BARNETRYGD) {
@@ -142,6 +171,7 @@ class BehandlingsresultatService(
                     )
                 }
             }
+
             FagsakType.BARN_ENSLIG_MINDREÅRIG -> {
                 ytelsePersoner.single()
             }
