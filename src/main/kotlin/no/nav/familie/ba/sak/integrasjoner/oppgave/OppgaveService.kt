@@ -80,8 +80,8 @@ class OppgaveService(
                 beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
                 enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
                 behandlingstema = when (behandling.underkategori) {
-                    BehandlingUnderkategori.ORDINÆR -> behandling.underkategori.tilOppgaveBehandlingTema().value
-                    BehandlingUnderkategori.UTVIDET -> behandling.underkategori.tilOppgaveBehandlingTema().value
+                    BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET, BehandlingUnderkategori.INSTITUSJON ->
+                        behandling.underkategori.tilOppgaveBehandlingTema().value
                 },
                 behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
                 tilordnetRessurs = tilordnetNavIdent
@@ -137,6 +137,14 @@ class OppgaveService(
         hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
             val oppgave = hentOppgave(dbOppgave.gsakId.toLong())
             copyOppgave(oppgave)?.also { patchOppgave(it) }
+        }
+    }
+
+    fun endreTilordnetEnhetPåOppgaverForBehandling(behandling: Behandling, nyEnhet: String) {
+        hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
+            val oppgave = hentOppgave(dbOppgave.gsakId.toLong())
+            logger.info("Oppdaterer enhet fra ${oppgave.tildeltEnhetsnr} til $nyEnhet på oppgave ${oppgave.id}")
+            integrasjonClient.tilordneEnhetForOppgave(oppgaveId = oppgave.id!!, nyEnhet = nyEnhet)
         }
     }
 
@@ -200,8 +208,10 @@ class OppgaveService(
             when {
                 gammelOppgave.id == null ->
                     logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+
                 gammelOppgave.fristFerdigstillelse == null ->
                     logger.warn("Oppgave ${dbOppgave.gsakId} har ingen oppgavefrist ved oppdatering av frist")
+
                 oppgaveErAvsluttet -> {}
                 else -> {
                     val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)

@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublis
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ArbeidsfordelingService(
@@ -29,6 +30,7 @@ class ArbeidsfordelingService(
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
 ) {
 
+    @Transactional
     fun manueltOppdaterBehandlendeEnhet(behandling: Behandling, endreBehandlendeEnhet: RestEndreBehandlendeEnhet) {
         val aktivArbeidsfordelingPåBehandling =
             arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
@@ -91,6 +93,7 @@ class ArbeidsfordelingService(
                             )
                         )
                     }
+
                     else -> {
                         if (!aktivArbeidsfordelingPåBehandling.manueltOverstyrt &&
                             (aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != arbeidsfordelingsenhet.enhetId)
@@ -157,14 +160,14 @@ class ArbeidsfordelingService(
                 begrunnelse = begrunnelse
             )
 
-            oppgaveService.patchOppgaverForBehandling(behandling) {
-                logger.info("Oppdaterer enhet fra ${it.tildeltEnhetsnr} til ${oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId} på oppgave ${it.id}")
-                it.copy(tildeltEnhetsnr = oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId)
-            }
+            oppgaveService.endreTilordnetEnhetPåOppgaverForBehandling(
+                behandling,
+                oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId
+            )
         }
     }
 
-    fun hentAbeidsfordelingPåBehandling(behandlingId: Long): ArbeidsfordelingPåBehandling {
+    fun hentArbeidsfordelingPåBehandling(behandlingId: Long): ArbeidsfordelingPåBehandling {
         return arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandlingId)
             ?: error("Finner ikke tilknyttet arbeidsfordeling på behandling med id $behandlingId")
     }

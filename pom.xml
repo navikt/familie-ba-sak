@@ -17,16 +17,16 @@
 
     <properties>
         <java.version>17</java.version>
-        <kotlin.version>1.7.20</kotlin.version>
+        <kotlin.version>1.7.21</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <spring.cloud.version>3.1.4</spring.cloud.version>
+        <spring.cloud.version>3.1.5</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
-        <prosessering.version>1.20221031112438_ad147ff</prosessering.version>
+        <prosessering.version>1.20221107161505_a52c041</prosessering.version>
         <felles.version>1.20221101085322_cc4d556</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20220609214258_f30c3ce</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>2.0_20221104130406_e9b1bc0</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20221108132527_9f0a1d4</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20221104085928_75706ae</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
@@ -34,7 +34,7 @@
         <token-validation-spring.version>2.1.6</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>1.6.12</springdoc.version>
-        <sentry.version>6.6.0</sentry.version>
+        <sentry.version>6.7.0</sentry.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
@@ -47,7 +47,7 @@
         <testcontainers.postgresql.version>1.17.5</testcontainers.postgresql.version>
         <unleash.version>6.1.0</unleash.version>
         <maven.model.version>3.8.6</maven.model.version>
-        <jackson.module.kotlin.version>2.13.4</jackson.module.kotlin.version>
+        <jackson.module.kotlin.version>2.14.0</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.6.5</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>

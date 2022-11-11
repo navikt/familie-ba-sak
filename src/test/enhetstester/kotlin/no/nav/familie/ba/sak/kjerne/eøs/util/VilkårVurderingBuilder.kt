@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilDagEllerSisteDagIPerioden
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapNotNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -59,7 +59,7 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
 
         fun medVilkår(tidslinje: Tidslinje<VilkårRegelverkResultat, T>): PersonResultatBuilder<T> {
             vilkårsresultatTidslinjer.add(
-                tidslinje.mapNotNull { UtdypendeVilkårRegelverkResultat(it.vilkår, it.resultat, it.regelverk) }
+                tidslinje.mapIkkeNull { UtdypendeVilkårRegelverkResultat(it.vilkår, it.resultat, it.regelverk) }
             )
             return this
         }

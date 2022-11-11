@@ -281,8 +281,14 @@ class VedtaksperiodeService(
         gjelderFortsattInnvilget: Boolean = false,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
     ): List<VedtaksperiodeMedBegrunnelser> {
+        val endringstidspunkt = manueltOverstyrtEndringstidspunkt
+            ?: if (!gjelderFortsattInnvilget) {
+                endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
+            } else {
+                TIDENES_MORGEN
+            }
         val opphørsperioder =
-            hentOpphørsperioder(vedtak.behandling).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
+            hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
 
         val utbetalingsperioder =
             utbetalingsperiodeMedBegrunnelserService.hentUtbetalingsperioder(vedtak, opphørsperioder)
@@ -291,25 +297,14 @@ class VedtaksperiodeService(
 
         return filtrerUtPerioderBasertPåEndringstidspunkt(
             vedtaksperioderMedBegrunnelser = (utbetalingsperioder + opphørsperioder),
-            behandlingId = vedtak.behandling.id,
-            gjelderFortsattInnvilget = gjelderFortsattInnvilget,
-            manueltOverstyrtEndringstidspunkt = manueltOverstyrtEndringstidspunkt
+            endringstidspunkt = endringstidspunkt
         ) + avslagsperioder
     }
 
     fun filtrerUtPerioderBasertPåEndringstidspunkt(
         vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
-        behandlingId: Long,
-        gjelderFortsattInnvilget: Boolean = false,
-        manueltOverstyrtEndringstidspunkt: LocalDate? = null
+        endringstidspunkt: LocalDate
     ): List<VedtaksperiodeMedBegrunnelser> {
-        val endringstidspunkt = manueltOverstyrtEndringstidspunkt
-            ?: if (!gjelderFortsattInnvilget) {
-                endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
-            } else {
-                TIDENES_MORGEN
-            }
-
         return vedtaksperioderMedBegrunnelser.filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
     }
 
@@ -513,7 +508,7 @@ class VedtaksperiodeService(
         )
     }
 
-    fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
+    fun hentOpphørsperioder(behandling: Behandling, endringstidspunkt: LocalDate = TIDENES_MORGEN): List<Opphørsperiode> {
         if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
 
         val iverksatteBehandlinger =
@@ -544,12 +539,16 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
-        return mapTilOpphørsperioder(
+        val alleOpphørsperioder = mapTilOpphørsperioder(
             forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
             forrigeAndelerTilkjentYtelse = forrigeAndelerMedEndringer,
             personopplysningGrunnlag = personopplysningGrunnlag,
             andelerTilkjentYtelse = andelerTilkjentYtelse
         )
+        val (perioderFørEndringstidspunkt, fraEndringstidspunktOgUtover) =
+            alleOpphørsperioder.partition { it.periodeFom.isBefore(endringstidspunkt) }
+
+        return perioderFørEndringstidspunkt + slåSammenOpphørsperioder(fraEndringstidspunktOgUtover)
     }
 
     private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {

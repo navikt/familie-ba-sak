@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -179,6 +180,45 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
             vilkårResultaterBeskåret
         )
     }
+
+fun Set<PersonResultat>.tilTidslinjeForSplitt(personerOgFødselsdatoer: Map<Aktør, LocalDate>): Tidslinje<List<VilkårResultat>, Måned> {
+    val tidslinjerPerPerson = this.map {
+        it.tilTidslinjeForSplittForPerson(fødselsdato = personerOgFødselsdatoer[it.aktør])
+    }
+
+    return tidslinjerPerPerson.kombiner { it.filterNotNull().flatten() }.filtrerIkkeNull().slåSammenLike()
+}
+
+fun PersonResultat.tilTidslinjeForSplittForPerson(fødselsdato: LocalDate?): Tidslinje<List<VilkårResultat>, Måned> {
+    val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår(fødselsdato)
+
+    return tidslinjer.kombiner { alleVilkårOppfyltEllerNull(it) }.filtrerIkkeNull().slåSammenLike()
+}
+
+/**
+ * Extention-funksjon som tar inn et sett med vilkårResultater og returnerer en forskjøvet måned-basert tidslinje for hvert vilkår
+ * Se readme-fil for utdypende forklaring av logikken for hvert vilkår
+ * */
+fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(fødselsdato: LocalDate?): List<Tidslinje<VilkårResultat, Måned>> {
+    return this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
+        val tidslinje = vilkårResultater.tilTidslinje().tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
+            when {
+                !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null
+                vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
+                else -> innholdFørsteDagDenneMåned
+            }
+        }
+
+        if (vilkår == Vilkår.UNDER_18_ÅR) tidslinje.beskjærPå18År(fødselsdato) else tidslinje
+    }
+}
+
+fun Tidslinje<VilkårResultat, Måned>.beskjærPå18År(fødselsdato: LocalDate?): Tidslinje<VilkårResultat, Måned> {
+    if (fødselsdato == null) throw Feil("Finner ikke fødselsdato for barn")
+    val under18Tidslinje = erUnder18ÅrVilkårTidslinje(fødselsdato)
+    return this.beskjærEtter(under18Tidslinje)
+}
+private fun VilkårResultat.erDeltBosted() = this.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) || this.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
 
 private fun MutableList<VilkårResultat>.fjernAvslagUtenPeriodeHvisDetFinsAndreVilkårResultat(): List<VilkårResultat> =
     if (this.any { !it.erAvslagUtenPeriode() }) this.filterNot { it.erAvslagUtenPeriode() } else this

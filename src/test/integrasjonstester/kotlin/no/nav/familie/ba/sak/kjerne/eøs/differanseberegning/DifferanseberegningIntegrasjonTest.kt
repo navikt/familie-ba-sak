@@ -5,12 +5,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseTestController
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpTestController
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursTestController
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilMånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingTestController
@@ -143,7 +141,7 @@ fun Iterable<Utbetalingsperiode>.sumUtbetaling(): Int {
         }
     }
 
-    return (tidslinje.fraOgMed()..tidslinje.tilOgMed()).fold(0) { sum, tidspunkt ->
+    return (tidslinje.tidsrom()).fold(0) { sum, tidspunkt ->
         sum + (tidslinje.innholdForTidspunkt(tidspunkt) ?: 0)
     }
 }

@@ -4,12 +4,16 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.samhandlereInfoMock
 import no.nav.familie.ba.sak.integrasjoner.samhandler.SamhandlerKlient
 import no.nav.familie.kontrakter.ba.tss.SøkSamhandlerInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
 
 internal class SamhandlerControllerTest {
 
@@ -31,6 +35,15 @@ internal class SamhandlerControllerTest {
         val samhandlerInfo = samhandlerController.hentSamhandlerDataForOrganisasjon("ORGNR")
         assertThat(samhandlerInfo.data).isNotNull()
         assertThat(samhandlerInfo.data!!.tssEksternId).isEqualTo("80000999999")
+    }
+
+    @Test
+    fun `Kaster feilmelding hvis det ikke fins organisasjon med gitt orgnr`() {
+        every { samhandlerKlientMock.hentSamhandler(any()) } throws HttpClientErrorException(HttpStatus.NOT_FOUND)
+        val feil = assertThrows<FunksjonellFeil> {
+            samhandlerController.hentSamhandlerDataForOrganisasjon("123456789")
+        }
+        assertThat(feil.message).isEqualTo("Finner ikke institusjon. Kontakt NØS for å opprette TSS-ident.")
     }
 
     @Test

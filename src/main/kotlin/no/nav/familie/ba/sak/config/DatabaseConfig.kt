@@ -2,11 +2,8 @@ package no.nav.familie.ba.sak.config
 
 import no.nav.familie.prosessering.PropertiesWrapperTilStringConverter
 import no.nav.familie.prosessering.StringTilPropertiesWrapperConverter
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.FilterType
 import org.springframework.data.jdbc.core.convert.JdbcCustomConversions
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration
 import org.springframework.data.jdbc.repository.config.EnableJdbcAuditing
@@ -18,8 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 @EnableJdbcAuditing
 @EnableJdbcRepositories("no.nav.familie.prosessering")
 @EnableJpaRepositories(
-    "no.nav.familie",
-    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = arrayOf(TaskRepository::class))]
+    "no.nav.familie"
 )
 @EnableJpaAuditing
 class DatabaseConfig : AbstractJdbcConfiguration() {
