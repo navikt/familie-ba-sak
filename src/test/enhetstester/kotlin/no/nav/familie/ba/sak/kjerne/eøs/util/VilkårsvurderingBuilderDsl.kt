@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
-import no.nav.familie.ba.sak.common.oppfyltVilkår
-import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
@@ -14,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.TidspunktClosedRange
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Uendelighet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilLocalDate
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.UtdypendeVilkårRegelverkResultat
@@ -39,13 +38,19 @@ internal infix fun Person.død(tidspunkt: Tidspunkt<Dag>) = this.copy(
 )
 
 internal val uendelig: Tidspunkt<Dag> = DagTidspunkt(LocalDate.now(), Uendelighet.FREMTID)
-internal fun Person.til18ÅrVilkårsdato() = DagTidspunkt.med(this.fødselsdato.til18ÅrsVilkårsdato())
+internal fun Person.under18år() = DagTidspunkt.med(this.fødselsdato)
+    .rangeTo(DagTidspunkt.med(this.fødselsdato.plusYears(18).minusDays(1)))
 
 val vilkårsvurdering get() = VilkårsvurderingBuilder<Dag>()
-infix fun Vilkår.etter(regelverk: Regelverk) = oppfyltVilkår(this, regelverk)
+infix fun Vilkår.og(vilkår: Vilkår) = listOf(this, vilkår)
+infix fun List<Vilkår>.og(vilkår: Vilkår) = this + vilkår
 infix fun <T : Tidsenhet> Vilkår.i(tidsrom: TidspunktClosedRange<T>) = oppfyltUtdypendeVilkår(this, null) i tidsrom
 infix fun <T : Tidsenhet> UtdypendeVilkårRegelverkResultat.i(tidsrom: TidspunktClosedRange<T>) =
     tidsrom.tilTidslinje { this }
+
+infix fun <T : Tidsenhet> List<Vilkår>.oppfylt(tidsrom: TidspunktClosedRange<T>) = this.map {
+    oppfyltUtdypendeVilkår(it, null) i tidsrom
+}
 
 infix fun <T : Tidsenhet> Vilkår.oppfylt(tidsrom: TidspunktClosedRange<T>) =
     oppfyltUtdypendeVilkår(this, null) i tidsrom
@@ -60,8 +65,14 @@ infix fun VilkårsvurderingBuilder<Dag>.der(person: Person) = this.forPerson(per
 infix fun VilkårsvurderingBuilder.PersonResultatBuilder<Dag>.har(vilkår: Tidslinje<UtdypendeVilkårRegelverkResultat, Dag>) =
     this.medUtdypendeVilkår(vilkår)
 
+infix fun VilkårsvurderingBuilder.PersonResultatBuilder<Dag>.har(vilkår: Iterable<Tidslinje<UtdypendeVilkårRegelverkResultat, Dag>>) =
+    vilkår.map { this.medUtdypendeVilkår(it) }.last()
+
 infix fun VilkårsvurderingBuilder.PersonResultatBuilder<Dag>.og(vilkår: Tidslinje<UtdypendeVilkårRegelverkResultat, Dag>) =
-    this.medUtdypendeVilkår(vilkår)
+    har(vilkår)
+
+infix fun VilkårsvurderingBuilder.PersonResultatBuilder<Dag>.og(vilkår: Iterable<Tidslinje<UtdypendeVilkårRegelverkResultat, Dag>>) =
+    har(vilkår)
 
 infix fun VilkårsvurderingBuilder.PersonResultatBuilder<Dag>.der(person: Person) =
     this.forPerson(person, DagTidspunkt.nå())
