@@ -667,11 +667,7 @@ class PersonResultatTest {
         val personResultater = setOf(personResultatSøker, personResultatBarn1, personResultatBarn2)
 
         val tidslinje = personResultater.tilTidslinjeForSplitt(
-            mapOf(
-                søker.aktør to søker.fødselsdato,
-                barn1.aktør to barn1.fødselsdato,
-                barn2.aktør to barn2.fødselsdato
-            )
+            listOf(søker, barn1, barn2)
         )
 
         val perioder = tidslinje.perioder()
