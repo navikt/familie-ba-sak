@@ -89,11 +89,11 @@ class ØkonomiService(
     fun hentStatus(oppdragId: OppdragId, behandlingId: Long, tilkjentYtelse: TilkjentYtelse): OppdragStatus {
         val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId)
 
-        if (tilkjentYtelse.utbetalingsperioder().isEmpty()) {
+        if (tilkjentYtelse.utbetalingsperioder().isEmpty() || andelerTilkjentYtelse.isEmpty()) {
             return OppdragStatus.KVITTERT_OK
         }
-
         val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
+
         return if (andelerSomSkalSendesTilOppdrag.any { it.kildeBehandlingId == null }) {
             økonomiKlient.hentStatus(oppdragId)
         } else {
