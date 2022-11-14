@@ -181,15 +181,16 @@ fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør
         )
     }
 
-fun Set<PersonResultat>.tilTidslinjeForSplitt(personerOgFødselsdatoer: Map<Aktør, LocalDate>): Tidslinje<List<VilkårResultat>, Måned> {
-    val tidslinjerPerPerson = this.map {
-        it.tilTidslinjeForSplittForPerson(fødselsdato = personerOgFødselsdatoer[it.aktør])
+fun Set<PersonResultat>.tilTidslinjeForSplitt(personerIPersongrunnlag: List<Person>): Tidslinje<List<VilkårResultat>, Måned> {
+    val tidslinjerPerPerson = this.map { personResultat ->
+        val person = personerIPersongrunnlag.find { it.aktør == personResultat.aktør } ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av tidslinje for splitt")
+        personResultat.tilTidslinjeForSplittForPerson(fødselsdato = person.fødselsdato)
     }
 
     return tidslinjerPerPerson.kombiner { it.filterNotNull().flatten() }.filtrerIkkeNull().slåSammenLike()
 }
 
-fun PersonResultat.tilTidslinjeForSplittForPerson(fødselsdato: LocalDate?): Tidslinje<List<VilkårResultat>, Måned> {
+fun PersonResultat.tilTidslinjeForSplittForPerson(fødselsdato: LocalDate): Tidslinje<List<VilkårResultat>, Måned> {
     val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår(fødselsdato)
 
     return tidslinjer.kombiner { alleVilkårOppfyltEllerNull(it) }.filtrerIkkeNull().slåSammenLike()
@@ -199,7 +200,7 @@ fun PersonResultat.tilTidslinjeForSplittForPerson(fødselsdato: LocalDate?): Tid
  * Extention-funksjon som tar inn et sett med vilkårResultater og returnerer en forskjøvet måned-basert tidslinje for hvert vilkår
  * Se readme-fil for utdypende forklaring av logikken for hvert vilkår
  * */
-fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(fødselsdato: LocalDate?): List<Tidslinje<VilkårResultat, Måned>> {
+fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(fødselsdato: LocalDate): List<Tidslinje<VilkårResultat, Måned>> {
     return this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
         val tidslinje = vilkårResultater.tilTidslinje()
             .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
@@ -214,8 +215,7 @@ fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(fødselsdato: L
     }
 }
 
-fun Tidslinje<VilkårResultat, Måned>.beskjærPå18År(fødselsdato: LocalDate?): Tidslinje<VilkårResultat, Måned> {
-    if (fødselsdato == null) throw Feil("Finner ikke fødselsdato for barn")
+fun Tidslinje<VilkårResultat, Måned>.beskjærPå18År(fødselsdato: LocalDate): Tidslinje<VilkårResultat, Måned> {
     val under18Tidslinje = erUnder18ÅrVilkårTidslinje(fødselsdato)
     return this.beskjærEtter(under18Tidslinje)
 }

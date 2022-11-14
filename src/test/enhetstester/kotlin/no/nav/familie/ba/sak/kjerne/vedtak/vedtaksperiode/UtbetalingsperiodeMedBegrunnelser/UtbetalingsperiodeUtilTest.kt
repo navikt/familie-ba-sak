@@ -91,10 +91,7 @@ class UtbetalingsperiodeUtilTest {
             andelerTilkjentYtelse = listOf(andelPerson1MarsTilApril, andelPerson1MaiTilJuli, andelPerson2MarsTilJuli),
             vedtak = vedtak,
             personResultater = personResultater,
-            personerOgFødselsdatoer = mapOf(
-                person1.aktør to person1.fødselsdato,
-                person2.aktør to person2.fødselsdato
-            )
+            personerIPersongrunnlag = listOf(person1, person2)
         )
 
         Assertions.assertEquals(
@@ -169,10 +166,7 @@ class UtbetalingsperiodeUtilTest {
             andelerTilkjentYtelse = listOf(andelPerson1MarsTilMai, andelPerson2MaiTilJuli),
             vedtak = vedtak,
             personResultater = personResultater,
-            personerOgFødselsdatoer = mapOf(
-                person1.aktør to person1.fødselsdato,
-                person2.aktør to person2.fødselsdato
-            )
+            personerIPersongrunnlag = listOf(person1, person2)
         )
 
         Assertions.assertEquals(
@@ -309,11 +303,7 @@ class UtbetalingsperiodeUtilTest {
             andelerTilkjentYtelse = listOf(andelBarn1MarsTilJuli, andelBarn2MarsTilJuli),
             vedtak = vedtak,
             personResultater = setOf(personResultatBarn1, personResultatBarn2),
-            personerOgFødselsdatoer = mapOf(
-                søker.aktør to søker.fødselsdato,
-                barn1.aktør to barn1.fødselsdato,
-                barn2.aktør to barn2.fødselsdato
-            )
+            personerIPersongrunnlag = listOf(søker, barn1, barn2)
         )
 
         Assertions.assertEquals(
@@ -352,9 +342,7 @@ class UtbetalingsperiodeUtilTest {
             andelerTilkjentYtelse = listOf(andelBarn1MarsTilApril, andelBarn1JuliTilJuli),
             vedtak = vedtak,
             personResultater = emptySet(),
-            personerOgFødselsdatoer = mapOf(
-                barn1.aktør to barn1.fødselsdato
-            )
+            personerIPersongrunnlag = listOf(barn1)
         )
 
         val forventetResultat = listOf(
@@ -467,10 +455,7 @@ class UtbetalingsperiodeUtilTest {
             andelerTilkjentYtelse = listOf(andelBarnMarsTilJuli),
             vedtak = vedtak,
             personResultater = setOf(personResultatBarn),
-            personerOgFødselsdatoer = mapOf(
-                søker.aktør to søker.fødselsdato,
-                barn.aktør to barn.fødselsdato
-            )
+            personerIPersongrunnlag = listOf(søker, barn)
         )
 
         Assertions.assertEquals(

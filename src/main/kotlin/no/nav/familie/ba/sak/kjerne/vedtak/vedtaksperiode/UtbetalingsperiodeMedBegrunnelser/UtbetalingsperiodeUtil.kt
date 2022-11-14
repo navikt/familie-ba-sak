@@ -1,6 +1,7 @@
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -11,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinjeForSplitt
-import java.time.LocalDate
 
 @Deprecated("Erstattes av hentPerioderMedUtbetaling")
 fun hentPerioderMedUtbetalingDeprecated(
@@ -60,9 +59,9 @@ fun hentPerioderMedUtbetaling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     vedtak: Vedtak,
     personResultater: Set<PersonResultat>,
-    personerOgFødselsdatoer: Map<Aktør, LocalDate>
+    personerIPersongrunnlag: List<Person>
 ): List<VedtaksperiodeMedBegrunnelser> {
-    val tidslinjeForSplitt = personResultater.tilTidslinjeForSplitt(personerOgFødselsdatoer)
+    val tidslinjeForSplitt = personResultater.tilTidslinjeForSplitt(personerIPersongrunnlag)
 
     val alleAndelerKombinertTidslinje = andelerTilkjentYtelse
         .tilTidslinjerPerPersonOgType().values

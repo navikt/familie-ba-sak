@@ -39,12 +39,11 @@ class UtbetalingsperiodeMedBegrunnelserService(
 
         val utbetalingsperioder = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_SPLITTE_VEDTAKSPERIODER)) {
             val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
-            val personerOgFødselsdatoer = personopplysningGrunnlag.personer.associate { it.aktør to it.fødselsdato }
             hentPerioderMedUtbetaling(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 vedtak = vedtak,
                 personResultater = vilkårsvurdering.personResultater,
-                personerOgFødselsdatoer = personerOgFødselsdatoer
+                personerIPersongrunnlag = personopplysningGrunnlag.personer.toList()
             )
         } else {
             val forskjøvetVilkårResultatTidslinjeMap =
