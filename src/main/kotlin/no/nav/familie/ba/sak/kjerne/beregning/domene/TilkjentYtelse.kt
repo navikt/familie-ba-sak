@@ -122,3 +122,5 @@ fun TilkjentYtelse.tilTidslinjeMedAndeler(): LocalDateTimeline<List<AndelTilkjen
 }
 
 fun TilkjentYtelse.utbetalingsoppdrag(): Utbetalingsoppdrag? = objectMapper.readValue(this.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
+
+fun TilkjentYtelse.utbetalingsperioder() = this.utbetalingsoppdrag()?.utbetalingsperiode ?: emptyList()
