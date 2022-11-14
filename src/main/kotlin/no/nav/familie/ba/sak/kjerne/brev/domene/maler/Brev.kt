@@ -30,6 +30,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     INNHENTE_OPPLYSNINGER_INSTITUSJON(false, "innhenteOpplysningerInstitusjon", "Innhente opplysninger institusjon"),
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "Henlegge trukket søknad"),
     VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "Varsel om revurdering"),
+    VARSEL_OM_REVURDERING_INSTITUSJON(false, "varselOmRevurderingInstitusjon", "Varsel om revurdering institusjon"),
     VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14(
         false,
         "varselOmRevurderingDeltBostedParagrafFjorten",
@@ -116,6 +117,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
+            VARSEL_OM_REVURDERING_INSTITUSJON,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             VARSEL_OM_REVURDERING_SAMBOER,
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
@@ -208,6 +210,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
             HENLEGGE_TRUKKET_SØKNAD -> Distribusjonstype.ANNET
             VARSEL_OM_REVURDERING -> Distribusjonstype.VIKTIG
+            VARSEL_OM_REVURDERING_INSTITUSJON -> Distribusjonstype.VIKTIG
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> Distribusjonstype.VIKTIG
             VARSEL_OM_REVURDERING_SAMBOER -> Distribusjonstype.ANNET
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> Distribusjonstype.VIKTIG
@@ -246,7 +249,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         when (this) {
             INNHENTE_OPPLYSNINGER,
             INNHENTE_OPPLYSNINGER_INSTITUSJON,
-            VARSEL_OM_REVURDERING -> true
+            VARSEL_OM_REVURDERING,
+            VARSEL_OM_REVURDERING_INSTITUSJON-> true
 
             else -> false
         }
@@ -257,6 +261,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER,
             INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
+            VARSEL_OM_REVURDERING_INSTITUSJON,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
@@ -275,6 +280,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER,
             INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
+            VARSEL_OM_REVURDERING_INSTITUSJON,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
@@ -303,6 +309,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER,
             INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
+            VARSEL_OM_REVURDERING_INSTITUSJON,
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
