@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -88,17 +89,22 @@ class ØkonomiService(
         if (andelerTilkjentYtelse.filter { it.kildeBehandlingId == null }.any { it.erAndelSomSkalSendesTilOppdrag() }) {
             return økonomiKlient.hentStatus(oppdragId)
         }
-        val atys = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
-        return if (atys.isEmpty()) {
+        val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
+        return if (andelerSomSkalSendesTilOppdrag.isEmpty()) {
             OppdragStatus.KVITTERT_OK
         } // sendte ikke data til økonomi
         else {
-            atys
-                .filter { it.kildeBehandlingId != null }
-                .map { økonomiKlient.hentStatus(oppdragId.copy(behandlingsId = it.kildeBehandlingId.toString())) }
-                .first()
+            hentStatusForKildeBehandling(andelerSomSkalSendesTilOppdrag, oppdragId)
         }
     }
+
+    private fun hentStatusForKildeBehandling(
+        atys: List<AndelTilkjentYtelse>,
+        oppdragId: OppdragId
+    ) = atys
+        .filter { it.kildeBehandlingId != null }
+        .map { økonomiKlient.hentStatus(oppdragId.copy(behandlingsId = it.kildeBehandlingId.toString())) }
+        .first()
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
