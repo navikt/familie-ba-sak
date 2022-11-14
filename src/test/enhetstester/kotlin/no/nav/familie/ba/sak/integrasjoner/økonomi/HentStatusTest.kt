@@ -5,11 +5,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdrag
@@ -17,11 +20,16 @@ import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.Month
 
 class HentStatusTest {
 
@@ -30,6 +38,8 @@ class HentStatusTest {
     private val beregningService: BeregningService = mockk()
 
     lateinit var statusFraOppdrag: StatusFraOppdrag
+
+    private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
 
     @BeforeEach
     fun setUp() {
@@ -44,7 +54,8 @@ class HentStatusTest {
         )
         statusFraOppdrag = StatusFraOppdrag(
             økonomiService = økonomiService,
-            taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() }
+            taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() },
+            tilkjentYtelseRepository = tilkjentYtelseRepository
         )
     }
 
@@ -57,6 +68,7 @@ class HentStatusTest {
                 match { it.behandlingsId == nyBehandling.id.toString() }
             )
         } throws RuntimeException()
+        lagTilkjentYtelse(nyBehandling, listOf(lagUtbetalingsperiode(nyBehandling)))
 
         val opprinneligBehandlingsid = -1L
 
@@ -92,6 +104,7 @@ class HentStatusTest {
     fun `henter status fra økonomi for behandling der alle utbetalingene hører til denne behandlinga`() {
         val tilfeldigPerson = tilfeldigPerson()
         val nyBehandling = lagBehandling()
+        lagTilkjentYtelse(nyBehandling, listOf(lagUtbetalingsperiode(nyBehandling)))
 
         every {
             økonomiKlient.hentStatus(
@@ -124,6 +137,7 @@ class HentStatusTest {
     fun `kan håndtere nullutbetaling uten tidligere historikk`() {
         val tilfeldigPerson = tilfeldigPerson()
         val nyBehandling = lagBehandling()
+        lagTilkjentYtelse(nyBehandling, listOf())
 
         every {
             økonomiKlient.hentStatus(
@@ -152,6 +166,14 @@ class HentStatusTest {
         verify(exactly = 0) { økonomiKlient.hentStatus(any()) }
     }
 
+    private fun lagTilkjentYtelse(behandling: Behandling, utbetalingsperiode: List<Utbetalingsperiode>) {
+        val nyTilkjentYtelse = lagInitiellTilkjentYtelse(
+            behandling = behandling,
+            utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdrag(utbetalingsperiode = utbetalingsperiode))
+        )
+        every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns nyTilkjentYtelse
+    }
+
     private fun statusFraOppdragMedTask(
         tilfeldigPerson: Person,
         nyBehandling: Behandling
@@ -168,4 +190,22 @@ class HentStatusTest {
             payload = ""
         )
     )
+
+    private fun lagUtbetalingsperiode(nyBehandling: Behandling) =
+        Utbetalingsperiode(
+            vedtakdatoFom = LocalDate.of(
+                2019,
+                Month.APRIL,
+                1
+            ),
+            vedtakdatoTom = LocalDate.of(2020, Month.MARCH, 31),
+            erEndringPåEksisterendePeriode = false,
+            periodeId = 1L,
+            behandlingId = nyBehandling.id,
+            datoForVedtak = LocalDate.of(2020, Month.APRIL, 1),
+            klassifisering = "",
+            sats = BigDecimal.ONE,
+            satsType = Utbetalingsperiode.SatsType.MND,
+            utbetalesTil = ""
+        )
 }

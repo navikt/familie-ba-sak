@@ -322,8 +322,8 @@ fun lagAndelTilkjentYtelseUtvidet(
     )
 }
 
-fun lagInitiellTilkjentYtelse(behandling: Behandling = lagBehandling()): TilkjentYtelse {
-    return TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
+fun lagInitiellTilkjentYtelse(behandling: Behandling = lagBehandling(), utbetalingsoppdrag: String? = null): TilkjentYtelse {
+    return TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now(), utbetalingsoppdrag = utbetalingsoppdrag)
 }
 
 fun lagTestPersonopplysningGrunnlag(

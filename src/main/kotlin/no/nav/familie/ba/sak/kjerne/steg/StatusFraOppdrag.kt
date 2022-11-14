@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotFamilieTilbakeTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -25,7 +26,8 @@ data class StatusFraOppdragMedTask(
 @Service
 class StatusFraOppdrag(
     private val økonomiService: ØkonomiService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) : BehandlingSteg<StatusFraOppdragMedTask> {
 
     override fun utførStegOgAngiNeste(
@@ -35,7 +37,7 @@ class StatusFraOppdrag(
         val statusFraOppdragDTO = data.statusFraOppdragDTO
         val task = data.task
 
-        val oppdragStatus = økonomiService.hentStatus(statusFraOppdragDTO.oppdragId, statusFraOppdragDTO.behandlingsId)
+        val oppdragStatus = økonomiService.hentStatus(statusFraOppdragDTO.oppdragId, statusFraOppdragDTO.behandlingsId, tilkjentYtelseRepository.findByBehandling(statusFraOppdragDTO.behandlingsId))
         logger.debug("Mottok status '$oppdragStatus' fra oppdrag")
         if (oppdragStatus != OppdragStatus.KVITTERT_OK) {
             if (oppdragStatus == OppdragStatus.LAGT_PÅ_KØ) {

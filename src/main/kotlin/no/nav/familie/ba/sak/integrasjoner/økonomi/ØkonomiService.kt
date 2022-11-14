@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -84,18 +86,17 @@ class ØkonomiService(
         }
     }
 
-    fun hentStatus(oppdragId: OppdragId, behandlingId: Long): OppdragStatus {
+    fun hentStatus(oppdragId: OppdragId, behandlingId: Long, tilkjentYtelse: TilkjentYtelse): OppdragStatus {
         val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId)
-        if (andelerTilkjentYtelse.filter { it.kildeBehandlingId == null }.any { it.erAndelSomSkalSendesTilOppdrag() }) {
-            return økonomiKlient.hentStatus(oppdragId)
+
+        if (tilkjentYtelse.utbetalingsperioder().isEmpty()) {
+            return OppdragStatus.KVITTERT_OK
         }
+
         val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
-        return if (andelerSomSkalSendesTilOppdrag.isEmpty()) {
-            OppdragStatus.KVITTERT_OK
-        } // sendte ikke data til økonomi
-        else {
-            hentStatusForKildeBehandling(andelerSomSkalSendesTilOppdrag, oppdragId)
-        }
+        return if (andelerSomSkalSendesTilOppdrag.any { it.kildeBehandlingId == null }) {
+            økonomiKlient.hentStatus(oppdragId)
+        } else hentStatusForKildeBehandling(andelerSomSkalSendesTilOppdrag, oppdragId)
     }
 
     private fun hentStatusForKildeBehandling(
