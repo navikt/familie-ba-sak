@@ -66,3 +66,8 @@ data class SanityEØSBegrunnelse(
 
 fun List<SanityEØSBegrunnelse>.finnBegrunnelse(eøsBegrunnelse: EØSStandardbegrunnelse): SanityEØSBegrunnelse? =
     this.find { it.apiNavn == eøsBegrunnelse.sanityApiNavn }
+
+enum class EØSTriggerType {
+    KOMPETANSE,
+    VILKÅRSVURDERING
+}
