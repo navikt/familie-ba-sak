@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerSenereEnn
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 
 class VilkårResultatTidslinje(
     private val vilkårResultater: Collection<VilkårResultat>

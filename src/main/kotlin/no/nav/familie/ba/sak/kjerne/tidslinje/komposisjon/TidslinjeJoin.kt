@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 
 fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.outerJoin(
     høyreTidslinjer: Map<K, Tidslinje<H, T>>,

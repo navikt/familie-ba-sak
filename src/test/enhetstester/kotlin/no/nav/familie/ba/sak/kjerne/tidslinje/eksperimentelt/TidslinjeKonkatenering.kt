@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 
 /**
  * Funksjon for å kjede sammen tidslinjer

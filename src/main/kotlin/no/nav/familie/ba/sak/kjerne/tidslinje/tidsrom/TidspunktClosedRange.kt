@@ -1,4 +1,13 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje.tid
+package no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
+
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.neste
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somEndelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
 
 /**
  * ClosedRange-implementasjon for <Tidspunkt>, som gir <A..B>-operatoren.

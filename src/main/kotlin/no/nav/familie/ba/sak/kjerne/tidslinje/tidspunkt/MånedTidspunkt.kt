@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje.tid
+package no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import java.time.LocalDate

@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
@@ -201,13 +201,14 @@ fun PersonResultat.tilTidslinjeForSplittForPerson(fødselsdato: LocalDate?): Tid
  * */
 fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(fødselsdato: LocalDate?): List<Tidslinje<VilkårResultat, Måned>> {
     return this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
-        val tidslinje = vilkårResultater.tilTidslinje().tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
-            when {
-                !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null
-                vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
-                else -> innholdFørsteDagDenneMåned
+        val tidslinje = vilkårResultater.tilTidslinje()
+            .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
+                when {
+                    !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null
+                    vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
+                    else -> innholdFørsteDagDenneMåned
+                }
             }
-        }
 
         if (vilkår == Vilkår.UNDER_18_ÅR) tidslinje.beskjærPå18År(fødselsdato) else tidslinje
     }
@@ -218,7 +219,11 @@ fun Tidslinje<VilkårResultat, Måned>.beskjærPå18År(fødselsdato: LocalDate?
     val under18Tidslinje = erUnder18ÅrVilkårTidslinje(fødselsdato)
     return this.beskjærEtter(under18Tidslinje)
 }
-private fun VilkårResultat.erDeltBosted() = this.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) || this.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
+
+private fun VilkårResultat.erDeltBosted() =
+    this.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) || this.utdypendeVilkårsvurderinger.contains(
+        UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+    )
 
 private fun MutableList<VilkårResultat>.fjernAvslagUtenPeriodeHvisDetFinsAndreVilkårResultat(): List<VilkårResultat> =
     if (this.any { !it.erAvslagUtenPeriode() }) this.filterNot { it.erAvslagUtenPeriode() } else this

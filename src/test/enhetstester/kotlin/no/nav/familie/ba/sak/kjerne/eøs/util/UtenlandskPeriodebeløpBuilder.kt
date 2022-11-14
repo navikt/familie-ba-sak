@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 
 class UtenlandskPeriodebeløpBuilder(
@@ -33,6 +33,11 @@ class UtenlandskPeriodebeløpBuilder(
                 else -> null
             }
         }
+
     fun medIntervall(intervall: Intervall) =
-        medTransformasjon { utenlandskPeriodebeløp -> utenlandskPeriodebeløp.copy(intervall = intervall) }.medTransformasjon { utenlandskPeriodebeløp -> utenlandskPeriodebeløp.copy(kalkulertMånedligBeløp = utenlandskPeriodebeløp.tilKalkulertMånedligBeløp()) }
+        medTransformasjon { utenlandskPeriodebeløp -> utenlandskPeriodebeløp.copy(intervall = intervall) }.medTransformasjon { utenlandskPeriodebeløp ->
+            utenlandskPeriodebeløp.copy(
+                kalkulertMånedligBeløp = utenlandskPeriodebeløp.tilKalkulertMånedligBeløp()
+            )
+        }
 }
