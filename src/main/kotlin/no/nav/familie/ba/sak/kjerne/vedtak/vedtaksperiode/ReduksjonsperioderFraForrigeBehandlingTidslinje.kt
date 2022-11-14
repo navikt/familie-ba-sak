@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerSenereEnn
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 
 class ReduksjonsperioderFraForrigeBehandlingTidslinje(

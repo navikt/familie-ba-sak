@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 
 /**
  * Extension-metode for å forskyve tidslinjen <tidsenheter> frem eller tilbake

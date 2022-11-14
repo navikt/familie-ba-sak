@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeTil
 
 /**
  * Base-klassen for alle tidslinjer. Bygger på en tanke om at en tidslinje inneholder en

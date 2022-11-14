@@ -8,16 +8,16 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tilVerdi
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.forrige
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somEndelig
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilForrigeMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilNesteMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.forrige
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somEndelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilForrigeMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilNesteMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 

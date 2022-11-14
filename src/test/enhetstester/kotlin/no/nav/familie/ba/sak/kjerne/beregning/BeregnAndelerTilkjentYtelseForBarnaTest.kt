@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.søker
 import no.nav.familie.ba.sak.kjerne.eøs.util.uendelig
 import no.nav.familie.ba.sak.kjerne.eøs.util.under18år
 import no.nav.familie.ba.sak.kjerne.eøs.util.vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr

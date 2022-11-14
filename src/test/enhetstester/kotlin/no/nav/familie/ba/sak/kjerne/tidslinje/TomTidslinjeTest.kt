@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.tidslinje
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals

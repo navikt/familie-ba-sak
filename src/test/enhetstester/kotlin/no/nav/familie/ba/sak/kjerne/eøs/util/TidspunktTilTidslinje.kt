@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.util
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.TidspunktClosedRange
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 

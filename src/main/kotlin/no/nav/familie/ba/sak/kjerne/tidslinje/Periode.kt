@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.TidspunktClosedRange
 
 data class Periode<I, T : Tidsenhet>(

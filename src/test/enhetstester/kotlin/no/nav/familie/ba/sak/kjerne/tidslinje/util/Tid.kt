@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.TidspunktClosedRange
 import java.time.LocalDate
 import java.time.YearMonth

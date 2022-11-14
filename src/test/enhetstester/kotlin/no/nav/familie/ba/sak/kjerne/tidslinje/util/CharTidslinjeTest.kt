@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeTil
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somEndelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somEndelig
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

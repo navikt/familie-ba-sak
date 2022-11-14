@@ -9,10 +9,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilLocalDateEllerNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser

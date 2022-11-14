@@ -24,11 +24,11 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk

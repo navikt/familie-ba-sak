@@ -1,15 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erEndelig
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeTil
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.forrige
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.neste
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somEndelig
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erEndelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.forrige
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.neste
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somEndelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.fraOgMed() =
