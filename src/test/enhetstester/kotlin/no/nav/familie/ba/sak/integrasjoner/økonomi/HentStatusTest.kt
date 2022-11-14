@@ -149,7 +149,7 @@ class HentStatusTest {
         val nesteSteg =
             statusFraOppdrag.utførStegOgAngiNeste(nyBehandling, statusFraOppdragMedTask(tilfeldigPerson, nyBehandling))
         assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE)
-        verify (exactly = 0) { økonomiKlient.hentStatus(any()) }
+        verify(exactly = 0) { økonomiKlient.hentStatus(any()) }
     }
 
     private fun statusFraOppdragMedTask(
