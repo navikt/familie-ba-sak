@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje
+package no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erEndelig
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.neste
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somEndelig
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeTil

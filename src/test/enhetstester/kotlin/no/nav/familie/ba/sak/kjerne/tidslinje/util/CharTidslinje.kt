@@ -7,11 +7,11 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somTilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import java.time.YearMonth
 
 class CharTidslinje<T : Tidsenhet>(private val tegn: String, private val startTidspunkt: Tidspunkt<T>) :

@@ -10,10 +10,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.TidspunktClosedRange
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Uendelighet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilLocalDate
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.TidspunktClosedRange
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.UtdypendeVilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder

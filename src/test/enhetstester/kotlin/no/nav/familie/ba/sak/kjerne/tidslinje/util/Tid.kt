@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.TidspunktClosedRange
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.TidspunktClosedRange
 import java.time.LocalDate
 import java.time.YearMonth
 

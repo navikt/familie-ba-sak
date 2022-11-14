@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogSenere
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogTidligere
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.aug
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb

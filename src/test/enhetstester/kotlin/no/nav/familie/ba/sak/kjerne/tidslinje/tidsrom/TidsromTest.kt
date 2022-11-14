@@ -1,5 +1,7 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje
+package no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.minsteAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.størsteAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr

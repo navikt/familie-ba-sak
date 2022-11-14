@@ -7,10 +7,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.forrige
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.neste
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somEndelig
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.fraOgMed() =
     this.perioder().firstOrNull()?.fraOgMed
