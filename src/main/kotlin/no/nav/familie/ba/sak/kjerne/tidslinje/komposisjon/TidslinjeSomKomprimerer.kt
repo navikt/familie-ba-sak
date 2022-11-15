@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 
 /**
  * Extension-funksjon som slår sammen påfølgende perioder der innholdet er likt

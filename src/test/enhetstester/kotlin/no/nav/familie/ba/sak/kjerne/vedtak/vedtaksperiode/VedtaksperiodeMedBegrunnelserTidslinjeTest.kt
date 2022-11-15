@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

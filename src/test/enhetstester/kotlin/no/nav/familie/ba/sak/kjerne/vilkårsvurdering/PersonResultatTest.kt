@@ -14,12 +14,12 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilMånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.neste
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilYearMonthEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.neste
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -667,11 +667,7 @@ class PersonResultatTest {
         val personResultater = setOf(personResultatSøker, personResultatBarn1, personResultatBarn2)
 
         val tidslinje = personResultater.tilTidslinjeForSplitt(
-            mapOf(
-                søker.aktør to søker.fødselsdato,
-                barn1.aktør to barn1.fødselsdato,
-                barn2.aktør to barn2.fødselsdato
-            )
+            listOf(søker, barn1, barn2)
         )
 
         val perioder = tidslinje.perioder()
