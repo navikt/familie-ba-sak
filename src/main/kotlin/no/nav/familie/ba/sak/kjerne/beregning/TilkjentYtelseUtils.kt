@@ -175,6 +175,14 @@ object TilkjentYtelseUtils {
             }
     }
 
+    internal fun beregnAndelerTilkjentYtelseForBarna() {
+        // 1: Lag liste med tidslinjer (1 for hvert barn) som viser når det er rett på utbetaling for hvert barn
+        // 2: For hvert barn:
+        //      2a: Lage satstidslinje
+        //      2b: Lage prosenttidslinje
+        //      2c: Kombinere rett, sats, og prosent til å lage andel
+    }
+
     fun beregnTilkjentYtelseUtvidet(
         utvidetVilkår: List<VilkårResultat>,
         andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
