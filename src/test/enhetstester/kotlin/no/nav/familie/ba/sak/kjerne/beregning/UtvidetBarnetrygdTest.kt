@@ -597,6 +597,8 @@ internal class UtvidetBarnetrygdTest {
                             erDeltBosted = barnOppfylt.erDeltBosted
                         )
                     )
+
+                    vilkårResultater.removeIf { it.vilkårType == Vilkår.BOR_MED_SØKER }
                     vilkårResultater.addAll(
                         setOf(
                             VilkårResultat(
@@ -636,17 +638,14 @@ internal class UtvidetBarnetrygdTest {
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
-        assertEquals(3, andeler.size)
+        assertEquals(2, andeler.size)
 
-        val andelBarn1 = andeler[0]
-        val andelBarn2 = andeler[1]
-        val andelUtvidet = andeler[2]
+        val andelBarn = andeler[0]
+        val andelUtvidet = andeler[1]
 
-        assertEquals(barnOppfylt.ident, andelBarn1.aktør.aktivFødselsnummer())
-        assertEquals(barnOppfylt.fom.plusMonths(1).toYearMonth(), andelBarn1.stønadFom)
-        assertEquals(b2bTom.plusMonths(1).toYearMonth(), andelBarn1.stønadTom) // Legger på 1mnd pga back2back
-        assertEquals(b2bFom.plusMonths(1).toYearMonth(), andelBarn2.stønadFom)
-        assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn2.stønadTom)
+        assertEquals(barnOppfylt.ident, andelBarn.aktør.aktivFødselsnummer())
+        assertEquals(barnOppfylt.fom.plusMonths(1).toYearMonth(), andelBarn.stønadFom)
+        assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
 
         assertEquals(søkerOrdinær.ident, andelUtvidet.aktør.aktivFødselsnummer())
         assertEquals(søkerOrdinær.fom.plusMonths(1).toYearMonth(), andelUtvidet.stønadFom)
