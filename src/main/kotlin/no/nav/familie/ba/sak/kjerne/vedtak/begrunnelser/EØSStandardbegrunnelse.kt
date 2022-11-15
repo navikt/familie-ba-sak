@@ -147,6 +147,18 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetTilleggstekstsekundaerDeltBostedAnnenForelderIkkeRett"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_GYLDIG_KONTONUMMER_REGISTRERT_EØS {
+        override val sanityApiNavn = "innvilgetGyldigKontonummerRegistrertEos"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_TILLEGGSTEKST_SEKUNDÆR_IKKE_FÅTT_SVAR_PÅ_SED {
+        override val sanityApiNavn = "innvilgetTilleggstekstSekundaerIkkeFaattSvarPaaSed"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_TILLEGGESTEKST_UK_FULL_ETTERBETALING {
+        override val sanityApiNavn = "innvilgetTilleggestekstUkFullEtterbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
@@ -194,6 +206,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     OPPHØR_UTSENDT_ARBEIDSTAKER_FRA_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorUtsendtArbeidstakerFraEosLand"
+    },
+    OPPHOR_UGYLDIG_KONTONUMMER_EØS {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorUgyldigKontonummerEos"
     }
     ;
 
