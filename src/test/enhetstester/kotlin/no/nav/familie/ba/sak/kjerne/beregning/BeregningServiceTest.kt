@@ -480,34 +480,17 @@ class BeregningServiceTest {
 
         val tilleggFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1354)
 
-        val personResultat = mutableSetOf(
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = søkerAktørId,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = periode1Fom,
-                periodeTom = periode1Tom,
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.SØKER
-            ),
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = søkerAktørId,
-                resultat = Resultat.IKKE_OPPFYLT,
-                periodeFom = periode2Fom,
-                periodeTom = periode2Tom,
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.SØKER
-            ),
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = søkerAktørId,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = periode3Fom,
-                periodeTom = periode3Tom,
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.SØKER
-            ),
+        val søkerVilkår = Vilkår.hentVilkårFor(PersonType.SØKER)
+        val vilkårResultaterSøker = søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode1Fom, periodeTom = periode1Tom) } + søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode2Fom, periodeTom = periode2Tom, resultat = Resultat.IKKE_OPPFYLT) } + søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode3Fom, periodeTom = periode3Tom) }
+
+        val personResultatSøker = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = søkerAktørId
+        )
+
+        personResultatSøker.setSortedVilkårResultater(vilkårResultaterSøker.toSet())
+
+        val personResultatBarna = mutableSetOf(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = barn1AktørId,
@@ -528,7 +511,7 @@ class BeregningServiceTest {
             )
         )
 
-        vilkårsvurdering.personResultater = personResultat
+        vilkårsvurdering.personResultater = personResultatBarna + personResultatSøker
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
@@ -821,7 +804,8 @@ class BeregningServiceTest {
             førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
             andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(1),
             forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
-            forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth()
+            forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
+            skalLageSplitt = false
         )
     }
 
@@ -832,7 +816,8 @@ class BeregningServiceTest {
             førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
             andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(2),
             forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.toYearMonth(),
-            forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth()
+            forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
+            skalLageSplitt = true
         )
     }
 
@@ -842,9 +827,10 @@ class BeregningServiceTest {
         kjørScenarioForBack2Backtester(
             førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
             andrePeriodeFomForBarnet = LocalDate.of(2020, 12, 1),
-            forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
-            forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
-            deltBostedForFørstePeriode = true
+            forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.toYearMonth(),
+            forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
+            deltBostedForFørstePeriode = true,
+            skalLageSplitt = true
         )
     }
 
@@ -856,7 +842,8 @@ class BeregningServiceTest {
             andrePeriodeFomForBarnet = LocalDate.of(2020, 12, 1),
             forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
             forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
-            deltBostedForAndrePeriode = true
+            deltBostedForAndrePeriode = true,
+            skalLageSplitt = true
         )
     }
 
@@ -869,7 +856,8 @@ class BeregningServiceTest {
             forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
             forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
             deltBostedForFørstePeriode = true,
-            deltBostedForAndrePeriode = true
+            deltBostedForAndrePeriode = true,
+            skalLageSplitt = false
         )
     }
 
@@ -879,7 +867,8 @@ class BeregningServiceTest {
         forventetSluttForFørsteAndelsperiode: YearMonth,
         forventetStartForAndreAndelsperiode: YearMonth,
         deltBostedForFørstePeriode: Boolean = false,
-        deltBostedForAndrePeriode: Boolean = false
+        deltBostedForAndrePeriode: Boolean = false,
+        skalLageSplitt: Boolean
     ) {
         val behandling = lagBehandling()
         val barnFødselsdato = LocalDate.of(2019, 1, 1)
@@ -938,6 +927,7 @@ class BeregningServiceTest {
             søkerFnr,
             listOf(barn1Fnr)
         )
+        every { featureToggleService.isEnabled(any()) } returns true
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
@@ -946,7 +936,7 @@ class BeregningServiceTest {
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
-        Assertions.assertEquals(4, slot.captured.andelerTilkjentYtelse.size)
+        Assertions.assertEquals(if (skalLageSplitt) 4 else 3, slot.captured.andelerTilkjentYtelse.size)
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
 
         // Første periode (før satsendring)
@@ -956,30 +946,39 @@ class BeregningServiceTest {
             if (deltBostedForFørstePeriode) 527 else 1054,
             andelerTilkjentYtelse[0].kalkulertUtbetalingsbeløp
         )
+        if (skalLageSplitt) {
+            // Andre periode (fra første satsendring til slutt av første godkjente perioderesultat for barnet)
+            Assertions.assertEquals(førsteSatsendringFom.toYearMonth(), andelerTilkjentYtelse[1].stønadFom)
+            Assertions.assertEquals(forventetSluttForFørsteAndelsperiode, andelerTilkjentYtelse[1].stønadTom)
+            Assertions.assertEquals(
+                if (deltBostedForFørstePeriode) 677 else 1354,
+                andelerTilkjentYtelse[1].kalkulertUtbetalingsbeløp
+            )
 
-        // Andre periode (fra første satsendring til slutt av første godkjente perioderesultat for barnet)
-        Assertions.assertEquals(førsteSatsendringFom.toYearMonth(), andelerTilkjentYtelse[1].stønadFom)
-        Assertions.assertEquals(forventetSluttForFørsteAndelsperiode, andelerTilkjentYtelse[1].stønadTom)
-        Assertions.assertEquals(
-            if (deltBostedForFørstePeriode) 677 else 1354,
-            andelerTilkjentYtelse[1].kalkulertUtbetalingsbeløp
-        )
+            // Tredje periode (fra start av andre godkjente perioderesultat for barnet til neste satsendring).
+            // At denne perioden følger back2back med tom for forrige periode er primært det som testes her.
+            Assertions.assertEquals(forventetStartForAndreAndelsperiode, andelerTilkjentYtelse[2].stønadFom)
+            Assertions.assertEquals(andreSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[2].stønadTom)
+            Assertions.assertEquals(
+                if (deltBostedForAndrePeriode) 677 else 1354,
+                andelerTilkjentYtelse[2].kalkulertUtbetalingsbeløp
+            )
+        } else {
+            Assertions.assertEquals(førsteSatsendringFom.toYearMonth(), andelerTilkjentYtelse[1].stønadFom)
+            Assertions.assertEquals(andreSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[1].stønadTom)
+            Assertions.assertEquals(
+                if (deltBostedForFørstePeriode) 677 else 1354,
+                andelerTilkjentYtelse[1].kalkulertUtbetalingsbeløp
+            )
+        }
 
-        // Tredje periode (fra start av andre godkjente perioderesultat for barnet til neste satsendring).
-        // At denne perioden følger back2back med tom for forrige periode er primært det som testes her.
-        Assertions.assertEquals(forventetStartForAndreAndelsperiode, andelerTilkjentYtelse[2].stønadFom)
-        Assertions.assertEquals(andreSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[2].stønadTom)
-        Assertions.assertEquals(
-            if (deltBostedForAndrePeriode) 677 else 1354,
-            andelerTilkjentYtelse[2].kalkulertUtbetalingsbeløp
-        )
-
-        // Fjerde periode (fra siste satsendring til slutt av endre godkjente perioderesultat for barnet)
-        Assertions.assertEquals(andreSatsendringFom.toYearMonth(), andelerTilkjentYtelse[3].stønadFom)
-        Assertions.assertEquals(andrePeriodeTomForBarnet.toYearMonth(), andelerTilkjentYtelse[3].stønadTom)
+        val sisteAndel = if (skalLageSplitt)andelerTilkjentYtelse[3] else andelerTilkjentYtelse[2]
+        // Siste periode (fra siste satsendring til slutt av endre godkjente perioderesultat for barnet)
+        Assertions.assertEquals(andreSatsendringFom.toYearMonth(), sisteAndel.stønadFom)
+        Assertions.assertEquals(andrePeriodeTomForBarnet.toYearMonth(), sisteAndel.stønadTom)
         Assertions.assertEquals(
             if (deltBostedForAndrePeriode) 827 else 1654,
-            andelerTilkjentYtelse[3].kalkulertUtbetalingsbeløp
+            sisteAndel.kalkulertUtbetalingsbeløp
         )
     }
 
