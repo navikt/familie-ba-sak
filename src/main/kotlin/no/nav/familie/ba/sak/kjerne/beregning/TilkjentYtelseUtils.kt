@@ -239,7 +239,7 @@ object TilkjentYtelseUtils {
             person to personResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato = person.fødselsdato, personType = person.type)
         }
 
-        val søkerTidslinje = tidslinjerPerPerson[personopplysningGrunnlag.søker] ?: throw Feil("Finner ikke tidslinje for søker ved generering av andeler tilkjent ytelse")
+        val søkerTidslinje = tidslinjerPerPerson[personopplysningGrunnlag.søker] ?: return emptyMap()
         val barnasTidslinjer = tidslinjerPerPerson.filter { it.key in personopplysningGrunnlag.barna }
 
         return barnasTidslinjer.mapValues { (_, barnTidslinje) ->

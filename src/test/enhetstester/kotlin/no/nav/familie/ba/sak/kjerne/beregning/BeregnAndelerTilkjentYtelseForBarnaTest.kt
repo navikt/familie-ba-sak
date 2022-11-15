@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.alt
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.halvparten
 import no.nav.familie.ba.sak.kjerne.eøs.util.barn
@@ -45,7 +48,19 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
 
     @Test
     fun `tom vilkårsvurdering gir ingen utbetalinger`() {
-        assertEquals(emptyList<BeregnetAndel>(), vilkårsvurdering.beregnAndelerTilkjentYtelseForBarna())
+        assertEquals(
+            emptyList<BeregnetAndel>(),
+            TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarna(
+                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+                    søkerPersonIdent = randomFnr(),
+                    barnasIdenter = listOf(
+                        randomFnr()
+                    ),
+                    behandlingId = lagBehandling().id
+                ),
+                personResultater = emptySet()
+            )
+        )
     }
 
     @Test
