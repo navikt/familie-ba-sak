@@ -234,8 +234,7 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
 
         val forventedeAndeler = listOf(
             barn får alt av 1054 i feb(2020)..aug(2020),
-            barn får alt av 1354 i sep(2020)..mai(2021),
-            barn får alt av 1354 i jun(2021)..aug(2021),
+            barn får alt av 1354 i sep(2020)..aug(2021),
             barn får alt av 1654 i sep(2021)..nov(2021)
         )
 
