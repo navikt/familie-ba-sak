@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
@@ -187,9 +188,9 @@ class UtbetalingsperiodeUtilTest {
         val mai2020 = YearMonth.of(2020, 5)
         val juli2020 = YearMonth.of(2020, 7)
 
-        val søker = lagPerson()
-        val barn1 = lagPerson()
-        val barn2 = lagPerson()
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(16))
+        val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(7))
 
         val vedtak = lagVedtak()
 
@@ -238,10 +239,13 @@ class UtbetalingsperiodeUtilTest {
             behandlingId = vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = emptyList()
         )
+
+        val resterendeVilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN).mapNotNull { if (it == Vilkår.BOR_MED_SØKER) null else lagVilkårResultat(vilkår = it, fom = mars2020.minusMonths(1), tom = juli2020) }
+
         val vilkårResultaterBarn1 = listOf(
             vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1,
             vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1
-        )
+        ) + resterendeVilkårForBarn
 
         personResultatBarn1.setSortedVilkårResultater(
             vilkårResultaterBarn1.toSet()
@@ -276,7 +280,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårResultaterBarn2 = listOf(
             vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn2,
             vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn2
-        )
+        ) + resterendeVilkårForBarn
 
         personResultatBarn2.setSortedVilkårResultater(
             vilkårResultaterBarn2.toSet()
@@ -380,8 +384,8 @@ class UtbetalingsperiodeUtilTest {
         val mai2020 = YearMonth.of(2020, 5)
         val juli2020 = YearMonth.of(2020, 7)
 
-        val søker = lagPerson()
-        val barn = lagPerson()
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(8))
 
         val vedtak = lagVedtak()
 
@@ -403,32 +407,34 @@ class UtbetalingsperiodeUtilTest {
             aktør = barn.aktør
         )
 
-        val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
+        fun nasjonaltVilkår(vilkårType: Vilkår): VilkårResultat = VilkårResultat(
             personResultat = personResultatBarn,
             periodeFom = mars2020.minusMonths(1).førsteDagIInneværendeMåned(),
             periodeTom = april2020.sisteDagIInneværendeMåned(),
-            vilkårType = Vilkår.BOR_MED_SØKER,
+            vilkårType = vilkårType,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
             behandlingId = vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = emptyList(),
             vurderesEtter = Regelverk.NASJONALE_REGLER
         )
-        val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
-            personResultat = personResultatBarn,
-            periodeFom = mai2020.førsteDagIInneværendeMåned(),
-            periodeTom = juli2020.sisteDagIInneværendeMåned(),
-            vilkårType = Vilkår.BOR_MED_SØKER,
-            resultat = Resultat.OPPFYLT,
-            begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
-            utdypendeVilkårsvurderinger = emptyList(),
-            vurderesEtter = Regelverk.EØS_FORORDNINGEN
-        )
-        val vilkårResultaterBarn1 = listOf(
-            vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1,
-            vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1
-        )
+
+        fun eøsVilkår(vilkårType: Vilkår): VilkårResultat =
+            VilkårResultat(
+                personResultat = personResultatBarn,
+                periodeFom = mai2020.førsteDagIInneværendeMåned(),
+                periodeTom = juli2020.sisteDagIInneværendeMåned(),
+                vilkårType = vilkårType,
+                resultat = Resultat.OPPFYLT,
+                begrunnelse = "",
+                behandlingId = vilkårsvurdering.behandling.id,
+                utdypendeVilkårsvurderinger = emptyList(),
+                vurderesEtter = Regelverk.EØS_FORORDNINGEN
+            )
+
+        val vilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN)
+
+        val vilkårResultaterBarn1 = vilkårForBarn.map { nasjonaltVilkår(it) } + vilkårForBarn.map { eøsVilkår(it) }
 
         personResultatBarn.setSortedVilkårResultater(
             vilkårResultaterBarn1.toSet()
