@@ -323,6 +323,7 @@ class BeregningServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
+            barnasFødselsdatoer = listOf(LocalDate.of(2016, 4, 5)),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
             barnAktør = listOf(barn.aktør),
             søkerAktør = søkerAktør
