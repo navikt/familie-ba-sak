@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.erRettFør
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somEndelig
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somFraOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.somTilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erRettFør
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somEndelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somFraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somTilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 
 @Deprecated("Bruk funksjonen tidlinjeFraTidspunkt i stedet")

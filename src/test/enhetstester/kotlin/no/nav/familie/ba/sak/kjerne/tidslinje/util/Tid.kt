@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.TidspunktClosedRange
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.TidspunktClosedRange
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -26,6 +26,11 @@ fun Int.feb(år: Int) = DagTidspunkt.med(LocalDate.of(år, 2, this))
 fun Int.mar(år: Int) = DagTidspunkt.med(LocalDate.of(år, 3, this))
 fun Int.apr(år: Int) = DagTidspunkt.med(LocalDate.of(år, 4, this))
 fun Int.mai(år: Int) = DagTidspunkt.med(LocalDate.of(år, 5, this))
+fun Int.jun(år: Int) = DagTidspunkt.med(LocalDate.of(år, 5, this))
+fun Int.jul(år: Int) = DagTidspunkt.med(LocalDate.of(år, 5, this))
+fun Int.aug(år: Int) = DagTidspunkt.med(LocalDate.of(år, 5, this))
+fun Int.sep(år: Int) = DagTidspunkt.med(LocalDate.of(år, 5, this))
+fun Int.okt(år: Int) = DagTidspunkt.med(LocalDate.of(år, 5, this))
 fun Int.nov(år: Int) = DagTidspunkt.med(LocalDate.of(år, 11, this))
 fun Int.des(år: Int) = DagTidspunkt.med(LocalDate.of(år, 12, this))
 

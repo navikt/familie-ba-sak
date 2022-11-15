@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.YearMonth
