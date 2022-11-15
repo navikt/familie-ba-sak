@@ -260,13 +260,13 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
 }
 
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
-    TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarna(
+    TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarnaDeprecated(
         this.byggPersonopplysningGrunnlag(),
         this.byggVilkårsvurdering()
     )
 
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
-    TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarna(
+    TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarnaDeprecated(
         this.byggPersonopplysningGrunnlag(),
         this.byggVilkårsvurdering()
     )

@@ -57,7 +57,7 @@ object TilkjentYtelseUtils {
 
         val (endretUtbetalingAndelerSøker, endretUtbetalingAndelerBarna) = endretUtbetalingAndeler.partition { it.person?.type == PersonType.SØKER }
 
-        val andelerTilkjentYtelseBarnaUtenEndringer = beregnAndelerTilkjentYtelseForBarna(
+        val andelerTilkjentYtelseBarnaUtenEndringer = beregnAndelerTilkjentYtelseForBarnaDeprecated(
             personopplysningGrunnlag = personopplysningGrunnlag,
             vilkårsvurdering = vilkårsvurdering
         ).map {
@@ -129,7 +129,8 @@ object TilkjentYtelseUtils {
         barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ): Boolean = utvidetAndeler.isNotEmpty() && barnasAndeler.isNotEmpty()
 
-    internal fun beregnAndelerTilkjentYtelseForBarna(
+    @Deprecated("Skal ikke brukes lenger, kan slettes når ny funksjonalitet bak toggle er godt nok testet")
+    internal fun beregnAndelerTilkjentYtelseForBarnaDeprecated(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         vilkårsvurdering: Vilkårsvurdering
     ): List<BeregnetAndel> {
