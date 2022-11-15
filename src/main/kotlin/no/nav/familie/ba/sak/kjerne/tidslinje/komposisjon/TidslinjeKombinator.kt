@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 
 /**
  * Extension-metode for å kombinere to tidslinjer
@@ -85,14 +86,13 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNull(
  * Resultatet er en tidslinje med tidsenhet T og innhold R
  */
 fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
-    listeKombinator: (Iterable<I?>) -> R?
-): Tidslinje<R, T> {
-    if (this.isEmpty()) return tidslinje { emptyList() }
-    val tidslinjer = this
-    return object : TidslinjeSomStykkerOppTiden<R, T>(tidslinjer) {
-        override fun finnInnholdForTidspunkt(tidspunkt: Tidspunkt<T>): R? =
-            listeKombinator(tidslinjer.map { it.innholdForTidspunkt(tidspunkt) })
-    }
+    listeKombinator: (Iterable<I>) -> R?
+) = tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
+    this.map { it.innholdsresultatForTidspunkt(tidspunkt) }
+        .filter { it.harVerdi }
+        .map { it.verdi }
+        .let { listeKombinator(it) }
+        .tilVerdi()
 }
 
 /**

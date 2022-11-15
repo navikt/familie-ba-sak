@@ -35,7 +35,7 @@ fun mapTilOpphørsperioder(
     val utbetalingsperioder =
         mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
 
-    val alleOpphørsperioder = if (forrigeUtbetalingsperioder.isNotEmpty() && utbetalingsperioder.isEmpty()) {
+    return if (forrigeUtbetalingsperioder.isNotEmpty() && utbetalingsperioder.isEmpty()) {
         listOf(
             Opphørsperiode(
                 periodeFom = forrigeUtbetalingsperioder.minOf { it.periodeFom },
@@ -56,8 +56,6 @@ fun mapTilOpphørsperioder(
             ).flatten()
         }.sortedBy { it.periodeFom }
     }
-
-    return slåSammenOpphørsperioder(alleOpphørsperioder)
 }
 
 fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): List<Opphørsperiode> {

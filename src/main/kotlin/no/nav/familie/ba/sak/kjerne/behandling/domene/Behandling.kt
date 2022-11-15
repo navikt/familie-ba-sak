@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.steg.SISTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verge.Verge
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.tilbakekreving.Regelverk
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -284,6 +285,7 @@ data class Behandling(
     fun hentYtelseTypeTilVilkår(): YtelseType = when (underkategori) {
         BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
         BehandlingUnderkategori.ORDINÆR -> YtelseType.ORDINÆR_BARNETRYGD
+        BehandlingUnderkategori.INSTITUSJON -> YtelseType.ORDINÆR_BARNETRYGD
     }
 
     fun harUtførtSteg(steg: StegType) =
@@ -411,16 +413,24 @@ enum class BehandlingKategori(val visningsnavn: String, val nivå: Int) {
             NASJONAL -> OppgaveBehandlingType.NASJONAL
         }
     }
+
+    fun tilRegelverk(): Regelverk =
+        when (this) {
+            EØS -> Regelverk.EØS
+            NASJONAL -> Regelverk.NASJONAL
+        }
 }
 
 fun List<BehandlingKategori>.finnHøyesteKategori(): BehandlingKategori? = this.maxByOrNull { it.nivå }
 
 enum class BehandlingUnderkategori(val visningsnavn: String, val nivå: Int) {
+    INSTITUSJON("Institusjon", 3),
     UTVIDET("Utvidet", 2),
     ORDINÆR("Ordinær", 1);
 
     fun tilOppgaveBehandlingTema(): OppgaveBehandlingTema {
         return when (this) {
+            INSTITUSJON -> OppgaveBehandlingTema.NasjonalInstitusjon
             UTVIDET -> OppgaveBehandlingTema.UtvidetBarnetrygd
             ORDINÆR -> OppgaveBehandlingTema.OrdinærBarnetrygd
         }

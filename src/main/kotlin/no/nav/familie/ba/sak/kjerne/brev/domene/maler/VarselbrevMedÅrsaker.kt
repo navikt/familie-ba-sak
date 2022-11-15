@@ -12,7 +12,9 @@ data class VarselbrevMedÅrsaker(
         navn: String,
         fødselsnummer: String,
         varselÅrsaker: List<String>,
-        enhet: String
+        enhet: String,
+        organisasjonsnummer: String? = null,
+        gjelder: String? = null
     ) : this(
         mal = mal,
         data = VarselOmRevurderingData(
@@ -20,7 +22,9 @@ data class VarselbrevMedÅrsaker(
             flettefelter = VarselOmRevurderingData.Flettefelter(
                 navn = navn,
                 fodselsnummer = fødselsnummer,
-                varselÅrsaker = varselÅrsaker
+                varselÅrsaker = varselÅrsaker,
+                organisasjonsnummer = organisasjonsnummer,
+                gjelder = gjelder
             )
         )
     )
@@ -35,17 +39,23 @@ data class VarselOmRevurderingData(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-        val varselAarsaker: Flettefelt
+        val varselAarsaker: Flettefelt,
+        override val organisasjonsnummer: Flettefelt,
+        override val gjelder: Flettefelt
     ) : FlettefelterForDokument {
 
         constructor(
             navn: String,
             fodselsnummer: String,
-            varselÅrsaker: List<String>
+            varselÅrsaker: List<String>,
+            organisasjonsnummer: String? = null,
+            gjelder: String? = null
         ) : this(
             navn = flettefelt(navn),
             fodselsnummer = flettefelt(fodselsnummer),
-            varselAarsaker = flettefelt(varselÅrsaker)
+            varselAarsaker = flettefelt(varselÅrsaker),
+            organisasjonsnummer = flettefelt(organisasjonsnummer),
+            gjelder = flettefelt(gjelder)
         )
     }
 

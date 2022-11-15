@@ -148,7 +148,7 @@ class BeregningService(
 
         return behandling.resultat == Behandlingsresultat.INNVILGET_OG_OPPHØRT &&
             when (behandling.underkategori) {
-                BehandlingUnderkategori.ORDINÆR -> true
+                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.INSTITUSJON -> true
                 BehandlingUnderkategori.UTVIDET -> false
             } &&
             behandling.erSøknad() &&

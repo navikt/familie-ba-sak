@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.DagTidspunkt.Companion.tilTidspunktEllerUendeligLengeTil
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import org.apache.kafka.common.Uuid
 
@@ -17,8 +17,8 @@ class VedtaksperioderMedUnikIdTidslinje(
     override fun lagPerioder(): List<Periode<VedtaksperiodeOgUnikId, Måned>> =
         vedtaksperioderMedBegrunnelser.map {
             Periode(
-                fraOgMed = it.fom.tilTidspunktEllerUendeligLengeSiden().tilInneværendeMåned(),
-                tilOgMed = it.tom.tilTidspunktEllerUendeligLengeTil().tilInneværendeMåned(),
+                fraOgMed = it.fom.tilTidspunktEllerTidligereEnn(it.tom).tilInneværendeMåned(),
+                tilOgMed = it.tom.tilTidspunktEllerSenereEnn(it.fom).tilInneværendeMåned(),
                 innhold = VedtaksperiodeOgUnikId(vedtaksperiode = it, uuid = Uuid.randomUuid())
             )
         }

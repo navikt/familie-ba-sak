@@ -1,13 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteAv
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 
 /**
@@ -16,9 +19,12 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
  * Perioder som ligger helt utenfor grensene vil forsvinne.
  * Perioden i hver ende som ligger delvis innenfor, vil forkortes.
  * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den nye benyttes
+ * Beskjæring mot tom tidslinje vil gi tom tidslinje
  */
-fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærEtter(tidslinje: Tidslinje<*, T>): Tidslinje<I, T> =
-    beskjær(tidslinje.fraOgMed(), tidslinje.tilOgMed())
+fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærEtter(tidslinje: Tidslinje<*, T>): Tidslinje<I, T> = when {
+    tidslinje.tidsrom().isEmpty() -> TomTidslinje()
+    else -> beskjær(tidslinje.fraOgMed()!!, tidslinje.tilOgMed()!!)
+}
 
 /**
  * Extension-metode for å beskjære (forkorte) en tidslinje etter til-og-med fra en annen tidslinje
@@ -26,9 +32,12 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærEtter(tidslinje: Tidslinje<*, T>)
  * Perioder som ligger helt utenfor grensene vil forsvinne.
  * Perioden i hver ende som ligger delvis innenfor, vil forkortes.
  * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den nye benyttes
+ * Beskjæring mot tom tidslinje vil gi tom tidslinje
  */
-fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMedEtter(tidslinje: Tidslinje<*, T>): Tidslinje<I, T> =
-    beskjær(this.fraOgMed(), tidslinje.tilOgMed())
+fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMedEtter(tidslinje: Tidslinje<*, T>): Tidslinje<I, T> = when {
+    tidslinje.tidsrom().isEmpty() -> TomTidslinje()
+    else -> beskjær(this.fraOgMed()!!, tidslinje.tilOgMed()!!)
+}
 
 /**
  * Extension-metode for å beskjære (forkorte) en tidslinje
@@ -40,45 +49,24 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMedEtter(tidslinje: Tidslinj
  * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den mest ekstreme benyttes
  */
 fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjær(fraOgMed: Tidspunkt<T>, tilOgMed: Tidspunkt<T>): Tidslinje<I, T> {
-    val tidslinje = this
-
-    return if (tilOgMed < fraOgMed) {
-        TomTidslinje()
-    } else {
-        object : Tidslinje<I, T>() {
-            override fun lagPerioder(): Collection<Periode<I, T>> {
-                return tidslinje.perioder()
-                    .filter { it.fraOgMed <= tilOgMed && it.tilOgMed >= fraOgMed }
-                    .map {
-                        Periode(
-                            størsteFraOgMed(fraOgMed, it.fraOgMed),
-                            minsteTilOgMed(tilOgMed, it.tilOgMed),
-                            it.innhold
-                        )
-                    }
-            }
-        }
+    if (tidsrom().isEmpty()) {
+        return this
     }
-}
 
-/**
- * Finner tidspunkt som representerer største (seneste) fra-og-med fra tidspunktene [t1] og [t2]
- * Tilfellet der både [t1] og [t2] er uendelig lenge siden må håndteres spesielt.
- * Da vil de betraktes som like, men vi velger den der det underliggende tidspunktet er minst/først
- * for å få lengst mulig underliggende tidslinje
- */
-fun <T : Tidsenhet> størsteFraOgMed(t1: Tidspunkt<T>, t2: Tidspunkt<T>) = when {
-    t1.erUendeligLengeSiden() && t2.erUendeligLengeSiden() -> minsteAv(t1, t2)
-    else -> størsteAv(t1, t2)
-}
+    val fom: Tidspunkt<T> = when {
+        // <--A..F begrenset med <--C..F må sjekke verdier fra og med <--A
+        // <--C..F begrenset med <--A..F trenger bare å sjekke verdier fra og med <--C
+        // Dvs i tilfellet de tidslinjens fom og begrensningens fom begge peker bakover, skal tidslinjens fom brukes
+        fraOgMed()!!.erUendeligLengeSiden() && fraOgMed.erUendeligLengeSiden() -> this.fraOgMed()!!
+        else -> maxOf(fraOgMed()!!, fraOgMed)
+    }
+    val tom: Tidspunkt<T> = when {
+        // A..F--> begrenset med A..C--> må sjekke verdier frem til og med F-->
+        // A..C--> begrenset med A..F--> trenger bare å sjekke verdier frem til og med C-->
+        // Dvs i tilfellet de tidslinjens tom og begrensningens tom begge peker fremover, skal tidslinjens tom brukes
+        tilOgMed()!!.erUendeligLengeTil() && tilOgMed.erUendeligLengeTil() -> this.tilOgMed()!!
+        else -> minOf(tilOgMed()!!, tilOgMed)
+    }
 
-/**
- * Finner tidspunkt som representerer minste (tidligste) til-og-med fra tidspunktene [t1] og [t2]
- * Tilfellet der både [t1] og [t2] er uendelig lenge til må håndteres spesielt.
- * Da vil de betraktes som like, men vi velger den der det underliggende tidspunktet er størst/sist
- * for å få lengst mulig underliggende tidslinje
- */
-fun <T : Tidsenhet> minsteTilOgMed(t1: Tidspunkt<T>, t2: Tidspunkt<T>) = when {
-    t1.erUendeligLengeTil() && t2.erUendeligLengeTil() -> størsteAv(t1, t2) // Riktig med største
-    else -> minsteAv(t1, t2)
+    return (fom..tom).tidslinjeFraTidspunkt { tidspunkt -> innholdsresultatForTidspunkt(tidspunkt) }
 }

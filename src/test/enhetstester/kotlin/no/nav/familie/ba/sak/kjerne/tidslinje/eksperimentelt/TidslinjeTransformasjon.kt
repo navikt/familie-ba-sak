@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 
 /**
@@ -27,7 +27,7 @@ fun <I, T : Tidsenhet, R> Tidslinje<I, T>.windowed(
         override fun lagPerioder(): Collection<Periode<R, T>> =
             tidslinje.perioder().windowed(size, step, partialWindows) { perioder ->
                 val periode = mapper(perioder)
-                if (periode.fraOgMed < fraOgMed || periode.tilOgMed > tilOgMed) {
+                if (periode.fraOgMed < fraOgMed!! || periode.tilOgMed > tilOgMed!!) {
                     throw IllegalArgumentException("Forsøk på å flytte perioden utenfor grensene for tidslinjen")
                 }
                 periode

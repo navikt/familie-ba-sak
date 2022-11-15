@@ -1,9 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Uendelighet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
 import org.junit.Assert.assertEquals
@@ -91,15 +99,16 @@ internal class BeskjæreTidslinjeTest {
     }
 
     @Test
-    fun `skal beskjære uendelig fremtid slik at den kortest mulig`() {
+    fun `skal beskjære uendelig fremtid slik at den blir kortest mulig`() {
         val hovedlinje = "aaaaaa>".tilCharTidslinje(des(1993))
         val beskjæring = "bbb>".tilCharTidslinje(feb(2002))
 
         val faktisk = hovedlinje.beskjærEtter(beskjæring)
-        val forventet = "aaa>".tilCharTidslinje(feb(2002))
+        val forventet = tidslinje { listOf(Periode(feb(2002), feb(2002).somUendeligLengeTil(), 'a')) }
 
         assertEquals(forventet, faktisk)
         assertEquals(forventet.somEndelig(), faktisk.somEndelig())
+        assertEquals(Uendelighet.FREMTID, faktisk.tilOgMed()?.uendelighet)
     }
 
     @Test
@@ -108,10 +117,11 @@ internal class BeskjæreTidslinjeTest {
         val beskjæring = "<bbb".tilCharTidslinje(feb(2002))
 
         val faktisk = hovedlinje.beskjærEtter(beskjæring)
-        val forventet = "<aaa".tilCharTidslinje(feb(2002))
+        val forventet = tidslinje { listOf(Periode(mai(2002).somUendeligLengeSiden(), mai(2002), 'a')) }
 
         assertEquals(forventet, faktisk)
         assertEquals(forventet.somEndelig(), faktisk.somEndelig())
+        assertEquals(Uendelighet.FORTID, faktisk.fraOgMed()?.uendelighet)
     }
 
     @Test
@@ -124,5 +134,15 @@ internal class BeskjæreTidslinjeTest {
 
         assertEquals(forventet, faktisk)
         assertEquals(forventet.somEndelig(), faktisk.somEndelig())
+    }
+
+    @Test
+    fun `beskjære mot tom tidslinje skal gi tom tidslinje`() {
+        val hovedlinje = "bbb".tilCharTidslinje(feb(2002))
+
+        val faktisk = hovedlinje.beskjærEtter(TomTidslinje<Char, Måned>())
+        val forventet = TomTidslinje<Char, Måned>()
+
+        assertEquals(forventet, faktisk)
     }
 }

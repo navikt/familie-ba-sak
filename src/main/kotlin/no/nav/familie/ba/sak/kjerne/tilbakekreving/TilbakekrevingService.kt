@@ -99,7 +99,7 @@ class TilbakekrevingService(
             )
 
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
-        val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
+        val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId)
         val institusjon = hentInstitusjon(vedtak.behandling.fagsak)
         val verge = hentVerge(vedtak.behandling.verge?.ident)
 
@@ -135,7 +135,7 @@ class TilbakekrevingService(
     fun lagOpprettTilbakekrevingRequest(behandling: Behandling): OpprettTilbakekrevingRequest {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
-        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id)
+        val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id)
 
         val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
             ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")
@@ -155,6 +155,7 @@ class TilbakekrevingService(
 
         return OpprettTilbakekrevingRequest(
             fagsystem = Fagsystem.BA,
+            regelverk = behandling.kategori.tilRegelverk(),
             ytelsestype = Ytelsestype.BARNETRYGD,
             eksternFagsakId = behandling.fagsak.id.toString(),
             personIdent = personopplysningGrunnlag.søker.aktør.aktivFødselsnummer(),

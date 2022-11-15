@@ -58,11 +58,12 @@ class SaksstatistikkService(
             BehandlingÅrsak.SØKNAD -> {
                 behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId) ?: behandling.opprettetTidspunkt
             }
+
             else -> behandling.opprettetTidspunkt
         }
 
         val behandlendeEnhetsKode =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
         val ansvarligEnhetKode = arbeidsfordelingService.hentArbeidsfordelingsenhet(behandling).enhetId
 
         val aktivtVedtak = vedtakService.hentAktivForBehandling(behandlingId)
@@ -81,8 +82,8 @@ class SaksstatistikkService(
             behandlingType = behandling.type.name,
             behandlingStatus = behandling.status.name,
             behandlingKategori = when (behandling.underkategori) { // Gjøres pga. tilpasning til DVH-modell
-                BehandlingUnderkategori.ORDINÆR -> behandling.underkategori.name
-                BehandlingUnderkategori.UTVIDET -> behandling.underkategori.name
+                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET, BehandlingUnderkategori.INSTITUSJON ->
+                    behandling.underkategori.name
             },
             behandlingUnderkategori = when (behandling.fagsak.type) { // <-'
                 NORMAL -> null

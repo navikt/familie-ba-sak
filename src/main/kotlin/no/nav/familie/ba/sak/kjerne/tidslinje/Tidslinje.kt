@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.NullTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeTil
 
 /**
  * Base-klassen for alle tidslinjer. Bygger på en tanke om at en tidslinje inneholder en
@@ -97,12 +98,6 @@ abstract class Tidslinje<I, T : Tidsenhet> {
             IllegalStateException(tidslinjeFeil.toString())
     }
 }
-
-fun <I, T : Tidsenhet> Tidslinje<I, T>.fraOgMed() =
-    this.perioder().firstOrNull()?.fraOgMed ?: NullTidspunkt.fraOgMed()
-
-fun <I, T : Tidsenhet> Tidslinje<I, T>.tilOgMed() =
-    this.perioder().lastOrNull()?.tilOgMed ?: NullTidspunkt.tilOgMed()
 
 fun <I, T : Tidsenhet> tidslinje(lagPerioder: () -> Collection<Periode<I, T>>) =
     object : Tidslinje<I, T>() {

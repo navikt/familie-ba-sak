@@ -1,8 +1,9 @@
-package no.nav.familie.ba.sak.kjerne.tidslinje
+package no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.minsteAv
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.størsteAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.minsteAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.størsteAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeSiden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
@@ -13,10 +14,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 
-class TidspunktTest {
+class TidsromTest {
     @Test
     fun testStørsteAv() {
         assertEquals(
@@ -84,15 +83,5 @@ class TidspunktTest {
 
         assertNotEquals(feb(2020).somUendeligLengeSiden(), feb(2020).somUendeligLengeTil())
         assertNotEquals(5.feb(2020).somUendeligLengeTil(), 5.feb(2020).somUendeligLengeSiden())
-    }
-
-    @Test
-    fun `En høyst teoretisk sjekk av at systemet ikke er blitt så gammelt at det ikke virker`() {
-        assertThrows<IllegalArgumentException> {
-            // Systemet virker ikke om 500 år
-            Tidspunkt.med(LocalDate.now().plusYears(500))
-        }
-        // Vil kaste exception hvis det er mindre enn 100 år til systemet ikke virker
-        Tidspunkt.med(LocalDate.now().plusYears(100))
     }
 }

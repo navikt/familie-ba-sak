@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevan
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.PerioderForBehandling
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
@@ -26,7 +26,7 @@ class AvstemmingService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val økonomiKlient: ØkonomiKlient,
     private val beregningService: BeregningService,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val batchRepository: BatchRepository,
     private val dataChunkRepository: DataChunkRepository
 ) {
@@ -107,7 +107,7 @@ class AvstemmingService(
                 this["transaksjonsId"] = konsistensavstemmingAvsluttTaskDTO.transaksjonsId.toString()
             }
         )
-        taskRepository.save(konsistensavstemmingAvsluttTask)
+        taskService.save(konsistensavstemmingAvsluttTask)
     }
 
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(
@@ -141,7 +141,7 @@ class AvstemmingService(
                 this["chunkNr"] = konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr.toString()
             }
         )
-        taskRepository.save(task)
+        taskService.save(task)
     }
 
     fun hentDataForKonsistensavstemming(

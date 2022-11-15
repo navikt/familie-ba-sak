@@ -1,25 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilForrigeMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilFørsteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilNesteMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.tilSisteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilPeriodeMedInnhold
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilPeriodeUtenInnhold
-
-fun Tidslinje<VilkårRegelverkResultat, Dag>.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() = this
-    .tilMånedEtterVilkårsregler { it.erOppfylt() }
-    .slåSammenLike()
-    .filtrerIkkeNull()
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
 
 /**
  * Extension-funksjon som konverterer en dag-basert tidslinje til en måned-basert tidslinje med VilkårRegelverkResultat
@@ -36,15 +19,7 @@ fun Tidslinje<VilkårRegelverkResultat, Dag>.tilMånedsbasertTidslinjeForVilkår
  * Ikke oppfylt | Oppfylt EØS   -> <Tomt>
  * Ikke oppfylt | Oppfylt Nasj  -> <Tomt>
  */
-fun <I> Tidslinje<I, Dag>.tilMånedEtterVilkårsregler(erOppfylt: (I?) -> Boolean) = tidslinje {
-    (fraOgMed().tilForrigeMåned()..tilOgMed().tilNesteMåned()).map { måned ->
-        val innholdSisteDagForrigeMåned = innholdForTidspunkt(måned.forrige().tilSisteDagIMåneden())
-        val innholdFørsteDagDenneMåned = innholdForTidspunkt(måned.tilFørsteDagIMåneden())
-
-        if (erOppfylt(innholdSisteDagForrigeMåned) && erOppfylt(innholdFørsteDagDenneMåned)) {
-            måned.tilPeriodeMedInnhold(innholdFørsteDagDenneMåned)
-        } else {
-            måned.tilPeriodeUtenInnhold()
-        }
+fun Tidslinje<VilkårRegelverkResultat, Dag>.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() = this
+    .tilMånedFraMånedsskifteIkkeNull { sisteDagForrigeMåned, førsteDagDenneMåned ->
+        if (sisteDagForrigeMåned.erOppfylt() && førsteDagDenneMåned.erOppfylt()) førsteDagDenneMåned else null
     }
-}

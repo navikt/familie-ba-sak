@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 
 /**
  * Funksjon for å kjede sammen tidslinjer
@@ -14,3 +14,6 @@ fun <I, T : Tidsenhet> konkatenerTidslinjer(vararg tidslinje: Tidslinje<I, T>) =
             else -> it.single { it != null }
         }
     }
+
+operator fun <I, T : Tidsenhet> Tidslinje<I, T>.plus(tidslinje: Tidslinje<I, T>): Tidslinje<I, T> =
+    konkatenerTidslinjer(this, tidslinje)

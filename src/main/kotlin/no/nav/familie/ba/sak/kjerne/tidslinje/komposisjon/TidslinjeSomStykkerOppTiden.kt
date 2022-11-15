@@ -2,22 +2,25 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erRettFør
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somEndelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somFraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somTilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 
+@Deprecated("Bruk funksjonen tidlinjeFraTidspunkt i stedet")
 abstract class TidslinjeSomStykkerOppTiden<I, T : Tidsenhet>(
     avhengigheter: Collection<Tidslinje<*, T>>
 ) : TidslinjeMedAvhengigheter<I, T>(avhengigheter) {
     constructor(vararg avhengighet: Tidslinje<*, T>) :
         this(avhengighet.asList())
 
-    val fraOgMed = avhengigheter.fraOgMed()
-    val tilOgMed = avhengigheter.tilOgMed()
+    val tidsrom = avhengigheter.tidsrom()
 
     override fun lagPerioder(): Collection<Periode<I, T>> {
-        val tidspunkter = fraOgMed..tilOgMed
-        return tidspunkter.map { tidspunkt -> TidspunktMedInnhold(tidspunkt, finnInnholdForTidspunkt(tidspunkt)) }
+        return tidsrom.map { tidspunkt -> TidspunktMedInnhold(tidspunkt, finnInnholdForTidspunkt(tidspunkt)) }
             .fold(emptyList()) { perioder, tidspunktMedInnhold ->
                 val sistePeriode = perioder.lastOrNull()
                 when {
