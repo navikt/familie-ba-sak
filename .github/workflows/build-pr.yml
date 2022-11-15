@@ -90,6 +90,7 @@ jobs:
       - name: Provenance, upload and sign attestation
         uses: nais/salsa@v0.4
         with:
+          GITHUB_USERNAME: x-access-token
           key: ${{ secrets.SALSA_KMS_KEY }}
           docker_pwd: ${{ secrets.GITHUB_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
