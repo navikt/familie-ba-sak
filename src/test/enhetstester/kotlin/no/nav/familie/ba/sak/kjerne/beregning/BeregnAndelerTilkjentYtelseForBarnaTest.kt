@@ -252,7 +252,7 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
             barn får alt av 1354 i sep(2020)..aug(2021),
             barn får alt av 1654 i sep(2021)..des(2021),
             barn får alt av 1676 i jan(2022)..nov(2025),
-            barn får alt av 1054 i des(2025)..des(2037)
+            barn får alt av 1054 i des(2025)..nov(2037)
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -260,13 +260,13 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
 }
 
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
-    TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarnaDeprecated(
+    TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarna(
         this.byggPersonopplysningGrunnlag(),
-        this.byggVilkårsvurdering()
+        this.byggVilkårsvurdering().personResultater
     )
 
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
-    TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarnaDeprecated(
+    TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarna(
         this.byggPersonopplysningGrunnlag(),
-        this.byggVilkårsvurdering()
+        this.byggVilkårsvurdering().personResultater
     )
