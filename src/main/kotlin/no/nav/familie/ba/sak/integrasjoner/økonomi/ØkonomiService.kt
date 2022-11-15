@@ -97,7 +97,7 @@ class ØkonomiService(
         }
         val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
 
-        return if (andelerSomSkalSendesTilOppdrag.any { it.kildeBehandlingId == null }) {
+        return if (andelerSomSkalSendesTilOppdrag.isEmpty() || andelerSomSkalSendesTilOppdrag.any { it.kildeBehandlingId == null }) {
             økonomiKlient.hentStatus(oppdragId)
         } else {
             hentStatusForKildeBehandling(andelerSomSkalSendesTilOppdrag, oppdragId)
