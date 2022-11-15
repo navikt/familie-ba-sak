@@ -110,6 +110,7 @@ class FeatureToggleConfig(
             "familie-ba-sak.endringer.validering.migeringsbehandling"
         const val NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE = "familie-ba-sak.behandling.generer-andeler-med-ny-metode"
         const val NY_MÅTE_Å_SPLITTE_VEDTAKSPERIODER = "familie-ba-sak.behandling.ny-metode-for-splitt-vedtaksperioder"
+        const val NY_MÅTE_Å_GENERERE_ATY_BARNA = "familie-ba-sak.behandling.ny-metode-generer-aty-barna"
 
         const val KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND = "familie-ba-sak.behandling.utvidet-eos-sekunderland"
 

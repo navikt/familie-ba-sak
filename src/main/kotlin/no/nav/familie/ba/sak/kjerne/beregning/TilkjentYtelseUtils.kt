@@ -60,6 +60,7 @@ object TilkjentYtelseUtils {
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> = emptyList(),
+        skalBrukeNyMåteÅGenerereAndelerForBarna: Boolean = true,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() }
     ): TilkjentYtelse {
         val tilkjentYtelse = TilkjentYtelse(
@@ -70,10 +71,19 @@ object TilkjentYtelseUtils {
 
         val (endretUtbetalingAndelerSøker, endretUtbetalingAndelerBarna) = endretUtbetalingAndeler.partition { it.person?.type == PersonType.SØKER }
 
-        val andelerTilkjentYtelseBarnaUtenEndringer = beregnAndelerTilkjentYtelseForBarnaDeprecated(
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            vilkårsvurdering = vilkårsvurdering
-        ).map {
+        val andelerTilkjentYtelseBarnaUtenEndringer = (
+            if (skalBrukeNyMåteÅGenerereAndelerForBarna) {
+                beregnAndelerTilkjentYtelseForBarna(
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    personResultater = vilkårsvurdering.personResultater
+                )
+            } else {
+                beregnAndelerTilkjentYtelseForBarnaDeprecated(
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    vilkårsvurdering = vilkårsvurdering
+                )
+            }
+            ).map {
             AndelTilkjentYtelse(
                 behandlingId = vilkårsvurdering.behandling.id,
                 tilkjentYtelse = tilkjentYtelse,
@@ -202,7 +212,7 @@ object TilkjentYtelseUtils {
                     sats == null -> throw Feil("Finner ikke sats i periode med rett til utbetaling")
                     else -> PeriodeInnhold(sats, prosent)
                 }
-            }.filtrerIkkeNull().slåSammenLike()
+            }.slåSammenLike().filtrerIkkeNull()
 
             satsProsentTidslinje.perioder().map {
                 val innholdIPeriode = it.innhold ?: throw Feil("Finner ikke sats og prosent i periode (${it.fraOgMed} - ${it.tilOgMed}) ved generering av andeler tilkjent ytelse")
@@ -251,7 +261,9 @@ object TilkjentYtelseUtils {
     private fun Iterable<VilkårResultat>.mapTilProsentEllerNull(personType: PersonType): BigDecimal? {
         return if (alleVilkårErOppfylt(personType)) {
             if (any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }) BigDecimal(50) else BigDecimal(100)
-        } else null
+        } else {
+            null
+        }
     }
 
     private fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int, Måned> {
