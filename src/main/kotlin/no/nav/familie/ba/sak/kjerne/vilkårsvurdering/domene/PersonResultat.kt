@@ -248,7 +248,7 @@ private fun alleVilkårOppfyltEllerNull(vilkårResultater: Iterable<VilkårResul
     return if (vilkårResultater.alleVilkårErOppfylt(personType)) vilkårResultater.filterNotNull() else null
 }
 
-private fun Iterable<VilkårResultat>.alleVilkårErOppfylt(personType: PersonType): Boolean {
+fun Iterable<VilkårResultat>.alleVilkårErOppfylt(personType: PersonType): Boolean {
     val alleVilkårForPersonType = Vilkår.hentVilkårFor(personType)
     return this.map { it.vilkårType }.containsAll(alleVilkårForPersonType) && this.all { it.resultat == Resultat.OPPFYLT }
 }
