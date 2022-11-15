@@ -757,21 +757,21 @@ internal class UtvidetBarnetrygdTest {
 
         assertEquals(barnOppfylt.ident, andelBarn1.aktør.aktivFødselsnummer())
         assertEquals(barnOppfylt.fom.plusMonths(1).toYearMonth(), andelBarn1.stønadFom)
-        assertEquals(b2bTom.plusMonths(1).toYearMonth(), andelBarn1.stønadTom) // Legger på 1mnd pga back2back
+        assertEquals(b2bTom.toYearMonth(), andelBarn1.stønadTom) // Legger på 1mnd pga back2back
         assertEquals(BigDecimal(50), andelBarn1.prosent)
 
         assertEquals(barnOppfylt.ident, andelBarn2.aktør.aktivFødselsnummer())
-        assertEquals(b2bFom.plusMonths(1).toYearMonth(), andelBarn2.stønadFom)
+        assertEquals(b2bFom.toYearMonth(), andelBarn2.stønadFom)
         assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn2.stønadTom)
         assertEquals(BigDecimal(100), andelBarn2.prosent)
 
         assertEquals(søkerOrdinær.ident, andelUtvidet1.aktør.aktivFødselsnummer())
         assertEquals(søkerOrdinær.fom.plusMonths(1).toYearMonth(), andelUtvidet1.stønadFom)
-        assertEquals(b2bTom.plusMonths(1).toYearMonth(), andelUtvidet1.stønadTom) // Legger på 1mnd pga back2back
+        assertEquals(b2bTom.toYearMonth(), andelUtvidet1.stønadTom) // Legger på 1mnd pga back2back
         assertEquals(BigDecimal(50), andelUtvidet1.prosent)
 
         assertEquals(søkerOrdinær.ident, andelUtvidet2.aktør.aktivFødselsnummer())
-        assertEquals(b2bFom.plusMonths(1).toYearMonth(), andelUtvidet2.stønadFom)
+        assertEquals(b2bFom.toYearMonth(), andelUtvidet2.stønadFom)
         assertEquals(søkerOrdinær.tom.toYearMonth(), andelUtvidet2.stønadTom)
         assertEquals(BigDecimal(100), andelUtvidet2.prosent)
     }
