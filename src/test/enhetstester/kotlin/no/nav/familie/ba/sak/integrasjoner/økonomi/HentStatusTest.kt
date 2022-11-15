@@ -50,12 +50,12 @@ class HentStatusTest {
             utbetalingsoppdragGenerator = mockk(),
             behandlingService = mockk(),
             featureToggleService = mockk(),
-            tilkjentYtelseValideringService = mockk()
+            tilkjentYtelseValideringService = mockk(),
+            tilkjentYtelseRepository = tilkjentYtelseRepository
         )
         statusFraOppdrag = StatusFraOppdrag(
             økonomiService = økonomiService,
-            taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() },
-            tilkjentYtelseRepository = tilkjentYtelseRepository
+            taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() }
         )
     }
 
