@@ -185,12 +185,34 @@ object TilkjentYtelseUtils {
             }
     }
 
-    internal fun beregnAndelerTilkjentYtelseForBarna() {
-        // 1: Lag liste med tidslinjer (1 for hvert barn) som viser når det er rett på utbetaling for hvert barn
+    internal fun beregnAndelerTilkjentYtelseForBarna(
+        personResultater: Set<PersonResultat>,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
+    ) {
+        val tidslinjerMedRettPerBarn = personResultater.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag)
         // 2: For hvert barn:
         //      2a: Lage satstidslinje
         //      2b: Lage prosenttidslinje
         //      2c: Kombinere rett, sats, og prosent til å lage andel
+    }
+
+    private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag: PersonopplysningGrunnlag): Map<Person, Tidslinje<BigDecimal, Måned>> {
+        val tidslinjerPerPerson = this.associate { personResultat ->
+            val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av andeler tilkjent ytelse")
+            person to personResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato = person.fødselsdato, personType = person.type)
+        }
+
+        val søkerTidslinje = tidslinjerPerPerson[personopplysningGrunnlag.søker] ?: throw Feil("Finner ikke tidslinje for søker ved generering av andeler tilkjent ytelse")
+        val barnasTidslinjer = tidslinjerPerPerson.filter { it.key in personopplysningGrunnlag.barna }
+
+        return barnasTidslinjer.mapValues { (_, barnTidslinje) ->
+            barnTidslinje.kombinerMed(søkerTidslinje) { barnProsent, søkerProsent ->
+                when {
+                    barnProsent == null || søkerProsent == null -> null
+                    else -> barnProsent
+                }
+            }.filtrerIkkeNull().slåSammenLike()
+        }
     }
 
     private fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato: LocalDate, personType: PersonType): Tidslinje<BigDecimal, Måned> {
