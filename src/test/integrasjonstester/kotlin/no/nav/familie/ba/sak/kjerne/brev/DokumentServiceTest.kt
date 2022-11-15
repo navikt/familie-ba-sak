@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -92,6 +93,9 @@ class DokumentServiceTest(
 
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
+
+    @Autowired
+    private val brevKlient: BrevKlient,
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService
@@ -286,7 +290,7 @@ class DokumentServiceTest(
         )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        io.mockk.verify(exactly = 1) {
+        verify(exactly = 1) {
             integrasjonClient.journalførDokument(match { it.fnr == fnr })
         }
     }
@@ -327,11 +331,20 @@ class DokumentServiceTest(
         )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        io.mockk.verify(exactly = 1) {
+        verify(exactly = 1) {
             integrasjonClient.journalførDokument(match { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" })
         }
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
         assertEquals("institusjonsbarnets navn", manueltBrevRequest.vedrørende?.navn)
+        verify {
+            brevKlient.genererBrev(
+                "bokmaal",
+                match {
+                    it.mal == Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON && it.data.flettefelter.gjelder!!.first() == "institusjonsbarnets navn" &&
+                        it.data.flettefelter.organisasjonsnummer!!.first() == orgNummer
+                }
+            )
+        }
     }
 
     @Test
@@ -370,7 +383,7 @@ class DokumentServiceTest(
         )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        io.mockk.verify(exactly = 1) {
+        verify(exactly = 1) {
             integrasjonClient.journalførDokument(match { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" })
         }
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
@@ -413,7 +426,7 @@ class DokumentServiceTest(
         )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        io.mockk.verify(exactly = 1) {
+        verify(exactly = 1) {
             integrasjonClient.journalførDokument(match { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" })
         }
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
@@ -457,7 +470,7 @@ class DokumentServiceTest(
         )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
-        io.mockk.verify(exactly = 1) {
+        verify(exactly = 1) {
             integrasjonClient.journalførDokument(match { it.fnr == fnr && it.avsenderMottaker?.id == orgNummer && it.avsenderMottaker?.navn == "Testinstitusjon" })
         }
         assertEquals(fnr, manueltBrevRequest.vedrørende?.fødselsnummer)
