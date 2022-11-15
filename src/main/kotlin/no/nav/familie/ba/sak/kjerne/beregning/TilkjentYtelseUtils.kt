@@ -41,6 +41,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -188,15 +189,39 @@ object TilkjentYtelseUtils {
     }
 
     internal fun beregnAndelerTilkjentYtelseForBarna(
-        personResultater: Set<PersonResultat>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
-    ) {
-        val tidslinjerMedRettPerBarn = personResultater.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag)
-        // 2: For hvert barn:
-        //      2a: Lage satstidslinje
-        //      2b: Lage prosenttidslinje
-        //      2c: Kombinere rett, sats, og prosent til å lage andel
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        personResultater: Set<PersonResultat>
+    ): List<BeregnetAndel> {
+        val tidslinjerMedRettTilProsentPerBarn = personResultater.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag)
+
+        return tidslinjerMedRettTilProsentPerBarn.flatMap { (barn, tidslinjeMedRettTilProsentForBarn) ->
+            val satsTidslinje = lagOrdinærTidslinje(barn)
+            val satsProsentTidslinje = tidslinjeMedRettTilProsentForBarn.kombinerMed(satsTidslinje) { prosent, sats ->
+                when {
+                    prosent == null -> null
+                    sats == null -> throw Feil("Finner ikke sats i periode med rett til utbetaling")
+                    else -> PeriodeInnhold(sats, prosent)
+                }
+            }.filtrerIkkeNull().slåSammenLike()
+
+            satsProsentTidslinje.perioder().map {
+                val innholdIPeriode = it.innhold ?: throw Feil("Finner ikke sats og prosent i periode (${it.fraOgMed} - ${it.tilOgMed}) ved generering av andeler tilkjent ytelse")
+                BeregnetAndel(
+                    person = barn,
+                    stønadFom = it.fraOgMed.tilYearMonth(),
+                    stønadTom = it.tilOgMed.tilYearMonth(),
+                    beløp = innholdIPeriode.sats.avrundetHeltallAvProsent(innholdIPeriode.prosent),
+                    sats = innholdIPeriode.sats,
+                    prosent = innholdIPeriode.prosent
+                )
+            }
+        }
     }
+
+    private data class PeriodeInnhold(
+        val sats: Int,
+        val prosent: BigDecimal
+    )
 
     private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag: PersonopplysningGrunnlag): Map<Person, Tidslinje<BigDecimal, Måned>> {
         val tidslinjerPerPerson = this.associate { personResultat ->
