@@ -57,6 +57,16 @@ jobs:
         run: |
           mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -Dtest="!no/nav/familie/ba/sak/kjerne/verdikjedetester/**"
           # mvn -B --no-transfer-progress verify sonar:sonar --settings .m2/maven-settings.xml --file pom.xml -Dtest="!no/nav/familie/ba/sak/kjerne/verdikjedetester/**"
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.SALSA_CREDENTIALS }}
+
+      - name: Provenance, upload and sign attestation
+        uses: nais/salsa@v0.4
+        with:
+          key: ${{ secrets.SALSA_KMS_KEY }}
+          docker_pwd: ${{ secrets.GITHUB_TOKEN }
   verdikjedetesterFeatureToggleOff:
     name: Verdikjedetester m/ feature toggles slått av
     runs-on: ubuntu-latest
