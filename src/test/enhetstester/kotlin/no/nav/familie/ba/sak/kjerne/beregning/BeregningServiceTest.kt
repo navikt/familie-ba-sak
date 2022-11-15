@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
@@ -901,7 +902,7 @@ class BeregningServiceTest {
         val andreSatsendringFom =
             SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1654)!!
 
-        val personResultat = mutableSetOf(
+        val personResultatSøker =
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = søkerAktørId,
@@ -910,30 +911,18 @@ class BeregningServiceTest {
                 periodeTom = periodeTomForSøker,
                 lagFullstendigVilkårResultat = true,
                 personType = PersonType.SØKER
-            ),
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = barn1AktørId,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = førstePeriodeFomForBarnet,
-                periodeTom = førstePeriodeTomForBarnet,
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN,
-                erDeltBosted = deltBostedForFørstePeriode
-            ),
-            lagPersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = barn1AktørId,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = andrePeriodeFomForBarnet,
-                periodeTom = andrePeriodeTomForBarnet,
-                lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN,
-                erDeltBosted = deltBostedForAndrePeriode
             )
+        val personResultatBarn = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = barn1AktørId
         )
 
-        vilkårsvurdering.personResultater = personResultat
+        val vilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN)
+        val vilkårResultaterBarn =
+            vilkårForBarn.lagVilkårResultaterForPerson(fom = førstePeriodeFomForBarnet, tom = førstePeriodeTomForBarnet, erDeltBosted = deltBostedForFørstePeriode) + vilkårForBarn.lagVilkårResultaterForPerson(fom = andrePeriodeFomForBarnet, tom = andrePeriodeTomForBarnet, erDeltBosted = deltBostedForAndrePeriode)
+
+        personResultatBarn.setSortedVilkårResultater(vilkårResultaterBarn.toSet())
+        vilkårsvurdering.personResultater = setOf(personResultatSøker, personResultatBarn)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
@@ -993,6 +982,21 @@ class BeregningServiceTest {
             andelerTilkjentYtelse[3].kalkulertUtbetalingsbeløp
         )
     }
+
+    private fun Set<Vilkår>.lagVilkårResultaterForPerson(fom: LocalDate, tom: LocalDate, erDeltBosted: Boolean): List<VilkårResultat> =
+        this.map {
+            lagVilkårResultat(
+                vilkårType = it,
+                periodeFom = fom,
+                periodeTom = tom,
+                utdypendeVilkårsvurderinger = listOfNotNull(
+                    when {
+                        erDeltBosted && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED
+                        else -> null
+                    }
+                )
+            )
+        }
 
     fun opprettAtyMedEndretUtbetalingsPeriode(
         behandlinsResultat: Behandlingsresultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
