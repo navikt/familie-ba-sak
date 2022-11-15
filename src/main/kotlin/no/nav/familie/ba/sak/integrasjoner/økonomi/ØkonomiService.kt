@@ -17,8 +17,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsperioder
+import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -65,7 +66,7 @@ class ØkonomiService(
     }
 
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, behandlingId: Long) {
-        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
+        if (!utbetalingsoppdrag.skalIverksettesMotOppdrag()) {
             UtbetalingsoppdragService.logger.warn(
                 "Iverksetter ikke noe mot oppdrag. " +
                     "Ingen utbetalingsperioder for behandlingId=$behandlingId"
@@ -91,7 +92,7 @@ class ØkonomiService(
         val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId)
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
 
-        if (tilkjentYtelse.utbetalingsperioder().isEmpty() || andelerTilkjentYtelse.isEmpty()) {
+        if (!tilkjentYtelse.skalIverksettesMotOppdrag()) {
             return OppdragStatus.KVITTERT_OK
         }
         val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
@@ -240,6 +241,11 @@ class ØkonomiService(
         val logger = LoggerFactory.getLogger(ØkonomiService::class.java)
     }
 }
+
+private fun Utbetalingsoppdrag.skalIverksettesMotOppdrag(): Boolean = utbetalingsperiode.isNotEmpty()
+
+private fun TilkjentYtelse.skalIverksettesMotOppdrag(): Boolean =
+    this.utbetalingsoppdrag()?.skalIverksettesMotOppdrag() ?: false
 
 fun Utbetalingsoppdrag.harLøpendeUtbetaling() =
     this.utbetalingsperiode.any {
