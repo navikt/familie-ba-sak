@@ -251,7 +251,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER,
             INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
-            VARSEL_OM_REVURDERING_INSTITUSJON-> true
+            VARSEL_OM_REVURDERING_INSTITUSJON -> true
 
             else -> false
         }
