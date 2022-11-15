@@ -86,7 +86,7 @@ jobs:
         with:
           key: ${{ secrets.SALSA_KMS_KEY }}
           docker_pwd: ${{ secrets.GITHUB_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}s
+          github_token: ${{ secrets.GITHUB_TOKEN }}
   verdikjedetesterFeatureToggleOn:
     name: Verdikjedetester m/ feature toggles slått på
     runs-on: ubuntu-latest
