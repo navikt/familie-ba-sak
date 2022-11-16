@@ -60,47 +60,6 @@ class HentStatusTest {
     }
 
     @Test
-    fun `der den nåværende behandlinga ikke har noen egne andeler som er sendt til økonomi, men den har andeler med kilde som alt er sendt, bruker vi kilde-behandlinga når vi sjekker status fra økonomi`() {
-        val tilfeldigPerson = tilfeldigPerson()
-        val nyBehandling = lagBehandling()
-        every {
-            økonomiKlient.hentStatus(
-                match { it.behandlingsId == nyBehandling.id.toString() }
-            )
-        } throws RuntimeException()
-        lagTilkjentYtelse(nyBehandling, listOf(lagUtbetalingsperiode(nyBehandling)))
-
-        val opprinneligBehandlingsid = -1L
-
-        every {
-            økonomiKlient.hentStatus(
-                match { it.behandlingsId == opprinneligBehandlingsid.toString() }
-            )
-        } returns OppdragStatus.KVITTERT_OK
-        val andelerTilkjentYtelse = listOf(
-            lagAndelTilkjentYtelse(
-                årMnd("2019-04"),
-                årMnd("2020-03"),
-                YtelseType.ORDINÆR_BARNETRYGD,
-                10,
-                behandling = nyBehandling,
-                person = tilfeldigPerson,
-                aktør = mockk(),
-                tilkjentYtelse = mockk(),
-                kildeBehandlingId = opprinneligBehandlingsid
-            )
-        )
-
-        every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(any()) } returns andelerTilkjentYtelse
-
-        val nesteSteg =
-            statusFraOppdrag.utførStegOgAngiNeste(nyBehandling, statusFraOppdragMedTask(tilfeldigPerson, nyBehandling))
-        assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE)
-        verify(exactly = 0) { økonomiKlient.hentStatus(match { it.behandlingsId == nyBehandling.id.toString() }) }
-        verify { økonomiKlient.hentStatus(match { it.behandlingsId == opprinneligBehandlingsid.toString() }) }
-    }
-
-    @Test
     fun `henter status fra økonomi for behandling der alle utbetalingene hører til denne behandlinga`() {
         val tilfeldigPerson = tilfeldigPerson()
         val nyBehandling = lagBehandling()
