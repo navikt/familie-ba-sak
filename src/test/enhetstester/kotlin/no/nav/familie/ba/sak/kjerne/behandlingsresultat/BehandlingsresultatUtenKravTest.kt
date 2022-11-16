@@ -53,8 +53,7 @@ class BehandlingsresultatUtenKravTest {
                     resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING),
                     ytelseSlutt = inneværendeMåned().plusMonths(1)
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.ENDRET_UTBETALING, behandlingsresultat)
     }
@@ -78,8 +77,7 @@ class BehandlingsresultatUtenKravTest {
                     resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = likOpphørsdato
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
@@ -103,8 +101,7 @@ class BehandlingsresultatUtenKravTest {
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = likOpphørsdato
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.OPPHØRT, behandlingsresultat)
     }
@@ -127,8 +124,7 @@ class BehandlingsresultatUtenKravTest {
                     resultater = emptySet(),
                     ytelseSlutt = inneværendeMåned().plusMonths(1)
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.ENDRET_UTBETALING, behandlingsresultat)
     }
@@ -151,8 +147,7 @@ class BehandlingsresultatUtenKravTest {
                     resultater = setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING),
                     ytelseSlutt = inneværendeMåned().plusMonths(1)
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.ENDRET_UTEN_UTBETALING, behandlingsresultat)
     }
@@ -175,8 +170,7 @@ class BehandlingsresultatUtenKravTest {
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.ENDRET_UTBETALING, behandlingsresultat)
     }
@@ -199,8 +193,7 @@ class BehandlingsresultatUtenKravTest {
                     resultater = setOf(YtelsePersonResultat.ENDRET_UTBETALING, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
@@ -223,8 +216,7 @@ class BehandlingsresultatUtenKravTest {
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
@@ -247,8 +239,7 @@ class BehandlingsresultatUtenKravTest {
                     resultater = emptySet(),
                     ytelseSlutt = inneværendeMåned().plusMonths(1)
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.ENDRET_UTBETALING, behandlingsresultat)
     }
@@ -271,8 +262,7 @@ class BehandlingsresultatUtenKravTest {
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = TIDENES_MORGEN.toYearMonth()
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.OPPHØRT, behandlingsresultat)
     }
@@ -295,8 +285,7 @@ class BehandlingsresultatUtenKravTest {
                     resultater = setOf(),
                     ytelseSlutt = inneværendeMåned().plusMonths(1)
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, behandlingsresultat)

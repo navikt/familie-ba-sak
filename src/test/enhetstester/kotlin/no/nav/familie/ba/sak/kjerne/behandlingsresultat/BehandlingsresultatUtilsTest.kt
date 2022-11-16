@@ -31,8 +31,7 @@ class BehandlingsresultatUtilsTest {
                         kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                         resultater = setOf(YtelsePersonResultat.IKKE_VURDERT)
                     )
-                ),
-                false
+                )
             )
         }
 
@@ -78,7 +77,7 @@ class BehandlingsresultatUtilsTest {
 
         assertEquals(
             Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer, false)
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }
 
@@ -91,7 +90,7 @@ class BehandlingsresultatUtilsTest {
 
         assertEquals(
             Behandlingsresultat.AVSLÅTT,
-            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer, false)
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }
 
@@ -105,7 +104,7 @@ class BehandlingsresultatUtilsTest {
 
         assertEquals(
             Behandlingsresultat.ENDRET_OG_OPPHØRT,
-            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer, false)
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }
 
@@ -119,7 +118,7 @@ class BehandlingsresultatUtilsTest {
 
         assertEquals(
             Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer, false)
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }
 
@@ -138,7 +137,7 @@ class BehandlingsresultatUtilsTest {
 
         assertEquals(
             Behandlingsresultat.FORTSATT_OPPHØRT,
-            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer, false)
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }
 
@@ -157,7 +156,7 @@ class BehandlingsresultatUtilsTest {
 
         assertEquals(
             Behandlingsresultat.ENDRET_UTBETALING,
-            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer, false)
+            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }
 }
