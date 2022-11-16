@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
@@ -88,29 +87,12 @@ class ØkonomiService(
         }
     }
 
-    fun hentStatus(oppdragId: OppdragId, behandlingId: Long): OppdragStatus {
-        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId)
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
-
-        if (!tilkjentYtelse.skalIverksettesMotOppdrag()) {
-            return OppdragStatus.KVITTERT_OK
-        }
-        val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
-
-        return if (andelerSomSkalSendesTilOppdrag.isEmpty() || andelerSomSkalSendesTilOppdrag.any { it.kildeBehandlingId == null }) {
+    fun hentStatus(oppdragId: OppdragId, behandlingId: Long): OppdragStatus =
+        if (tilkjentYtelseRepository.findByBehandling(behandlingId).skalIverksettesMotOppdrag()) {
             økonomiKlient.hentStatus(oppdragId)
         } else {
-            hentStatusForKildeBehandling(andelerSomSkalSendesTilOppdrag, oppdragId)
+            OppdragStatus.KVITTERT_OK
         }
-    }
-
-    private fun hentStatusForKildeBehandling(
-        atys: List<AndelTilkjentYtelse>,
-        oppdragId: OppdragId
-    ) = atys
-        .filter { it.kildeBehandlingId != null }
-        .map { økonomiKlient.hentStatus(oppdragId.copy(behandlingsId = it.kildeBehandlingId.toString())) }
-        .first()
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
