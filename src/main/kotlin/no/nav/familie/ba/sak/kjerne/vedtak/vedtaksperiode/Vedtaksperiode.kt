@@ -52,7 +52,7 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
         )
     ),
     OPPHØR(listOf(VedtakBegrunnelseType.OPPHØR, VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING)),
-    AVSLAG(listOf(VedtakBegrunnelseType.AVSLAG)),
+    AVSLAG(listOf(VedtakBegrunnelseType.AVSLAG, VedtakBegrunnelseType.EØS_AVSLAG)),
     FORTSATT_INNVILGET(listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET)),
 
     @Deprecated("Legacy")

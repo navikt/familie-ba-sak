@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
@@ -12,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -284,7 +286,8 @@ class VedtaksperiodeUtilTest {
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = kompetanserIPeriode,
-            kompetanserSomStopperRettFørPeriode = emptyList()
+            kompetanserSomStopperRettFørPeriode = emptyList(),
+            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser().tilMinimertVedtaksperiode()
         )
         Assertions.assertTrue(
             forventedeBegrunnelser.all {
@@ -318,11 +321,36 @@ class VedtaksperiodeUtilTest {
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = kompetanserIPeriode,
-            kompetanserSomStopperRettFørPeriode = emptyList()
+            kompetanserSomStopperRettFørPeriode = emptyList(),
+            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser().tilMinimertVedtaksperiode()
         )
 
         Assertions.assertTrue(
             forventedeBegrunnelser.all {
+                gyldigeEØSBegrunnelserForPeriode.contains(it)
+            }
+        )
+    }
+
+    @Test
+    fun `skal finne riktige begrunnelser for EØS-avslag`() {
+        val minimertVedtaksperiode =
+            lagUtvidetVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.AVSLAG).tilMinimertVedtaksperiode()
+
+        val minimumForventedeBegrunnelser = listOf(
+            EØSStandardbegrunnelse.AVSLAG_EØS_IKKE_EØS_BORGER,
+            EØSStandardbegrunnelse.AVSLAG_EØS_IKKE_ANSVAR_FOR_BARN,
+            EØSStandardbegrunnelse.AVSLAG_EØS_SEPARASJONSAVTALEN_GJELDER_IKKE
+        )
+        val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
+            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+            kompetanserIPeriode = emptyList(),
+            kompetanserSomStopperRettFørPeriode = emptyList(),
+            minimertVedtaksperiode = minimertVedtaksperiode
+        )
+
+        Assertions.assertTrue(
+            minimumForventedeBegrunnelser.all {
                 gyldigeEØSBegrunnelserForPeriode.contains(it)
             }
         )

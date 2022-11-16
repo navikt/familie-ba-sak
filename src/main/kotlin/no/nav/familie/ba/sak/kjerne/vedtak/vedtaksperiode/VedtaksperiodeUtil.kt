@@ -218,7 +218,8 @@ fun hentGyldigeBegrunnelserForPeriode(
         hentGyldigeEØSBegrunnelserForPeriode(
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = kompetanserIPeriode,
-            kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
+            kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
+            minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode()
         )
 
     return standardbegrunnelser + eøsBegrunnelser
@@ -260,7 +261,8 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
 fun hentGyldigeEØSBegrunnelserForPeriode(
     sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
     kompetanserIPeriode: List<Kompetanse>,
-    kompetanserSomStopperRettFørPeriode: List<Kompetanse>
+    kompetanserSomStopperRettFørPeriode: List<Kompetanse>,
+    minimertVedtaksperiode: MinimertVedtaksperiode
 ) = EØSStandardbegrunnelse.values()
     .mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }
     .filter { begrunnelse ->
@@ -281,6 +283,9 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
                     resultatFraKompetanse = kompetanse.resultat!!
                 )
             }
+            VedtakBegrunnelseType.EØS_AVSLAG -> minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(
+                VedtakBegrunnelseType.EØS_AVSLAG
+            )
             else -> false
         }
     }.map { it.eøsBegrunnelse }
