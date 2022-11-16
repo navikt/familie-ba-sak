@@ -108,8 +108,12 @@ object BehandlingsresultatUtils {
         val utvidaBarnetrygd = ytelsePersoner
             .filter { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD }
 
-        return if (utvidaBarnetrygd.isEmpty()) false else utvidaBarnetrygd.all {
-            it.resultater == setOf(YtelsePersonResultat.OPPHØRT)
+        return if (utvidaBarnetrygd.isEmpty()) {
+            false
+        } else {
+            utvidaBarnetrygd.all {
+                it.resultater == setOf(YtelsePersonResultat.OPPHØRT)
+            }
         }
     }
 
