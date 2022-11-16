@@ -86,8 +86,8 @@ internal class BehandlingsresultatServiceTest {
             søkerAktør,
             YtelseType.UTVIDET_BARNETRYGD,
             listOf(KravOpprinnelse.INNEVÆRENDE, KravOpprinnelse.TIDLIGERE),
-            setOf(YtelsePersonResultat.OPPHØRT),
-            YearMonth.of(2022, Month.APRIL)
+            setOf(),
+            YearMonth.of(2037, Month.MAY)
         )
         val ytelsePersonBarn = YtelsePerson(
             Aktør("1234567890124"),

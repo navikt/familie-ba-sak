@@ -92,7 +92,7 @@ object BehandlingsresultatUtils {
         }
 
         val opphørSomFørerTilEndring =
-            altOpphører && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling && !kunFortsattOpphørt
+            (altOpphører || erUtvidaBarnetrygdEndra(ytelsePersoner)) && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling && !kunFortsattOpphørt
         if (opphørSomFørerTilEndring) {
             samledeResultater.add(YtelsePersonResultat.ENDRET_UTBETALING)
         }
@@ -102,6 +102,15 @@ object BehandlingsresultatUtils {
         }
 
         return finnBehandlingsresultat(samledeResultater)
+    }
+
+    private fun erUtvidaBarnetrygdEndra(ytelsePersoner: List<YtelsePerson>): Boolean {
+        val utvidaBarnetrygd = ytelsePersoner
+            .filter { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD }
+
+        return if (utvidaBarnetrygd.isEmpty()) false else utvidaBarnetrygd.all {
+            it.resultater == setOf(YtelsePersonResultat.OPPHØRT)
+        }
     }
 
     private fun finnBehandlingsresultat(samledeResultater: MutableSet<YtelsePersonResultat>): Behandlingsresultat =

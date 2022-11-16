@@ -132,21 +132,6 @@ class BehandlingsresultatService(
             .also { secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat") }
             .also { logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $it") }
 
-    private fun erUtvidaBarnetrygdEndra(
-        andelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        forrigeAndelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
-    ) = andelerMedEndringer.filter { it.erUtvidet() }
-        .map {
-            Pair(
-                it,
-                forrigeAndelerMedEndringer.filter { f -> f.erUtvidet() }.find { f -> f.andel.aktør == it.andel.aktør }
-            )
-        }
-        .filter { it.second != null }
-        .any { pair ->
-            (pair.second!!.andel.stønadFom != pair.first.stønadFom || pair.second!!.andel.stønadTom != pair.first.andel.stønadTom)
-        }
-
     private fun validerYtelsePersoner(behandling: Behandling, ytelsePersoner: List<YtelsePerson>) {
         when (behandling.fagsak.type) {
             FagsakType.NORMAL -> {
