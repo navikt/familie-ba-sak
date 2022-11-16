@@ -37,7 +37,7 @@ class BehandlingsresultatService(
     private val featureToggleService: FeatureToggleService
 ) {
 
-    fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
+    internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
 

@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 
-fun validerBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat) {
+internal fun validerBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat) {
     if ((
         behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
                 Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
