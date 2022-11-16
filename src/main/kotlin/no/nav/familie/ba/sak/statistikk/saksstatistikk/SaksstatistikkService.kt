@@ -166,7 +166,7 @@ class SaksstatistikkService(
         return if (person.bostedsadresser.isNotEmpty()) {
             "NO"
         } else {
-            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
+            personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(
                 person.aktør
             )
         }
@@ -178,7 +178,9 @@ class SaksstatistikkService(
         return if (personInfo.bostedsadresser.isNotEmpty()) {
             "NO"
         } else {
-            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(aktør)
+            personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(
+                aktør
+            )
         }
     }
 

@@ -121,20 +121,20 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentLandkodeUtenlandskAdresse() skal returnere landkode `() {
-        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(tilAktør(ID_MOR))
-        assertThat(landkode).isEqualTo("DK")
+        val landkode = personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(tilAktør(ID_MOR))
+        assertThat(landkode).isEqualTo("GB")
     }
 
     @Test
     fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen landkode `() {
-        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(tilAktør(ID_BARN_1))
+        val landkode = personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(tilAktør(ID_BARN_1))
         assertThat(landkode).isEqualTo("ZZ")
     }
 
     @Test
     fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen bostedsadresse `() {
         val landkode =
-            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(tilAktør(ID_MOR_MED_TOM_BOSTEDSADRESSE))
+            personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(tilAktør(ID_MOR_MED_TOM_BOSTEDSADRESSE))
         assertThat(landkode).isEqualTo("ZZ")
     }
 
