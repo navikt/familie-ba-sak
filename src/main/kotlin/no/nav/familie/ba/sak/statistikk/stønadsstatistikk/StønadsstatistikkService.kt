@@ -206,7 +206,7 @@ class StønadsstatistikkService(
     } else if (personopplysningerService.hentPersoninfoEnkel(person.aktør).bostedsadresser.isNotEmpty()) {
         "NO"
     } else {
-        val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(person.aktør)
+        val landKode = personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(person.aktør)
 
         if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {
             logger.info("Sender landkode ukjent til DVH")

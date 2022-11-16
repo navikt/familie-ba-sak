@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
+import com.neovisionaries.i18n.CountryCode
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
@@ -96,9 +97,20 @@ class PersonopplysningerService(
             frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler opphold."
         )
 
-    fun hentLandkodeUtenlandskBostedsadresse(aktør: Aktør): String {
+    fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String {
         val landkode = pdlRestClient.hentUtenlandskBostedsadresse(aktør)?.landkode
-        return if (landkode.isNullOrEmpty()) UKJENT_LANDKODE else landkode
+
+        if (landkode.isNullOrEmpty()) return UKJENT_LANDKODE
+
+        return if (landkode.length == 3) {
+            if (landkode == PDL_UKJENT_LANDKODE) {
+                UKJENT_LANDKODE
+            } else {
+                CountryCode.getByAlpha3Code(landkode.uppercase()).alpha2
+            }
+        } else {
+            landkode
+        }
     }
 
     fun hentAdressebeskyttelseSomSystembruker(aktør: Aktør): ADRESSEBESKYTTELSEGRADERING =
@@ -107,8 +119,14 @@ class PersonopplysningerService(
     companion object {
 
         const val UKJENT_LANDKODE = "ZZ"
+        const val PDL_UKJENT_LANDKODE = "XUK"
         val UKJENT_STATSBORGERSKAP =
-            Statsborgerskap(land = "XUK", bekreftelsesdato = null, gyldigFraOgMed = null, gyldigTilOgMed = null)
+            Statsborgerskap(
+                land = PDL_UKJENT_LANDKODE,
+                bekreftelsesdato = null,
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = null
+            )
         private val logger: Logger =
             LoggerFactory.getLogger(PersonopplysningerService::class.java)
     }

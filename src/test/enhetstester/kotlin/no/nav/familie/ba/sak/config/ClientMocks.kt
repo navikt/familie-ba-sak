@@ -142,7 +142,7 @@ class ClientMocks {
         }
 
         every {
-            mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
+            mockPersonopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any())
         } returns "NO"
 
         val ukjentId = "43125678910"
@@ -288,7 +288,7 @@ class ClientMocks {
             } returns VergeResponse(false)
 
             every {
-                mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
+                mockPersonopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any())
             } returns "NO"
 
             val idSlotForHentPersoninfo = slot<Aktør>()
@@ -423,6 +423,7 @@ class ClientMocks {
                             )
                         )
                     )
+
                     mockBarnAutomatiskBehandlingFnr -> personInfo.getValue(id)
                     mockBarnAutomatiskBehandling2Fnr -> personInfo.getValue(id)
                     mockSøkerAutomatiskBehandlingFnr -> personInfo.getValue(id)

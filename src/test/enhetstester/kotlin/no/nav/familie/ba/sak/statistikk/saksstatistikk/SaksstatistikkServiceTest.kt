@@ -379,7 +379,7 @@ internal class SaksstatistikkServiceTest(
                 1
             )
         )
-        every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(tilAktør("12345678910")) } returns "SE"
+        every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(tilAktør("12345678910")) } returns "SE"
 
         every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns null
 
@@ -400,7 +400,7 @@ internal class SaksstatistikkServiceTest(
             Fagsak(status = FagsakStatus.OPPRETTET, aktør = randomAktørId)
         }
         every { personidentService.hentAktør(any()) } returns randomAktørId
-        every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "SE"
+        every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any()) } returns "SE"
 
         every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(
             1,
