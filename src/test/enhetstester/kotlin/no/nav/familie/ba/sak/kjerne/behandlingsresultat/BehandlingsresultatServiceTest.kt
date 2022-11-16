@@ -21,6 +21,7 @@ internal class BehandlingsresultatServiceTest {
         mockk(),
         mockk(),
         mockk(),
+        mockk(),
         mockk()
     )
 
@@ -63,6 +64,7 @@ internal class BehandlingsresultatServiceTest {
         )
 
         val service = BehandlingsresultatService(
+            mockk(),
             mockk(),
             mockk(),
             mockk(),
