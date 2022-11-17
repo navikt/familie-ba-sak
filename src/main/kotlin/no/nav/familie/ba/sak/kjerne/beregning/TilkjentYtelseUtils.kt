@@ -248,14 +248,14 @@ object TilkjentYtelseUtils {
                     barnProsent == null || søkerProsent == null -> null
                     else -> barnProsent
                 }
-            }.filtrerIkkeNull().slåSammenLike()
+            }.slåSammenLike().filtrerIkkeNull()
         }
     }
 
     private fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato: LocalDate, personType: PersonType): Tidslinje<BigDecimal, Måned> {
         val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato)
 
-        return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType) }.filtrerIkkeNull().slåSammenLike()
+        return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType) }.slåSammenLike().filtrerIkkeNull()
     }
 
     private fun Iterable<VilkårResultat>.mapTilProsentEllerNull(personType: PersonType): BigDecimal? {
