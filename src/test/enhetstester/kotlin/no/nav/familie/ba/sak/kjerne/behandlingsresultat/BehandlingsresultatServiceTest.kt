@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -15,17 +18,21 @@ import java.time.YearMonth
 
 internal class BehandlingsresultatServiceTest {
 
+    private val featureToggleService = mockk<FeatureToggleService>()
+
     private val service = BehandlingsresultatService(
         mockk(),
         mockk(),
         mockk(),
         mockk(),
         mockk(),
-        mockk()
+        mockk(),
+        featureToggleService
     )
 
     @Test
     fun `endra fom eller tom for utvida barnetrygd gir behandlingsresultat endret`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT) } returns true
         val søkerAktør = Aktør("1234567890123")
         val ytelsePersonSøker = YtelsePerson(
             søkerAktør,
@@ -61,15 +68,6 @@ internal class BehandlingsresultatServiceTest {
                 prosent = BigDecimal(50)
             )
         )
-
-        val service = BehandlingsresultatService(
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk()
-        )
         val behandlingsresultat = service.utledBehandlingsresultat(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
@@ -81,6 +79,8 @@ internal class BehandlingsresultatServiceTest {
 
     @Test
     fun `samme fom og tom for utvida barnetrygd gir behandlingsresultat fortsatt innvilget`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT) } returns true
+
         val søkerAktør = Aktør("1234567890123")
         val ytelsePersonSøker = YtelsePerson(
             søkerAktør,
@@ -128,6 +128,8 @@ internal class BehandlingsresultatServiceTest {
 
     @Test
     fun `utvida barnetrygd nå, men ingenting før gir behandlingsresultat innvilget`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT) } returns true
+
         val søkerAktør = Aktør("1234567890123")
         val ytelsePersonSøker = YtelsePerson(
             søkerAktør,
@@ -165,6 +167,8 @@ internal class BehandlingsresultatServiceTest {
 
     @Test
     fun `utvida barnetrygd før, men alt opphørt nå gir behandlingsresultat innvilget`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT) } returns true
+
         val søkerAktør = Aktør("1234567890123")
         val ytelsePersonSøker = YtelsePerson(
             søkerAktør,

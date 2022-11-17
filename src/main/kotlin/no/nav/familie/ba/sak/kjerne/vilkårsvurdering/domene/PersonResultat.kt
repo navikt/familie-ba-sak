@@ -193,7 +193,7 @@ fun Set<PersonResultat>.tilTidslinjeForSplitt(personerIPersongrunnlag: List<Pers
 }
 
 fun PersonResultat.tilTidslinjeForSplittForPerson(fødselsdato: LocalDate, personType: PersonType): Tidslinje<List<VilkårResultat>, Måned> {
-    val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår(fødselsdato)
+    val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato)
 
     return tidslinjer.kombiner { alleVilkårOppfyltEllerNull(vilkårResultater = it, personType = personType) }.filtrerIkkeNull().slåSammenLike()
 }
@@ -202,9 +202,9 @@ fun PersonResultat.tilTidslinjeForSplittForPerson(fødselsdato: LocalDate, perso
  * Extention-funksjon som tar inn et sett med vilkårResultater og returnerer en forskjøvet måned-basert tidslinje for hvert vilkår
  * Se readme-fil for utdypende forklaring av logikken for hvert vilkår
  * */
-fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertVilkår(fødselsdato: LocalDate): List<Tidslinje<VilkårResultat, Måned>> {
+fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato: LocalDate): List<Tidslinje<VilkårResultat, Måned>> {
     return this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
-        val tidslinje = vilkårResultater.tilTidslinje()
+        val tidslinje = vilkårResultater.filter { it.erOppfylt() }.tilTidslinje()
             .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
                 when {
                     !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null

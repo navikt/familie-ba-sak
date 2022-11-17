@@ -143,7 +143,7 @@ internal class StønadsstatistikkServiceTest(
         every { kompetanseService.hentKompetanser(any()) } returns kompetanseperioder
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
+        every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any()) } returns "DK"
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(any()) } returns
             andelerTilkjentYtelse
     }

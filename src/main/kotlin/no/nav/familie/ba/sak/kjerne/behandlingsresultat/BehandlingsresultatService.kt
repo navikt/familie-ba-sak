@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -31,7 +33,8 @@ class BehandlingsresultatService(
     private val personidentService: PersonidentService,
     private val persongrunnlagService: PersongrunnlagService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
@@ -125,8 +128,8 @@ class BehandlingsresultatService(
         behandling: Behandling
     ) =
         BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-            ytelsePersonerMedResultat,
-            erUtvidaBarnetrygdEndra(andelerMedEndringer, forrigeAndelerMedEndringer)
+            ytelsePersoner = ytelsePersonerMedResultat,
+            erUtvidaBarnetrygdEndra = if (featureToggleService.isEnabled(FeatureToggleConfig.SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT)) erUtvidaBarnetrygdEndra(andelerMedEndringer, forrigeAndelerMedEndringer) else false
         )
             .also { secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat") }
             .also { logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $it") }

@@ -168,6 +168,17 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
             enhet = this.enhetNavn()
         )
 
+    Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON ->
+        VarselbrevMedÅrsaker(
+            mal = Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
+            navn = this.mottakerNavn,
+            fødselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+            varselÅrsaker = this.multiselectVerdier,
+            enhet = this.enhetNavn(),
+            organisasjonsnummer = mottakerIdent,
+            gjelder = this.vedrørende?.navn
+        )
+
     Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 ->
         VarselOmRevurderingDeltBostedParagraf14Brev(
             data = VarselOmRevurderingDeltBostedParagraf14Data(
