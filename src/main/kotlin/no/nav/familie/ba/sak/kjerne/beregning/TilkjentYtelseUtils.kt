@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erBack2BackIMånedsskifte
 import no.nav.familie.ba.sak.common.erDagenFør
-import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.isSameOrAfter
@@ -36,7 +35,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
@@ -266,12 +264,6 @@ object TilkjentYtelseUtils {
         } else {
             null
         }
-    }
-
-    private fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int, Måned> {
-        val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
-        val tilleggOrbaTidslinje = satstypeTidslinje(SatsType.TILLEGG_ORBA).filtrerMed(erUnder6ÅrTidslinje(barn))
-        return orbaTidslinje.kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
     }
 
     fun beregnTilkjentYtelseUtvidet(
