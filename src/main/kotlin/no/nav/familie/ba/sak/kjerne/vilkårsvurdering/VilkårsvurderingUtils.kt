@@ -401,13 +401,23 @@ fun eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
     val eøsSanityBegrunnelse = vedtakBegrunnelse.tilSanityEØSBegrunnelse(sanityEØSBegrunnelser) ?: return emptyList()
 
-    return listOf(
-        RestVedtakBegrunnelseTilknyttetVilkår(
-            id = vedtakBegrunnelse,
-            navn = eøsSanityBegrunnelse.navnISystem,
-            vilkår = null
+    return if (eøsSanityBegrunnelse.vilkår.isEmpty()) {
+        listOf(
+            RestVedtakBegrunnelseTilknyttetVilkår(
+                id = vedtakBegrunnelse,
+                navn = eøsSanityBegrunnelse.navnISystem,
+                vilkår = null
+            )
         )
-    )
+    } else {
+        eøsSanityBegrunnelse.vilkår.map {
+            RestVedtakBegrunnelseTilknyttetVilkår(
+                id = vedtakBegrunnelse,
+                navn = eøsSanityBegrunnelse.navnISystem,
+                vilkår = it
+            )
+        }
+    }
 }
 
 private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {

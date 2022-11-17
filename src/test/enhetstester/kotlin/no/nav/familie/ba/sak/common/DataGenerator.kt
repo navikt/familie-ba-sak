@@ -1212,7 +1212,8 @@ fun lagSanityEøsBegrunnelse(
     hjemlerFolketrygdloven: List<String> = emptyList(),
     hjemlerEØSForordningen883: List<String> = emptyList(),
     hjemlerEØSForordningen987: List<String> = emptyList(),
-    hjemlerSeperasjonsavtalenStorbritannina: List<String> = emptyList()
+    hjemlerSeperasjonsavtalenStorbritannina: List<String> = emptyList(),
+    vilkår: List<Vilkår> = emptyList()
 ): SanityEØSBegrunnelse = SanityEØSBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1223,7 +1224,8 @@ fun lagSanityEøsBegrunnelse(
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     hjemlerEØSForordningen883 = hjemlerEØSForordningen883,
     hjemlerEØSForordningen987 = hjemlerEØSForordningen987,
-    hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina
+    hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina,
+    vilkår = vilkår
 )
 
 fun lagTriggesAv(
