@@ -239,6 +239,8 @@ object TilkjentYtelseUtils {
             person to personResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato = person.fødselsdato, personType = person.type)
         }
 
+        if (tidslinjerPerPerson.isEmpty()) return emptyMap()
+
         val søkerTidslinje = tidslinjerPerPerson[personopplysningGrunnlag.søker] ?: return emptyMap()
         val barnasTidslinjer = tidslinjerPerPerson.filter { it.key in personopplysningGrunnlag.barna }
 
