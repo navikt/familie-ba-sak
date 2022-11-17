@@ -342,7 +342,7 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
             if (localDateMatch != null && localDateMatch.groupValues.size == 3) {
                 val fom = localDateMatch.groupValues[1].let { LocalDate.parse(it) }
                 val tom =
-                    localDateMatch.groupValues[2].let { if (it.length == 10) LocalDate.parse(it) else LocalDate.MAX }
+                    localDateMatch.groupValues[2].let { if (it.length == 10) LocalDate.parse(it) else null }
 
                 return TestPeriode(fom!!, tom)
             }
@@ -359,9 +359,7 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
                         if (it.length == 7) {
                             YearMonth.parse(it)
                         } else {
-                            YearMonth.from(
-                                LocalDate.MAX
-                            )
+                            null
                         }
                     }
 
