@@ -48,7 +48,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.alleVilkårErOppfylt
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilForskjøvetTidslinjerForHvertVilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilForskjøvetTidslinjerForHvertOppfylteVilkår
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -253,7 +253,7 @@ object TilkjentYtelseUtils {
     }
 
     private fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato: LocalDate, personType: PersonType): Tidslinje<BigDecimal, Måned> {
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår(fødselsdato)
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato)
 
         return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType) }.filtrerIkkeNull().slåSammenLike()
     }
