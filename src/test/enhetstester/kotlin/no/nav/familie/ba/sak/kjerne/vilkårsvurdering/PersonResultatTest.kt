@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.beskjærPå18År
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilForskjøvetTidslinjerForHvertVilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilForskjøvetTidslinjerForHvertOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinjeForSplitt
 import org.junit.jupiter.api.Assertions
@@ -393,7 +393,7 @@ class PersonResultatTest {
             maksTom = barnets18årsdag
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår(barnets18årsdag.minusYears(18))
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -445,7 +445,7 @@ class PersonResultatTest {
             maksTom = barnets18årsdag
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår(barnets18årsdag.minusYears(18))
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -496,7 +496,7 @@ class PersonResultatTest {
             maksTom = barnets18årsdag
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertVilkår(barnets18årsdag.minusYears(18))
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
