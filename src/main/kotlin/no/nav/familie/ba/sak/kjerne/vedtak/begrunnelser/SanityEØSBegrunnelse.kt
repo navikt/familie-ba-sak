@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 enum class BarnetsBostedsland {
     NORGE,
@@ -23,7 +24,8 @@ data class RestSanityEØSBegrunnelse(
     val hjemlerFolketrygdloven: List<String>?,
     val hjemlerEOSForordningen883: List<String>?,
     val hjemlerEOSForordningen987: List<String>?,
-    val hjemlerSeperasjonsavtalenStorbritannina: List<String>?
+    val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
+    val vilkaar: List<String>? = null,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
