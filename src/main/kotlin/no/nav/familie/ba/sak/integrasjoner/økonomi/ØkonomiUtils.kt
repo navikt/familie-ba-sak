@@ -114,38 +114,6 @@ object ØkonomiUtils {
     }
 
     /**
-     * Finner eksisterende offset og kilde på andeler som skal bestå
-     *
-     * @param[forrigeKjeder] forrige behandlings tilstand
-     * @param[oppdaterteKjeder] nåværende tilstand
-     * @return liste over oppdateringer som skal utføres
-     */
-    fun finnBeståendeAndelerMedOffsetSomMåOppdateres(
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>
-    ): List<OffsetOppdatering> = oppdaterteKjeder
-        .filter { forrigeKjeder.containsKey(it.key) }
-        .flatMap { (kjedeIdentifikator, oppdatertKjede) ->
-            beståendeAndelerIKjede(
-                forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator),
-                oppdatertKjede = oppdatertKjede
-            )?.mapNotNull { bestående ->
-                val offsetOppdatering = OffsetOppdatering(
-                    beståendeAndelSomSkalHaOppdatertOffset = oppdatertKjede.find {
-                        it.erTilsvarendeForUtbetaling(
-                            bestående
-                        )
-                    }
-                        ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand."),
-                    periodeOffset = bestående.periodeOffset,
-                    forrigePeriodeOffset = bestående.forrigePeriodeOffset,
-                    kildeBehandlingId = bestående.kildeBehandlingId
-                )
-                if (offsetOppdatering.erGyldigOppdatering()) offsetOppdatering else null
-            } ?: listOf()
-        }
-
-    /**
      * Tar utgangspunkt i ny tilstand og finner andeler som må bygges opp (nye, endrede og bestående etter første endring)
      *
      * @param[oppdaterteKjeder] ny tilstand
