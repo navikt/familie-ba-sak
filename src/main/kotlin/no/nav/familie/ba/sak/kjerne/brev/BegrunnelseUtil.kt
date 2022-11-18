@@ -31,11 +31,13 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     dødeBarnForrigePeriode: List<String>
 ): Set<String> {
-    val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
+    val erFortsattInnvilgetBegrunnelse =
+        vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET || vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
     val erUtbetalingMedReduksjonFraSistIverksatteBehandling =
-        vedtaksperiodetype == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING &&
-            vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON && !triggesAv.vilkår.contains(Vilkår.UNDER_18_ÅR)
+        vedtaksperiodetype == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING && (vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON || vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_REDUKSJON) && !triggesAv.vilkår.contains(
+            Vilkår.UNDER_18_ÅR
+        )
 
     fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
         minimertePersonResultater = restBehandlingsgrunnlagForBrev.minimertePersonResultater,
@@ -54,26 +56,24 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     ).map { person -> person.personIdent }
 
     return when {
-        (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg) && !erEndretUtbetalingBegrunnelse ->
-            hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
-                identerMedUtbetaling = identerMedUtbetalingPåPeriode,
-                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                periode = periode
-            ) + when {
-                triggesAv.vilkår.any { it != Vilkår.UTVIDET_BARNETRYGD } -> hentPersonerForUtgjørendeVilkår()
-                else -> emptyList()
-            }
+        (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg) && !erEndretUtbetalingBegrunnelse -> hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
+            identerMedUtbetaling = identerMedUtbetalingPåPeriode,
+            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+            periode = periode
+        ) + when {
+            triggesAv.vilkår.any { it != Vilkår.UTVIDET_BARNETRYGD } -> hentPersonerForUtgjørendeVilkår()
+            else -> emptyList()
+        }
 
-        triggesAv.barnMedSeksårsdag ->
-            restBehandlingsgrunnlagForBrev.personerPåBehandling.barnMedSeksårsdagPåFom(periode.fom)
-                .map { person -> person.personIdent }
+        triggesAv.barnMedSeksårsdag -> restBehandlingsgrunnlagForBrev.personerPåBehandling.barnMedSeksårsdagPåFom(
+            periode.fom
+        ).map { person -> person.personIdent }
 
-        triggesAv.personerManglerOpplysninger ->
-            if (restBehandlingsgrunnlagForBrev.minimertePersonResultater.harPersonerSomManglerOpplysninger()) {
-                emptyList()
-            } else {
-                error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
-            }
+        triggesAv.personerManglerOpplysninger -> if (restBehandlingsgrunnlagForBrev.minimertePersonResultater.harPersonerSomManglerOpplysninger()) {
+            emptyList()
+        } else {
+            error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
+        }
 
         erFortsattInnvilgetBegrunnelse -> identerMedUtbetalingPåPeriode
         erEndretUtbetalingBegrunnelse -> hentPersonerForEndretUtbetalingBegrunnelse(
@@ -85,14 +85,14 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             },
             minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer
         )
+
         erUtbetalingMedReduksjonFraSistIverksatteBehandling -> identerMedReduksjonPåPeriode
 
-        triggesAv.etterEndretUtbetaling ->
-            hentPersonerForEtterEndretUtbetalingsperiode(
-                minimerteEndredeUtbetalingAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
-                fom = periode.fom,
-                endringsaarsaker = triggesAv.endringsaarsaker
-            )
+        triggesAv.etterEndretUtbetaling -> hentPersonerForEtterEndretUtbetalingsperiode(
+            minimerteEndredeUtbetalingAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
+            fom = periode.fom,
+            endringsaarsaker = triggesAv.endringsaarsaker
+        )
 
         triggesAv.barnDød -> dødeBarnForrigePeriode
 
@@ -114,6 +114,7 @@ private fun hentPersonerForEndretUtbetalingBegrunnelse(
             EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES -> {
                 it.utbetaltPerMnd > 0
             }
+
             EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES -> it.utbetaltPerMnd == 0
         }
     }.map { it.person.personIdent }.filter { personerMedRiktigTypeEndringer.contains(it) }
@@ -134,18 +135,15 @@ private fun hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     periode: NullablePeriode
 ): List<String> {
-    val identerFraSammenfallendeEndringsperioder = restBehandlingsgrunnlagForBrev
-        .minimerteEndredeUtbetalingAndeler
-        .somOverlapper(periode.tilNullableMånedPeriode())
-        .map { it.personIdent }
+    val identerFraSammenfallendeEndringsperioder =
+        restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler.somOverlapper(periode.tilNullableMånedPeriode())
+            .map { it.personIdent }
 
     val søkersIdent =
         restBehandlingsgrunnlagForBrev.personerPåBehandling.find { it.type == PersonType.SØKER }?.personIdent
             ?: throw IllegalStateException("Søker mangler i behandlingsgrunnlag for brev")
 
-    return identerMedUtbetaling +
-        identerFraSammenfallendeEndringsperioder +
-        søkersIdent
+    return identerMedUtbetaling + identerFraSammenfallendeEndringsperioder + søkersIdent
 }
 
 private fun hentAktuellePersonerForVedtaksperiode(
@@ -153,7 +151,7 @@ private fun hentAktuellePersonerForVedtaksperiode(
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     identerMedUtbetalingPåPeriode: List<String>
 ): List<MinimertRestPerson> = personerPåBehandling.filter { person ->
-    if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
+    if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET || vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_INNVILGET) {
         identerMedUtbetalingPåPeriode.contains(person.personIdent) || person.type == PersonType.SØKER
     } else {
         true

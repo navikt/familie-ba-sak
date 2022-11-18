@@ -41,9 +41,9 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.validerMinstEnInnvilgetbegrunne
     fagsakId: Long
 ) {
     val erMuligÅVelgeInnvilgetBegrunnelse =
-        this.gyldigeBegrunnelser.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
+        this.gyldigeBegrunnelser.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET || it.vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_INNVILGET }
     val erValgtInnvilgetBegrunnelse =
-        this.begrunnelser.any { it.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
+        this.begrunnelser.any { it.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET || it.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_INNVILGET }
 
     if (erMuligÅVelgeInnvilgetBegrunnelse && !erValgtInnvilgetBegrunnelse) {
         logger.warn("Vedtaksperioden ${this.fom?.tilKortString() ?: ""} - ${this.tom?.tilKortString() ?: ""} mangler innvilgelsebegrunnelse. Fagsak: $fagsakId, behandling: $behandlingId")
@@ -55,9 +55,9 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.validerMinstEnReduksjonsbegrunn
     fagsakId: Long
 ) {
     val erMuligÅVelgeReduksjonBegrunnelse =
-        this.gyldigeBegrunnelser.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON }
+        this.gyldigeBegrunnelser.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON || it.vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_REDUKSJON }
     val erValgtReduksjonBegrunnelse =
-        this.begrunnelser.any { it.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON }
+        this.begrunnelser.any { it.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON || it.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_REDUKSJON }
 
     if (erMuligÅVelgeReduksjonBegrunnelse && !erValgtReduksjonBegrunnelse) {
         logger.warn("Vedtaksperioden ${this.fom?.tilKortString() ?: ""} - ${this.tom?.tilKortString() ?: ""} mangler reduksjonsbegrunnelse. Fagsak: $fagsakId, behandling: $behandlingId")

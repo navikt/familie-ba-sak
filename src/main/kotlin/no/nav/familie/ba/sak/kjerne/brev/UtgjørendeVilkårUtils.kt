@@ -103,19 +103,21 @@ private fun erVilkårResultatUtgjørende(
     vedtaksperiode: Periode,
     erFørsteVedtaksperiodePåFagsak: Boolean
 ): Boolean {
-    if (minimertVilkårResultat.periodeFom == null && begrunnelseType != VedtakBegrunnelseType.AVSLAG) {
+    if (minimertVilkårResultat.periodeFom == null && begrunnelseType != VedtakBegrunnelseType.AVSLAG && begrunnelseType != VedtakBegrunnelseType.INSTITUSJON_AVSLAG) {
         return false
     }
 
     return when (begrunnelseType) {
-        VedtakBegrunnelseType.INNVILGET ->
+        VedtakBegrunnelseType.INNVILGET,
+        VedtakBegrunnelseType.INSTITUSJON_INNVILGET ->
             erInnvilgetVilkårResultatUtgjørende(
                 triggesAv,
                 minimertVilkårResultat,
                 vedtaksperiode
             )
 
-        VedtakBegrunnelseType.OPPHØR -> if (triggesAv.gjelderFørstePeriode) {
+        VedtakBegrunnelseType.OPPHØR,
+        VedtakBegrunnelseType.INSTITUSJON_OPPHØR -> if (triggesAv.gjelderFørstePeriode) {
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 vedtaksperiode = vedtaksperiode,
@@ -130,7 +132,7 @@ private fun erVilkårResultatUtgjørende(
             )
         }
 
-        VedtakBegrunnelseType.REDUKSJON -> {
+        VedtakBegrunnelseType.REDUKSJON, VedtakBegrunnelseType.INSTITUSJON_REDUKSJON -> {
             erReduksjonResultatUtgjøreneForPeriode(
                 vilkårSomAvsluttesRettFørDennePerioden = minimertVilkårResultat,
                 triggesAv = triggesAv,
@@ -139,7 +141,7 @@ private fun erVilkårResultatUtgjørende(
             )
         }
 
-        VedtakBegrunnelseType.AVSLAG ->
+        VedtakBegrunnelseType.AVSLAG, VedtakBegrunnelseType.INSTITUSJON_AVSLAG ->
             vilkårResultatPasserForAvslagsperiode(minimertVilkårResultat, vedtaksperiode)
 
         else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
