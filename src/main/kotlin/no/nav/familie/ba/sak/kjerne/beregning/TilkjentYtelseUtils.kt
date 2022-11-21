@@ -204,13 +204,7 @@ object TilkjentYtelseUtils {
 
         return tidslinjerMedRettTilProsentPerBarn.flatMap { (barn, tidslinjeMedRettTilProsentForBarn) ->
             val satsTidslinje = lagOrdinærTidslinje(barn)
-            val satsProsentTidslinje = tidslinjeMedRettTilProsentForBarn.kombinerMed(satsTidslinje) { rettTilProsent, sats ->
-                when {
-                    rettTilProsent == null -> null
-                    sats == null -> throw Feil("Finner ikke sats i periode med rett til utbetaling")
-                    else -> PeriodeInnhold(sats, rettTilProsent)
-                }
-            }.slåSammenLike().filtrerIkkeNull()
+            val satsProsentTidslinje = kombinerProsentOgSatsTidslinjer(tidslinjeMedRettTilProsentForBarn, satsTidslinje)
 
             satsProsentTidslinje.perioder().map {
                 val innholdIPeriode = it.innhold ?: throw Feil("Finner ikke sats og prosent i periode (${it.fraOgMed} - ${it.tilOgMed}) ved generering av andeler tilkjent ytelse")
@@ -225,6 +219,17 @@ object TilkjentYtelseUtils {
             }
         }
     }
+
+    private fun kombinerProsentOgSatsTidslinjer(
+        tidslinjeMedRettTilProsentForBarn: Tidslinje<BigDecimal, Måned>,
+        satsTidslinje: Tidslinje<Int, Måned>
+    ) = tidslinjeMedRettTilProsentForBarn.kombinerMed(satsTidslinje) { rettTilProsent, sats ->
+        when {
+            rettTilProsent == null -> null
+            sats == null -> throw Feil("Finner ikke sats i periode med rett til utbetaling")
+            else -> PeriodeInnhold(sats, rettTilProsent)
+        }
+    }.slåSammenLike().filtrerIkkeNull()
 
     private data class PeriodeInnhold(
         val sats: Int,
