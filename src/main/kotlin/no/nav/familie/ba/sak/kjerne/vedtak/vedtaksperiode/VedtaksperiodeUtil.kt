@@ -393,7 +393,7 @@ private fun velgUtbetalingsbegrunnelser(
 ): List<Standardbegrunnelse> {
     val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype
-            .filter { it.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET && it.vedtakBegrunnelseType != VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET }
+            .filter { !it.vedtakBegrunnelseType.erFortsattInnvilget() }
             .filter { it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }
             .fold(mutableSetOf()) { acc, standardBegrunnelse ->
                 if (standardBegrunnelse.triggesForPeriode(
@@ -419,8 +419,7 @@ private fun velgUtbetalingsbegrunnelser(
             standardbegrunnelser.isEmpty()
 
     return if (fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget) {
-        tillateBegrunnelserForVedtakstype
-            .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET || it.vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET }
+        tillateBegrunnelserForVedtakstype.filter { it.vedtakBegrunnelseType.erFortsattInnvilget() }
     } else {
         standardbegrunnelser.toList()
     }

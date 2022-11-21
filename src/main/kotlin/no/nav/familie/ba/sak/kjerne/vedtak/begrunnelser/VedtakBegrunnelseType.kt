@@ -21,7 +21,27 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     FORTSATT_INNVILGET(5),
     INSTITUSJON_FORTSATT_INNVILGET(5),
     ENDRET_UTBETALING(7),
-    ETTER_ENDRET_UTBETALING(6)
+    ETTER_ENDRET_UTBETALING(6);
+
+    fun erInnvilget(): Boolean {
+        return this == INNVILGET || this == INSTITUSJON_INNVILGET
+    }
+
+    fun erFortsattInnvilget(): Boolean {
+        return this == FORTSATT_INNVILGET || this == INSTITUSJON_FORTSATT_INNVILGET
+    }
+
+    fun erReduksjon(): Boolean {
+        return this == REDUKSJON || this == INSTITUSJON_REDUKSJON
+    }
+
+    fun erAvslag(): Boolean {
+        return this == AVSLAG || this == INSTITUSJON_AVSLAG
+    }
+
+    fun erOpphør(): Boolean {
+        return this == OPPHØR || this == INSTITUSJON_OPPHØR
+    }
 }
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {

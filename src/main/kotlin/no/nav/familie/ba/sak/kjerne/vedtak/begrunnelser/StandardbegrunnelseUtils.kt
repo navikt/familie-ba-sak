@@ -45,7 +45,7 @@ fun Standardbegrunnelse.triggesForPeriode(
     val aktuellePersoner = minimertePersoner
         .filter { person -> triggesAv.personTyper.contains(person.type) }
         .filter { person ->
-            if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET || this.vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_INNVILGET) {
+            if (this.vedtakBegrunnelseType.erInnvilget()) {
                 aktørIderMedUtbetaling.contains(person.aktørId) || person.type == PersonType.SØKER
             } else {
                 true

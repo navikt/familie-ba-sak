@@ -31,11 +31,10 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
     dødeBarnForrigePeriode: List<String>
 ): Set<String> {
-    val erFortsattInnvilgetBegrunnelse =
-        vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET || vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET
+    val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType.erFortsattInnvilget()
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
     val erUtbetalingMedReduksjonFraSistIverksatteBehandling =
-        vedtaksperiodetype == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING && (vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON || vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_REDUKSJON) && !triggesAv.vilkår.contains(
+        vedtaksperiodetype == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING && vedtakBegrunnelseType.erReduksjon() && !triggesAv.vilkår.contains(
             Vilkår.UNDER_18_ÅR
         )
 
@@ -151,7 +150,7 @@ private fun hentAktuellePersonerForVedtaksperiode(
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     identerMedUtbetalingPåPeriode: List<String>
 ): List<MinimertRestPerson> = personerPåBehandling.filter { person ->
-    if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET || vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_INNVILGET) {
+    if (vedtakBegrunnelseType.erInnvilget()) {
         identerMedUtbetalingPåPeriode.contains(person.personIdent) || person.type == PersonType.SØKER
     } else {
         true

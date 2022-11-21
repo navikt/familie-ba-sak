@@ -290,10 +290,8 @@ private fun BrevBegrunnelseGrunnlagMedPersoner.hentBeløp(
     gjelderSøker: Boolean,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
 ) = if (gjelderSøker) {
-    if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG ||
-        this.vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_AVSLAG ||
-        this.vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR ||
-        this.vedtakBegrunnelseType == VedtakBegrunnelseType.INSTITUSJON_OPPHØR
+    if (this.vedtakBegrunnelseType.erAvslag() ||
+        this.vedtakBegrunnelseType.erOpphør()
     ) {
         0
     } else {

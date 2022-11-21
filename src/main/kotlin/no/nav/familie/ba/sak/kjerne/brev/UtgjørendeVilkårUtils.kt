@@ -103,7 +103,7 @@ private fun erVilkårResultatUtgjørende(
     vedtaksperiode: Periode,
     erFørsteVedtaksperiodePåFagsak: Boolean
 ): Boolean {
-    if (minimertVilkårResultat.periodeFom == null && begrunnelseType != VedtakBegrunnelseType.AVSLAG && begrunnelseType != VedtakBegrunnelseType.INSTITUSJON_AVSLAG) {
+    if (minimertVilkårResultat.periodeFom == null && begrunnelseType.erAvslag()) {
         return false
     }
 
