@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
+import java.time.Month
 import java.time.Period
 
 data class RestScenarioPerson(
@@ -47,8 +48,8 @@ val defaultBostedsadresseHistorikk = mutableListOf(
         )
     ),
     Bostedsadresse(
-        angittFlyttedato = LocalDate.now().minusYears(1),
-        gyldigTilOgMed = null,
+        angittFlyttedato = LocalDate.of(2018, Month.JANUARY, 1),
+        gyldigTilOgMed = LocalDate.now().minusDays(16),
         matrikkeladresse = Matrikkeladresse(
             matrikkelId = 123L,
             bruksenhetsnummer = "H301",
