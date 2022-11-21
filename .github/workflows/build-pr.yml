@@ -35,7 +35,7 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn antrun:run@ktlint
+          mvn -B --no-transfer-progress antrun:run@ktlint
   enhetstester-integrasjonstester-og-sonar:
     name: Enhetstester, integrasjonstester og sonar
     runs-on: ubuntu-latest
