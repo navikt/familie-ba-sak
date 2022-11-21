@@ -1,6 +1,8 @@
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import org.springframework.boot.builder.SpringApplicationBuilder
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 fun main(args: Array<String>) {
     System.setProperty("spring.profiles.active", "dev-postgres-preprod")
@@ -17,5 +19,29 @@ fun main(args: Array<String>) {
         springBuilder.initializers(DbContainerInitializer())
     }
 
-    springBuilder.run(*args)
+    if (!args.contains("--manuellMiljø")) {
+        settClientIdOgSecret()
+    }
+
+    springBuilder.run(* args)
+}
+
+private fun settClientIdOgSecret() {
+    val cmd = "src/test/resources/hentMiljøvariabler.sh"
+
+    val process = ProcessBuilder(cmd).start()
+
+    if (process.waitFor() == 1) {
+        error("Klarte ikke hente variabler fra Nais. Er du logget på Naisdevice og gcloud?")
+    }
+
+    val inputStream = BufferedReader(InputStreamReader(process.inputStream))
+    inputStream.readLine() // "Switched to context dev-gcp"
+    val clientIdOgSecret = inputStream.readLine().split(";")
+    inputStream.close()
+
+    clientIdOgSecret.forEach {
+        val keyValuePar = it.split("=")
+        System.setProperty(keyValuePar[0], keyValuePar[1])
+    }
 }
