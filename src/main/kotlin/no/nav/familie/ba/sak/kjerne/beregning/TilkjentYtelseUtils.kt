@@ -204,11 +204,11 @@ object TilkjentYtelseUtils {
 
         return tidslinjerMedRettTilProsentPerBarn.flatMap { (barn, tidslinjeMedRettTilProsentForBarn) ->
             val satsTidslinje = lagOrdinærTidslinje(barn)
-            val satsProsentTidslinje = tidslinjeMedRettTilProsentForBarn.kombinerMed(satsTidslinje) { prosent, sats ->
+            val satsProsentTidslinje = tidslinjeMedRettTilProsentForBarn.kombinerMed(satsTidslinje) { rettTilProsent, sats ->
                 when {
-                    prosent == null -> null
+                    rettTilProsent == null -> null
                     sats == null -> throw Feil("Finner ikke sats i periode med rett til utbetaling")
-                    else -> PeriodeInnhold(sats, prosent)
+                    else -> PeriodeInnhold(sats, rettTilProsent)
                 }
             }.slåSammenLike().filtrerIkkeNull()
 
