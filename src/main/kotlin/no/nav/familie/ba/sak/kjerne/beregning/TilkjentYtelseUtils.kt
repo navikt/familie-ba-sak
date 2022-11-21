@@ -232,24 +232,37 @@ object TilkjentYtelseUtils {
     )
 
     private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag: PersonopplysningGrunnlag): Map<Person, Tidslinje<BigDecimal, Måned>> {
-        val tidslinjerPerPerson = this.associate { personResultat ->
-            val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør } ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av andeler tilkjent ytelse")
-            person to personResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato = person.fødselsdato, personType = person.type)
-        }
+        val tidslinjerPerPerson = lagTidslinjerMedRettTilProsentPerPerson(personopplysningGrunnlag)
 
         if (tidslinjerPerPerson.isEmpty()) return emptyMap()
 
         val søkerTidslinje = tidslinjerPerPerson[personopplysningGrunnlag.søker] ?: return emptyMap()
         val barnasTidslinjer = tidslinjerPerPerson.filter { it.key in personopplysningGrunnlag.barna }
 
-        return barnasTidslinjer.mapValues { (_, barnTidslinje) ->
-            barnTidslinje.kombinerMed(søkerTidslinje) { barnProsent, søkerProsent ->
-                when {
-                    barnProsent == null || søkerProsent == null -> null
-                    else -> barnProsent
-                }
-            }.slåSammenLike().filtrerIkkeNull()
-        }
+        return kombinerSøkerMedHvertBarnSinTidslinje(barnasTidslinjer, søkerTidslinje)
+    }
+
+    private fun kombinerSøkerMedHvertBarnSinTidslinje(
+        barnasTidslinjer: Map<Person, Tidslinje<BigDecimal, Måned>>,
+        søkerTidslinje: Tidslinje<BigDecimal, Måned>
+    ) = barnasTidslinjer.mapValues { (_, barnTidslinje) ->
+        barnTidslinje.kombinerMed(søkerTidslinje) { barnProsent, søkerProsent ->
+            when {
+                barnProsent == null || søkerProsent == null -> null
+                else -> barnProsent
+            }
+        }.slåSammenLike().filtrerIkkeNull()
+    }
+
+    private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerPerson(
+        personopplysningGrunnlag: PersonopplysningGrunnlag
+    ) = this.associate { personResultat ->
+        val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
+            ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av andeler tilkjent ytelse")
+        person to personResultat.tilTidslinjeMedRettTilProsentForPerson(
+            fødselsdato = person.fødselsdato,
+            personType = person.type
+        )
     }
 
     private fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato: LocalDate, personType: PersonType): Tidslinje<BigDecimal, Måned> {
