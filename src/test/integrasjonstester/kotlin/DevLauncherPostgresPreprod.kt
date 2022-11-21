@@ -38,10 +38,10 @@ private fun settClientIdOgSecret() {
     val inputStream = BufferedReader(InputStreamReader(process.inputStream))
     inputStream.readLine() // "Switched to context dev-gcp"
     val clientIdOgSecret = inputStream.readLine().split(";")
+        .map { it.split("=") }
+        .map { it[1] }
     inputStream.close()
 
-    clientIdOgSecret.forEach {
-        val keyValuePar = it.split("=")
-        System.setProperty(keyValuePar[0], keyValuePar[1])
-    }
+    System.setProperty("BA_SAK_CLIENT_ID", clientIdOgSecret[0])
+    System.setProperty("CLIENT_SECRET", clientIdOgSecret[1])
 }
