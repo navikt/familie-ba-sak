@@ -227,11 +227,11 @@ object TilkjentYtelseUtils {
         when {
             rettTilProsent == null -> null
             sats == null -> throw Feil("Finner ikke sats i periode med rett til utbetaling")
-            else -> PeriodeInnhold(sats, rettTilProsent)
+            else -> SatsProsent(sats, rettTilProsent)
         }
     }.slåSammenLike().filtrerIkkeNull()
 
-    private data class PeriodeInnhold(
+    private data class SatsProsent(
         val sats: Int,
         val prosent: BigDecimal
     )
